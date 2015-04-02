@@ -35,7 +35,8 @@ import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -141,8 +142,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             long maxDurationTime = 0;
 
             if (mode == SailingSimulatorConstants.ModeMeasured) {
-                PositionDTO pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
-                PositionDTO pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
+                Position pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
+                Position pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
                 
                 raceCourseCanvasOverlay.setStartEndPoint(LatLng.newInstance(pos1.getLatDeg(), pos1.getLngDeg()), LatLng.newInstance(pos2.getLatDeg(), pos2.getLngDeg()));
             }
@@ -632,9 +633,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         	windStreamletsCanvasOverlay.setVisible(false);
         }
 
-        PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.getStartPoint().getLatitude(),
+        Position startPointDTO = new DegreePosition(raceCourseCanvasOverlay.getStartPoint().getLatitude(),
                 raceCourseCanvasOverlay.getStartPoint().getLongitude());
-        PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(),
+        Position endPointDTO = new DegreePosition(raceCourseCanvasOverlay.getEndPoint().getLatitude(),
                 raceCourseCanvasOverlay.getEndPoint().getLongitude());
         LOGGER.info("StartPoint:" + startPointDTO);
         windParams.setRaceCourseStart(startPointDTO);
@@ -752,11 +753,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
 
         if (mode != SailingSimulatorConstants.ModeMeasured) {
-            PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.getStartPoint().getLatitude(), 
+            Position startPointDTO = new DegreePosition(raceCourseCanvasOverlay.getStartPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getStartPoint().getLongitude());
             windParams.setRaceCourseStart(startPointDTO);
 
-            PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(), 
+            Position endPointDTO = new DegreePosition(raceCourseCanvasOverlay.getEndPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getEndPoint().getLongitude());
             windParams.setRaceCourseEnd(endPointDTO);
         }

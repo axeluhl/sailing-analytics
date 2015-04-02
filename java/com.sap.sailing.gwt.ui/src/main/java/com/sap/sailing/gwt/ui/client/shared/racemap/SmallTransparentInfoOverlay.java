@@ -6,7 +6,7 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
@@ -26,7 +26,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
     /**
      * The current GPS fix of the boat position of the competitor.
      */
-    private PositionDTO position;
+    private Position position;
 
     private int canvasWidth;
     private int canvasHeight;
@@ -114,7 +114,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
      * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
      */
 
-    public void setPosition(PositionDTO position, long timeForPositionTransitionMillis) {
+    public void setPosition(Position position, long timeForPositionTransitionMillis) {
         if (timeForPositionTransitionMillis == -1) {
             removeCanvasPositionAndRotationTransition();
         } else {

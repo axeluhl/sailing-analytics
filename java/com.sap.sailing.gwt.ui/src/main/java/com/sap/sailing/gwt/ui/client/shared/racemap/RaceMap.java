@@ -76,9 +76,9 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
@@ -1354,8 +1354,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // draw the course middle line
             if (legOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > legOfLeadingCompetitor &&
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)) {
-                PositionDTO position1DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1);
-                PositionDTO position2DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor);
+                Position position1DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1);
+                Position position2DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor);
                 LatLng courseMiddleLinePoint1 = LatLng.newInstance(position1DTO.getLatDeg(), position1DTO.getLngDeg());
                 LatLng courseMiddleLinePoint2 = LatLng.newInstance(position2DTO.getLatDeg(), position2DTO.getLngDeg()); 
                 if (courseMiddleLine == null) {
@@ -1407,7 +1407,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * still in the pre-start phase, show a {@link SmallTransparentInfoOverlay} at the
      * start line that shows the count down.
      */
-    private void updateCountdownCanvas(List<PositionDTO> startMarkPositions) {
+    private void updateCountdownCanvas(List<DegreePosition> startMarkPositions) {
         if (!settings.isShowSelectedCompetitorsInfo() || startMarkPositions == null || startMarkPositions.isEmpty()
                 || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
             if (countDownOverlay != null) {
@@ -1882,7 +1882,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // now compute a weighted average depending on the time difference to "date" (see also bug 1924)
                     double factorForAfter = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
                     double factorForBefore = 1-factorForAfter;
-                    PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.getLatDeg() + factorForAfter*fixAfter.position.getLatDeg(),
+                    DegreePosition betweenPosition = new DegreePosition(factorForBefore*fixBefore.position.getLatDeg() + factorForAfter*fixAfter.position.getLatDeg(),
                             factorForBefore*fixBefore.position.getLngDeg() + factorForAfter*fixAfter.position.getLngDeg());
                     final double betweenBearing;
                     if (fixBefore.speedWithBearing == null) {
@@ -2111,7 +2111,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             for (CompetitorDTO competitor : competitors) {
                 try {
                     GPSFixDTO competitorFix = forMap.getBoatFix(competitor, forMap.timer.getTime());
-                    PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
+                    Position competitorPosition = competitorFix != null ? competitorFix.position : null;
                     if (competitorPosition != null) {
                         if (newBounds == null) {
                             newBounds = BoundsUtil.getAsBounds(competitorPosition);

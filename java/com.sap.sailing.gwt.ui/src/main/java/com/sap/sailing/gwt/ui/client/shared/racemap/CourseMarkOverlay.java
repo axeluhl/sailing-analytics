@@ -10,7 +10,7 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
@@ -26,7 +26,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      */
     private MarkDTO mark;
 
-    private PositionDTO position;
+    private Position position;
 
     private double buoyZoneRadiusInMeter;
     
@@ -123,7 +123,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                lastHeight == null || lastHeight != height;
     }
 
-    public Util.Pair<Double, Size> getMarkScaleAndSize(PositionDTO markPosition) {
+    public Util.Pair<Double, Size> getMarkScaleAndSize(Position markPosition) {
         double minMarkHeight = 20;
         
         // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
@@ -161,7 +161,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return mark;
     }
 
-    public void setMarkPosition(PositionDTO position) {
+    public void setMarkPosition(Position position) {
         this.position = position;
     }
 

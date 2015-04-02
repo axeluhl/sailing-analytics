@@ -5,12 +5,12 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class CoursePositionsDTO implements IsSerializable {
-    public List<PositionDTO> waypointPositions;
-    public List<PositionDTO> startMarkPositions;
-    public List<PositionDTO> finishMarkPositions;
+    public List<DegreePosition> waypointPositions;
+    public List<DegreePosition> startMarkPositions;
+    public List<DegreePosition> finishMarkPositions;
     public Set<MarkDTO> marks;
     
     /**

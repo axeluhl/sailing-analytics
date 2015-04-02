@@ -173,7 +173,6 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -1174,7 +1173,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         windDTO.trueWindSpeedInKnots = wind.getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
         if (wind.getPosition() != null) {
-            windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition()
+            windDTO.position = new DegreePosition(wind.getPosition().getLatDeg(), wind.getPosition()
                     .getLngDeg());
         }
         if (wind.getTimePoint() != null) {
@@ -1206,7 +1205,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         windDTO.dampenedTrueWindSpeedInKnots = wind.getKnots();
         windDTO.dampenedTrueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
         if (wind.getPosition() != null) {
-            windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition()
+            windDTO.position = new DegreePosition(wind.getPosition().getLatDeg(), wind.getPosition()
                     .getLngDeg());
         }
         if (wind.getTimePoint() != null) {
@@ -1532,8 +1531,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceMapDataDTO rcDTO;
                 rcDTO = new RaceMapDataDTO();
                 rcDTO.coursePositions = new CoursePositionsDTO();
-                rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
-                PositionDTO posDTO;
+                rcDTO.coursePositions.waypointPositions = new ArrayList<DegreePosition>();
+                DegreePosition posDTO;
                 posDTO = SimulatorServiceUtils.toPositionDTO(startPosition);
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
                 posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
@@ -1756,7 +1755,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
-                                            position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
+                                            position==null?null:new DegreePosition(position.getLatDeg(), position.getLngDeg()),
                                                     estimatedSpeed2==null?null:createSpeedWithBearingDTO(estimatedSpeed2), windDTO2,
                                                             tack2, legType2, /* extrapolated */ true);
                                     fixesForCompetitor.add(extrapolated);
@@ -1781,7 +1780,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private GPSFixDTO createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated) {
-        return new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition()==null?null:new PositionDTO(fix
+        return new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition()==null?null:new DegreePosition(fix
                 .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
                 speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
     }
@@ -1904,13 +1903,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 dateAsTimePoint = new MillisecondsTimePoint(date);
             }
             result.marks = new HashSet<MarkDTO>();
-            result.waypointPositions = new ArrayList<PositionDTO>();
+            result.waypointPositions = new ArrayList<DegreePosition>();
             Set<Mark> marks = new HashSet<Mark>();
             Course course = trackedRace.getRace().getCourse();
             for (Waypoint waypoint : course.getWaypoints()) {
                 Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
                 if (waypointPosition != null) {
-                    result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition
+                    result.waypointPositions.add(new DegreePosition(waypointPosition.getLatDeg(), waypointPosition
                             .getLngDeg()));
                 }
                 for (Mark b : waypoint.getMarks()) {
@@ -1930,7 +1929,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (firstWaypoint != null && Util.size(firstWaypoint.getMarks()) == 2) {
                 final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
                 if (markPositionDTOsAndLineAdvantage != null) {
-                    final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
+                    final List<DegreePosition> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
                             firstWaypoint);
                     result.startMarkPositions = startMarkPositionDTOs;
                     result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
@@ -1948,7 +1947,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (lastWaypoint != null && Util.size(lastWaypoint.getMarks()) == 2) {
                 final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
                 if (markPositionDTOsAndLineAdvantage != null) {
-                    final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
+                    final List<DegreePosition> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
                             lastWaypoint);
                     result.finishMarkPositions = finishMarkPositionDTOs;
                     result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
@@ -2060,14 +2059,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private List<PositionDTO> getMarkPositionDTOs(
+    private List<DegreePosition> getMarkPositionDTOs(
             TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
-        List<PositionDTO> markPositionDTOs = new ArrayList<PositionDTO>();
+        List<DegreePosition> markPositionDTOs = new ArrayList<DegreePosition>();
         for (Mark startMark : waypoint.getMarks()) {
             final Position estimatedMarkPosition = trackedRace.getOrCreateTrack(startMark)
                     .getEstimatedPosition(timePoint, /* extrapolate */false);
             if (estimatedMarkPosition != null) {
-                markPositionDTOs.add(new PositionDTO(estimatedMarkPosition.getLatDeg(), estimatedMarkPosition.getLngDeg()));
+                markPositionDTOs.add(new DegreePosition(estimatedMarkPosition.getLatDeg(), estimatedMarkPosition.getLngDeg()));
             }
         }
         return markPositionDTOs;
@@ -3076,7 +3075,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final ManeuverDTO maneuverDTO;
             if (maneuver.getType() == ManeuverType.MARK_PASSING) {
                 maneuverDTO = new MarkpassingManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
-                        new PositionDTO(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
+                        new DegreePosition(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
                         maneuver.getTimePoint().asDate(),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
@@ -3084,7 +3083,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 ((MarkPassingManeuver) maneuver).getSide());
             } else  {
                 maneuverDTO = new ManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
-                        new PositionDTO(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
+                        new DegreePosition(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
                         maneuver.getTimePoint().asDate(),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
@@ -5044,17 +5043,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToRaceCourseDTO(lastPublishedCourse);
     }
     
-    private Position convertToPosition(PositionDTO dto) {
-        return new DegreePosition(dto.getLatDeg(), dto.getLngDeg());
-    }
-    
     @Override
     public void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            MarkDTO markDTO, PositionDTO positionDTO) {
+            MarkDTO markDTO, Position positionDTO) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Mark mark = convertToMark(markDTO, true);
         TimePoint time = MillisecondsTimePoint.now();
-        Position position = convertToPosition(positionDTO);
+        Position position = positionDTO;
         GPSFix fix = new GPSFixImpl(position, time);
         
         getRaceLogTrackingAdapter().pingMark(raceLog, mark, fix, getService());

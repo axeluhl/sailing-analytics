@@ -10,7 +10,7 @@ import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
@@ -213,7 +213,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots
                 + "knots " + windDTO.trueWindBearingDeg;
         logger.fine(msg);
-        PositionDTO position = windDTO.position;
+        Position position = windDTO.position;
         LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x = canvasPositionInPx.getX() - getWidgetPosLeft();

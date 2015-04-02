@@ -7,31 +7,32 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class WindLinesDTO implements IsSerializable {
     
-    private Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap;
+    private Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> windLinesMap;
 
-    public Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> getWindLinesMap() {
+    public Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> getWindLinesMap() {
         return windLinesMap;
     }
 
-    public void setWindLinesMap(Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap) {
+    public void setWindLinesMap(Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> windLinesMap) {
         this.windLinesMap = windLinesMap;
     }
     
-    public void addWindLine(PositionDTO position, Long timePoint, List<PositionDTO> windLine) {
+    public void addWindLine(DegreePosition position, Long timePoint, List<DegreePosition> windLine) {
         if (windLinesMap == null) {
-            windLinesMap = new HashMap<PositionDTO, SortedMap<Long, List<PositionDTO>>>();
+            windLinesMap = new HashMap<DegreePosition, SortedMap<Long, List<DegreePosition>>>();
         }
         if (!windLinesMap.containsKey(position)) {
-            windLinesMap.put(position, new TreeMap<Long, List<PositionDTO>>());
+            windLinesMap.put(position, new TreeMap<Long, List<DegreePosition>>());
         }
         windLinesMap.get(position).put(timePoint, windLine);
     }
     
-    public List<PositionDTO> getWindLine(PositionDTO position, Long timePoint) {
+    public List<DegreePosition> getWindLine(Position position, Long timePoint) {
         if (windLinesMap != null) {
             if (windLinesMap.get(position) != null) {
                 return windLinesMap.get(position).get(timePoint);

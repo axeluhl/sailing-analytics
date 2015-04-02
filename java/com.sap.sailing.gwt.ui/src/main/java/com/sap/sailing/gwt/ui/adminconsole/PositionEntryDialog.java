@@ -4,22 +4,23 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class PositionEntryDialog extends DataEntryDialog<PositionDTO> {
+public class PositionEntryDialog extends DataEntryDialog<Position> {
     private final DoubleBox lat;
     private final DoubleBox lng;
     private final StringMessages stringMessages;
     
     private static final double ERROR_VAL = Double.MIN_VALUE;
 
-    public PositionEntryDialog(String title, final StringMessages stringMessages, DialogCallback<PositionDTO> callback) {
+    public PositionEntryDialog(String title, final StringMessages stringMessages, DialogCallback<Position> callback) {
         super(title, title, stringMessages.save(), stringMessages.cancel(),
-                new DataEntryDialog.Validator<PositionDTO>() {
+                new DataEntryDialog.Validator<Position>() {
                     @Override
-                    public String getErrorMessage(PositionDTO valueToValidate) {
+                    public String getErrorMessage(Position valueToValidate) {
                         if (valueToValidate.getLatDeg() == ERROR_VAL) {
                             return stringMessages.pleaseEnterA(stringMessages.latitude());
                         }
@@ -43,10 +44,10 @@ public class PositionEntryDialog extends DataEntryDialog<PositionDTO> {
     }
 
     @Override
-    protected PositionDTO getResult() {
+    protected Position getResult() {
         Double latDeg = lat.getValue();
         Double lngDeg = lng.getValue();
-        return new PositionDTO(latDeg == null ? ERROR_VAL : latDeg, lngDeg == null ? ERROR_VAL : lngDeg);
+        return new DegreePosition(latDeg == null ? ERROR_VAL : latDeg, lngDeg == null ? ERROR_VAL : lngDeg);
         
     }
     

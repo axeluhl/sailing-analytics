@@ -4,7 +4,6 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 
@@ -24,12 +23,7 @@ public class BoundsUtil {
                 LatLng.newInstance(bounds.getNorthEast().getLatDeg(), bounds.getNorthEast().getLngDeg()));
     }
     
-    public static Bounds getAsBounds(PositionDTO positionDTO) {
-        Position pos = getAsPosition(positionDTO);
-        return new BoundsImpl(pos, pos);
-    }
-    
-    public static Position getAsPosition(PositionDTO positionDTO) {
+    public static Position getAsPosition(Position positionDTO) {
         return new DegreePosition(positionDTO.getLatDeg(), positionDTO.getLngDeg());
     }
 

@@ -20,7 +20,6 @@ import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHand
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
@@ -1086,8 +1085,8 @@ public class PathPolyline {
      *            - the LatLng object used
      * @returns a PositionDTO object.
      */
-    private static PositionDTO toPositionDTO(LatLng position) {
-        return new PositionDTO(position.getLatitude(), position.getLongitude());
+    private static DegreePosition toPositionDTO(LatLng position) {
+        return new DegreePosition(position.getLatitude(), position.getLongitude());
     }
 
     /**
@@ -1108,7 +1107,7 @@ public class PathPolyline {
     }
 
     private void getTotalTime() {
-        List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
+        List<DegreePosition> turnPointsAsPositionDTO = new ArrayList<DegreePosition>();
 
         for (LatLng point : this.turnPoints) {
             turnPointsAsPositionDTO.add(toPositionDTO(point));

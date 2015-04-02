@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -44,7 +43,7 @@ import com.sap.sse.common.Util;
 public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeProvider {
     private static final double MAX_WIND_SPEED_IN_KNOTS = 40;
     private final Bounds infiniteBounds = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
-    private final Weigher<PositionDTO> weigher;
+    private final Weigher<Position> weigher;
     private double averageLatitudeDeg;
     private double averageLatitudeCosine;
     private double knotsInDegreePerFrame;
@@ -90,10 +89,10 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
 
     @Override
     public Vector getVector(Position p, Date at) {
-        final PositionDTO request = new PositionDTO(p.getLatDeg(), p.getLngDeg());
+        final Position request = new DegreePosition(p.getLatDeg(), p.getLngDeg());
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
-        final BearingWithConfidenceCluster<PositionDTO> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
+        final BearingWithConfidenceCluster<Position> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
                 continue;
@@ -107,12 +106,12 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                         speedConfidenceSum += confidence;
                         knotSpeedSumScaledByConfidence += confidence * timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
                     }
-                    bearingCluster.add(new BearingWithConfidenceImpl<PositionDTO>(
+                    bearingCluster.add(new BearingWithConfidenceImpl<Position>(
                             new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), confidence, timewiseClosestFixForWindSource.position));
                 }
             }
         }
-        final BearingWithConfidence<PositionDTO> bearing = bearingCluster.getAverage(request);
+        final BearingWithConfidence<Position> bearing = bearingCluster.getAverage(request);
         final Vector result;
         if (bearing != null && bearing.getObject() != null) {
             final double bearingRad = bearing.getObject().getRadians();

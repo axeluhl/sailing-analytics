@@ -14,7 +14,7 @@ import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -198,7 +198,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
         double weight = 3.0;
 
-        PositionDTO position = p1.position;
+        Position position = p1.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
@@ -223,7 +223,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
         double weight = 3.0;
 
-        PositionDTO position = p.position;
+        Position position = p.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
@@ -243,7 +243,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         if (p1 == null || p2 == null) {
             return true;
         }
-        PositionDTO position = p1.position;
+        Position position = p1.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);

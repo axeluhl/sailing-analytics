@@ -5,12 +5,12 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class GPSFixDTO implements IsSerializable {
     public Date timepoint;
-    public PositionDTO position;
+    public DegreePosition position;
     public SpeedWithBearingDTO speedWithBearing;
 
     /**
@@ -39,14 +39,14 @@ public class GPSFixDTO implements IsSerializable {
     
     public GPSFixDTO() {}
 
-    public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
+    public GPSFixDTO(Date timepoint, DegreePosition position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
             Tack tack, LegType legType, boolean extrapolated) {
         this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
                 new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
                         new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated);
     }
 
-    public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
+    public GPSFixDTO(Date timepoint, DegreePosition position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
             Tack tack, LegType legType, boolean extrapolated) {
         super();
         this.timepoint = timepoint;

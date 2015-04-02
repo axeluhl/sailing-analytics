@@ -7,7 +7,6 @@ import java.util.List;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -127,10 +126,10 @@ public class SimulatorServiceUtils {
         return result;
     }
 
-    public static List<Position> getIntermediatePoints2(List<PositionDTO> points, double stepSizeMeters) {
+    public static List<Position> getIntermediatePoints2(List<DegreePosition> points, double stepSizeMeters) {
         List<Position> newPoints = new ArrayList<Position>();
 
-        for (PositionDTO point : points) {
+        for (Position point : points) {
             newPoints.add(new DegreePosition(point.getLatDeg(), point.getLngDeg()));
         }
 
@@ -314,11 +313,11 @@ public class SimulatorServiceUtils {
         return new RadianPosition(lat2, lon2);
     }
 
-    public static double getSign(PositionDTO p1, PositionDTO p2, PositionDTO p3) {
+    public static double getSign(Position p1, Position p2, Position p3) {
         return (p1.getLatDeg() - p3.getLatDeg()) * (p2.getLngDeg() - p3.getLngDeg()) - (p2.getLatDeg() - p3.getLatDeg()) * (p1.getLngDeg() - p3.getLngDeg());
     }
 
-    public static boolean isPointInsideTriangle(PositionDTO point, PositionDTO corner1, PositionDTO corner2, PositionDTO corner3) {
+    public static boolean isPointInsideTriangle(Position point, Position corner1, Position corner2, Position corner3) {
 
         boolean b1, b2, b3;
 
@@ -434,15 +433,15 @@ public class SimulatorServiceUtils {
         return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timepointMsec);
     }
 
-    public static PositionDTO toPositionDTO(Position position) {
-        return new PositionDTO(position.getLatDeg(), position.getLngDeg());
+    public static DegreePosition toPositionDTO(Position position) {
+        return new DegreePosition(position.getLatDeg(), position.getLngDeg());
     }
 
-    public static Position toPosition(PositionDTO positionDTO) {
+    public static Position toPosition(Position positionDTO) {
         return new DegreePosition(positionDTO.getLatDeg(), positionDTO.getLngDeg());
     }
 
-    public static boolean equals(Position position, PositionDTO positonDTO) {
+    public static boolean equals(Position position, Position positonDTO) {
         return (position.getLatDeg() == positonDTO.getLatDeg() && position.getLngDeg() == positonDTO.getLngDeg());
     }
 

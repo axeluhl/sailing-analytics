@@ -5,10 +5,10 @@ import java.util.Date;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.Weigher;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 /**
- * A weigher that uses a {@link PositionDTO} and a {@link Date} to compute a confidence based on space and time
+ * A weigher that uses a {@link DegreePosition} and a {@link Date} to compute a confidence based on space and time
  * distance. If the <code>fix</code> or the <code>request</code> parameter in a call to
  * {@link #getConfidence(com.sap.sse.common.Util.Pair, com.sap.sse.common.Util.Pair)} have a <code>null</code>
  * {@link Position} then no distance-based confidence is considered, and only the time difference is taken into account.
@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
  * @author Axel Uhl (d043530)
  * 
  */
-public class PositionDTOWeigher implements Weigher<PositionDTO> {
+public class PositionDTOWeigher implements Weigher<Position> {
     private static final long serialVersionUID = -262428237738496818L;
     private final double halfConfidenceDistanceNauticalMiles;
     private final AverageLatitudeProvider averageLatitudeDegProvider;
@@ -43,7 +43,7 @@ public class PositionDTOWeigher implements Weigher<PositionDTO> {
     }
     
     @Override
-    public double getConfidence(PositionDTO fix, PositionDTO request) {
+    public double getConfidence(Position fix, Position request) {
         final double distanceConfidence;
         if (fix != null && request != null) {
             double x = getApproximateNauticalMileDistance(fix, request);
@@ -57,7 +57,7 @@ public class PositionDTOWeigher implements Weigher<PositionDTO> {
         return distanceConfidence;
     }
 
-    private double getApproximateNauticalMileDistance(PositionDTO p1, PositionDTO p2) {
+    private double getApproximateNauticalMileDistance(Position p1, Position p2) {
         final double latDiffDeg = Math.abs(p1.getLatDeg() - p2.getLatDeg());
         final double normalizedLngDiffDeg = getCosineOfAverageLatitude() * Math.abs(p1.getLngDeg() - p2.getLngDeg());
         // One degree of latitude or one degree of longitude at the equator each correspond to 60 nautical miles.

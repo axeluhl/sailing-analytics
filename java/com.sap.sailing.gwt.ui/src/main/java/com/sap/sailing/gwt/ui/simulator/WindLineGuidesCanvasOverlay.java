@@ -16,7 +16,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -177,7 +177,7 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
         final Context2d context2d = canvas.getContext2d();
         context2d.setGlobalAlpha(0.2);
 
-        final PositionDTO position = windDTO.position;
+        final Position position = windDTO.position;
 
         final LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         final Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
