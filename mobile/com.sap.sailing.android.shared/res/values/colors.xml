@@ -34,4 +34,15 @@
 	<color name="welter_yellow">#ffffff00</color>
 	<color name="welter_green">#ff00ff00</color>
 	<color name="welter_blue">#ff0000ff</color>
+	
+	<color name="black">#000000</color>
+	<color name="black_transparent">#55000000</color>
+    <color name="black_slightly_transparent">#D8000000</color>
+	<color name="white">#FFFFFF</color>
+	<color name="white_less_transparent">#CCFFFFFF</color>
+	<color name="sap_green">#8AB54E</color>
+    <color name="sap_red">#E94A1B</color>
+    <color name="sap_yellow">#EEAA29</color>
+    <color name="gray">#333333</color>
+    <color name="colorPrimary">@color/gray</color>
 </resources>

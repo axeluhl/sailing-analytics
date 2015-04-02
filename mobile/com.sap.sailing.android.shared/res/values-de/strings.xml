@@ -9,5 +9,27 @@
 
     <!-- Generic -->
     <string name="generic_error">Fehler</string>
-
+    <string name="about">Info</string>
+    <string name="signal_accuracy_indicator_view_description">GPS Genauigkeit</string>
+    <string name="poor">schwach</string>
+    <string name="good">gut</string>
+    <string name="great">sehr gut</string>
+    <string name="no_signal">kein Signal</string>
+    <string name="ok">OK</string>
+    
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">Fehler: Datenbank-Operation ist fehlgeschlagen.</string>
+    <string name="no_qr_code_popup_title">Kein QR-Code?</string>
+	<string name="no_qr_code_popup_message">Bitte kontaktieren Sie die Rennleitung, falls Sie keinen QR-Code erhalten haben.</string>
+	<string name="error_play_store_and_scanning_not_available">"PlayStore und BarcodeScanner-App nicht verfügbar."</string>
+	<string name="scanning_cancelled">Scan abgebrochen</string>
+	<string name="error_scanning_qrcode">Fehler beim Scannen des QR-Codes {result-code}</string>
+	<string name="notify_user_api_call_failed">Bei der Kommunikation mit dem Server ist ein Fehler aufgetreten. Bitte versuchen Sie es noch einmal.</string>
+	<string name="please_wait">Bitte warten</string>
+	<string name="error_invalid_qr_code">Ungültiger QR-Code</string>
+	
+	<!-- Regatta -->
+    <string name="your_regattas">Ihre Regattas:</string>
+    <string name="options_refresh">Aktualisieren</string>
+    
 </resources>

@@ -1,10 +1,14 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
+import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class CheckinData {
+public class CheckinData extends AbstractCheckinData{
     // public String gcmId;
     public String leaderboardName;
     public String eventId;

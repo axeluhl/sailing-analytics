@@ -2,11 +2,9 @@
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
-	<string name="notify_user_api_call_failed">An error occurred while contacting the server. Please try again.</string>
 	<string name="confirm_data_hello_name">Hello {full_name}</string>
 	<string name="confirm_data_you_are_signed_in_as_sail_id">You are signing in as {sail_id}</string>
     <string name="confirm_data_is_correct">OK</string>
     <string name="decline_data_is_incorrect">That\'s not me!</string>
-    <string name="notify_user_db_operation_failed">Error: Database operation has failed.</string>
     
 </resources>

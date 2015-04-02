@@ -7,7 +7,6 @@
     <string name="options_menu_checkout">Checkout</string>
     <string name="options_add_team_photo">Add Team Photo</string>
     <string name="options_replace_team_photo">Replace Team Photo</string>
-    <string name="options_refresh">Refresh</string>
     <string name="settings_category_other">Other Settings</string>
     <string name="device_identifier">Device Identifier</string>
     <string name="tracker_started">SAP Sailing Tracker started</string>
@@ -18,19 +17,11 @@
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
     <string name="do_you_really_want_to_stop_tracking">Do you really want to stop tracking?</string>
-    <string name="ok">OK</string>
-    <string name="signal_accuracy_indicator_view_description">GPS Accuracy</string>
-    <string name="poor">poor</string>
-    <string name="good">good</string>
-    <string name="great">great</string>
-    <string name="no_signal">no signal</string>
-	<string name="checkin_digest" translatable="false">CheckinDigest</string>
 	<string name="add_team_photo">Add Team Photo</string>
 	<string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Do you want to use an existing image or take a new one?</string>
 	<string name="existing_image">Existing</string>
 	<string name="take_photo">Take Photo</string>
 	<string name="add_photo_select">Photo</string>
-	<string name="please_wait">Please wait</string>
 	<string name="checking_in">Checking in..</string>
 	<string name="checking_out">Checking out..</string>
 	<string name="getting_event">Getting event informatiopn..</string>
@@ -47,11 +38,8 @@
 	<string name="minute">Minute</string>
 	<string name="day">Day</string>
 	<string name="please_listen_to_announcements">Please listen to the announcements</string>
-	<string name="your_regattas">Your Regattas:</string>
 	<string name="close">Close</string>
 	<string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
-	<string name="no_qr_code_popup_title">No QR-Code?</string>
-	<string name="no_qr_code_popup_message">Please contact race management if you have not received a QR-Code.</string>
 	<string name="tracking_colon">Tracking:</string>
 	<string name="regatta_in_progress">The regatta is in progress.</string>
 	<string name="heading">Heading</string>
@@ -59,10 +47,6 @@
     <string name="speed_over_ground">Speed over Ground</string>
 	<string name="none">None</string>
 	<string name="show_leaderboard">Leader board</string>
-	<string name="error_play_store_and_scanning_not_available">"PlayStore and Scanning not available."</string>
-	<string name="scanning_cancelled">Scanning cancelled</string>
-	<string name="error_scanning_qrcode">Error scanning QR-Code {result-code}</string>
-	<string name="error_invalid_qr_code">Invalid QR-Code</string>
 	<string name="error_while_receiving_server_data">Error while receiving server data</string>
 	<string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
 	<string name="warning">Warning</string>
