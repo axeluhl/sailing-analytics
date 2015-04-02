@@ -1085,7 +1085,7 @@ public class PathPolyline {
      *            - the LatLng object used
      * @returns a PositionDTO object.
      */
-    private static DegreePosition toPositionDTO(LatLng position) {
+    private static Position toPositionDTO(LatLng position) {
         return new DegreePosition(position.getLatitude(), position.getLongitude());
     }
 
@@ -1107,7 +1107,7 @@ public class PathPolyline {
     }
 
     private void getTotalTime() {
-        List<DegreePosition> turnPointsAsPositionDTO = new ArrayList<DegreePosition>();
+        List<Position> turnPointsAsPositionDTO = new ArrayList<>();
 
         for (LatLng point : this.turnPoints) {
             turnPointsAsPositionDTO.add(toPositionDTO(point));

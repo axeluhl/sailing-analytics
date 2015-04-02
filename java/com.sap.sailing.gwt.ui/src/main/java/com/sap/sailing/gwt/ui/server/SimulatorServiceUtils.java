@@ -126,13 +126,11 @@ public class SimulatorServiceUtils {
         return result;
     }
 
-    public static List<Position> getIntermediatePoints2(List<DegreePosition> points, double stepSizeMeters) {
-        List<Position> newPoints = new ArrayList<Position>();
-
+    public static List<Position> getIntermediatePoints2(List<Position> points, double stepSizeMeters) {
+        List<Position> newPoints = new ArrayList<>();
         for (Position point : points) {
             newPoints.add(new DegreePosition(point.getLatDeg(), point.getLngDeg()));
         }
-
         return SimulatorServiceUtils.getIntermediatePoints(newPoints, stepSizeMeters);
     }
 
@@ -419,30 +417,15 @@ public class SimulatorServiceUtils {
     }
 
     public static SimulatorWindDTO toSimulatorWindDTO(TimedPositionWithSpeed point) {
-
         Position position = point.getPosition();
         SpeedWithBearing windSpeedWithBearing = point.getSpeed();
         TimePoint timePoint = point.getTimePoint();
-
         double latDeg = position.getLatDeg();
         double lngDeg = position.getLngDeg();
         double windSpeedKn = windSpeedWithBearing.getKnots();
         double windBearingDeg = windSpeedWithBearing.getBearing().getDegrees();
         long timepointMsec = timePoint.asMillis();
-
         return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timepointMsec);
-    }
-
-    public static DegreePosition toPositionDTO(Position position) {
-        return new DegreePosition(position.getLatDeg(), position.getLngDeg());
-    }
-
-    public static Position toPosition(Position positionDTO) {
-        return new DegreePosition(positionDTO.getLatDeg(), positionDTO.getLngDeg());
-    }
-
-    public static boolean equals(Position position, Position positonDTO) {
-        return (position.getLatDeg() == positonDTO.getLatDeg() && position.getLngDeg() == positonDTO.getLngDeg());
     }
 
     public static SimulatorUISelection toSimulatorUISelection(SimulatorUISelectionDTO selection) {

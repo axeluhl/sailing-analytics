@@ -1498,7 +1498,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             windField.generate(startTimePoint, null, timeStep);
             
             // prepare simulation-parameters
-            List<Position> course = new ArrayList<Position>();
+            List<Position> course = new ArrayList<>();
             course.add(startPosition);
             course.add(endPosition);
             BoatClass boatClass = trackedRace.getRace().getBoatClass();
@@ -1531,12 +1531,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceMapDataDTO rcDTO;
                 rcDTO = new RaceMapDataDTO();
                 rcDTO.coursePositions = new CoursePositionsDTO();
-                rcDTO.coursePositions.waypointPositions = new ArrayList<DegreePosition>();
-                DegreePosition posDTO;
-                posDTO = SimulatorServiceUtils.toPositionDTO(startPosition);
-                rcDTO.coursePositions.waypointPositions.add(posDTO);
-                posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
-                rcDTO.coursePositions.waypointPositions.add(posDTO);
+                rcDTO.coursePositions.waypointPositions = new ArrayList<>();
+                rcDTO.coursePositions.waypointPositions.add(startPosition);
+                rcDTO.coursePositions.waypointPositions.add(endPosition);
                 result = new SimulatorResultsDTO(startTimePoint.asDate(), timeStep.asMillis(), legDuration, rcDTO, pathDTOs, null, null);
             }
         }
@@ -1560,7 +1557,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         if (position != null) {
-            result.position = SimulatorServiceUtils.toPositionDTO(position);
+            result.position = position;
         }
 
         if (timePoint != null) {
@@ -1903,7 +1900,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 dateAsTimePoint = new MillisecondsTimePoint(date);
             }
             result.marks = new HashSet<MarkDTO>();
-            result.waypointPositions = new ArrayList<DegreePosition>();
+            result.waypointPositions = new ArrayList<>();
             Set<Mark> marks = new HashSet<Mark>();
             Course course = trackedRace.getRace().getCourse();
             for (Waypoint waypoint : course.getWaypoints()) {
@@ -1929,8 +1926,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (firstWaypoint != null && Util.size(firstWaypoint.getMarks()) == 2) {
                 final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
                 if (markPositionDTOsAndLineAdvantage != null) {
-                    final List<DegreePosition> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
-                            firstWaypoint);
+                    final List<Position> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
                     result.startMarkPositions = startMarkPositionDTOs;
                     result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
                     Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage
@@ -1947,8 +1943,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (lastWaypoint != null && Util.size(lastWaypoint.getMarks()) == 2) {
                 final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
                 if (markPositionDTOsAndLineAdvantage != null) {
-                    final List<DegreePosition> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace,
-                            lastWaypoint);
+                    final List<Position> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
                     result.finishMarkPositions = finishMarkPositionDTOs;
                     result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
                     Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage
@@ -2059,9 +2054,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private List<DegreePosition> getMarkPositionDTOs(
+    private List<Position> getMarkPositionDTOs(
             TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
-        List<DegreePosition> markPositionDTOs = new ArrayList<DegreePosition>();
+        List<Position> markPositionDTOs = new ArrayList<>();
         for (Mark startMark : waypoint.getMarks()) {
             final Position estimatedMarkPosition = trackedRace.getOrCreateTrack(startMark)
                     .getEstimatedPosition(timePoint, /* extrapolate */false);

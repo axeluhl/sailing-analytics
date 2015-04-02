@@ -518,11 +518,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        Position edgeStart = SimulatorServiceUtils.toPosition(requestData.edgeStart);
-        Position edgeEnd = SimulatorServiceUtils.toPosition(requestData.edgeEnd);
+        Position edgeStart = requestData.edgeStart;
+        Position edgeEnd = requestData.edgeEnd;
 
-        Position oldMovedPosition = SimulatorServiceUtils.toPosition(requestData.oldMovedPoint);
-        Position newMovedPosition = SimulatorServiceUtils.toPosition(requestData.newMovedPoint);
+        Position oldMovedPosition = requestData.oldMovedPoint;
+        Position newMovedPosition = requestData.newMovedPoint;
         Bearing oldMovedToNewMovedBearing = oldMovedPosition.getBearingGreatCircle(newMovedPosition);
         boolean areTowardsSameDirection = SimulatorServiceUtils.areTowardsSameDirection(oldMovedToNewMovedBearing, new DegreeBearingImpl(
                 requestData.startToEndBearingDegrees));
@@ -553,13 +553,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         leftSide1Turner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, realStart, realEnd, startTime, true, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
         rightSide1Turner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, realStart, realEnd, startTime, false, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
 
-        boolean isLeftSide1TurnerOnTheInside = SimulatorServiceUtils.isPointInsideTriangle(SimulatorServiceUtils.toPositionDTO(leftSide1Turner.getPosition()),
+        boolean isLeftSide1TurnerOnTheInside = SimulatorServiceUtils.isPointInsideTriangle(leftSide1Turner.getPosition(),
                 requestData.beforeMovedPoint,
                 requestData.newMovedPoint, requestData.edgeStart);
         System.out.println("isLeftSide1TurnerOnTheInside = " + isLeftSide1TurnerOnTheInside);
 
         boolean isRightSide1TurnerOnTheInside = SimulatorServiceUtils.isPointInsideTriangle(
-                SimulatorServiceUtils.toPositionDTO(rightSide1Turner.getPosition()),
+                rightSide1Turner.getPosition(),
                 requestData.beforeMovedPoint,
                 requestData.newMovedPoint, requestData.edgeStart);
         System.out.println("isRightSide1TurnerOnTheInside = " + isRightSide1TurnerOnTheInside);
@@ -597,8 +597,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
 
         return new Response1TurnerDTO(SimulatorServiceUtils.toSimulatorWindDTOList(path), SimulatorServiceUtils.toSimulatorWindDTO(leftSide1Turner),
-                SimulatorServiceUtils.toSimulatorWindDTO(rightSide1Turner), SimulatorServiceUtils.toPositionDTO(oldMovedPosition),
-                SimulatorServiceUtils.toPositionDTO(newMovedPosition),
+                SimulatorServiceUtils.toSimulatorWindDTO(rightSide1Turner), oldMovedPosition,
+                newMovedPosition,
                 notificationMessage);
     }
 
@@ -672,7 +672,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         result.trueWindSpeedInKnots = wind.getKnots();
 
         if (position != null) {
-            result.position = SimulatorServiceUtils.toPositionDTO(position);
+            result.position = position;
         }
         if (timePoint != null) {
             result.timepoint = timePoint.asMillis();
@@ -697,7 +697,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         if (position != null) {
-            result.position = SimulatorServiceUtils.toPositionDTO(position);
+            result.position = position;
         }
 
         if (timePoint != null) {
@@ -904,15 +904,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         if (mode == SailingSimulatorConstants.ModeMeasured) {
             rcDTO = new RaceMapDataDTO();
             rcDTO.coursePositions = new CoursePositionsDTO();
-            rcDTO.coursePositions.waypointPositions = new ArrayList<DegreePosition>();
-
+            rcDTO.coursePositions.waypointPositions = new ArrayList<>();
             Path rc = simulator.getRaceCourse();
-            DegreePosition posDTO;
-            posDTO = SimulatorServiceUtils.toPositionDTO(rc.getPathPoints().get(0).getPosition());
-
-            rcDTO.coursePositions.waypointPositions.add(posDTO);
-            posDTO = SimulatorServiceUtils.toPositionDTO(rc.getPathPoints().get(1).getPosition());
-            rcDTO.coursePositions.waypointPositions.add(posDTO);
+            rcDTO.coursePositions.waypointPositions.add(rc.getPathPoints().get(0).getPosition());
+            rcDTO.coursePositions.waypointPositions.add(rc.getPathPoints().get(1).getPosition());
         } else {
             rcDTO = null;
         }

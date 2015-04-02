@@ -1407,7 +1407,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * still in the pre-start phase, show a {@link SmallTransparentInfoOverlay} at the
      * start line that shows the count down.
      */
-    private void updateCountdownCanvas(List<DegreePosition> startMarkPositions) {
+    private void updateCountdownCanvas(List<Position> startMarkPositions) {
         if (!settings.isShowSelectedCompetitorsInfo() || startMarkPositions == null || startMarkPositions.isEmpty()
                 || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
             if (countDownOverlay != null) {
