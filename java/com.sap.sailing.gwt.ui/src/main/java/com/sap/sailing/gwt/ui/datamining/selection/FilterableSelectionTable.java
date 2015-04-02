@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -73,60 +71,21 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         return element.toString();
     }
     
-    /**
-     * Replaces the current content of the table with the new one, while preserving the current selection.<br />
-     * Returns <code>true</code>, if:
-     * <ul>
-     *   <li>Previously selected elements have been removed</li>
-     *   <li>Nothing was selected and elements have been added or removed</li>
-     * </ul>
-     * 
-     * @param newContent The new content.
-     * @return <code>true</code>, if query related elements has been changed.
-     */
     @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-    public boolean updateContent(Collection<?> newContent) {
+    public void setContent(Collection<?> newContent) {
         Collection<ContentType> specificNewContent = null;
         try {
             specificNewContent = (Collection<ContentType>) newContent;
         } catch (ClassCastException e) {
-            return false;
+            return;
         }
         
-        Collection<ContentType> oldContent = new ArrayList<ContentType>(dataProvider.getList());
-        Collection<ContentType> selection = selectionModel.getSelectedSet();
-        
-        dataProvider.getList().clear();
-        dataProvider.getList().addAll(specificNewContent);
         allData.clear();
         allData.addAll(specificNewContent);
+        dataProvider.getList().clear();
+        dataProvider.getList().addAll(allData);
+        clearSelection();
         filterPanel.updateAll(allData);
-        
-        return selection.isEmpty() ? elementsHaveBeenAddedOrRemoved(oldContent, specificNewContent) : selectedElementsHaveBeenRemoved(selection, specificNewContent);
-    }
-    
-    private boolean selectedElementsHaveBeenRemoved(Collection<ContentType> selection, Collection<ContentType> newContent) {
-        Set<Object> selectionKeys = getKeysFor(selection);
-        Set<Object> newContentKeys = getKeysFor(newContent);
-        return !newContentKeys.containsAll(selectionKeys);
-    }
-
-    private boolean elementsHaveBeenAddedOrRemoved(Collection<ContentType> oldContent, Collection<ContentType> newContent) {
-        if (oldContent.size() != newContent.size()) {
-            return true;
-        }
-        
-        Set<Object> oldContentKeys = getKeysFor(oldContent);
-        Set<Object> newContentKeys = getKeysFor(newContent);
-        return !newContentKeys.containsAll(oldContentKeys);
-    }
-
-    private Set<Object> getKeysFor(Collection<ContentType> content) {
-        Set<Object> contentKeys = new HashSet<Object>();
-        for (ContentType element : content) {
-            contentKeys.add(dataProvider.getKey(element));
-        }
-        return contentKeys;
     }
 
     public Collection<ContentType> getSelection() {
@@ -134,10 +93,10 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     }
 
     public void setSelection(Iterable<?> elements) {
-        clearSelection();
         try {
             @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
             Iterable<ContentType> specificContent = (Iterable<ContentType>) elements;
+            clearSelection();
             for (ContentType element : specificContent) {
                 selectionModel.setSelected(element, true);
             }

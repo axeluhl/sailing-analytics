@@ -35,10 +35,10 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     private final DataRetrieverChainDefinitionDTO retrieverChain;
     private final LocalizedTypeDTO retrievedDataType;
     private final int retrieverLevel;
-    private final List<FunctionDTO> availableDimensions;
+    private final Collection<FunctionDTO> availableDimensions;
     
     private final HorizontalLayoutPanel mainPanel;
-    private final Collection<SingleDimensionFilterSelectionProvider> dimensionFilters;
+    private final Collection<SingleDimensionFilter> dimensionFilters;
     private final SelectionChangeEvent.Handler selectionTablesChangedListener;
     private final Widget sizeProvider;
 
@@ -70,27 +70,66 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     public void setAvailableDimensions(Collection<FunctionDTO> dimensions) {
         availableDimensions.clear();
         availableDimensions.addAll(dimensions);
-        Collections.sort(availableDimensions);
         
-        SingleDimensionFilterSelectionProvider dimensionFilter = createDimensionFilterSelectionProvider();
-        dimensionFilter.setAvailableDimensions(availableDimensions);
+        SingleDimensionFilter dimensionFilter = createDimensionFilter();
+        List<FunctionDTO> availableDimensionsList = new ArrayList<>(availableDimensions);
+        Collections.sort(availableDimensionsList);
+        dimensionFilter.setAvailableDimensions(availableDimensionsList);
         addDimensionFilter(dimensionFilter);
     }
+    
+    void createAndAddDimensionFilter() {
+        addDimensionFilter(createDimensionFilter());
+    }
 
-    private SingleDimensionFilterSelectionProvider createDimensionFilterSelectionProvider() {
-        SingleDimensionFilterSelectionProvider dimensionFilter = new SingleDimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
+    private SingleDimensionFilter createDimensionFilter() {
+        SingleDimensionFilter dimensionFilter = new SingleDimensionFilter(dataMiningService, errorReporter, session, this);
         dimensionFilter.addSelectionChangeHandler(selectionTablesChangedListener);
         return dimensionFilter;
     }
     
-    private void addDimensionFilter(SingleDimensionFilterSelectionProvider dimensionFilter) {
+    private void addDimensionFilter(SingleDimensionFilter dimensionFilter) {
         dimensionFilters.add(dimensionFilter);
         mainPanel.add(dimensionFilter.getEntryWidget());
+        mainPanel.onResize();
+    }
+
+    public void removeDimensionFilter(SingleDimensionFilter dimensionFilter) {
+        dimensionFilter.clearSelection(); // Notifies the listeners, if values were selected
+        dimensionFilters.remove(dimensionFilter);
+        mainPanel.remove(dimensionFilter.getEntryWidget());
+        mainPanel.onResize();
+    }
+    
+    void updateAvailableDimensions() {
+        Collection<FunctionDTO> remainingDimensionsBase = new ArrayList<FunctionDTO>(availableDimensions);
+        remainingDimensionsBase.removeAll(getSelectedDimensions());
+        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
+            List<FunctionDTO> remainingDimensions = new ArrayList<>(remainingDimensionsBase);
+            FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
+            if (selectedDimension != null) {
+                remainingDimensions.add(selectedDimension);
+            }
+            Collections.sort(remainingDimensions);
+            remainingDimensions.add(null);
+            dimensionFilter.setAvailableDimensions(remainingDimensions);
+        }
+    }
+
+    private Collection<FunctionDTO> getSelectedDimensions() {
+        Collection<FunctionDTO> selectedDimensions = new ArrayList<>();
+        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
+            FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
+            if (selectedDimension != null) {
+                selectedDimensions.add(selectedDimension);
+            }
+        }
+        return selectedDimensions;
     }
 
     public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
         HashMap<FunctionDTO, Collection<? extends Serializable>> filterSelection = new HashMap<>();
-        for (SingleDimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
             Collection<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
@@ -100,11 +139,22 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     }
 
     public void applySelection(Map<FunctionDTO, Collection<? extends Serializable>> filterSelection) {
-        //TODO
+        dimensionFilters.clear();
+        mainPanel.clear();
+        
+        List<FunctionDTO> sortedDimensions = new ArrayList<>(filterSelection.keySet());
+        Collections.sort(sortedDimensions);
+        
+        for (FunctionDTO functionDTO : sortedDimensions) {
+            SingleDimensionFilter dimensionFilter = createDimensionFilter();
+            addDimensionFilter(dimensionFilter);
+            updateAvailableDimensions();
+            dimensionFilter.setSelectedDimensionAndValues(functionDTO, filterSelection.get(functionDTO));
+        }
     }
 
     public void clearSelection() {
-        for (SingleDimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
             dimensionFilter.clearSelection();
         }
     }
@@ -176,7 +226,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
             setSize(sizeProvider.getOffsetWidth() + "px", sizeProvider.getOffsetHeight() + "px");
             
             int heightInPX = sizeProvider.getOffsetHeight();
-            for (SingleDimensionFilterSelectionProvider selectionProvider : dimensionFilters) {
+            for (SingleDimensionFilter selectionProvider : dimensionFilters) {
                 selectionProvider.resizeToHeight(heightInPX);
             }
         }

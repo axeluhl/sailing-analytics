@@ -27,7 +27,7 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
-class SingleDimensionFilterSelectionProvider {
+class SingleDimensionFilter {
     
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -38,12 +38,13 @@ class SingleDimensionFilterSelectionProvider {
     
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<FunctionDTO> dimensionListBox;
+    private final DimensionChangedHandler dimensionChangedHandler;
     private final ToggleButton toggleFilterButton;
     
     private final SimpleBusyIndicator busyIndicator;
     private final FilterableSelectionTable<?> selectionTable;
     
-    public SingleDimensionFilterSelectionProvider(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
+    public SingleDimensionFilter(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
                                                   SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -62,7 +63,8 @@ class SingleDimensionFilterSelectionProvider {
                 return function.getDisplayName();
             }
         });
-        dimensionListBox.addValueChangeHandler(new DimensionChangedHandler());
+        dimensionChangedHandler = new DimensionChangedHandler();
+        dimensionListBox.addValueChangeHandler(dimensionChangedHandler);
         controlsPanel.add(dimensionListBox);
         
         toggleFilterButton = new ToggleButton("S");
@@ -85,9 +87,12 @@ class SingleDimensionFilterSelectionProvider {
     }
     
     private class DimensionChangedHandler implements ValueChangeHandler<FunctionDTO> {
+        boolean firstChange = true;
+        Collection<?> selectionToBeApplied;
+        
         @Override
         public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
-            final FunctionDTO dimension = getSelectedDimension();
+            final FunctionDTO dimension = event.getValue();
             if (dimension != null) {
                 Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
                 dimensionDTOs.add(dimension);
@@ -99,13 +104,15 @@ class SingleDimensionFilterSelectionProvider {
                             public void onSuccess(QueryResult<Set<Object>> result) {
                                 GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
                                 Collection<?> content = result.getResults().get(contentKey);
-                                selectionTable.updateContent(content == null ? new ArrayList<>() : content);
+                                selectionTable.setContent(content == null ? new ArrayList<>() : content);
+                                if (selectionToBeApplied != null) {
+                                    selectionTable.setSelection(selectionToBeApplied);
+                                    selectionToBeApplied = null;
+                                }
                                 
                                 busyIndicator.setVisible(false);
                                 selectionTable.setVisible(true);
                                 toggleFilterButton.setVisible(true);
-                                
-                                //TODO Add a new dimension filter to the retrieverLevelSelectionProvider
                             }
                             @Override
                             public void onFailure(Throwable caught) {
@@ -113,9 +120,14 @@ class SingleDimensionFilterSelectionProvider {
                                         + caught.getMessage());
                             }
                         });
+                if (firstChange) {
+                    retrieverLevelSelectionProvider.createAndAddDimensionFilter();
+                }
             } else {
-                //TODO Remove this dimension filter from the retrieverLevelSelectionProvider
+                retrieverLevelSelectionProvider.removeDimensionFilter(SingleDimensionFilter.this);
             }
+            retrieverLevelSelectionProvider.updateAvailableDimensions();
+            firstChange = false;
         }
     }
     
@@ -126,10 +138,6 @@ class SingleDimensionFilterSelectionProvider {
     public FunctionDTO getSelectedDimension() {
         return dimensionListBox.getValue();
     }
-    
-    void setSelection(Iterable<?> elements) {
-        selectionTable.setSelection(elements);
-    }
 
     public Collection<? extends Serializable> getSelection() {
         return selectionTable.getSelection();
@@ -137,6 +145,12 @@ class SingleDimensionFilterSelectionProvider {
     
     void clearSelection() {
         selectionTable.clearSelection();
+    }
+
+    void setSelectedDimensionAndValues(FunctionDTO functionDTO, Collection<?> selection) {
+        dimensionChangedHandler.firstChange = false;
+        dimensionChangedHandler.selectionToBeApplied = selection;
+        dimensionListBox.setValue(functionDTO, true);
     }
     
     void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
