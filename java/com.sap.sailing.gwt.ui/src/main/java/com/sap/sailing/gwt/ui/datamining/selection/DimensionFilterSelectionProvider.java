@@ -27,12 +27,12 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
-class SingleDimensionFilter {
+class DimensionFilterSelectionProvider {
     
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final DataMiningSession session;
-    private final SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider;
+    private final RetrieverLevelFilterSelectionProvider retrieverLevelSelectionProvider;
 
     private final FlowPanel mainPanel;
     
@@ -44,8 +44,8 @@ class SingleDimensionFilter {
     private final SimpleBusyIndicator busyIndicator;
     private final FilterableSelectionTable<?> selectionTable;
     
-    public SingleDimensionFilter(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
-                                                  SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider) {
+    public DimensionFilterSelectionProvider(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
+                                                  RetrieverLevelFilterSelectionProvider retrieverLevelSelectionProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.session = session;
@@ -125,7 +125,7 @@ class SingleDimensionFilter {
                 }
                 firstChange = false;
             } else if (retrieverLevelSelectionProvider.shouldRemoveDimensionFilter()) {
-                retrieverLevelSelectionProvider.removeDimensionFilter(SingleDimensionFilter.this);
+                retrieverLevelSelectionProvider.removeDimensionFilter(DimensionFilterSelectionProvider.this);
                 firstChange = false;
             } else {
                 selectionTable.clearSelection();

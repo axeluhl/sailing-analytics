@@ -25,7 +25,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public class SingleRetrieverLevelSelectionProvider implements Component<Object> {
+public class RetrieverLevelFilterSelectionProvider implements Component<Object> {
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -38,11 +38,11 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     private final Collection<FunctionDTO> availableDimensions;
     
     private final HorizontalLayoutPanel mainPanel;
-    private final Collection<SingleDimensionFilter> dimensionFilters;
+    private final Collection<DimensionFilterSelectionProvider> dimensionFilters;
     private final SelectionChangeEvent.Handler selectionTablesChangedListener;
     private final Widget sizeProvider;
 
-    public SingleRetrieverLevelSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
+    public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataRetrieverChainDefinitionDTO retrieverChain,
             LocalizedTypeDTO retrievedDataType, int retrieverLevel, Widget sizeProvider) {
         this.dataMiningService = dataMiningService;
@@ -74,7 +74,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     }
 
     private void initializeDimensionFilters() {
-        SingleDimensionFilter dimensionFilter = createDimensionFilter();
+        DimensionFilterSelectionProvider dimensionFilter = createDimensionFilter();
         List<FunctionDTO> availableDimensionsList = new ArrayList<>(availableDimensions);
         Collections.sort(availableDimensionsList);
         dimensionFilter.setAvailableDimensions(availableDimensionsList);
@@ -89,13 +89,13 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         addDimensionFilter(createDimensionFilter());
     }
 
-    private SingleDimensionFilter createDimensionFilter() {
-        SingleDimensionFilter dimensionFilter = new SingleDimensionFilter(dataMiningService, errorReporter, session, this);
+    private DimensionFilterSelectionProvider createDimensionFilter() {
+        DimensionFilterSelectionProvider dimensionFilter = new DimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
         dimensionFilter.addSelectionChangeHandler(selectionTablesChangedListener);
         return dimensionFilter;
     }
     
-    private void addDimensionFilter(SingleDimensionFilter dimensionFilter) {
+    private void addDimensionFilter(DimensionFilterSelectionProvider dimensionFilter) {
         dimensionFilters.add(dimensionFilter);
         mainPanel.add(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
@@ -105,7 +105,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         return availableDimensions.size() - getSelectedDimensions().size() > 1;
     }
     
-    void removeDimensionFilter(SingleDimensionFilter dimensionFilter) {
+    void removeDimensionFilter(DimensionFilterSelectionProvider dimensionFilter) {
         dimensionFilter.clearSelection(); // Notifies the listeners, if values were selected
         dimensionFilters.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
@@ -115,7 +115,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     void updateAvailableDimensions() {
         Collection<FunctionDTO> remainingDimensionsBase = new ArrayList<FunctionDTO>(availableDimensions);
         remainingDimensionsBase.removeAll(getSelectedDimensions());
-        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
             List<FunctionDTO> remainingDimensions = new ArrayList<>(remainingDimensionsBase);
             FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
             if (selectedDimension != null) {
@@ -130,7 +130,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
 
     private Collection<FunctionDTO> getSelectedDimensions() {
         Collection<FunctionDTO> selectedDimensions = new ArrayList<>();
-        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
             FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
             if (selectedDimension != null) {
                 selectedDimensions.add(selectedDimension);
@@ -141,7 +141,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
 
     public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
         HashMap<FunctionDTO, Collection<? extends Serializable>> filterSelection = new HashMap<>();
-        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
             Collection<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
@@ -158,7 +158,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         Collections.sort(sortedDimensions);
         
         for (FunctionDTO functionDTO : sortedDimensions) {
-            SingleDimensionFilter dimensionFilter = createDimensionFilter();
+            DimensionFilterSelectionProvider dimensionFilter = createDimensionFilter();
             addDimensionFilter(dimensionFilter);
             updateAvailableDimensions();
             dimensionFilter.setSelectedDimensionAndValues(functionDTO, filterSelection.get(functionDTO));
@@ -239,7 +239,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
             setHeight(sizeProvider.getOffsetHeight() + "px");
             
             int heightInPX = sizeProvider.getOffsetHeight();
-            for (SingleDimensionFilter selectionProvider : dimensionFilters) {
+            for (DimensionFilterSelectionProvider selectionProvider : dimensionFilters) {
                 selectionProvider.resizeToHeight(heightInPX);
             }
         }

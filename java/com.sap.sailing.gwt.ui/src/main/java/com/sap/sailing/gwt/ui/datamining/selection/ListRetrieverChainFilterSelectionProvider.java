@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
-import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -37,7 +37,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public class ListRetrieverChainSelectionProvider implements SelectionProvider<Object>, DataRetrieverChainDefinitionChangedListener {
+public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider<Object>, DataRetrieverChainDefinitionChangedListener {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
@@ -52,10 +52,10 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
     private final SimpleLayoutPanel selectionPanel;
 
     private DataRetrieverChainDefinitionDTO retrieverChain;
-    private final Map<LocalizedTypeDTO, SingleRetrieverLevelSelectionProvider> selectionProvidersMappedByRetrieverLevel;
+    private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrieverLevel;
     private final SelectionChangedListener selectionChangedListener;
 
-    public ListRetrieverChainSelectionProvider(DataMiningSession session, StringMessages stringMessages,
+    public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             SimpleDataRetrieverChainDefinitionProvider retrieverChainProvider) {
         this.session = session;
@@ -124,8 +124,8 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
                     if (dimensionsMappedBySourceType.containsKey(sourceTypeName) &&
                         !dimensionsMappedBySourceType.get(sourceTypeName).isEmpty()) {
                         firstFilterableRetrieverLevel = firstFilterableRetrieverLevel == null ? retrieverLevel : firstFilterableRetrieverLevel;
-                        SingleRetrieverLevelSelectionProvider selectionProvider =
-                                new SingleRetrieverLevelSelectionProvider(session, dataMiningService, errorReporter, retrieverChain,
+                        RetrieverLevelFilterSelectionProvider selectionProvider =
+                                new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, retrieverChain,
                                                                           retrieverLevel, retrieverLevelIndex, selectionPanel);
                         selectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
                         selectionProvider.addSelectionChangedListener(selectionChangedListener);
@@ -158,9 +158,9 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
     }
 
     @Override
-    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection() {
+    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getSelection() {
         Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = new HashMap<>();
-        for (SingleRetrieverLevelSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
+        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
             Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = selectionProvider.getFilterSelection();
             if (!levelFilterSelection.isEmpty()) {
                 filterSelection.put(selectionProvider.getRetrieverLevel(),
@@ -172,7 +172,7 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
 
     @Override
     public void applySelection(QueryDefinitionDTO queryDefinition) {
-        for (SingleRetrieverLevelSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
+        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
             Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
             int retrieverLevel = selectionProvider.getRetrieverLevel();
             if (filterSelection.containsKey(retrieverLevel)) {
@@ -183,7 +183,7 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
 
     @Override
     public void clearSelection() {
-        for (SingleRetrieverLevelSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
+        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
             selectionProvider.clearSelection();
         }
     }

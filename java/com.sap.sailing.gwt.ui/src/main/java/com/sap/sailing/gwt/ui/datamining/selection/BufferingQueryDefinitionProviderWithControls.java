@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
-import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -55,7 +55,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
     private MultiDimensionalGroupingProvider groupBySelectionPanel;
     
-    private SelectionProvider<?> selectionProvider;
+    private FilterSelectionProvider<?> selectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
@@ -64,7 +64,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
         mainPanel.addNorth(createFunctionsPanel(), 80);
 
-        selectionProvider = new ListRetrieverChainSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        selectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {
@@ -142,7 +142,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : selectionProvider.getFilterSelection().entrySet()) {
+        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : selectionProvider.getSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
         
@@ -173,7 +173,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
-    public SelectionProvider<?> getSelectionProvider() {
+    public FilterSelectionProvider<?> getSelectionProvider() {
         return selectionProvider;
     }
 
