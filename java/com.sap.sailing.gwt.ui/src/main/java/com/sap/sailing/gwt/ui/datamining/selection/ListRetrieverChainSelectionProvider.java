@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -42,6 +43,7 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
+    private final Set<SelectionChangedListener> listeners;
     
     private final DockLayoutPanel mainPanel;
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
@@ -51,6 +53,7 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
 
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<LocalizedTypeDTO, SingleRetrieverLevelSelectionProvider> selectionProvidersMappedByRetrieverLevel;
+    private final SelectionChangedListener selectionChangedListener;
 
     public ListRetrieverChainSelectionProvider(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -59,6 +62,7 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        listeners = new HashSet<>();
         
         mainPanel = new DockLayoutPanel(Unit.PX);
         
@@ -78,6 +82,12 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
         
         retrieverChain = null;
         selectionProvidersMappedByRetrieverLevel = new HashMap<>();
+        selectionChangedListener = new SelectionChangedListener() {
+            @Override
+            public void selectionChanged() {
+                notifyListeners();
+            }
+        };
         
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
     }
@@ -118,6 +128,7 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
                                 new SingleRetrieverLevelSelectionProvider(session, dataMiningService, errorReporter, retrieverChain,
                                                                           retrieverLevel, retrieverLevelIndex, selectionPanel);
                         selectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
+                        selectionProvider.addSelectionChangedListener(selectionChangedListener);
                         selectionProvidersMappedByRetrieverLevel.put(retrieverLevel, selectionProvider);
                     }
                     retrieverLevelIndex++;
@@ -179,8 +190,13 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
 
     @Override
     public void addSelectionChangedListener(SelectionChangedListener listener) {
-        // TODO Auto-generated method stub
-        
+        listeners.add(listener);
+    }
+    
+    private void notifyListeners() {
+        for (SelectionChangedListener listener : listeners) {
+            listener.selectionChanged();
+        }
     }
     
     private class RetrieverLevelCell extends AbstractCell<LocalizedTypeDTO> {

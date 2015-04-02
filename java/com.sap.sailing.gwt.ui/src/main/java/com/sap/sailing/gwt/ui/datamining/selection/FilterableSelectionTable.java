@@ -17,14 +17,14 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 public class FilterableSelectionTable<ContentType extends Serializable> extends FlowPanel {
     
-    private Collection<ContentType> allData;
+    private final Collection<ContentType> allData;
     private int width;
     private int height;
 
-    private AbstractFilterablePanel<ContentType> filterPanel;
-    private DataGrid<ContentType> table;
-    private MultiSelectionModel<ContentType> selectionModel;
-    private ListDataProvider<ContentType> dataProvider;
+    private final AbstractFilterablePanel<ContentType> filterPanel;
+    private final DataGrid<ContentType> table;
+    private final MultiSelectionModel<ContentType> selectionModel;
+    private final ListDataProvider<ContentType> dataProvider;
     
     public FilterableSelectionTable() {
         allData = new ArrayList<ContentType>();
