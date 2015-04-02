@@ -8,31 +8,30 @@ import java.util.TreeMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class WindLinesDTO implements IsSerializable {
     
-    private Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> windLinesMap;
+    private Map<Position, SortedMap<Long, List<Position>>> windLinesMap;
 
-    public Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> getWindLinesMap() {
+    public Map<Position, SortedMap<Long, List<Position>>> getWindLinesMap() {
         return windLinesMap;
     }
 
-    public void setWindLinesMap(Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> windLinesMap) {
+    public void setWindLinesMap(Map<Position, SortedMap<Long, List<Position>>> windLinesMap) {
         this.windLinesMap = windLinesMap;
     }
     
-    public void addWindLine(DegreePosition position, Long timePoint, List<DegreePosition> windLine) {
+    public void addWindLine(Position position, Long timePoint, List<Position> windLine) {
         if (windLinesMap == null) {
-            windLinesMap = new HashMap<DegreePosition, SortedMap<Long, List<DegreePosition>>>();
+            windLinesMap = new HashMap<Position, SortedMap<Long, List<Position>>>();
         }
         if (!windLinesMap.containsKey(position)) {
-            windLinesMap.put(position, new TreeMap<Long, List<DegreePosition>>());
+            windLinesMap.put(position, new TreeMap<Long, List<Position>>());
         }
         windLinesMap.get(position).put(timePoint, windLine);
     }
     
-    public List<DegreePosition> getWindLine(Position position, Long timePoint) {
+    public List<Position> getWindLine(Position position, Long timePoint) {
         if (windLinesMap != null) {
             if (windLinesMap.get(position) != null) {
                 return windLinesMap.get(position).get(timePoint);

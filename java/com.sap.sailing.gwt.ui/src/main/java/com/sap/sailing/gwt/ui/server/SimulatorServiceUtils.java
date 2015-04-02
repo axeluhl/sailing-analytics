@@ -129,7 +129,7 @@ public class SimulatorServiceUtils {
     public static List<Position> getIntermediatePoints2(List<Position> points, double stepSizeMeters) {
         List<Position> newPoints = new ArrayList<>();
         for (Position point : points) {
-            newPoints.add(new DegreePosition(point.getLatDeg(), point.getLngDeg()));
+            newPoints.add(point);
         }
         return SimulatorServiceUtils.getIntermediatePoints(newPoints, stepSizeMeters);
     }

@@ -1173,8 +1173,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         windDTO.trueWindSpeedInKnots = wind.getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
         if (wind.getPosition() != null) {
-            windDTO.position = new DegreePosition(wind.getPosition().getLatDeg(), wind.getPosition()
-                    .getLngDeg());
+            windDTO.position = wind.getPosition();
         }
         if (wind.getTimePoint() != null) {
             windDTO.measureTimepoint = wind.getTimePoint().asMillis();
@@ -1205,8 +1204,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         windDTO.dampenedTrueWindSpeedInKnots = wind.getKnots();
         windDTO.dampenedTrueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
         if (wind.getPosition() != null) {
-            windDTO.position = new DegreePosition(wind.getPosition().getLatDeg(), wind.getPosition()
-                    .getLngDeg());
+            windDTO.position = wind.getPosition();
         }
         if (wind.getTimePoint() != null) {
             windDTO.measureTimepoint = wind.getTimePoint().asMillis();
@@ -1573,7 +1571,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Position p = null;
             if (windDTO.position != null) {
-                p = new DegreePosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg());
+                p = windDTO.position;
             }
             TimePoint at = null;
             if (windDTO.measureTimepoint != null) {
@@ -1752,7 +1750,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
-                                            position==null?null:new DegreePosition(position.getLatDeg(), position.getLngDeg()),
+                                            position==null?null:position,
                                                     estimatedSpeed2==null?null:createSpeedWithBearingDTO(estimatedSpeed2), windDTO2,
                                                             tack2, legType2, /* extrapolated */ true);
                                     fixesForCompetitor.add(extrapolated);
@@ -1777,8 +1775,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private GPSFixDTO createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated) {
-        return new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition()==null?null:new DegreePosition(fix
-                .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
+        return new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition()==null?null:fix.getPosition(),
                 speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
     }
 
@@ -1906,8 +1903,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Waypoint waypoint : course.getWaypoints()) {
                 Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
                 if (waypointPosition != null) {
-                    result.waypointPositions.add(new DegreePosition(waypointPosition.getLatDeg(), waypointPosition
-                            .getLngDeg()));
+                    result.waypointPositions.add(waypointPosition);
                 }
                 for (Mark b : waypoint.getMarks()) {
                     marks.add(b);
@@ -2061,7 +2057,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Position estimatedMarkPosition = trackedRace.getOrCreateTrack(startMark)
                     .getEstimatedPosition(timePoint, /* extrapolate */false);
             if (estimatedMarkPosition != null) {
-                markPositionDTOs.add(new DegreePosition(estimatedMarkPosition.getLatDeg(), estimatedMarkPosition.getLngDeg()));
+                markPositionDTOs.add(estimatedMarkPosition);
             }
         }
         return markPositionDTOs;
@@ -2148,7 +2144,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Position p = null;
             if (windDTO.position != null) {
-                p = new DegreePosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg());
+                p = windDTO.position;
             }
             TimePoint at = null;
             if (windDTO.measureTimepoint != null) {
@@ -3070,7 +3066,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final ManeuverDTO maneuverDTO;
             if (maneuver.getType() == ManeuverType.MARK_PASSING) {
                 maneuverDTO = new MarkpassingManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
-                        new DegreePosition(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
+                        maneuver.getPosition(), 
                         maneuver.getTimePoint().asDate(),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
@@ -3078,7 +3074,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 ((MarkPassingManeuver) maneuver).getSide());
             } else  {
                 maneuverDTO = new ManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
-                        new DegreePosition(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
+                        maneuver.getPosition(), 
                         maneuver.getTimePoint().asDate(),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
