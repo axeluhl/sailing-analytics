@@ -16,10 +16,10 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CustomScrollPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -28,8 +28,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
-import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
+import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -49,7 +49,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
     private final SingleSelectionModel<LocalizedTypeDTO> retrieverLevelSelectionModel;
     private final ListDataProvider<LocalizedTypeDTO> retrieverLevelDataProvider;
-    private final SimpleLayoutPanel selectionPanel;
+    private final SizeProvidingScrollPanel selectionPanel;
 
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrieverLevel;
@@ -76,7 +76,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         
         DockLayoutPanel innerDockLayoutPanel = new DockLayoutPanel(Unit.PX);
         innerDockLayoutPanel.addNorth(new Label(this.stringMessages.filterBy()), 18);
-        selectionPanel = new SimpleLayoutPanel();
+        selectionPanel = new SizeProvidingScrollPanel();
         innerDockLayoutPanel.add(selectionPanel);
         mainPanel.add(innerDockLayoutPanel);
         
@@ -237,6 +237,18 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             }
             
             super.setSelected(item, selected);
+        }
+    }
+    
+    private class SizeProvidingScrollPanel extends CustomScrollPanel implements SizeProvider {
+        @Override
+        public int getFreeWidthInPX() {
+            return getOffsetWidth() - getVerticalScrollbar().asWidget().getOffsetWidth();
+        }
+        @Override
+        public int getFreeHeightInPX() {
+            //Subtracting a value prevents weird scroll behavior
+            return getOffsetHeight() - getHorizontalScrollbar().asWidget().getOffsetHeight() - 3;
         }
     }
 

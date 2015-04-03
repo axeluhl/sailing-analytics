@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -40,11 +41,11 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     private final HorizontalLayoutPanel mainPanel;
     private final Collection<DimensionFilterSelectionProvider> dimensionFilters;
     private final SelectionChangeEvent.Handler selectionTablesChangedListener;
-    private final Widget sizeProvider;
+    private final SizeProvider sizeProvider;
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataRetrieverChainDefinitionDTO retrieverChain,
-            LocalizedTypeDTO retrievedDataType, int retrieverLevel, Widget sizeProvider) {
+            LocalizedTypeDTO retrievedDataType, int retrieverLevel, SizeProvider sizeProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
@@ -99,6 +100,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
         dimensionFilters.add(dimensionFilter);
         mainPanel.add(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
+        RootLayoutPanel.get().forceLayout();
     }
 
     boolean shouldRemoveDimensionFilter() {
@@ -110,6 +112,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
         dimensionFilters.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
+        RootLayoutPanel.get().forceLayout();
     }
     
     void updateAvailableDimensions() {
@@ -126,6 +129,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
             dimensionFilter.setAvailableDimensions(remainingDimensions);
         }
         mainPanel.onResize();
+        RootLayoutPanel.get().forceLayout();
     }
 
     private Collection<FunctionDTO> getSelectedDimensions() {
@@ -236,9 +240,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
         @Override
         public void onResize() {
-            setHeight(sizeProvider.getOffsetHeight() + "px");
-            
-            int heightInPX = sizeProvider.getOffsetHeight();
+            int heightInPX = sizeProvider.getFreeHeightInPX();
+            setHeight(heightInPX + "px");
             for (DimensionFilterSelectionProvider selectionProvider : dimensionFilters) {
                 selectionProvider.resizeToHeight(heightInPX);
             }
