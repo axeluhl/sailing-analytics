@@ -2,11 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 public class RaceColumnInSeriesDTO extends RaceColumnDTO {
     private static final long serialVersionUID = 3308901125173317674L;
-    private String seriesName; 
-    private String regattaName; 
-
-    // for GWT serialization
-    RaceColumnInSeriesDTO() {}
+    private final String seriesName; 
+    private final String regattaName; 
 
     public RaceColumnInSeriesDTO(String seriesName, String regattaName) {
         super();
