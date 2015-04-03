@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
+import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.WindListener;

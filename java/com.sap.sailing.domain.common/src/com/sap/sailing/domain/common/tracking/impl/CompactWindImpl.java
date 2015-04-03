@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking.impl;
+package com.sap.sailing.domain.common.tracking.impl;
 
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractPosition;
@@ -20,7 +20,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
     private final double degBearing;
     private final long timePointAsMillis;
 
-    private class CompactPosition extends AbstractPosition {
+    public class CompactPosition extends AbstractPosition {
         private static final long serialVersionUID = 5621506820766614178L;
 
         @Override
