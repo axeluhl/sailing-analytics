@@ -20,6 +20,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     private int height;
 
     private final AbstractFilterablePanel<ContentType> filterPanel;
+    private String filterText;
     private final DataGrid<ContentType> table;
     private final MultiSelectionModel<ContentType> selectionModel;
     private final ListDataProvider<ContentType> dataProvider;
@@ -62,6 +63,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         filterPanel.setWidth("95%");
         filterPanel.getTextBox().setWidth("95%");
         filterPanel.setVisible(false);
+        filterText = "";
         
         add(filterPanel);
         add(table);
@@ -111,11 +113,20 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         selectionModel.addSelectionChangeHandler(handler);
     }
     
-    public boolean isFilterWidgetVisible() {
+    public boolean isFilteringEnabled() {
         return filterPanel.isVisible();
     }
     
-    public void setFilterWidgetVisible(boolean visible) {
+    public void setFilteringEnabled(boolean visible) {
+        if (visible) {
+            filterPanel.getTextBox().setText(filterText);
+            filterPanel.filter();
+        } else {
+            filterText = filterPanel.getTextBox().getText();
+            filterPanel.getTextBox().setText("");
+            filterPanel.filter();
+        }
+        
         filterPanel.setVisible(visible);
         resizeTo(width, height);
     }
@@ -132,8 +143,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         height = heightInPX;
         
         setSize(width + "px", height+ "px");
-        
-        int tableHeight = isFilterWidgetVisible() ? Math.max(0, height - filterPanel.getOffsetHeight()) : height;
+        filterPanel.setWidth(width + "px");
+        int tableHeight = filterPanel.isVisible() ? Math.max(0, height - filterPanel.getOffsetHeight()) : height;
         table.setSize(width + "px", tableHeight + "px");
         //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
         table.redraw();

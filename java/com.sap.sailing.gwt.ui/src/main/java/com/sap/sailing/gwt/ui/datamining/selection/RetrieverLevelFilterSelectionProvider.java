@@ -13,7 +13,6 @@ import java.util.Set;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -100,7 +99,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
         dimensionFilters.add(dimensionFilter);
         mainPanel.add(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
-        RootLayoutPanel.get().forceLayout();
     }
 
     boolean shouldRemoveDimensionFilter() {
@@ -112,7 +110,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
         dimensionFilters.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
-        RootLayoutPanel.get().forceLayout();
     }
     
     void updateAvailableDimensions() {
@@ -129,7 +126,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
             dimensionFilter.setAvailableDimensions(remainingDimensions);
         }
         mainPanel.onResize();
-        RootLayoutPanel.get().forceLayout();
     }
 
     private Collection<FunctionDTO> getSelectedDimensions() {

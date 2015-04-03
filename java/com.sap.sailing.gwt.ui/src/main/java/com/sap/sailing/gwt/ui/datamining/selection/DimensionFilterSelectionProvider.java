@@ -71,7 +71,7 @@ class DimensionFilterSelectionProvider {
         toggleFilterButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                selectionTable.setFilterWidgetVisible(toggleFilterButton.isDown());
+                selectionTable.setFilteringEnabled(toggleFilterButton.isDown());
             }
         });
         toggleFilterButton.setVisible(false);
