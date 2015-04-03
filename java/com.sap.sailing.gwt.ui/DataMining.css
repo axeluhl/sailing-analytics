@@ -214,6 +214,11 @@ input.magnifier {
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
+.settingsAnchor {
+	position: relative;
+	top: 9px;
+}
+
 .groupingProviderElement {
 	margin: 2px;
 }

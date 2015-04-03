@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -66,17 +65,16 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
 
-        Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName() + ":");
-        queryDefinitionProviderWithControls.addControl(runnerSettingsLabel);
-        Anchor runnerSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
-        runnerSettingsAnchor.setTitle(getStringMessages().settings());
-        runnerSettingsAnchor.addClickHandler(new ClickHandler() {
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
+        settingsAnchor.addStyleName("settingsAnchor");
+        settingsAnchor.setTitle(getStringMessages().settings());
+        settingsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new SettingsDialog<QueryRunnerSettings>(queryRunner, getStringMessages()).show();
             }
         });
-        queryDefinitionProviderWithControls.addControl(runnerSettingsAnchor);
+        queryDefinitionProviderWithControls.addControl(settingsAnchor);
     }
 
     private LogoAndTitlePanel createLogoAndTitlePanel() {

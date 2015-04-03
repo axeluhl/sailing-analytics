@@ -22,9 +22,9 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
-import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -34,7 +34,6 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryDefinitionDTOImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
 
 public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -49,7 +48,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final Timer queryDefinitionReleaseTimer;
     
     private final DockLayoutPanel mainPanel;
-    private HorizontalFlowPanel controlsPanel;
+    private FlowPanel controlsPanel;
     
     private StatisticProvider statisticProvider;
     private SimpleDataRetrieverChainDefinitionProvider retrieverChainProvider;
@@ -111,7 +110,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         });
         ScrollPanel groupBySelectionScrollPanel = new ScrollPanel(groupBySelectionPanel.getEntryWidget());
         
-        controlsPanel = new HorizontalFlowPanel();
+        controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("definitionProviderControls");
 
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
@@ -125,7 +124,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         
         SplitLayoutPanel controlsSplitPanel = new SplitLayoutPanel(15);
         controlsSplitPanel.addWest(new ScrollPanel(statisticAndRetrieverChainPanel), 800);
-        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 300);
+        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 130);
         controlsSplitPanel.add(groupBySelectionScrollPanel);
         return controlsSplitPanel;
     }
