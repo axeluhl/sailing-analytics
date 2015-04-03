@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -62,7 +63,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         
         mainPanel = new DockLayoutPanel(Unit.PX);
 
-        mainPanel.addNorth(createFunctionsPanel(), 80);
+        mainPanel.addNorth(createFunctionsPanel(), 92);
 
         selectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
@@ -122,11 +123,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         });
         addControl(clearSelectionButton);
         
-        DockLayoutPanel controlsDockPanel = new DockLayoutPanel(Unit.PX);
-        controlsDockPanel.addWest(statisticAndRetrieverChainPanel, 800);
-        controlsDockPanel.addEast(controlsPanel, 300);
-        controlsDockPanel.add(groupBySelectionScrollPanel);
-        return controlsDockPanel;
+        SplitLayoutPanel controlsSplitPanel = new SplitLayoutPanel(15);
+        controlsSplitPanel.addWest(new ScrollPanel(statisticAndRetrieverChainPanel), 800);
+        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 300);
+        controlsSplitPanel.add(groupBySelectionScrollPanel);
+        return controlsSplitPanel;
     }
     
     private void scheduleQueryDefinitionChanged() {
