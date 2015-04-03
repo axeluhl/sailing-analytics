@@ -364,6 +364,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
+        coordinateSystem = updateCoordinateSystemFromSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
@@ -374,11 +375,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls);
-        
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages);
         combinedWindPanel.setVisible(false);
     }
     
+    private CoordinateSystem updateCoordinateSystemFromSettings() {
+        coordinateSystem = getSettings().isWindUp()
+                ? new RotateAndTranslateCoordinateSystem(/* TODO */ new DegreePosition(0, 0), /* TODO */ new DegreeBearingImpl(0))
+                : new IdentityCoordinateSystem();
+        return coordinateSystem;
+    }
+
     private void loadMapsAPIV3(final boolean showMapControls) {
         boolean sensor = true;
 
@@ -2090,6 +2097,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
             simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
+        }
+        if (newSettings.isWindUp() != settings.isWindUp()) {
+            updateCoordinateSystemFromSettings();
+            requiredRedraw = true;
         }
         if (requiredRedraw) {
             redraw();

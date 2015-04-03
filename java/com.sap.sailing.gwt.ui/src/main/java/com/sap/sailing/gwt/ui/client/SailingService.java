@@ -607,5 +607,4 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
-
 }

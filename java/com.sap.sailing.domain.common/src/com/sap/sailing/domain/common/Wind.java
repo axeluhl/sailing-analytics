@@ -1,8 +1,5 @@
-package com.sap.sailing.domain.tracking;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Positioned;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.common.Timed;
 
 /**

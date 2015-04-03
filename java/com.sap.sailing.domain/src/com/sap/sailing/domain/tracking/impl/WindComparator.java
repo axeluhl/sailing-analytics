@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.Timed;
 
 /**

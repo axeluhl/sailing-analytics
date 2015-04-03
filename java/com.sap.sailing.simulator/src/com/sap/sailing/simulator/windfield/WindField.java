@@ -2,7 +2,7 @@ package com.sap.sailing.simulator.windfield;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;

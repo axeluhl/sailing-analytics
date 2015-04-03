@@ -709,5 +709,4 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName, AsyncCallback<Void> callback);
-
 }
