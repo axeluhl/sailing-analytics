@@ -66,7 +66,6 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     
     public class CompactPosition extends AbstractPosition {
         private static final long serialVersionUID = 5621506820766614178L;
-        CompactPosition() {} // for GWT serialization
 
         @Override
         public double getLatDeg() {
@@ -110,8 +109,6 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
             return cachedEstimatedSpeedInKnots;
         }
     }
-    
-    CompactGPSFixImpl() { latDeg=0; lngDeg=0; timePointAsMillis=0; } // for GWT serialization only
     
     public CompactGPSFixImpl(Position position, TimePoint timePoint) {
         latDeg = position.getLatDeg();
