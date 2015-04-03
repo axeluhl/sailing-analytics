@@ -1851,6 +1851,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 dateAsTimePoint = new MillisecondsTimePoint(date);
             }
+            result.totalLegsCount = trackedRace.getRace().getCourse().getLegs().size();
+            result.currentLegNumber = trackedRace.getLastLegStarted(dateAsTimePoint);
             result.marks = new HashSet<MarkDTO>();
             result.waypointPositions = new ArrayList<PositionDTO>();
             Set<Mark> marks = new HashSet<Mark>();
