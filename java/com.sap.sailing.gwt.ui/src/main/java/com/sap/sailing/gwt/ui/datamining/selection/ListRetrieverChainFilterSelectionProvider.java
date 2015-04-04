@@ -28,8 +28,10 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -37,23 +39,25 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider<Object>, DataRetrieverChainDefinitionChangedListener {
+public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider, DataRetrieverChainDefinitionChangedListener {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<SelectionChangedListener> listeners;
+
+    private DataRetrieverChainDefinitionDTO retrieverChain;
+    private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrieverLevel;
+    private final SelectionChangedListener retrieverLevelSelectionChangedListener;
     
     private final DockLayoutPanel mainPanel;
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
     private final SingleSelectionModel<LocalizedTypeDTO> retrieverLevelSelectionModel;
     private final ListDataProvider<LocalizedTypeDTO> retrieverLevelDataProvider;
     private final SizeProvidingScrollPanel selectionPanel;
-
-    private DataRetrieverChainDefinitionDTO retrieverChain;
-    private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrieverLevel;
-    private final SelectionChangedListener selectionChangedListener;
+    private final FilterSelectionPresenter selectionPresenter;
+    private final ScrollPanel selectionPresenterScrollPanel;
 
     public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -63,8 +67,17 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
+        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
         
-        mainPanel = new DockLayoutPanel(Unit.PX);
+        retrieverChain = null;
+        selectionProvidersMappedByRetrieverLevel = new HashMap<>();
+        retrieverLevelSelectionChangedListener = new SelectionChangedListener() {
+            @Override
+            public void selectionChanged() {
+                mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
+                notifyListeners();
+            }
+        };
         
         retrieverLevelList = new CellList<LocalizedTypeDTO>(new RetrieverLevelCell());
         retrieverLevelSelectionModel = new RetrieverLevelSelectionModel();
@@ -72,24 +85,20 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         retrieverLevelDataProvider = new ListDataProvider<>();
         retrieverLevelDataProvider.addDataDisplay(retrieverLevelList);
         ScrollPanel retrieverLevelListScrollPanel = new ScrollPanel(retrieverLevelList);
-        mainPanel.addWest(retrieverLevelListScrollPanel, 300);
         
-        DockLayoutPanel innerDockLayoutPanel = new DockLayoutPanel(Unit.PX);
-        innerDockLayoutPanel.addNorth(new Label(this.stringMessages.filterBy()), 18);
+        DockLayoutPanel selectionDockLayoutPanel = new DockLayoutPanel(Unit.PX);
+        selectionDockLayoutPanel.addNorth(new Label(this.stringMessages.filterBy()), 18);
         selectionPanel = new SizeProvidingScrollPanel();
-        innerDockLayoutPanel.add(selectionPanel);
-        mainPanel.add(innerDockLayoutPanel);
+        selectionDockLayoutPanel.add(selectionPanel);
         
-        retrieverChain = null;
-        selectionProvidersMappedByRetrieverLevel = new HashMap<>();
-        selectionChangedListener = new SelectionChangedListener() {
-            @Override
-            public void selectionChanged() {
-                notifyListeners();
-            }
-        };
+        selectionPresenter = new PlainFilterSelectionPresenter(stringMessages, retrieverChainProvider, this);
+        selectionPresenterScrollPanel = new ScrollPanel(selectionPresenter.getEntryWidget());
         
-        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
+        mainPanel = new DockLayoutPanel(Unit.PX);
+        mainPanel.addSouth(selectionPresenterScrollPanel, 100);
+        mainPanel.addWest(retrieverLevelListScrollPanel, 300);
+        mainPanel.add(selectionDockLayoutPanel);
+        mainPanel.setWidgetHidden(selectionPresenterScrollPanel, true);
     }
     
     @Override
@@ -128,7 +137,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                                 new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, retrieverChain,
                                                                           retrieverLevel, retrieverLevelIndex, selectionPanel);
                         selectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
-                        selectionProvider.addSelectionChangedListener(selectionChangedListener);
+                        selectionProvider.addSelectionChangedListener(retrieverLevelSelectionChangedListener);
                         selectionProvidersMappedByRetrieverLevel.put(retrieverLevel, selectionProvider);
                     }
                     retrieverLevelIndex++;
@@ -153,8 +162,9 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private void clearContent() {
         retrieverLevelDataProvider.getList().clear();
         retrieverLevelSelectionModel.clear();
-        selectionProvidersMappedByRetrieverLevel.clear();
         selectionPanel.clear();
+        clearSelection();
+        selectionProvidersMappedByRetrieverLevel.clear();
     }
 
     @Override

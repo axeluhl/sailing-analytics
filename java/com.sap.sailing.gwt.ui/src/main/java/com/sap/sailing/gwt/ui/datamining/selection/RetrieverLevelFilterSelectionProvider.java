@@ -166,10 +166,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     }
 
     public void clearSelection() {
-        dimensionFilters.clear();
         mainPanel.clear();
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+            dimensionFilter.clearSelection();
+        }
+        dimensionFilters.clear();
         initializeDimensionFilters();
-        notifyListeners();
     }
     
     public void addSelectionChangedListener(SelectionChangedListener listener) {

@@ -55,7 +55,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
     private MultiDimensionalGroupingProvider groupBySelectionPanel;
     
-    private FilterSelectionProvider<?> selectionProvider;
+    private FilterSelectionProvider selectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
@@ -170,11 +170,6 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     @Override
     public Widget getEntryWidget() {
         return mainPanel;
-    }
-
-    @Override
-    public FilterSelectionProvider<?> getSelectionProvider() {
-        return selectionProvider;
     }
 
     @Override

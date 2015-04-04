@@ -13,6 +13,4 @@ public interface QueryDefinitionProvider extends Component<Object>  {
     public void addQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
     public void removeQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
 
-    public abstract FilterSelectionProvider<?> getSelectionProvider();
-
 }
