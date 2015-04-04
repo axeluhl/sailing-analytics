@@ -45,6 +45,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         createUI();
