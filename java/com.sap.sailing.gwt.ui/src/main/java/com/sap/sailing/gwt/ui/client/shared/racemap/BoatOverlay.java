@@ -69,7 +69,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
         super(map, zIndex, coordinateSystem);
         this.boatClass = competitorDTO.getBoatClass();
         this.color = color;
-
         boatScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
         boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
     }

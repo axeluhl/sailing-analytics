@@ -41,7 +41,6 @@ import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHand
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnRemoveHandler;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 
@@ -385,15 +384,12 @@ public abstract class CanvasOverlayV3 {
         return Math.abs(pointX.getX() - point.getX());
     }
     
-    protected Size calculateBoundingBox(MapCanvasProjection projection, LatLng position, double distanceXInMeter, double distanceYInMeter) {
-        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+    protected Size calculateBoundingBox(MapCanvasProjection projection, Position pos, double distanceXInMeter, double distanceYInMeter) {
         Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
         Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(distanceYInMeter));
-
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
-
-        Point pointCenter = projection.fromLatLngToDivPixel(position);
+        Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
         Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
 
