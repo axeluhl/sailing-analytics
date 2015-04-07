@@ -10,6 +10,7 @@
     <!-- SystemInformationActivity -->
     <string name="application_information" translatable="false">Application Information</string>
     <string name="application_identifier" translatable="false">Identifier</string>
+    <string name="application_compile_information" translatable="false">Build Information</string>
     <string name="application_install_date" translatable="false">Install Date</string>
     <string name="persistence_information" translatable="false">Persistence Status</string>
     <string name="persistence_waiting_clear_events" translatable="false">Clear events</string>

@@ -46,6 +46,20 @@
             android:text="@string/empty" />
 
         <TextView
+            android:id="@+id/system_information_application_compile_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="@string/application_compile_information"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <TextView
+            android:id="@+id/system_information_application_compile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/empty"/>
+
+        <TextView
             android:id="@+id/system_information_application_install_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,7 +99,7 @@
         <ListView
             android:id="@+id/system_information_persistence_waiting"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="match_parent"
             android:fadeScrollbars="false" />
 
         <Button

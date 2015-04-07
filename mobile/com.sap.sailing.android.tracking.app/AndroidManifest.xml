@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="21" />
+        android:targetSdkVersion="22" />
 
     <permission
         android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"

@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.util.AppUtils;
+import org.w3c.dom.Text;
 
 public class SystemInformationActivityHelper {
     private final SendingServiceAwareActivity activity;
@@ -22,6 +23,7 @@ public class SystemInformationActivityHelper {
         this.activity = activity;
         activity.setContentView(R.layout.system_information_view);
         setupVersionView(deviceIdentifier);
+        setupCompileView();
         setupInstalledView();
         setupPersistenceView();
     }
@@ -70,6 +72,13 @@ public class SystemInformationActivityHelper {
             versionView.setText(activity.getString(R.string.generic_error));
         } else {
             versionView.setText(String.format("%s (Code %s)", info.versionName, info.versionCode));
+        }
+    }
+
+    private void setupCompileView() {
+        TextView view = (TextView) activity.findViewById(R.id.system_information_application_compile);
+        if (view != null) {
+            view.setText(AppUtils.getBuildInfo(activity));
         }
     }
 
