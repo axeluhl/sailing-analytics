@@ -10,21 +10,38 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/voice_header"
+        <LinearLayout
+            android:id="@+id/voice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/default_margin"
-            android:text="@string/finished_recording"
-            android:textAllCaps="true"
-            android:textColor="?sap_light_gray"
-            android:textSize="@dimen/textSize_22" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/voice_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/finished_recording"
+                android:textAllCaps="true"
+                android:textColor="?sap_light_gray"
+                android:textSize="@dimen/textSize_22" />
+
+            <ImageView
+                android:id="@+id/voice_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/lock_outline"
+                android:tint="?sap_light_gray"
+                android:visibility="visible" />
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/voice_header">
+            android:layout_below="@id/voice">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -47,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/marker" />
+            android:src="@drawable/marker" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -56,21 +73,38 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/photo_header"
+        <LinearLayout
+            android:id="@+id/photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/default_margin"
-            android:text="@string/finished_list"
-            android:textAllCaps="true"
-            android:textColor="?sap_light_gray"
-            android:textSize="@dimen/textSize_22" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/photo_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/finished_list"
+                android:textAllCaps="true"
+                android:textColor="?sap_light_gray"
+                android:textSize="@dimen/textSize_22" />
+
+            <ImageView
+                android:id="@+id/photo_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/lock_outline"
+                android:tint="?sap_light_gray"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/photo_header">
+            android:layout_below="@id/photo">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -93,7 +127,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/marker" />
+            android:src="@drawable/marker" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -102,21 +136,38 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/list_header"
+        <LinearLayout
+            android:id="@+id/list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/default_margin"
-            android:text="@string/finished_tracking"
-            android:textAllCaps="true"
-            android:textColor="?sap_light_gray"
-            android:textSize="@dimen/textSize_22" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/list_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/finished_tracking"
+                android:textAllCaps="true"
+                android:textColor="?sap_light_gray"
+                android:textSize="@dimen/textSize_22" />
+
+            <ImageView
+                android:id="@+id/list_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/lock_outline"
+                android:tint="?sap_light_gray"
+                android:visibility="visible" />
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/list_header">
+            android:layout_below="@id/list">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -134,11 +185,11 @@
             android:layout_alignParentRight="true"
             android:background="?black" />
 
-        <View
+        <ImageView
             android:id="@+id/list_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/marker" />
+            android:src="@drawable/marker" />
     </RelativeLayout>
 </LinearLayout>

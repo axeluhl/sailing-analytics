@@ -23,7 +23,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemClick {
+public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick {
 
     private MoreFlagsAdapter mAdapter;
 
@@ -83,7 +83,7 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
-    public static class FinishingTimeFragment extends ScheduleFragment implements View.OnClickListener {
+    public static class FinishingTimeFragment extends BaseFragment implements View.OnClickListener {
 
         public static final String STARTMODE = "startMode";
 
@@ -224,7 +224,7 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
         }
     }
 
-    public static class FinishingWaitingFragment extends ScheduleFragment {
+    public static class FinishingWaitingFragment extends BaseFragment {
 
         public FinishingWaitingFragment() {
 

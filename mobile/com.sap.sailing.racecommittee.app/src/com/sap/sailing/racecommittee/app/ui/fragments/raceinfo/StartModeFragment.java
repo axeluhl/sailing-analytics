@@ -18,10 +18,9 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartModeFragment extends ScheduleFragment implements StartModeAdapter.StartModeClick {
+public class StartModeFragment extends BaseFragment implements StartModeAdapter.StartModeClick {
 
     private final static String STARTMODE = "startMode";
 

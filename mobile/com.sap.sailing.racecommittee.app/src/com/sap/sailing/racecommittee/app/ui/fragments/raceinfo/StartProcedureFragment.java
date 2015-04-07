@@ -13,12 +13,11 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
 
-public class StartProcedureFragment extends ScheduleFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
+public class StartProcedureFragment extends BaseFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
 
     private final static String STARTMODE = "startMode";
 

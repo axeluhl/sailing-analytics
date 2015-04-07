@@ -53,18 +53,10 @@ public abstract class BasePanelFragment extends RaceFragment {
                 retValue = drawable.getLevel() - offset;
                 switch (retValue) {
                     case 1:
-//                        if (layoutParams != null) {
-//                            layoutParams.height = getResources().getDimensionPixelSize(R.dimen.thick_line);
-//                            view.invalidate();
-//                        }
                         v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray_black_20));
                         break;
 
                     default:
-//                        if (layoutParams != null) {
-//                            layoutParams.height = getResources().getDimensionPixelSize(R.dimen.thin_line);
-//                            view.invalidate();
-//                        }
                         v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray));
                         break;
                 }
@@ -90,6 +82,10 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     protected void replaceFragment(RaceFragment fragment) {
+        replaceFragment(fragment, R.id.race_frame);
+    }
+
+    protected void replaceFragment(RaceFragment fragment, @IdRes int idRes) {
         Bundle args = getRecentArguments();
         if (fragment.getArguments() != null) {
             args.putAll(fragment.getArguments());
@@ -97,7 +93,7 @@ public abstract class BasePanelFragment extends RaceFragment {
         fragment.setArguments(args);
         getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.race_frame, fragment)
+                .replace(idRes, fragment)
                 .commit();
     }
 

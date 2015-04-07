@@ -12,7 +12,7 @@ import com.sap.sailing.racecommittee.app.R;
 
 import java.text.SimpleDateFormat;
 
-public class RaceFinishingFragment extends ScheduleFragment {
+public class RaceFinishingFragment extends BaseFragment {
 
     public static RaceFinishingFragment newInstance() {
         RaceFinishingFragment fragment = new RaceFinishingFragment();

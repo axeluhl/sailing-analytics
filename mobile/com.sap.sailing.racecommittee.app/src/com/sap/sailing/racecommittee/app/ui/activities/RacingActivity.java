@@ -18,7 +18,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.*;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
@@ -40,7 +42,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
@@ -63,21 +64,17 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private static ProgressBar mProgressSpinner;
 
     private IntentReceiver mReceiver;
-    private TextView windValue;
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
     private Wind mWind;
     private RaceListFragment mRaceList;
-    private RaceFragment raceFragment;
     private ManagedRace mSelectedRace;
-    private RelativeLayout windButton;
     private WindFragment windFragment;
     private Serializable mEventId;
     private EventBase mEvent;
     private CourseArea mCourseArea;
     private Serializable mCourseAreaId;
     private TimePoint startTime;
-    private TimePanelFragment timeFragment;
 
     private void setupFragments() {
         new Handler().post(new Runnable() {
@@ -453,12 +450,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
         });
         builder.create().show();
-    }
-
-    public void showMarker(ImageView view, int level) {
-        if (view != null) {
-            view.setImageLevel(level);
-        }
     }
 
     public void openDrawer() {

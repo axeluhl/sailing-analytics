@@ -436,7 +436,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
         private String displayName;
 
-        private FilterMode(int resId) {
+        FilterMode(int resId) {
             this.displayName = RaceApplication.getStringContext().getString(resId);
         }
 
@@ -446,7 +446,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
-    public static interface RaceListCallbacks {
+    public interface RaceListCallbacks {
         void onRaceListItemSelected(RaceListDataType selectedItem);
     }
 }

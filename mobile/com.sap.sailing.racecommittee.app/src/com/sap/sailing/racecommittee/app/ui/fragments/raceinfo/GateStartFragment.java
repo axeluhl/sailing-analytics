@@ -24,7 +24,7 @@ public class GateStartFragment {
     private final static String NAT = "nationality";
     private final static String NUM = "number";
 
-    public static class Pathfinder extends ScheduleFragment {
+    public static class Pathfinder extends BaseFragment {
 
         private EditText mNat;
         private EditText mNum;
@@ -166,7 +166,7 @@ public class GateStartFragment {
         }
     }
 
-    public static class Timing extends ScheduleFragment {
+    public static class Timing extends BaseFragment {
 
         private final static String STARTMODE = "startMode";
 

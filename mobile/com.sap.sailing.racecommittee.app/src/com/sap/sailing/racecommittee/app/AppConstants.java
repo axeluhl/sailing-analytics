@@ -45,6 +45,10 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
     public final static String INTENT_ACTION_TOGGLE_MORE = "more";
 
+    public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
+    public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";
+    public final static String INTENT_ACTION_TOOGLE_LIST = "list";
+
     private final static String INTENT_ACTION_TIME = PACKAGE_NAME + "action.time";
     public final static String INTENT_ACTION_TIME_HIDE = INTENT_ACTION_TIME + ".hide";
     public final static String INTENT_ACTION_TIME_SHOW = INTENT_ACTION_TIME + ".show";
@@ -53,4 +57,5 @@ public class AppConstants {
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";
 
     public final static String INTENT_ACTION_SHOW_MAIN_CONTENT = PACKAGE_NAME + ".action.show.main";
+    public final static String INTENT_ACTION_SHOW_SUMMARY_CONTENT = PACKAGE_NAME + ".action.show.summary";
 }

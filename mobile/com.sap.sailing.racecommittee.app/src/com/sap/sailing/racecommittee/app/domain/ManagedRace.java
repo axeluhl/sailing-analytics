@@ -16,51 +16,51 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     /**
      * @return the identifier of the race.
      */
-    public ManagedRaceIdentifier getIdentifier();
+    ManagedRaceIdentifier getIdentifier();
 
     /**
      * @return the state of the race.
      */
-    public RaceState getState();
+    RaceState getState();
 
     /**
      * Shortcut to {@link RaceState#getRaceLog()} of {@link ManagedRace#getState()}.
      * 
      * @return the log of the race.
      */
-    public RaceLog getRaceLog();
+    RaceLog getRaceLog();
 
     /**
      * Shortcut to {@link RaceState#getStatus()} of {@link ManagedRace#getState()}.
      * 
      * @return the status of the race's state.
      */
-    public RaceLogRaceStatus getStatus();
+    RaceLogRaceStatus getStatus();
 
     /**
      * the current course of the race
      * 
      * @return the course of the race
      */
-    public CourseBase getCourseDesign();
+    CourseBase getCourseDesign();
 
     /**
      * returns the list of competitors for this race
      * 
      * @return list of competitors
      */
-    public Collection<Competitor> getCompetitors();
+    Collection<Competitor> getCompetitors();
 
     /**
      * returns the list of markers to display on the racemap
      *
      * @return list of Markers
      */
-    public List<MapMarker> getMapMarkers();
+    List<MapMarker> getMapMarkers();
 
-    public CourseBase getCourseOnServer();
+    CourseBase getCourseOnServer();
 
-    public void setCourseOnServer(CourseBase course);
+    void setCourseOnServer(CourseBase course);
 
     /**
      * sets the list of competitors for a race. As the competitors are retrieved later from the backend, the list of
@@ -69,7 +69,7 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      * @param competitors
      *            the retrieved list of competitors for this race
      */
-    public void setCompetitors(Collection<Competitor> competitors);
+    void setCompetitors(Collection<Competitor> competitors);
 
 
     /**
@@ -79,5 +79,5 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      * @param markers
      *            the retrieved list of mapItems for this race
      */
-    public void setMapMarkers(List<MapMarker> markers);
+    void setMapMarkers(List<MapMarker> markers);
 }

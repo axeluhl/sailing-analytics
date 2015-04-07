@@ -11,8 +11,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -21,7 +19,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import java.util.Calendar;
 import java.util.List;
 
-public class RaceFlagViewerFragment extends ScheduleFragment {
+public class RaceFlagViewerFragment extends BaseFragment {
 
     private LinearLayout mLayout;
 

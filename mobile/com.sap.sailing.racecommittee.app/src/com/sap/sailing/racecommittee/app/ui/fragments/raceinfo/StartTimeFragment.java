@@ -24,7 +24,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartTimeFragment
-        extends ScheduleFragment
+        extends BaseFragment
         implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
     private static final String STARTMODE = "startMode";
     private static final int MAX_DAYS = 30;

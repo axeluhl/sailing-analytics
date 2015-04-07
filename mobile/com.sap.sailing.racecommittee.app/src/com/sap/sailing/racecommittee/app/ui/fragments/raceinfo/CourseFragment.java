@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
-public abstract class CourseFragment extends ScheduleFragment {
+public abstract class CourseFragment extends BaseFragment {
 
     public static RaceFragment newInstance(int startMode) {
         return CourseFragmentName.newInstance(startMode);

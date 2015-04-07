@@ -6,7 +6,7 @@ import android.support.annotation.IdRes;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
-public class ScheduleFragment extends RaceFragment {
+public class BaseFragment extends RaceFragment {
 
     protected void openMainScheduleFragment() {
         replaceFragment(MainScheduleFragment.newInstance());
