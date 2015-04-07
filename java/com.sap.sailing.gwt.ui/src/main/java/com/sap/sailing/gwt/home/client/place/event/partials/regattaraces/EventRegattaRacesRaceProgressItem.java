@@ -1,11 +1,11 @@
-package com.sap.sailing.gwt.home.client.place.event.regattaraces;
+package com.sap.sailing.gwt.home.client.place.event.partials.regattaraces;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaResources;
+import com.sap.sailing.gwt.home.client.place.event.partials.RegattaResources;
 
 public class EventRegattaRacesRaceProgressItem extends UIObject {
     private static EventRegattaRacesRaceProgressItemUiBinder uiBinder = GWT.create(EventRegattaRacesRaceProgressItemUiBinder.class);

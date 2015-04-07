@@ -9,14 +9,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
@@ -79,9 +80,8 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
                     .createLeaderboardSettingsFromURLParameters(Window.Location
                     .getParameterMap());
 
-            final RaceIdentifier preselectedRace = EventParamUtils
+            final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
                     .getPreselectedRace(Window.Location.getParameterMap());
-
 
             LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
                     leaderboardSettings, //
