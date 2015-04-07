@@ -152,7 +152,8 @@ public class Swarm implements TimeListener {
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
-        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude()+visibleBoundsOfField.getNorthEast().getLatitude())/2);
+        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude()/180.*Math.PI+
+                visibleBoundsOfField.getNorthEast().getLatitude()/180.*Math.PI)/2);
     };
 
     //native void log(String message) /*-{
