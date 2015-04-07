@@ -66,7 +66,10 @@ public class FixesAndTails {
      */
     private final Map<CompetitorDTO, Integer> lastShownFix;
 
-    public FixesAndTails() {
+    private final CoordinateSystem coordinateSystem;
+
+    public FixesAndTails(CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
@@ -140,14 +143,16 @@ public class FixesAndTails {
             if (!fix.timepoint.before(to)) {
                 indexOfLast = i-1;
             } else {
-                LatLng point = null;
+                final LatLng point;
                 if (indexOfFirst == -1) {
                     if (!fix.timepoint.before(from)) {
                         indexOfFirst = i;
-                        point = LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg());
+                        point = coordinateSystem.toLatLng(fix.position);
+                    } else {
+                        point = null;
                     }
                 } else {
-                    point = LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg());
+                    point = coordinateSystem.toLatLng(fix.position);
                 }
                 if (point != null) {
                     points.add(point);

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
+import com.google.gwt.maps.client.base.LatLng;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 
@@ -24,4 +25,6 @@ public interface CoordinateSystem {
      * @return a degree angle from the interval [0..360)
      */
     double mapDegreeBearing(double trueBearingInDegrees);
+
+    LatLng toLatLng(Position position);
 }

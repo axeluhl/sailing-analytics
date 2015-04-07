@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
+import com.google.gwt.maps.client.base.LatLng;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 
@@ -17,5 +18,10 @@ public class IdentityCoordinateSystem implements CoordinateSystem {
     @Override
     public double mapDegreeBearing(double trueBearingInDegrees) {
         return trueBearingInDegrees;
+    }
+
+    @Override
+    public LatLng toLatLng(Position position) {
+        return LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
     }
 }

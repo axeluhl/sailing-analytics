@@ -215,7 +215,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
                 + "knots " + windDTO.trueWindBearingDeg;
         logger.fine(msg);
         Position position = windDTO.position;
-        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+        LatLng positionLatLng = coordinateSystem.toLatLng(position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x = canvasPositionInPx.getX() - getWidgetPosLeft();
         double y = canvasPositionInPx.getY() - getWidgetPosTop();

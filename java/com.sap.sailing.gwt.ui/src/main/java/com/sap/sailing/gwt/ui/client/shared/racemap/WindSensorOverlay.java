@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
@@ -61,7 +60,7 @@ public class WindSensorOverlay extends CanvasOverlayV3 {
             if (position != null) {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
                 transformer.drawToCanvas(getCanvas(), rotationDegOfWindSymbol, 1.0);
-                setLatLngPosition(LatLng.newInstance(windDTO.position.getLatDeg(), windDTO.position.getLngDeg()));
+                setLatLngPosition(coordinateSystem.toLatLng(windDTO.position));
                 Point sensorPositionInPx = mapProjection.fromLatLngToDivPixel(getLatLngPosition());
                 setCanvasPosition(sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
                 String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 

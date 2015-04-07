@@ -364,33 +364,25 @@ public abstract class CanvasOverlayV3 {
         setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate("+Math.round(rotationInDegrees)+"deg)");
     }
 
-    protected double calculateRadiusOfBoundingBox(MapCanvasProjection projection, LatLng centerPosition, double lengthInMeter) {
-        Position centerPos = new DegreePosition(centerPosition.getLatitude(), centerPosition.getLongitude());
-        Position translateRhumbX = centerPos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
-        Position translateRhumbY = centerPos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(lengthInMeter));
-
-        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
-        LatLng posWithDistanceY = LatLng.newInstance(translateRhumbY.getLatDeg(), translateRhumbY.getLngDeg());
-        
-        Point pointCenter = projection.fromLatLngToDivPixel(centerPosition);
+    protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, double lengthInMeter) {
+        Position translateRhumbX = centerPosition.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
+        Position translateRhumbY = centerPosition.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(lengthInMeter));
+        LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
+        LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
+        Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(centerPosition));
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
         Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
-        
         double diffX = Math.abs(pointX.getX() - pointCenter.getX());
         double diffY = Math.abs(pointY.getY() - pointCenter.getY());
-        
         return Math.min(diffX, diffY);  
     }
 
     protected double calculateDistanceAlongX(MapCanvasProjection projection, LatLng position, double distanceXInMeter) {
         Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
-        
         Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
-        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
-
+        LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         Point point = projection.fromLatLngToDivPixel(position);
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
-
         return Math.abs(pointX.getX() - point.getX());
     }
     
@@ -399,8 +391,8 @@ public abstract class CanvasOverlayV3 {
         Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
         Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(distanceYInMeter));
 
-        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
-        LatLng posWithDistanceY = LatLng.newInstance(translateRhumbY.getLatDeg(), translateRhumbY.getLngDeg());
+        LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
+        LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
 
         Point pointCenter = projection.fromLatLngToDivPixel(position);
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);

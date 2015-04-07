@@ -66,13 +66,12 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
             double markSizeScaleFactor = markScaleAndSize.getA();
             getCanvas().setTitle(getTitle());
-            LatLng latLngPosition = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
             // calculate canvas size
             double canvasWidth = markScaleAndSize.getB().getWidth();
             double canvasHeight = markScaleAndSize.getB().getHeight();
             double buoyZoneRadiusInPixel = -1;
             if (showBuoyZone && mark.type == MarkType.BUOY) {
-                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition,
+                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBoxInPixels(mapProjection, position,
                         buoyZoneRadiusInMeter);
                 if (buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     canvasWidth = (buoyZoneRadiusInPixel + 1) * 2;
@@ -102,7 +101,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
-            Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
+            Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
             if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
             } else {
@@ -131,7 +130,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         double buoyScaleFactor = 2.0;
 
         Size markSizeInPixel = calculateBoundingBox(mapProjection,
-                LatLng.newInstance(markPosition.getLatDeg(), markPosition.getLngDeg()),
+                coordinateSystem.toLatLng(markPosition),
                 markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
         
         double markHeightInPixel = markSizeInPixel.getHeight();

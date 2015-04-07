@@ -354,7 +354,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.timer = timer;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager();
-        fixesAndTails = new FixesAndTails();
+        fixesAndTails = new FixesAndTails(coordinateSystem);
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<SidelineDTO, Polygon>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
@@ -1047,13 +1047,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         double lat1 = position.getLatitude() / 180. * Math.PI;
         double lon1 = position.getLongitude() / 180. * Math.PI;
         double bearingRad = bearingDeg / 180. * Math.PI;
-
         double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distianceRad) + 
                         Math.cos(lat1) * Math.sin(distianceRad) * Math.cos(bearingRad));
         double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distianceRad)*Math.cos(lat1), 
                        Math.cos(distianceRad)-Math.sin(lat1)*Math.sin(lat2));
         lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180�
-        
+        // position is already in LatLng space, so no mapping through coordinateSystem is required here
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
     
@@ -1109,7 +1108,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             .getHullLengthInMeters() / 1000.; // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
-                    LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.getLatDeg(), lastBoatFix.position.getLngDeg());
+                    LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
                     LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg,
                             distanceFromBoatPositionInKm);
                     final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);

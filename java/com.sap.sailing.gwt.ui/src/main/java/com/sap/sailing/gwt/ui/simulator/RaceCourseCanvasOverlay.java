@@ -230,6 +230,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
     private void center() {
         double cLat = (startPoint.getLatitude() + ((endPoint.getLatitude() - startPoint.getLatitude()) % 180.) / 2. + 90.) % 180. - 90.;
         double cLon = (startPoint.getLongitude() + ((endPoint.getLongitude() - startPoint.getLongitude()) % 360.) / 2. + 180.) % 360. - 180;
+        // startPoint and endPoint are already in the map's coordinate space, so no further mapping through coordinateSystem is required here
         LatLng centerPoint = LatLng.newInstance(cLat, cLon);
         getMap().panTo(centerPoint);
     }

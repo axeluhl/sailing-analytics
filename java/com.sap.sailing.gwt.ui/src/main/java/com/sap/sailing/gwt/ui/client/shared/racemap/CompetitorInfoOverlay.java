@@ -47,7 +47,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
     @Override
     protected void draw() {
         if (mapProjection != null && position != null) {
-            LatLng latLngPosition = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+            LatLng latLngPosition = coordinateSystem.toLatLng(position);
             Context2d ctx = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 

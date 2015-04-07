@@ -201,18 +201,14 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     private void drawLine(final Position p1, final Position p2) {
         final double weight = 1.0;
-
-        LatLng positionLatLng = LatLng.newInstance(p1.getLatDeg(), p1.getLngDeg());
+        LatLng positionLatLng = coordinateSystem.toLatLng(p1);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         final double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
-        positionLatLng = LatLng.newInstance(p2.getLatDeg(), p2.getLngDeg());
+        positionLatLng = coordinateSystem.toLatLng(p2);
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         final double x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
         drawLine(x1, y1, x2, y2, weight, lineColor);
     }
 

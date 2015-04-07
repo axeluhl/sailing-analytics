@@ -196,23 +196,15 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     }
 
     private void drawLine(SimulatorWindDTO p1, SimulatorWindDTO p2) {
-
         double weight = 3.0;
-
-        Position position = p1.position;
-
-        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+        LatLng positionLatLng = coordinateSystem.toLatLng(p1.position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
-        position = p2.position;
-        positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+        positionLatLng = coordinateSystem.toLatLng(p2.position);
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
         // Context2d context2d = canvas.getContext2d();
         // context2d.setShadowBlur(weight);
         drawLine(x1, y1, x2, y2, weight, pathColor);
@@ -221,17 +213,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     }
 
     private void drawPoint(SimulatorWindDTO p) {
-
         double weight = 3.0;
-
-        Position position = p.position;
-
-        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+        LatLng positionLatLng = coordinateSystem.toLatLng(p.position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
         drawCircle(x1, y1, weight / 2., pathColor);
     }
 
@@ -244,20 +230,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         if (p1 == null || p2 == null) {
             return true;
         }
-        Position position = p1.position;
-
-        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+        LatLng positionLatLng = coordinateSystem.toLatLng(p1.position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         double x1 = canvasPositionInPx.getX();
         double y1 = canvasPositionInPx.getY();
-
-        position = p2.position;
-        positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
+        positionLatLng = coordinateSystem.toLatLng(p2.position);
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x2 = canvasPositionInPx.getX();
         double y2 = canvasPositionInPx.getY();
-
         double pxDistance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
         if (pxDistance >= MinimumPxDistanceBetweenArrows) {
             return true;

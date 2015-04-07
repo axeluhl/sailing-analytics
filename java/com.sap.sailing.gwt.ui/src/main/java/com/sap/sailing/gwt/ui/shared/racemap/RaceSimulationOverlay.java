@@ -10,7 +10,6 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
@@ -155,8 +154,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             ctxt.setStrokeStyle(this.colors.getColor(colorIdx));
             ctxt.beginPath();
             for (SimulatorWindDTO point : points) {
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.getLatDeg(),
-                        point.position.getLngDeg()));
+                Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
                 if (first) {
                     ctxt.moveTo(px.getX(), px.getY());
                     first = false;
@@ -171,9 +169,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
                     continue;
                 }
-
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.getLatDeg(),
-                        point.position.getLngDeg()));
+                Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
                 ctxt.beginPath();
                 ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2 * Math.PI);
                 ctxt.closePath();

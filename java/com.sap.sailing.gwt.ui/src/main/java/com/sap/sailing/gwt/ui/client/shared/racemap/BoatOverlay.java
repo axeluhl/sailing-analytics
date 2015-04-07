@@ -101,7 +101,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 lastScale = boatSizeScaleFactor;
                 lastColor = color;
             }
-            LatLng latLngPosition = LatLng.newInstance(boatFix.position.getLatDeg(), boatFix.position.getLngDeg());
+            LatLng latLngPosition = coordinateSystem.toLatLng(boatFix.position);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);

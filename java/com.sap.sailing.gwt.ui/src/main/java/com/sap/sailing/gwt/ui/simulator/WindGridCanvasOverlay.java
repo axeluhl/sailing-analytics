@@ -408,19 +408,14 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     private void drawGridCell(final GridCell cell) {
-
-        LatLng positionLatLng = LatLng.newInstance(cell.bottomLeft.getLatDeg(), cell.bottomLeft.getLngDeg());
+        LatLng positionLatLng = coordinateSystem.toLatLng(cell.bottomLeft);
         final Point blPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(cell.bottomRight.getLatDeg(), cell.bottomRight.getLngDeg());
+        positionLatLng = coordinateSystem.toLatLng(cell.bottomRight);
         final Point brPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(cell.topLeft.getLatDeg(), cell.topLeft.getLngDeg());
+        positionLatLng = coordinateSystem.toLatLng(cell.topLeft);
         final Point tlPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(cell.topRight.getLatDeg(), cell.topRight.getLngDeg());
+        positionLatLng = coordinateSystem.toLatLng(cell.topRight);
         final Point trPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         /*
          * Uncomment to see the center of the grid for debug drawCircle(blPoint.getX()-this.getWidgetPosLeft(),
          * blPoint.getY()-this.getWidgetPosTop(),2,"red"); drawCircle(brPoint.getX()-this.getWidgetPosLeft(),

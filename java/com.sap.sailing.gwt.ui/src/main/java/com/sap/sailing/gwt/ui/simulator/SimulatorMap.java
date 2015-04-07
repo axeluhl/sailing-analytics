@@ -572,13 +572,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 windNeedleCanvasOverlay.addToMap();
             }
         }
-    	
         raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode, coordinateSystem);
-
         if (mode == SailingSimulatorConstants.ModeEvent) {
             regattaAreaCanvasOverlay.setRaceCourseCanvas(raceCourseCanvasOverlay);
         }
-
         if (windParams.isShowArrows()) {
             windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams, coordinateSystem);
         }
@@ -596,9 +593,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode, coordinateSystem);
-
         Window.addResizeHandler(new ResizeHandler() {
-
             @Override
             public void onResize(ResizeEvent event) {
                 regattaAreaCanvasOverlay.onResize();
@@ -621,9 +616,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 legendCanvasOverlay.onResize();
                 timePanel.resetTimeSlider();
             }
-
         });
-
         overlaysInitialized = true;
     }
 
@@ -1034,7 +1027,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(parent.getSelectedBoatClassIndex(), parent.getSelectedRaceIndex(),
                 parent.getSelectedCompetitorIndex(), parent.getSelectedLegIndex());
 
-        return PathPolyline.createPathPolyline(pathDTO.getPoints(), errorReporter, simulatorService, map, this, parent, selection);
+        return PathPolyline.createPathPolyline(pathDTO.getPoints(), errorReporter, simulatorService, map, this, parent, selection, coordinateSystem);
     }
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {

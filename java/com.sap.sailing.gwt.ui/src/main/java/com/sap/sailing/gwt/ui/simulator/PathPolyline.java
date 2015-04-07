@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -80,32 +81,21 @@ public class PathPolyline {
 
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, String color, int weight, double opacity, ErrorReporter errorReporter,
             SimulatorServiceAsync simulatorService,
-            MapWidget map, SimulatorMap simulatorMap, SimulatorMainPanel simulatorMainPanel, SimulatorUISelectionDTO selection) {
-
+            MapWidget map, SimulatorMap simulatorMap, SimulatorMainPanel simulatorMainPanel, SimulatorUISelectionDTO selection, CoordinateSystem coordinateSystem) {
         List<LatLng> points = new ArrayList<LatLng>();
-
-        // int counter = 1;
-        // int max = 5;
         for (SimulatorWindDTO pathPoint : pathPoints) {
             if (pathPoint.isTurn) {
-
-                // counter++;
-                points.add(LatLng.newInstance(pathPoint.position.getLatDeg(), pathPoint.position.getLngDeg()));
-                // if (counter > max) {
-                // break;
-                // }
+                points.add(coordinateSystem.toLatLng(pathPoint.position));
             }
         }
-
         return new PathPolyline(points.toArray(new LatLng[0]), color, weight, opacity, selection, errorReporter, pathPoints, simulatorService, map,
                 simulatorMap, simulatorMainPanel);
     }
 
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
-            MapWidget map, SimulatorMap simulatorMap, SimulatorMainPanel simulatorMainPanel, SimulatorUISelectionDTO selection) {
-
+            MapWidget map, SimulatorMap simulatorMap, SimulatorMainPanel simulatorMainPanel, SimulatorUISelectionDTO selection, CoordinateSystem coordinateSystem) {
         return createPathPolyline(pathPoints, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, errorReporter, simulatorService, map, simulatorMap,
-                simulatorMainPanel, selection);
+                simulatorMainPanel, selection, coordinateSystem);
     }
 
     private PathPolyline(LatLng[] points, String color, int weight, double opacity, SimulatorUISelectionDTO selection, ErrorReporter errorReporter,
