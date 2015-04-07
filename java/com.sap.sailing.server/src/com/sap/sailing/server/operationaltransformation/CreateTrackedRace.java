@@ -77,7 +77,10 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     public DynamicTrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore, 
         		gpsFixStore == null ? EmptyGPSFixStore.INSTANCE : gpsFixStore,
-                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                /* useMarkPassingCalculator */ false); // no separate mark passing calculations in replica;
+        // Mark passings are computed on master and are replicated separately.
+        // See UpdateMarkPassings
     }
 
 }

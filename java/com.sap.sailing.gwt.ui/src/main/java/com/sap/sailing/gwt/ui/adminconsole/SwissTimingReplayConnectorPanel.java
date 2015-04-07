@@ -224,11 +224,11 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateWithStartTimeNow());
-        simulateWithStartTimeNow.setWordWrap(false);
-        simulateWithStartTimeNow.setValue(false);
-        trackPanel.add(simulateWithStartTimeNow);
-        
+        final CheckBox useInternalMarkPassingAlgorithmCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
+        useInternalMarkPassingAlgorithmCheckbox.setWordWrap(false);
+        useInternalMarkPassingAlgorithmCheckbox.setValue(Boolean.FALSE);
+        trackPanel.add(useInternalMarkPassingAlgorithmCheckbox);
+
         trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
@@ -240,7 +240,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue(), simulateWithStartTimeNow.getValue());
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue(),
+                        useInternalMarkPassingAlgorithmCheckbox.getValue());
             }
         });
 
@@ -337,7 +338,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         });
     }
 
-    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
@@ -353,7 +354,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
             sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
-                simulateWithStartTimeNow, new AsyncCallback<Void>() {
+                useInternalMarkPassingAlgorithm, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register races " + selectedRaces
