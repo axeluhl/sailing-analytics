@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 
 /**
@@ -118,7 +119,7 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *         <code>new MillisecondsTimePoint(0)</code>). If no fix after <code>fix</code> is found, the second
      *         component is the end of time (<code>new MillisecondsTimePoint(Long.MAX_VALUE)</code>).
      */
-    Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
+    TimeRange getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
 
     /**
      * Same as {@link #getEstimatedPosition(TimePoint, boolean)}, but produces an iterator for all {@link Timed} objects

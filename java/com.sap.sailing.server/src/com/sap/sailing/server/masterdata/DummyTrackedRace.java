@@ -577,4 +577,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

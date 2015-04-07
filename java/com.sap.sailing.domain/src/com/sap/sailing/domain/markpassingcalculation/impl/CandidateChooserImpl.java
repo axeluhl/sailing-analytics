@@ -12,6 +12,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -54,6 +55,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
     private TimePoint raceStartTime;
+    private final WaypointPositionAndDistanceCache waypointPositionAndDistanceCache;
     
     /**
      * An artificial proxy candidate that comes before the start mark passing. Its time point is set to
@@ -61,16 +63,16 @@ public class CandidateChooserImpl implements CandidateChooser {
      * in case the race start time is not known.
      */
     private final CandidateWithSettableTime start;
-    private final Candidate end;
+    private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
 
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
+        waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
-        end = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */
-        null,
-        /* Probability */1, /* Waypoint */null);
+        end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
+                /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
@@ -86,7 +88,6 @@ public class CandidateChooserImpl implements CandidateChooser {
             allEdges.put(c, new HashMap<Candidate, Set<Edge>>());
             fixedPasses.addAll(startAndEnd);
             addCandidates(c, startAndEnd);
-
         }
     }
 
@@ -113,12 +114,18 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void removeWaypoints(Iterable<Waypoint> ways) {
+    public void removeWaypoints(Iterable<Waypoint> waypoints) {
         for (Competitor c : currentMarkPasses.keySet()) {
-            for (Waypoint w : ways) {
+            for (Waypoint w : waypoints) {
                 currentMarkPasses.get(c).remove(w);
             }
         }
+        end.setOneBasedWaypointIndex(end.getOneBasedIndexOfWaypoint()-Util.size(waypoints));
+    }
+    
+    @Override
+    public void addWaypoints(Iterable<Waypoint> waypoints) {
+        end.setOneBasedWaypointIndex(end.getOneBasedIndexOfWaypoint()+Util.size(waypoints));
     }
 
     @Override
@@ -191,6 +198,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                         startTimingProbability = 1; // no start time point known; all candidate time points equally likely
                         estimatedDistanceProbability = 1; // can't tell distance sailed either because we don't know the start time
                     } else {
+                        // no gate start and we know the race start time
                         if (late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
                             // no skips; going from the start proxy node to a candidate for the start mark passing;
                             // calculate the probability for the start being the start given its timing and multiply
@@ -225,7 +233,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
                 if (travelingForwardInTimeOrUnknown(early, late) &&
                         (fixed.contains(early) || fixed.contains(late) || estimatedDistanceProbability > MINIMUM_PROBABILITY)) {
-                    addEdge(edges, new Edge(early, late, startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse()));
+                    addEdge(edges, new Edge(early, late, startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints()));
                 }
             }
         }
@@ -279,7 +287,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
             boolean endFound = false;
             currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
-                    0, race.getRace().getCourse()), 0.0));
+                    0, race.getRace().getCourse().getNumberOfWaypoints()), 0.0));
             while (!endFound) {
                 Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
@@ -289,7 +297,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                     // The cheapest edge taking us to currentCheapestEdge.getEnd() is found. Remember it.
                     candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
                             currentCheapestEdge.getStart(), currentCheapestCost));
-                    logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
+                    }
                     endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
                     if (!endFound) {
                         // the end of the segment was not yet found; add edges leading away from
@@ -339,7 +349,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                     newMarkPassings.add(newMarkPassing);
                 }
             }
-            logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
+            }
             race.updateMarkPassings(c, newMarkPassings);
         }
     }
@@ -361,7 +373,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             first = c1.getWaypoint();
         }
         final Waypoint second = c2.getWaypoint();
-        Distance totalGreatCircleDistance = getTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+        Distance totalGreatCircleDistance = getApproximateTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
         Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
         result = getProbabilityOfActualDistanceGivenGreatCircleDistance(totalGreatCircleDistance, actualDistanceTraveled);
         return result;
@@ -401,7 +413,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         return result;
     }
 
-    private Distance getTotalGreatCircleDistanceBetweenWaypoints(Waypoint first, final Waypoint second,
+    private Distance getApproximateTotalGreatCircleDistanceBetweenWaypoints(Waypoint first, final Waypoint second,
             final TimePoint timePoint) {
         Distance totalGreatCircleDistance = new MeterDistance(0);
         boolean legsAreBetweenCandidates = false;
@@ -414,7 +426,8 @@ public class CandidateChooserImpl implements CandidateChooser {
                 legsAreBetweenCandidates = true;
             }
             if (legsAreBetweenCandidates) {
-                totalGreatCircleDistance = totalGreatCircleDistance.add(leg.getGreatCircleDistance(timePoint));
+                totalGreatCircleDistance = totalGreatCircleDistance.add(
+                        waypointPositionAndDistanceCache.getApproximateDistance(from, leg.getLeg().getTo(), timePoint));
             }
         }
         return totalGreatCircleDistance;
@@ -445,13 +458,38 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private class CandidateWithSettableTime extends CandidateImpl {
-
+        private TimePoint variableTimePoint;
+        
         public CandidateWithSettableTime(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
-            super(oneBasedIndexOfWaypoint, p, distanceProbability, w);
+            super(oneBasedIndexOfWaypoint, /* time point */ null, distanceProbability, w);
+            this.variableTimePoint = p;
         }
 
         public void setTimePoint(TimePoint t) {
-            p = t;
+            variableTimePoint = t;
+        }
+        
+        @Override
+        public TimePoint getTimePoint() {
+            return variableTimePoint;
+        }
+    }
+
+    private class CandidateWithSettableWaypointIndex extends CandidateImpl {
+        private int variableOneBasedWaypointIndex;
+        
+        public CandidateWithSettableWaypointIndex(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
+            super(/* oneBasedIndexOfWaypoint */ -1, p, distanceProbability, w);
+            this.variableOneBasedWaypointIndex = oneBasedIndexOfWaypoint;
+        }
+
+        public void setOneBasedWaypointIndex(int oneBasedWaypointIndex) {
+            this.variableOneBasedWaypointIndex = oneBasedWaypointIndex;
+        }
+        
+        @Override
+        public int getOneBasedIndexOfWaypoint() {
+            return variableOneBasedWaypointIndex;
         }
     }
 }

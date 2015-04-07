@@ -1605,7 +1605,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             Wind wind = new WindImpl(p, at, speedWithBearing);
             Iterable<WindSource> webWindSources = trackedRace.getWindSources(WindSourceType.WEB);
-            if(Util.size(webWindSources) == 0) {
+            if (Util.size(webWindSources) == 0) {
                 // create a new WEB wind source if not available
                 trackedRace.recordWind(wind, new WindSourceImpl(WindSourceType.WEB));
             } else {
