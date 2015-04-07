@@ -109,7 +109,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (speedWithBearing == null) {
                 speedWithBearing = new SpeedWithBearingDTO(0, 0);
             }
-            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees) - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE);
+            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
             setCanvasRotation(boatDrawingAngle);
         }
     }
@@ -127,7 +127,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     /**
-     * Updates {@link #boatDrawingAngle} to that the CSS transition from the old {@link #boatDrawingAngle} to
+     * Updates {@link #boatDrawingAngle} so that the CSS transition from the old {@link #boatDrawingAngle} to
      * <code>newBoatDrawingAngle</code> is minimal.
      */
     private void updateBoatDrawingAngle(double newBoatDrawingAngle) {
