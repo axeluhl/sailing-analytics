@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
@@ -34,8 +35,8 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private Swarm swarm;
 
     public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final StreamletParameters streamletPars,
-            final WindFieldGenParamsDTO windParams) {
-        super(simulatorMap.getMap(), zIndex);
+            final WindFieldGenParamsDTO windParams, CoordinateSystem coordinateSystem) {
+        super(simulatorMap.getMap(), zIndex, coordinateSystem);
         this.simulatorMap = simulatorMap;
         this.timer = timer;
         this.windParams = windParams;

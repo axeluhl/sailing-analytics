@@ -33,8 +33,8 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     private Color competitorColor; 
 
-    public CompetitorInfoOverlay(MapWidget map, int zIndex, Color competitorColor, String infoText) {
-        super(map, zIndex);
+    public CompetitorInfoOverlay(MapWidget map, int zIndex, Color competitorColor, String infoText, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.competitorColor = competitorColor;
         this.infoText = infoText;
         canvasWidth = 100;

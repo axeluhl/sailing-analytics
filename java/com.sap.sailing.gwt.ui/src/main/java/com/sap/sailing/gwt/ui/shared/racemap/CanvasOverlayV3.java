@@ -43,6 +43,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 
 /**
  * The abstract base class for all canvas overlays.
@@ -79,6 +80,8 @@ public abstract class CanvasOverlayV3 {
 
     protected MapCanvasProjection mapProjection;
     
+    protected final CoordinateSystem coordinateSystem;
+    
     /**
      * The time in milliseconds that will be used to move the boat from its old position to the next.
      * <code>-1</code> means that currently no transition is set. Invariant: this field's value corresponds
@@ -89,11 +92,11 @@ public abstract class CanvasOverlayV3 {
     private final int minZoomLevel = 1;
     private final int maxZoomLevel = 21;
     
-    public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId) {
+    public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
         this.mapProjection = null;
-        
+        this.coordinateSystem = coordinateSystem;
         canvas = Canvas.createIfSupported();
         canvas.getElement().getStyle().setZIndex(zIndex);
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
@@ -104,8 +107,8 @@ public abstract class CanvasOverlayV3 {
         customOverlayView = OverlayView.newInstance(map, getOnDrawHandler(), getOnAddHandler(), getOnRemoveHandler());
     }
 
-    public CanvasOverlayV3(MapWidget map, int zIndex) {
-        this(map, zIndex, null);
+    public CanvasOverlayV3(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, null, coordinateSystem);
     }
 
     public Canvas getCanvas() {

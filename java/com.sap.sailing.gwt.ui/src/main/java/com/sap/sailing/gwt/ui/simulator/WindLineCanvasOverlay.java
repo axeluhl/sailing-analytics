@@ -18,6 +18,7 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindLinesDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.LineSegment;
@@ -36,8 +37,8 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
   
     private static Logger logger = Logger.getLogger(WindLineCanvasOverlay.class.getName());
 
-    public WindLineCanvasOverlay(MapWidget map, int zIndex, final Timer timer) {
-        super(map, zIndex);
+    public WindLineCanvasOverlay(MapWidget map, int zIndex, final Timer timer, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         
         this.timer = timer;
         windLinesDTO = null;

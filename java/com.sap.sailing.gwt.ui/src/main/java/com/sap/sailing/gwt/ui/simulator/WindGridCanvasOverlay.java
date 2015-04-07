@@ -20,6 +20,7 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
@@ -91,8 +92,8 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         }
     }
 
-    public WindGridCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final int xRes, final int yRes) {
-        super(map, zIndex);
+    public WindGridCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final int xRes, final int yRes, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.timer = timer;
         this.xRes = xRes;
         this.yRes = yRes;
@@ -102,8 +103,8 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         colorPalette = null;
     }
 
-    public WindGridCanvasOverlay(MapWidget map, int zIndex) {
-        this(map, zIndex, null, 0, 0);
+    public WindGridCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, null, 0, 0, coordinateSystem);
     }
 
     public void setWindField(final WindFieldDTO wl) {

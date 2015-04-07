@@ -504,7 +504,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
               // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's visible
               streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
-                      timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages);
+                      timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
               streamletOverlay.addToMap();
               if (showViewStreamlets) {
                   streamletOverlay.setVisible(true);
@@ -514,7 +514,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             	  // determine availability of polar diagram
             	  setHasPolar();
                   // initialize simulation canvas
-                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
+                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
                   simulationOverlay.addToMap();
                   simulationOverlay.setVisible(false);
               }
@@ -1427,7 +1427,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     .formatElapsedTime(timeToStartInMs)) : stringMessages.start();
             if (countDownOverlay == null) {
                 countDownOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
-                        countDownText);
+                        countDownText, coordinateSystem);
                 countDownOverlay.addToMap();
             } else {
                 countDownOverlay.setInfoText(countDownText);
@@ -1545,7 +1545,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     protected CourseMarkOverlay createCourseMarkOverlay(int zIndex, final MarkDTO markDTO) {
-        final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, markDTO);
+        final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, markDTO, coordinateSystem);
         courseMarkOverlay.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
@@ -1558,11 +1558,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
         String infoText = competitorDTO.getSailID() == null || competitorDTO.getSailID().isEmpty() ? competitorDTO.getName() : competitorDTO.getSailID();
-        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO), infoText);
+        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO), infoText, coordinateSystem);
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO));
+        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO), coordinateSystem);
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
@@ -1598,7 +1598,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     protected WindSensorOverlay createWindSensorOverlay(int zIndex, final WindSource windSource, final WindTrackInfoDTO windTrackInfoDTO) {
-        final WindSensorOverlay windSensorOverlay = new WindSensorOverlay(map, zIndex, raceMapImageManager, stringMessages);
+        final WindSensorOverlay windSensorOverlay = new WindSensorOverlay(map, zIndex, raceMapImageManager, stringMessages, coordinateSystem);
         windSensorOverlay.setWindInfo(windTrackInfoDTO, windSource);
         windSensorOverlay.addClickHandler(new ClickMapHandler() {
             @Override

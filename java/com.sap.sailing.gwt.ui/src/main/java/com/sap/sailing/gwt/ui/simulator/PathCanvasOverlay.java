@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sse.common.Named;
@@ -51,40 +52,40 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
      */
     public boolean displayWindAlongPath = true;
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name) {
-        super(map, zIndex);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.name = name;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams) {
-        super(map, zIndex, timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, timer, windParams, coordinateSystem);
         this.name = name;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds) {
-        super(map, zIndex);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, String color) {
-        super(map, zIndex);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, String color, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
         this.pathColor = color;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds) {
-        super(map, zIndex, timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, timer, windParams, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color) {
-        super(map, zIndex, timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, timer, windParams, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;

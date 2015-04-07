@@ -18,6 +18,7 @@ import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
@@ -51,8 +52,8 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
 
     private static Logger logger = Logger.getLogger(WindLineGuidesCanvasOverlay.class.getName());
 
-    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex, final Timer timer, int xRes) {
-        super(map, zIndex);
+    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex, final Timer timer, int xRes, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         
         this.timer = timer;
         this.xRes = xRes;
@@ -63,8 +64,8 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
         timePointWindDTOMap = new TreeMap<Long, List<SimulatorWindDTO>>();        
     }
 
-    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex) {
-        this(map, zIndex, null, 0);
+    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, null, 0, coordinateSystem);
     }
 
     @Override

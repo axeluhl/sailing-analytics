@@ -44,8 +44,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Boolean lastShowBuoyZone;
     private Double lastBuoyZoneRadiusInMeter;
 
-    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO) {
-        super(map, zIndex);
+    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.mark = markDTO;
         this.position = markDTO.position;
         this.buoyZoneRadiusInMeter = 0.0;

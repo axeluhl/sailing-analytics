@@ -5,6 +5,7 @@ import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
@@ -19,9 +20,9 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
     private double raceBearing = 0.0;
     private double diffBearing = 0.0;
 
-    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event, final SimulatorMap simulatorMap) {
+    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event, final SimulatorMap simulatorMap, CoordinateSystem coordinateSystem) {
 
-    	super(map, zIndex);
+    	super(map, zIndex, coordinateSystem);
 
     	this.simulatorMap = simulatorMap;
         this.venue = VenueDescriptorFactory.createVenue(event);

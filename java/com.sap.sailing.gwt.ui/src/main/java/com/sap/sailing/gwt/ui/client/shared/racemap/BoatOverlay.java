@@ -65,8 +65,8 @@ public class BoatOverlay extends CanvasOverlayV3 {
      */
     private Double boatDrawingAngle;
 
-    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color) {
-        super(map, zIndex);
+    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.boatClass = competitorDTO.getBoatClass();
         this.color = color;
 

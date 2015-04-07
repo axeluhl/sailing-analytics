@@ -5,6 +5,7 @@ import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.client.shared.racemap.ImageTransformer;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
@@ -20,8 +21,8 @@ public class ImageCanvasOverlay extends CanvasOverlayV3 {
 
     private ImageTransformer imgTrafo;
     
-    public ImageCanvasOverlay(MapWidget map, int zIndex, ImageResource img) {
-        super(map, zIndex);
+    public ImageCanvasOverlay(MapWidget map, int zIndex, ImageResource img, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         canvasWidth = 100;
         canvasHeight = 100;
         if (getCanvas() != null) {
@@ -44,7 +45,6 @@ public class ImageCanvasOverlay extends CanvasOverlayV3 {
     public void addToMap() {
         super.addToMap();
     }
-
 
     public void setPosition() {
         if (mapProjection != null) {

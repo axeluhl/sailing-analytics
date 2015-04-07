@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -108,7 +109,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathPolyline pathPolyline = null;
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
-    private char raceCourseDirection; 
+    private char raceCourseDirection;
+    private final CoordinateSystem coordinateSystem; 
 
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
@@ -177,7 +179,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     pathWindDTO.setMatrix(currentPath.getPoints());
 
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
-                            pathName.split("#")[1], timer, windParams);
+                            pathName.split("#")[1], timer, windParams, coordinateSystem);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
 
@@ -327,8 +329,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.parent = parent;    
     }*/
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
-            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls) {
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
+            int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
+            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams,
+            SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls, CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -553,44 +558,44 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private void initializeOverlays() {
         if (mode == SailingSimulatorConstants.ModeEvent) {
             if (regattaAreaCanvasOverlay == null) {
-                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent(), this);
+                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent(), this, coordinateSystem);
                 regattaAreaCanvasOverlay.addToMap();
                 
                 int offsetLeft = 50;
                 int offsetTop = 25;
-                windRoseCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseBackground());
+                windRoseCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseBackground(), coordinateSystem);
                 windRoseCanvasOverlay.setOffset(offsetLeft, offsetTop);
                 windRoseCanvasOverlay.addToMap();
-                windNeedleCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseNeedle());
+                windNeedleCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseNeedle(), coordinateSystem);
                 windNeedleCanvasOverlay.setOffset(offsetLeft, offsetTop);                
                 windNeedleCanvasOverlay.setBearing(180.0);
                 windNeedleCanvasOverlay.addToMap();
             }
         }
     	
-        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode);
+        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode, coordinateSystem);
 
         if (mode == SailingSimulatorConstants.ModeEvent) {
             regattaAreaCanvasOverlay.setRaceCourseCanvas(raceCourseCanvasOverlay);
         }
 
         if (windParams.isShowArrows()) {
-            windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams);
+            windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams, coordinateSystem);
         }
         if (windParams.isShowLineGuides()) {
-            windLineGuidesCanvasOverlay = new WindLineGuidesCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes);
+            windLineGuidesCanvasOverlay = new WindLineGuidesCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes, coordinateSystem);
         }
         if (windParams.isShowStreamlets()) {
-        	windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, streamletPars, windParams);
+        	windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, streamletPars, windParams, coordinateSystem);
         }
         if (windParams.isShowGrid()) {
-            windGridCanvasOverlay = new WindGridCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDGRID_ZINDEX, timer, xRes, yRes);
+            windGridCanvasOverlay = new WindGridCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDGRID_ZINDEX, timer, xRes, yRes, coordinateSystem);
         }
         if (windParams.isShowLines()) {
-            windLineCanvasOverlay = new WindLineCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDLINE_ZINDEX, timer);
+            windLineCanvasOverlay = new WindLineCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDLINE_ZINDEX, timer, coordinateSystem);
         }
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
-        legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode);
+        legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode, coordinateSystem);
 
         Window.addResizeHandler(new ResizeHandler() {
 
@@ -1034,7 +1039,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {
         PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX,
-                PathPolyline.END_USER_NAME, totalTimeMilliseconds, PathPolyline.DEFAULT_COLOR);
+                PathPolyline.END_USER_NAME, totalTimeMilliseconds, PathPolyline.DEFAULT_COLOR, coordinateSystem);
         legendCanvasOverlay.addPathOverlay(pathCanvasOverlay);
     }
 

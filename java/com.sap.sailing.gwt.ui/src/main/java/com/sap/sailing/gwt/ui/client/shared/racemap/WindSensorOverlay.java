@@ -35,8 +35,8 @@ public class WindSensorOverlay extends CanvasOverlayV3 {
 
     private final NumberFormat numberFormat = NumberFormat.getFormat("0.0");
     
-    public WindSensorOverlay(MapWidget map, int zIndex, RaceMapImageManager raceMapImageManager, StringMessages stringMessages) {
-        super(map, zIndex);
+    public WindSensorOverlay(MapWidget map, int zIndex, RaceMapImageManager raceMapImageManager, StringMessages stringMessages, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.stringMessages = stringMessages;
         canvasWidth = 28;
         canvasHeight = 28;

@@ -34,8 +34,8 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
     private int infoBoxWidth;
     private double cornerRadius;
 
-    public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText) {
-        super(map, zIndex);
+    public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.infoText = infoText;
         canvasWidth = 20;
         canvasHeight = 45;

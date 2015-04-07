@@ -11,6 +11,7 @@ import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
@@ -38,8 +39,8 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     
     protected static Logger logger = Logger.getLogger(FullCanvasOverlay.class.getName());
     
-    public FullCanvasOverlay(MapWidget map, int zIndex) {
-        super(map, zIndex);
+    public FullCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         getMap().addCenterChangeHandler(new CenterChangeMapHandler() {
             @Override
             public void onEvent(CenterChangeMapEvent event) {
