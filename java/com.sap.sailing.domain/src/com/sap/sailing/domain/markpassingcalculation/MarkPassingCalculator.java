@@ -124,6 +124,7 @@ public class MarkPassingCalculator {
                         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
                                 .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
                         chooser.removeWaypoints(removedWaypoints);
+                        chooser.addWaypoints(addedWaypoints);
                         for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
                                 .entrySet()) {
                             Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
@@ -184,6 +185,7 @@ public class MarkPassingCalculator {
                 fixesForCompetitor.addAll(competitorEntry.getValue());
             }
             if (!newMarkFixes.isEmpty()) {
+                // FIXME bug 2745 use new mark fixes to invalidate chooser's mark position and mutual mark/waypoint distance cache
                 for (Entry<Competitor, List<GPSFix>> fixesAffectedByNewMarkFixes : finder
                         .calculateFixesAffectedByNewMarkFixes(newMarkFixes).entrySet()) {
                     Set<GPSFix> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());

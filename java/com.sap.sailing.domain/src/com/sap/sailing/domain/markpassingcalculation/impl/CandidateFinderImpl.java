@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 
 /**
@@ -119,10 +120,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         TimePoint end = null;
         for (Entry<Mark, List<GPSFix>> fixes : markFixes.entrySet()) {
             for (GPSFix fix : fixes.getValue()) {
-                Util.Pair<TimePoint, TimePoint> timePoints = race.getOrCreateTrack(fixes.getKey())
+                TimeRange timePoints = race.getOrCreateTrack(fixes.getKey())
                         .getEstimatedPositionTimePeriodAffectedBy(fix);
-                TimePoint newStart = timePoints.getA();
-                TimePoint newEnd = timePoints.getB();
+                TimePoint newStart = timePoints.from();
+                TimePoint newEnd = timePoints.to();
                 start = start == null || start.after(newStart) ? newStart : start;
                 end = end == null || end.before(newEnd) ? newEnd : end;
             }
@@ -829,7 +830,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * @return the marks of a waypoint with two marks in the order port, starboard (when approching the waypoint from
+     * @return the marks of a waypoint with two marks in the order port, starboard (when approaching the waypoint from
      *         the direction of the waypoint beforehand.
      */
     private Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
