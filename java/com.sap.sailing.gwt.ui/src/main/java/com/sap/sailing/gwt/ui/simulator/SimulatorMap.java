@@ -146,8 +146,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (mode == SailingSimulatorConstants.ModeMeasured) {
                 Position pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
                 Position pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
-                
-                raceCourseCanvasOverlay.setStartEndPoint(LatLng.newInstance(pos1.getLatDeg(), pos1.getLngDeg()), LatLng.newInstance(pos2.getLatDeg(), pos2.getLngDeg()));
+                raceCourseCanvasOverlay.setStartEndPoint(coordinateSystem.toLatLng(pos1), coordinateSystem.toLatLng(pos2));
             }
 
             raceCourseCanvasOverlay.draw();

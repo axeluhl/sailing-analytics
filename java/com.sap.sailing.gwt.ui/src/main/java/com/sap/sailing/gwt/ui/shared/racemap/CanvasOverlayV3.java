@@ -377,11 +377,10 @@ public abstract class CanvasOverlayV3 {
         return Math.min(diffX, diffY);  
     }
 
-    protected double calculateDistanceAlongX(MapCanvasProjection projection, LatLng position, double distanceXInMeter) {
-        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+    protected double calculateDistanceAlongX(MapCanvasProjection projection, Position pos, double distanceXInMeter) {
         Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
-        Point point = projection.fromLatLngToDivPixel(position);
+        Point point = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
         return Math.abs(pointX.getX() - point.getX());
     }

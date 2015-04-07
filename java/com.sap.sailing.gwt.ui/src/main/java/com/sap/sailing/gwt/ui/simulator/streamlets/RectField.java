@@ -135,7 +135,7 @@ public class RectField implements VectorField {
     }
 
     public LatLng getCenter() {
-        return LatLng.newInstance((y0 + y1) / 2.0, (x0 + x1) / 2.0);
+        return coordinateSystem.toLatLng(new DegreePosition((y0 + y1) / 2.0, (x0 + x1) / 2.0));
     }
 
     @Override

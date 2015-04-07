@@ -36,7 +36,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
-    private CheckBox windUpCHeckbox;
+    private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
@@ -73,9 +73,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         
-        windUpCHeckbox = dialog.createCheckbox(stringMessages.windUp());
-        windUpCHeckbox.setValue(initialSettings.isWindUp());
-        vp.add(windUpCHeckbox);
+        windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
+        windUpCheckbox.setValue(initialSettings.isWindUp());
+        vp.add(windUpCheckbox);
         
         if (showViewSimulation) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
@@ -226,7 +226,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         } else {
             result.setShowSimulationOverlay(false);            
         }
-        result.setWindUp(windUpCHeckbox.getValue());
+        result.setWindUp(windUpCheckbox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);

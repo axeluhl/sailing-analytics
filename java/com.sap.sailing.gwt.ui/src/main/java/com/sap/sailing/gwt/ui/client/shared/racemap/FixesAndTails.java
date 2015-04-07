@@ -261,7 +261,7 @@ public class FixesAndTails {
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                        tail.getPath().setAt(intoThisIndex - indexOfFirstShownFix, LatLng.newInstance(mergeThisFix.position.getLatDeg(), mergeThisFix.position.getLngDeg()));
+                        tail.getPath().setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
                 } else {
                     // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
@@ -289,8 +289,7 @@ public class FixesAndTails {
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
                 if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix,
-                            LatLng.newInstance(mergeThisFix.position.getLatDeg(), mergeThisFix.position.getLngDeg()));
+                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                 }
                 if (intoThisIndex < indexOfFirstShownFix) {
                     indexOfFirstShownFix++;
@@ -379,7 +378,7 @@ public class FixesAndTails {
                         && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
                     indexOfFirstShownFix--;
                     GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
-                    tail.getPath().insertAt(0, LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg()));
+                    tail.getPath().insertAt(0, coordinateSystem.toLatLng(fix.position));
                     vertexCount++;
                 }
                 // now adjust the polylines tail: remove excess vertices that are after "to"
@@ -400,7 +399,7 @@ public class FixesAndTails {
                         && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
                     indexOfLastShownFix++;
                     GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
-                    tail.getPath().insertAt(vertexCount++, LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg()));
+                    tail.getPath().insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                 }
                 firstShownFix.put(competitorDTO, indexOfFirstShownFix);
                 lastShownFix.put(competitorDTO, indexOfLastShownFix);

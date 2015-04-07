@@ -839,7 +839,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     LatLng[] sidelinePoints = new LatLng[sidelineDTO.getMarks().size()];
                     int i=0;
                     for (MarkDTO sidelineMark : sidelineDTO.getMarks()) {
-                        sidelinePoints[i] = LatLng.newInstance(sidelineMark.position.getLatDeg(), sidelineMark.position.getLngDeg());
+                        sidelinePoints[i] = coordinateSystem.toLatLng(sidelineMark.position);
                         i++;
                     }
                     if (sideline == null) {
@@ -1200,9 +1200,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
         if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)){
-            LatLng windwardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(0).getLatDeg(), courseDTO.startMarkPositions.get(0).getLngDeg()); 
-            LatLng leewardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(1).getLatDeg(), courseDTO.startMarkPositions.get(1).getLngDeg());
-            LatLng firstMarkPoint = LatLng.newInstance(courseDTO.waypointPositions.get(1).getLatDeg(), courseDTO.waypointPositions.get(1).getLngDeg());
+            LatLng windwardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0)); 
+            LatLng leewardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1));
+            LatLng firstMarkPoint = coordinateSystem.toLatLng(courseDTO.waypointPositions.get(1));
             
             if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
                 PolylineOptions options = PolylineOptions.newInstance();
@@ -1251,8 +1251,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             updateCountdownCanvas(courseDTO.startMarkPositions);
             if (legOfLeadingCompetitor <= 1 && 
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions != null && courseDTO.startMarkPositions.size() == 2) {
-                LatLng startLinePoint1 = LatLng.newInstance(courseDTO.startMarkPositions.get(0).getLatDeg(), courseDTO.startMarkPositions.get(0).getLngDeg()); 
-                LatLng startLinePoint2 = LatLng.newInstance(courseDTO.startMarkPositions.get(1).getLatDeg(), courseDTO.startMarkPositions.get(1).getLngDeg()); 
+                LatLng startLinePoint1 = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0));
+                LatLng startLinePoint2 = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1)); 
                 if (courseDTO.startLineAngleToCombinedWind != null) {
                     startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                             NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
@@ -1305,8 +1305,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // draw the finish line
             if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions != null && courseDTO.finishMarkPositions.size() == 2) {
-                LatLng finishLinePoint1 = LatLng.newInstance(courseDTO.finishMarkPositions.get(0).getLatDeg(), courseDTO.finishMarkPositions.get(0).getLngDeg()); 
-                LatLng finishLinePoint2 = LatLng.newInstance(courseDTO.finishMarkPositions.get(1).getLatDeg(), courseDTO.finishMarkPositions.get(1).getLngDeg()); 
+                LatLng finishLinePoint1 = coordinateSystem.toLatLng(courseDTO.finishMarkPositions.get(0)); 
+                LatLng finishLinePoint2 = coordinateSystem.toLatLng(courseDTO.finishMarkPositions.get(1)); 
                 if (courseDTO.startLineAngleToCombinedWind != null) {
                     finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                             NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
@@ -1362,8 +1362,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)) {
                 Position position1DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1);
                 Position position2DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor);
-                LatLng courseMiddleLinePoint1 = LatLng.newInstance(position1DTO.getLatDeg(), position1DTO.getLngDeg());
-                LatLng courseMiddleLinePoint2 = LatLng.newInstance(position2DTO.getLatDeg(), position2DTO.getLngDeg()); 
+                LatLng courseMiddleLinePoint1 = coordinateSystem.toLatLng(position1DTO);
+                LatLng courseMiddleLinePoint2 = coordinateSystem.toLatLng(position2DTO); 
                 if (courseMiddleLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
@@ -1570,7 +1570,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     lastInfoWindow.close();
                 }
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
-                LatLng where = LatLng.newInstance(latestFixForCompetitor.position.getLatDeg(), latestFixForCompetitor.position.getLngDeg());
+                LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
                 InfoWindowOptions options = InfoWindowOptions.newInstance();
                 InfoWindow infoWindow = InfoWindow.newInstance(options);
                 infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
@@ -1648,7 +1648,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if(lastInfoWindow != null) {
                 lastInfoWindow.close();
             }
-            LatLng where = LatLng.newInstance(windDTO.position.getLatDeg(), windDTO.position.getLngDeg());
+            LatLng where = coordinateSystem.toLatLng(windDTO.position);
             InfoWindowOptions options = InfoWindowOptions.newInstance();
             InfoWindow infoWindow = InfoWindow.newInstance(options);
             infoWindow.setContent(getInfoWindowContent(windSource, windTrackInfoDTO));
@@ -1810,7 +1810,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 CompetitorDTO competitorDTO = iter.next();
                 List<GPSFixDTO> gpsFix = gpsFixPointMapForCompetitors.get(competitorDTO);
                 for (GPSFixDTO fix : gpsFix) {
-                    LatLng latLng = LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg());
+                    LatLng latLng = coordinateSystem.toLatLng(fix.position);
                     MarkerOptions options = MarkerOptions.newInstance();
                     options.setTitle(fix.timepoint+": "+fix.position+", "+fix.speedWithBearing.toString());
                     Marker marker = Marker.newInstance(options);
@@ -1832,7 +1832,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
-                        LatLng latLng = LatLng.newInstance(maneuver.position.getLatDeg(), maneuver.position.getLngDeg());
+                        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
                         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new com.sap.sse.common.Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
                         MarkerOptions options = MarkerOptions.newInstance();
                         options.setTitle(maneuver.toString(stringMessages));

@@ -110,7 +110,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (speedWithBearing == null) {
                 speedWithBearing = new SpeedWithBearingDTO(0, 0);
             }
-            updateBoatDrawingAngle(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE);
+            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees) - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE);
             setCanvasRotation(boatDrawingAngle);
         }
     }
@@ -155,8 +155,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     public Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
-        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
-                LatLng.newInstance(boatFix.position.getLatDeg(), boatFix.position.getLngDeg()), boatClass.getHullLengthInMeters());
+        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection, boatFix.position, boatClass.getHullLengthInMeters());
         if (boatHullLengthInPixel < minBoatHullLengthInPx) {
             boatHullLengthInPixel = minBoatHullLengthInPx;
         }

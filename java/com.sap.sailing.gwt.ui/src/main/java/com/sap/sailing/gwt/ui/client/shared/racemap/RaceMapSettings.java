@@ -44,6 +44,10 @@ public class RaceMapSettings {
         maneuverTypesToShow = new HashSet<ManeuverType>();
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
+        
+        // FIXME remove again
+        int i;
+        this.windUp = true;
     }
 
     /**
