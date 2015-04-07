@@ -27,4 +27,13 @@ public interface CoordinateSystem {
     double mapDegreeBearing(double trueBearingInDegrees);
 
     LatLng toLatLng(Position position);
+
+    /**
+     * "Unmaps" a map position <code>p</code>, inverting the mapping implemented by the {@link #map(Position)} method.
+     * 
+     * @param p
+     *            a coordinate from the map, such as one obtained from the {@link #map(Position)} operation
+     * @return a real-world position <code>result</code> such that {@link #map(Position) map(p)}<code>.equals(result)</code>
+     */
+    Position getPosition(LatLng p);
 }

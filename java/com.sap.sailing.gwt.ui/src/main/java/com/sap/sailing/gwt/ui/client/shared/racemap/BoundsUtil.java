@@ -44,4 +44,42 @@ public class BoundsUtil {
     public static boolean isCrossesDateLine(LatLngBounds latLngBounds) {
         return latLngBounds.getNorthEast().getLongitude() < latLngBounds.getSouthWest().getLongitude();
     }
+    
+    public static LatLngBounds intersect(LatLngBounds b1, LatLngBounds other) {
+        final double maxSouthLatDeg = Math.max(b1.getSouthWest().getLatitude(), other.getSouthWest().getLatitude());
+        final double minNorthLatDeg = Math.min(b1.getNorthEast().getLatitude(), other.getNorthEast().getLatitude());
+        final double westDeg;
+        if (containsLngDeg(b1, other.getSouthWest().getLongitude())) {
+            westDeg = other.getSouthWest().getLongitude();
+        } else if (containsLngDeg(other, b1.getSouthWest().getLongitude())) {
+            westDeg = b1.getSouthWest().getLongitude();
+        } else {
+            // no intersection
+            westDeg = b1.getSouthWest().getLongitude();
+        }
+        final double eastDeg;
+        if (containsLngDeg(b1, other.getNorthEast().getLongitude())) {
+            eastDeg = other.getNorthEast().getLongitude();
+        } else if (containsLngDeg(other, b1.getNorthEast().getLongitude())) {
+            eastDeg = b1.getNorthEast().getLongitude();
+        } else {
+            // no intersection
+            eastDeg = b1.getSouthWest().getLongitude();
+        }
+        return LatLngBounds.newInstance(LatLng.newInstance(maxSouthLatDeg, westDeg), LatLng.newInstance(minNorthLatDeg, eastDeg));
+    }
+    
+    private static boolean containsLngDeg(LatLngBounds bounds, double lngDeg) {
+        return spansLngDeg(bounds.getSouthWest().getLongitude(), bounds.getNorthEast().getLongitude(), lngDeg);
+    }
+
+    private static boolean spansLngDeg(double westLngDeg, double eastLngDeg, double lngDeg) {
+        return isCrossingDateLine(westLngDeg, eastLngDeg)
+                ? (lngDeg >= westLngDeg && lngDeg <= 180) || (lngDeg >= -180 && lngDeg <= eastLngDeg)
+                : westLngDeg <= lngDeg && lngDeg <= eastLngDeg;
+    }
+
+    private static boolean isCrossingDateLine(double westLngDeg, double eastLngDeg) {
+        return westLngDeg > eastLngDeg;
+    }
 }

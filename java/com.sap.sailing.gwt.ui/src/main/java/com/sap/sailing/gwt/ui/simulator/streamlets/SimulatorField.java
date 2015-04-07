@@ -4,10 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sailing.domain.common.Bounds;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -51,8 +52,10 @@ public class SimulatorField implements VectorField {
     private final String[] colorsForSpeeds;
     private final Date startTime;
     private final Duration timeStep;
+    private final CoordinateSystem coordinateSystem;
 
-    public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters) {
+    public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters, CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         this.startTime = windParams.getStartTime();
         this.timeStep = windParams.getTimeStep();
         this.colorsForSpeeds = createColorsForSpeeds();
@@ -117,10 +120,10 @@ public class SimulatorField implements VectorField {
                 gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
     }
 
-    private Position getInnerPosition(double factX, double factY) {
+    private LatLng getInnerPosition(double factX, double factY) {
         double latDeg = this.bdA.getLatDeg() + factY * this.bdB.getLatDeg() + factX * this.bdC.getLatDeg();
         double lngDeg = this.bdA.getLngDeg() + factY * this.bdB.getLngDeg() + factX * this.bdC.getLngDeg();
-        Position result = new DegreePosition(latDeg, lngDeg);
+        LatLng result = LatLng.newInstance(latDeg, lngDeg);
         if (swarmDebug && (!this.inBounds(result))) {
             GWT.log("random-position: out of bounds");
         }
@@ -133,6 +136,11 @@ public class SimulatorField implements VectorField {
         boolean inBool = (idx.x >= 0) && (idx.x < (this.resX + 2 * this.borderX)) && (idx.y >= 0)
                 && (idx.y < (this.resY + 2 * this.borderY));
         return inBool;
+    }
+
+    @Override
+    public boolean inBounds(LatLng p) {
+        return inBounds(coordinateSystem.getPosition(p));
     }
 
     private Vector interpolate(Position p, Date at) {
@@ -158,8 +166,8 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public Vector getVector(Position p, Date at) {
-        return this.interpolate(p, at);
+    public Vector getVector(LatLng p, Date at) {
+        return this.interpolate(coordinateSystem.getPosition(p), at);
     }
 
     private Index getIndex(Position p) {
@@ -216,7 +224,7 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public double getParticleWeight(Position p, Vector v) {
+    public double getParticleWeight(LatLng p, Vector v) {
         return v == null ? 0 : (v.length() / this.maxLength + 0.1);
     }
 
@@ -262,23 +270,23 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public Bounds getFieldCorners() {
+    public LatLngBounds getFieldCorners() {
         // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
-        Position fieldNE = this.getInnerPosition(+0.5, 1.0);
-        Position fieldSW = this.getInnerPosition(-0.5, 0.0);
-        Position fieldSE = this.getInnerPosition(+0.5, 0.0);
-        Position fieldNW = this.getInnerPosition(-0.5, 1.0);
-        double minLat = Math.min(Math.min(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
-                Math.min(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
-        double minLng = Math.min(Math.min(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
-                Math.min(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
-        Position sw = new DegreePosition(minLat, minLng);
-        double maxLat = Math.max(Math.max(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
-                Math.max(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
-        double maxLng = Math.max(Math.max(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
-                Math.max(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
-        Position ne = new DegreePosition(maxLat, maxLng);
-        return new BoundsImpl(sw, ne);
+        LatLng fieldNE = this.getInnerPosition(+0.5, 1.0);
+        LatLng fieldSW = this.getInnerPosition(-0.5, 0.0);
+        LatLng fieldSE = this.getInnerPosition(+0.5, 0.0);
+        LatLng fieldNW = this.getInnerPosition(-0.5, 1.0);
+        double minLat = Math.min(Math.min(fieldNE.getLatitude(), fieldSW.getLatitude()),
+                Math.min(fieldNW.getLatitude(), fieldSE.getLatitude()));
+        double minLng = Math.min(Math.min(fieldNE.getLongitude(), fieldSW.getLongitude()),
+                Math.min(fieldNW.getLongitude(), fieldSE.getLongitude()));
+        LatLng sw = LatLng.newInstance(minLat, minLng);
+        double maxLat = Math.max(Math.max(fieldNE.getLatitude(), fieldSW.getLatitude()),
+                Math.max(fieldNW.getLatitude(), fieldSE.getLatitude()));
+        double maxLng = Math.max(Math.max(fieldNE.getLongitude(), fieldSW.getLongitude()),
+                Math.max(fieldNW.getLongitude(), fieldSE.getLongitude()));
+        LatLng ne = LatLng.newInstance(maxLat, maxLng);
+        return LatLngBounds.newInstance(sw, ne);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 /**
  * Translates and rotates a coordinate space. The translation is specified by providing the position
@@ -20,6 +21,8 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
     private final Position zeroZero;
     private final Bearing equator;
     private final Bearing rotationAngle;
+    private final static Position ZERO_ZERO = new DegreePosition(0, 0);
+    private final static Bearing EQUATOR_BEARING = new DegreeBearingImpl(90);
     
     /**
      * The {@link #rotationAngle}'s {@link Bearing#getDegrees() degrees} value, for faster mapping in case of
@@ -44,6 +47,12 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
     @Override
     public Position map(Position position) {
         return position.getLocalCoordinates(zeroZero, equator);
+    }
+
+    @Override
+    public Position getPosition(LatLng p) {
+        final Position mapped = new DegreePosition(p.getLatitude(), p.getLongitude());
+        return mapped.getTargetCoordinates(zeroZero, equator, /* targetOrigin */ ZERO_ZERO, /* targetEquatorBearing */ EQUATOR_BEARING);
     }
 
     @Override

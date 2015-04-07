@@ -57,7 +57,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     public void startStreamlets() {
         if (swarm == null) {
-            final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams(), streamletPars);
+            final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams(), streamletPars, coordinateSystem);
             setCanvasSettings();
             this.swarm = new Swarm(this, map, timer, field, streamletPars);
         }
@@ -127,7 +127,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
                 macroWeather = false;
                 SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
                 String jsonStr = bundle.windStreamletsDataJS().getText();
-                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars);
+                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars, coordinateSystem);
                 map.setZoom(5);
                 map.panTo(f.getCenter());
                 this.swarm = new Swarm(this, map, timer, f, streamletPars);

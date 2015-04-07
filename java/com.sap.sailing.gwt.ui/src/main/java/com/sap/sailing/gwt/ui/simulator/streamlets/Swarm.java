@@ -5,11 +5,11 @@ import java.util.Date;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.user.client.Timer;
-import com.sap.sailing.domain.common.Bounds;
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.BoundsImpl;
-import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -48,7 +48,13 @@ public class Swarm implements TimeListener {
     
     private int swarmPause = 0;
     private boolean swarmContinue = true;
-    private Bounds visibleBoundsOfField;
+    
+    /**
+     * Bounds in the map's coordinate system which may have undergone rotation and translation. See the
+     * {@link CoordinateSystem} instance in place which facilitates the mapping.
+     */
+    private LatLngBounds visibleBoundsOfField;
+    
     private Date timePoint;
     private double cosineOfAverageLatitude;
 
@@ -110,13 +116,13 @@ public class Swarm implements TimeListener {
         return particle;
     }
     
-    private Position getRandomPosition() {
-        final Position result;
+    private LatLng getRandomPosition() {
+        final LatLng result;
         double rndY = Math.random();
         double rndX = Math.random();
-        double latDeg = rndY * this.visibleBoundsOfField.getSouthWest().getLatDeg() + (1 - rndY) * this.visibleBoundsOfField.getNorthEast().getLatDeg();
-        double lngDeg = rndX * this.visibleBoundsOfField.getSouthWest().getLngDeg() + (1 - rndX) * this.visibleBoundsOfField.getNorthEast().getLngDeg();
-        result = new DegreePosition(latDeg, lngDeg);
+        double latDeg = rndY * this.visibleBoundsOfField.getSouthWest().getLatitude() + (1 - rndY) * this.visibleBoundsOfField.getNorthEast().getLatitude();
+        double lngDeg = rndX * this.visibleBoundsOfField.getSouthWest().getLongitude() + (1 - rndX) * this.visibleBoundsOfField.getNorthEast().getLongitude();
+        result = LatLng.newInstance(latDeg, lngDeg);
         return result;
     }
 
@@ -137,18 +143,16 @@ public class Swarm implements TimeListener {
     }
 
     private void updateBounds() {
-        Bounds fieldBounds = this.field.getFieldCorners();
-        final BoundsImpl mapBounds = new BoundsImpl(
-                new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds().getSouthWest().getLongitude()),
-                new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds().getNorthEast().getLongitude()));
+        LatLngBounds fieldBounds = this.field.getFieldCorners();
+        final LatLngBounds mapBounds = map.getBounds();
         swarmOffScreen = !fieldBounds.intersects(mapBounds);
-        visibleBoundsOfField = fieldBounds.intersect(mapBounds);
+        visibleBoundsOfField = BoundsUtil.intersect(fieldBounds, mapBounds);
         Vector boundsSWpx = this.projection.latlng2pixel(visibleBoundsOfField.getSouthWest());
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
-        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatRad()+visibleBoundsOfField.getNorthEast().getLatRad())/2);
+        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude()+visibleBoundsOfField.getNorthEast().getLatitude())/2);
     };
 
     //native void log(String message) /*-{
@@ -236,9 +240,9 @@ public class Swarm implements TimeListener {
                 if (diffPx.y != 0) {
                     particle.previousPixelCoordinate.y += diffPx.y;
                 }
-                double latDeg = particle.currentPosition.getLatDeg() + speed * particle.v.y;
-                double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x / cosineOfAverageLatitude;
-                particle.currentPosition = new DegreePosition(latDeg, lngDeg);
+                double latDeg = particle.currentPosition.getLatitude() + speed * particle.v.y;
+                double lngDeg = particle.currentPosition.getLongitude() + speed * particle.v.x / cosineOfAverageLatitude;
+                particle.currentPosition = LatLng.newInstance(latDeg, lngDeg);
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
