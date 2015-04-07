@@ -30,4 +30,18 @@ public class BoundsUtil {
     public static Bounds getAsBounds(Position position) {
         return new BoundsImpl(position, position);
     }
+    
+    public static LatLngBounds getAsBounds(LatLng position) {
+        return LatLngBounds.newInstance(position, position);
+    }
+    
+    public static boolean contains(LatLngBounds doesOrDoesNotContain, LatLngBounds containedOrNotContained) {
+        return isCrossesDateLine(doesOrDoesNotContain) == isCrossesDateLine(containedOrNotContained)
+                && doesOrDoesNotContain.contains(containedOrNotContained.getNorthEast())
+                && doesOrDoesNotContain.contains(containedOrNotContained.getSouthWest());
+    }
+
+    public static boolean isCrossesDateLine(LatLngBounds latLngBounds) {
+        return latLngBounds.getNorthEast().getLongitude() < latLngBounds.getSouthWest().getLongitude();
+    }
 }
