@@ -301,7 +301,11 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             logThatMoreThanOneFunctionMatchedDTO(functionDTO, functionsMatchingDTO);
         }
         
-        return getFunctionToReturn(functionsMatchingDTO);
+        Function<?> function = getFunctionToReturn(functionsMatchingDTO);
+        if (function == null) {
+            LOGGER.log(Level.WARNING, "No function found for the DTO: " + functionDTO);
+        }
+        return function;
     }
 
     private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -23,7 +25,9 @@ public interface DataMiningServiceAsync {
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
             AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>> callback);
 
-    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
+    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
+            Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO,
+            String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
 
     <ResultType extends Number> void runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

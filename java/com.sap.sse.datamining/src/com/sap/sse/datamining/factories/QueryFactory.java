@@ -117,9 +117,9 @@ public class QueryFactory {
     }
 
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
-            DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
-            Iterable<Function<?>> dimensions, Locale locale,
-            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
+            final DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, final int retrieverLevel,
+            final Iterable<Function<?>> dimensions, final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
+            final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, new SimpleAdditionalQueryData(QueryType.DIMENSION_VALUES, dataRetrieverChainDefinition.getID())) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {
@@ -127,10 +127,14 @@ public class QueryFactory {
                 
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
+                Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection);
                 DataRetrieverChainBuilder<DataSource> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);
-                chainBuilder.stepFurther(); //Initialization
-                for (int level = 0; level < retrieverLevel; level++) {
+                while (chainBuilder.getCurrentRetrieverLevel() < retrieverLevel) {
                     chainBuilder.stepFurther();
+                    
+                    if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
+                        chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
+                    }
                 }
                 for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, getParameterProvidersFor(dimensions, stringMessages, locale), stringMessages, locale)) {

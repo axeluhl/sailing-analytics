@@ -134,7 +134,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                         !dimensionsMappedBySourceType.get(sourceTypeName).isEmpty()) {
                         firstFilterableRetrieverLevel = firstFilterableRetrieverLevel == null ? retrieverLevel : firstFilterableRetrieverLevel;
                         RetrieverLevelFilterSelectionProvider selectionProvider =
-                                new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, retrieverChain,
+                                new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, ListRetrieverChainFilterSelectionProvider.this, retrieverChain,
                                                                           retrieverLevel, retrieverLevelIndex, selectionPanel);
                         selectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
                         selectionProvider.addSelectionChangedListener(retrieverLevelSelectionChangedListener);

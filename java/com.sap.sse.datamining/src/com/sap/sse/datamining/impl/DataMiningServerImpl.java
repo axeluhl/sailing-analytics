@@ -218,9 +218,9 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public <DataSourceType> Query<Set<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, int retrieverLevel,
-            Iterable<Function<?>> dimensions, Locale locale) {
+            Iterable<Function<?>> dimensions, Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, Locale locale) {
         DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(dataRetrieverChainDefinition.getDataSourceType());
-        return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, locale, getStringMessages(), getExecutorService());
+        return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale, getStringMessages(), getExecutorService());
     }
 
     @SuppressWarnings("unchecked")

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -45,7 +46,7 @@ class DimensionFilterSelectionProvider {
     private final FilterableSelectionTable<?> selectionTable;
     
     public DimensionFilterSelectionProvider(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
-                                                  RetrieverLevelFilterSelectionProvider retrieverLevelSelectionProvider) {
+                                            RetrieverLevelFilterSelectionProvider retrieverLevelSelectionProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.session = session;
@@ -96,9 +97,12 @@ class DimensionFilterSelectionProvider {
             if (dimension != null) {
                 Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
                 dimensionDTOs.add(dimension);
+                @SuppressWarnings("unchecked")
+                Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO = 
+                        (Map<Integer, Map<FunctionDTO, Collection<?>>>)(Map<?, ?>) retrieverLevelSelectionProvider.getCompleteFilterSelection();
                 busyIndicator.setVisible(true);
-                dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider
-                        .getDataRetrieverChain(), retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs,
+                dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
+                        retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
                         LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
                             @Override
                             public void onSuccess(QueryResult<Set<Object>> result) {
@@ -120,11 +124,11 @@ class DimensionFilterSelectionProvider {
                                         + caught.getMessage());
                             }
                         });
-                if (firstChange && retrieverLevelSelectionProvider.canAddDimensionFilter()) {
-                    retrieverLevelSelectionProvider.createAndAddDimensionFilter();
+                if (firstChange && retrieverLevelSelectionProvider.canAddDimensionSelectionProvider()) {
+                    retrieverLevelSelectionProvider.createAndAddDimensionSelectionProvider();
                 }
                 firstChange = false;
-            } else if (retrieverLevelSelectionProvider.shouldRemoveDimensionFilter()) {
+            } else if (retrieverLevelSelectionProvider.shouldRemoveDimensionSelectionProvider()) {
                 retrieverLevelSelectionProvider.removeDimensionFilter(DimensionFilterSelectionProvider.this);
                 firstChange = false;
             } else {

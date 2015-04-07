@@ -18,6 +18,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -32,32 +33,34 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     private final Set<SelectionChangedListener> listeners;
     
     private final DataMiningSession session;
+    private final FilterSelectionProvider selectionProvider;
     private final DataRetrieverChainDefinitionDTO retrieverChain;
     private final LocalizedTypeDTO retrievedDataType;
     private final int retrieverLevel;
     private final Collection<FunctionDTO> availableDimensions;
     
     private final HorizontalLayoutPanel mainPanel;
-    private final Collection<DimensionFilterSelectionProvider> dimensionFilters;
-    private final SelectionChangeEvent.Handler selectionTablesChangedListener;
+    private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
+    private final SelectionChangeEvent.Handler dimensionSelectionChangedListener;
     private final SizeProvider sizeProvider;
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, DataRetrieverChainDefinitionDTO retrieverChain,
+            ErrorReporter errorReporter, FilterSelectionProvider selectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
             LocalizedTypeDTO retrievedDataType, int retrieverLevel, SizeProvider sizeProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
         
         this.session = session;
+        this.selectionProvider = selectionProvider;
         this.retrieverChain = retrieverChain;
         this.retrievedDataType = retrievedDataType;
         this.retrieverLevel = retrieverLevel;
         availableDimensions = new ArrayList<>();
         
         mainPanel = new HorizontalLayoutPanel();
-        dimensionFilters = new ArrayList<>();
-        selectionTablesChangedListener = new SelectionChangeEvent.Handler() {
+        dimensionSelectionProviders = new ArrayList<>();
+        dimensionSelectionChangedListener = new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 notifyListeners();
@@ -70,44 +73,44 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     public void setAvailableDimensions(Collection<FunctionDTO> dimensions) {
         availableDimensions.clear();
         availableDimensions.addAll(dimensions);
-        initializeDimensionFilters();
+        initializeDimensionSelectionProviders();
     }
 
-    private void initializeDimensionFilters() {
-        DimensionFilterSelectionProvider dimensionFilter = createDimensionFilter();
+    private void initializeDimensionSelectionProviders() {
+        DimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
         List<FunctionDTO> availableDimensionsList = new ArrayList<>(availableDimensions);
         Collections.sort(availableDimensionsList);
         dimensionFilter.setAvailableDimensions(availableDimensionsList);
-        addDimensionFilter(dimensionFilter);
+        addDimensionSelectionProvider(dimensionFilter);
     }
     
-    boolean canAddDimensionFilter() {
+    boolean canAddDimensionSelectionProvider() {
         return availableDimensions.size() != getSelectedDimensions().size();
     }
     
-    void createAndAddDimensionFilter() {
-        addDimensionFilter(createDimensionFilter());
+    void createAndAddDimensionSelectionProvider() {
+        addDimensionSelectionProvider(createDimensionSelectionProvider());
     }
 
-    private DimensionFilterSelectionProvider createDimensionFilter() {
+    private DimensionFilterSelectionProvider createDimensionSelectionProvider() {
         DimensionFilterSelectionProvider dimensionFilter = new DimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
-        dimensionFilter.addSelectionChangeHandler(selectionTablesChangedListener);
+        dimensionFilter.addSelectionChangeHandler(dimensionSelectionChangedListener);
         return dimensionFilter;
     }
     
-    private void addDimensionFilter(DimensionFilterSelectionProvider dimensionFilter) {
-        dimensionFilters.add(dimensionFilter);
+    private void addDimensionSelectionProvider(DimensionFilterSelectionProvider dimensionFilter) {
+        dimensionSelectionProviders.add(dimensionFilter);
         mainPanel.add(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
     }
 
-    boolean shouldRemoveDimensionFilter() {
+    boolean shouldRemoveDimensionSelectionProvider() {
         return availableDimensions.size() - getSelectedDimensions().size() > 1;
     }
     
     void removeDimensionFilter(DimensionFilterSelectionProvider dimensionFilter) {
         dimensionFilter.clearSelection(); // Notifies the listeners, if values were selected
-        dimensionFilters.remove(dimensionFilter);
+        dimensionSelectionProviders.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
         mainPanel.onResize();
     }
@@ -115,7 +118,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     void updateAvailableDimensions() {
         Collection<FunctionDTO> remainingDimensionsBase = new ArrayList<FunctionDTO>(availableDimensions);
         remainingDimensionsBase.removeAll(getSelectedDimensions());
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             List<FunctionDTO> remainingDimensions = new ArrayList<>(remainingDimensionsBase);
             FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
             if (selectedDimension != null) {
@@ -130,7 +133,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
 
     private Collection<FunctionDTO> getSelectedDimensions() {
         Collection<FunctionDTO> selectedDimensions = new ArrayList<>();
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
             if (selectedDimension != null) {
                 selectedDimensions.add(selectedDimension);
@@ -139,9 +142,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
         return selectedDimensions;
     }
 
+    Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getCompleteFilterSelection() {
+        return selectionProvider.getSelection();
+    }
+
     public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
         HashMap<FunctionDTO, Collection<? extends Serializable>> filterSelection = new HashMap<>();
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             Collection<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
@@ -151,15 +158,15 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
     }
 
     public void applySelection(Map<FunctionDTO, Collection<? extends Serializable>> filterSelection) {
-        dimensionFilters.clear();
+        dimensionSelectionProviders.clear();
         mainPanel.clear();
         
         List<FunctionDTO> sortedDimensions = new ArrayList<>(filterSelection.keySet());
         Collections.sort(sortedDimensions);
         
         for (FunctionDTO functionDTO : sortedDimensions) {
-            DimensionFilterSelectionProvider dimensionFilter = createDimensionFilter();
-            addDimensionFilter(dimensionFilter);
+            DimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
+            addDimensionSelectionProvider(dimensionFilter);
             updateAvailableDimensions();
             dimensionFilter.setSelectedDimensionAndValues(functionDTO, filterSelection.get(functionDTO));
         }
@@ -167,11 +174,11 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
 
     public void clearSelection() {
         mainPanel.clear();
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
+        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             dimensionFilter.clearSelection();
         }
-        dimensionFilters.clear();
-        initializeDimensionFilters();
+        dimensionSelectionProviders.clear();
+        initializeDimensionSelectionProviders();
     }
     
     public void addSelectionChangedListener(SelectionChangedListener listener) {
@@ -240,7 +247,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Object> 
         public void onResize() {
             int heightInPX = sizeProvider.getFreeHeightInPX();
             setHeight(heightInPX + "px");
-            for (DimensionFilterSelectionProvider selectionProvider : dimensionFilters) {
+            for (DimensionFilterSelectionProvider selectionProvider : dimensionSelectionProviders) {
                 selectionProvider.resizeToHeight(heightInPX);
             }
         }

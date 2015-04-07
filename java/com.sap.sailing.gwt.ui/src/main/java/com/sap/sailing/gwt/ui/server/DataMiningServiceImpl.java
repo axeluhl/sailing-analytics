@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.osgi.framework.BundleContext;
@@ -124,11 +126,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
-            int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName) {
-        DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+            int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO, String localeInfoName) {
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
+        Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
-        Query<Set<Object>> dimensionValuesQuery = getDataMiningServer().createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, locale);
+        Query<Set<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
 //        QueryResult<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
         QueryResult<Set<Object>> result = dimensionValuesQuery.run();
         return result;
@@ -138,9 +142,32 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         List<Function<?>> functions = new ArrayList<>();
         DataMiningServer dataMiningServer = getDataMiningServer();
         for (FunctionDTO functionDTO : functionDTOs) {
-            functions.add(dataMiningServer.getFunctionForDTO(functionDTO));
+            Function<?> function = dataMiningServer.getFunctionForDTO(functionDTO);
+            if (function != null) {
+                functions.add(function);
+            }
         }
         return functions;
+    }
+
+    private Map<Integer, Map<Function<?>, Collection<?>>> filterSelectionDTOAsFilterSelection(
+            Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO) {
+        Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
+        for (Integer retrieverLevel : filterSelectionDTO.keySet()) {
+            Map<FunctionDTO, Collection<?>> retrievalLevelSelection = filterSelectionDTO.get(retrieverLevel);
+            for (FunctionDTO dimensionDTO : retrievalLevelSelection.keySet()) {
+                if (!retrievalLevelSelection.get(dimensionDTO).isEmpty()) {
+                    Function<?> function = getDataMiningServer().getFunctionForDTO(dimensionDTO);
+                    if (function != null) {
+                        if (!filterSelection.containsKey(retrieverLevel)) {
+                            filterSelection.put(retrieverLevel, new HashMap<Function<?>, Collection<?>>());
+                        }
+                        filterSelection.get(retrieverLevel).put(function, retrievalLevelSelection.get(dimensionDTO));
+                    }
+                }
+            }
+        }
+        return filterSelection;
     }
 
     @Override

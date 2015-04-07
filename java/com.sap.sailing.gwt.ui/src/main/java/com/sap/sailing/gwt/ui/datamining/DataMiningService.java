@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -20,7 +22,8 @@ public interface DataMiningService extends RemoteService {
 
     Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
 
-    QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName);
+    QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
+            Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO, String localeInfoName);
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinition);
 
