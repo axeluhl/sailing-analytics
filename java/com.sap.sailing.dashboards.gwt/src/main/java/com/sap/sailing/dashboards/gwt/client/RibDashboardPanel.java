@@ -100,8 +100,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
         loadAndAddEventLogo(sailingServiceAsync);
         initAndAddWrongOrientationNotification();
-        String platform = Navigator.getPlatform();
-        Window.alert(""+platform);
     }
 
     private void initLogos() {
