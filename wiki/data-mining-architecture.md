@@ -39,6 +39,28 @@ These `DataSourceProviders` are used by the framework to create new queries.
 
 ## Building and running Queries
 
+### Defining and building a Data Retriever Chain
+
+### Building a Processor Query
+
+### Running a Query directly
+
+### Running a Query with the `DataMiningServer`
+
 ## Data Processing Components
 
+### Processors
+
+### Filter Criteria
+
 ## Data Mining Functions
+
+### Connectors
+
+### Statistics
+
+### Dimensions
+
+### Function Registration Process
+
+### Compound Functions
