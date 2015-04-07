@@ -1124,6 +1124,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorCommunicatingWithServer();
     String userManagement();
     String structureImportUrls();
+    String filteredBy();
     String filterBy();
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
@@ -1210,4 +1211,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardSpeedInKts();
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String currentFilterSelection();
 }
