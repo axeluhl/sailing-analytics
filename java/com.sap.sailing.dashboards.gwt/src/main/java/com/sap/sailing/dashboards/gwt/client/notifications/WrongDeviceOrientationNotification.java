@@ -20,8 +20,6 @@ public class WrongDeviceOrientationNotification extends AbsolutePanel implements
         this.addStyleName("wrongOrientationNotification");
         this.addStyleName("wrongOrientationNotification_hidden");
 
-        Orientation.getInstance().addListener(this);
-
         Image rotateDeviceIcon = new Image();
         rotateDeviceIcon.setResource(RibDashboardImageResources.INSTANCE.rotatedevice());
         rotateDeviceIcon.getElement().addClassName("wrongOrientationNotification_logo");
@@ -31,6 +29,9 @@ public class WrongDeviceOrientationNotification extends AbsolutePanel implements
         rotateDeviceLabel.getElement().addClassName("wrongOrientationNotification_text");
         rotateDeviceLabel.setText("Rotate Device");
         add(rotateDeviceLabel);
+        
+        Orientation.getInstance().addListener(this);
+        Orientation.getInstance().triggerDeviceOrientationRead();
     }
 
     public void show() {
