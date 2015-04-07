@@ -90,8 +90,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public @UiConstructor VerticalWindChart(String positiveFillColor, String negativeFillColor) {
-        initVerticalWindChartWithColors(positiveFillColor, negativeFillColor);
+    public @UiConstructor VerticalWindChart(String positiveFillColorAsHex, String negativeFillColorAsHex) {
+        initVerticalWindChartWithColors(positiveFillColorAsHex, negativeFillColorAsHex);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

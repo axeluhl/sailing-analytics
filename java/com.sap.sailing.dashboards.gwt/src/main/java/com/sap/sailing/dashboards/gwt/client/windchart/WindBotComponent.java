@@ -85,14 +85,14 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * One of two {@link VerticalWindChart}s that shows the wind fixes speed measured by the wind bot in a chart
      * vertically.
      * */
-    @UiField
+    @UiField(provided = true)
     public VerticalWindChart trueWindSpeedVerticalWindChart;
 
     /**
      * One of two {@link VerticalWindChart}s that shows the wind fixes direction measured by the wind bot in a chart
      * vertically.
      * */
-    @UiField
+    @UiField(provided = true)
     public VerticalWindChart trueWindDirectionVerticalWindChart;
 
     /**
@@ -120,6 +120,8 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
         movingAverageDirection = new MovingAverage(500);
         trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeed(), stringConstants.dashboardTrueWindSpeedUnit());
         trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), stringConstants.dashboardTrueWindDirectionUnit());
+        trueWindSpeedVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
+        trueWindDirectionVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         initWidget(uiBinder.createAndBindUi(this));
         windBotNamePanel.getElement().setInnerText(stringConstants.dashboardWindBot()+" "+ windBotId);
         trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
