@@ -38,10 +38,8 @@ public class RaceMapZoomSettings {
      */
     public RaceMapZoomSettings() {
         typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
-//        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
-//        typesToConsiderOnZoom.add(ZoomTypes.TAILS);
+        // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
-//        typesToConsiderOnZoom.add(ZoomTypes.WINDSENSORS);
         zoomToSelectedCompetitors = false;
     }
     

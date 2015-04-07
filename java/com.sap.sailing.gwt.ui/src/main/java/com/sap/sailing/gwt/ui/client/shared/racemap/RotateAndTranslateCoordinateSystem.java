@@ -21,6 +21,12 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
     private final Bearing rotationAngle;
     
     /**
+     * The {@link #rotationAngle}'s {@link Bearing#getDegrees() degrees} value, for faster mapping in case of
+     * <code>double</code> degree values being provided to {@link #mapDegreeBearing(double)}.
+     */
+    private final double rotationAngleInDegrees;
+    
+    /**
      * @param zeroZero
      *            where to map {lat: 0, lng: 0} to in this coordinate system
      * @param equator
@@ -31,6 +37,7 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
         this.zeroZero = zeroZero;
         this.equator = equator;
         rotationAngle = new DegreeBearingImpl(90).getDifferenceTo(equator);
+        rotationAngleInDegrees = rotationAngle.getDegrees();
     }
 
     @Override
@@ -45,6 +52,6 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
 
     @Override
     public double mapDegreeBearing(double trueBearingInDegrees) {
-        return (trueBearingInDegrees + rotationAngle.getDegrees()) % 360.;
+        return (trueBearingInDegrees + rotationAngleInDegrees) % 360.;
     }
 }
