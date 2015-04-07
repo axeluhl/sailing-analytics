@@ -292,4 +292,34 @@ public class PositionTest {
         long endQuick = System.currentTimeMillis();
         System.out.println("Full: "+(endFull-startFull)+"ms; Quick: "+(endQuick-endFull)+"ms");
     }
+    
+    @Test
+    public void noOpRotationAndTranslation() {
+        Position p1 = new DegreePosition(1, 1);
+        Position unchanged = p1.getLocalCoordinates(new DegreePosition(0, 0), new DegreeBearingImpl(90));
+        assertEquals(1., unchanged.getLatDeg(), 0.0000001);
+        assertEquals(1., unchanged.getLngDeg(), 0.0000001);
+    }
+
+    /**
+     * The new coordinate system has its center at (0, 0) and an equator running north from there. Relative to this new
+     * coordinate system, the position (0, 1) will seem 1deg south of this new local equator, exactly south of the (0,
+     * 0) position. Therefore, the result of {@link Position#getLocalCoordinates(Position, Bearing)} is expected to be
+     * (-1, 0).
+     */
+    @Test
+    public void simpleRotation() {
+        Position p1 = new DegreePosition(0, 1);
+        Position rotatedBy90DegreesCounterClockWise = p1.getLocalCoordinates(new DegreePosition(0, 0), new DegreeBearingImpl(0));
+        assertEquals(-1, rotatedBy90DegreesCounterClockWise.getLatDeg(), 0.000001);
+        assertEquals(0, rotatedBy90DegreesCounterClockWise.getLngDeg(), 0.000001);
+    }
+
+    @Test
+    public void oddRotation() {
+        Position p1 = new DegreePosition(0, 1);
+        Position rotatedBy90DegreesCounterClockWise = p1.getLocalCoordinates(new DegreePosition(0, 0), new DegreeBearingImpl(45));
+        assertEquals(-Math.sqrt(1./2.), rotatedBy90DegreesCounterClockWise.getLatDeg(), 0.001);
+        assertEquals(Math.sqrt(1./2.), rotatedBy90DegreesCounterClockWise.getLngDeg(), 0.001);
+    }
 }
