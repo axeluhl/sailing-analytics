@@ -226,6 +226,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         } else {
             result.setShowSimulationOverlay(false);            
         }
+        result.setWindUp(windUpCHeckbox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);

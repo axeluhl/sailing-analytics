@@ -58,11 +58,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
 
     @Override
-    protected void doOnModuleLoad() {    
+    protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
-     
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-
         // read mandatory parameters
         regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
         raceName = Window.Location.getParameter(PARAM_RACE_NAME);

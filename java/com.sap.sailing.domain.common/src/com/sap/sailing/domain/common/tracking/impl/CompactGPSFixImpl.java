@@ -113,7 +113,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     public CompactGPSFixImpl(Position position, TimePoint timePoint) {
         latDeg = position.getLatDeg();
         lngDeg = position.getLngDeg();
-        timePointAsMillis = timePoint.asMillis();
+        timePointAsMillis = timePoint==null?-1:timePoint.asMillis();
     }
     
     public CompactGPSFixImpl(GPSFix gpsFix) {

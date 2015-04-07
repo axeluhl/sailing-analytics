@@ -353,7 +353,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.timer = timer;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager();
-        fixesAndTails = new FixesAndTails(coordinateSystem);
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<SidelineDTO, Polygon>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
@@ -364,6 +363,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
         coordinateSystem = updateCoordinateSystemFromSettings();
+        fixesAndTails = new FixesAndTails(coordinateSystem);
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
@@ -449,6 +449,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                           settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                       }
+                      // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
                   }
               });
               map.addDragEndHandler(new DragEndMapHandler() {

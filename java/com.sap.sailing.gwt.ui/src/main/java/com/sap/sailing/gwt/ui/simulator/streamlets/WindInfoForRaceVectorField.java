@@ -122,9 +122,9 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         final BearingWithConfidence<Position> bearing = bearingCluster.getAverage(p);
         final Vector result;
         if (bearing != null && bearing.getObject() != null) {
-            final double bearingRad = bearing.getObject().getRadians();
+            final double mappedBearingRad = coordinateSystem.map(bearing.getObject()).getRadians();
             final double speedInKnots = knotSpeedSumScaledByConfidence / speedConfidenceSum;
-            result = new Vector(speedInKnots * Math.sin(bearingRad), speedInKnots * Math.cos(bearingRad));
+            result = new Vector(speedInKnots * Math.sin(mappedBearingRad), speedInKnots * Math.cos(mappedBearingRad));
         } else {
             result = null;
         }
