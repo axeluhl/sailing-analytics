@@ -1294,6 +1294,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        int result = 0;
+        int indexOfLastWaypointPassed = -1;
+        int legCount = race.getCourse().getLegs().size();
+        for (Map.Entry<Waypoint, NavigableSet<MarkPassing>> entry : markPassingsForWaypoint.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                MarkPassing first = entry.getValue().first();
+                // Did the mark passing happen at or before the requested time point?
+                if (first.getTimePoint().compareTo(timePoint) <= 0) {
+                    int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(entry.getKey());
+                    if (indexOfWaypoint > indexOfLastWaypointPassed) {
+                        indexOfLastWaypointPassed = indexOfWaypoint;
+                    }
+                }
+            }
+        }
+        if(indexOfLastWaypointPassed >= 0) {
+            result = indexOfLastWaypointPassed+1 < legCount ? indexOfLastWaypointPassed+1 : legCount;  
+        }
+        return result;
+    }
+    
+    @Override
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings != null) {

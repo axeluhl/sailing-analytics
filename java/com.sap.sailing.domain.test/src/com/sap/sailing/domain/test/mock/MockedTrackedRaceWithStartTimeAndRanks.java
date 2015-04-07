@@ -603,4 +603,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return false;
     }
 
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

@@ -152,6 +152,13 @@ public interface TrackedRace extends Serializable {
     TrackedLeg getCurrentLeg(TimePoint timePoint);
 
     /**
+     * Tells the number of the last started leg at <code>timePoint</code>
+     * The leg number is 0 before the start, the number of the current leg during the race
+     * and the number of the last leg at the end of the race even if the race has finished. 
+     */
+    int getLastLegStarted(TimePoint timePoint);
+    
+    /**
      * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
      */
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);

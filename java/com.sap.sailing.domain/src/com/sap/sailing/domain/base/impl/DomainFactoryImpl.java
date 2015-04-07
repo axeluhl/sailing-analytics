@@ -51,7 +51,6 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
@@ -204,12 +203,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         if(race.getCourse() != null) {
             statisticsDTO.hasLegProgressData = true;
             statisticsDTO.totalLegsCount = race.getCourse().getLegs().size();
-            TrackedLeg currentLeg = trackedRace.getCurrentLeg(MillisecondsTimePoint.now());
-            if(currentLeg != null) {
-                statisticsDTO.currentLegNo = race.getCourse().getIndexOfWaypoint(currentLeg.getLeg().getFrom());
-            } else {
-                statisticsDTO.currentLegNo = 0;
-            }
+            statisticsDTO.currentLegNo = trackedRace.getLastLegStarted(MillisecondsTimePoint.now());
         }
         
         // media data
