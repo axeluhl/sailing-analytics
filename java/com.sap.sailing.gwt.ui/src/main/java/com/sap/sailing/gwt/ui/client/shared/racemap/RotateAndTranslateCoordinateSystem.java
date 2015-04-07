@@ -42,4 +42,9 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
     public Bearing map(Bearing bearing) {
         return bearing.add(rotationAngle);
     }
+
+    @Override
+    public double mapDegreeBearing(double trueBearingInDegrees) {
+        return (trueBearingInDegrees + rotationAngle.getDegrees()) % 360.;
+    }
 }

@@ -13,4 +13,9 @@ public class IdentityCoordinateSystem implements CoordinateSystem {
     public Bearing map(Bearing bearing) {
         return bearing;
     }
+
+    @Override
+    public double mapDegreeBearing(double trueBearingInDegrees) {
+        return trueBearingInDegrees;
+    }
 }
