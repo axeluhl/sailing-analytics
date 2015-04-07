@@ -24,9 +24,12 @@ public class CombinedWindPanel extends FlowPanel {
     private Canvas canvas;
     
     private CombinedWindPanelStyle combinedWindPanelStyle;
+    private final CoordinateSystem coordinateSystem;
     
-    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle, StringMessages stringMessages) {
+    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle,
+            StringMessages stringMessages, CoordinateSystem coordinateSystem) {
         this.stringMessages = stringMessages;
+        this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.combinedWindPanelStyle = combinedWindPanelStyle;
         addStyleName(combinedWindPanelStyle.combinedWindPanel());
@@ -47,7 +50,7 @@ public class CombinedWindPanel extends FlowPanel {
                 double windFromDeg = windDTO.dampenedTrueWindFromDeg;
                 NumberFormat numberFormat = NumberFormat.getFormat("0.0");
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                transformer.drawTransformedImage(rotationDegOfWindSymbol, 1.0);
+                transformer.drawTransformedImage(coordinateSystem.mapDegreeBearing(rotationDegOfWindSymbol), 1.0);
                 String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
                         + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
                 canvas.setTitle(title);

@@ -40,7 +40,7 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
         super();
         this.zeroZero = zeroZero;
         this.equator = equator;
-        rotationAngle = new DegreeBearingImpl(90).getDifferenceTo(equator);
+        rotationAngle = equator.getDifferenceTo(new DegreeBearingImpl(90));
         rotationAngleInDegrees = rotationAngle.getDegrees();
     }
 

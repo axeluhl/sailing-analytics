@@ -374,13 +374,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls);
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages);
+        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
     }
     
     private CoordinateSystem updateCoordinateSystemFromSettings() {
         coordinateSystem = getSettings().isWindUp()
-                ? new RotateAndTranslateCoordinateSystem(/* TODO */ new DegreePosition(0, 0), /* TODO */ new DegreeBearingImpl(0))
+                ? new RotateAndTranslateCoordinateSystem(/* TODO */ new DegreePosition(-33.957425, 25.679894), /* TODO */ new DegreeBearingImpl(180))
                 : new IdentityCoordinateSystem();
         return coordinateSystem;
     }
