@@ -19,7 +19,7 @@ public class WindSourceImpl_CustomFieldSerializer extends CustomFieldSerializer<
     }
 
     public static WindSourceImpl instantiate(SerializationStreamReader streamReader) throws SerializationException {
-        return new WindSourceImpl((WindSourceType) streamReader.readObject());
+        return new WindSourceImpl(WindSourceType.values()[streamReader.readInt()]);
     }
 
     public static void deserialize(SerializationStreamReader streamReader, WindSourceImpl instance)
@@ -41,7 +41,7 @@ public class WindSourceImpl_CustomFieldSerializer extends CustomFieldSerializer<
 
     public static void serialize(SerializationStreamWriter streamWriter, WindSourceImpl instance)
             throws SerializationException {
-        streamWriter.writeObject(instance.getType());
+        streamWriter.writeInt(instance.getType().ordinal());
     }
 
 }
