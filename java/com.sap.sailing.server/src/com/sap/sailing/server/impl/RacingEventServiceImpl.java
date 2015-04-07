@@ -1447,12 +1447,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null);
+                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(

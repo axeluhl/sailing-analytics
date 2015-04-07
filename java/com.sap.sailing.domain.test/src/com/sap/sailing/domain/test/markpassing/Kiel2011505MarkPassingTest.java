@@ -16,6 +16,8 @@ public class Kiel2011505MarkPassingTest extends AbstractMarkPassingTest {
         super();
     }
 
+    // The Start-Times are set very wrong on these races
+    
     @Ignore
     public void testRace2() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         testRace("2");

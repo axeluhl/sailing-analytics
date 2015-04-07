@@ -286,7 +286,7 @@ public class WindTest {
                         boatClass, Collections.singleton(competitor)), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 1000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
-                        /* millisecondsOverWhichToAverageSpeed */ 30000);
+                        /* millisecondsOverWhichToAverageSpeed */ 30000, /*useMarkPassingCalculator*/ false);
         TimePoint start = MillisecondsTimePoint.now();
         TimePoint topMarkRounding = start.plus(30000);
         TimePoint finish = topMarkRounding.plus(30000);

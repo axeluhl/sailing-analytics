@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -478,8 +477,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-                    GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+                    GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+                    long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+                    boolean useMarkPassingCalculator) {
                 return null;
             }
         };
@@ -822,16 +822,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
-        return null;
-    }
-
-    @Override
-    public Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
-        return null;
-    }
-
-    @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalysis) throws NoWindException {
         return null;
@@ -867,8 +857,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
     }
+
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
@@ -894,4 +891,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public long getGateStartGolfDownTime() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }
