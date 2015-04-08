@@ -194,23 +194,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * interval or not. So there are two cases where the extreme points of the x-axis get calculated differently.
      * */
     private void adaptVerticalWindChartExtemes() {
-        if (getVerticalWindChartSeriesPointsTimeRangeInMilliseconds() < chartIntervallinMinutes * 60 * 1000) {
-            setXAxisExtremesForSeriesPointRangeIsSmallerThanChartDisplayIntervall();
-        } else {
             setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall();
-        }
-    }
-
-    /**
-     * When the time range of the series points is smaller than the current selected display interval represented by
-     * either LARGE_DISPLAY_INTERVALL_IN_MINUTES or SMALL_DISPLAY_INTERVALL_IN_MINUTES the x-axis extremes min value is
-     * the the first points time and the maximum value the min value plus the selected display interval. The chart gets
-     * other extremes, because the values fit easily into the selected display interval.
-     * */
-    private void setXAxisExtremesForSeriesPointRangeIsSmallerThanChartDisplayIntervall() {
-        long minimumExtremeValueInMillis = getFirstPointOfVerticalWindChartSeries().getX().longValue();
-        long maximumExtremeValueInMillis = minimumExtremeValueInMillis + chartIntervallinMinutes * 60 * 1000;
-        verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, true);
     }
 
     /**
@@ -225,24 +209,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, true);
     }
 
-    private long getVerticalWindChartSeriesPointsTimeRangeInMilliseconds() {
-        Point[] seriesPoints = verticalWindChartSeries.getPoints();
-        long pointRangeInMilliseconds;
-        int seriesPointsLenght = seriesPoints.length;
-        if (seriesPointsLenght > 0 && seriesPoints[0].getX() != null) {
-            long earliesPointAsTimestamp = seriesPoints[0].getX().longValue();
-            long latestPointAsTimestamp;
-            if (seriesPointsLenght > 1) {
-                latestPointAsTimestamp = seriesPoints[seriesPointsLenght - 1].getX().longValue();
-            } else {
-                latestPointAsTimestamp = earliesPointAsTimestamp;
-            }
-            pointRangeInMilliseconds = latestPointAsTimestamp - earliesPointAsTimestamp;
-        } else {
-            pointRangeInMilliseconds = 0;
-        }
-        return pointRangeInMilliseconds;
-    }
 
     private Point getLastPointOfVerticalWindChartSeries() {
         Point lastPointOfVerticalWindChartSeries = null;
@@ -256,16 +222,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         return lastPointOfVerticalWindChartSeries;
     }
 
-    private Point getFirstPointOfVerticalWindChartSeries() {
-        Point firstPointOfVerticalWindChartSeries = null;
-        Point[] seriesPoints = verticalWindChartSeries.getPoints();
-        int seriesPointsLenght = seriesPoints.length;
-        if (seriesPointsLenght > 0) {
-            firstPointOfVerticalWindChartSeries = seriesPoints[0];
-        }
-        return firstPointOfVerticalWindChartSeries;
-    }
-    
     public void addVerticalWindChartClickListener(VerticalWindChartClickListener verticalWindChartClickListener) {
         verticalWindChartClickListeners.add(verticalWindChartClickListener);
     }

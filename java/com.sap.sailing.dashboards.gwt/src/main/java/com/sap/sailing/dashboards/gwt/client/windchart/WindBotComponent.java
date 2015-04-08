@@ -104,6 +104,7 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
 
     private String windBotId;
     private StringMessages stringConstants;
+    private final static String UNIT_WIND_DIRECTION = "°";
 
     public WindBotComponent(String windBotId) {
         this.windBotId = windBotId;
@@ -119,7 +120,7 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
         movingAverageSpeed = new MovingAverage(500);
         movingAverageDirection = new MovingAverage(500);
         trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeed(), stringConstants.dashboardTrueWindSpeedUnit());
-        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), stringConstants.dashboardTrueWindDirectionUnit());
+        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), UNIT_WIND_DIRECTION);
         trueWindSpeedVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         trueWindDirectionVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         initWidget(uiBinder.createAndBindUi(this));
