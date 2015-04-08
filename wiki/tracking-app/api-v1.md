@@ -305,16 +305,16 @@ _see [bug 2651](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2651)_
 
 Do not use the course to get the list of marks to ping. Instead, use the ``RaceLogDefineMarkEvent``s in the RaceLog, or ``TrackedRace#getMarks()``. As the JavaDoc of the latter states, not all marks for a race are necessarily present in the course - e.g. if they are backup buoys to be used in the case of a wind shift.
 
-**Path:** ``leaderboards/{leaderboard-name}/marks?raceColumn={race-column-name}&fleet={fleet-name}``
+**Path:** ``leaderboards/{leaderboard-name}/marks?race_column={race-column-name}&fleet={fleet-name}``
 
-The parameters ``raceColumn`` and ``fleet`` are optional. 
+The parameters ``race_column`` and ``fleet`` are optional. 
 
-* neither ``raceColumn`` nor ``fleet``: all marks of the leaderboard get returned
-* only ``raceColumn``:  all marks of the leaderboard's raceColumn get returned
-* both ``raceColumn`` and ``fleet``: all marks of a certain fleet of a leaderboard's raceColumn
+* neither ``race_column`` nor ``fleet``: all marks of the leaderboard get returned
+* only ``race_column``:  all marks of the leaderboard's raceColumn get returned
+* both ``race_column`` and ``fleet``: all marks of a certain fleet of a leaderboard's raceColumn
 * only ``fleet``: HTTP/400 Bad Request 
 
-Specifying an invalid leaderboard/raceColumn/fleet leads to an HTTP/404 Not found
+Specifying an invalid leaderboard/race_column/fleet leads to an HTTP/404 Not found
 
 **Verb:** ``GET``
 
