@@ -56,16 +56,26 @@ public class DeviceMappingConstants {
 
     @Deprecated
     public static String getDeviceMappingForRaceLogUrl(String serverUrlWithoutTrailingSlash, String leaderboardName,
-            String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, long fromMillis,
-            long toMillis, UrlHelper helper) throws QRCodeURLCreationException {
-        if (fromMillis > toMillis) {
-            throw new QRCodeURLCreationException("from can't lie after to");
+            String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, Long fromMillis,
+            Long toMillis, UrlHelper helper) throws QRCodeURLCreationException {
+        
+        if (toMillis != null && fromMillis != null){
+            if (fromMillis > toMillis) {
+                throw new QRCodeURLCreationException("from can't lie after to");
+            }
         }
-        return helper.encodeUrl(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
+        
+        StringBuilder urlToEncode = new StringBuilder();
+        
+        urlToEncode.append(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
                 + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + leaderboardName + "&"
                 + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
                 + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName + "&" + mappedItemType + "="
-                + mappedItemId + "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis + "&"
-                + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis);
+                + mappedItemId);
+    
+        urlToEncode.append((fromMillis != null) ? "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis : "");
+        urlToEncode.append((toMillis != null) ? "&" + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis : "");
+        
+        return helper.encodeUrl(urlToEncode.toString());
     }
 }
