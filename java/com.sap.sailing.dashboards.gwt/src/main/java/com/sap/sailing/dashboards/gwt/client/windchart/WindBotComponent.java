@@ -200,16 +200,16 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
             Point[] points = new Point[windFixes.size()];
             int counter = 0;
             if (windtype.equals(WindType.DIRECTION)) {
-                Point previouspoint = new Point(windFixes.get(0).requestTimepoint, windFixes.get(0).trueWindBearingDeg);
+                Point previouspoint = new Point(windFixes.get(0).requestTimepoint, windFixes.get(0).trueWindFromDeg);
                 for (WindDTO windDTO : windFixes) {
                     double nextSinusValue = 0;
                     if (inSimulationMode == true) {
                         nextSinusValue = directionSinWave.getNexNumber();
                     }
-                    points[counter] = new Point(windDTO.requestTimepoint, windDTO.trueWindBearingDeg + nextSinusValue);
+                    points[counter] = new Point(windDTO.requestTimepoint, windDTO.trueWindFromDeg + nextSinusValue);
                     points[counter] = adaptWindDirectionPointToStayCloseToLastPoint(previouspoint, points[counter]);
                     previouspoint = points[counter];
-                        movingAverageDirection.add(windDTO.trueWindBearingDeg + nextSinusValue);
+                        movingAverageDirection.add(windDTO.trueWindFromDeg + nextSinusValue);
                     counter++;
                 }
             } else if (windtype.equals(WindType.SPEED)) {
