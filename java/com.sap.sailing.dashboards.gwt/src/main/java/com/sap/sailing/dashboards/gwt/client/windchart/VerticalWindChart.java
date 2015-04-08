@@ -26,6 +26,8 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.BarPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -175,18 +177,24 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * {@link #setXAxisExtremesForSeriesPointRangeIsSmallerThanChartDisplayIntervall()} and
      * {@link #setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall()}.
      * */
-    public void addPointsToSeriesWithAverage(Point[] points, double average) {
-        if (verticalWindChartSeries == null) {
-            initVerticalWindChartSeries();
-            verticalWindChartSeries.setPoints(points, true);
-        } else {
-            for (Point point : points) {
-                verticalWindChartSeries.addPoint(point, true, false, false);
+    public void addPointsToSeriesWithAverage(final Point[] points, final double average) {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                if (verticalWindChartSeries == null) {
+                    initVerticalWindChartSeries();
+                    verticalWindChartSeries.setPoints(points, true);
+                } else {
+                    for (Point point : points) {
+                        verticalWindChartSeries.addPoint(point, true, false, false);
+                    }
+                }
+                verticalWindChartSeries.updateThreshold("" + average);
+                adaptVerticalWindChartExtemes();
+                verticalWindChart.setSizeToMatchContainer();
             }
-        }
-        verticalWindChartSeries.updateThreshold("" + average);
-        adaptVerticalWindChartExtemes();
-        verticalWindChart.setSizeToMatchContainer();
+        });
     }
 
     /**
@@ -204,9 +212,9 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * gets other extremes, because the values do not fit anymore into the selected display interval.
      * */
     private void setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall() {
-        long maximumExtremeValueInMillis = getLastPointOfVerticalWindChartSeries().getX().longValue();
-        long minimumExtremeValueInMillis = maximumExtremeValueInMillis - chartIntervallinMinutes * 60 * 1000;
-        verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, true);
+                long maximumExtremeValueInMillis = getLastPointOfVerticalWindChartSeries().getX().longValue();
+                long minimumExtremeValueInMillis = maximumExtremeValueInMillis - chartIntervallinMinutes * 60 * 1000;
+                verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, true);                
     }
 
 
@@ -247,8 +255,13 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         } else {
             chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
         }
-        adaptVerticalWindChartExtemes();
-        notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                adaptVerticalWindChartExtemes();
+                notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
+            }});
     }
 
     @Override
