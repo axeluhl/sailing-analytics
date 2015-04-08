@@ -17,7 +17,7 @@ public abstract class AbstractStartAnalysisCreationValidator {
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
         Iterator<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator();
         int markPassingsCounter = 0;
-        while (markPassingsInOrder.hasNext() || markPassingsCounter < MINIMUM_MARKPASSIINGS_AT_FIRST_MARK) {
+        while (markPassingsInOrder.hasNext() && markPassingsCounter < MINIMUM_MARKPASSIINGS_AT_FIRST_MARK) {
             markPassingsInOrder.next();
             markPassingsCounter ++;
         }
