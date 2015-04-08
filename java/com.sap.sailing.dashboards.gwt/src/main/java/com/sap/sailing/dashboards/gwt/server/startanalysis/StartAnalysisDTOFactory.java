@@ -34,6 +34,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
 
     private static int MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS = 3;
     private static int DEFAULT_GATE_START_INTERVALL_IN_MILLISECONDS = 5*60*1000;
+    private static int ONE_MINUTE_INTERVALL_IN_MILLISECONDS = 60*1000;
 
     private static final Logger logger = Logger.getLogger(StartAnalysisDTOFactory.class.getName());
 
@@ -72,7 +73,6 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         if (trackedRace.isGateStart()) {
             logger.log(Level.INFO, "IS GATESTART");
             startAnalysisDTO.racingProcedureType = RacingProcedureType.GateStart;
-//            Waypoint startLineWaypoint = trackedRace.getStartLine(trackedRace.getStartOfRace()).getWaypoint();
             long timePointOfGolfDownTime = trackedRace.getGateStartGolfDownTime();
             startAnalysisDTO.timeOfStartInMilliSeconds = trackedRace.getStartOfRace().asMillis();
             if(timePointOfGolfDownTime < trackedRace.getStartOfRace().asMillis() || timePointOfGolfDownTime == 0){
@@ -83,6 +83,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         } else {
             startAnalysisDTO.racingProcedureType = RacingProcedureType.ESS;
             startAnalysisDTO.timeOfStartInMilliSeconds = trackedRace.getStartOfRace().asMillis();
+            startAnalysisDTO.tailLenghtInMilliseconds = ONE_MINUTE_INTERVALL_IN_MILLISECONDS;
         }
         startAnalysisDTO.regattaAndRaceIdentifier = trackedRace.getRaceIdentifier();
         logger.log(Level.INFO, "Created StartAnalysis For Competitor " + competitor.getName() + " and "+ trackedRace.getRace().getName());
