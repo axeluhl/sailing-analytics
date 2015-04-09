@@ -109,9 +109,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
             if(place instanceof MultiregattaMediaPlace) {
                 return new RegattaMediaPlace(contextWithoutRegatta);
             }
-            // TODO Overview isn't implemented yet
-//            return new RegattaOverviewPlace(ctxToUse);
-            return new RegattaRacesPlace(contextWithoutRegatta);
+            return new RegattaOverviewPlace(contextWithoutRegatta);
         }
         
         if(place instanceof AbstractEventRegattaPlace) {
