@@ -96,6 +96,14 @@ public class PolarResource extends AbstractSailingServerResource {
                     }
                 }
             }
+            for (double trueWindAngle = -177.5; trueWindAngle < 180; trueWindAngle = trueWindAngle + 5) {
+                try {
+                    PolynomialFunction speedForTWAFunction = polarDataService.getSpeedRegressionFunction(boatClass, trueWindAngle);
+                    stringBuilder.append("Speed for TWA: " + boatClass + " " + trueWindAngle + ": " + speedForTWAFunction.toString() + "\n");
+                } catch (NotEnoughDataHasBeenAddedException e) {
+                    stringBuilder.append("No data for " + boatClass + " " + trueWindAngle + "\n");
+                }
+            }
             stringBuilder.append("\n\n");
         }
 
