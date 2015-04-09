@@ -737,6 +737,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 if (entryBefore.totalPoints != null) {
                     addedScores += entryBefore.totalPoints;
                 }
+                // else "add 0"
                 if (raceColumn.getName().equals(getRaceColumnName())) {
                     break; // we've reached the current column - stop here
                 }
