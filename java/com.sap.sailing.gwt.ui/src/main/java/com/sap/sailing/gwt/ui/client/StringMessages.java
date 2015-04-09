@@ -1213,4 +1213,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String suppressedMarkPassing();
     String windUp();
     String currentFilterSelection();
+    String notCapableOfGeneratingACodeForIdentifier();
+    String serverUrl();
 }

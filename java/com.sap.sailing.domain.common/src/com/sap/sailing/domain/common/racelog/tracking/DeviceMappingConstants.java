@@ -50,8 +50,9 @@ public class DeviceMappingConstants {
     }
     
     public static String getBuoyTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
-            String leaderboardName, UrlHelper helper) {
-        return helper.encodeUrl(serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_LEADERBOARD_NAME + "=" + leaderboardName);
+            String leaderboardName, String eventId, UrlHelper helper) {
+        return helper.encodeUrl(serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_EVENT_ID + "="
+                + eventId + "&" + URL_LEADERBOARD_NAME + "=" + leaderboardName);
     }
 
     @Deprecated

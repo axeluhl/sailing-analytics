@@ -410,10 +410,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
         String[] emailArray = emails.split(",");
         String leaderboardName = leaderboard.getName();
-
-        // http://<host>/buoy-tender/checkin&leaderboard_name=<leaderboard-name>
+        
+        String eventId = event.getId().toString();
+        
+        // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
         String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,
-                NonGwtUrlHelper.INSTANCE);
+                eventId, NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
                 sendInvitationEmail(locale, toAddress, leaderboardName,
