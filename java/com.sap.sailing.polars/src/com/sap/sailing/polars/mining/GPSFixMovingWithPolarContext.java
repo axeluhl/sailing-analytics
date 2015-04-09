@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -170,18 +171,12 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
 
     @Override
     public LegType getLegType() {
-        return getLegTypeWithPolarConstraints(getAngleToTheWind().getObject());
-    }
-
-    public static LegType getLegTypeWithPolarConstraints(Bearing angleDifferenceWindToBoat) {
-        double absoluteDiffInDeg = Math.abs(angleDifferenceWindToBoat.getDegrees());
-        LegType result = null;
-        if (absoluteDiffInDeg > 20 && absoluteDiffInDeg < 75) {
-            result = LegType.UPWIND;
-        } else if (absoluteDiffInDeg > 105) {
-            result = LegType.DOWNWIND;
+        TimePoint timePoint = fix.getTimePoint();
+        try {
+            return race.getCurrentLeg(timePoint).getLegType(timePoint);
+        } catch (NoWindException e) {
+            return null;
         }
-        return result;
     }
 
     @Override
