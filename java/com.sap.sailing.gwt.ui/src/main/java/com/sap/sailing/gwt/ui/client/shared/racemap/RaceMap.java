@@ -698,7 +698,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             if (windInfo != null) {
                                 lastCombinedWindTrackInfoDTO = windInfo; 
                                 showAdvantageLine(competitorsToShow, newTime);
-                                for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+                                for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
                                         case EXPEDITION:
@@ -2099,6 +2099,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
+            settings.setWindUp(newSettings.isWindUp());
             updateCoordinateSystemFromSettings();
             requiredRedraw = true;
         }
