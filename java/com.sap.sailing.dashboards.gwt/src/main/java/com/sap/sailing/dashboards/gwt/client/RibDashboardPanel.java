@@ -121,7 +121,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     private void initAndAddWrongOrientationNotification(){
         WrongDeviceOrientationNotification wrongDeviceOrientationNotification = new WrongDeviceOrientationNotification();
         Document.get().getBody().appendChild(wrongDeviceOrientationNotification.getElement());
-        //wrongDeviceOrientationNotification.show();
     }
 
     private void initWindBotComponents(List<String> windBotIDs,
