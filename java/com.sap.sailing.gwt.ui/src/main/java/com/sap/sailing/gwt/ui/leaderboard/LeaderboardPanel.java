@@ -736,7 +736,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
                 if (entryBefore.totalPoints != null) {
                     addedScores += entryBefore.totalPoints;
-                } 
+                } else {
+                    addedScores += 0.;
+                }
                 if (raceColumn.getName().equals(getRaceColumnName())) {
                     break; // we've reached the current column - stop here
                 }
@@ -808,11 +810,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     if (isShowAddedScores()) {
+                        double result = 0;
                         double o1AddedScore = computeAddedScores(o1);
                         double o2AddedScore = computeAddedScores(o2);
                         // FIXME bug 2717: need to respect the scoring scheme's isHigherBetter() flag here
-                        double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? 1. : -1. : o2AddedScore - o1AddedScore;
-                        return result > 0 ? 1 : result < 0 ? -1 : 0;
+                        double intermediate_result = o1AddedScore == 0. ? (o2AddedScore == 0. ? -1. : isAscending() ? 1. : -1.) : o2AddedScore == 0. ? (isAscending() ? -1. : 1.) : o1AddedScore - o2AddedScore;
+                        if (!getLeaderboard().isHigherScoreBetter()) {
+                            result = intermediate_result > 0 ? 1 : intermediate_result < 0 ? -1 : 0;
+                        } else {
+                            result = intermediate_result > 0 ? -1 : intermediate_result < 0 ? 1 : 0;
+                        }
+                        return new Double(result).intValue();
                     } else {
                         List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
                                 race);
