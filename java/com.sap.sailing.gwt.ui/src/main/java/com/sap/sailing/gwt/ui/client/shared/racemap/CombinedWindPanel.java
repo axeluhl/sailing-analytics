@@ -68,9 +68,4 @@ public class CombinedWindPanel extends FlowPanel {
         this.windTrackInfoDTO = windTrackInfoDTO;
         this.windSource = windSource;
     }
-
-    public WindSource getWindSource() {
-        return windSource;
-    }
-
 }
