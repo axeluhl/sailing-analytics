@@ -808,7 +808,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     if (isShowAddedScores()) {
                         double o1AddedScore = computeAddedScores(o1);
                         double o2AddedScore = computeAddedScores(o2);
-                        double intermediate_result = o1AddedScore == 0. ? (o2AddedScore == 0. ? -1. : isAscending() ? 1. : -1.) : o2AddedScore == 0. ? (isAscending() ? -1. : 1.) : o1AddedScore - o2AddedScore;
+                        double intermediate_result = o1AddedScore == 0. ? (o2AddedScore == 0. ? -1.
+                                : isAscending() ? 1. : -1.) : o2AddedScore == 0. ? (isAscending() ? -1. : 1.)
+                                : o1AddedScore - o2AddedScore;
                         if (!getLeaderboard().isHigherScoreBetter()) {
                             result = intermediate_result > 0 ? 1 : intermediate_result < 0 ? -1 : 0;
                         } else {
