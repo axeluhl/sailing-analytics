@@ -46,7 +46,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
         });
         
         inputGrid = new Grid(1, 2);
-        inputGrid.setWidget(0, 0, new Label("Server URL:"));
+        inputGrid.setWidget(0, 0, new Label(stringMessages.serverUrl()+":"));
         inputGrid.setWidget(0, 1, serverBox);
         
         qrCodeComposite = new QRCodeComposite(qrCodeSize, errorCorrectionLevel);

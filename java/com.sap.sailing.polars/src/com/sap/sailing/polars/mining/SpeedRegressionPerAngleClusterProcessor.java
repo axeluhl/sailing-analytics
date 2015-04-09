@@ -63,9 +63,10 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
             if (regressions.containsKey(key)) {
                 speedSum += regressions.get(key).getOrCreatePolynomialFunction().value(windSpeed.getKnots());
                 numberOfSpeeds++;
-            } else {
-                throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
-            }
+            } 
+        }
+        if (numberOfSpeeds < 1) {
+            throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
         }
         Speed speed = new KnotSpeedImpl(speedSum / numberOfSpeeds);
         return new SpeedWithConfidenceImpl<Void>(speed, /*FIXME*/ 0.5, null);
