@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.client.place.events.recent.RecentEventTeaser;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -46,6 +47,9 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
         initWidget(ourUiBinder.createAndBindUi(this));
 
         for (EventMetadataDTO eventOfSeries : currentPresenter.getCtx().getSeriesDTO().getEvents()) {
+            if(eventOfSeries.getState() == EventState.PLANNED) {
+                continue;
+            }
             final PlaceNavigation<EventDefaultPlace> eventNavigation = currentPresenter.getEventNavigation(eventOfSeries.getId());
             RecentEventTeaser eventTeaser = new RecentEventTeaser(eventNavigation, eventOfSeries, eventOfSeries.getState().getStateMarker());
             eventsContainer.add(eventTeaser);
