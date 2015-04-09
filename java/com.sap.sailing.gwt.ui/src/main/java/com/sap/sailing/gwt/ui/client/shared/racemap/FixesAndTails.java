@@ -507,4 +507,19 @@ public class FixesAndTails {
         }
         return null;
     }
+
+    /**
+     * Clears all tail data, removing them from the map and from this object's internal structures. GPS fixes remain
+     * cached. Immediately after this call, {@link #getTail(CompetitorDTO)} will return <code>null</code> for all
+     * competitors. Tails will need to be created (again) using
+     * {@link #createTailAndUpdateIndices(CompetitorDTO, Date, Date, TailFactory)}.
+     */
+    protected void clearTails() {
+        for (Polyline tail : tails.values()) {
+            tail.setMap(null);
+        }
+        tails.clear();
+        firstShownFix.clear();
+        lastShownFix.clear();
+    }
 }

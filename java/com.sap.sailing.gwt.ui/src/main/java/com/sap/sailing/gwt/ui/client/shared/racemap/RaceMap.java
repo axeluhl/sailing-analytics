@@ -142,7 +142,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * embedded in the map. The coordinate systems facilitates the possibility of transformed displays such as
      * rotated and translated versions of the map, implementing the "wind-up" view.
      */
-    private CoordinateSystem coordinateSystem;
+    private DelegateCoordinateSystem coordinateSystem;
     
     private FlowPanel headerPanel;
     private AbsolutePanel panelForLeftHeaderLabels;
@@ -362,8 +362,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
-        coordinateSystem = updateCoordinateSystemFromSettings();
+        coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
         fixesAndTails = new FixesAndTails(coordinateSystem);
+        updateCoordinateSystemFromSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
@@ -378,11 +379,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         combinedWindPanel.setVisible(false);
     }
     
-    private CoordinateSystem updateCoordinateSystemFromSettings() {
-        coordinateSystem = getSettings().isWindUp()
+    private void updateCoordinateSystemFromSettings() {
+        coordinateSystem.setCoordinateSystem(getSettings().isWindUp()
                 ? new RotateAndTranslateCoordinateSystem(/* TODO */ new DegreePosition(-33.957425, 25.679894), /* TODO */ new DegreeBearingImpl(180))
-                : new IdentityCoordinateSystem();
-        return coordinateSystem;
+                : new IdentityCoordinateSystem());
+        fixesAndTails.clearTails();
+        redraw();
     }
 
     private void loadMapsAPIV3(final boolean showMapControls) {
