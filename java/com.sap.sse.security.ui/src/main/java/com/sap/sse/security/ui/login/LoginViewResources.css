@@ -39,12 +39,8 @@ body {
 	padding: 10px;
 }
 
-.textInput_watermark {
+.textInput_watermark, .passwordTextInput_watermark {
 	color: gray;
-}
-
-.passwordTextInput_watermark {
-	color:;
 }
 
 .glowing_border {
