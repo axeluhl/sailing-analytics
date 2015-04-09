@@ -410,6 +410,11 @@ public class PolarDataMiner {
             throws NotEnoughDataHasBeenAddedException {
         return cubicRegressionPerCourseProcessor.getAngleRegressionFunction(boatClass, legType, tack);
     }
+    
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        return speedRegressionPerAngleClusterProcessor.getSpeedRegressionFunction(boatClass, trueWindAngle);
+    }
 
     public void raceFinishedTracking(TrackedRace race) {
         Set<GPSFixMovingWithOriginInfo> fixes = null;

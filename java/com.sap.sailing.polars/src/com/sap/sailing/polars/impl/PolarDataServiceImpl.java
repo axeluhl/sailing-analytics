@@ -146,9 +146,16 @@ public class PolarDataServiceImpl implements PolarDataService {
             throws NotEnoughDataHasBeenAddedException {
         return polarDataMiner.getAngleRegressionFunction(boatClass, legType, tack);
     }
+    
+    @Override
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarDataMiner.getSpeedRegressionFunction(boatClass, trueWindAngle);
+    }
 
     @Override
     public void raceFinishedLoading(TrackedRace race) {
         polarDataMiner.raceFinishedTracking(race);
     }
+
 }

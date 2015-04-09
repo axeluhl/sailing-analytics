@@ -194,5 +194,19 @@ public interface PolarDataService {
      */
     PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
+    /**
+     * This method is not intended to be used directly apart from debugging purposes. If you intend to use the polar service please 
+     * use {@link #getSpeed(BoatClass, Speed, Bearing)}.
+     * 
+     * @param boatClass
+     * @param trueWindAngle
+     * @return The estimating function for the true wind angle estimating boatspeed over windspeed for the
+     *         given boat class. All values in kn.
+     * @throws NotEnoughDataHasBeenAddedException
+     */
+    PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle) throws NotEnoughDataHasBeenAddedException;
+    
     void raceFinishedLoading(TrackedRace race);
+
+
 }
