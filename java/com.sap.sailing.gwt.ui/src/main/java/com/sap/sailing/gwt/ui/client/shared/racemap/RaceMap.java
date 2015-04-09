@@ -67,6 +67,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
@@ -79,6 +80,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
@@ -339,6 +341,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private boolean hasPolar;
     
     private final RegattaAndRaceIdentifier raceIdentifier;
+    
+    /**
+     * When the user requests wind-up display this may happen at a point where no mark positions are known or when
+     * no wind direction is known yet. In this case, this flag will be set, and when wind information or course mark
+     * positions are received later, this flag is checked, and if set, a {@link #updateCoordinateSystemFromSettings()}
+     * call is issued to make sure that the user's request for a new coordinate system is honored.
+     */
+    private boolean requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
@@ -379,12 +389,48 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         combinedWindPanel.setVisible(false);
     }
     
+    /**
+     * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
+     * {@link WindSourceType#COMBINED} source which has at least one fix recorded; <code>null</code> otherwise.
+     */
+    private Bearing getLastCombinedTrueWindFromDirection() {
+        if (lastCombinedWindTrackInfoDTO != null) {
+            for (Entry<WindSource, WindTrackInfoDTO> e : lastCombinedWindTrackInfoDTO.windTrackInfoByWindSource.entrySet()) {
+                if (e.getKey().getType() == WindSourceType.COMBINED) {
+                    final List<WindDTO> windFixes = e.getValue().windFixes;
+                    if (!windFixes.isEmpty()) {
+                        return new DegreeBearingImpl(windFixes.get(0).dampenedTrueWindFromDeg);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
     private void updateCoordinateSystemFromSettings() {
-        coordinateSystem.setCoordinateSystem(getSettings().isWindUp()
-                ? new RotateAndTranslateCoordinateSystem(/* TODO */ new DegreePosition(-33.957425, 25.679894), /* TODO */ new DegreeBearingImpl(180))
-                : new IdentityCoordinateSystem());
+        if (getSettings().isWindUp()) {
+            final Position centerOfCourse = getCenterOfCourse();
+            if (centerOfCourse != null) {
+                final Bearing lastCombinedTrueWindFromDirection = getLastCombinedTrueWindFromDirection();
+                if (lastCombinedTrueWindFromDirection != null) {
+                    // new equator shall point 90deg right of the "from" wind direction to make wind come from top of map
+                    coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
+                            lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
+                    requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown = false;
+                } else {
+                    // register callback in case center of course and wind info becomes known
+                    requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown = true;
+                }
+            } else {
+                // register callback in case center of course and wind info becomes known
+                requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown = true;
+            }
+        } else {
+            coordinateSystem.setCoordinateSystem(new IdentityCoordinateSystem());
+        }
         fixesAndTails.clearTails();
         redraw();
+        zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
     }
 
     private void loadMapsAPIV3(final boolean showMapControls) {
@@ -709,6 +755,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                             break;
                                         case COMBINED:
                                             showCombinedWindOnMap(windSource, windTrackInfoDTO);
+                                            if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
+                                                updateCoordinateSystemFromSettings();
+                                            }
                                             break;
                                     default:
                                         // Which wind sources are requested is defined in a list above this
@@ -796,6 +845,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         
                         // Do mark specific actions
                         showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                        if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
+                            updateCoordinateSystemFromSettings();
+                        }
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
                         showStartAndFinishLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
@@ -916,6 +968,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
         }
+    }
+    
+    /**
+     * Based on the mark positions in {@link #courseMarkOverlays}' values this method determines the center of gravity of these marks'
+     * {@link CourseMarkOverlay#getPosition() positions}.
+     */
+    private Position getCenterOfCourse() {
+        ScalablePosition center = null;
+        int count = 0;
+        for (CourseMarkOverlay markOverlay : courseMarkOverlays.values()) {
+            ScalablePosition markPosition = new ScalablePosition(markOverlay.getPosition());
+            if (center == null) {
+                center = markPosition;
+            } else {
+                center.add(markPosition);
+            }
+            count++;
+        }
+        return center == null ? null : center.divide(count);
     }
 
     protected void showCombinedWindOnMap(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
@@ -1549,7 +1620,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         courseMarkOverlay.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
-                LatLng latlng = courseMarkOverlay.getMarkPosition();
+                LatLng latlng = courseMarkOverlay.getMarkLatLngPosition();
                 showMarkInfoWindow(markDTO, latlng);
             }
         });

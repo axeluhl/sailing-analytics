@@ -162,8 +162,19 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     public void setMarkPosition(Position position) {
         this.position = position;
     }
+    
+    /**
+     * The real-world position where the mark displayed by this overlay is located
+     */
+    public Position getPosition() {
+        return this.position;
+    }
 
-    public LatLng getMarkPosition() {
+    /**
+     * The {@link LatLng} position where the mark is shown on the map. This is transformed through the
+     * {@link CoordinateSystem} in place for the {@link RaceMap}.
+     */
+    public LatLng getMarkLatLngPosition() {
         return coordinateSystem.toLatLng(position);
     }
 

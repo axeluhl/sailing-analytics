@@ -18,10 +18,6 @@ public class DelegateCoordinateSystem implements CoordinateSystem {
         this.coordinateSystem = coordinateSystem;
     }
 
-    public CoordinateSystem getCoordinateSystem() {
-        return coordinateSystem;
-    }
-
     public void setCoordinateSystem(CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
     }
