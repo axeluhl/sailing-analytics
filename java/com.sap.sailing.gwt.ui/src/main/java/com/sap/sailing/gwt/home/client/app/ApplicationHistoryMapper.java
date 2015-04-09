@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         RegattaMediaPlace.Tokenizer.class,
         // Fake series places:
         SeriesDefaultPlace.Tokenizer.class,
+        RegattaOverviewPlace.Tokenizer.class,
         SeriesEventsPlace.Tokenizer.class,
         EventSeriesCompetitorAnalyticsPlace.Tokenizer.class,
         EventSeriesOverallLeaderboardPlace.Tokenizer.class,

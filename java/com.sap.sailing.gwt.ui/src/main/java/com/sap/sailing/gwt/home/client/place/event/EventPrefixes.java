@@ -13,6 +13,7 @@ public class EventPrefixes {
     public static final String RegattaCompetitorAnalytics = "/regatta/competitoranalytics/";
     public static final String RegattaMedia = "/regatta/media/";
     public static final String SeriesDefault = "/series/";
+    public static final String SeriesOverview = "/series/overview/";
     public static final String SeriesEvents = "/series/events/";
     public static final String EventSeriesCompetitorAnalytics = "/series/competitoranalytics/";
     public static final String EventSeriesOverallLeaderboard = "/series/overallleaderboard/";
