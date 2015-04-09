@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
@@ -102,8 +104,19 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
         logger.severe("Polar Data Mining Pipe failed.");
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
-
-
+    
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle));
+        PolynomialFunction polynomialFunction;
+        if (regressions.containsKey(key)) {
+            polynomialFunction = regressions.get(key).getOrCreatePolynomialFunction();
+        } else {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
+        return polynomialFunction;
+    }
+    
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
      // TODO Auto-generated method stub
