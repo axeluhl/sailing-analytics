@@ -62,9 +62,11 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
 
     }
 
+ // TODO delete UiBinder if we do not need it for the new media page implementation
     interface MyBinder extends UiBinder<HTMLPanel, RegattaMediaTabView> {
     }
 
+    @SuppressWarnings("unused")
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
 

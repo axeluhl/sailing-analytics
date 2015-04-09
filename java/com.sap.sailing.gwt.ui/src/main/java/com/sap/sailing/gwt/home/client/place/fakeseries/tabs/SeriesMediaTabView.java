@@ -14,9 +14,11 @@ import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 public class SeriesMediaTabView extends Composite implements SeriesTabView<SeriesMediaPlace> {
 
+ // TODO delete UiBinder if we do not need it for the new media page implementation
     interface MyBinder extends UiBinder<HTMLPanel, SeriesMediaTabView> {
     }
 
+    @SuppressWarnings("unused")
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private SeriesView.Presenter currentPresenter;
 
