@@ -34,7 +34,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     
     @Override
     public TabView.State getState() {
-        return TabView.State.VISIBLE;
+        // TODO activate
+        return TabView.State.NOT_AVAILABLE;
     }
 
     @Override

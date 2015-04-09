@@ -50,10 +50,9 @@
 			<c:header>
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
-			<!-- Overview isn't implemented yet. -->
-<!-- 			<c:tabcontent title="{i18n.overview}"> -->
-<!-- 				<tabs:RegattaOverviewTabView /> -->
-<!-- 			</c:tabcontent> -->
+ 			<c:tabcontent title="{i18n.overview}">
+ 				<tabs:RegattaOverviewTabView />
+ 			</c:tabcontent>
 			<c:tabcontent title="{i18n.races}">
 				<tabs:RegattaRacesTabView />
 			</c:tabcontent>

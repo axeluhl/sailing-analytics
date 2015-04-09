@@ -26,7 +26,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @Override
     public TabView.State getState() {
-        return TabView.State.VISIBLE;
+        return TabView.State.NOT_AVAILABLE;
     }
 
     @Override

@@ -50,7 +50,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race);
 
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
-        PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaName);
+        PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);
         
         void ensureRegattaStructure(AsyncCallback<List<RaceGroupDTO>> callback);
         void ensureLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);

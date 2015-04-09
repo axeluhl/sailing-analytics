@@ -9,16 +9,18 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesMediaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -34,11 +36,11 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         // Event tab places...
         EventDefaultPlace.Tokenizer.class,
         // Multiregatta places:
-        // TODO not implemented: MultiregattaOverviewPlace.Tokenizer.class,
+        MultiregattaOverviewPlace.Tokenizer.class,
         MultiregattaRegattasPlace.Tokenizer.class,
         MultiregattaMediaPlace.Tokenizer.class,
         // Regatta places:
-        // TODO not implemented: RegattaOverviewPlace.Tokenizer.class,
+        RegattaOverviewPlace.Tokenizer.class,
         RegattaRacesPlace.Tokenizer.class,
         RegattaLeaderboardPlace.Tokenizer.class,
         RegattaCompetitorAnalyticsPlace.Tokenizer.class,

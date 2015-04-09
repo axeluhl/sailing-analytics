@@ -123,6 +123,7 @@ public class TabPanel<PRESENTER> extends Composite {
                             currentTab.stop();
                         }
                         fireEvent(new TabPanelPlaceSelectionEvent(tab));
+                        return;
                     }
                 }
             }

@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.PlaceCallback;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
@@ -84,9 +84,8 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     }
     
     @Override
-    public PlaceNavigation<RegattaRacesPlace> getCurrentRegattaOverviewNavigation() {
-        // TODO Overview isn't implemented yet
-        return homePlacesNavigator.getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+    public PlaceNavigation<RegattaOverviewPlace> getCurrentRegattaOverviewNavigation() {
+        return homePlacesNavigator.getEventNavigation(new RegattaOverviewPlace(ctx), null, false);
     }
 
 

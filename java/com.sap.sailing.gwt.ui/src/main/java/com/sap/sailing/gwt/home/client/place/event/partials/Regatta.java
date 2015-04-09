@@ -23,7 +23,6 @@ import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -72,7 +71,7 @@ public class Regatta extends Composite {
 
     private Presenter presenter;
 
-    private PlaceNavigation<RegattaRacesPlace> regattaNavigation;
+    private PlaceNavigation<?> regattaNavigation;
     
     public Regatta(boolean isSingleView, EventView.Presenter presenter) {
         this.event = presenter.getCtx().getEventDTO();

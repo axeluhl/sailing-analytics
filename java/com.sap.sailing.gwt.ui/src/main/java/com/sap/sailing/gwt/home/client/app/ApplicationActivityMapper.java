@@ -17,10 +17,12 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
@@ -28,8 +30,8 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivityProxy;
@@ -126,11 +128,10 @@ public class ApplicationActivityMapper implements ActivityMapper {
             eventContext.withRegattaId(regattaId);
             
             switch (place.getNavigationTab()) {
-            // TODO some places aren't implemented yet 
             case Media:
                 return new RegattaMediaPlace(eventContext);
             case Overview:
-                // Overview not implemented yet -> using regatta list
+                return new RegattaOverviewPlace(eventContext);
             case Regatta:
                 return new RegattaRacesPlace(eventContext);
             }
@@ -140,7 +141,7 @@ public class ApplicationActivityMapper implements ActivityMapper {
             case Media:
                 return new MultiregattaMediaPlace(eventContext);
             case Overview:
-                // Overview not implemented yet -> using race list
+                return new MultiregattaOverviewPlace(eventContext);
             case Schedule:
                 // Schedule not implemented yet -> using race list
             case Regattas:

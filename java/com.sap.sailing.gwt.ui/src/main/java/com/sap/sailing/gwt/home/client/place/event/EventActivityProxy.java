@@ -9,10 +9,12 @@ import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaActivity;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaActivity;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -87,13 +89,9 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private AbstractEventPlace getRealPlace() {
         EventViewDTO event = ctx.getEventDTO();
         if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
-            // TODO Overview isn't implemented yet
-//            return new RegattaOverviewPlace(new EventContext(ctx.getEventDTO()));
-            return new RegattaRacesPlace(new EventContext(ctx).withRegattaId(null));
+            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
         }
-        // TODO Overview isn't implemented yet
-//        return new MultiregattaOverviewPlace(place.getCtx());
-        return new MultiregattaRegattasPlace(place.getCtx());
+        return new MultiregattaOverviewPlace(place.getCtx());
     }
     
     /**
