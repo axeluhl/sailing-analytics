@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisDTO> {
 
@@ -17,6 +18,8 @@ public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisD
     public List<StartAnalysisCompetitorDTO> startAnalysisCompetitorDTOs;
     public long timeOfStartInMilliSeconds;
     public RegattaAndRaceIdentifier regattaAndRaceIdentifier;
+    public RacingProcedureType racingProcedureType;
+    public long tailLenghtInMilliseconds;
 
     public StartAnalysisDTO() {
     }

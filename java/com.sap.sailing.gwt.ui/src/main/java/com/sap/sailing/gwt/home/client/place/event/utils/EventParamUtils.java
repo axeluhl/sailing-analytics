@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 
 public class EventParamUtils {
 
-    public static RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
-        RaceIdentifier result;
+    public static RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
+        RegattaAndRaceIdentifier result;
         if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME)
                 && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1
                 && parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME)

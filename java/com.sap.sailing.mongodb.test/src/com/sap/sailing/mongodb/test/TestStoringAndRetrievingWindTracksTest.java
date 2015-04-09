@@ -87,7 +87,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE);
+                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaces().iterator().next().getId());
         DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
@@ -95,7 +95,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                });
+                }, /*useMarkPassingCalculator*/ false);
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());

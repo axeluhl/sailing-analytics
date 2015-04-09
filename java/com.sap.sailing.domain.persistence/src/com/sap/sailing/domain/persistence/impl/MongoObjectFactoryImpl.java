@@ -19,6 +19,7 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
@@ -867,6 +869,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, FixedMarkPassingEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFixedMarkPassingEvent(event));
+        return result;
+    }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, SuppressedMarkPassingsEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogSuppressedMarkPassingsEvent(event));
+        return result;
+    }
+
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
@@ -981,6 +997,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
         storeTimePoint(event.getClosingTimePoint(), result, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
+        return result;
+    }
+
+    private Object storeRaceLogFixedMarkPassingEvent(FixedMarkPassingEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), FixedMarkPassingEvent.class.getSimpleName());
+        result.put(FieldNames.INDEX_OF_PASSED_WAYPOINT.name(), event.getZeroBasedIndexOfPassedWaypoint());
+        result.put(FieldNames.TIMEPOINT_OF_FIXED_MARKPASSING.name(), event.getTimePointOfFixedPassing().asMillis());
+        return result;
+    }
+
+    private Object storeRaceLogSuppressedMarkPassingsEvent(SuppressedMarkPassingsEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), SuppressedMarkPassingsEvent.class.getSimpleName());
+        result.put(FieldNames.INDEX_OF_FIRST_SUPPRESSED_WAYPOINT.name(), event.getZeroBasedIndexOfFirstSuppressedWaypoint());
         return result;
     }
 
@@ -1147,7 +1180,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_TYPE.name(), mark.getType() == null ? null : mark.getType().name());
         return result;
     }
-
+    
     private String getPassingInstructions(PassingInstruction passingInstructions) {
         final String passing;
         if (passingInstructions != null) {

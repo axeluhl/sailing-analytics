@@ -99,8 +99,6 @@ public class ResultsChart implements ResultsPresenter<Number> {
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
-        sortByPanel.setVisible(false);
-        mainPanel.addNorth(sortByPanel, 50);
         sortByPanel.add(new Label(stringMessages.sortBy()));
         keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
             @Override
@@ -116,6 +114,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
             }
         });
         sortByPanel.add(keyComparatorListBox);
+        mainPanel.addNorth(sortByPanel, 40);
+        mainPanel.setWidgetHidden(sortByPanel, true);
         
         presentationPanel = new ResizingSimplePanel() {
             @Override
@@ -177,7 +177,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
 
     private void updateKeyComparatorListBox() {
-        boolean visible = false;
+        boolean hidden = true;
         Comparator<GroupKey> valueToBeSelected = standardKeyComparator;
         Collection<Comparator<GroupKey>> acceptableValues = new ArrayList<>();
         acceptableValues.add(valueToBeSelected);
@@ -185,11 +185,12 @@ public class ResultsChart implements ResultsPresenter<Number> {
             valueToBeSelected = getKeyComparator() != null ? getKeyComparator() : valueToBeSelected;
             acceptableValues.add(ascendingByValueKeyComparator);
             acceptableValues.add(descendingByValueKeyComparator);
-            visible = true;
+            hidden = false;
         }
         keyComparatorListBox.setValue(valueToBeSelected);
         keyComparatorListBox.setAcceptableValues(acceptableValues);
-        sortByPanel.setVisible(visible);
+        mainPanel.setWidgetHidden(sortByPanel, hidden);
+        mainPanel.forceLayout();
     }
 
     private boolean isCurrentResultSimple() {

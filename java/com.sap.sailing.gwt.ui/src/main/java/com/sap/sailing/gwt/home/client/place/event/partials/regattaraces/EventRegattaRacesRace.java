@@ -48,6 +48,7 @@ public class EventRegattaRacesRace extends Composite {
 
     @UiField DivElement raceFeaturesDiv;
     @UiField DivElement legProgressDiv;
+    @UiField DivElement legProgressPanel;
     @UiField DivElement raceFlagDiv;
     @UiField DivElement windStatusDiv;
     
@@ -117,6 +118,12 @@ public class EventRegattaRacesRace extends Composite {
                     showElement(legProgressDiv);
                     currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
                     totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
+                    
+                    for(int i = 0; i < race.trackedRaceStatistics.totalLegsCount; i++) {
+                        boolean isLive = i <= race.trackedRaceStatistics.currentLegNo; 
+                        EventRegattaRacesRaceProgressItem item = new EventRegattaRacesRaceProgressItem(isLive);
+                        legProgressPanel.appendChild(item.getElement());
+                    }
                 }
                 if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceLeaderDiv);

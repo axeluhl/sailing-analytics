@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -76,7 +77,7 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
                     .createLeaderboardSettingsFromURLParameters(Window.Location
                     .getParameterMap());
 
-            final RaceIdentifier preselectedRace = EventParamUtils
+            final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
                     .getPreselectedRace(Window.Location.getParameterMap());
 
             LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createOverallLeaderboardPanel(

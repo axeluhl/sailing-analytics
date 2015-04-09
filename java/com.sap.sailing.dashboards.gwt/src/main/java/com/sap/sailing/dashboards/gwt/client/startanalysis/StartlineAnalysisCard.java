@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.rankingtable.StartAnalysisStartRankTable;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -53,6 +54,9 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
 
     @UiField
     DivElement startanalysis_card_line_advantage;
+    
+    @UiField
+    DivElement startanalysis_card_race_time;
 
     private int cardid;
     private StartAnalysisDTO startAnalysisDTO;
@@ -64,7 +68,8 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
 
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
     private final double GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 210;
-    private final int TAIL_LENGHT_IN_MILLISECONDS = 900000;
+    private final int TABLE_MARGIN_IN_PT = 10;
+    private final String RACE_TIME_START = "00:00:00";
     
 
     private static StartAnalysisResources resources = GWT.create(StartAnalysisResources.class);
@@ -74,12 +79,13 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         resources.combinedWindPanelStyle().ensureInjected();
         this.sailingServiceAsync = sailingServiceAsync;
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true);
-
+        competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
+                raceMap);
         initWidget(uiBinder.createAndBindUi(this));
         startanalysis_card.getElement().getStyle().setLeft(leftCSSProperty, Unit.PCT);
         this.startAnalysisDTO = startAnalysisDTO;
         this.cardid = cardId;
-        startanalysis_card_table.add(new StartAnalysisStartRankTable(startAnalysisDTO.startAnalysisCompetitorDTOs));
+        startanalysis_card_table.add(new StartAnalysisStartRankTable(startAnalysisDTO.startAnalysisCompetitorDTOs, competitorSelectionModel));
         fillWindAndStartLineData(this.startAnalysisDTO);
     }
 
@@ -100,7 +106,21 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
                                     .getFormat("#0.0")
                                     .format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage)
                             + " m");
+            String formattedTimeSinceStart;
+            if (startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)) {
+                formattedTimeSinceStart = getRaceTimeStringFromMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);
+            } else {
+                formattedTimeSinceStart = RACE_TIME_START;
+            }
+            startanalysis_card_race_time.setInnerHTML("Elapsed Time: "+formattedTimeSinceStart);
         }
+    }
+    
+    private String getRaceTimeStringFromMilliseconds(long milliseconds){
+        int seconds = (int) (milliseconds / 1000) % 60 ;
+        int minutes = (int) ((milliseconds / (1000*60)) % 60);
+        int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
+        return NumberFormat.getFormat("00").format(hours)+":"+NumberFormat.getFormat("00").format(minutes)+":"+NumberFormat.getFormat("00").format(seconds);
     }
 
     private void setLineAdvantageDivWidth(StartlineAdvantageType startlineAdvantageType) {
@@ -113,26 +133,28 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     }
 
     private void addMap(final int cardID, final StartAnalysisDTO startAnalysisDTO) {
-        AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live, 1000l);
-        timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
         timer.pause();
-
+        ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
+        if(startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)){
+            timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds+startAnalysisDTO.tailLenghtInMilliseconds);
+            zoomTypes.add(ZoomTypes.BUOYS);
+        }else{
+            timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
+            zoomTypes.add(ZoomTypes.TAILS);
+        }
+        AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-
         raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel,
                 StringMessages.INSTANCE, false, false, false, startAnalysisDTO.regattaAndRaceIdentifier,
                 resources.combinedWindPanelStyle());
-        competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
-                raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier));
-        ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
-        zoomTypes.add(ZoomTypes.TAILS);
         raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
         raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());
-        raceMap.getSettings().setTailLengthInMilliseconds(TAIL_LENGHT_IN_MILLISECONDS);
+        raceMap.getSettings().setTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
+        raceMap.setSize("100%", getHeightForRaceMapInPixels()+"px");
         startanalysis_card.add(raceMap);
         /**
          * Executes onResize() after the reflow of the DOM. Otherwise it has no effect.
@@ -146,12 +168,17 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
             }
         });
     }
+    
+    private int getHeightForRaceMapInPixels(){
+        return this.getElement().getOffsetHeight() - startanalysis_card_table.getElement().getOffsetHeight() + (TABLE_MARGIN_IN_PT*3);
+    }
 
     private RaceMapHelpLinesSettings getHelpLineSettings() {
         HashSet<HelpLineTypes> visibleHelpLines = new HashSet<HelpLineTypes>();
         visibleHelpLines.add(HelpLineTypes.STARTLINE);
         visibleHelpLines.add(HelpLineTypes.BOATTAILS);
         visibleHelpLines.add(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE);
+        visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
         return new RaceMapHelpLinesSettings(visibleHelpLines);
     }
 
