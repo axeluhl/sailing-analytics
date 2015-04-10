@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sailing.gwt.home.server;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,8 +21,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
-public final class SailingServiceUtil {
-    private SailingServiceUtil() {
+public final class HomeServiceUtil {
+    private HomeServiceUtil() {
     }
 
     private static final String STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "stage";

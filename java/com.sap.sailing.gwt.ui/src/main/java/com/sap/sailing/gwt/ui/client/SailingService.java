@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -86,10 +85,6 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -604,21 +599,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
-
-    EventViewDTO getEventViewById(UUID id);
-
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
-
-    EventSeriesViewDTO getEventSeriesViewById(UUID id);
-    
-    MediaDTO getMediaForEvent(UUID eventId);
-    
-    MediaDTO getMediaForEventSeries(UUID seriesId);
-
-    EventListViewDTO getEventListView() throws Exception;
-
-    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
 
