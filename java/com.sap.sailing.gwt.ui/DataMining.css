@@ -214,16 +214,19 @@ input.magnifier {
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
-.dataMiningPanel-settingsButton {
-	background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
-	background-position: center, center 0;
-	background-repeat: no-repeat, repeat-x;
-	width: 27px;
-	height: 23px;
-    margin: 0 12px 0 1px;
-	-webkit-border-radius: 0px 3px 3px 0px;
-	-moz-border-radius: 0px 3px 3px 0px;
-	-o-border-radius: 0px 3px 3px 0px;
-	-ms-border-radius: 0px 3px 3px 0px;
-	border-radius: 0px 3px 3px 0px;
+.settingsAnchor {
+	position: relative;
+	top: 9px;
+}
+
+.groupingProviderElement {
+	margin: 2px;
+}
+
+.definitionProviderControls {
+	margin: 2px;
+}
+
+.definitionProviderControlsElements {
+	margin: 2px;
 }

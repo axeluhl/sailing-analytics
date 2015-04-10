@@ -49,7 +49,6 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         if (!importantDataIsNotNull) {
             return false;
         }
-        boolean hasLegType = hasLegType(element);
         boolean afterStartTime = isAfterStartTime(element);
         boolean beforeFinishTime = isBeforeFinishTime(element);
         boolean noDirectionChange = !hasDirectionChange(element);
@@ -58,7 +57,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
             isInLeadingCompetitors = isInLeadingCompetitors(element.getRace(), element.getCompetitor(),
                     pctOfLeadingCompetitorsToInclude);
         }
-        return (importantDataIsNotNull && hasLegType && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
+        return (importantDataIsNotNull && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
     }
     
     private boolean importantDataIsNotNull(GPSFixMovingWithPolarContext element) {
@@ -70,10 +69,6 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
             result = true;
         }
         return result;
-    }
-
-    private boolean hasLegType(GPSFixMovingWithPolarContext element) {
-        return element.getLegType() != null;
     }
     
     public static boolean isInLeadingCompetitors(TrackedRace trackedRace, Competitor competitor, double numberOfLeadingCompetitorsToInclude) {

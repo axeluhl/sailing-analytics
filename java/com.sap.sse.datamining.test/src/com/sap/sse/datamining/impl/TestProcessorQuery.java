@@ -16,6 +16,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -53,9 +55,9 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestProcessorQuery {
     
-    private final static ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
-    
-    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
+    private static final Logger LOGGER = Logger.getLogger(TestProcessorQuery.class.getSimpleName());
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
+    private static final ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
@@ -200,6 +202,7 @@ public class TestProcessorQuery {
             fail("The previous line should throw a timeout exception");
         } catch (TimeoutException e) {
             // A timeout exception is expected
+            LOGGER.log(Level.INFO, "The query timed out: ", e);
         }
         assertThat(query.getState(), is(QueryState.TIMED_OUT));
         
@@ -321,7 +324,7 @@ public class TestProcessorQuery {
     }
     
     @Test
-    public void testQueryWithSevereFailure() {
+    public void testQueryWithError() {
         Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
             @SuppressWarnings("unchecked")
             @Override
@@ -351,10 +354,11 @@ public class TestProcessorQuery {
             query.run();
             fail("The previous line should throw a runtime exception");
         } catch (RuntimeException e) {
-            // A RuntimeException wiht a RejectedExecitonException is expected
+            // A RuntimeException with a RejectedExecitonException as cause is expected
             if (!(e.getCause() instanceof RejectedExecutionException)) {
                 throw e;
             }
+            LOGGER.log(Level.INFO, "The query had an error: ", e);
         }
         assertThat(query.getState(), is(QueryState.ERROR));
     }
