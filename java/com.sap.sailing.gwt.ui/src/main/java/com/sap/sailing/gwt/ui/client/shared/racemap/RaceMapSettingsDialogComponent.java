@@ -136,7 +136,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));
             checkboxAndManeuverType.add(new Util.Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
             maneuverGrid.setWidget(currentRowIndex++, currentColumnIndex, checkbox);
-            if(currentRowIndex >= gridRowsRequired) {
+            if (currentRowIndex >= gridRowsRequired) {
                 currentColumnIndex = 1;
                 currentRowIndex = 0; 
             }
