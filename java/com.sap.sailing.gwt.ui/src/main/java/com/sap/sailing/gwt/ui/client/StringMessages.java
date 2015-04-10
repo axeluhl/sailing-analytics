@@ -358,6 +358,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String waypoint();
     String showAllCompetitors();
     String boatTails();
+    String startFirstMarkTriangle();
     String resultImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
@@ -753,6 +754,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String protestEndsAt();
     String unknown();
     String raceLog();
+    String regattaLog();
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
@@ -850,6 +852,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noCustomGrouperScriptTextError();
     String noDimensionToGroupBySelectedError();
     String noGrouperSelectedError();
+    String noDataRetrieverChainDefinitonSelectedError();
     String windImport_Upload();
     String windImport_Title();
     String windImport_BoatId();
@@ -1090,6 +1093,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
     String mediaHideVideoCaption();
@@ -1120,6 +1124,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorCommunicatingWithServer();
     String userManagement();
     String structureImportUrls();
+    String filteredBy();
     String filterBy();
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
@@ -1143,12 +1148,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointEssOverallDescription();
     String timeBetweenRaceStartAndCompetitorStartInSeconds();
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
+    String useInternalAlgorithm();
+    String editMarkPassings();
+    String removeFixedPassings();
+    String setFixedPassing();
+    String setSuppressedPassing();
+    String removeSuppressedPassing();
+    String errorRemovingFixedPassing(String message);
+    String errorSettingFixedPassing(String message);
+    String errorSuppressingPassing(String message);
+    String errorRemovingSupressedPassing(String message);
+    String errorTryingToObtainMarkPassing(String message);
+    String errorTryingToObtainRaceLogMarkPassingData(String message);
     String email();
     String pleaseEnterAnEmail();
     String inviteCompetitors();
     String notAllCompetitorsProvideEmail();
     String sendingMailsFailed();
-    String sendingMailsSuccessfull();
+    String sendingMailsSuccessful();
     String selectEventForInvitation();
     String imageURL();
     String upload();
@@ -1157,4 +1174,44 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String fileUploadResult(JSONValue status, JSONValue message);
     String showCompetitorSailIdColumn();
     String showCompetitorFullNameColumn();
+    String loadingDimensionValues();
+    String runningQuery();
+    String inviteBuoyTenders();
+    String orMultipleEmails();
+    String courseOverGroundTrueDegreesTooltip();
+    String courseOverGroundTrueDegrees();
+    String distanceIncludingGateStartInMeters();
+    String distanceTraveledIncludingGateStartTooltip();
+    String raceDistanceTraveledIncludingGateStartTooltip();
+    String results();
+    String group();
+    String valueAscending();
+    String valueDescending();
+    String sortBy();
+    
+    String dashboardWindBotLoading();
+    String dashboardWindBotNotAvailable();
+    String dashboardWindBot();
+    String dashboardTrueWindSpeed();
+    String dashboardTrueWindDirection();
+    String dashboardTrueWindSpeedUnit();
+    String dashboardTrueWindDirectionUnit();
+    String dashboardLiveWind();
+    String dashboardAverageWind();
+    String dashboardAverageWindMinutes(int minutes);
+    String dashboardWindChartHint();
+    
+    String dashboardNewStartAnalysisAvailable();
+    
+    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantageByGeometry();
+    String dashboardRankAtFirstMark();
+    String dashboardTeam();
+    String dashboardDistanceToLineInM();
+    String dashboardSpeedInKts();
+    String fixedMarkPassing();
+    String suppressedMarkPassing();
+    String currentFilterSelection();
+    String notCapableOfGeneratingACodeForIdentifier();
+    String serverUrl();
 }

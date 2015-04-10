@@ -27,7 +27,4 @@ public class GPSFixMovingWithOriginInfo {
     public Competitor getCompetitor() {
         return competitor;
     }
-    
-    
-
 }

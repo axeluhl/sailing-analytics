@@ -248,26 +248,26 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException,
             SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), domainFactory, paramURL, liveURI,
                 storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                simulateWithStartTimeNow, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
+                simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
                 tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(IRace tractracRace, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
+            long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
         this(tractracRace, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, regattaLogStore, windStore,
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
                 gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
     }
     
@@ -279,14 +279,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
+            long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException,
             MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), regatta, domainFactory, paramURL,
                 liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                simulateWithStartTimeNow, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
+                simulateWithStartTimeNow, ignoreTracTracMarkPassings, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
                 tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
     }
     
@@ -303,7 +303,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
+            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
@@ -398,7 +398,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, tractracRace, tracTracUpdateURI,
-                tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber)) {
+                tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber, useInternalMarkPassingAlgorithm)) {
             receivers.add(receiver);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -510,8 +510,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     receiver.stopAfterProcessingQueuedEvents();
                 }
             }
-            lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
-            updateStatusOfTrackedRaces();
+            if (!stopReceiversPreemtively) {
+                // wait for their queues to be worked down before signalling the FINISHED state.
+                new AbstractLoadingQueueDoneCallBack(receivers) {
+                    @Override
+                    protected void executeWhenAllReceiversAreDoneLoading() {
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                        updateStatusOfTrackedRaces();
+                    }
+                };
+            } else {
+                // queues contents were cleared preemptively; this means we're done with loading immediately
+                lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                updateStatusOfTrackedRaces();
+            }
         }
     }
 
@@ -577,7 +589,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             } 
         }
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
-        lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
+        if (progress==1.0) {
+            new AbstractLoadingQueueDoneCallBack(receivers) {
+                @Override
+                protected void executeWhenAllReceiversAreDoneLoading() {
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+                    updateStatusOfTrackedRaces();
+                }
+            };
+        }
         lastProgressPerID.put(getID(), new Util.Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
@@ -620,21 +641,29 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void stopped(Object o) {
-        logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
-        updateStatusOfTrackedRaces();
-        if (!stopped) {
-            try {
-                for (RaceDefinition race : getRaces()) {
-                    // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
-                    // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
-                    // at this point without missing any data.
-                    trackedRegattaRegistry.stopTracking(regatta, race);
+        logger.info("stopped TracTrac tracking in tracker " + getID() + " for " + getRaces() + " while in status "
+                + lastStatus);
+        new AbstractLoadingQueueDoneCallBack(receivers) {
+            @Override
+            protected void executeWhenAllReceiversAreDoneLoading() {
+                lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+                updateStatusOfTrackedRaces();
+                if (!stopped) {
+                    try {
+                        for (RaceDefinition race : getRaces()) {
+                            // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
+                            // TracAPI then
+                            // all subscriptions have received all their data and it's therefore safe to stop all
+                            // subscriptions
+                            // at this point without missing any data.
+                            trackedRegattaRegistry.stopTracking(regatta, race);
+                        }
+                    } catch (InterruptedException | IOException e) {
+                        logger.log(Level.INFO, "Interrupted while trying to stop tracker " + this, e);
+                    }
                 }
-            } catch (InterruptedException | IOException e) {
-                logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
             }
-        }
+        };
     }
 
     @Override

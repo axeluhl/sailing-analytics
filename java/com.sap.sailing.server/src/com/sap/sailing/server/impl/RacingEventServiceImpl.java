@@ -13,8 +13,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,6 +45,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -85,11 +88,13 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -124,11 +129,13 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -143,6 +150,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.polars.PolarDataService;
@@ -369,6 +377,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
             .withInitial(() -> false);
+    
+    private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
+    
+    private final JoinedClassLoader joinedClassLoader;
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -446,6 +458,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             CompetitorStore competitorStore, WindStore windStore, GPSFixStore gpsFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
+        this.masterDataClassLoaders.add(this.getClass().getClassLoader());
+        joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         this.operationsSentToMasterForReplication = new HashSet<>();
         if (windStore == null) {
             try {
@@ -967,6 +981,83 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
+    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
+        GPSFixTrack<Mark, GPSFix> track = null;
+        // If no spanning track is found, the fix closest to the time point requested is used instead
+        GPSFix nonSpanningFallback = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
+            if (trackCandidate != null) {
+                if (spansTimePoint(trackCandidate, timePoint)) {
+                    track = trackCandidate;
+                    break;
+                } else {
+                    nonSpanningFallback = improveTimewiseClosestFix(nonSpanningFallback, trackCandidate, timePoint);
+                }
+            }
+        }
+        if (track == null) { // no spanning track found in any tracked race, or no tracked races found
+            // try to load from store
+            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
+            track = loadedTrack;
+            Set<AbstractLog<?, ?>> logs = new HashSet<>();
+            logs.add(leaderboard.getRegattaLike().getRegattaLog());
+            if (raceLog == null) { // no race log explicitly provided --> use all race logs
+                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        logs.add(raceColumn.getRaceLog(fleet));
+                    }
+                }
+            } else {
+                logs.add(raceLog);
+            }
+            for (AbstractLog<?, ?> log : logs) {
+                try {
+                    getGPSFixStore().loadMarkTrack(loadedTrack, log, mark);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Couldn't load mark track for mark " + mark + " from log " + log, e);
+                }
+            }
+        }
+        Position result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        if (result == null) {
+            result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
+        }
+        return result;
+    }
+
+    private GPSFix improveTimewiseClosestFix(GPSFix nonSpanningFallback, GPSFixTrack<Mark, GPSFix> track, final TimePoint timePoint) {
+        GPSFix lastAtOrBefore = track.getLastFixAtOrBefore(timePoint);
+        GPSFix firstAtOrAfter = track.getFirstFixAtOrAfter(timePoint);
+        // find the fix closes to timePoint, sorting null values to the end and fixes near timePoint to the beginning
+        final List<GPSFix> list = Arrays.asList(nonSpanningFallback, lastAtOrBefore, firstAtOrAfter);
+        list.sort(new Comparator<GPSFix>() {
+            @Override
+            public int compare(GPSFix o1, GPSFix o2) {
+                final int result;
+                if (o1 == null) {
+                    if (o2 == null) {
+                        result = 0;
+                    } else {
+                        result = 1;
+                    }
+                } else if (o2 == null) {
+                    result = -1;
+                } else {
+                    result = new Long(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
+                            Math.abs(o2.getTimePoint().until(timePoint).asMillis()));
+                }
+                return result;
+            }
+        });
+        return list.get(0);
+    }
+
+    private boolean spansTimePoint(GPSFixTrack<Mark, GPSFix> track, TimePoint timePoint) {
+        return track.getLastFixAtOrBefore(timePoint) != null && track.getFirstFixAtOrAfter(timePoint) != null;
+    }
+
+    @Override
     public Map<String, Leaderboard> getLeaderboards() {
         return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
     }
@@ -1356,12 +1447,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null);
+                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -1450,6 +1541,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
             polarDataService.competitorPositionChanged(fix, item, race);
         }
+        
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING
+                    && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                polarDataService.raceFinishedLoading(race);
+            }
+        }
 
     }
 
@@ -1522,7 +1621,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             replicate(new UpdateTrackedRaceStatus(getRaceIdentifier(), newStatus));
         }
 
@@ -2191,6 +2290,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+    }
+    
+    @Override
+    public ClassLoader getDeserializationClassLoader() {
+        return joinedClassLoader;
     }
 
     @Override
@@ -2994,5 +3098,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return null;
         }
         return bundleContext.getService(ref);
+    }
+
+    public void addMasterDataClassLoader(ClassLoader classLoader) {
+        masterDataClassLoaders.add(classLoader);
+    }
+
+    public void removeMasterDataClassLoader(ClassLoader classLoader) {
+        masterDataClassLoaders.remove(classLoader);
+    }
+    
+    @Override
+    public ClassLoader getCombinedMasterDataClassLoader() {
+        JoinedClassLoader joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
+        return joinedClassLoader;
     }
 }

@@ -169,7 +169,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) {
         return 0;
     }
 
@@ -210,91 +210,73 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void waitForNextUpdate(int sinceUpdate) throws InterruptedException {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public TimePoint getStartOfTracking() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public TimePoint getEndOfTracking() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public TimePoint getTimePointOfNewestEvent() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public TimePoint getTimePointOfOldestEvent() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void lockForRead(Iterable<MarkPassing> markPassings) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public TimePoint getTimePointOfLastEvent() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public long getMillisecondsOverWhichToAverageSpeed() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public long getDelayToLiveInMillis() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public Wind getEstimatedWindDirection(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
     
     @Override
     public Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -305,328 +287,300 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Wind getDirectionFromStartToNextMark(TimePoint at) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean raceIsKnownToStartUpwind() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean hasWindData() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean hasGPSData() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void addListener(RaceChangeListener listener) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
             boolean notifyAboutGPSFixesAlreadyLoaded) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void removeListener(RaceChangeListener listener) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
             throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Set<WindSource> getWindSourcesToExclude() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Set<WindSource> windSourcesToExclude) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalysis) throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
             boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public WindStore getWindStore() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return null;
     }
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalyses) throws NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public TrackedRaceStatus getStatus() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void waitUntilNotLoading() {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void detachRaceLog(Serializable identifier) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void detachAllRaceLogs() {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public RaceLog getRaceLog(Serializable identifier) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean isLive(TimePoint at) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public Iterable<Sideline> getCourseSidelines() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
-        // TODO Auto-generated method stub
         return null;
     }
     
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public TimePoint getStartTimeReceived() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public LineDetails getStartLine(TimePoint at) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public LineDetails getFinishLine(TimePoint at) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getCourseLength() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public GPSFixStore getGPSFixStore() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public Position getCenterOfCourse(TimePoint at) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
-        // TODO Auto-generated method stub
-        
     }
 
+    @Override
+    public Boolean isGateStart() {
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return null;
+    }
+
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
+
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

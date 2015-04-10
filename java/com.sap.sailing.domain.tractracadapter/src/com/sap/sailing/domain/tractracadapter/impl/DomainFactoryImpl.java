@@ -47,7 +47,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -402,7 +401,7 @@ public class DomainFactoryImpl implements DomainFactory {
             WindStore windStore, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI,
             String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber,
-            IRaceSubscriber raceSubscriber, ReceiverType... types) {
+            IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, ReceiverType... types) {
         IEvent tractracEvent = tractracRace.getEvent();
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
@@ -411,7 +410,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new RaceCourseReceiver(this, trackedRegatta, tractracEvent, tractracRace,
                         windStore, raceDefinitionSetToUpdate,
                         delayToLiveInMillis, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator,
-                        courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber));
+                        courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber, useInternalMarkPassingAlgorithm));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -422,7 +421,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta, tractracEvent, this, simulator, eventSubscriber, raceSubscriber));
                 break;
             case MARKPASSINGS:
-                if (Activator.getInstance().isUseTracTracMarkPassings()) {
+                if (!useInternalMarkPassingAlgorithm) {
                     result.add(new MarkPassingReceiver(trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber));
                 }
                 break;
@@ -440,9 +439,10 @@ public class DomainFactoryImpl implements DomainFactory {
             long delayToLiveInMillis, Simulator simulator, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, IRace tractracRace,
             URI courseDesignUpdateURI, String tracTracUsername, 
-            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm) {
         return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
-                raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
+                raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername,
+                tracTracPassword, eventSubscriber, raceSubscriber, useInternalMarkPassingAlgorithm,
                 ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
                 ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
@@ -505,7 +505,7 @@ public class DomainFactoryImpl implements DomainFactory {
             String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
+            URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
@@ -520,7 +520,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
                     trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, EmptyGPSFixStore.INSTANCE,
-                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
                     addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
                             raceDefinition, trackedRace);
@@ -533,9 +533,6 @@ public class DomainFactoryImpl implements DomainFactory {
                 }
             } else {
                 logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
-            }
-            if (!Activator.getInstance().isUseTracTracMarkPassings()) {
-                new MarkPassingCalculator(trackedRace, true);
             }
             return trackedRace;
         }
@@ -559,11 +556,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines, WindStore windStore, GPSFixStore gpsFixStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator) {
         return trackedRegatta.createTrackedRace(race, sidelines,
                 windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate);
+                raceDefinitionSetToUpdate, useMarkPassingCalculator);
     }
     
     @Override
@@ -638,26 +635,26 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, regattaLogStore, windStore,
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
                 gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore,
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry);
     }
@@ -675,11 +672,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
+            long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore,
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility);
     }
 

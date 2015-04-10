@@ -19,7 +19,10 @@ import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtrac
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMaxAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMinAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.components.AggregatorType;
@@ -54,6 +57,12 @@ public class ProcessorFactory {
                 return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMedianAggregationProcessor(executor, specificResultReceivers);
             case Sum:
                 return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataSumAggregationProcessor(executor, specificResultReceivers);
+            case Maximum:
+                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMaxAggregationProcessor(executor, specificResultReceivers);
+            case Minimum:
+                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMinAggregationProcessor(executor, specificResultReceivers);
+            case Count:
+                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDataCountAggregationProcessor(executor, specificResultReceivers);
             default:
                 throw new IllegalArgumentException("No aggregation processor implemented for the aggregation type '"
                         + aggregatorType + "'");

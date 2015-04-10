@@ -985,6 +985,37 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(29 /* two wins, one second */, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[3], later), 0.000000001);
     }
 
+    @Test
+    public void testOverallLeaderboardWithESSHighPointScoringWithTwoCompetitorsHavingWonTheSameNumberOfRegattas() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f2 = new Competitor[] { c[0], c[2], c[1], c[3] };
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Regatta 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new HighPointFirstGets10Or8AndLastBreaksTie(), null);
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f1)), "R1", /* medalRace */
+                false);
+        assertTrue(leaderboard1.getTotalPoints(c[2], later) > leaderboard1.getTotalPoints(c[0], later)); // c2 better than c[0]
+        assertEquals(10.0, leaderboard1.getTotalPoints(c[2], later), 0.1);
+        assertEquals(9.0, leaderboard1.getTotalPoints(c[0], later), 0.1);
+        FlexibleLeaderboard leaderboard2 = new FlexibleLeaderboardImpl("Regatta 2", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new HighPointFirstGets10Or8AndLastBreaksTie(), null);
+        leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f2)), "R1", /* medalRace */
+                false);
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", /* displayName */ null, false, Arrays.asList(leaderboard1,
+                leaderboard2));
+        leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
+        List<Competitor> rankedCompetitors = leaderboardGroup.getOverallLeaderboard().getCompetitorsFromBestToWorst(later);
+        assertEquals(4, rankedCompetitors.size());
+        assertEquals(19, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[0], later), 0.000000001);
+        assertEquals(19, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[2], later), 0.000000001);
+        assertEquals(16, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[1], later), 0.000000001);
+        assertEquals(14, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[3], later), 0.000000001);
+        assertEquals(c[0], rankedCompetitors.get(0));
+        assertEquals(c[2], rankedCompetitors.get(1));
+    }
     @Test 
     public void testHighPointScoringEightWithInterpolationWhenFleetNotComplete() throws NoWindException {
         int competitorsCount = 21;

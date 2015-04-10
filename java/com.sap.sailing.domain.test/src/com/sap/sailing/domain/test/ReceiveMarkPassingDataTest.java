@@ -21,6 +21,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
@@ -88,6 +89,10 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     }
                 });
             }
+
+            @Override
+            public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {    
+            }
         };
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
@@ -102,7 +107,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     }
                 }, /* trackedRegattaRegistry */null,
                 /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
-                getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }

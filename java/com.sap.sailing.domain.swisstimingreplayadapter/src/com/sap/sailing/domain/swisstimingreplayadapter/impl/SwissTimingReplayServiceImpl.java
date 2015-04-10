@@ -143,8 +143,8 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     }
 
     @Override
-    public void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry) {
-        SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory, trackedRegattaRegistry);
+    public void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm) {
+        SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm);
         loadRaceData(link, listener);
     }
 }

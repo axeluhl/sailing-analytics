@@ -43,8 +43,10 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
@@ -356,7 +358,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+    public TimeRange getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
         if (fix == null) {
             throw new IllegalArgumentException("fix must not be null");
         }
@@ -393,7 +395,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     end = fixesForPositionEstimation.getB().getTimePoint();
                 }
             }
-            return new Util.Pair<TimePoint, TimePoint>(start, end);
+            return new TimeRangeImpl(start, end);
         } finally {
             unlockAfterRead();
         }
@@ -1033,8 +1035,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 while (!result && next.compareTo(end) <= 0) {
                     SpeedWithBearing estimatedSpeedAtNext = getEstimatedSpeed(next);
                     if (estimatedSpeedAtNext != null) {
-                        Bearing bearingAtEnd = estimatedSpeedAtNext.getBearing();
-                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+                        Bearing bearingAtNext = estimatedSpeedAtNext.getBearing();
+                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtNext).getDegrees()) > minimumDegreeDifference;
                     }
                     next = new MillisecondsTimePoint(next.asMillis()
                             + Math.max(1000l, getMillisecondsOverWhichToAverageSpeed() / 2));
@@ -1091,5 +1093,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
             listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
         }
+    }
+    
+    public static Speed getDefaultMaxSpeedForSmoothing() {
+        return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
     }
 }

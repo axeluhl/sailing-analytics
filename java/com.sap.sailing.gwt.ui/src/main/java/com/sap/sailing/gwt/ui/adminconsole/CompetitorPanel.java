@@ -61,10 +61,7 @@ public class CompetitorPanel extends SimplePanel {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
-        final Class<?> selectionModelType = MultiSelectionModel.class;
-        @SuppressWarnings("unchecked")
-        final Class<MultiSelectionModel<CompetitorDTO>> multiSelectionType = (Class<MultiSelectionModel<CompetitorDTO>>) selectionModelType;
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, multiSelectionType, false);
+        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false);
         this.competitorSelectionModel = competitorTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -298,7 +295,7 @@ public class CompetitorPanel extends SimplePanel {
 
                             @Override
                             public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                                Window.alert(stringMessages.sendingMailsSuccessful());
                             }
                         });
             }

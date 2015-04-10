@@ -85,5 +85,11 @@ public class PolarChart implements ResultsPresenter<Number> {
         // TODO Auto-generated method stub
 
     }
+    
+    @Override
+    public void showBusyIndicator() {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
@@ -149,6 +151,16 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     
     @Override
     public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(FixedMarkPassingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
         notifyOnAdd(event);
     }
 

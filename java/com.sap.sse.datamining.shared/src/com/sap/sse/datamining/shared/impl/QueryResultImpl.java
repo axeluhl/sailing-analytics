@@ -6,11 +6,13 @@ import java.util.Map;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResultState;
 import com.sap.sse.datamining.shared.Unit;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = 5173796619174827696L;
     
+    private QueryResultState state;
     private Map<GroupKey, AggregatedType> results;
     private AdditionalResultData additionalData;
     
@@ -20,13 +22,19 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Deprecated
     QueryResultImpl() { }
     
-    public QueryResultImpl(Map<GroupKey, AggregatedType> results) {
-        this(results, new NullAdditionalResultData());
+    public QueryResultImpl(QueryResultState state, Map<GroupKey, AggregatedType> results) {
+        this(state, results, new NullAdditionalResultData());
     }
     
-    public QueryResultImpl(Map<GroupKey, AggregatedType> results, AdditionalResultData additionalData) {
+    public QueryResultImpl(QueryResultState state, Map<GroupKey, AggregatedType> results, AdditionalResultData additionalData) {
+        this.state = state;
         this.results = new HashMap<GroupKey, AggregatedType>(results);
         this.additionalData = additionalData;
+    }
+    
+    @Override
+    public QueryResultState getState() {
+        return state;
     }
 
     @Override
@@ -52,6 +60,11 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Override
     public Unit getUnit() {
     	return additionalData.getUnit();
+    }
+    
+    @Override
+    public String getUnitSignifier() {
+        return additionalData.getUnitSignifier();
     }
 
     @Override

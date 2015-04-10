@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -31,6 +32,8 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -83,7 +86,6 @@ public interface TrackedRace extends Serializable {
      * <li>Returns time of the last mark passing recorded for the finish line</li>
      * <li>TODO: Returns the time of the first passing of the finish line + the target window (defined in the
      * competition rules) if a target window has been defined for the race</li>
-     * </ol>
      */
     TimePoint getEndOfRace();
 
@@ -147,6 +149,13 @@ public interface TrackedRace extends Serializable {
     TrackedLeg getCurrentLeg(TimePoint timePoint);
 
     /**
+     * Tells the number of the last started leg at <code>timePoint</code>
+     * The leg number is 0 before the start, the number of the current leg during the race
+     * and the number of the last leg at the end of the race even if the race has finished. 
+     */
+    int getLastLegStarted(TimePoint timePoint);
+    
+    /**
      * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
      */
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
@@ -196,7 +205,7 @@ public interface TrackedRace extends Serializable {
      * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting with
      *         <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
-    int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    int getRank(Competitor competitor, TimePoint timePoint);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
@@ -220,8 +229,18 @@ public interface TrackedRace extends Serializable {
     /**
      * Yields the track describing <code>mark</code>'s movement over time; never <code>null</code> because a new track
      * will be created in case no track was present for <code>mark</code> so far.
+     * 
+     * @see #getTrack(Mark)
      */
     GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
+    
+    /**
+     * Yields the track describing <code>mark</code>'s movement over time; <code>null</code> if no track exists for
+     * <code>mark</code> so far.
+     * 
+     * @see #getOrCreateTrack(Mark)
+     */
+    GPSFixTrack<Mark, GPSFix> getTrack(Mark mark);
 
     /**
      * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
@@ -473,6 +492,11 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
+    /**
+     * See {@link TrackedLegOfCompetitor#getDistanceTraveledConsideringGateStart(TimePoint)}
+     */
+    Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
+
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
@@ -550,7 +574,7 @@ public interface TrackedRace extends Serializable {
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will
@@ -719,5 +743,28 @@ public interface TrackedRace extends Serializable {
      * Computes the center point of the course's marks at the given time point.
      */
     Position getCenterOfCourse(TimePoint at);
+
+    /**
+     * If the {@link RacingProcedure} defined by any of the {@link #attachedRaceLogs attached} {@link RaceLog}s
+     * has type {@link RacingProcedureType#GateStart}, this method returns <code>true</code>, <code>false</code> for
+     * any other type found. If no type is found, e.g., because no race log is currently attached to this tracked race,
+     * <code>null</code> is returned, meaning that the type is not known.
+     */
+    Boolean isGateStart();
+    
+    /**
+     * Returns the time in milliseconds when the line was closed with lowering flag {@link Flags#GOLF} if {@link #isGateStart()} is <code>true</code>.
+     * If flag was not raised or {@link #isGateStart()} is <code>false</code> it returns <code>null</code>. 
+     */
+    long getGateStartGolfDownTime();
+    
+    /**
+     * If the race was started with a gate start (see {@link #isGateStart()}, this method returns the distance between
+     * the competitor's starting position and the port side of the start line (pin end); otherwise, returns a zero
+     * distance.
+     */
+    Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
+
+    boolean isUsingMarkPassingCalculator();
 
 }

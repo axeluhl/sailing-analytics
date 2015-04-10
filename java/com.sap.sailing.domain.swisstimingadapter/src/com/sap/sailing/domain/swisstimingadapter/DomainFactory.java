@@ -62,7 +62,7 @@ public interface DomainFactory {
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore);
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);
 

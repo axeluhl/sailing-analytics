@@ -66,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
@@ -109,13 +110,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws Exception;
 
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
-            String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword) throws Exception;
+            String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
+            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, String tracTracUsername, String tracTracPassword) throws Exception;
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
-            boolean trackWind, boolean correctWindByDeclination) throws Exception;
+            boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) throws Exception;
     
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
-            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
+            boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm);
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception;
 
@@ -139,7 +141,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
     
-    Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier);
+    boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier);
 
     SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime);
 
@@ -397,6 +399,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
+    RegattaLogDTO getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
+
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
     UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
@@ -458,7 +462,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * 
      * @see RaceLogTrackingAdapter#startTracking
      */
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind, boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
     
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
@@ -477,7 +481,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
-    Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+    Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
     
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
@@ -492,6 +496,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
     
+    /**
+     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
+     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     */
     void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
             Set<Util.Triple<String, String, String>> raceLogsTo);
     
@@ -551,6 +559,23 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     PolarSheetsXYDiagramData createXYDiagramForBoatClass(String itemText);
 
+    Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
+
+    /**
+     * Obtains fixed mark passings and mark passing suppressions from the race log identified by
+     * <code>leaderboardName</code>, <code>raceColumnDTO</code> and <code>fleet</code>. The result contains
+     * pairs of zero-based waypoint numbers and times where <code>null</code> represents a suppressed mark
+     * passing and a valid {@link Date} objects represents a fixed mark passing.
+     */
+    Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            CompetitorDTO competitor);
+
+    void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
+
+    void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
+            Date dateOfMarkPassing, CompetitorDTO competitorDTO);
+
     void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitors)
             throws DoesNotHaveRegattaLogException;
     
@@ -577,4 +602,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
+
+    Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
+
+    void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
+            String emails, String localeInfoName) throws MailException;
+
 }

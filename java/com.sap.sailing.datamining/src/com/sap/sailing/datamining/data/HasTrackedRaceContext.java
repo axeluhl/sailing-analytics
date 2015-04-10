@@ -11,6 +11,9 @@ import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public interface HasTrackedRaceContext {
     
+    @Connector(scanForStatistics=false)
+    public HasLeaderboardContext getLeaderboardContext();
+    
     public TrackedRace getTrackedRace();
     
     @Connector(messageKey="Regatta", ordinal=0)
@@ -30,5 +33,5 @@ public interface HasTrackedRaceContext {
     
     @Dimension(messageKey="Year", ordinal=2)
     public Integer getYear();
-
+    
 }

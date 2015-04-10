@@ -25,7 +25,6 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -48,6 +47,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -144,7 +144,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) {
         return 0;
     }
 
@@ -483,7 +483,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
                     WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator) {
                 return null;
             }
         };
@@ -821,18 +821,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
-    @Override
     public GPSFixStore getGPSFixStore() {
-        return null;
-    }
-
-    @Override
-    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
-        return null;
-    }
-
-    @Override
-    public Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         return null;
     }
 
@@ -872,14 +861,47 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void attachRegattaLog(RegattaLog regattaLog) {
+    public boolean isUsingMarkPassingCalculator() {
         // TODO Auto-generated method stub
-        
+        return false;
+    }
+
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
     }
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+    }
+
+    @Override
+    public Boolean isGateStart() {
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return null;
+    }
+
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
+
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
         // TODO Auto-generated method stub
-        
+        return 0;
     }
 }

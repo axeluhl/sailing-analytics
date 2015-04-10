@@ -19,7 +19,7 @@ public class RaceLogDefineMarkEventImpl extends RaceLogEventImpl implements Race
     public RaceLogDefineMarkEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, int pPassId, Mark mark) {
         super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);
-         this.mark = mark;
+        this.mark = mark;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,7 +16,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -42,6 +43,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, false /* default*/);
         final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_EMBEDDED, false /* default*/); 
@@ -140,7 +142,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-        final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
+        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         final LeaderboardSettings leaderboardSettings = LeaderboardSettings.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
@@ -174,8 +176,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         mainPanel.add(contentScrollPanel);
     }
    
-    private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
-        RaceIdentifier result;
+    private RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
+        RegattaAndRaceIdentifier result;
         if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1 &&
                 parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).size() == 1) {
             result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0), parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));

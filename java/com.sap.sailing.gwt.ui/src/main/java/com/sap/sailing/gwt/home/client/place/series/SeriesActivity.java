@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
@@ -97,7 +97,7 @@ public class SeriesActivity extends AbstractActivity {
         }
             
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-        final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
+        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
@@ -189,8 +189,8 @@ public class SeriesActivity extends AbstractActivity {
         return result;
     }
 
-    private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
-        RaceIdentifier result;
+    private RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
+        RegattaAndRaceIdentifier result;
         if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1 &&
                 parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).size() == 1) {
             result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0), parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));

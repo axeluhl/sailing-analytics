@@ -7,18 +7,12 @@
 		src='StartlineAnalysis.css'></ui:style>
 
 	<g:HTMLPanel ui:field="startanalysis_card" styleName="{style.startanalysis_card}">
-		<!-- <maps:MapWidget></maps:MapWidget> -->
 		<div class="{style.startanalysis_card_wind_line_data_container}">
-			<g:HTMLPanel ui:field="winddirection"
-				styleName="{style.startanalysis_card_wind_direction_image}">
-			</g:HTMLPanel>
-			<div ui:field="startanalysis_card_wind_data_direction"
-				class="{style.startanalysis_card_data} {style.startanalysis_card_wind_data_direction}"></div>
-			<div ui:field="startanalysis_card_wind_data_speed"
-				class="{style.startanalysis_card_data} {style.startanalysis_card_wind_data_speed}"></div>
 			<div ui:field="startanalysis_card_line_advantage"
 				class="{style.startanalysis_card_data} {style.startanalysis_card_line_advantage}"></div>
 		</div>
+		<div ui:field="startanalysis_card_race_time"
+				class="{style.startanalysis_card_race_time}">Time: 00:05:00</div>
 		<g:HTMLPanel ui:field="startanalysis_card_table"
 			styleName="{style.startanalysis_card_table}"></g:HTMLPanel>
 	</g:HTMLPanel>

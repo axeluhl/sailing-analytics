@@ -5,7 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalytics;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
@@ -34,7 +34,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesAnaly
     }
     
     public void createSeriesAnalyticsViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
+            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showSeriesLeaderboards) {
         seriesAnalytics.createSeriesAnalyticsViewer(sailingService, asyncActionsExecutor, timer, leaderboardSettings, preselectedLeaderboardName,

@@ -16,7 +16,7 @@ public class NullProcessor<InputType, ResultType> extends AbstractProcessor<Inpu
 
     @Override
     public void onFailure(Throwable failure) {
-
+        throw new RuntimeException("An error occured during the processing", failure);
     }
 
     @Override

@@ -9,13 +9,15 @@ Import-Package: com.sap.sailing.server,
  org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sailing.datamining,
  com.sap.sailing.datamining.data
-Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
+Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
- com.sap.sailing.datamining.shared;bundle-version="1.0.0",
- com.sap.sse.datamining;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.datamining.shared,
+ com.sap.sse.datamining,
+ com.sap.sse.datamining.shared,
  com.sap.sse,
- com.sap.sse.common
+ com.sap.sse.common,
+ org.eclipse.osgi,
+ com.sap.sailing.polars
 Bundle-ClassPath: .
 Bundle-Activator: com.sap.sailing.datamining.Activator
 Bundle-ActivationPolicy: lazy

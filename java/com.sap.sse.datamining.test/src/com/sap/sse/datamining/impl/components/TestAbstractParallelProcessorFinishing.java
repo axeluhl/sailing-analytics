@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,8 +37,18 @@ public class TestAbstractParallelProcessorFinishing {
 
     @Test
     public void testProcessFinishing() {
-        processor.processElement(1);
-        ConcurrencyTestsUtil.tryToFinishTheProcessorInAnotherThread(processor);
+        Thread worker = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                processor.processElement(1);
+                try {
+                    processor.finish();
+                } catch (InterruptedException e) {
+                    fail("The test was interrupted: " + e.getMessage());
+                }
+            }
+        });
+        worker.start();
         ConcurrencyTestsUtil.sleepFor(100); //Wait till the processor tries to finish
         assertThat(receiverWasToldToFinish, is(false));
         instructionIsWorking = false; //The processer should be able to finish after the instruction is done
@@ -54,20 +63,16 @@ public class TestAbstractParallelProcessorFinishing {
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
             }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
-            }
         };
     }
 
     private AbstractSimpleParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer, ?>> receivers) {
         return new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected Callable<Integer> createInstruction(Integer partialElement) {
-                return new Callable<Integer>() {
+            protected AbstractProcessorInstruction<Integer> createInstruction(Integer partialElement) {
+                return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
-                    public Integer call() {
+                    public Integer computeResult() {
                         while (instructionIsWorking) {
                             try {
                                 Thread.sleep(100);

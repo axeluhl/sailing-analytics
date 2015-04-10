@@ -133,13 +133,17 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private final Map<Competitor, Short> lastNextMark;
 
     private RaceStatus lastRaceStatus;
+    
+    private final boolean useInternalMarkPassingAlgorithm;
 
     /**
      * @param regatta
      *            the regatta to associate the race(s) received by the listener with, or <code>null</code> to force the
      *            use / creation of a default regatta per race
+     * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
      */
-    public SwissTimingReplayToDomainAdapter(Regatta regatta, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public SwissTimingReplayToDomainAdapter(Regatta regatta, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm) {
         this.regatta = regatta;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         racePerRaceID = new HashMap<>();
@@ -153,6 +157,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         windAtControlPoint = new HashMap<>();
         lastNextMark = new HashMap<>();
         this.domainFactory = domainFactory;
+        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
     }
 
     public Iterable<DynamicTrackedRace> getTrackedRaces() {
@@ -260,7 +265,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short trueWindDirectionInDegrees) {
         final List<String> markNames = new ArrayList<>();
         markNames.add(id1.trim());
-        if (id2 != null) {
+        if (id2 != null && !id2.trim().isEmpty()) {
             markNames.add(id2.trim());
         }
         final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(markNames);
@@ -282,25 +287,21 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     @Override
     public void trackersCount(short trackersCount) {
-        try {
-            RaceDefinition race = racePerRaceID.get(currentRaceID);
-            if (race == null) {
-                createRace();
-            } else {
-                Course course = race.getCourse();
-                try {
-                    // TODO: Does SwissTiming also deliver the passing side for course marks?
-                    List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
-                    for (ControlPoint cp : currentCourseDefinition) {
-                        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
-                    }
-                    course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
-                } catch (PatchFailedException e) {
-                    throw new RuntimeException(e);
+        RaceDefinition race = racePerRaceID.get(currentRaceID);
+        if (race == null) {
+            createRace();
+        } else {
+            Course course = race.getCourse();
+            try {
+                // TODO: Does SwissTiming also deliver the passing side for course marks?
+                List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
+                for (ControlPoint cp : currentCourseDefinition) {
+                    courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
                 }
+                course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
+            } catch (PatchFailedException e) {
+                throw new RuntimeException(e);
             }
-        } finally {
-            currentCourseDefinition = null;
         }
     }
 
@@ -315,7 +316,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null);
+                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm);
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
@@ -353,7 +354,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 trackedRace.recordFix(competitor, fix);
                 Course course = trackedRace.getRace().getCourse();
                 // record a mark passing, but not if the mark passing has happened longer than 30s before the race start
-                if (bestStartTimePerRaceID.get(currentRaceID) != null &&
+                if (!useInternalMarkPassingAlgorithm && bestStartTimePerRaceID.get(currentRaceID) != null &&
                         !bestStartTimePerRaceID.get(currentRaceID).after(
                                 raceTimePoint.plus(THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS)) &&
                                 (!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {

@@ -23,6 +23,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     private final QRCodeComposite qrCodeComposite;
     private final Widget baseWidget;
     private final Label error;
+    private final Label url;
 
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages) {
         this(qrCodeSize, stringMessages, QRCodeComposite.ERROR_CORRECTION_LEVEL_H);
@@ -46,7 +47,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
         });
         
         inputGrid = new Grid(1, 2);
-        inputGrid.setWidget(0, 0, new Label("Server URL:"));
+        inputGrid.setWidget(0, 0, new Label(stringMessages.serverUrl()+":"));
         inputGrid.setWidget(0, 1, serverBox);
         
         qrCodeComposite = new QRCodeComposite(qrCodeSize, errorCorrectionLevel);
@@ -54,12 +55,15 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
         error = new Label();
         error.setStyleName("errorLabel");
         
+        url = new Label();
+        
         VerticalPanel panel = new VerticalPanel();
         panel.add(inputGrid);
         panel.add(qrCodeComposite);
         panel.setCellHorizontalAlignment(qrCodeComposite, HasHorizontalAlignment.ALIGN_CENTER);
         panel.add(error);
-
+        panel.add(url);
+        
         baseWidget = panel;
     }
     
@@ -72,8 +76,10 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     
     public void generateQRCode() {
         try {
-            qrCodeComposite.generateQRCode(generateEncodedQRCodeContent());
+            String qrCodeUrl = generateEncodedQRCodeContent();
+            qrCodeComposite.generateQRCode(qrCodeUrl);
             error.setText("");
+            url.setText(qrCodeUrl);
         } catch (QRCodeURLCreationException e) {
             setError(e.getMessage());
         }
@@ -87,7 +93,13 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
         return serverUrl;
     }
     
+    protected void clear() {
+        qrCodeComposite.clearQRCode();
+        url.setText("");
+    }
+    
     protected void setError(String text) {
         error.setText(text);
+        qrCodeComposite.clearQRCode();
     }
 }

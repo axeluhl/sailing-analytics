@@ -9,6 +9,7 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
     private int retrievedDataAmount;
     private String resultSignifier;
     private Unit unit;
+    private String unitSignifier;
     private int valueDecimals;
     private long calculationTimeInNanos;
 
@@ -18,11 +19,12 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
     @Deprecated
     AdditionalResultDataImpl() { }
 
-    public AdditionalResultDataImpl(int retrievedDataAmount, String resultSignifier, Unit unit, int valueDecimals,
-            long calculationTimeInNanos) {
+    public AdditionalResultDataImpl(int retrievedDataAmount, String resultSignifier, Unit unit, String unitSignifier,
+            int valueDecimals, long calculationTimeInNanos) {
                 this.retrievedDataAmount = retrievedDataAmount;
                 this.resultSignifier = resultSignifier;
                 this.unit = unit;
+                this.unitSignifier = unitSignifier;
                 this.valueDecimals = valueDecimals;
                 this.calculationTimeInNanos = calculationTimeInNanos;
     }
@@ -45,6 +47,11 @@ public class AdditionalResultDataImpl implements AdditionalResultData {
     @Override
     public Unit getUnit() {
         return unit;
+    }
+    
+    @Override
+    public String getUnitSignifier() {
+        return unitSignifier;
     }
 
     @Override

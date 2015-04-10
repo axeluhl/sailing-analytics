@@ -33,7 +33,9 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
@@ -77,6 +79,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     private static final long serialVersionUID = -4397496421917807499L;
 
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+    
+    private static Duration RESOLUTION = Duration.ONE_SECOND;
 
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
 
@@ -613,10 +617,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         private void invalidateForNewWind(Wind wind, WindSource windSource) {
             WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
             // check what the next fixes before and after the one affected are; if they are further than the
-            // averagingInterval
-            // away, extend the invalidation interval accordingly because the entire span up to the next fix may be
-            // influenced
-            // by adding/removing a fix in a sparsely occupied track. See
+            // averagingInterval away, extend the invalidation interval accordingly because the entire span up
+            // to the next fix may be influenced by adding/removing a fix in a sparsely occupied track. See
             // WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
             long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
             final TimePoint timePoint = wind.getTimePoint();
@@ -664,7 +666,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the
             // cache
             // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
@@ -703,10 +705,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             // A mark position change can mean a leg type change. The interval over which the wind estimation is
             // affected
             // depends on how the GPS track computes the estimated mark position. Ask it:
-            Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark)
-                    .getEstimatedPositionTimePeriodAffectedBy(fix);
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
-            TimePoint endOfInvalidation = interval.getB();
+            TimeRange interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.from());
+            TimePoint endOfInvalidation = interval.to();
             scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
         }
     }
@@ -788,7 +789,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
          */
         private EstimatedWindFixesAsNavigableSet(TrackedRace trackedRace,
                 TimePoint from, TimePoint to) {
-            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, /* resolution in milliseconds */ 1000l);
+            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, RESOLUTION.asMillis());
         }
 
         @Override
@@ -815,4 +816,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     public void windDataReceived(WindImpl wind, WindSource realWindSource) {
         listener.windDataReceived(wind, realWindSource);
     }
+
+    @Override
+    public Duration getResolutionOutsideOfWhichNoFixWillBeReturned() {
+        return RESOLUTION;
+    }
+
 }

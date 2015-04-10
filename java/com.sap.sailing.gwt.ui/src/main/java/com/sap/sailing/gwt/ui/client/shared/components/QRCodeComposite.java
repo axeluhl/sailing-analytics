@@ -56,7 +56,9 @@ public class QRCodeComposite extends Composite {
     }-*/;
     
     public native void clearQRCode() /*-{
-        $wnd.qrcode.clear();
+        if ($wnd.qrcode != null){ //if exists
+            $wnd.qrcode.clear();
+        }
     }-*/;
     
     public native void generateQRCode(String content) /*-{

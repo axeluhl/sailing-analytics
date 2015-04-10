@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -39,6 +40,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -47,6 +49,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -99,6 +102,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
+    private EditMarkPassingsPanel editMarkPassingPanel;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -115,6 +119,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private boolean currentRaceHasBeenSelectedOnce;
     
     private final List<Component<?>> components;
+    private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
     /**
      * @param event
@@ -155,8 +160,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
+        raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier);
+        competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle());
         components.add(raceMap);
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
@@ -217,11 +223,17 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         componentsForSideBySideViewer.add(windChart);
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier,
+                stringMessages, competitorSelectionModel, errorReporter, timer);
+        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
+        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+        componentsForSideBySideViewer.add(editMarkPassingPanel);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, componentsForSideBySideViewer, stringMessages);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
+                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel);
         components.addAll(componentsForSideBySideViewer);
         mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
         boolean showLeaderboard = getConfiguration().isShowLeaderboard();
@@ -348,6 +360,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
+        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboard);
     }
 
     @Override
