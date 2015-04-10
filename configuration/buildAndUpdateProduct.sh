@@ -655,7 +655,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
             echo "Waiting for startup..."
             adb wait-for-device
-            sleep 10
+            sleep 60
             $PROJECT_HOME/configuration/androidWaitForEmulator.sh
             if [[ $? != 0 ]]; then
                 adb emu kill
