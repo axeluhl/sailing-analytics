@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.tracking.GPSFix;
 
 /**
  * Importer for extracting GPS fixes from an {@link InputStream}. Importers are picked up via the OSGi service registry,

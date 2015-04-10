@@ -16,6 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -54,8 +55,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
 
-    public WindFieldCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams) {
-        super(map, zIndex);
+    public WindFieldCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.timer = timer;
         this.windParams = windParams;
         
@@ -65,8 +66,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         timePointWindDTOMap = new TreeMap<Long, List<SimulatorWindDTO>>();
     }
 
-    public WindFieldCanvasOverlay(MapWidget map, int zIndex) {
-        this(map, zIndex, null, null);
+    public WindFieldCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, null, null, coordinateSystem);
     }
 
     public void setWindField(final WindFieldDTO windFieldDTO) {
