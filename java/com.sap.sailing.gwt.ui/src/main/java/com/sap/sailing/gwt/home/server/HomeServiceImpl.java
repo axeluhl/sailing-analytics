@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,14 +31,13 @@ import com.sap.sailing.gwt.home.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
@@ -62,6 +61,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         BundleContext context = Activator.getDefault();
         
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+    }
+    
+    private SailingServiceImpl getSailingService() {
+        return SailingServiceImpl.getInstance();
     }
 
     protected RacingEventService getService() {
@@ -92,7 +95,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
+            result.add(getSailingService().convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
         }
         return result;
     }

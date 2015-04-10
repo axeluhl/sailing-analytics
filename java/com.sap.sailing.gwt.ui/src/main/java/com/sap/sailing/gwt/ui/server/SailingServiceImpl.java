@@ -507,7 +507,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final QuickRanksLiveCache quickRanksLiveCache;
     
+    private static SailingServiceImpl instance;
+    
     public SailingServiceImpl() {
+        instance = this;
+        
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
         if (context != null) {
@@ -561,6 +565,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+    }
+    
+    public static SailingServiceImpl getInstance() {
+        return instance;
     }
     
     /**
@@ -3157,7 +3165,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withGeoLocationData, false);
     }
 
-    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData, boolean withStatisticalData) {
+    public LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData, boolean withStatisticalData) {
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO(leaderboardGroup.getId(), leaderboardGroup.getName(),
                 leaderboardGroup.getDisplayName(), leaderboardGroup.getDescription());
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
