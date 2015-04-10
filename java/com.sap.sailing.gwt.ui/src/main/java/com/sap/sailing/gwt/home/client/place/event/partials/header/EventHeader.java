@@ -169,11 +169,11 @@ public class EventHeader extends Composite {
     private void initTitleAndSelection(String nameToShow) {
         if(!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
-            LabelTypeUtil.renderLabelType(eventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
+            LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
-            LabelTypeUtil.renderLabelType(dropdownEventState, event.getState().getStateMarker());
+            LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
             hide(staticTitle);
             
             initDropdown();
