@@ -1184,7 +1184,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private boolean autoZoomInProgress;
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
-        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)){
+        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)) {
             LatLng windwardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
             LatLng leewardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(1).latDeg, courseDTO.startMarkPositions.get(1).lngDeg);
             LatLng firstMarkPoint = LatLng.newInstance(courseDTO.waypointPositions.get(1).latDeg, courseDTO.waypointPositions.get(1).lngDeg);
@@ -1223,6 +1223,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 leewardStartLineMarkToFirstMarkLine.getPath().removeAt(0);
                 leewardStartLineMarkToFirstMarkLine.getPath().insertAt(0, leewardStartLinePoint);
                 leewardStartLineMarkToFirstMarkLine.getPath().insertAt(1, firstMarkPoint);
+            }
+        } else {
+            if (windwardStartLineMarkToFirstMarkLine != null) {
+                windwardStartLineMarkToFirstMarkLine.setMap(null);
+                windwardStartLineMarkToFirstMarkLine = null;
+            }
+            if (leewardStartLineMarkToFirstMarkLine != null) {
+                leewardStartLineMarkToFirstMarkLine.setMap(null);
+                leewardStartLineMarkToFirstMarkLine = null;
             }
         }
     }
