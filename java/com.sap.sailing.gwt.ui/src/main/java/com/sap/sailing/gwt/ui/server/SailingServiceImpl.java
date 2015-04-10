@@ -5716,7 +5716,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Date now = new Date();
         Date startDate = regatta.getStartDate();
         Date endDate = regatta.getEndDate();
-        if(now.compareTo(startDate) < 0) {
+        if(startDate != null && now.compareTo(startDate) < 0) {
             return RegattaState.UPCOMING;
         }
         if(endDate != null && now.compareTo(endDate) > 0) {
