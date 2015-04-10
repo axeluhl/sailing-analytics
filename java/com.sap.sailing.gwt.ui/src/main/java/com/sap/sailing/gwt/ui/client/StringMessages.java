@@ -1215,4 +1215,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();
     String serverUrl();
+    String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
 }

@@ -4,7 +4,10 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl.CompactPosition;
 
 public final class CompactWindImpl {
@@ -23,8 +26,9 @@ public final class CompactWindImpl {
         public static CompactPosition instantiate(SerializationStreamReader streamReader) throws SerializationException {
             final double latDeg = streamReader.readDouble();
             final double lngDeg = streamReader.readDouble();
-            return (CompactPosition) new com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl(
-                    new DegreePosition(latDeg, lngDeg), /* timePoint */null).getPosition();
+            return (CompactPosition) new com.sap.sailing.domain.common.tracking.impl.CompactWindImpl(new WindImpl(
+                    new DegreePosition(latDeg, lngDeg), /* timePoint */null, new KnotSpeedWithBearingImpl(0,
+                            new DegreeBearingImpl(0)))).getPosition();
         }
 
         @Override
