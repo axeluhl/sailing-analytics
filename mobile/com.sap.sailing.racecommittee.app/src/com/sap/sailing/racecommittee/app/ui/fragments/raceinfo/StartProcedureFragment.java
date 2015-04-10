@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class StartProcedureFragment extends BaseFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
 
-    private final static String STARTMODE = "startMode";
+    private final static String START_MODE = "startMode";
 
     private final ArrayList<StartProcedure> startProcedure = new ArrayList<>();
 
@@ -30,7 +30,7 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
     public static StartProcedureFragment newInstance(int startMode) {
         StartProcedureFragment fragment = new StartProcedureFragment();
         Bundle args = new Bundle();
-        args.putInt(STARTMODE, startMode);
+        args.putInt(START_MODE, startMode);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,7 +58,7 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
+            switch (getArguments().getInt(START_MODE, 0)) {
                 case 1:
                     if (getView() != null) {
                         View header = getView().findViewById(R.id.header);
@@ -106,14 +106,14 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
     public void onClick(RacingProcedureType procedureType, String className) {
         getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         if (TextUtils.isEmpty(className)) {
-            if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                 openMainScheduleFragment();
             } else {
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             }
         } else {
-            if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                 replaceFragment(GateStartFragment.Pathfinder.newInstance());
             } else {
                 replaceFragment(GateStartFragment.Pathfinder.newInstance(1), R.id.race_frame);

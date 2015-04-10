@@ -85,7 +85,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
     public static class FinishTimeFragment extends BaseFragment implements View.OnClickListener {
 
-        public static final String STARTMODE = "startMode";
+        public static final String START_MODE = "startMode";
 
         private SimpleDateFormat mDateFormat;
         private TimePicker mTimePicker;
@@ -98,7 +98,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         public static FinishTimeFragment newInstance(int startMode) {
             FinishTimeFragment fragment = new FinishTimeFragment();
             Bundle args = new Bundle();
-            args.putInt(STARTMODE, startMode);
+            args.putInt(START_MODE, startMode);
             fragment.setArguments(args);
             return fragment;
         }
@@ -132,7 +132,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 finishCustom.setOnClickListener(this);
             }
 
-            switch (getArguments().getInt(STARTMODE, 0)) {
+            switch (getArguments().getInt(START_MODE, 0)) {
             case 1:
                 ImageView flag = ViewHolder.get(layout, R.id.header_flag);
                 if (flag != null) {
@@ -215,7 +215,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             } else {
                 finishTime = getFinishTime();
             }
-            switch (getArguments().getInt(STARTMODE, 0)) {
+            switch (getArguments().getInt(START_MODE, 0)) {
             case 1:
                 FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
                 if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class GateStartFragment {
 
     private final static int ONE_MINUTE_MILLISECONDS = 60000;
-    private final static String STARTMODE = "startMode";
+    private final static String START_MODE = "startMode";
     private final static String NAT = "nationality";
     private final static String NUM = "number";
 
@@ -46,7 +46,7 @@ public class GateStartFragment {
         public static Pathfinder newInstance(int startMode, String nat, String num) {
             Pathfinder fragment = new Pathfinder();
             Bundle args = new Bundle();
-            args.putInt(STARTMODE, startMode);
+            args.putInt(START_MODE, startMode);
             args.putString(NAT, nat);
             args.putString(NUM, num);
             fragment.setArguments(args);
@@ -124,7 +124,7 @@ public class GateStartFragment {
             super.onActivityCreated(savedInstanceState);
 
             if (getArguments() != null) {
-                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                if (getArguments().getInt(START_MODE, 0) != 0) {
                     if (getView() != null) {
                         View header = ViewHolder.get(getView(), R.id.header);
                         if (header != null) {
@@ -149,7 +149,7 @@ public class GateStartFragment {
                         }
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                         procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
-                        if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+                        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                             replaceFragment(Timing.newInstance(nation, number));
                         } else {
                             replaceFragment(Timing.newInstance(1, nation, number), R.id.race_frame);
@@ -168,7 +168,7 @@ public class GateStartFragment {
 
     public static class Timing extends BaseFragment {
 
-        private final static String STARTMODE = "startMode";
+        private final static String START_MODE = "startMode";
 
         public static Timing newInstance(String nat, String num) {
             return newInstance(0, nat, num);
@@ -177,7 +177,7 @@ public class GateStartFragment {
         public static Timing newInstance(int startMode, String nat, String num) {
             Timing fragment = new Timing();
             Bundle args = new Bundle();
-            args.putInt(STARTMODE, startMode);
+            args.putInt(START_MODE, startMode);
             args.putString(NAT, nat);
             args.putString(NUM, num);
             fragment.setArguments(args);
@@ -207,7 +207,7 @@ public class GateStartFragment {
             super.onActivityCreated(savedInstanceState);
 
             if (getArguments() != null) {
-                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                if (getArguments().getInt(START_MODE, 0) != 0) {
                     if (getView() != null) {
                         View header = getView().findViewById(R.id.header);
                         if (header != null) {
@@ -254,7 +254,7 @@ public class GateStartFragment {
 
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                         procedure.setGateLineOpeningTimes(MillisecondsTimePoint.now(), launch, golf);
-                        if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+                        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                             openMainScheduleFragment();
                         } else {
                             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);

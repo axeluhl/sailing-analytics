@@ -65,7 +65,7 @@ public class WindFragment extends BaseFragment
         TextView.OnEditorActionListener {
 
     private final static String TAG = WindFragment.class.getName();
-    private final static String STARTMODE = "startMode";
+    private final static String START_MODE = "startMode";
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
     private final static int MIN_KTS = 3;
@@ -104,7 +104,7 @@ public class WindFragment extends BaseFragment
     public static WindFragment newInstance(int startMode) {
         WindFragment fragment = new WindFragment();
         Bundle args = new Bundle();
-        args.putInt(STARTMODE, startMode);
+        args.putInt(START_MODE, startMode);
         fragment.setArguments(args);
         return fragment;
     }
@@ -171,7 +171,7 @@ public class WindFragment extends BaseFragment
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
+            switch (getArguments().getInt(START_MODE, 0)) {
                 case 1:
                     if (getView() != null) {
                         View header = getView().findViewById(R.id.header);
@@ -421,7 +421,7 @@ public class WindFragment extends BaseFragment
         Wind wind = getResultingWindFix();
         getRaceState().setWindFix(MillisecondsTimePoint.now(), wind);
         saveEntriesInPreferences(wind);
-        switch (getArguments().getInt(STARTMODE, 0)) {
+        switch (getArguments().getInt(START_MODE, 0)) {
             case 1:
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;

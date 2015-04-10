@@ -22,7 +22,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends BaseFragment implements StartModeAdapter.StartModeClick {
 
-    private final static String STARTMODE = "startMode";
+    private final static String START_MODE = "startMode";
 
     private class StartModeComparator implements Comparator<StartMode> {
 
@@ -38,7 +38,7 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
     public static StartModeFragment newInstance(int startMode) {
         StartModeFragment fragment = new StartModeFragment();
         Bundle args = new Bundle();
-        args.putInt(STARTMODE, startMode);
+        args.putInt(START_MODE, startMode);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,7 +48,7 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
+            switch (getArguments().getInt(START_MODE, 0)) {
                 case 1:
                     if (getView() != null)  {
                         View header = getView().findViewById(R.id.header);
@@ -116,7 +116,7 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
     @Override
     public void onClick(StartMode startMode) {
         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
-        if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
             openMainScheduleFragment();
         } else {
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
