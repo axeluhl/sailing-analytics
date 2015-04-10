@@ -16,6 +16,8 @@ import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -349,12 +351,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * call is issued to make sure that the user's request for a new coordinate system is honored.
      */
     private boolean requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown;
+    
+    private final boolean showMapControls;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
             StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
             RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle) {
         this.setSize("100%", "100%");
+        this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -408,6 +413,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private void updateCoordinateSystemFromSettings() {
+        final MapOptions mapOptions;
         if (getSettings().isWindUp()) {
             final Position centerOfCourse = getCenterOfCourse();
             if (centerOfCourse != null) {
@@ -416,21 +422,43 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // new equator shall point 90deg right of the "from" wind direction to make wind come from top of map
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
+                    if (map != null) {
+                        mapOptions = getMapOptions(showMapControls, /* wind-up */ true);
+                    } else {
+                        mapOptions = null;
+                    }
                     requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown = false;
                 } else {
                     // register callback in case center of course and wind info becomes known
                     requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown = true;
+                    mapOptions = null;
                 }
             } else {
                 // register callback in case center of course and wind info becomes known
                 requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown = true;
+                mapOptions = null;
             }
         } else {
+            if (map != null) {
+                mapOptions = getMapOptions(showMapControls, /* wind-up */ false);
+            } else {
+                mapOptions = null;
+            }
             coordinateSystem.setCoordinateSystem(new IdentityCoordinateSystem());
         }
         fixesAndTails.clearTails();
         redraw();
-        zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+        // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                if (map != null) {
+                    map.setOptions(mapOptions);
+                    final LatLngBounds newBounds = getDefaultZoomBounds();
+                    zoomMapToNewBounds(newBounds);
+                }
+            }
+        });
     }
 
     private void loadMapsAPIV3(final boolean showMapControls) {
@@ -444,42 +472,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Runnable onLoad = new Runnable() {
           @Override
           public void run() {
-              MapOptions mapOptions = MapOptions.newInstance();
-              mapOptions.setScrollWheel(true);
-              mapOptions.setMapTypeControl(showMapControls);
-              mapOptions.setPanControl(showMapControls);
-              mapOptions.setZoomControl(showMapControls);
-              mapOptions.setScaleControl(true);
-              
-              MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
-              
-              // hide all transit lines including ferry lines
-              mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
-              // hide points of interest
-              mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
-              // simplify road display
-              mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
-              // set water color
-              // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
-              // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
-              // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
-              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
-              
-              MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
-              mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
-              mapOptions.setMapTypeControlOptions(mapTypeControlOptions);
-
-              mapOptions.setMapTypeStyles(mapTypeStyles);
-              // no need to try to position the scale control; it always ends up at the right bottom corner
-              mapOptions.setStreetViewControl(false);
-              if (showMapControls) {
-                  ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-                  zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-                  mapOptions.setZoomControlOptions(zoomControlOptions);
-                  PanControlOptions panControlOptions = PanControlOptions.newInstance();
-                  panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-                  mapOptions.setPanControlOptions(panControlOptions);
-              }
+              MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
               Image sapLogo = createSAPLogo();
@@ -2409,5 +2402,49 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private LatLngBounds getDefaultZoomBounds() {
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
+    }
+
+    private MapOptions getMapOptions(final boolean showMapControls, boolean windUp) {
+        MapOptions mapOptions = MapOptions.newInstance();
+          mapOptions.setScrollWheel(true);
+          mapOptions.setMapTypeControl(showMapControls && !windUp);
+          mapOptions.setPanControl(showMapControls);
+          mapOptions.setZoomControl(showMapControls);
+          mapOptions.setScaleControl(true);
+          if (windUp) {
+              mapOptions.setMinZoom(8);
+          } else {
+              mapOptions.setMinZoom(0);
+          }
+          MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
+          
+          // hide all transit lines including ferry lines
+          mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
+          // hide points of interest
+          mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
+          // simplify road display
+          mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
+          // set water color
+          // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
+          // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
+          // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
+          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
+          
+          MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
+          mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
+          mapOptions.setMapTypeControlOptions(mapTypeControlOptions);
+
+          mapOptions.setMapTypeStyles(mapTypeStyles);
+          // no need to try to position the scale control; it always ends up at the right bottom corner
+          mapOptions.setStreetViewControl(false);
+          if (showMapControls) {
+              ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
+              zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
+              mapOptions.setZoomControlOptions(zoomControlOptions);
+              PanControlOptions panControlOptions = PanControlOptions.newInstance();
+              panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
+              mapOptions.setPanControlOptions(panControlOptions);
+          }
+        return mapOptions;
     }
 }
