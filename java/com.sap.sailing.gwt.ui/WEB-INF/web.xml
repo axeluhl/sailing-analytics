@@ -64,6 +64,16 @@
 	</servlet-mapping>
 
 	<servlet>
+	    <display-name>Home Service</display-name>
+	    <servlet-name>HomeService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.home.server.HomeServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>HomeService</servlet-name>
+		<url-pattern>/service/home</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<display-name>Media Service</display-name>
 	    <servlet-name>MediaService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceImpl</servlet-class>
