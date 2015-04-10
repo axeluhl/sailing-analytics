@@ -12,6 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -27,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.home.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
+import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
@@ -50,6 +54,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
  */
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
     private static final long serialVersionUID = 3947782997746039939L;
+    private static final Logger logger = Logger.getLogger(HomeServiceImpl.class.getName());
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
@@ -267,23 +272,22 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
 
     @Override
     public MediaDTO getMediaForEvent(UUID eventId) {
-        EventDTO o;
-        try {
-            o = getEventById(eventId, false);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("We can do better than MalformedURLException");
-        }
+        Event event = getService().getEvent(eventId);
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
-        for(String url : o.getPhotoGalleryImageURLs()) {
-            ImageSize imageSize = o.getImageSize(url);
-            MediaEntryDTO entry = new MediaEntryDTO(url);
-            entry.setWidthInPx(imageSize.getWidth());
-            entry.setHeightInPx(imageSize.getHeight());
+        for(URL url : HomeServiceUtil.getPhotoGalleryImageURLs(event)) {
+            MediaEntryDTO entry = new MediaEntryDTO(url.toString());
+            try {
+                ImageSize imageSize = event.getImageSize(url);
+                entry.setWidthInPx(imageSize.getWidth());
+                entry.setHeightInPx(imageSize.getHeight());
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
+            }
             media.addPhoto(entry);
         }
-        for(String url : o.getVideoURLs()) {
-            media.addVideo(new MediaEntryDTO(o.getName(), url));
+        for(URL url : event.getVideoURLs()) {
+            media.addVideo(new MediaEntryDTO(event.getName(), url.toString()));
         }
         return media;
     }
