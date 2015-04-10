@@ -32,7 +32,13 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
-    public static ProtestTimeDialogFragment newInstace(List<ManagedRace> races) {
+    public static ProtestTimeDialogFragment newInstance(ManagedRace race) {
+        ArrayList<ManagedRace> races = new ArrayList<>();
+        races.add(race);
+        return newInstance(races);
+    }
+
+    public static ProtestTimeDialogFragment newInstance(List<ManagedRace> races) {
         ArrayList<Serializable> raceIds = new ArrayList<Serializable>();
         for (ManagedRace race : races) {
             raceIds.add(race.getId());
@@ -51,7 +57,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     private View customView;
 
     public ProtestTimeDialogFragment() {
-        races = new ArrayList<ManagedRace>();
+        races = new ArrayList<>();
     }
     
     @Override

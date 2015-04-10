@@ -382,4 +382,8 @@
 
     <string name="protest_time">Protest Time</string>
 
+    <string name="no_camera">No Camera App found</string>
+    <string name="delete_file_title">Delete file</string>
+    <string name="delete_file">This will delete the picture</string>
+
 </resources>

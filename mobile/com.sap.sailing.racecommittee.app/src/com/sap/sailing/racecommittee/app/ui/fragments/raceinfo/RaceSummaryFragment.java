@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
@@ -54,7 +55,7 @@ public class RaceSummaryFragment extends BaseFragment {
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO
+                        Toast.makeText(getActivity(), "Function not yet implemented.", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

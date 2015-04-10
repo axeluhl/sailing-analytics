@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/photo_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/background" />
+        android:cropToPadding="true"
+        android:src="@drawable/background"/>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -17,22 +18,25 @@
         android:layout_alignRight="@id/photo_view"
         android:background="@color/constant_black_transparent">
 
-        <TextView
-            android:id="@+id/date_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding"
-            android:paddingRight="@dimen/default_padding"
-            android:textAppearance="?textSmall"
-            tools:text="22.08.15 / 11:20:05" />
-
         <ImageView
+            android:id="@+id/delete_photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/default_margin_half"
-            android:src="@drawable/ic_menu_delete" />
+            android:src="@drawable/ic_menu_delete"/>
+
+        <TextView
+            android:id="@+id/date_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/delete_photo"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
+            android:textAppearance="?textSmall"
+            tools:text="22.08.15 / 11:20:05"/>
     </RelativeLayout>
 </RelativeLayout>

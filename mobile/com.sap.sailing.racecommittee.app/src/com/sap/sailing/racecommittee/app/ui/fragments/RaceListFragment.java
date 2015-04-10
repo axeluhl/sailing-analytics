@@ -296,7 +296,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void onJuryFlagClicked(BoatClassSeriesFleet group) {
         if (mRacesByGroup.containsKey(group)) {
             List<ManagedRace> races = mRacesByGroup.get(group);
-            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstace(races);
+            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
             fragment.show(getFragmentManager(), null);
         }
     }

@@ -20,7 +20,7 @@ public class BasicRaceInfoFragmentChooser extends RaceInfoFragmentChooser {
 
     @Override
     protected Class<? extends RaceFragment> getFinishingFragment() {
-        return BasicFinishingRaceFragment.class;
+        return BasicStartphaseRaceFragment.class;
     }
 
     @Override

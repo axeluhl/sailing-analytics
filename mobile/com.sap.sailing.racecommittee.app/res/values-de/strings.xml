@@ -361,5 +361,8 @@
     <string name="finished_text_02">Your evaluation has been published. Changes need to be re-submitted to be in effect.</string>
     <string name="protest_time">Protest Time</string>
     <string name="finished_duration">#TIME# min</string>
+    <string name="no_camera">Keine Kamera App gefunden</string>
+    <string name="delete_file">Das löscht das Foto</string>
+    <string name="delete_file_title">Datei löschen</string>
 
 </resources>

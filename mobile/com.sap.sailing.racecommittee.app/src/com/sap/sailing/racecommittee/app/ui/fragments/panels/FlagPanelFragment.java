@@ -103,7 +103,9 @@ public class FlagPanelFragment extends BasePanelFragment {
                 changeVisibility(mPostponeFlags, View.VISIBLE);
                 changeVisibility(mAbandonFlags, View.VISIBLE);
                 changeVisibility(mRecallFlags, View.VISIBLE);
+                changeVisibility(mCourseFlags, View.GONE);
                 changeVisibility(mMoreFlags, View.VISIBLE);
+                uncheckMarker(mCourseFlags);
                 break;
 
             case SCHEDULED:
@@ -111,6 +113,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                 changeVisibility(mPostponeFlags, View.VISIBLE);
                 changeVisibility(mAbandonFlags, View.GONE);
                 changeVisibility(mRecallFlags, View.GONE);
+                changeVisibility(mCourseFlags, View.GONE);
                 changeVisibility(mMoreFlags, View.GONE);
                 uncheckMarker(mAbandonFlags);
                 uncheckMarker(mRecallFlags);
@@ -121,28 +124,42 @@ public class FlagPanelFragment extends BasePanelFragment {
                 changeVisibility(mPostponeFlags, View.VISIBLE);
                 changeVisibility(mAbandonFlags, View.VISIBLE);
                 changeVisibility(mRecallFlags, View.VISIBLE);
+                changeVisibility(mCourseFlags, View.GONE);
                 changeVisibility(mMoreFlags, View.VISIBLE);
+                uncheckMarker(mCourseFlags);
                 break;
 
             case FINISHING:
                 changeVisibility(mPostponeFlags, View.VISIBLE);
                 changeVisibility(mAbandonFlags, View.VISIBLE);
-                changeVisibility(mRecallFlags, View.VISIBLE);
-                changeVisibility(mMoreFlags, View.VISIBLE);
+                changeVisibility(mRecallFlags, View.GONE);
+                changeVisibility(mCourseFlags, View.GONE);
+                changeVisibility(mMoreFlags, View.GONE);
+                uncheckMarker(mRecallFlags);
+                uncheckMarker(mCourseFlags);
+                uncheckMarker(mMoreFlags);
                 break;
 
             case FINISHED:
                 changeVisibility(mPostponeFlags, View.VISIBLE);
                 changeVisibility(mAbandonFlags, View.VISIBLE);
                 changeVisibility(mRecallFlags, View.VISIBLE);
+                changeVisibility(mCourseFlags, View.GONE);
                 changeVisibility(mMoreFlags, View.VISIBLE);
+                uncheckMarker(mCourseFlags);
                 break;
 
             default:
                 changeVisibility(mPostponeFlags, View.GONE);
                 changeVisibility(mAbandonFlags, View.GONE);
                 changeVisibility(mRecallFlags, View.GONE);
+                changeVisibility(mCourseFlags, View.GONE);
                 changeVisibility(mMoreFlags, View.GONE);
+                uncheckMarker(mPostponeFlags);
+                uncheckMarker(mAbandonFlags);
+                uncheckMarker(mRecallFlags);
+                uncheckMarker(mCourseFlags);
+                uncheckMarker(mMoreFlags);
                 break;
         }
     }
@@ -281,7 +298,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                     break;
 
                 case 1:
-                    replaceFragment(MoreFlagsFragment.FinishingTimeFragment.newInstance(0));
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(0));
                     break;
 
                 default:

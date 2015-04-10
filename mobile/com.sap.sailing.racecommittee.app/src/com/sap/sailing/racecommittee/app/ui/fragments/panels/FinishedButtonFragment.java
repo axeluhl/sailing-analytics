@@ -1,9 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -53,6 +56,9 @@ public class FinishedButtonFragment extends BasePanelFragment {
             mPhoto.setOnClickListener(new PhotoClick());
         }
         mPhotoLock = ViewHolder.get(layout, R.id.photo_lock);
+        if (!isCameraAvailable(getActivity())) {
+            mPhotoLock.setVisibility(View.VISIBLE);
+        }
 
         mList = ViewHolder.get(layout, R.id.list_button);
         if (mList != null) {
@@ -95,6 +101,16 @@ public class FinishedButtonFragment extends BasePanelFragment {
                 resetFragment(null, CourseFragment.class);
                 setMarkerLevel(mList, R.id.list_marker, 0);
             }
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static  boolean isCameraAvailable(Context context) {
+        PackageManager manager = context.getPackageManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+        } else {
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA) || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
         }
     }
 

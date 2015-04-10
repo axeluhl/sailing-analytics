@@ -15,6 +15,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRa
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.FlagPanelFragment;
@@ -180,7 +181,10 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         public void onFinishedTimeChanged(ReadonlyRaceState state) {
             super.onFinishedTimeChanged(state);
 
-
+            RacingActivity activity = (RacingActivity) getActivity();
+            if (activity != null) {
+                activity.onRaceItemClicked(getRace());
+            }
         }
     }
 

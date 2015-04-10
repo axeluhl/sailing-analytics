@@ -29,6 +29,13 @@ public class CameraHelper {
     }
 
     /**
+     * Returns a folder Uri for app depended picture folder
+     */
+    public Uri getOutputMediaFolderUri(@Nullable String subFolder) {
+        return Uri.fromFile(getOutputMediaFolder(subFolder));
+    }
+
+    /**
      * Create a file Uri for saving an image or video
      */
     public Uri getOutputMediaFileUri(int type, @Nullable String subFolder) {
@@ -36,9 +43,9 @@ public class CameraHelper {
     }
 
     /**
-     * Create a File for saving an image or video
+     * Returns a folder file for app depended picture folder
      */
-    public File getOutputMediaFile(int type, @Nullable String subFolder) {
+    public File getOutputMediaFolder(@Nullable String subFolder) {
         if (subFolder == null) {
             subFolder = "";
         } else {
@@ -49,7 +56,7 @@ public class CameraHelper {
         // using Environment.getExternalStorageState() before doing this.
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), APP_NAME + File.separator + subFolder);
+            Environment.DIRECTORY_PICTURES), APP_NAME + File.separator + subFolder);
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 
@@ -60,6 +67,15 @@ public class CameraHelper {
                 return null;
             }
         }
+
+        return mediaStorageDir;
+    }
+
+    /**
+     * Create a File for saving an image or video
+     */
+    public File getOutputMediaFile(int type, @Nullable String subFolder) {
+        File mediaStorageDir = getOutputMediaFolder(subFolder);
 
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());

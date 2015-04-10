@@ -31,7 +31,7 @@ public class RaceFinishingFragment extends BaseFragment {
             down.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO Click
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1), R.id.race_frame);
                 }
             });
         }

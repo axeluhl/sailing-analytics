@@ -25,6 +25,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -42,6 +43,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
@@ -534,7 +536,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         @Override
         public void onLoadSucceded(Collection<EventBase> data, boolean isCached) {
-            // TODO Auto-generated method stub
             Toast.makeText(RacingActivity.this, getString(R.string.loading_events_succeded), Toast.LENGTH_SHORT).show();
             setSupportProgressBarIndeterminateVisibility(false);
 
@@ -594,7 +595,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
                     Bundle args = new Bundle();
                     args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
-                    Fragment fragment = RaceFlagViewerFragment.newInstance();
+                    Fragment fragment;
+                    if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
+                        fragment = RaceFlagViewerFragment.newInstance();
+                    } else {
+                        fragment = RaceFinishingFragment.newInstance();
+                    }
                     fragment.setArguments(args);
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
                     transaction.replace(R.id.race_frame, fragment).commit();
