@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
+    String general();
     String listRaces();
     String listRegattas();
     String wind();

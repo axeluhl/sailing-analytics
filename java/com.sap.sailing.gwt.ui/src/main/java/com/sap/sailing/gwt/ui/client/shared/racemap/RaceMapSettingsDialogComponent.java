@@ -58,6 +58,23 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
 
+        Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
+        vp.add(generalLabel);
+       
+        windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
+        windUpCheckbox.setValue(initialSettings.isWindUp());
+        vp.add(windUpCheckbox);
+
+        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
+        vp.add(showWindStreamletOverlayCheckbox);
+        
+        if (showViewSimulation) {
+            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
+            vp.add(showSimulationOverlayCheckbox);
+        }
+
         Label competitorsLabel = dialog.createHeadlineLabel(stringMessages.competitors());
         vp.add(competitorsLabel);
 
@@ -69,20 +86,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSelectedCompetitorsInfoCheckBox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
         vp.add(showSelectedCompetitorsInfoCheckBox);
 
-        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
-        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
-        vp.add(showWindStreamletOverlayCheckbox);
-        
-        windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
-        windUpCheckbox.setValue(initialSettings.isWindUp());
-        vp.add(windUpCheckbox);
-        
-        if (showViewSimulation) {
-            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
-            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
-            vp.add(showSimulationOverlayCheckbox);
-        }
-        
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
         
