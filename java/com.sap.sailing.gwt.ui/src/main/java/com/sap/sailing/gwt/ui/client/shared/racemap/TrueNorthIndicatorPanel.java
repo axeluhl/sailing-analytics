@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -64,9 +65,10 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     protected void redraw() {
         final double mappedTrueNorthDeg = coordinateSystem.mapDegreeBearing(0);
         transformer.drawTransformedImage(mappedTrueNorthDeg, 1.0);
-        String title = stringMessages.rotatedFromTrueNorthClickToToggleWindUp(mappedTrueNorthDeg);
+        String title = stringMessages.rotatedFromTrueNorthClickToToggleWindUp(Math.round(mappedTrueNorthDeg));
         canvas.setTitle(title);
-        textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : title);
+        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+        textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(mappedTrueNorthDeg));
         if (!isVisible()) {
             setVisible(true);
         }

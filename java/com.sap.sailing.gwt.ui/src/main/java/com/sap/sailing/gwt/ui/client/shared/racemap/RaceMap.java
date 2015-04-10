@@ -573,6 +573,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               // Data has been initialized
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
+              trueNorthIndicatorPanel.redraw();
           }
         };
 
