@@ -1216,4 +1216,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String notCapableOfGeneratingACodeForIdentifier();
     String serverUrl();
     String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
+    String startLineToFirstMarkTriangle(String distanceInMeters);
 }

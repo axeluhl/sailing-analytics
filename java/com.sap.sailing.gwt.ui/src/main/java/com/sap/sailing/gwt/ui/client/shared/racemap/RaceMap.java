@@ -1262,8 +1262,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    final StringBuilder startLineAdvantageText = new StringBuilder();
-    final StringBuilder finishLineAdvantageText = new StringBuilder();
+    private final StringBuilder startLineAdvantageText = new StringBuilder();
+    private final StringBuilder finishLineAdvantageText = new StringBuilder();
 
     /**
      * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
@@ -1271,8 +1271,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private boolean autoZoomInProgress;
     
+    private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
+    
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
-        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)) {
+        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                && courseDTO.startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
             LatLng windwardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0)); 
             LatLng leewardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1));
             LatLng firstMarkPoint = coordinateSystem.toLatLng(courseDTO.waypointPositions.get(1));
@@ -1289,14 +1292,39 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 windwardLinePoints.insertAt(1, firstMarkPoint);
 
                 MVCArray<LatLng> leewardLinePoints = MVCArray.newInstance();
-                windwardLinePoints.insertAt(0, leewardStartLinePoint);
-                windwardLinePoints.insertAt(1, firstMarkPoint);
+                leewardLinePoints.insertAt(0, leewardStartLinePoint);
+                leewardLinePoints.insertAt(1, firstMarkPoint);
 
                 windwardStartLineMarkToFirstMarkLine = Polyline.newInstance(options);
                 windwardStartLineMarkToFirstMarkLine.setPath(windwardLinePoints);
-
+                windwardStartLineMarkToFirstMarkLine.addMouseOverHandler(new MouseOverMapHandler() {
+                    @Override
+                    public void onEvent(MouseOverMapEvent event) {
+                        map.setTitle(stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal.format(
+                                courseDTO.startMarkPositions.get(0).getDistance(courseDTO.waypointPositions.get(1)).getMeters())));
+                    }
+                });
+                windwardStartLineMarkToFirstMarkLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                    @Override
+                    public void onEvent(MouseOutMapEvent event) {
+                        map.setTitle("");
+                    }
+                });
                 leewardStartLineMarkToFirstMarkLine = Polyline.newInstance(options);
                 leewardStartLineMarkToFirstMarkLine.setPath(leewardLinePoints);
+                leewardStartLineMarkToFirstMarkLine.addMouseOverHandler(new MouseOverMapHandler() {
+                    @Override
+                    public void onEvent(MouseOverMapEvent event) {
+                        map.setTitle(stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal.format(
+                                courseDTO.startMarkPositions.get(1).getDistance(courseDTO.waypointPositions.get(1)).getMeters())));
+                    }
+                });
+                leewardStartLineMarkToFirstMarkLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                    @Override
+                    public void onEvent(MouseOutMapEvent event) {
+                        map.setTitle("");
+                    }
+                });
 
                 windwardStartLineMarkToFirstMarkLine.setMap(map);
                 leewardStartLineMarkToFirstMarkLine.setMap(map);
