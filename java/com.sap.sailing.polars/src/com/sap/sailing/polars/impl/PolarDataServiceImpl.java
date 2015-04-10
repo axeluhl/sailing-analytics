@@ -17,6 +17,9 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataService;
@@ -156,6 +159,33 @@ public class PolarDataServiceImpl implements PolarDataService {
     @Override
     public void raceFinishedLoading(TrackedRace race) {
         polarDataMiner.raceFinishedTracking(race);
+    }
+
+    @Override
+    public BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, LegType legType, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
+        if (legType != LegType.DOWNWIND && legType != LegType.UPWIND) {
+            throw new IllegalArgumentException("LegType needs to be upwind or downwind.");
+        }
+        if (boatClass == null || windSpeed == null) {
+            throw new IllegalArgumentException("Boatclass and windspeed cannot be null.");
+        }
+        SpeedWithBearingWithConfidence<Void> port = getAverageSpeedWithBearing(boatClass, windSpeed, legType, Tack.PORT);
+        SpeedWithBearingWithConfidence<Void> starboard = getAverageSpeedWithBearing(boatClass, windSpeed, legType,
+                Tack.STARBOARD);
+        double angleSumInDeg = Math.abs(port.getObject().getBearing().getDegrees())
+                + Math.abs(starboard.getObject().getBearing().getDegrees());
+        Bearing bearing = new DegreeBearingImpl(angleSumInDeg);
+        double confidence = (port.getConfidence() + starboard.getConfidence()) / 2;
+        BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing, confidence,
+                null);
+        return bearingWithConfidence;
+    }
+
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, true);
     }
 
 }

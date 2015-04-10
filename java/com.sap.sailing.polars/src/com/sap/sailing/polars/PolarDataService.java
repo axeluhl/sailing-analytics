@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.mining.MovingAverageProcessor;
@@ -206,7 +207,25 @@ public interface PolarDataService {
      */
     PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle) throws NotEnoughDataHasBeenAddedException;
     
+    /**
+     * For Upwind and Downwind returns the typical angle needed for a maneuver.
+     * 
+     * @param boatClass
+     * @param legType needs to be Upwind or Downwind
+     * @param windSpeed Since the maneuver angle is windSpeed depended, supply it here
+     * @return angle with confidence as supplied by polars. Angle is always >= 0
+     * @throws NotEnoughDataHasBeenAddedException 
+     */
+    BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, LegType legType, Speed windSpeed) throws NotEnoughDataHasBeenAddedException;
+    
     void raceFinishedLoading(TrackedRace race);
+
+    /**
+     * See {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)}
+     * Always use regression
+     */
+    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
 
 }
