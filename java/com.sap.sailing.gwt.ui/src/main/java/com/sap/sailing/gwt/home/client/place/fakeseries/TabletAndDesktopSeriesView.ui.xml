@@ -49,6 +49,9 @@
       <c:header>
         <h:SeriesHeader ui:field="seriesHeader" />
       </c:header>
+      <c:tabcontent title="{i18n.overview}">
+        <tabs:SeriesOverviewTabView />
+      </c:tabcontent>
       <c:tabcontent title="{i18n.events}">
         <tabs:SeriesEventsTabView />
       </c:tabcontent>
