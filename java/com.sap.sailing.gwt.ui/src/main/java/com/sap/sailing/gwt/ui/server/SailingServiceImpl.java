@@ -5714,13 +5714,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
         Date now = new Date();
-        if(regatta.getStartDate() != null && now.compareTo(regatta.getStartDate()) < 0) {
+        Date startDate = regatta.getStartDate();
+        Date endDate = regatta.getEndDate();
+        if(now.compareTo(startDate) < 0) {
             return RegattaState.UPCOMING;
         }
-        if(regatta.getEndDate() != null && now.compareTo(regatta.getStartDate()) > 0) {
-            return RegattaState.UPCOMING;
+        if(endDate != null && now.compareTo(endDate) > 0) {
+            return RegattaState.FINISHED;
         }
-        if(regatta.getStartDate() != null && now.compareTo(regatta.getStartDate()) >= 0 && regatta.getEndDate() != null && now.compareTo(regatta.getStartDate()) <= 0) {
+        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
             return RegattaState.RUNNING;
         }
         return RegattaState.UNKNOWN;
