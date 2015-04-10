@@ -356,6 +356,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final boolean showMapControls;
 
+    /**
+     * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
+     * active while auto-zooming whereas stopping them seems the better option for manual zooms.
+     */
+    private boolean autoZoomInProgress;
+    
+    private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
+    
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
             StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
@@ -1262,16 +1270,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    private final StringBuilder startLineAdvantageText = new StringBuilder();
-    private final StringBuilder finishLineAdvantageText = new StringBuilder();
-
-    /**
-     * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
-     * active while auto-zooming whereas stopping them seems the better option for manual zooms.
-     */
-    private boolean autoZoomInProgress;
-    
-    private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
+    private final StringBuilder windwardStartLineMarkToFirstMarkLineText = new StringBuilder();
+    private final StringBuilder leewardStartLineMarkToFirstMarkLineText = new StringBuilder();
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
         if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
@@ -1279,7 +1279,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             LatLng windwardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0)); 
             LatLng leewardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1));
             LatLng firstMarkPoint = coordinateSystem.toLatLng(courseDTO.waypointPositions.get(1));
-            
+            windwardStartLineMarkToFirstMarkLineText.replace(0, windwardStartLineMarkToFirstMarkLineText.length(),
+                    stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
+                            .format(courseDTO.startMarkPositions.get(0).getDistance(courseDTO.waypointPositions.get(1))
+                                    .getMeters())));
+            leewardStartLineMarkToFirstMarkLineText.replace(0, leewardStartLineMarkToFirstMarkLineText.length(),
+                    stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
+                            .format(courseDTO.startMarkPositions.get(1).getDistance(courseDTO.waypointPositions.get(1))
+                                    .getMeters())));
             if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
                 PolylineOptions options = PolylineOptions.newInstance();
                 options.setGeodesic(true);
@@ -1300,8 +1307,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 windwardStartLineMarkToFirstMarkLine.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
                     public void onEvent(MouseOverMapEvent event) {
-                        map.setTitle(stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal.format(
-                                courseDTO.startMarkPositions.get(0).getDistance(courseDTO.waypointPositions.get(1)).getMeters())));
+                        map.setTitle(windwardStartLineMarkToFirstMarkLineText.toString());
                     }
                 });
                 windwardStartLineMarkToFirstMarkLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -1315,8 +1321,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 leewardStartLineMarkToFirstMarkLine.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
                     public void onEvent(MouseOverMapEvent event) {
-                        map.setTitle(stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal.format(
-                                courseDTO.startMarkPositions.get(1).getDistance(courseDTO.waypointPositions.get(1)).getMeters())));
+                        map.setTitle(leewardStartLineMarkToFirstMarkLineText.toString());
                     }
                 });
                 leewardStartLineMarkToFirstMarkLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -1351,6 +1356,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
+
+    private final StringBuilder startLineAdvantageText = new StringBuilder();
+    private final StringBuilder finishLineAdvantageText = new StringBuilder();
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
