@@ -316,6 +316,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final CombinedWindPanel combinedWindPanel;
     
+    private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
+    
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
@@ -392,6 +394,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         initializeData(showMapControls);
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel.setVisible(true);
     }
     
     /**
@@ -456,6 +460,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     map.setOptions(mapOptions);
                     final LatLngBounds newBounds = getDefaultZoomBounds();
                     zoomMapToNewBounds(newBounds);
+                    trueNorthIndicatorPanel.redraw();
                 }
             }
         });
@@ -479,6 +484,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               RaceMap.this.add(sapLogo);
               map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
               combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
+              map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
+              trueNorthIndicatorPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
