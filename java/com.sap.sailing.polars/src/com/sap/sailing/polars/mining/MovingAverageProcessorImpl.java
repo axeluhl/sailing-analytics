@@ -52,35 +52,37 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
-        GroupKey key = element.getKey();
-        MovingAverageBoatSpeedEstimator boatSpeedEstimator;
-        synchronized (boatSpeedEstimators) {
-            boatSpeedEstimator = boatSpeedEstimators.get(key);
-            if (boatSpeedEstimator == null) {
-                boatSpeedEstimator = new MovingAverageBoatSpeedEstimator();
-                boatSpeedEstimators.put(key, boatSpeedEstimator);
-            }
-        }
-        AverageAngleContainer averageAngleContainer;
-        synchronized (averageAngleContainers) {
-            averageAngleContainer = averageAngleContainers.get(key);
-            if (averageAngleContainer == null) {
-                averageAngleContainer = new AverageAngleContainer();
-                averageAngleContainers.put(key, averageAngleContainer);
-            }
-        }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
-        BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
-        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWind();
-        SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
-        availableBoatClasses.add(element.getDataEntry().getBoatClass());
-        WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
-        double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
-        double confidenceForWindBearing = angleToTheWind.getConfidence();
-        double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
-        double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
-        averageAngleContainer.addFix(angleToTheWind.getObject().getDegrees());
-        boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject(), averagedConfidence);
+        if (fix.getLegType() == LegType.UPWIND || fix.getLegType() == LegType.DOWNWIND) {
+            GroupKey key = element.getKey();
+            MovingAverageBoatSpeedEstimator boatSpeedEstimator;
+            synchronized (boatSpeedEstimators) {
+                boatSpeedEstimator = boatSpeedEstimators.get(key);
+                if (boatSpeedEstimator == null) {
+                    boatSpeedEstimator = new MovingAverageBoatSpeedEstimator();
+                    boatSpeedEstimators.put(key, boatSpeedEstimator);
+                }
+            }
+            AverageAngleContainer averageAngleContainer;
+            synchronized (averageAngleContainers) {
+                averageAngleContainer = averageAngleContainers.get(key);
+                if (averageAngleContainer == null) {
+                    averageAngleContainer = new AverageAngleContainer();
+                    averageAngleContainers.put(key, averageAngleContainer);
+                }
+            }
+            BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
+            WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWind();
+            SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
+            availableBoatClasses.add(element.getDataEntry().getBoatClass());
+            WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
+            double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
+            double confidenceForWindBearing = angleToTheWind.getConfidence();
+            double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
+            double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
+            averageAngleContainer.addFix(angleToTheWind.getObject().getDegrees());
+            boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject(), averagedConfidence);
+        }
     }
 
     @Override
