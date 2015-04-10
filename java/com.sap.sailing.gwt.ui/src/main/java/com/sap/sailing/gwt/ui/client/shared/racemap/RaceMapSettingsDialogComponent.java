@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -124,15 +125,25 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
+        int checkBoxCount = ManeuverType.values().length + 1; // including douglas peucker checkbox
+        int gridRowsRequired = checkBoxCount / 2 + checkBoxCount % 2; 
+        Grid maneuverGrid = new Grid(gridRowsRequired, 2);
+        vp.add(maneuverGrid);
+        int currentRowIndex = 0;
+        int currentColumnIndex = 0;
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));
             checkboxAndManeuverType.add(new Util.Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
-            vp.add(checkbox);
+            maneuverGrid.setWidget(currentRowIndex++, currentColumnIndex, checkbox);
+            if(currentRowIndex >= gridRowsRequired) {
+                currentColumnIndex = 1;
+                currentRowIndex = 0; 
+            }
         }
         showDouglasPeuckerPointsCheckBox = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
         showDouglasPeuckerPointsCheckBox.setValue(initialSettings.isShowDouglasPeuckerPoints());
-        vp.add(showDouglasPeuckerPointsCheckBox);
+        maneuverGrid.setWidget(currentRowIndex, currentColumnIndex, showDouglasPeuckerPointsCheckBox);
         
         Label helpLinesLabel = dialog.createHeadlineLabel(stringMessages.helpLines());
         vp.add(helpLinesLabel);
