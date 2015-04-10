@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.HomeServiceAsync;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
@@ -60,6 +61,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.clientFactory = clientFactory;
     }
 
+    public HomeServiceAsync getHomeService() {
+        return clientFactory.getHomeService();
+    }
+    
     public SailingServiceAsync getSailingService() {
         return clientFactory.getSailingService();
     }
@@ -223,7 +228,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
         final EventViewDTO eventDTO = ctx.getEventDTO();
 
-        getSailingService().getLeaderboardGroupsByEventId(eventDTO.getId(),
+        getHomeService().getLeaderboardGroupsByEventId(eventDTO.getId(),
                 new AsyncCallback<ArrayList<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(ArrayList<LeaderboardGroupDTO> leaderboardGroups) {
@@ -251,7 +256,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             return;
         }
 
-        getSailingService().getMediaForEvent(ctx.getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
+        getHomeService().getMediaForEvent(ctx.getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO @FM: extract error message

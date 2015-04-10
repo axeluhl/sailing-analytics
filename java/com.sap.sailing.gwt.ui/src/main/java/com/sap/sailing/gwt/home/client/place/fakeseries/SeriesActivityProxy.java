@@ -33,7 +33,7 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
         } else {
             final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
             
-            clientFactory.getSailingService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
+            clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
                 @Override
                 public void onSuccess(final EventSeriesViewDTO event) {
                     ctx.updateContext(event);

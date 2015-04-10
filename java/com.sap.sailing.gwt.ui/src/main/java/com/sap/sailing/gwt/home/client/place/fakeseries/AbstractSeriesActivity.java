@@ -83,7 +83,7 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
             callback.onSuccess(ctx.getMedia());
             return;
         }
-        clientFactory.getSailingService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
+        clientFactory.getHomeService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
              // TODO @FM: extract error message
