@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
+import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -84,6 +85,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
 
     private URL getBaseURL(URL url) throws MalformedURLException {
         return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
+    }
+    
+    @Override
+    public StartViewDTO getStartView() {
+        // TODO implement
+        return null;
     }
     
     @Override

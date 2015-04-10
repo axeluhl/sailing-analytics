@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 
 /**
@@ -26,4 +27,6 @@ public interface HomeServiceAsync {
     void getEventListView(AsyncCallback<EventListViewDTO> callback);
 
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
+
+    void getStartView(AsyncCallback<StartViewDTO> callback);
 }

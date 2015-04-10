@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 public interface HomeService extends RemoteService {
     EventViewDTO getEventViewById(UUID id);
@@ -22,5 +23,7 @@ public interface HomeService extends RemoteService {
     EventListViewDTO getEventListView() throws Exception;
     
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
+    
+    StartViewDTO getStartView();
 
 }
