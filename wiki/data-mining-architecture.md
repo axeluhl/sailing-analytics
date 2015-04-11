@@ -1,6 +1,6 @@
 # Data Mining Architecture
 
-The data mining framework consists of four major parts. At first the general infrastructure, that handles the registration and deregistration of data mining bundles and provides information about the data mining components, that are currently available. The next part is about how to build and run queries. After that come the data processing components, that are used by queries and contain the main functionality of the framework. The last part are the functions, that are used by the data processing components and that can be changed during runtime.
+The data mining framework consists of four major parts. At first the general infrastructure, that handles the registration and deregistration of data mining bundles and provides information about the data mining components, that are currently available. The next part is about how to build and run queries. After that come the data processing components, that are used by queries and contain the main functionality of the framework. The last part are the functions, that are used by the data processing components and that can be changed during run-time.
 
 [[_TOC_]]
 
@@ -30,16 +30,96 @@ A data mining bundle needs string messages, that are created server-side (for ex
 	* The `ResourceBundleStringMessages` needs the resource base name, which should be `<string messages package name>/<string messages base name>`
 	* A reference to this `ResourceBundleStringMessages` should be returned by the method `getStringMessages()`
 
-The provided `ResourceBundleStringMessages` will be added to the string messages of the framework, when the data mining bundle is registered. The framework string messages are an instance of `CompoundResourceBundleStringMessages`, that logs message keys that occure multiple times with the log level `INFO`.
+The provided `ResourceBundleStringMessages` will be added to the string messages of the framework, when the data mining bundle is registered. The framework string messages are an instance of `CompoundResourceBundleStringMessages`, that logs message keys that occur multiple times with the log level `INFO`.
 
 ### Data Source Provider
 
 A `DataSourceProvider` provides an instance of a data source, that is used by queries. A data source can be from any type, for example is the `RacingEventService` used as one. Your own `DataSourceProviders` should extend `AbstractDataSourceProvider`. Have a look at `RacingEventServiceProvider` for an example.<br />
 These `DataSourceProviders` are used by the framework to create new queries.
 
+### Client-Server Communication (Data Mining DTOs)
+
 ## Building and running Queries
 
 ### Defining and building a Data Retriever Chain
+
+The interface `DataRetrieverChainDefinition<DataSourceType, DataType>` describes the order of retrieval processors ([Processors](#Processors) with the specific functionality to map an `InputType` to a `ResultType`) to get from the `DataSourceType` to the `DataType`. It provides methods to get some information about the retriever chain and to define the order of the processors. There's currently one implementation, which is the `SimpleDataRetrieverChainDefinition<DataSourceType, DataType>`. Every retriever chain has a `UUID` for identification, which is important for the client server communication. The `SimpleDataRetrieverChainDefinition` generates a new random `UUID` upon construction.
+
+The `DataRetrieverChainDefinition<DataSourceType, DataType>` provides three methods to define the order of the retriever chain:
+
+* The method `startWith` to define the first retrieval processor.
+	* The other methods would throw an exception, if this method hasn't been called exactly once.
+	* Calling this method more than once causes an exception.
+* The method `addAfter` to add a retrieval processor to the end a the list.
+	* The parameter `lastAddedRetrieverType` is necessary to ensure, that the `ResultType` and `InputType` of successive retrieval processors match.
+* The method `endWith` to complete the retriever chain with the last retrieval processor
+	* Completing a retriever chain makes it immutable.
+	* This causes all modifying methods to throw an exception, if `endWith` has been called.
+	* The parameter `lastAddedRetrieverType` is necessary to ensure, that the `ResultType` and `InputType` of successive retrieval processors match.
+
+This results in the mandatory call order `startWith addAfter* endWith` to define a fresh retriever chain. This strict policy ensures, that the resulting retriever chain instances are type safe and work correctly. The retrieval processors added with this methods have to have a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)` or an exception will be thrown. This constructor is used to create concrete instances of the retrieval processors via reflection, when a retriever chain is constructed. All the definition methods (and the constructors of `SimpleDataRetrieverChainDefinition`) have a `String` parameter for a string message key, that would return the name of the retrieval level/chain. This is necessary to display the retriever chain in a human readable way.
+
+This is an example for the correct definition of a fresh retriever chain:
+
+	DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(RacingEventService.class, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
+	legOfCompetitorRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroupWithContext.class, "LeaderboardGroup");
+	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class, HasLeaderboardContext.class, "Leaderboard");
+	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class, HasTrackedRaceContext.class, "Race");
+	legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
+	legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class, HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
+
+The `SimpleDataRetrieverChainDefinition` has a second constructor, where the parameter for the `Class` of the `DataSourceType` is replaced with an `DataRetrieverChainDefinition`. This allows the reuse of existing retriever chains and initializes the new one in the state as if the method `startWith` has been called exactly once. This is an example for the correct reuse of an existing retriever:
+
+	DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(RacingEventService.class, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
+	legOfCompetitorRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroupWithContext.class, "LeaderboardGroup");
+	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class, HasLeaderboardContext.class, "Leaderboard");
+	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class, HasTrackedRaceContext.class, "Race");
+	legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
+	legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class, HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
+	
+	DataRetrieverChainDefinition<RacingEventService, HasGPSFixContext> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(legOfCompetitorRetrieverChainDefinition, HasGPSFixContext.class, "GPSFixSailingDomainRetrieverChain");
+    gpsFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, GPSFixRetrievalProcessor.class,HasGPSFixContext.class, "GpsFix");
+
+Concrete data retriever chain instances can be constructed with a `DataRetrieverChainBuilder`. To get the builder of a **completed** `DataRetrieverChainDefinition` call its `startBuilding` method, which can be done as often as necessary. The interface `DataRetrieverChainBuilder<DataSourceType>` provides methods to iterate the defined retriever chain and to modify the current retrieval processor.
+
+* The method `stepFurther` iterates over the retriever chain and sets the next retrieval processor as the one to modify.
+	* Is similar to the `next` method of `Iterator`.
+	* Initializes the builder, which is necessary to call the modifying methods.
+* The method `canStepFurther` returns `true`, if `stepFurther` can be called at least once more.
+	* Is similar to the `hasNext` method of `Iterator`
+
+The builder has to be initialized, to call the modifying methods so that no exception is thrown. This means, that the `stepFurther` method has to be called at least once. This allows a better usage of the builder in loops as described in the construction examples.
+
+* The method `setFilter`, sets the [Filter Criterion](#Filter-Criteria) that is applied after the current retrieval processor.
+	* If this method is called more than once for the same retrieval processor, than the old filter is replaced by the new one. Use `CompoundFilterCriterion` to filter with multiple criteria.
+	* The `ElementType` of the given criterion has to match the `ResultType` of the current retrieval processor or an exception will be thrown. Call the builders `getCurrentRetrievedDataType` method to get the current `ResultType`.
+* The method `addResultReceiver` adds the given processor as a result receiver of the current retrieval processor, which means that all retrieved data elements will be forwarded to the result receiver.
+	* It's possible to add more than one result receiver to the same retrieval processor.
+	* Note that, successive retrieval processors will automatically be result receivers of the corresponding precursor.
+	* The `InputType` of the given processor has to match the `ResultType` of the current retrieval processor or an exception will be thrown. Call the builders `getCurrentRetrievedDataType` method to get the current `ResultType`.
+
+All iterating and modifying methods return the builder. This can be used to make multiple calls in a single statement. The method `build` constructs the configured retriever chain until the **current** retrieval processor and returns the **first** processor of the concrete retriever chain instance. This can be useful in some cases, but the standard use case is to configure the retrieval processors, that should be configured and iterate through the builder until `canStepFurther` returns `false` (this results in instances of the complete retriever chain). `build` can be called as often as necessary and it's legal to configure the chain, after `build` has been called. Note that the previously created retriever chain instance won't be affected from these changes.
+
+This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be configured in a single statement, which is useful for tests or fix configurations:
+
+	DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+	chainBuilder.stepFurther().stepFurther().setFilter(raceFilter).stepFurther().setFilter(legOfCompetitorFilter).addResultReceiver(legReceiver);
+	Processor<Collection<Test_Regatta>, ?> firstRetrieverInChain = chainBuilder.build();
+
+This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be configured with a loop, which is useful to create many different retriever chain instances of one definition:
+
+	DataRetrieverChainBuilder<DataSourceType> chainBuilder = dataRetrieverChainDefinition().startBuilding(executor);
+    Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = getFilterCriteriaForLevel();
+    while (chainBuilder.canStepFurther()) {
+        chainBuilder.stepFurther();
+        
+        if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
+            chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
+        }
+    }
+    chainBuilder.addResultReceiver(groupingProcessor);
+
+	Processor<DataSourceType, ?> firstRetrieverInChain = chainBuilder.build();
 
 ### Building a Processor Query
 
@@ -53,13 +133,17 @@ These `DataSourceProviders` are used by the framework to create new queries.
 
 ### Filter Criteria
 
+### Data Types
+
 ## Data Mining Functions
 
-### Connectors
+Data Mining Functions are used by the [Data Processing Components](#Data-Processing-Components) to get the data from the data elements, that is necessary for the data processing. This can be for the filtration or grouping by dimension values (like the name of the regatta or the leg type) or for the extraction of the statistic values (like the traveled distance or the relative rank). Functions can be defined by annotating the methods of data types and domain types, that should be used to the data. There are currently the three annotations `Connector`, `Dimension` and `Statistic` with different properties and conditions as described below. This makes the system really flexible and allows developers to add new or change existing dimensions and statistics really fast. This can also be done during run-time, if the corresponding OSGi-Bundles are hot deployed or refreshed (see [Registration and Deregistration of Data Mining Bundles](#Registration-and-Deregistration-of-Data-Mining-Bundles) for more information).
 
-### Statistics
+### Connecter
 
 ### Dimensions
+
+### Statistics
 
 ### Function Registration Process
 

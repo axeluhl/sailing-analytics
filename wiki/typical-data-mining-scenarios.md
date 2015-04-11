@@ -22,7 +22,7 @@
 
 ## Adding a completely new Data Type
 
-A data type is an elementar unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](wiki/data-mining-architecture#Data-Mining-Functions).
+A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](wiki/data-mining-architecture#Data-Mining-Functions).
 
 ### Create the necessary Data Types
 
@@ -86,7 +86,7 @@ A data type is an elementar unit on which the processing components operate. A d
             </tr>
 		  </table>
 		  than existing retriever chain should be splitted after the retrieval processor for the `TrackedRaces`.
-	* To split an existing retriever chain, create a new one after the split point with the usage of the existing one. Then move the `addAfter` and `endWith` calls to the new retriever chain. The first part of the splitted retriever chain can now be used to create the retriever chain for the new data type.
+	* To split an existing retriever chain, create a new one after the split point with the usage of the existing one. Then move the `addAfter` and `endWith` calls to the new retriever chain. The first part of the split retriever chain can now be used to create the retriever chain for the new data type.
 		* Note, that it's not necessary to call `startWith`, if a retriever chain is used to create a new one. 
 	* In pseudo code would this look like this:<br>
 	  Before:<br>
@@ -113,3 +113,5 @@ RetrieverChain markPassingRetrieverChain = new RetrieverChain(trackedRaceRetriev
 markPassingRetrieverChain.endWith(MarkPassingRetrievalProcessor.class);
 </pre>
 * Ensure, that all retriever chains are added to the `DataMiningBundleService`
+
+## Enforce the adding of a Type to the GWT Serialization Policy 
