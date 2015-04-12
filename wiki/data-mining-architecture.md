@@ -137,14 +137,99 @@ This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be conf
 
 ## Data Mining Functions
 
-Data Mining Functions are used by the [Data Processing Components](#Data-Processing-Components) to get the data from the data elements, that is necessary for the data processing. This can be for the filtration or grouping by dimension values (like the name of the regatta or the leg type) or for the extraction of the statistic values (like the traveled distance or the relative rank). Functions can be defined by annotating the methods of data types and domain types, that should be used to the data. There are currently the three annotations `Connector`, `Dimension` and `Statistic` with different properties and conditions as described below. This makes the system really flexible and allows developers to add new or change existing dimensions and statistics really fast. This can also be done during run-time, if the corresponding OSGi-Bundles are hot deployed or refreshed (see [Registration and Deregistration of Data Mining Bundles](#Registration-and-Deregistration-of-Data-Mining-Bundles) for more information).
+Data Mining Functions are used by the [Data Processing Components](#Data-Processing-Components) to get the data from the data elements, that is necessary for the data processing. This can be for the filtration or grouping by dimension values (like the name of the regatta or the leg type) or for the extraction of the statistic values (like the traveled distance or the relative rank). Functions can be defined by annotating the methods of data types and domain types, that should be used to the data. There are currently the three annotations `Connector`, `Dimension` and `Statistic` with different properties and conditions as described below. This makes the system flexible and allows developers to add new or change existing dimensions and statistics very fast. This can also be done during run-time, if the corresponding OSGi-Bundles are hot deployed or refreshed (see [Registration and Deregistration of Data Mining Bundles](#Registration-and-Deregistration-of-Data-Mining-Bundles) for more information).
 
 ### Connecter
 
+Methods marked with the annotation `Connector` indicate the framework, that the result type contains functions. The method has to match the following conditions, to be registered by the framework:
+
+* It has no parameters.
+* The return type isn't `void`.
+* It should be side effect free.
+	* This isn't checked by the framework, so methods with side effects will be registered, but this could have strange effects on the data mining.
+
+Connecter can have the following properties:
+
+* A `String messageKey` with the default `""`, that is used for the internationalization.
+* An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
+* A `boolean scanForStatistics` with the default `true`, that indicates the framework, if the statistics contained by the return type of the marked method should be registered.
+	* This is useful for connections to *higher level* data types, to be able to use their dimensions, without the registration of unwanted or even wrong statistics.
+
+How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
+
 ### Dimensions
+
+Methods marked with the annotation `Dimension` will be registered as dimension by the framework. The method will be called via reflection, if the dimension value of data elements of this data type is requested (for example to filter or group the data). The method has to match the following conditions, to be registered by the framework:
+
+* It has no parameters, except if the parameter list is exactly `Locale, ResourceBundleStringMessages`.
+* The return type isn't `void`.
+* It should be side effect free.
+	* This isn't checked by the framework, so methods with side effects will be registered, but this could have strange effects on the data mining.
+
+The return type of the marked method should be:
+
+* A primitive type or wrapper class or
+* Classes that implement `equals`, `hashCode`
+	* Or the grouping could become incorrect.
+* and `toString`.
+	* Or the result presentation will be unreadable.
+
+Dimensions have the following properties:
+
+* The mandatory `String messageKey`, that is used for the internationalization.
+* An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
+
+How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
 
 ### Statistics
 
+Methods marked with the annotation `Statistic` will be registered as computable statistics by the framework. The method will be called via reflection, if the statistic value of a data elements of this data type is requested (for example for the statistic extraction). The method has to match the following conditions, to be registered by the framework:
+
+* It has no parameters, except if the parameter list is exactly `Locale, ResourceBundleStringMessages`.
+* The return type isn't `void`.
+* It should be side effect free.
+	* This isn't checked by the framework, so methods with side effects will be registered, but this could have strange effects on the data mining.
+
+The return type of the method has to be processable by an aggregator (described in [Processors](#Processors)) of the data mining framework, for example `int` or `double`.
+
+Statistics have the following properties:
+
+* The mandatory `String messageKey`, that is used for the internationalization.
+* An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
+* A `Unit resultUnit` with the default `Unit.None`, that is shown in the result presentation.
+	* `Unit` is an enum located in the bundle `com.sap.sse.datamining.shared`.
+	* Every member of `Unit` needs a message key in the string messages of the bundle `com.sap.sse.datamining` for internationalization purposes. For example has the unit `Meters` the entry `Meters=m` in the file `StringMessages_en.properties`.
+* An `int resultDecimals` with the default `0`, that sets the number of the visible result decimals.
+
+How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
+
 ### Function Registration Process
 
+The function registration process is triggered, when a [data mining bundle is registered](#Registration-and-Deregistration-of-Data-Mining-Bundles). The classes returned by the method `getClassesWithMarkedMethods` of the `DataMiningBundleService` are given to a `FunctionRegistry`. The registry iterates over all public methods (including those declared by the class or interface and those inherited from superclasses and superinterfaces) for each of the given classes and does the following:
+
+* If the method is a valid [Connector](#Connecter), then the method gets converted to a `Function`, which is added to the list of *previous functions*. The return type of the function gets registered to the `FunctionRegistry`.
+* If the method is a valid [Dimension](#Dimensions), then the method gets converted to a `Function`, which is registered as dimension. If the list of *previous functions* isn't empty, than the list and the dimension will be saved as `ConcatenatingCompoundFunction`.
+* If the method is a valid [Statistic](#Statistics) and no connector in the list of *previous functions* has set the `scanForStatistics` to `false`, then the method gets converted to a `Function`, which is registered as statistic. If the list of *previous functions* isn't empty, than the list and the statistic will be saved as `ConcatenatingCompoundFunction`.
+
+What is a valid connector/dimension/statistic and what isn't is described in the corresponding sections of this wiki page. How the `ConcatenatingCompoundFunction` works in detail, is described in [Compound Functions](#Compound-Functions).
+
+Currently unsupported are
+
+* Annotating a method with multiple data mining annotations.
+	* The annotations `Dimension` and `Statistic` have a higher priority than `Connector`, so a method annotated with `Dimension` and `Connector` will be handled as `Dimensions`.
+* Cycles in the annotation graph.
+	* For example, if `A` has the connector `B foo()` and `B` has the connector `A bar()`.
+	* This would result in an infinite loop during the registration process, that should lead to a `StackOverflowError`.
+
 ### Compound Functions
+
+Compound functions provide the `Function<ReturnType>` interface for a collection of functions. There is currently only the `ConcatenatingCompoundFunction`, that capsules a list of functions, that are called one after another (like the java statement `foo().bar().stat();`). It's necessary to handle some of the methods declared in the `Function` interface in a special way, what is described here.
+
+* The methods `getDeclaringType` and `getParameters` return the corresponding value of the **first** function in the list.
+* The methods `getReturnType`, `getResultUnit`, `getResultDecimals` and `isDimension` return the corresponding value of the **last** function in the list.
+* The `tryToInvoke` methods invoke the first function in the list with the given instance and all other functions with the return value of the previous function.
+	* It returns `null`, if one of the functions in the list returned `null`.
+* The method `getOrdinal` returns the smallest ordinal of the functions in the list.
+* The method `getSimpleName` returns the name of the function, if the name has been set. If not returns the method the concatenated simple names of the functions in the list separated by `->`.
+* The method `isLocalizable` returns `true`, if any of the functions in the list is localizable.
+* The method `getLocalizedName` returns the name of the function, if the name has been set, the simple name, if the compound function isn't localizable or the concatenated simple names of the functions in the list separated by a single space.
