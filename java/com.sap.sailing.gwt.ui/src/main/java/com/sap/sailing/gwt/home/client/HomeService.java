@@ -24,6 +24,6 @@ public interface HomeService extends RemoteService {
     
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
     
-    StartViewDTO getStartView();
+    StartViewDTO getStartView() throws Exception;
 
 }
