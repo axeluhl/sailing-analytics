@@ -29,9 +29,6 @@ public class PlaceNavigation<T extends Place> {
         this.baseUrl = isDestinationOnRemoteServer ? baseUrl : getLocationURL();
     }
 
-    public void gotoPlace() {
-    }
-
     public String getTargetUrl() {
         return buildPlaceUrl();
     }
