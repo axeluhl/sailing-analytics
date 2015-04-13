@@ -17,8 +17,8 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
         return createEntryPointLink("/gwt/Spectator.html", parameters);
     }
     
-    public static String createEventLink(Map<String, String> parameters, String eventId) {
-        return createEntryPointLink("/gwt/Home.html#EventPlace:eventId="+eventId, parameters);
+    public static String createEventPlaceLink(String eventId, Map<String, String> parameters) {
+        return createEntryPointLink("/gwt/Home.html#/event/:eventId="+eventId, parameters);
     }
     
     public static String createRegattaOverviewLink(Map<String, String> parameters) {

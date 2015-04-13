@@ -36,7 +36,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         }
         setStyleName(this.styleName);
         if (event != null  && event.getName() != null) {
-            String eventLink = EntryPointLinkFactory.createEventLink(new HashMap<String, String>(), event.id.toString());
+            String eventLink = EntryPointLinkFactory.createEventPlaceLink(event.id.toString(), new HashMap<String, String>());
             addNavigationLink(event.getName(), eventLink, "event", stringMessages.goToEventOverview());
         } else {
             if (showHomeNavigation) {
