@@ -47,9 +47,9 @@ import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesSt
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
@@ -437,21 +437,21 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     @Override
     public MediaDTO getMediaForEvent(UUID eventId) {
         Event event = getService().getEvent(eventId);
+        String eventName = event.getName();
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
         for(URL url : HomeServiceUtil.getPhotoGalleryImageURLs(event)) {
-            MediaEntryDTO entry = new MediaEntryDTO(url.toString());
+            ImageSize imageSize = null;
             try {
-                ImageSize imageSize = event.getImageSize(url);
-                entry.setWidthInPx(imageSize.getWidth());
-                entry.setHeightInPx(imageSize.getHeight());
+                imageSize = event.getImageSize(url);
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
             }
+            ImageMetadataDTO entry = new ImageMetadataDTO(url, imageSize, eventName);
             media.addPhoto(entry);
         }
         for(URL url : event.getVideoURLs()) {
-            media.addVideo(new MediaEntryDTO(event.getName(), url.toString()));
+            media.addVideo(new VideoMetadataDTO(url, eventName));
         }
         return media;
     }
