@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -23,13 +23,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_chevron_left_white_24dp" />
+                android:src="?chevron_left_24dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/gate_start_timing"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textNormal"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/header"
-        android:background="?black" />
+        android:background="?black"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -67,12 +67,12 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:text="@string/time_launch"
-                        android:textSize="@dimen/textSize_18" />
+                        android:textSize="@dimen/textSize_18"/>
 
                     <NumberPicker
                         android:id="@+id/time_launch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
 
                 <TextView
@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:text="+"
-                    android:textSize="@dimen/textSize_18" />
+                    android:textSize="@dimen/textSize_18"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -93,12 +93,12 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:text="@string/time_golf"
-                        android:textSize="@dimen/textSize_18" />
+                        android:textSize="@dimen/textSize_18"/>
 
                     <NumberPicker
                         android:id="@+id/time_golf"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -110,7 +110,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/default_margin"
                 android:layout_marginRight="@dimen/default_margin"
-                android:text="@string/gate_start_set" />
+                android:text="@string/gate_start_set"/>
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

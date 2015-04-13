@@ -2,32 +2,33 @@
 <resources>
 
     <!-- custom colors -->
-    <attr name="black" format="color" />
-    <attr name="sap_blue_1" format="color" />
-    <attr name="sap_gray" format="color" />
-    <attr name="sap_gray_black_20" format="color" />
-    <attr name="sap_gray_black_30" format="color" />
-    <attr name="sap_gray_black_40" format="color" />
-    <attr name="sap_gray_white_10" format="color" />
-    <attr name="sap_light_gray" format="color" />
-    <attr name="sap_red_1" format="color" />
-    <attr name="sap_yellow_1" format="color" />
-    <attr name="white" format="color" />
+    <attr name="black" format="color"/>
+    <attr name="sap_blue_1" format="color"/>
+    <attr name="sap_gray" format="color"/>
+    <attr name="sap_gray_black_20" format="color"/>
+    <attr name="sap_gray_black_30" format="color"/>
+    <attr name="sap_gray_black_40" format="color"/>
+    <attr name="sap_gray_white_10" format="color"/>
+    <attr name="sap_light_gray" format="color"/>
+    <attr name="sap_red_1" format="color"/>
+    <attr name="sap_yellow_1" format="color"/>
+    <attr name="white" format="color"/>
 
     <!-- custom references (e.g. styles) -->
-    <attr name="buttonSolidSmall" format="reference" />
-    <attr name="buttonSolidNormal" format="reference" />
-    <attr name="textSmall" format="reference" />
-    <attr name="textNormal" format="reference" />
-    <attr name="textLarge" format="reference" />
-    <attr name="textXLarge" format="reference" />
+    <attr name="buttonSolidSmall" format="reference"/>
+    <attr name="buttonSolidNormal" format="reference"/>
+    <attr name="textSmall" format="reference"/>
+    <attr name="textNormal" format="reference"/>
+    <attr name="textLarge" format="reference"/>
+    <attr name="textXLarge" format="reference"/>
 
     <!-- drawable -->
-    <attr name="access_time_36dp" format="reference" />
-    <attr name="check_18dp" format="reference" />
-    <attr name="dns_48dp" format="reference" />
-    <attr name="hearing_48dp" format="reference" />
-    <attr name="mic_48dp" format="reference" />
-    <attr name="photo_camera_48dp" format="reference" />
-    
+    <attr name="access_time_36dp" format="reference"/>
+    <attr name="check_18dp" format="reference"/>
+    <attr name="chevron_left_24dp" format="reference"/>
+    <attr name="dns_48dp" format="reference"/>
+    <attr name="hearing_48dp" format="reference"/>
+    <attr name="mic_48dp" format="reference"/>
+    <attr name="photo_camera_48dp" format="reference"/>
+
 </resources>

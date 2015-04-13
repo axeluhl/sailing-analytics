@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -24,8 +24,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_chevron_left_white_24dp"
-                android:visibility="gone" />
+                android:src="?chevron_left_24dp"
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/header_flag"
@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/default_margin"
                 android:layout_marginRight="@dimen/default_margin"
-                android:src="@drawable/flag_first_blue_48dp" />
+                android:src="@drawable/flag_first_blue_48dp"/>
 
             <TextView
                 android:id="@+id/header_headline"
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@string/race_begin_finish_header"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textNormal"/>
         </LinearLayout>
 
         <View
@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="?black" />
+            android:background="?black"/>
     </RelativeLayout>
 
     <LinearLayout
@@ -83,7 +83,7 @@
                     android:textColor="?white"
                     android:textSize="@dimen/textSize_40"
                     android:visibility="invisible"
-                    tools:text="@string/time" />
+                    tools:text="@string/time"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -97,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:text="@string/race_begin_finish_current" />
+                    android:text="@string/race_begin_finish_current"/>
             </RelativeLayout>
         </LinearLayout>
 
@@ -118,7 +118,7 @@
                     layout="@layout/time_picker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true" />
+                    android:layout_centerInParent="true"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -132,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:text="@string/race_begin_finish_custom" />
+                    android:text="@string/race_begin_finish_custom"/>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

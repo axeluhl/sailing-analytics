@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/windFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:descendantFocusability="beforeDescendants"
-    android:focusableInTouchMode="true"
-    android:orientation="vertical">
+<RelativeLayout android:id="@+id/windFragment"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:descendantFocusability="beforeDescendants"
+                android:focusableInTouchMode="true"
+                android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -24,7 +24,7 @@
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
             android:text="@string/wind_off"
-            android:textSize="@dimen/textSize_26" />
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/wind_off"
@@ -35,7 +35,7 @@
             android:layout_marginRight="@dimen/default_margin_half"
             android:layout_toLeftOf="@id/wind_sensor"
             android:layout_toStartOf="@id/wind_sensor"
-            android:src="@drawable/wind_off" />
+            android:src="@drawable/wind_off"/>
 
         <ImageView
             android:id="@+id/wind_on"
@@ -47,7 +47,7 @@
             android:layout_toLeftOf="@id/wind_sensor"
             android:layout_toStartOf="@id/wind_sensor"
             android:src="@drawable/wind_on"
-            android:visibility="invisible" />
+            android:visibility="invisible"/>
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -67,14 +67,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_chevron_left_white_24dp" />
+                android:src="?chevron_left_24dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@string/wind"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textNormal"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -98,7 +98,7 @@
             android:layout_margin="@dimen/default_margin_half"
             android:enabled="false"
             android:padding="@dimen/default_padding_half"
-            android:text="@string/wind_set_data" />
+            android:text="@string/wind_set_data"/>
 
         <Button
             android:id="@+id/set_position"
@@ -111,7 +111,7 @@
             android:layout_margin="@dimen/default_margin_half"
             android:padding="@dimen/default_padding_half"
             android:text="@string/wind_set_position"
-            android:visibility="invisible" />
+            android:visibility="invisible"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -131,13 +131,13 @@
                     android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/default_margin"
                     android:text="@string/wind_from"
-                    android:textSize="@dimen/textSize_22" />
+                    android:textSize="@dimen/textSize_22"/>
 
                 <com.sap.sailing.racecommittee.app.ui.views.CompassView
                     android:id="@+id/compassView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true" />
+                    android:layout_centerInParent="true"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -156,13 +156,13 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_margin="@dimen/default_margin"
                     android:text="@string/wind_speed"
-                    android:textSize="@dimen/textSize_22" />
+                    android:textSize="@dimen/textSize_22"/>
 
                 <NumberPicker
                     android:id="@+id/wind_speed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true" />
+                    android:layout_centerInParent="true"/>
 
             </RelativeLayout>
 
@@ -179,7 +179,7 @@
                     android:layout_margin="@dimen/default_margin"
                     android:text="@string/wind_position"
                     android:textSize="@dimen/textSize_22"
-                    android:visibility="visible" />
+                    android:visibility="visible"/>
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
@@ -191,7 +191,7 @@
                         android:name="com.sap.sailing.racecommittee.app.ui.fragments.maps.WindMap"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        tools:layout="@layout/welcome" />
+                        tools:layout="@layout/welcome"/>
 
                     <RelativeLayout
                         android:id="@+id/address"
@@ -211,7 +211,7 @@
                             android:layout_centerVertical="true"
                             android:background="@android:color/transparent"
                             android:padding="@dimen/default_padding_half"
-                            android:src="@drawable/ic_search_black_24dp" />
+                            android:src="@drawable/ic_search_black_24dp"/>
 
                         <EditText
                             android:id="@+id/address_input"
@@ -226,7 +226,7 @@
                             android:singleLine="true"
                             android:textAppearance="?android:attr/textAppearanceLarge"
                             android:textColor="?black"
-                            android:textColorHint="?sap_light_gray" />
+                            android:textColorHint="?sap_light_gray"/>
                     </RelativeLayout>
 
                     <RelativeLayout
@@ -237,7 +237,7 @@
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@color/constant_black_transparent" />
+                            android:background="@color/constant_black_transparent"/>
 
                         <Button
                             android:id="@+id/enter_position"
@@ -249,7 +249,7 @@
                             android:text="@string/wind_enter_position"
                             android:textAllCaps="true"
                             android:textAppearance="?android:attr/textAppearanceLarge"
-                            android:textColor="?white" />
+                            android:textColor="?white"/>
                     </RelativeLayout>
                 </RelativeLayout>
             </RelativeLayout>

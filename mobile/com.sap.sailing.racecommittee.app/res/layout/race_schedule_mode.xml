@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -23,13 +23,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_chevron_left_white_24dp" />
+                android:src="?chevron_left_24dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_mode"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textNormal"/>
         </LinearLayout>
 
         <View
@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thick_line"
             android:layout_alignParentBottom="true"
-            android:background="?black" />
+            android:background="?black"/>
     </RelativeLayout>
 
     <ListView
@@ -47,5 +47,5 @@
         android:layout_below="@id/header"
         android:background="?sap_gray_black_30"
         android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"/>
 </RelativeLayout>

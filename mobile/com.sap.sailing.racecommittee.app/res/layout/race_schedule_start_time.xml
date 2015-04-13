@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -24,14 +24,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_chevron_left_white_24dp"
-                android:visibility="gone" />
+                android:src="?chevron_left_24dp"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_time"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textNormal"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
                 android:src="@drawable/value_next"
-                android:tag="+" />
+                android:tag="+"/>
 
             <TextView
                 android:id="@+id/start_countdown"
@@ -66,7 +66,7 @@
                 android:textColor="?white"
                 android:textSize="@dimen/textSize_40"
                 android:visibility="visible"
-                tools:text="@string/race_start_time_in" />
+                tools:text="@string/race_start_time_in"/>
 
             <ImageButton
                 android:id="@+id/minute_dec"
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
                 android:src="@drawable/value_prev"
-                android:tag="-" />
+                android:tag="-"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -84,7 +84,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@+id/buttonBar"
-        android:background="?black" />
+        android:background="?black"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -103,14 +103,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:descendantFocusability="blocksDescendants" />
+                android:descendantFocusability="blocksDescendants"/>
 
             <include
                 android:id="@+id/start_time_picker"
                 layout="@layout/time_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"/>
         </LinearLayout>
 
         <Button
@@ -122,6 +122,6 @@
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin_twice"
-            android:text="@string/race_set_start" />
+            android:text="@string/race_set_start"/>
     </RelativeLayout>
 </RelativeLayout>

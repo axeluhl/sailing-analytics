@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Base application theme -->
-    <style name="AppTheme.Dark" parent="AppTheme.Dark.Base" />
+    <style name="AppTheme.Dark" parent="AppTheme.Dark.Base"/>
 
     <style name="AppTheme.Dark.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
@@ -39,6 +39,7 @@
         <!-- drawable -->
         <item name="access_time_36dp">@drawable/ic_access_time_white_36dp</item>
         <item name="check_18dp">@drawable/ic_check_white_18dp</item>
+        <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
         <item name="dns_48dp">@drawable/ic_dns_white_48dp</item>
         <item name="hearing_48dp">@drawable/ic_hearing_white_48dp</item>
         <item name="mic_48dp">@drawable/ic_mic_white_48dp</item>
