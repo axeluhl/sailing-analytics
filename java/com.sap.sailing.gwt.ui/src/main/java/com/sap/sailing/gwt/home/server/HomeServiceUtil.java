@@ -2,10 +2,13 @@ package com.sap.sailing.gwt.home.server;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -25,6 +28,7 @@ public final class HomeServiceUtil {
     private HomeServiceUtil() {
     }
 
+    private static final int MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS = 500;
     private static final String STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "stage";
     private static final String THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "eventteaser";
     
@@ -267,6 +271,21 @@ public final class HomeServiceUtil {
         }
         return result;
     }
+    
+    public static List<URL> getSailingLovesPhotographyImages(EventBase event) {
+        final List<URL> acceptedImages = new LinkedList<>();
+        for (URL candidateImageUrl : event.getImageURLs()) {
+            try {
+                ImageSize imageSize = event.getImageSize(candidateImageUrl);
+                if (imageSize != null && imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
+                    acceptedImages.add(candidateImageUrl);
+                }
+            } catch (Exception e) {
+                // TODO what should we do here?
+            }
+        }
+        return acceptedImages;
+    }
 
     public static int calculateCompetitorsCount(Leaderboard sl) {
         int count=0;
@@ -338,5 +357,13 @@ public final class HomeServiceUtil {
             }
         }
         return false;
+    }
+    
+    public static URL getRandomURL(Collection<URL> urls) {
+        List<URL> videoURLs = new ArrayList<URL>((Collection<URL>)urls);
+        if (videoURLs.isEmpty()) {
+            return null;
+        }
+        return videoURLs.get(new Random(videoURLs.size()).nextInt(videoURLs.size()));
     }
 }

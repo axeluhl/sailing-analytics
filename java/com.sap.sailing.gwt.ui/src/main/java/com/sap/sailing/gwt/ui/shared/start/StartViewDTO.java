@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.ui.shared.start;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
+import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
 
 public class StartViewDTO implements IsSerializable {
 
@@ -13,8 +16,8 @@ public class StartViewDTO implements IsSerializable {
 
     private ArrayList<EventListEventDTO> recentEvents = new ArrayList<EventListEventDTO>();
     
-    private ArrayList<MediaEntryDTO> photos = new ArrayList<>();
-    private ArrayList<MediaEntryDTO> videos = new ArrayList<>();
+    private ArrayList<ImageReferenceDTO> photos = new ArrayList<>();
+    private HashSet<VideoMetadataDTO> videos = new HashSet<>();
 
     public List<EventStageDTO> getStageEvents() {
         return stageEvents;
@@ -32,19 +35,19 @@ public class StartViewDTO implements IsSerializable {
         this.recentEvents.add(event);
     }
     
-    public ArrayList<MediaEntryDTO> getPhotos() {
+    public ArrayList<ImageReferenceDTO> getPhotos() {
         return photos;
     }
     
-    public void addPhoto(MediaEntryDTO photo) {
+    public void addPhoto(ImageReferenceDTO photo) {
         photos.add(photo);
     }
     
-    public ArrayList<MediaEntryDTO> getVideos() {
+    public Collection<VideoMetadataDTO> getVideos() {
         return videos;
     }
     
-    public void addVideo(MediaEntryDTO video) {
+    public void addVideo(VideoMetadataDTO video) {
         videos.add(video);
     }
 }
