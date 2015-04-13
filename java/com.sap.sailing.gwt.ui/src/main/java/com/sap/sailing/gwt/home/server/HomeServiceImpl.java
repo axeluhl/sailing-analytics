@@ -190,7 +190,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             // TODO implement better that using a hard cast...
             Collection<URL> videosOfEvent = (Collection<URL>) holder.event.getVideoURLs();
             if (videosOfEvent.size() > 0 && result.getVideos().size() < MAX_VIDEO_COUNT) {
-                // TODO only transfer YT ID
                 URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
                 result.addVideo(new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName()));
             }

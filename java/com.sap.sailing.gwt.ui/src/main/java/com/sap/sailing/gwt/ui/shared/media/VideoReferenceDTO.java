@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class VideoReferenceDTO implements IsSerializable {
     
     @GwtIncompatible
-    private static final Pattern YOUTUBE_ID_REGEX = Pattern.compile("^.*(youtu.be/|v/|u/\\w/|embed/|watch\\?v=|\\&v=)([^#\\&\\?]*).*");
+    private static final Pattern YOUTUBE_ID_REGEX = Pattern.compile("^.*(youtu.be/|v/|u/\\w/|embed/|watch\\?v=|\\&v=)([^#\\&\\?]+).*$");
     @GwtIncompatible
     private static final Pattern HTTP_FTP_REGEX = Pattern.compile("^(http|ftp).*"); // starting with http, https or ftp
     
@@ -23,7 +23,7 @@ public class VideoReferenceDTO implements IsSerializable {
     @GwtIncompatible
     private static String getIdByUrl(String url) {
         Matcher match = YOUTUBE_ID_REGEX.matcher(url);
-        if ((match != null) && (match.groupCount() == 3)) {
+        if (match.matches() && match.groupCount() == 2) {
             return match.group(2);
         } else if (HTTP_FTP_REGEX.matcher(url).matches()) { //--> doesn't start with either http, https or ftp --> supposed to be a naked youtube id   
             return url.trim();
@@ -33,7 +33,7 @@ public class VideoReferenceDTO implements IsSerializable {
     }
 
     public enum VideoType {
-        YOUTUBE
+        YOUTUBE, SOMETHING_ELSE
     }
 
     private VideoType type;
@@ -42,9 +42,16 @@ public class VideoReferenceDTO implements IsSerializable {
     protected VideoReferenceDTO() {
     }
 
-    public VideoReferenceDTO(String youtubeIdOrURL) {
-        type = VideoType.YOUTUBE;
-        ref = getIdByUrl(youtubeIdOrURL);
+    @GwtIncompatible
+    public VideoReferenceDTO(String videoURLOrYoutubeId) {
+        String youtubeId = getIdByUrl(videoURLOrYoutubeId);
+        if(youtubeId != null) {
+            type = VideoType.YOUTUBE;
+            ref = youtubeId;
+        } else {
+            type = VideoType.SOMETHING_ELSE;
+            ref = videoURLOrYoutubeId;
+        }
     }
 
     public VideoType getType() {

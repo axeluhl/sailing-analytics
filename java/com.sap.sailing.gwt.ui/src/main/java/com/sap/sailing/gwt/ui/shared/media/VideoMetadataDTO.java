@@ -13,12 +13,14 @@ public class VideoMetadataDTO extends VideoReferenceDTO {
     }
 
     @GwtIncompatible
-    public VideoMetadataDTO(URL youtubeIdOrURL, String title) {
-        this(youtubeIdOrURL.toString(), title);
+    public VideoMetadataDTO(URL videoURLOrYoutubeId, String title) {
+        this(videoURLOrYoutubeId.toString(), title);
     }
     
-    public VideoMetadataDTO(String youtubeIdOrURL, String title) {
-        super(youtubeIdOrURL);
+    @GwtIncompatible
+    public VideoMetadataDTO(String videoURLOrYoutubeId, String title) {
+        super(videoURLOrYoutubeId);
+        this.title = title;
     }
 
     public String getTitle() {
