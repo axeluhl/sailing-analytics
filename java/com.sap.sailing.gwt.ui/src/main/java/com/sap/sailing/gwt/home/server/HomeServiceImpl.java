@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -232,24 +233,24 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if(leaderboard instanceof RegattaLeaderboard) {
-                    Regatta regattaEntity = getService().getRegattaByName(leaderboard.getName());
-                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                    Regatta regatta = getService().getRegattaByName(leaderboard.getName());
+                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, regatta)) {
                         continue;
                     }
                     
-                    RegattaMetadataDTO regatta = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getName());
-                    regatta.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
-                    regatta.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
-                    regatta.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
-                    regatta.setTrackedRacesCount(HomeServiceUtil.calculateTrackedRaceCount(leaderboard));
-                    regatta.setBoatClass(HomeServiceUtil.calculateBoatClass(leaderboard));
+                    RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                    regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
+                    regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
+                    regattaDTO.setState(calculateRegattaState(regattaDTO));
+                    dto.getRegattas().add(regattaDTO);
                     
-                    regatta.setStartDate(regattaEntity.getStartDate() != null ? regattaEntity.getStartDate().asDate() : null);
-                    regatta.setEndDate(regattaEntity.getEndDate() != null ? regattaEntity.getEndDate().asDate() : null);
-                    regatta.setState(calculateRegattaState(regatta));
-                    dto.getRegattas().add(regatta);
-                } else {
-                    // TODO: Implement for FlexibleLeaderboard
+                } else if(leaderboard instanceof FlexibleLeaderboard) {
+                    RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                    
+                    regattaDTO.setStartDate(null);
+                    regattaDTO.setEndDate(null);
+                    regattaDTO.setState(calculateRegattaState(regattaDTO));
+                    dto.getRegattas().add(regattaDTO);
                 }
             }
         }
@@ -285,6 +286,17 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         }
 
         return dto;
+    }
+
+    private RegattaMetadataDTO createRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getName());
+        regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+        regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
+        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
+        regattaDTO.setTrackedRacesCount(HomeServiceUtil.calculateTrackedRaceCount(leaderboard));
+        regattaDTO.setBoatClass(HomeServiceUtil.calculateBoatClass(leaderboard));
+        
+        return regattaDTO;
     }
     
     private RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
@@ -476,7 +488,9 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 if(!HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
                     continue;
                 }
-            } else {
+            } else if(leaderboard instanceof FlexibleLeaderboard) {
+                int t = 0;
+                t++;
                 // TODO: Implement for FlexibleLeaderboard
             }
             return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();

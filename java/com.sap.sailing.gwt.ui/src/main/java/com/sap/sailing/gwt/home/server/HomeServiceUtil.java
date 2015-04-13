@@ -301,10 +301,10 @@ public final class HomeServiceUtil {
         return count;
     }
     
-    public static String calculateBoatClass(Leaderboard sl) {
+    public static String calculateBoatClass(Leaderboard leaderboard) {
         String boatClass = null;
         String boatClassDisplayName = null;
-        for (Competitor competitor : sl.getCompetitors()) {
+        for (Competitor competitor : leaderboard.getCompetitors()) {
             if(competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
                 if(boatClass == null) {
                     boatClass = competitor.getBoat().getBoatClass().getName();
