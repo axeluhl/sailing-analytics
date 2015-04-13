@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.home.client;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -22,8 +20,5 @@ public interface HomeService extends RemoteService {
     
     EventListViewDTO getEventListView() throws Exception;
     
-    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
-    
     StartViewDTO getStartView() throws Exception;
-
 }

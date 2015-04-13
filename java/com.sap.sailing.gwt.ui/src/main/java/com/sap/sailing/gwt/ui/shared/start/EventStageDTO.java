@@ -8,6 +8,7 @@ public class EventStageDTO extends EventMetadataDTO {
     private StageEventType stageType;
     private String baseURL;
     private boolean isOnRemoteServer;
+    private String stageImageURL;
 
     public String getBaseURL() {
         return baseURL;
@@ -31,5 +32,13 @@ public class EventStageDTO extends EventMetadataDTO {
 
     public void setStageType(StageEventType stageType) {
         this.stageType = stageType;
+    }
+
+    public String getStageImageURL() {
+        return stageImageURL;
+    }
+
+    public void setStageImageURL(String stageImageURL) {
+        this.stageImageURL = stageImageURL;
     }
 }

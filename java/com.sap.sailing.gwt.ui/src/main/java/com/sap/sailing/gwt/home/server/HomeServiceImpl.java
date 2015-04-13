@@ -4,13 +4,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -32,8 +36,6 @@ import com.sap.sailing.gwt.home.client.HomeService;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -45,8 +47,10 @@ import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesSt
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
+import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
@@ -87,12 +91,13 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             return event1Range.timeDifference(now).compareTo(event2Range.timeDifference(now));
         }
     }
-        
+    
     private static final long serialVersionUID = 3947782997746039939L;
     private static final Logger logger = Logger.getLogger(HomeServiceImpl.class.getName());
     
     private static final int MAX_STAGE_EVENTS = 5;
     private static final int MAX_RECENT_EVENTS = 3;
+    private static final int MAX_VIDEO_COUNT = 3;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
@@ -100,10 +105,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         BundleContext context = Activator.getDefault();
         
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-    }
-    
-    private SailingServiceImpl getSailingService() {
-        return SailingServiceImpl.getInstance();
     }
 
     protected RacingEventService getService() {
@@ -179,6 +180,13 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
             result.addStageEvent(convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType));
+            
+            // TODO implement better that using a hard cast...
+            Collection<URL> videosOfEvent = (Collection<URL>) holder.event.getVideoURLs();
+            if (videosOfEvent.size() > 0 && result.getVideos().size() < MAX_VIDEO_COUNT) {
+                URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
+                result.addVideo(new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName()));
+            }
         }
         Collections.sort(recentEventsOfLast12Month, new Comparator<EventHolder>() {
             @Override
@@ -187,25 +195,58 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 return diff > 0l ? 1 : diff < 0l ? -1 : 0;
             }
         });
+        
+        final Set<ImageReferenceDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable amount of shuffling
+        final List<VideoMetadataDTO> videoCandidates = new ArrayList<>();
+        
         for(int i = 0; i < MAX_RECENT_EVENTS && i < recentEventsOfLast12Month.size(); i++) {
             EventHolder holder = recentEventsOfLast12Month.get(i);
             result.addRecentEvent(convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer));
-        }
-        // TODO media
-        return result;
-    }
-    
-    @Override
-    public ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id) {
-        Event event = getService().getEvent(id);
-        if (event == null) {
-            throw new RuntimeException("Event not found");
+            
+            EventBase event = holder.event;
+
+            for (URL url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
+                try {
+                    ImageSize imageSize = event.getImageSize(url);
+                    if(imageSize != null) {
+                        photoGalleryUrls.add(new ImageReferenceDTO(url, imageSize));
+                    }
+                } catch (Exception e) {
+                }
+            }
+            for (URL videoUrl : event.getVideoURLs()) {
+                videoCandidates.add(new VideoMetadataDTO(videoUrl, holder.event.getName()));
+            }
         }
         
-        ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
-        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            result.add(getSailingService().convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
+        final int numberOfCandidatesAvailable = videoCandidates.size();
+        if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - result.getVideos().size())) {
+            // add all we have, no randomize
+            for (VideoMetadataDTO video : videoCandidates) {
+                result.addVideo(video);
+            }
+        } else {
+            // fill up the list randomly from videoCandidates
+            final Random videosRandomizer = new Random(numberOfCandidatesAvailable);
+            randomlyPick: for (int i = 0; i < numberOfCandidatesAvailable; i++) {
+                int nextVideoindex = videosRandomizer.nextInt(numberOfCandidatesAvailable);
+                final VideoMetadataDTO video = videoCandidates.get(nextVideoindex);
+                result.addVideo(video);
+                if (result.getVideos().size() == MAX_VIDEO_COUNT) {
+                    break randomlyPick;
+                }
+            }
         }
+        Random random = new Random();
+        List<ImageReferenceDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
+        final int gallerySize = photoGalleryUrls.size();
+        for (int i = 0; i < gallerySize; i++) {
+            Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
+        }
+        for (ImageReferenceDTO holder : shuffledPhotoGallery) {
+            result.addPhoto(holder);
+        }
+        // TODO media
         return result;
     }
 
@@ -447,6 +488,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
+        dto.setStageImageURL(HomeServiceUtil.getStageImageURLAsString(event));
         return dto;
     }
     

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.Countdown;
 import com.sap.sailing.gwt.home.client.shared.Countdown.CountdownListener;
 import com.sap.sailing.gwt.home.client.shared.Countdown.RemainingTime;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.carousel.LazyLoadable;
@@ -49,7 +49,7 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
     }
 
     private static StageTeaserUiBinder uiBinder = GWT.create(StageTeaserUiBinder.class);
-    private final EventBaseDTO event;
+    private final EventStageDTO event;
 
     @Override
     public void doInitializeLazyComponents() {
@@ -70,23 +70,21 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
 
     }
 
-    public StageTeaser(EventBaseDTO event) {
+    public StageTeaser(EventStageDTO event) {
         this.event = event;
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
-        if (event.startDate != null) {
-            TimePoint eventStart = new MillisecondsTimePoint(event.startDate);
-            CountdownListener countdownListener = new CountdownListener() {
+        TimePoint eventStart = new MillisecondsTimePoint(event.getStartDate());
+        CountdownListener countdownListener = new CountdownListener() {
 
-                @Override
-                public void changed(RemainingTime major, RemainingTime minor) {
-                    updateCountdown(major, minor);
-                }
+            @Override
+            public void changed(RemainingTime major, RemainingTime minor) {
+                updateCountdown(major, minor);
+            }
 
-            };
-            new Countdown(eventStart, countdownListener);
-        }
+        };
+        new Countdown(eventStart, countdownListener);
     }
 
     private void updateCountdown(RemainingTime major, RemainingTime minor) {

@@ -228,7 +228,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
         final EventViewDTO eventDTO = ctx.getEventDTO();
 
-        getHomeService().getLeaderboardGroupsByEventId(eventDTO.getId(),
+        getSailingService().getLeaderboardGroupsByEventId(eventDTO.getId(),
                 new AsyncCallback<ArrayList<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(ArrayList<LeaderboardGroupDTO> leaderboardGroups) {

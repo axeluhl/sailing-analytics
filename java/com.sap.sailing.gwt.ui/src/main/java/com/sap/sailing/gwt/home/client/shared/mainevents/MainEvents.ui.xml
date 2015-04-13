@@ -15,9 +15,9 @@
       </header>
     </div>
   </div>
-  <div ui:field="recentEventsDiv" class="{res.mediaCss.grid}">
-	<!-- the recent events will be inserted here -->
-  </div>
+  <g:FlowPanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid}">
+    <!-- the recent events will be inserted here -->
+  </g:FlowPanel>
   <div class="{res.mediaCss.grid} {res.mainCss.mainsection_navigation}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <g:Anchor ui:field="showAllEventsAnchor" styleName="{res.mainCss.button}"><ui:text from='{i18n.mainEventShowAll}'/></g:Anchor>
