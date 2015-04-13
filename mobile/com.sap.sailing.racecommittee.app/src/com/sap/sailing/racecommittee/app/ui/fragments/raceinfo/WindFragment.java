@@ -44,25 +44,21 @@ import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.URI;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class WindFragment extends BaseFragment
-        implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        LocationListener, OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener,
-        TextView.OnEditorActionListener {
+public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks,
+    GoogleApiClient.OnConnectionFailedListener, LocationListener, OnClickListener, OnMarkerDragListener,
+    OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
@@ -133,11 +129,8 @@ public class WindFragment extends BaseFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        apiClient = new GoogleApiClient.Builder(getActivity())
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+        apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this).build();
     }
 
     @Override
@@ -172,15 +165,15 @@ public class WindFragment extends BaseFragment
 
         if (getArguments() != null) {
             switch (getArguments().getInt(START_MODE, 0)) {
-                case 1:
-                    if (getView() != null) {
-                        View header = getView().findViewById(R.id.header);
-                        header.setVisibility(View.GONE);
-                    }
-                    break;
+            case 1:
+                if (getView() != null) {
+                    View header = getView().findViewById(R.id.header);
+                    header.setVisibility(View.GONE);
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
@@ -315,7 +308,8 @@ public class WindFragment extends BaseFragment
             if (bigMap) {
                 showBigMap();
                 if (savedInstanceState.getDouble("lat", -1) != -1) {
-                    windMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"), savedInstanceState.getFloat("zoom"));
+                    windMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"),
+                        savedInstanceState.getFloat("zoom"));
                     if (markerLat != -1) {
                         windMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
                     }
@@ -381,36 +375,36 @@ public class WindFragment extends BaseFragment
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.header_text:
-                if (bigMap) {
-                    showElements(true);
-                    bigMap = false;
-                } else {
-                    openMainScheduleFragment();
-                }
-                break;
-
-            case R.id.enter_position:
-                showBigMap();
-                break;
-
-            case R.id.address_search:
-                if (mAddressInput != null) {
-                    new GeoCodeTask().execute("" + mAddressInput.getText());
-                }
-                break;
-
-            case R.id.set_data: {
-                onSendClick();
-                break;
+        case R.id.header_text:
+            if (bigMap) {
+                showElements(true);
+                bigMap = false;
+            } else {
+                openMainScheduleFragment();
             }
-            case R.id.set_position: {
-                onPositionSetClick();
-                break;
+            break;
+
+        case R.id.enter_position:
+            showBigMap();
+            break;
+
+        case R.id.address_search:
+            if (mAddressInput != null) {
+                new GeoCodeTask().execute("" + mAddressInput.getText());
             }
-            default: {
-                break;
-            }
+            break;
+
+        case R.id.set_data: {
+            onSendClick();
+            break;
+        }
+        case R.id.set_position: {
+            onPositionSetClick();
+            break;
+        }
+        default: {
+            break;
+        }
         }
     }
 
@@ -422,13 +416,13 @@ public class WindFragment extends BaseFragment
         getRaceState().setWindFix(MillisecondsTimePoint.now(), wind);
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+        case 1:
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            break;
 
-            default:
-                openMainScheduleFragment();
-                break;
+        default:
+            openMainScheduleFragment();
+            break;
         }
     }
 
@@ -464,7 +458,9 @@ public class WindFragment extends BaseFragment
     private void showElements(boolean show) {
         if (mSetData != null) {
             mSetData.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-            mSetData.setEnabled(windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null && mCurrentLocation != null);
+            mSetData.setEnabled(
+                windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null
+                    && mCurrentLocation != null);
         }
         if (mSetPosition != null) {
             mSetPosition.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
@@ -532,12 +528,12 @@ public class WindFragment extends BaseFragment
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         switch (actionId) {
-            case EditorInfo.IME_ACTION_DONE:
-                new GeoCodeTask().execute("" + v.getText());
-                return true;
+        case EditorInfo.IME_ACTION_DONE:
+            new GeoCodeTask().execute("" + v.getText());
+            return true;
 
-            default:
-                return false;
+        default:
+            return false;
         }
     }
 
@@ -620,22 +616,24 @@ public class WindFragment extends BaseFragment
             StringBuilder responseBody = new StringBuilder();
             JSONObject locJSON = null;
             try {
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpGet request = new HttpGet();
-                URI website = new URI(getString(R.string.url_google_geocoder)
-                        + URLEncoder.encode(location, "UTF-8")
-                        + getString(R.string.urlpart_google_geocoder_sensor));
+                URL website = new URL(
+                    getString(R.string.url_google_geocoder) + URLEncoder.encode(location, "UTF-8") + getString(
+                        R.string.urlpart_google_geocoder_sensor));
                 ExLog.i(getActivity(), TAG, website.toString());
-                request.setURI(website);
-                HttpResponse response = httpclient.execute(request);
-                BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-                String line;
-                while ((line = in.readLine()) != null) {
-                    responseBody.append(line);
+                HttpURLConnection urlConnection = (HttpURLConnection) website.openConnection();
+                BufferedReader in;
+                try {
+                    in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        responseBody.append(line);
+                    }
+                    JSONObject jObject = new JSONObject(responseBody + "");
+                    locJSON = jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry")
+                        .getJSONObject("location");
+                } finally {
+                    urlConnection.disconnect();
                 }
-                JSONObject jObject = new JSONObject(responseBody + "");
-                locJSON = jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
             } catch (Exception e) {
                 ExLog.ex(WindFragment.this.getActivity(), TAG, e);
             }
@@ -650,7 +648,9 @@ public class WindFragment extends BaseFragment
                 return;
             }
             try {
-                ExLog.i(getActivity(), TAG, "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng"));
+                ExLog.i(getActivity(), TAG,
+                    "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON
+                        .getDouble("lng"));
                 windMap.centerMap(locJSON.getDouble("lat"), locJSON.getDouble("lng"));
             } catch (JSONException e) {
                 ExLog.ex(WindFragment.this.getActivity(), TAG, e);
