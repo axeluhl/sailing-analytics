@@ -2,7 +2,7 @@ package com.sap.sailing.domain.persistence.racelog.tracking;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 
 /**
  * For GPS Fixes, the fully qualified class name is the type used to identify

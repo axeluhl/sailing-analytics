@@ -22,6 +22,11 @@ public class RaceMapImageManager {
     protected ImageTransformer combinedWindIconTransformer;
 
     /**
+     * An arrow showing the true north direction
+     */
+    protected ImageTransformer trueNorthIndicatorIconTransformer;
+
+    /**
      * An arrow showing the wind provided by a wind sensor on a boat 
      */
     protected ImageTransformer windSensorIconTransformer;
@@ -32,7 +37,7 @@ public class RaceMapImageManager {
 
     public RaceMapImageManager() {
         maneuverIconsForTypeAndTargetTack = new HashMap<Util.Pair<ManeuverType, Tack>, Marker>();
-        
+        trueNorthIndicatorIconTransformer = new ImageTransformer(resources.trueNorthIndicatorIcon());
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
         windSensorIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
@@ -72,6 +77,10 @@ public class RaceMapImageManager {
         options.setIcon(markerImage);
         Marker marker = Marker.newInstance(options);
         return marker;
+    }
+    
+    public ImageTransformer getTrueNorthIndicatorIconTransformer() {
+        return trueNorthIndicatorIconTransformer;
     }
     
     public ImageTransformer getCombinedWindIconTransformer() {

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class WindLatticeDTO implements Serializable {
 
@@ -10,16 +10,16 @@ public class WindLatticeDTO implements Serializable {
 	 * Generated uid for serialisation
 	 */
 	private static final long serialVersionUID = -2110785502151983845L;
-	private PositionDTO[][] matrix;
+	private Position[][] matrix;
 
 	public WindLatticeDTO() {
 	}
 
-	public void setMatrix(PositionDTO[][] matrix) {
+	public void setMatrix( Position[][] matrix ) {
 		this.matrix = matrix;
 	}
 
-	public PositionDTO[][] getMatrix() {
+	public Position[][] getMatrix() {
 		return matrix;
 	}
 }

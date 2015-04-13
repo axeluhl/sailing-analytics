@@ -60,13 +60,13 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -410,10 +410,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
         String[] emailArray = emails.split(",");
         String leaderboardName = leaderboard.getName();
-
-        // http://<host>/buoy-tender/checkin&leaderboard_name=<leaderboard-name>
+        
+        String eventId = event.getId().toString();
+        
+        // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
         String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,
-                NonGwtUrlHelper.INSTANCE);
+                eventId, NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
                 sendInvitationEmail(locale, toAddress, leaderboardName,

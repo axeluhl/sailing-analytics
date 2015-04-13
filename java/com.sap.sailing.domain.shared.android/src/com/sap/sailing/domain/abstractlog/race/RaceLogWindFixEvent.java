@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race;
 
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 
 /**
  * Contains a wind fix that the race officers documented in the Race Committee App ashore

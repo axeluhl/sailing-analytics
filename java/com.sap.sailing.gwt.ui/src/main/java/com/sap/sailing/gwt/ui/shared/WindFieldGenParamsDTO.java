@@ -3,13 +3,13 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Duration;
 
 public class WindFieldGenParamsDTO implements IsSerializable {
 
-    private PositionDTO raceCourseStart;
-    private PositionDTO raceCourseEnd;
+    private Position raceCourseStart;
+    private Position raceCourseEnd;
 
     private int xRes;
     private int yRes;
@@ -51,19 +51,19 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     public WindFieldGenParamsDTO() {
     }
 
-    public PositionDTO getRaceCourseStart() {
+    public Position getRaceCourseStart() {
         return raceCourseStart;
     }
 
-    public void setRaceCourseStart(PositionDTO raceCourseStart) {
+    public void setRaceCourseStart(Position raceCourseStart) {
         this.raceCourseStart = raceCourseStart;
     }
 
-    public PositionDTO getRaceCourseEnd() {
+    public Position getRaceCourseEnd() {
         return raceCourseEnd;
     }
 
-    public void setRaceCourseEnd(PositionDTO raceCourseEnd) {
+    public void setRaceCourseEnd(Position raceCourseEnd) {
         this.raceCourseEnd = raceCourseEnd;
     }
 

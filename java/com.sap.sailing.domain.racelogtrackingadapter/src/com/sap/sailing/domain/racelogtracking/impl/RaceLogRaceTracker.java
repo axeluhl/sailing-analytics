@@ -59,7 +59,8 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -68,8 +69,6 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -446,7 +445,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
         trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore, gpsFixStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                boatClass.getApproximateManeuverDurationInMilliseconds(), null);
+                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true);
 
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
         
@@ -463,9 +462,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         // add listeners for devices in mappings already present
         addListeners(competitorMappings);
         addListeners(markMappings);
-
-        // add mark passing detection
-        new MarkPassingCalculator(trackedRace, true);
 
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles

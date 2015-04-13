@@ -6,10 +6,10 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;

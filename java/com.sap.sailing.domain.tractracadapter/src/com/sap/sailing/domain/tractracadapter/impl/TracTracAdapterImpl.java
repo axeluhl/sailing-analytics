@@ -56,7 +56,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI,
                         /* startOfTracking */null,
-                        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false,
+                        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, /* ignoreTracTracMarkPassings */ false,
                         raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility),
                 timeoutInMilliseconds);
     }
@@ -65,13 +65,13 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     public RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
-            boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword, String raceStatus,
+            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility) throws Exception {
         return trackerManager.addRace(
                 regattaToAddTo,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                        simulateWithStartTimeNow, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
+                        simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
                         raceStatus, raceVisibility), timeoutInMilliseconds);
     }
 

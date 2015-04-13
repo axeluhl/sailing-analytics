@@ -18,6 +18,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
 
     private class DeviceConfigurationQRIdentifierWidget extends BaseQRIdentifierWidget {
         private final TextBox identifierBox;
+        private StringMessages stringMessages;
         public DeviceConfigurationQRIdentifierWidget(String identifier, StringMessages stringMessages) {
             super(qrCodeSize, stringMessages);
             
@@ -30,12 +31,14 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
             inputGrid.resize(2, 2);
             inputGrid.setWidget(1, 0, new Label("Identifier:"));
             inputGrid.setWidget(1, 1, identifierBox);
+            
+            this.stringMessages = stringMessages;
         }
         
         @Override
         protected String generateEncodedQRCodeContent() {
             if (identifierBox.getValue().contains("#")) {
-                Window.alert("I'm not capable of generating a code for this identifier."); // TODO i18n
+                Window.alert(stringMessages.notCapableOfGeneratingACodeForIdentifier());
             } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
                 return DeviceConfigurationQRCodeUtils.composeQRContent(identifierBox.getValue(), apkUrl);

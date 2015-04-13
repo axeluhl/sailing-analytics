@@ -88,7 +88,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE,
+                        0l, /* simulateWithStartTimeNow */false, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
     }
 

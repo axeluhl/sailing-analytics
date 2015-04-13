@@ -34,7 +34,7 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
                 if (mark.position == null) {
                     return "";
                 }
-                return mark.position.latDeg + ", " + mark.position.lngDeg;
+                return mark.position.getLatDeg() + ", " + mark.position.getLngDeg();
             }
         };
         table.addColumn(markPositionColumn, stringMessages.position());
