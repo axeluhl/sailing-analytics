@@ -199,9 +199,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         final Set<ImageReferenceDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable amount of shuffling
         final List<VideoMetadataDTO> videoCandidates = new ArrayList<>();
         
-        for(int i = 0; i < MAX_RECENT_EVENTS && i < recentEventsOfLast12Month.size(); i++) {
-            EventHolder holder = recentEventsOfLast12Month.get(i);
-            result.addRecentEvent(convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer));
+        for(EventHolder holder : recentEventsOfLast12Month) {
+            if(result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
+                result.addRecentEvent(convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer));
+            }
             
             EventBase event = holder.event;
 
