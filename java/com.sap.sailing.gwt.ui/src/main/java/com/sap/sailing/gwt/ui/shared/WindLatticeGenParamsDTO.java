@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 
 public class WindLatticeGenParamsDTO implements Serializable {
@@ -12,7 +12,7 @@ public class WindLatticeGenParamsDTO implements Serializable {
 	 */
 	private static final long serialVersionUID = 6074038176026601942L;
 	
-	private PositionDTO center;
+	private Position center;
 	private double xSize	=  1;
 	private double ySize	=  1;
 	private int gridsizeX	= 20;
@@ -21,11 +21,11 @@ public class WindLatticeGenParamsDTO implements Serializable {
 	public WindLatticeGenParamsDTO() {
 	}
 
-	public void setCenter(PositionDTO center) {
+	public void setCenter(Position center) {
 		this.center = center;
 	}
 	
-	public PositionDTO getCenter() {
+	public Position getCenter() {
 		return center;
 	}
 

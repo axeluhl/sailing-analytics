@@ -18,8 +18,9 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
@@ -173,7 +174,8 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     public LegType getLegType() {
         TimePoint timePoint = fix.getTimePoint();
         try {
-            return race.getCurrentLeg(timePoint).getLegType(timePoint);
+            final TrackedLeg currentLeg = race.getCurrentLeg(timePoint);
+            return currentLeg==null?null:currentLeg.getLegType(timePoint);
         } catch (NoWindException e) {
             return null;
         }

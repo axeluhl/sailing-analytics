@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;

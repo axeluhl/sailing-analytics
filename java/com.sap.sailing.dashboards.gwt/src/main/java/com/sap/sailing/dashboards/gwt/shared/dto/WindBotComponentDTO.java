@@ -2,7 +2,7 @@ package com.sap.sailing.dashboards.gwt.shared.dto;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class WindBotComponentDTO implements Serializable{
     
@@ -13,7 +13,7 @@ public class WindBotComponentDTO implements Serializable{
     public double liveWindDirectionInDegrees;
     public double averageWindSpeedInKts;
     public double averageWindDirectionInDegrees;
-    public PositionDTO position;
+    public Position position;
     
     public WindBotComponentDTO() {}
 }
