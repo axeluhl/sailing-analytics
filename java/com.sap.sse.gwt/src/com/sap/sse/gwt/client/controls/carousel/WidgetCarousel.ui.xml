@@ -1,58 +1,74 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-
- 	    @external slick-slide, slick-prev, slick-next, slick-track;
-
-        .slider {
-			width: 100%;
-
-        }
-
-		.slider .slick-track {
-			
-		}
-
-        .slider ul li > button:before {
-            font-size: 15px;
-        }
+	@external slick-slide, slick-prev, slick-next, slick-track;
+	.slider {
+		width: 100%;
+	}
+	
+	.slider .slick-track {
 		
-		.slider .slick-slide {
-           	margin: 0px;
-			background-color: #fcfcfc;
-		}
-
-		
-		.slider .slick-prev {
-			left: 20px;
-			z-index:1;
-			height: 60px;
-			width: 60px;
-
-		}
-		.slider .slick-prev:before {
-			color: #000000;
-			font-size: 60px;
-			left: -60px;
-			top: 10px;
-		} 
-		.slider .slick-next {
-			right: 20px;
-			z-index:1;
-			height: 60px;
-			width: 60px;
-		} 
-		.slider .slick-next:before {
-			color: #000000;
-			font-size: 60px;
-			left: -60px;
-		} 
-
-    </ui:style>
+	}
+	
+	.slider ul li>button:before {
+		font-size: 15px;
+	}
+	
+	.slider .slick-slide {
+		margin: 0px;
+		background-color: #fcfcfc;
+	}
+	
+	.slider .slick-prev {
+		left: 0px;
+		z-index: 1;
+		height: 60px;
+		width: 60px;
+	}
+	
+	.slick-prev, .slick-next {
+		position: absolute;
+		background-position: 0 0;
+		background-repeat: no-repeat;
+		z-index: 10;
+		cursor: pointer;
+		top: 50%;
+		-webkit-transform: translate(0, -50%);
+		-moz-transform: translate(0, -50%);
+		-ms-transform: translate(0, -50%);
+		transform: translate(0, -50%);
+		width: 4em;
+		height: 4em;
+		background-image:
+			url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxNzkyQ0E2OUQ0MzgxMUUzQTM5MEI2NkI4RTRCODhEMyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoxNzkyQ0E2QUQ0MzgxMUUzQTM5MEI2NkI4RTRCODhEMyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjE3OTJDQTY3RDQzODExRTNBMzkwQjY2QjhFNEI4OEQzIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjE3OTJDQTY4RDQzODExRTNBMzkwQjY2QjhFNEI4OEQzIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+8Qas9QAAA/9JREFUeNrs3T1LW1EYwHFzk2poS1sthSJipRrFRcEX0CWmgkMHv0YHd2dxlDsGAv0IfgIRlYIgWYpBF4cW0SjokFYL0oY0L80zZKlx8t5zntzz/4Mf4Dm/E5PDzb2JTU9Pf+6iyOaxBAATwAQwAUwAE8AEMMAEMAFMABPABDDpBk4kEjH5i8qiaprH07AYuVzuQzabzUQBWWaQWWQmDfN4GnCnpqZGJicnhyYmJl51OrDMILPITBqQ4/39/cu2cSuVyt+1tbWtg4ODUqcDX11dlYvF4nU6nX4/MDDwpjnfy62trbN6ve4OcDvcnZ2d66i8B5+ent5pQTYOHHVcbchGgV3B1YRsDNg1XC3IRoBdxX0Iufkp+8X29va5CeTQgVvnwpmZmZSLuO2QBwcHjSGHCtzCnZ2ddRrXJnJowODqQA4FGFw9yIEDg6sLOVBgcPUhB36xIR6Px6DTs3aBvoJl58khXg7zct6TnSk7VHYqfPdbWlp6u76+/rG7u/vJ4eHh95WVlS/VarWh+j0YZD24oX2KBlkHbqjnYJDt44YKDLJ93NCBQbaLawQYZHu4xoBdRraJaxTYRWTbuMaBXULWgGsF2AVkLbjWgB9CLhQK5/K94k7Gbc7T6/v+sgZcKWFzMWRwWYBcLtdVq9Uax8fHt53+6pUZjo6OzuTCgW1cKabhWZWt2ztsL0YU50loWJCowGqch/uDIx7AABPABDABTAATwAQwwAQwAUwAE8D0qORy4TTLwCuYACaACWACmAAmgAEmgAlgApgAJoAJYIAtJffSRukhpprm8TQshu/7QxsbG++igCwzyCwyk4Z5PA246XS6b25urnd0dLSn04FlBplFZtKALM/o+GQbt1wu11dXV78VCoXfnQ5cKpWqJycnd4uLi33Dw8NPx8bGenZ3d381Gg13gNvh5vP5yDxG6fLysqIF2Thw1HG1IRsFdgVXE7IxYNdwtSAbAXYV9yHkVCrVvbe3ZwQ5dODWuXBhYeG1i7jtkEdGRp6ZQg4VuIWbyWScxrWJHBowuDqQQwEGVw9y4MDg6kIOFBhcfciBX2zwPI/fLlS0doG+gmXnySFeDvNy3pOdKTtUdip895ufn3/u+34qmUx6+/v7P5v/8c7kudmq34NB1oMb2qdokHXghnoOBtk+bqjAINvHDR0YZLu4RoBBtodrDNhlZJu4RoFdRLaNaxzYJWQNuFaAXUDWgmsN+CHkfD5/K98r7mTc8fHxZDabHdOAaxX4f+SLi4s/m5ubP2x9QTyobm5uak3knmKxWLaNK8lvF361vSit2ztsL0YU51Hx24VRgdU4D/cHRzyAASaACWACmAAmgAlggAlgApgAJoDpUf0TYADnqrAanCLw9QAAAABJRU5ErkJggg==)
+	}
+	
+	.slick-prev:hover, .slick-prev:focus, .slick-next:hover, .slick-next:focus
+	{
+		color: transparent;
+		outline: none;
+	}
+	
+	.slick-prev {
+		left: 0;
+		background-position: 0 0
+	}
+	
+	.slick-prev:hover {
+		background-position: 0 100%
+	}
+	
+	.slick-next {
+		right: 0;
+		background-position: 100% 0
+	}
+	
+	.slick-next:hover {
+		background-position: 100% 100%
+	}
+	</ui:style>
 
 	<g:HTMLPanel styleName="{style.slider}" ui:field="sliderMainUi">
-
-	
 	</g:HTMLPanel>
 
 </ui:UiBinder>
