@@ -509,6 +509,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
+        dto.setStageImageURL(HomeServiceUtil.getStageImageURLAsString(event));
         return dto;
     }
     
