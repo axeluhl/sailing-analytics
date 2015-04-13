@@ -1,6 +1,6 @@
 package com.sap.sailing.simulator.impl;
 
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.simulator.TimedPosition;
 
 public class PathCandidate implements Comparable<PathCandidate> {

@@ -66,7 +66,10 @@ public class FixesAndTails {
      */
     private final Map<CompetitorDTO, Integer> lastShownFix;
 
-    public FixesAndTails() {
+    private final CoordinateSystem coordinateSystem;
+
+    public FixesAndTails(CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
@@ -140,14 +143,16 @@ public class FixesAndTails {
             if (!fix.timepoint.before(to)) {
                 indexOfLast = i-1;
             } else {
-                LatLng point = null;
+                final LatLng point;
                 if (indexOfFirst == -1) {
                     if (!fix.timepoint.before(from)) {
                         indexOfFirst = i;
-                        point = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
+                        point = coordinateSystem.toLatLng(fix.position);
+                    } else {
+                        point = null;
                     }
                 } else {
-                    point = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
+                    point = coordinateSystem.toLatLng(fix.position);
                 }
                 if (point != null) {
                     points.add(point);
@@ -256,7 +261,7 @@ public class FixesAndTails {
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                        tail.getPath().setAt(intoThisIndex - indexOfFirstShownFix, LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                        tail.getPath().setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
                 } else {
                     // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
@@ -284,8 +289,7 @@ public class FixesAndTails {
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
                 if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix,
-                            LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                 }
                 if (intoThisIndex < indexOfFirstShownFix) {
                     indexOfFirstShownFix++;
@@ -374,7 +378,7 @@ public class FixesAndTails {
                         && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
                     indexOfFirstShownFix--;
                     GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
-                    tail.getPath().insertAt(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+                    tail.getPath().insertAt(0, coordinateSystem.toLatLng(fix.position));
                     vertexCount++;
                 }
                 // now adjust the polylines tail: remove excess vertices that are after "to"
@@ -395,7 +399,7 @@ public class FixesAndTails {
                         && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
                     indexOfLastShownFix++;
                     GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
-                    tail.getPath().insertAt(vertexCount++, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+                    tail.getPath().insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                 }
                 firstShownFix.put(competitorDTO, indexOfFirstShownFix);
                 lastShownFix.put(competitorDTO, indexOfLastShownFix);
@@ -502,5 +506,20 @@ public class FixesAndTails {
             }
         }
         return null;
+    }
+
+    /**
+     * Clears all tail data, removing them from the map and from this object's internal structures. GPS fixes remain
+     * cached. Immediately after this call, {@link #getTail(CompetitorDTO)} will return <code>null</code> for all
+     * competitors. Tails will need to be created (again) using
+     * {@link #createTailAndUpdateIndices(CompetitorDTO, Date, Date, TailFactory)}.
+     */
+    protected void clearTails() {
+        for (Polyline tail : tails.values()) {
+            tail.setMap(null);
+        }
+        tails.clear();
+        firstShownFix.clear();
+        lastShownFix.clear();
     }
 }

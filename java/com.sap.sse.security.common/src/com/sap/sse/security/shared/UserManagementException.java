@@ -13,9 +13,7 @@ public class UserManagementException extends Exception implements Serializable {
     public static final String USERNAME_DOES_NOT_MEET_REQUIREMENTS = "Username does not meet requirements";
     public static final String CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL = "Cannot reset password without validated e-mail address";
 
-    public UserManagementException() {} // for GWT serialization
-    
-    private String message;
+    private final String message;
     
     @Override
     public String getMessage() {
