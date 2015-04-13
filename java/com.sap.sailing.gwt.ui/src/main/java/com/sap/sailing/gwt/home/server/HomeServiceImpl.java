@@ -532,8 +532,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                     continue;
                 }
             } else if(leaderboard instanceof FlexibleLeaderboard) {
-                int t = 0;
-                t++;
                 // TODO: Implement for FlexibleLeaderboard
             }
             return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
