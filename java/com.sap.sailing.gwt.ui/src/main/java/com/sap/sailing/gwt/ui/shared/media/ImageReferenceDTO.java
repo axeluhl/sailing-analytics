@@ -11,13 +11,12 @@ public class ImageReferenceDTO implements IsSerializable {
     private int heightInPx;
     private String imageURL;
 
-    @SuppressWarnings("unused")
-    private ImageReferenceDTO() {
+    protected ImageReferenceDTO() {
     }
 
     @GwtIncompatible
     public ImageReferenceDTO(URL imageURL, ImageSize size) {
-        this(imageURL.toString(), size.getWidth(), size.getHeight());
+        this(imageURL.toString(), size == null ? 0 : size.getWidth(), size == null ? 0 : size.getHeight());
     }
 
     public ImageReferenceDTO(String imageURL, int widthInPx, int heightInPx) {

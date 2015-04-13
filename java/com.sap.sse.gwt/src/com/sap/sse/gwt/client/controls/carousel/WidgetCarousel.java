@@ -60,7 +60,7 @@ public class WidgetCarousel extends Composite {
     /**
      * slick slider property: infiniteScrolling
      */
-    private boolean infiniteScrolling = false;
+    private boolean infiniteScrolling = true;
 
     private final String uniqueId;
 

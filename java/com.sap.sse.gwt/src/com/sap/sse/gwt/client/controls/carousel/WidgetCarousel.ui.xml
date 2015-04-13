@@ -32,7 +32,7 @@
 		background-repeat: no-repeat;
 		z-index: 10;
 		cursor: pointer;
-		top: 50%;
+		top: 40%;
 		-webkit-transform: translate(0, -50%);
 		-moz-transform: translate(0, -50%);
 		-ms-transform: translate(0, -50%);

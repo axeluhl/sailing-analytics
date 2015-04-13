@@ -11,10 +11,10 @@
         <div ui:field="eventImage" class="{local_res.css.eventteaser_image}"></div>
         <!-- IF event.state === 'live' -->
         <div ui:field="eventTeaserWithState" class="{local_res.css.eventteaser_title}">
-          <div ui:field="eventNameWithState" class="{local_res.css.eventteaser_title_name}" />
           <div class="{local_res.css.eventteaser_title_label}">
             <div ui:field="eventState" data-labeltype="live" class="{local_res.css.label} {res.mainCss.label} {res.mainCss.labellarge}" />
           </div>
+          <div ui:field="eventNameWithState" class="{local_res.css.eventteaser_title_name}" />
         </div>
         <!-- IF/ELSE event.state !== 'live' -->
         <div ui:field="eventName" class="{local_res.css.eventteaser_name}">

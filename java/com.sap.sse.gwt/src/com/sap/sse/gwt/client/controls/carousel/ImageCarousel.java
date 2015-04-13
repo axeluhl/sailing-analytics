@@ -152,8 +152,6 @@ public class ImageCarousel extends Widget {
             setInfiniteScrolling(false);
             setShowDots(false);
         }
-
-        GWT.log("# of elements: " + getElement().getChildCount());
     }
 
     /**
