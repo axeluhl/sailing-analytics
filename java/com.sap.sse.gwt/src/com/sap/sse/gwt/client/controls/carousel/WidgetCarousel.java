@@ -60,7 +60,7 @@ public class WidgetCarousel extends Composite {
     /**
      * slick slider property: infiniteScrolling
      */
-    private boolean infiniteScrolling = true;
+    private boolean infiniteScrolling = false;
 
     private final String uniqueId;
 
@@ -115,17 +115,14 @@ public class WidgetCarousel extends Composite {
 						dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
 						infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
 						swipeToSlide : false,
+						arrows : true,
 						responsive : false,
 						onAfterChange : function() {
 						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
 						},
 						onInit : function() {
 						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-						},
-						arrows : true,
-						prevArrow : "<div class='slick-prev'/>",
-						nextArrow : "<div class='slick-next'/>"
-
+						}
 					    });
 			});
 
