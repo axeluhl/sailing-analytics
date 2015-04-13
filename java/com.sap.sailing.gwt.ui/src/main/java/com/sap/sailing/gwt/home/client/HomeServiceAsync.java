@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.home.client;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -25,8 +23,6 @@ public interface HomeServiceAsync {
     void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
 
     void getEventListView(AsyncCallback<EventListViewDTO> callback);
-
-    void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 
     void getStartView(AsyncCallback<StartViewDTO> callback);
 }

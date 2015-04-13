@@ -507,11 +507,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final QuickRanksLiveCache quickRanksLiveCache;
     
-    private static SailingServiceImpl instance;
-    
     public SailingServiceImpl() {
-        instance = this;
-        
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
         if (context != null) {
@@ -565,10 +561,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-    }
-    
-    public static SailingServiceImpl getInstance() {
-        return instance;
     }
     
     /**
@@ -5631,5 +5623,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 emails, getLocale(localeInfoName));
+    }
+    
+    @Override
+    public ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id) {
+        Event event = getService().getEvent(id);
+        if (event == null) {
+            throw new RuntimeException("Event not found");
+        }
+        
+        ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
+        }
+        return result;
     }
 }

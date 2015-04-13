@@ -36,8 +36,6 @@ import com.sap.sailing.gwt.home.client.HomeService;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -107,10 +105,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         BundleContext context = Activator.getDefault();
         
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-    }
-    
-    private SailingServiceImpl getSailingService() {
-        return SailingServiceImpl.getInstance();
     }
 
     protected RacingEventService getService() {
@@ -253,20 +247,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             result.addPhoto(holder);
         }
         // TODO media
-        return result;
-    }
-    
-    @Override
-    public ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id) {
-        Event event = getService().getEvent(id);
-        if (event == null) {
-            throw new RuntimeException("Event not found");
-        }
-        
-        ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
-        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            result.add(getSailingService().convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
-        }
         return result;
     }
 

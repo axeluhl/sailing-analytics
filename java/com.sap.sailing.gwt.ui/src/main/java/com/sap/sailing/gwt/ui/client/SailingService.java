@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -606,4 +607,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
+    
+    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 }
