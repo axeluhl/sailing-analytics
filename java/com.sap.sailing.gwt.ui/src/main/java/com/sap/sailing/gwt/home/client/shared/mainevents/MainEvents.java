@@ -54,7 +54,7 @@ public class MainEvents extends Composite {
     
     @UiHandler("showAllEventsAnchor")
     public void showAllEvents(ClickEvent e) {
-        eventsNavigation.gotoPlace();
+        eventsNavigation.goToPlace();
         e.preventDefault();
    }
 
