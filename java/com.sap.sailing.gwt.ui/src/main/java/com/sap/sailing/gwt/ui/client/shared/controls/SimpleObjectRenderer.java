@@ -1,4 +1,5 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sailing.gwt.ui.client.shared.controls;
+
 
 /**
  * Simple renderer, that uses the objects toString method to render.

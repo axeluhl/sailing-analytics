@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentGroup;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentToolbar;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentToolbarEntry;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 
@@ -87,12 +87,12 @@ public class CollapsableComponentViewer<SettingsType extends Settings> implement
             if (embeddableComponent.hasToolbar()) {
                 collapsablePanel.setHeaderToolbar(embeddableComponent.getToolbarWidget());
             } else {
-                ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+                ComponentToolbarEntry<SettingsType> toolbar = new ComponentToolbarEntry<SettingsType>(component, stringMessages);
                 toolbar.addSettingsButton();
                 collapsablePanel.setHeaderToolbar(toolbar);
             }
         } else {
-            ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+            ComponentToolbarEntry<SettingsType> toolbar = new ComponentToolbarEntry<SettingsType>(component, stringMessages);
             toolbar.addSettingsButton();
             collapsablePanel.setHeaderToolbar(toolbar);
         }

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.components;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface ComponentResources extends ClientBundle {
+public interface ComponentResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/open.png")
     ImageResource openIcon();
