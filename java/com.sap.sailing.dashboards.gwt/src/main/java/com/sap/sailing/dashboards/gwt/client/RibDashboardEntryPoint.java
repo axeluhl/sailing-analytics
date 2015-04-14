@@ -30,7 +30,7 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
     @Override
     public void doOnModuleLoad() {
         SailingServiceAsync sailingService = GWT.create(SailingService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.WEB_CONTEXT_PATH, RemoteServiceMappingConstants.sailingServiceRemotePath);
         
         RibDashboardServiceAsync ribdashboardService = GWT.create(RibDashboardService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) ribdashboardService, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, RemoteServiceMappingConstants.ribdashboardServiceRemotePath);
