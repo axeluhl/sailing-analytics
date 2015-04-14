@@ -19,22 +19,24 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
@@ -616,10 +618,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         private void invalidateForNewWind(Wind wind, WindSource windSource) {
             WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
             // check what the next fixes before and after the one affected are; if they are further than the
-            // averagingInterval
-            // away, extend the invalidation interval accordingly because the entire span up to the next fix may be
-            // influenced
-            // by adding/removing a fix in a sparsely occupied track. See
+            // averagingInterval away, extend the invalidation interval accordingly because the entire span up
+            // to the next fix may be influenced by adding/removing a fix in a sparsely occupied track. See
             // WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
             long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
             final TimePoint timePoint = wind.getTimePoint();
@@ -706,10 +706,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             // A mark position change can mean a leg type change. The interval over which the wind estimation is
             // affected
             // depends on how the GPS track computes the estimated mark position. Ask it:
-            Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark)
-                    .getEstimatedPositionTimePeriodAffectedBy(fix);
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
-            TimePoint endOfInvalidation = interval.getB();
+            TimeRange interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.from());
+            TimePoint endOfInvalidation = interval.to();
             scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
         }
     }

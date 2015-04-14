@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -37,14 +36,17 @@ import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
-import com.sap.sailing.domain.tracking.WithValidityCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
@@ -356,7 +358,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+    public TimeRange getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
         if (fix == null) {
             throw new IllegalArgumentException("fix must not be null");
         }
@@ -393,7 +395,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     end = fixesForPositionEstimation.getB().getTimePoint();
                 }
             }
-            return new Util.Pair<TimePoint, TimePoint>(start, end);
+            return new TimeRangeImpl(start, end);
         } finally {
             unlockAfterRead();
         }

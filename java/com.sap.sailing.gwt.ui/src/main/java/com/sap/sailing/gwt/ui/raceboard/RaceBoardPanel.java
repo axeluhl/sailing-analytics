@@ -40,12 +40,10 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -58,11 +56,15 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentViewer;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -102,6 +104,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
+    private EditMarkPassingsPanel editMarkPassingPanel;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -218,11 +221,16 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier,
+                stringMessages, competitorSelectionModel, errorReporter, timer);
+        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
+        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+        components.add(editMarkPassingPanel);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -242,7 +250,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
     
     @SuppressWarnings("unused")
-    private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
+    private <SettingsType extends Settings> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
             settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
                 public void execute() {
@@ -351,6 +359,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
+        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboard);
     }
 
     @Override

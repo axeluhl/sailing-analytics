@@ -220,7 +220,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             public String getValue(WindDTO object) {
                 String result = "";
                 if (object.position != null) {
-                    result = "Lat: " + object.position.latDeg + ", Lon: " + object.position.lngDeg;
+                    result = "Lat: " + object.position.getLatDeg() + ", Lon: " + object.position.getLngDeg();
                 }
                 return result;
             }
@@ -592,11 +592,11 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                     if (windTrackInfo != null && windTrackInfo.windFixes.size() >= 7) {
                         NumberFormat formatter = NumberFormat.getFormat(".##");
                         for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
-                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.latDeg) + " (lat) " + formatter.format(windFix.position.lngDeg) + " (lng) " + new Date(windFix.measureTimepoint)));
+                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
                         }
                         // These fixes must not necessarily be the real last ones. This especially holds for long races.
                         for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size() - 4, windTrackInfo.windFixes.size() - 1)) {
-                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.latDeg) + " (lat) " + formatter.format(windFix.position.lngDeg) + " (lng) " + new Date(windFix.measureTimepoint)));
+                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
                         }
                     } else {
                         windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));

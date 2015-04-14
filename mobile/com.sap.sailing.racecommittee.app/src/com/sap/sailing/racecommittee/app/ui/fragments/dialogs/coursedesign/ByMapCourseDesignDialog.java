@@ -33,7 +33,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;

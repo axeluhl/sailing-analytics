@@ -240,7 +240,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         ribDashboardServiceAsync.getCompetitorsInLeaderboard(leaderboardName, new AsyncCallback<List<CompetitorDTO>>() {
             @Override
             public void onSuccess(List<CompetitorDTO> result) {
-                if (!competitorSelectionPopup.isShown())
+                if (result != null && result.size() > 0 && !competitorSelectionPopup.isShown())
                     competitorSelectionPopup.show(result);
             }
 

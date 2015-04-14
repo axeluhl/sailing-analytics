@@ -4,11 +4,10 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.Shared;
 
 @Shared
-public interface CombinedWindPanelStyle extends CssResource{
-    
+public interface CombinedWindPanelStyle extends CssResource {
     public String combinedWindPanel();
-    
+
     public String combinedWindPanelTextLabel();
-    
+
     public String combinedWindPanelCanvas();
 }

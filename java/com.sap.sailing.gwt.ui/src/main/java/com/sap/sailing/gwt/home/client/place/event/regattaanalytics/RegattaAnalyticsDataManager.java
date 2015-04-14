@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -14,14 +14,15 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -52,7 +53,7 @@ public class RegattaAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(leaderboardPanel == null) {
@@ -124,7 +125,7 @@ public class RegattaAnalyticsDataManager {
         showComponentSettingsDialog(multiCompetitorChart, null);
     }
     
-    protected <SettingsType> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
+    protected <SettingsType extends Settings> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
         String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
         String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
         SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component, StringMessages.INSTANCE);

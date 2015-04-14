@@ -95,6 +95,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -102,6 +103,8 @@ import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -133,8 +136,6 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -145,7 +146,6 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
@@ -379,6 +379,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             .withInitial(() -> false);
     
     private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
+    
+    private final JoinedClassLoader joinedClassLoader;
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -457,6 +459,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
         this.masterDataClassLoaders.add(this.getClass().getClassLoader());
+        joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         this.operationsSentToMasterForReplication = new HashSet<>();
         if (windStore == null) {
             try {
@@ -1444,12 +1447,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null);
+                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -2291,7 +2294,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public ClassLoader getDeserializationClassLoader() {
-        return getCombinedMasterDataClassLoader();
+        return joinedClassLoader;
     }
 
     @Override

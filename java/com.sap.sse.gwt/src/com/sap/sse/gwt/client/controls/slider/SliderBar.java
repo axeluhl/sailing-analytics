@@ -1016,8 +1016,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 }
 
                 // Hide unused markers
-                for (int i = (numMarkers + 1); i < markerElements.size(); i++) {
-                    tickElements.get(i).getStyle().setDisplay(Display.NONE);
+                for (int i = numMarkers; i < markerElements.size(); i++) {
+                    markerElements.get(i).getStyle().setDisplay(Display.NONE);
                 }
             } else { // Hide all markers
                 for (Element elem : markerElements) {

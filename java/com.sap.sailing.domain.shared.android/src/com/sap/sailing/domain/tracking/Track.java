@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 /**
  * A track records {@link Timed} items for an object of type <code>ItemType</code>. It allows clients to ask for a value
@@ -65,20 +65,44 @@ public interface Track<FixType extends Timed> extends Serializable {
      */
     Iterable<FixType> getRawFixes();
 
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getLastFixAtOrBefore(TimePoint timePoint);
 
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getLastFixBefore(TimePoint timePoint);
-
+    
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getLastRawFixAtOrBefore(TimePoint timePoint);
 
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getFirstFixAtOrAfter(TimePoint timePoint);
 
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getFirstRawFixAtOrAfter(TimePoint timePoint);
 
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getLastRawFixBefore(TimePoint timePoint);
 
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getFirstRawFixAfter(TimePoint timePoint);
     
+    /**
+     * Returns <code>null</code> if no such fix exists.      
+     */
     FixType getFirstFixAfter(TimePoint timePoint);
     
     /**

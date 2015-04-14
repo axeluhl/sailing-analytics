@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 
 public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCell {
     public final static String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";

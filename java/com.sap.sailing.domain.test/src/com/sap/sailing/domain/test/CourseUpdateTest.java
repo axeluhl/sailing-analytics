@@ -88,7 +88,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                     }
                 },
                 /* delayToLiveInMillis */0l, /* millisecondsOverWhichToAverageWind */30000, /* simulator */null, /* courseDesignUpdateURI */
-                null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber()) {
+                null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/false) {
             @Override
             protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
                 super.handleEvent(event);

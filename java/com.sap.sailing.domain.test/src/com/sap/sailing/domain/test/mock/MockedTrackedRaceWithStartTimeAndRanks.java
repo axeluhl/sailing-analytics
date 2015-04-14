@@ -26,12 +26,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -44,7 +45,6 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -590,6 +590,23 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return null;
+    }
+
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
+
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

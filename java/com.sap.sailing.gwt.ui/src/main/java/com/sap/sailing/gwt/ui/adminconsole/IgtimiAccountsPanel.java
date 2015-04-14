@@ -33,7 +33,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;

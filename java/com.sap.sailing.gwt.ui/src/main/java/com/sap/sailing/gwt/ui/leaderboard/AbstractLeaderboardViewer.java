@@ -13,11 +13,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
 /**
  * A base class for a leaderboard viewer.
@@ -66,7 +67,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         return mainPanel;
     }
     
-    protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
+    protected <SettingsType extends Settings> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
             String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
         if (!hideToolbar) {
             final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();

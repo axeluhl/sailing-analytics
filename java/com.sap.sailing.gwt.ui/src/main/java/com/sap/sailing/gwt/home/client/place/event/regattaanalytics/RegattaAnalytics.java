@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -99,7 +100,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     }
     
     public void createRegattaAnalyticsViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+            final Timer timer, final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final UserAgentDetails userAgent, boolean showRaceDetails,  
             boolean autoExpandLastRaceColumn, boolean showOverallLeaderboard) {

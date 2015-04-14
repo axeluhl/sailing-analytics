@@ -5,28 +5,28 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
-import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
@@ -34,6 +34,7 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryDefinitionDTOImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -47,32 +48,24 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     
     private final Timer queryDefinitionReleaseTimer;
     
-    private final FlowPanel mainPanel;
-    private HorizontalPanel controlsPanel;
+    private final DockLayoutPanel mainPanel;
+    private FlowPanel controlsPanel;
     
     private StatisticProvider statisticProvider;
     private SimpleDataRetrieverChainDefinitionProvider retrieverChainProvider;
 
     private MultiDimensionalGroupingProvider groupBySelectionPanel;
     
-    private SelectionProvider<?> selectionProvider;
+    private FilterSelectionProvider selectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
         
-        mainPanel = new ResizingFlowPanel() {
-            @Override
-            public void onResize() {
-                Widget selectionWidget = selectionProvider.getEntryWidget();
-                if (selectionWidget instanceof RequiresResize) {
-                    ((RequiresResize) selectionWidget).onResize();
-                }
-            }
-        };
+        mainPanel = new DockLayoutPanel(Unit.PX);
 
-        mainPanel.add(createFunctionsPanel());
+        mainPanel.addNorth(createFunctionsPanel(), 92);
 
-        selectionProvider = new RetrieverLevelSpecificSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        selectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {
@@ -90,10 +83,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     private Widget createFunctionsPanel() {
-        HorizontalPanel functionsPanel = new HorizontalPanel();
-        functionsPanel.setSpacing(5);
-
-        VerticalPanel statisticAndRetrieverChainPanel = new VerticalPanel();
+        FlowPanel statisticAndRetrieverChainPanel = new FlowPanel();
         statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
@@ -111,7 +101,6 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         });
         statisticAndRetrieverChainPanel.add(retrieverChainProvider.getEntryWidget());
-        functionsPanel.add(statisticAndRetrieverChainPanel);
 
         groupBySelectionPanel = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
         groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
@@ -120,7 +109,10 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                 scheduleQueryDefinitionChanged();
             }
         });
-        functionsPanel.add(groupBySelectionPanel.getEntryWidget());
+        ScrollPanel groupBySelectionScrollPanel = new ScrollPanel(groupBySelectionPanel.getEntryWidget());
+        
+        controlsPanel = new FlowPanel();
+        controlsPanel.addStyleName("definitionProviderControls");
 
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -129,13 +121,13 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                 selectionProvider.clearSelection();
             }
         });
-        functionsPanel.add(clearSelectionButton);
+        addControl(clearSelectionButton);
         
-        controlsPanel = new HorizontalPanel();
-        controlsPanel.setSpacing(5);
-        functionsPanel.add(controlsPanel);
-
-        return functionsPanel;
+        SplitLayoutPanel controlsSplitPanel = new SplitLayoutPanel(15);
+        controlsSplitPanel.addWest(new ScrollPanel(statisticAndRetrieverChainPanel), 800);
+        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 130);
+        controlsSplitPanel.add(groupBySelectionScrollPanel);
+        return controlsSplitPanel;
     }
     
     private void scheduleQueryDefinitionChanged() {
@@ -151,7 +143,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : selectionProvider.getFilterSelection().entrySet()) {
+        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : selectionProvider.getSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
         
@@ -172,17 +164,13 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
     @Override
     public void addControl(Widget controlWidget) {
+        controlWidget.addStyleName("definitionProviderControlsElements");
         controlsPanel.add(controlWidget);
     }
 
     @Override
     public Widget getEntryWidget() {
         return mainPanel;
-    }
-
-    @Override
-    public SelectionProvider<?> getSelectionProvider() {
-        return selectionProvider;
     }
 
     @Override
@@ -206,12 +194,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) { }
+    public void updateSettings(Settings newSettings) { }
 
     @Override
     public String getDependentCssClassName() {

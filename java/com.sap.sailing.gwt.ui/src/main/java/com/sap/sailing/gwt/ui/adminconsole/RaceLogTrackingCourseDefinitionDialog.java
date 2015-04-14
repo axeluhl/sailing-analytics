@@ -6,7 +6,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -65,10 +65,9 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                 public void update(int index, final MarkDTO markDTO, String value) {
                     if (RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell.ACTION_PING.equals(value)) {
                         new PositionEntryDialog(stringMessages.pingPosition(stringMessages.mark()),
-                                stringMessages, new DataEntryDialog.DialogCallback<PositionDTO>() {
-
+                                stringMessages, new DataEntryDialog.DialogCallback<Position>() {
                             @Override
-                            public void ok(PositionDTO position) {
+                            public void ok(Position position) {
                                 sailingService.pingMarkViaRaceLogTracking(leaderboardName, raceColumnName, fleetName,
                                         markDTO, position, new AsyncCallback<Void>() {
                                             

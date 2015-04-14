@@ -21,12 +21,12 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -86,7 +86,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         private static final long serialVersionUID = -8007932232555073829L;
 
         public MockedTrackedRaceImpl() {
-            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0);
+            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0, false);
         }
         
         @Override

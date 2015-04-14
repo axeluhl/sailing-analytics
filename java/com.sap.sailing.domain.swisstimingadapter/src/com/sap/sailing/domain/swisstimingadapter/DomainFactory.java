@@ -10,10 +10,10 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -62,7 +62,7 @@ public interface DomainFactory {
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore);
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);
 

@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
+    String general();
     String listRaces();
     String listRegattas();
     String wind();
@@ -1124,6 +1125,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorCommunicatingWithServer();
     String userManagement();
     String structureImportUrls();
+    String filteredBy();
     String filterBy();
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
@@ -1147,12 +1149,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointEssOverallDescription();
     String timeBetweenRaceStartAndCompetitorStartInSeconds();
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
+    String useInternalAlgorithm();
+    String editMarkPassings();
+    String removeFixedPassings();
+    String setFixedPassing();
+    String setSuppressedPassing();
+    String removeSuppressedPassing();
+    String errorRemovingFixedPassing(String message);
+    String errorSettingFixedPassing(String message);
+    String errorSuppressingPassing(String message);
+    String errorRemovingSupressedPassing(String message);
+    String errorTryingToObtainMarkPassing(String message);
+    String errorTryingToObtainRaceLogMarkPassingData(String message);
     String email();
     String pleaseEnterAnEmail();
     String inviteCompetitors();
     String notAllCompetitorsProvideEmail();
     String sendingMailsFailed();
-    String sendingMailsSuccessfull();
+    String sendingMailsSuccessful();
     String selectEventForInvitation();
     String imageURL();
     String upload();
@@ -1196,4 +1210,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
+    String fixedMarkPassing();
+    String suppressedMarkPassing();
+    String windUp();
+    String currentFilterSelection();
+    String notCapableOfGeneratingACodeForIdentifier();
+    String serverUrl();
+    String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
+    String startLineToFirstMarkTriangle(String distanceInMeters);
 }
