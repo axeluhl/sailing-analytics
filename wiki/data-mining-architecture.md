@@ -39,6 +39,8 @@ These `DataSourceProviders` are used by the framework to create new queries.
 
 ### Client-Server Communication (Data Mining DTOs)
 
+*This site is under construction.*
+
 ## Building and running Queries
 
 ### Defining and building a Data Retriever Chain
@@ -123,17 +125,29 @@ This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be conf
 
 ### Building a Processor Query
 
+*This site is under construction.*
+
 ### Running a Query directly
 
+*This site is under construction.*
+
 ### Running a Query with the `DataMiningServer`
+
+*This site is under construction.*
 
 ## Data Processing Components
 
 ### Processors
 
+*This site is under construction.*
+
 ### Filter Criteria
 
+*This site is under construction.*
+
 ### Data Types
+
+*This site is under construction.*
 
 ## Data Mining Functions
 
