@@ -114,6 +114,15 @@ markPassingRetrieverChain.endWith(MarkPassingRetrievalProcessor.class);
 </pre>
 * Ensure, that all retriever chains are added to the `DataMiningBundleService`
 
-## Enforce the adding of a Type to the GWT Serialization Policy
+## Include a Type forcefully in the GWT Serialization Policy
 
-*This site is under construction.*
+It can happen, that a necessary type isn't included in the GWT Serialization Policy, because of the generality of the framework. To enforce the include of a type, the GWT-Service has to use the type in one of its methods. To do this, follow these steps:
+
+* Create a dummy class in a shared bundle, if such a dummy class doesn't exist already in the scope of the type.
+	* For example like `SSEDataMiningSerializationDummy`.
+	* The class has to implement `Serializable` and should only have a private standard constructor, to prevent an accidental instantiation.
+* Add a private non-final instance variable of the type to the dummy.
+* Add a pseudo method to the GWT-Service, that uses the dummy class, if such a method doesn't exist already.
+	* For example like `SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy()`.
+
+The type will be included in the GWT Serialization Policy, because the GWT-Service has a method, that uses the dummy class, that uses the type.
