@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -85,10 +85,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
@@ -112,6 +108,11 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -284,8 +285,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     private boolean isEmbedded;
 
-    private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
-    private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
+    private static final LeaderboardResources resources = GWT.create(LeaderboardResources.class);
+    private static final ComponentResources componentResources = GWT.create(ComponentResources.class);
+    private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
 
     private ImageResource pauseIcon;
     private ImageResource playIcon;
@@ -385,7 +387,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     protected ImageResource getSettingsIcon() {
-        return resources.settingsIcon();
+        return componentResources.settingsIcon();
     }
 
     public void updateSettings(final LeaderboardSettings newSettings) {

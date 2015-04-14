@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sailing.gwt.ui.client.shared.controls;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
