@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -84,6 +85,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
         return fragment;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
