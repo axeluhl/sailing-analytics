@@ -95,8 +95,8 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
-        windloadinghintleft.setInnerText(stringConstants.dashboardWindBotLoading());
-        windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
+        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
         loadAndAddEventLogo(sailingServiceAsync);
         initAndAddWrongOrientationNotification();
     }
