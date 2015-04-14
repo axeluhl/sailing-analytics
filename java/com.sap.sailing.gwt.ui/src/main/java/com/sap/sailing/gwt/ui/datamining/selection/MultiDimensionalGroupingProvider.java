@@ -15,6 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -225,12 +226,12 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) { }
+    public void updateSettings(Settings newSettings) { }
     
     @Override
     public String getDependentCssClassName() {

@@ -1,7 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 
-public interface FilterSelectionPresenter extends Component<Object> {
+public interface FilterSelectionPresenter extends Component<Settings> {
 
 }

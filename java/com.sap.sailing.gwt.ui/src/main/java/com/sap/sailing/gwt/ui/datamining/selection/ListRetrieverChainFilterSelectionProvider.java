@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
@@ -293,12 +294,12 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) {
+    public void updateSettings(Settings newSettings) {
     }
 
 }

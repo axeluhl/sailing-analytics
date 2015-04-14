@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining.settings;
 
-public class QueryRunnerSettings {
+import com.sap.sailing.domain.common.settings.Settings;
+
+public class QueryRunnerSettings implements Settings {
     
     private boolean runAutomatically;
     

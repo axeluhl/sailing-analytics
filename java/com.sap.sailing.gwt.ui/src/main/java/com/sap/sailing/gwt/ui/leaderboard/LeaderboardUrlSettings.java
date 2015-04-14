@@ -2,9 +2,10 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sse.gwt.client.URLEncoder;
 
-public class LeaderboardUrlSettings {
+public class LeaderboardUrlSettings implements Settings {
     public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
     public static final String PARAM_EVENT_ID = "eventId";
     public static final String PARAM_EMBEDDED = "embedded";

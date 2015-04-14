@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 
-public interface QueryDefinitionProvider extends Component<Object>  {
+public interface QueryDefinitionProvider extends Component<Settings>  {
 
     public Iterable<String> validateQueryDefinition(QueryDefinitionDTO queryDefinition);
     public QueryDefinitionDTO getQueryDefinition();

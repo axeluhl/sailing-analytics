@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.domain.common.security.Roles;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -226,7 +227,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         }
     }
 
-    public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {
+    public <SettingsType extends Settings> void showSettingsDialog(Component<SettingsType> component) {
         if (component.hasSettings()) {
             new SettingsDialog<SettingsType>(component, stringMessages).show();
         }

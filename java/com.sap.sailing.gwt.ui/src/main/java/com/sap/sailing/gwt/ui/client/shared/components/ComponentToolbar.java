@@ -7,9 +7,10 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class ComponentToolbar<SettingsType> extends HorizontalPanel {
+public class ComponentToolbar<SettingsType extends Settings> extends HorizontalPanel {
     
     private static ComponentResources resources = GWT.create(ComponentResources.class);
 

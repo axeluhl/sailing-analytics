@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
@@ -41,7 +42,7 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
                 }
             }
 
-            private <SettingsType> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+            private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
                 componentAndSettings.getA().updateSettings(componentAndSettings.getB());
             }
 

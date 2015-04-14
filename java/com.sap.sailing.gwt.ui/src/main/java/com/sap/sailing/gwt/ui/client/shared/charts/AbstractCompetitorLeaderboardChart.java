@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardDataEntriesAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -53,7 +54,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
  */
-public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
+public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Settings> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
     CompetitorSelectionChangeListener, RequiresResize, TimeListener {
     public static final String LODA_LEADERBOARD_CHART_DATA_CATEGORY = "loadLeaderboradChartData";
     

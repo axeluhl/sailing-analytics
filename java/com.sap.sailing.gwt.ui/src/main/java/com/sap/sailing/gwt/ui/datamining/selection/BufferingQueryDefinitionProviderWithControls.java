@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -193,12 +194,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) { }
+    public void updateSettings(Settings newSettings) { }
 
     @Override
     public String getDependentCssClassName() {

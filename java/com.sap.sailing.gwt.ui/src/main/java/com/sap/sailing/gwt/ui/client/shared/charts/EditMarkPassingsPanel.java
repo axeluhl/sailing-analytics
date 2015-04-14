@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -47,7 +48,7 @@ import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Void>, RaceSelectionChangeListener,
+public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Settings>, RaceSelectionChangeListener,
         CompetitorSelectionChangeListener {
 
     private static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -434,12 +435,12 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Vo
     }
 
     @Override
-    public SettingsDialogComponent<Void> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Void newSettings) {
+    public void updateSettings(Settings newSettings) {
     }
 
     @Override

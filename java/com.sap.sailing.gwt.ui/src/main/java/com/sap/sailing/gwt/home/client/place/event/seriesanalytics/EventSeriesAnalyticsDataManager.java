@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
@@ -148,7 +149,7 @@ public class EventSeriesAnalyticsDataManager {
         showComponentSettingsDialog(multiCompetitorChart, null);
     }
     
-    protected <SettingsType> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
+    protected <SettingsType extends Settings> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
         String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
         String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
         SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component, StringMessages.INSTANCE);

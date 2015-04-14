@@ -5,9 +5,10 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 
-public class RaceMapSettings {
+public class RaceMapSettings implements Settings {
 
     private boolean showDouglasPeuckerPoints = false;
 

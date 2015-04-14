@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -66,7 +67,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         return mainPanel;
     }
     
-    protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
+    protected <SettingsType extends Settings> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
             String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
         if (!hideToolbar) {
             final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();

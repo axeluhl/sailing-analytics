@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.components;
 
+import com.sap.sailing.domain.common.settings.Settings;
+
 /**
  * 
  * @author Axel Uhl (d043530)
@@ -7,8 +9,8 @@ package com.sap.sailing.gwt.ui.client.shared.components;
  * @param <SettingsType>
  *            the type that describes this component's settings (if any). Use {@link Object} in case your components
  *            doesn't support any settings.
- */public interface ComponentSettings<SettingsType> {
-
+ */
+public interface ComponentSettings<SettingsType extends Settings> {
     /**
      * @return whether this component has settings that a user may change; if so, 
      */

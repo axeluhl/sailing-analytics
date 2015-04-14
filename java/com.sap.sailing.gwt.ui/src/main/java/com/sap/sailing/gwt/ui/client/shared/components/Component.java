@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.settings.Settings;
 
-public interface Component<SettingsType> extends ComponentSettings<SettingsType> {
+public interface Component<SettingsType extends Settings> extends ComponentSettings<SettingsType> {
     /**
      * @return the name to display to a user for quick navigation to this component
      */

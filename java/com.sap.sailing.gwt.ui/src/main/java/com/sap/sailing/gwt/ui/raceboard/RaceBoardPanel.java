@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
@@ -249,7 +250,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
     
     @SuppressWarnings("unused")
-    private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
+    private <SettingsType extends Settings> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
             settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
                 public void execute() {

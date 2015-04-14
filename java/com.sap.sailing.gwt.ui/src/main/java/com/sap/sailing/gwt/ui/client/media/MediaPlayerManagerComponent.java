@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.domain.common.security.Roles;
+import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -53,7 +54,7 @@ import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class MediaPlayerManagerComponent implements Component<Void>, PlayStateListener, TimeListener,
+public class MediaPlayerManagerComponent implements Component<Settings>, PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
@@ -733,12 +734,12 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
     }
 
     @Override
-    public SettingsDialogComponent<Void> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateSettings(Void newSettings) {
+    public void updateSettings(Settings newSettings) {
         throw new UnsupportedOperationException();
     }
 

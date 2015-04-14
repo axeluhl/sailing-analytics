@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class RegattaRaceStatesSettings {
+import com.sap.sailing.domain.common.settings.Settings;
+
+public class RegattaRaceStatesSettings implements Settings {
     private List<UUID> visibleCourseAreas;
     private List<String> visibleRegattas;
     
