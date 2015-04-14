@@ -21,7 +21,6 @@ Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.racelog.utils,
  com.sap.sailing.domain.common.scalablevalue.impl,
  com.sap.sailing.domain.common.security,
- com.sap.sailing.domain.common.settings,
  com.sap.sailing.domain.common.trackfiles,
  com.sap.sailing.domain.common.tracking,
  com.sap.sailing.domain.common.tracking.impl

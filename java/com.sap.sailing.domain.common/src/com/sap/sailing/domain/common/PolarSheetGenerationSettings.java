@@ -3,7 +3,7 @@ package com.sap.sailing.domain.common;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 public interface PolarSheetGenerationSettings extends Serializable, Settings {
 

@@ -1,11 +1,11 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import java.util.ArrayList;
 
-import com.sap.sailing.domain.common.settings.Settings;
-import com.sap.sailing.gwt.ui.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
     private static class ComponentAndValidator<SettingsType extends Settings> extends Util.Pair<Component<SettingsType>, Validator<SettingsType>> {

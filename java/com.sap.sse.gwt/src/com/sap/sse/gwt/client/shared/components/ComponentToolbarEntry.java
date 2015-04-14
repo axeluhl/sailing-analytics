@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -7,8 +7,8 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.sap.sailing.domain.common.settings.Settings;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.StringMessages;
 
 /**
  * One entry in a component toolbar. Represents one {@link Component} that can be selected and whose

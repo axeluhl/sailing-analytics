@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.settings;
+package com.sap.sse.common.settings;
 
 /**
  * The settings for a <code>Component</code>. Such settings may be initialized with defaults. Usually they can be edited by a

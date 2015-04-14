@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 public interface ComponentGroup<SettingsType extends Settings> extends Component<SettingsType> {
 

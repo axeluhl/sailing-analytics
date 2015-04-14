@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 /**
  * Settings for a tracked race.

@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 public class WindChartSettings implements Settings {
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;

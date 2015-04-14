@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
-import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.Settings;
 
 public class CompositeSettings implements Settings {
     public static class ComponentAndSettingsPair<SettingsType extends Settings> extends Util.Pair<Component<SettingsType>, SettingsType> {

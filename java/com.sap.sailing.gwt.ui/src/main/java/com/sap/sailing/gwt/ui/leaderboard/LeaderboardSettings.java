@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit

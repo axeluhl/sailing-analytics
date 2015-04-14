@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 public interface Component<SettingsType extends Settings> {
     /**

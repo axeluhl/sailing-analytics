@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 
 public class TimePanelSettings implements Settings {
     private long refreshInterval;

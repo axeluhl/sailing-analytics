@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.settings.Settings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.URLEncoder;
 
 public class LeaderboardUrlSettings implements Settings {

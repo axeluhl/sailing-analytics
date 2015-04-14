@@ -1,12 +1,12 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.settings.Settings;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 /**
  * A composite settings dialog that combines the settings of several {@link Component}s, providing a tab

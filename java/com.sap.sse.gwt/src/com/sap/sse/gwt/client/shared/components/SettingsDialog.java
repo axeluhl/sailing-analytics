@@ -1,12 +1,12 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.settings.Settings;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SettingsDialog<SettingsType extends Settings> extends DataEntryDialog<SettingsType> {

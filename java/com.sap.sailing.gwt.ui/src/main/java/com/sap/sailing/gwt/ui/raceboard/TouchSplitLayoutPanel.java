@@ -41,9 +41,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets. These splitters have draggers

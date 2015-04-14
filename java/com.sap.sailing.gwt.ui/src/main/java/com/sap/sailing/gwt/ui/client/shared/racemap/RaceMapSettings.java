@@ -5,8 +5,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.settings.Settings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
+import com.sap.sse.common.settings.Settings;
 
 public class RaceMapSettings implements Settings {
 
