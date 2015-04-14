@@ -125,29 +125,42 @@ This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be conf
 
 ### Building a Processor Query
 
-*This site is under construction.*
+*This section is under construction.*
 
 ### Running a Query directly
 
-*This site is under construction.*
+*This section is under construction.*
 
 ### Running a Query with the `DataMiningServer`
 
-*This site is under construction.*
+*This section is under construction.*
 
 ## Data Processing Components
 
 ### Processors
 
-*This site is under construction.*
+Processors are the main component of the framework to process the data and work with the [Pipes and Filter Architecture](http://de.wikipedia.org/wiki/Pipes_und_Filter). The interface `Processor<InputType, ResultType>` describes the functionality of processors, which combines pipes and filters. It has methods to process given elements or to react to a thrown failure and also methods to control the work-flow (for example to finish or abort the work), but it doesn't have methods to get the result of the data processing. The results of processors are forwarded to something, that depends on the concrete implementation (this will be other processors in most cases). Here are the most important methods of `Processor`:
+
+* The method `processElement` processes the given element and forwards the result.
+* The method `onFailure` handles failures during the processing.
+	* The standard implementation is forwarding them to the last processor, that collects the failures, until the processing is finished. Than the failures will be handled.
+* The method `finish` tells the processor to finish.
+	* It won't accept new elements given with `processElement`.
+	* After the processor has finished all remaining work, will it tell all result receivers to finish.
+* The method `abort` aborts the processing immediately.
+	* The resulting data of the processor can be incomplete or undefined.
+	* It won't accept new elements given with `processElement`.
+	* All result receivers will be told to abort.
+
+How this functionality is implemented, depends on the concrete implementation, but it should stick to this description, except for some special cases (like the last processor in a chain). New processors should extend `AbstractPartitioningParallelProcessor` or `AbstractSimpleParallelProcessor`. The main difference between these two abstract processors is that the partitioning processor allows to convert one element of the `InputType` to an iterable of elements of a `WorkingType`, which can be useful in some cases.
 
 ### Filter Criteria
 
-*This site is under construction.*
+*This section is under construction.*
 
 ### Data Types
 
-*This site is under construction.*
+*This section is under construction.*
 
 ## Data Mining Functions
 
