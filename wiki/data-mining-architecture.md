@@ -152,7 +152,63 @@ Processors are the main component of the framework to process the data and work 
 	* It won't accept new elements given with `processElement`.
 	* All result receivers will be told to abort.
 
-How this functionality is implemented, depends on the concrete implementation, but it should stick to this description, except for some special cases (like the last processor in a chain). New processors should extend `AbstractPartitioningParallelProcessor` or `AbstractSimpleParallelProcessor`. The main difference between these two abstract processors is that the partitioning processor allows to convert one element of the `InputType` to an iterable of elements of a `WorkingType`, which can be useful in some cases.
+How this functionality is implemented, depends on the concrete implementation, but it should stick to this description, except for some special cases (like the last processor in a chain). New processors should extend `AbstractPartitioningParallelProcessor` or `AbstractSimpleParallelProcessor`. The main difference between these two abstract processors is that the partitioning processor allows to convert one element of the `InputType` to an iterable of elements of a `WorkingType`, which can be useful in some cases. These two abstract implementations implement most of the functionality defined by `Processor`, where the processing of the input elements is parallel. The parallelization is done by the method `processElement`:
+
+* The given input element gets partitioned to an iterable of elements of the `WorkingType`.
+	* This step simplified by the `AbstractSimpleParallelProcessor` in the way, that the `InputType` and `WorkingType` are the same and the resulting iterable contains exactly the given input element.
+* For each partial element in the resulting iterable is a `AbstractProcessorInstruction` created.
+* The instruction is given to an `ExecutorService`, if it is valid.
+	* For example are `null` instructions invalid.
+	* See [Processor Instructions](#Processor-Instructions) for detailed information about instructions.
+* The instruction forwards its result, after it has been executed.
+* The execution of instructions is handled by the `ExecutorService` of the processor.
+
+Abstract processors have the following abstract methods:
+
+* The method `createInstruction` creates an `AbstractProcessorInstruction` for the given input element, in which the concrete functionality of the instruction is implemented.
+	* See [Processor Instructions](#Processor-Instructions) for detailed information about instructions.
+* The method `partitionElement` converts the given input element to an iterable of elements of the `WorkingType`
+	* The `AbstractSimpleParallelProcessor` implements this method in the way, that the `InputType` and `WorkingType` are the same and the resulting iterable contains exactly the given input element.
+* The method `setAdditionalData` sets the additional result data for the processor.
+	* For example the amount of filtered or retrieved data elements.
+
+An useful method for concrete processors is the protected method `createInvalidResult`, that returns an instruction, that won't be passed to the `ExecutorService`. This can be used to stop the processing of a specific input element (for example to filter the data).
+
+There are useful implementations of the abstract processors, that are more specialized. These special processors implement the creation of instructions and the setting of the additional data for their special case.
+
+#### Retrieval Processor
+
+Retrieval processors are used to get many result elements (as `ResultType`) from one input element (as `InputType`). The abstract class `AbstractSimpleRetrievalProcessor<InputType, ResultType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the `partitionElement` method, so the retrieval process isn't parallel, but the processing of each retrieved element will be parallel.
+
+#### Filtering Processor
+
+Filtering processors are used to filter the input elements. The class `ParallelFilteringProcessor<InputType>` is a concrete processor, that checks in its instructions, if a given input element matches a `FilterCriterion`. If yes, the given input element is returned as result and if not an invalid result (created with the method `createInvalidResult`) is returned. See [Filter Criteria](#Filter-Criteria) for detailed information about possible filters.
+
+#### Grouping Processor
+
+Grouping processors are used classify the data elements. The class `ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>` is a concrete processor, that creates a compound `GroupKey` for the dimension values of a collection of [Dimension Functions](#Dimensions) for a data element. The calculation of this group key is done in the processor instruction and the type of the results is `GroupedDataEntry<DataType>`. The resulting group key is a nesting of the single dimension values. So if the dimension values for a data element would be
+
+* Regatta Name: `Kieler Woche 2014`
+* Race Name: `505 Race 1`
+* Leg Type: `UPWIND`
+
+And the dimensions to group by would be the list `[Regatta Name, Race Name, Leg Type]`, then the resulting group key would be `Kieler Woche 2014 (505 Race 1 (UPWIND))`.
+
+There's also the abstract class `AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>` (that is implemented by the dimensions value processor), that implements the functionality to build the nested key out of a collection of dimensions. It has the abstract method `createGroupKeyFor`, that has to implement the concrete key creation for the data element for a single dimension.
+
+#### Extraction Processor
+
+Extraction processors are used to get statistic value of a grouped data element. The class `ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>` is a concrete processor, that takes `GroupedDataEntry<DataType>` as input elements and has `GroupedDataEntry<FunctionReturnType>` as result elements. It needs a [Statistic Function](#Statistics) to extract the statistic value from the data elements, which is done in its instructions. If the statistic value is `null`, then an invalid result  (created with the method `createInvalidResult`) is returned. If the value is something else, then the statistic value grouped by the key of the data element is returned.
+
+### Aggregators
+
+*This section is under construction.*
+
+### Processor Instructions
+
+*This section is under construction.*
+
+Processor instructions are `Runnables` enriched with a priority. The abstract class `AbstractProcessorInstruction<ResultType>` should be used to create new instructions.
 
 ### Filter Criteria
 
