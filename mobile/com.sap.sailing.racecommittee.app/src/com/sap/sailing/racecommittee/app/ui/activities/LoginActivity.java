@@ -287,7 +287,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     }
 
                     @Override
-                    public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
+                    public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
                         setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 

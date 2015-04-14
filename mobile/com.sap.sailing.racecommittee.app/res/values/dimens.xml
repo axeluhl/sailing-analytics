@@ -15,7 +15,8 @@
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
 
-    <dimen name="textSize_18">18sp</dimen>
+    <dimen name="textSize_14">14sp</dimen> <!-- XXSmall -->
+    <dimen name="textSize_18">18sp</dimen> <!-- XSmall -->
     <dimen name="textSize_20">20sp</dimen>
     <dimen name="textSize_22">22sp</dimen> <!-- Small -->
     <dimen name="textSize_26">26sp</dimen> <!-- Normal -->

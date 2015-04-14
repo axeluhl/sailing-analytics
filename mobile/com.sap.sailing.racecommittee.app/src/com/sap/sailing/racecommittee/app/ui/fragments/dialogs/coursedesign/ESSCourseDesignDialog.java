@@ -176,8 +176,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 				R.id.listViewPreviousCourse);
 		previousCourseListView.setAdapter(previousCourseElementAdapter);
 
-		takePreviousButton = (Button) getView().findViewById(
-				R.id.takePreviousCourseDesignButton);
+		takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
 		takePreviousButton.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View arg0) {
@@ -281,8 +280,8 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 							}
 
 							@Override
-							public void onLoadSucceded(Collection<Mark> data,
-									boolean isCached) {
+							public void onLoadSucceeded(Collection<Mark> data,
+							    boolean isCached) {
 								onLoadMarksSucceeded(data);
 							}
 						}));

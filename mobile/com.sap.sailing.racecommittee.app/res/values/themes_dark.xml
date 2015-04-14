@@ -31,6 +31,8 @@
         <!-- styles -->
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Dark.Button.Normal</item>
+        <item name="textXXSmall">@style/AppTheme.Dark.Text.XXSmall</item>
+        <item name="textXSmall">@style/AppTheme.Dark.Text.XSmall</item>
         <item name="textSmall">@style/AppTheme.Dark.Text.Small</item>
         <item name="textNormal">@style/AppTheme.Dark.Text.Normal</item>
         <item name="textLarge">@style/AppTheme.Dark.Text.Large</item>
@@ -76,6 +78,14 @@
 
     <style name="AppTheme.Dark.Text">
         <item name="android:textColor">?white</item>
+    </style>
+
+    <style name="AppTheme.Dark.Text.XXSmall">
+        <item name="android:textSize">@dimen/textSize_14</item>
+    </style>
+
+    <style name="AppTheme.Dark.Text.XSmall">
+        <item name="android:textSize">@dimen/textSize_18</item>
     </style>
 
     <style name="AppTheme.Dark.Text.Small">

@@ -98,7 +98,7 @@
                 android:layout_marginRight="5dp"
                 android:src="@drawable/lock_outline"
                 android:tint="?sap_light_gray"
-                android:visibility="visible" />
+                android:visibility="gone" />
         </LinearLayout>
 
         <RelativeLayout

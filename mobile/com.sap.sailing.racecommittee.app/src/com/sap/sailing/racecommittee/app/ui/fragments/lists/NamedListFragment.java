@@ -122,7 +122,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onLoadSucceded(Collection<T> data, boolean isCached) {
+    public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         setListShown(true);
         namedList.clear();
         namedList.addAll(data);

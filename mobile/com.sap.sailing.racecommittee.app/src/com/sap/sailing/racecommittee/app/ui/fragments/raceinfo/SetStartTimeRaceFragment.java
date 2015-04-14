@@ -161,7 +161,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void showCourseDesignDialog() {
-        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
+        RaceDialogFragment fragment = CourseDesignerChooser.choose(getRace());
         fragment.setArguments(getRecentArguments());
         fragment.show(getFragmentManager(), "courseDesignDialogFragment");
     }

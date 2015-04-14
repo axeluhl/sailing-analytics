@@ -17,6 +17,8 @@
     <!-- custom references (e.g. styles) -->
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
+    <attr name="textXXSmall" format="reference"/>
+    <attr name="textXSmall" format="reference"/>
     <attr name="textSmall" format="reference"/>
     <attr name="textNormal" format="reference"/>
     <attr name="textLarge" format="reference"/>

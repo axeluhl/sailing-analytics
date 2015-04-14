@@ -47,6 +47,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFrag
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.DialogBuilder;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -439,7 +441,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId().toString());
-                ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
+                ExLog.w(RacingActivity.this, TAG,
+                    String.format("Race %s is selected for reset.", mSelectedRace.getId()));
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
                 onRaceItemClicked(mSelectedRace);
             }
@@ -451,7 +454,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 dialog.cancel();
             }
         });
-        builder.create().show();
+        DialogBuilder.showColoredDialog(builder.create(), ColorHelper.getThemedColor(this, R.attr.colorAccent));
     }
 
     public void openDrawer() {
@@ -494,7 +497,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
 
         @Override
-        public void onLoadSucceded(Collection<ManagedRace> data, boolean isCached) {
+        public void onLoadSucceeded(Collection<ManagedRace> data, boolean isCached) {
             // Let's do the setup stuff only when the data is changed (or its the first time)
             if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
                 ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
@@ -535,7 +538,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
 
         @Override
-        public void onLoadSucceded(Collection<EventBase> data, boolean isCached) {
+        public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
             Toast.makeText(RacingActivity.this, getString(R.string.loading_events_succeded), Toast.LENGTH_SHORT).show();
             setSupportProgressBarIndeterminateVisibility(false);
 
@@ -564,7 +567,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
 
         @Override
-        public void onLoadSucceded(Collection<CourseArea> data, boolean isCached) {
+        public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
             Toast.makeText(RacingActivity.this, "Loading of CourseData succeeded", Toast.LENGTH_SHORT).show();
             setSupportProgressBarIndeterminateVisibility(false);
 
