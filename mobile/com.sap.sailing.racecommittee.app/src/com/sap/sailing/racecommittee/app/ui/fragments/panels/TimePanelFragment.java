@@ -158,22 +158,18 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                 break;
 
             case RUNNING:
-                mRaceHeader.performClick();
                 changeVisibility(mTimeLock, View.VISIBLE);
                 break;
 
             case FINISHING:
-                mRaceHeader.performClick();
                 changeVisibility(mTimeLock, View.VISIBLE);
                 break;
 
             case FINISHED:
-                mRaceHeader.performClick();
                 changeVisibility(mTimeLock, View.VISIBLE);
                 break;
 
             default:
-                mRaceHeader.performClick();
                 changeVisibility(mTimeLock, View.VISIBLE);
                 break;
         }

@@ -160,11 +160,12 @@ public class StartTimeFragment
         if (mStartTime == null) {
             mStartTime = getPickerTime(true);
         }
+        resId = R.string.race_start_time_ago;
         if (mStartTime.after(now)) {
-            resId = R.string.race_start_time_in;
+//            resId = R.string.race_start_time_in;
             time = TimeUtils.formatDurationUntil(mStartTime.minus(now.asMillis()).asMillis());
         } else {
-            resId = R.string.race_start_time_ago;
+//            resId = R.string.race_start_time_ago;
             time = TimeUtils.formatDurationSince(now.minus(mStartTime.asMillis()).asMillis());
         }
         if (mCountdown != null) {

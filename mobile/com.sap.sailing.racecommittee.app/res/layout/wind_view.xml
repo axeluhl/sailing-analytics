@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/windFragment"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:descendantFocusability="beforeDescendants"
-                android:focusableInTouchMode="true"
-                android:orientation="vertical">
+<RelativeLayout
+    android:id="@+id/windFragment"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -162,7 +163,9 @@
                     android:id="@+id/wind_speed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerInParent="true"
+                    android:scaleX="1.55"
+                    android:scaleY="1.55"/>
 
             </RelativeLayout>
 

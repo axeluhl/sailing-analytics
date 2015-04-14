@@ -48,10 +48,6 @@
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
     </style>
 
-    <style name="AppTheme.Light.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
-        <item name="android:divider">@color/light_colorAccent</item>
-    </style>
-
     <style name="AppTheme.Light.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">false</item>
     </style>
