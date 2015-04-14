@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.shared.components.CollapsablePanel.Imager;
+import com.sap.sse.gwt.client.shared.components.CollapsablePanel.Imager;
 
 /**
  * The default header widget used within a {@link CollapsablePanel}.
