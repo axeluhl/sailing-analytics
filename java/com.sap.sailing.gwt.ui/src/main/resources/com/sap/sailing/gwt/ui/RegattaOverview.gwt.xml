@@ -10,7 +10,7 @@
 	<inherits name="com.google.gwt.logging.Logging"/>
 	
 	<!-- Other module inherits                                      -->
-	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
@@ -39,7 +39,7 @@
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 	
 	<!-- Specify the paths for translatable code                    -->
-<extend-property name="locale" values="de"/>
+        <extend-property name="locale" values="de"/>
 	<extend-property name="locale" values="ru"/>
 	
 	<source path='common'/> 

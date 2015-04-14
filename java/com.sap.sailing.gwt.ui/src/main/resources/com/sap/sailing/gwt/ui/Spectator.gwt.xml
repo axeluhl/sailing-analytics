@@ -8,7 +8,7 @@
 	<inherits name="com.google.gwt.resources.Resources" />
 	
 	<!-- Other module inherits                                      -->
-	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
