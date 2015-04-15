@@ -51,14 +51,14 @@ A data type is an atomic unit on which the processing components operate. A data
 * Add a `DataSourceProvider` to the `DataMiningBundleService`, if it doesn't contain one for the data source of the data type.
 * Implement a retrieval processor for each data type.
 	* Retrieval processors should extend `AbstractSimpleRetrievalProcessor`.
-	* Retrieval processors used by retriever chains need a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)`.
+	* Retrieval processors used by retriever chains need a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)`.
 	* A retrieval processor describes how to get from the input data type (like `RacingEventService` or `TrackedRace`) to the result data type (like `TrackedLeg`) with the method `retrieveData`.
 * Create a `DataRetrieverChainDefinition` and add it to the `DataMiningBundleService`.
 	* A retriever chain is created with its methods `startWith`, `addAfter` and `endWith`, that add `Classes` of your retrieval processors to the chain.
 	* Each method has a parameter for the `Class` of the retrieved data type of the next step and some also have a parameter for the `Class` of the retrieval processor of the previous step to ensure type safety.
 	* Each method has a parameter for a message key, that is needed for the internationalization of the chain.
 	* The call order of these methods has to match `startWith addAfter* endWith` or an exception will be thrown.
-	* Every retrieval processor needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)` or an exception will be thrown.
+	* Every retrieval processor needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)` or an exception will be thrown.
 	* See [Defining and building a Data Retriever Chain](wiki/data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain) for examples and more detailed information.
 
 ## Adding a new Data Type with a reusable Retriever Chain
