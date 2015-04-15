@@ -7,9 +7,9 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.place.start.LeaderboardSettingsDialog.ProxyLeaderboardComponent;
 import com.sap.sailing.gwt.autoplay.client.place.start.RaceMapSettingsDialog.ProxyRaceMapComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
  * A perspective containing a race viewer with all components like map, leaderboard, charts, etc.  

@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -20,12 +21,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     //Initializing the lists to prevent a null pointer exception in the first validation call
@@ -36,6 +37,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
+    private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
@@ -57,6 +59,23 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
 
+        Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
+        vp.add(generalLabel);
+       
+        windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
+        windUpCheckbox.setValue(initialSettings.isWindUp());
+        vp.add(windUpCheckbox);
+
+        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
+        vp.add(showWindStreamletOverlayCheckbox);
+        
+        if (showViewSimulation) {
+            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
+            vp.add(showSimulationOverlayCheckbox);
+        }
+
         Label competitorsLabel = dialog.createHeadlineLabel(stringMessages.competitors());
         vp.add(competitorsLabel);
 
@@ -68,16 +87,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSelectedCompetitorsInfoCheckBox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
         vp.add(showSelectedCompetitorsInfoCheckBox);
 
-        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
-        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
-        vp.add(showWindStreamletOverlayCheckbox);
-        
-        if (showViewSimulation) {
-            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
-            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
-            vp.add(showSimulationOverlayCheckbox);
-        }
-        
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
         
@@ -116,15 +125,25 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
+        int checkBoxCount = ManeuverType.values().length + 1; // including douglas peucker checkbox
+        int gridRowsRequired = checkBoxCount / 2 + checkBoxCount % 2; 
+        Grid maneuverGrid = new Grid(gridRowsRequired, 2);
+        vp.add(maneuverGrid);
+        int currentRowIndex = 0;
+        int currentColumnIndex = 0;
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));
             checkboxAndManeuverType.add(new Util.Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
-            vp.add(checkbox);
+            maneuverGrid.setWidget(currentRowIndex++, currentColumnIndex, checkbox);
+            if (currentRowIndex >= gridRowsRequired) {
+                currentColumnIndex = 1;
+                currentRowIndex = 0; 
+            }
         }
         showDouglasPeuckerPointsCheckBox = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
         showDouglasPeuckerPointsCheckBox.setValue(initialSettings.isShowDouglasPeuckerPoints());
-        vp.add(showDouglasPeuckerPointsCheckBox);
+        maneuverGrid.setWidget(currentRowIndex, currentColumnIndex, showDouglasPeuckerPointsCheckBox);
         
         Label helpLinesLabel = dialog.createHeadlineLabel(stringMessages.helpLines());
         vp.add(helpLinesLabel);
@@ -221,6 +240,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         } else {
             result.setShowSimulationOverlay(false);            
         }
+        result.setWindUp(windUpCheckbox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);

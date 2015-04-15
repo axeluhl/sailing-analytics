@@ -18,7 +18,9 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
@@ -53,14 +55,14 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
 
     private class GridCell {
-        public PositionDTO bottomLeft;
-        public PositionDTO bottomRight;
-        public PositionDTO topLeft;
-        public PositionDTO topRight;
+        public Position bottomLeft;
+        public Position bottomRight;
+        public Position topLeft;
+        public Position topRight;
 
         public double windSpeedInKnots;
 
-        public GridCell(final PositionDTO bl, final PositionDTO br, final PositionDTO tl, final PositionDTO tr, final Double windSpeedInKnots) {
+        public GridCell(final Position bl, final Position br, final Position tl, final Position tr, final Double windSpeedInKnots) {
             this.bottomLeft = bl;
             this.bottomRight = br;
             this.topLeft = tl;
@@ -79,19 +81,19 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private class SortByLatitude implements Comparator<SimulatorWindDTO> {
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
-            return Double.compare(w1.position.latDeg, w2.position.latDeg);
+            return Double.compare(w1.position.getLatDeg(), w2.position.getLatDeg());
         }
     }
 
     private class SortByLongitude implements Comparator<SimulatorWindDTO> {
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
-            return Double.compare(w1.position.lngDeg, w2.position.lngDeg);
+            return Double.compare(w1.position.getLngDeg(), w2.position.getLngDeg());
         }
     }
 
-    public WindGridCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final int xRes, final int yRes) {
-        super(map, zIndex);
+    public WindGridCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final int xRes, final int yRes, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.timer = timer;
         this.xRes = xRes;
         this.yRes = yRes;
@@ -101,8 +103,8 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         colorPalette = null;
     }
 
-    public WindGridCanvasOverlay(MapWidget map, int zIndex) {
-        this(map, zIndex, null, 0, 0);
+    public WindGridCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, null, 0, 0, coordinateSystem);
     }
 
     public void setWindField(final WindFieldDTO wl) {
@@ -239,10 +241,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SimulatorWindDTO windDTO1 = windDTOList.get(0);
             final SimulatorWindDTO windDTO2 = windDTOList.get(1);
 
-            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg, windDTO1.position.lngDeg);
+            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.getLatDeg(), windDTO1.position.getLngDeg());
             final Point canvasPositionInPx1 = mapProjection.fromLatLngToDivPixel(positionLatLng1);
 
-            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.latDeg, windDTO2.position.lngDeg);
+            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.getLatDeg(), windDTO2.position.getLngDeg());
             final Point canvasPositionInPx2 = mapProjection.fromLatLngToDivPixel(positionLatLng2);
 
             return canvasPositionInPx2.getX() - canvasPositionInPx1.getX();
@@ -264,10 +266,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SimulatorWindDTO windDTO1 = windDTOList.get(0);
             final SimulatorWindDTO windDTO2 = windDTOList.get(1);
 
-            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg, windDTO1.position.lngDeg);
+            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.getLatDeg(), windDTO1.position.getLngDeg());
             final Point canvasPositionInPx1 = mapProjection.fromLatLngToDivPixel(positionLatLng1);
 
-            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.latDeg, windDTO2.position.lngDeg);
+            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.getLatDeg(), windDTO2.position.getLngDeg());
             final Point canvasPositionInPx2 = mapProjection.fromLatLngToDivPixel(positionLatLng2);
 
             return canvasPositionInPx2.getY() - canvasPositionInPx1.getY();
@@ -324,11 +326,9 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
          * Row before the first row
          */
         for (int j = 0; j < xRes; ++j) {
-            final PositionDTO position = new PositionDTO();
-            final PositionDTO p1 = windMatrix[1][j].position;
-            final PositionDTO p2 = windMatrix[2][j].position;
-            position.latDeg = 2 * p1.latDeg - p2.latDeg;
-            position.lngDeg = 2 * p1.lngDeg - p2.lngDeg;
+            final Position p1 = windMatrix[1][j].position;
+            final Position p2 = windMatrix[2][j].position;
+            final Position position = new DegreePosition(2 * p1.getLatDeg() - p2.getLatDeg(), 2 * p1.getLngDeg() - p2.getLngDeg());
             final SimulatorWindDTO windDTO = new SimulatorWindDTO();
             // Only the position of this windDTO is used
             windDTO.position = position;
@@ -340,11 +340,9 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
          * Row after the last row
          */
         for (int j = 0; j < xRes; ++j) {
-            final PositionDTO position = new PositionDTO();
-            final PositionDTO p1 = windMatrix[numRow - 2][j].position;
-            final PositionDTO p2 = windMatrix[numRow - 3][j].position;
-            position.latDeg = 2 * p1.latDeg - p2.latDeg;
-            position.lngDeg = 2 * p1.lngDeg - p2.lngDeg;
+            final Position p1 = windMatrix[numRow - 2][j].position;
+            final Position p2 = windMatrix[numRow - 3][j].position;
+            final Position position = new DegreePosition(2 * p1.getLatDeg() - p2.getLatDeg(), 2 * p1.getLngDeg() - p2.getLngDeg());
             final SimulatorWindDTO windDTO = new SimulatorWindDTO();
             // Only the position of this windDTO is used
             windDTO.position = position;
@@ -362,13 +360,13 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                     gridCellMap = new HashMap<Util.Pair<Integer, Integer>, GridCell>();
                     for (int i = 1; i < numRow - 1; ++i) {
                         for (int j = 1; j < numCol - 1; ++j) {
-                            final PositionDTO bl = getCenter(windMatrix[i - 1][j - 1].position, windMatrix[i - 1][j].position,
+                            final Position bl = getCenter(windMatrix[i - 1][j - 1].position, windMatrix[i - 1][j].position,
                                     windMatrix[i][j].position, windMatrix[i][j - 1].position);
-                            final PositionDTO tl = getCenter(windMatrix[i][j - 1].position, windMatrix[i][j].position,
+                            final Position tl = getCenter(windMatrix[i][j - 1].position, windMatrix[i][j].position,
                                     windMatrix[i + 1][j - 1].position, windMatrix[i + 1][j].position);
-                            final PositionDTO br = getCenter(windMatrix[i - 1][j].position, windMatrix[i - 1][j + 1].position,
+                            final Position br = getCenter(windMatrix[i - 1][j].position, windMatrix[i - 1][j + 1].position,
                                     windMatrix[i][j].position, windMatrix[i][j + 1].position);
-                            final PositionDTO tr = getCenter(windMatrix[i][j].position, windMatrix[i][j + 1].position,
+                            final Position tr = getCenter(windMatrix[i][j].position, windMatrix[i][j + 1].position,
                                     windMatrix[i + 1][j].position, windMatrix[i + 1][j + 1].position);
                             final GridCell cell = new GridCell(bl, br, tl, tr, windMatrix[i - 1][j].trueWindSpeedInKnots);
                             final Util.Pair<Integer, Integer> cellPair = new Util.Pair<Integer, Integer>(i, j);
@@ -410,19 +408,14 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     private void drawGridCell(final GridCell cell) {
-
-        LatLng positionLatLng = LatLng.newInstance(cell.bottomLeft.latDeg, cell.bottomLeft.lngDeg);
+        LatLng positionLatLng = coordinateSystem.toLatLng(cell.bottomLeft);
         final Point blPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(cell.bottomRight.latDeg, cell.bottomRight.lngDeg);
+        positionLatLng = coordinateSystem.toLatLng(cell.bottomRight);
         final Point brPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(cell.topLeft.latDeg, cell.topLeft.lngDeg);
+        positionLatLng = coordinateSystem.toLatLng(cell.topLeft);
         final Point tlPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(cell.topRight.latDeg, cell.topRight.lngDeg);
+        positionLatLng = coordinateSystem.toLatLng(cell.topRight);
         final Point trPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         /*
          * Uncomment to see the center of the grid for debug drawCircle(blPoint.getX()-this.getWidgetPosLeft(),
          * blPoint.getY()-this.getWidgetPosTop(),2,"red"); drawCircle(brPoint.getX()-this.getWidgetPosLeft(),
@@ -448,16 +441,15 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         // context2d.stroke(); // Dont show the lines
     }
 
-    private PositionDTO getCenter(final PositionDTO a, final PositionDTO b, final PositionDTO c, final PositionDTO d) {
-        final PositionDTO center = new PositionDTO();
-        center.latDeg = (a.latDeg + b.latDeg + c.latDeg + d.latDeg) / 4.0;
-        center.lngDeg = (a.lngDeg + b.lngDeg + c.lngDeg + d.lngDeg) / 4.0;
+    private Position getCenter(final Position a, final Position b, final Position c, final Position d) {
+        final Position center = new DegreePosition((a.getLatDeg() + b.getLatDeg() + c.getLatDeg() + d.getLatDeg()) / 4.0,
+                                                   (a.getLngDeg() + b.getLngDeg() + c.getLngDeg() + d.getLngDeg()) / 4.0);
         return center;
     }
 
-    public PositionDTO[] getGridCorners() {
+    public Position[] getGridCorners() {
         if (gridCellMap != null && !gridCellMap.isEmpty()) {
-            final PositionDTO[] corners = new PositionDTO[4];
+            final Position[] corners = new Position[4];
             final int numRow = windMatrix.length;
             final int numCol = windMatrix[0].length;
             final Util.Pair<Integer, Integer> cellPair1 = new Util.Pair<Integer, Integer>(1, 1);

@@ -10,10 +10,10 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -27,7 +27,7 @@ import com.sap.sse.gwt.client.player.TimeListener;
  *
  */
 public class SmallWindHistoryPanel extends FormPanel implements TimeListener, RaceSelectionChangeListener {
-    private final PositionDTO position;
+    private final Position position;
     private final WindIndicator[] windIndicators;
     private final Label selectedWindSourceLabel;
     private Date date;
@@ -46,7 +46,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
      * @param windTrack
      *            the wind track to visualize using this panel
      */
-    public SmallWindHistoryPanel(SailingServiceAsync sailingService, PositionDTO position,
+    public SmallWindHistoryPanel(SailingServiceAsync sailingService, Position position,
             int numberOfTimepoints, long millisecondStepsPerLabel, StringMessages stringConstants, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.position = position;
@@ -72,7 +72,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (race != null) {
                 sailingService.getAveragedWindInfo(race, from, millisecondStepsPerLabel,
-                        windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
+                        windIndicators.length, position.getLatDeg(), position.getLngDeg(), /* all sources */ null,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onSuccess(WindInfoForRaceDTO result) {

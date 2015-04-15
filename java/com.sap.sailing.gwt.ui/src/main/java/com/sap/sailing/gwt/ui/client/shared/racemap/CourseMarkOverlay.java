@@ -10,7 +10,7 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
@@ -26,7 +26,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      */
     private MarkDTO mark;
 
-    private PositionDTO position;
+    private Position position;
 
     private double buoyZoneRadiusInMeter;
     
@@ -44,8 +44,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Boolean lastShowBuoyZone;
     private Double lastBuoyZoneRadiusInMeter;
 
-    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO) {
-        super(map, zIndex);
+    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.mark = markDTO;
         this.position = markDTO.position;
         this.buoyZoneRadiusInMeter = 0.0;
@@ -66,13 +66,12 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
             double markSizeScaleFactor = markScaleAndSize.getA();
             getCanvas().setTitle(getTitle());
-            LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
             // calculate canvas size
             double canvasWidth = markScaleAndSize.getB().getWidth();
             double canvasHeight = markScaleAndSize.getB().getHeight();
             double buoyZoneRadiusInPixel = -1;
             if (showBuoyZone && mark.type == MarkType.BUOY) {
-                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition,
+                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBoxInPixels(mapProjection, position,
                         buoyZoneRadiusInMeter);
                 if (buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     canvasWidth = (buoyZoneRadiusInPixel + 1) * 2;
@@ -102,7 +101,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
-            Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
+            Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
             if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
             } else {
@@ -123,15 +122,14 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                lastHeight == null || lastHeight != height;
     }
 
-    public Util.Pair<Double, Size> getMarkScaleAndSize(PositionDTO markPosition) {
+    public Util.Pair<Double, Size> getMarkScaleAndSize(Position markPosition) {
         double minMarkHeight = 20;
         
         // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
         // therefore we scale the buoys with factor 2 by default
         double buoyScaleFactor = 2.0;
 
-        Size markSizeInPixel = calculateBoundingBox(mapProjection,
-                LatLng.newInstance(markPosition.latDeg, markPosition.lngDeg),
+        Size markSizeInPixel = calculateBoundingBox(mapProjection, markPosition,
                 markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
         
         double markHeightInPixel = markSizeInPixel.getHeight();
@@ -161,12 +159,23 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return mark;
     }
 
-    public void setMarkPosition(PositionDTO position) {
+    public void setMarkPosition(Position position) {
         this.position = position;
     }
+    
+    /**
+     * The real-world position where the mark displayed by this overlay is located
+     */
+    public Position getPosition() {
+        return this.position;
+    }
 
-    public LatLng getMarkPosition() {
-        return LatLng.newInstance(position.latDeg, position.lngDeg);
+    /**
+     * The {@link LatLng} position where the mark is shown on the map. This is transformed through the
+     * {@link CoordinateSystem} in place for the {@link RaceMap}.
+     */
+    public LatLng getMarkLatLngPosition() {
+        return coordinateSystem.toLatLng(position);
     }
 
     public double getBuoyZoneRadiusInMeter() {

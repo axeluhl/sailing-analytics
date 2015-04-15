@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sse.common.settings.Settings;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.common.DetailType;
  * @author Axel Uhl (d043530)
  *
  */
-public class LeaderboardSettings {
+public class LeaderboardSettings implements Settings {
     public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
     public static final String PARAM_EMBEDDED = "embedded";
     public static final String PARAM_HIDE_TOOLBAR = "hideToolbar";
