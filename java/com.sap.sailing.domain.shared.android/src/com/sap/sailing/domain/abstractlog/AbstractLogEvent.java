@@ -2,8 +2,8 @@ package com.sap.sailing.domain.abstractlog;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.WithID;
 
 /**

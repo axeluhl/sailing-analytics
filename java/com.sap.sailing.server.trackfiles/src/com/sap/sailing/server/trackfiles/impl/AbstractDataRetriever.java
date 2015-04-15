@@ -26,11 +26,11 @@ import slash.navigation.ovl.OvlFormat;
 import slash.navigation.tcx.Tcx1Format;
 import slash.navigation.tcx.Tcx2Format;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 public abstract class AbstractDataRetriever implements DataRetriever {
 

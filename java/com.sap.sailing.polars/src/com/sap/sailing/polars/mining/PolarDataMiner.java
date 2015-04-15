@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
@@ -409,6 +409,11 @@ public class PolarDataMiner {
     public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
             throws NotEnoughDataHasBeenAddedException {
         return cubicRegressionPerCourseProcessor.getAngleRegressionFunction(boatClass, legType, tack);
+    }
+    
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        return speedRegressionPerAngleClusterProcessor.getSpeedRegressionFunction(boatClass, trueWindAngle);
     }
 
     public void raceFinishedTracking(TrackedRace race) {

@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
-import com.sap.sailing.domain.tracking.impl.ScalableWind;
+import com.sap.sailing.domain.common.confidence.impl.ScalableWind;
 import com.sap.sse.common.TimePoint;
 
 /**
