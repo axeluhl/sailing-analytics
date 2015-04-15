@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sse.gwt.client.shared.components;
 
 import java.util.Iterator;
 

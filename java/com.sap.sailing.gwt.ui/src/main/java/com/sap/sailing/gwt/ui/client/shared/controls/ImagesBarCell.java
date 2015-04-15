@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sailing.gwt.ui.client.shared.controls;
 
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.FieldUpdater;
