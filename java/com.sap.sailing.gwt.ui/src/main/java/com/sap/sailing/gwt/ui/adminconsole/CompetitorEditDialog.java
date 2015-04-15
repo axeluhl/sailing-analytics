@@ -20,7 +20,6 @@ import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.RGBColor;
-import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -41,7 +40,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final TextBox sailId;
     private final TextBox email;
     private final StringMessages stringMessages;
-    private final URLFieldWithFileUpload imageUrlAndUploadComposite;
+    private final TextBox imageURL;
+//    private final URLFieldWithFileUpload imageUrlAndUploadComposite;
     
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
             DialogCallback<CompetitorDTO> callback) {
@@ -122,8 +122,9 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         this.sailId = createTextBox(competitorToEdit.getSailID());
-        imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
+        this.imageURL = createTextBox(competitorToEdit.getImageURL(), 100);
+        // imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        // imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
     }
 
     
@@ -180,7 +181,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
-                imageUrlAndUploadComposite.getURL(), boatClass);
+                imageURL.getText(), boatClass);
+                // imageUrlAndUploadComposite.getURL(), boatClass);
         return result;
     }
 
@@ -200,7 +202,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(5, 0, new Label(stringMessages.boatClass()));
         result.setWidget(5, 1, boatClassName);
         result.setWidget(6, 0, new Label(stringMessages.imageURL()));
-        result.setWidget(6, 1, imageUrlAndUploadComposite);
+        result.setWidget(6, 1, imageURL);
+//        result.setWidget(6, 1, imageUrlAndUploadComposite);
         return result;
     }
 

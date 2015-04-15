@@ -105,8 +105,10 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
             public SafeHtml getValue(CompetitorDTO competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 if (competitor.getImageURL() != null && !competitor.getImageURL().isEmpty()) {
-                    sb.appendHtmlConstant("<img src=\"/sailingserver/api/v1/file?uri=" + competitor.getImageURL()
-                            + "\" height=\"40px\" title=\"" + competitor.getImageURL() + "\"/>");
+//                    sb.appendHtmlConstant("<img src=\"/sailingserver/api/v1/file?uri=" + competitor.getImageURL()
+//                            + "\" height=\"40px\" title=\"" + competitor.getImageURL() + "\"/>");
+                  sb.appendHtmlConstant("<img src=\"" + competitor.getImageURL()
+                          + "\" height=\"40px\" title=\"" + competitor.getImageURL() + "\"/>");
                 }
                 return sb.toSafeHtml();
             }
@@ -165,7 +167,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(competitorNameColumn, stringMessages.name());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(displayColorColumn, stringMessages.color());
-        table.addColumn(imageColumn, stringMessages.imageURL());
+        table.addColumn(imageColumn, stringMessages.image());
         table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorIdColumn, stringMessages.id());
     }
