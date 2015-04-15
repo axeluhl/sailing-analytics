@@ -192,17 +192,38 @@ Grouping processors are used classify the data elements. The class `ParallelMult
 * Race Name: `505 Race 1`
 * Leg Type: `UPWIND`
 
-And the dimensions to group by would be the list `[Regatta Name, Race Name, Leg Type]`, then the resulting group key would be `Kieler Woche 2014 (505 Race 1 (UPWIND))`.
+And the dimensions to group by would be the list `[Regatta Name, Race Name, Leg Type]`, then the resulting group key would be `Kieler Woche 2014 (505 Race 1 (UPWIND))`. The `Functions`, that are given to the grouping processor have to meet some conditions or an exception will be thrown upon construction:
+
+* The given iterable mustn't be `null`.
+* The given iterable mustn't be empty.
+* Every `Function` has to be a dimension.
 
 There's also the abstract class `AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>` (that is implemented by the dimensions value processor), that implements the functionality to build the nested key out of a collection of dimensions. It has the abstract method `createGroupKeyFor`, that has to implement the concrete key creation for the data element for a single dimension.
 
 #### Extraction Processor
 
-Extraction processors are used to get statistic value of a grouped data element. The class `ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>` is a concrete processor, that takes `GroupedDataEntry<DataType>` as input elements and has `GroupedDataEntry<FunctionReturnType>` as result elements. It needs a [Statistic Function](#Statistics) to extract the statistic value from the data elements, which is done in its instructions. If the statistic value is `null`, then an invalid result  (created with the method `createInvalidResult`) is returned. If the value is something else, then the statistic value grouped by the key of the data element is returned.
+Extraction processors are used to get statistic value of a grouped data element. The class `ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>` is a concrete processor, that takes `GroupedDataEntry<DataType>` as input elements and has `GroupedDataEntry<FunctionReturnType>` as result elements. It needs a [Statistic Function](#Statistics) to extract the statistic value from the data elements, which is done in its instructions. If the statistic value is `null`, then an invalid result (created with the method `createInvalidResult`) is returned. If the value is something else, then the statistic value grouped by the key of the data element is returned.
 
 ### Aggregators
 
-*This section is under construction.*
+Aggregators are special processors, that are used to aggregate a collection of input elements (e.g. grouped statistic values) to a single result element (e.g. grouped statistic aggregate). The abstract class `AbstractParallelStoringAggregationProcessor<InputType, AggregatedType>` should be used to implement new aggregators. It creates instructions, that store the input element in a collection, that depends on the concrete implementation. The concrete aggregators doesn't have to use a concurrent collection, because the abstract aggregator handles the locking before storing an input element. The instructions always return an invalid result (created with the method `createInvalidResult`). This has the effect, that there won't be a result element forwarded to the result receivers, when the instruction has been executed. This is because the standard aggregator needs all input elements before it can calculate the aggregate. This is done in the implementation of the method `finish`. The calculated aggregate will then be forwarded to the result receivers. The abstract aggregator has two abstract methods:
+
+* The method `storeElement`, that is called in the instructions to store the given element in the specific collection.
+* The method `aggregateResult`, that is called in the `finish` method. It calculates the aggregate for the stored input elements and returns a single result element.
+
+**It's important to add a new entry to the enum `AggregatorType`, after a new type of aggregator has been implemented.** The aggregator won't be displayed in the generic data mining UI otherwise. This is legacy code from the previous architecture and will be removed in the future development.
+
+There are some concrete aggregators, that have `GroupedDataEntry<DataType>` as `InputType` and `Map<GroupKey, Double` as `ResultType`. Most of them have `Double` as `DataType`, but some of them are type independent. This has the effect, that currently the `ReturnType` of [Statistics](#Statistics) has to be `Double` or has to be autocasted or wrapped to `Double`. It is planned to use `ScalableValue` instead of `Double`, which will make the aggregation more flexible. These are the concrete aggregators for the statistic aggregation:
+
+* Sum (implemented by `ParallelGroupedDoubleDataSumAggregationProcessor`)
+* Average (implemented by `ParallelGroupedDoubleDataAverageAggregationProcessor`)
+* Median (implemented by `ParallelGroupedDoubleDataMedianAggregationProcessor`)
+* Maximum (implemented by `ParallelGroupedDoubleDataMaxAggregationProcessor`)
+* Minimum (implemented by `ParallelGroupedDoubleDataMinAggregationProcessor`)
+* Count (implemented by `ParallelGroupedDataCountAggregationProcessor`)
+	* This aggregator is type independent and can be used with any `GroupedDataEntry<?>`
+
+There's also the special aggregator `ParallelGroupedDataCollectingAsSetProcessor<DataType>`, that returns a `Map<GroupKey, Set<DataType>>` as result element. There's no entry in the enum `AggregatorType`, because this aggregator shouldn't be used by the end users. It is used to collect all dimension values of a collection of data elements.
 
 ### Processor Instructions
 
