@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentGroup;
@@ -22,7 +22,7 @@ import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CollapsableComponentViewer<SettingsType extends Settings> implements ComponentViewer {
+public class CollapsableComponentViewer<SettingsType extends AbstractSettings> implements ComponentViewer {
     
     public enum ViewerPanelTypes{ABSOLUTE_PANEL,  SCROLL_PANEL}
 

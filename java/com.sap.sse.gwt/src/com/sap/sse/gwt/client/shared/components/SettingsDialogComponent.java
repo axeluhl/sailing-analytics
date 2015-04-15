@@ -2,10 +2,11 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
-public interface SettingsDialogComponent<SettingsType> {
+public interface SettingsDialogComponent<SettingsType extends Settings> {
     /**
      * Called by the framework to obtain the widget to show in the settings dialog. Called each time before the
      * settings dialog is shown, therefore also before {@link #getResult()} is called and before any method on

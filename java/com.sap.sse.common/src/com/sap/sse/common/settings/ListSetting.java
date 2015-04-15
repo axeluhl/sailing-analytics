@@ -14,4 +14,9 @@ public class ListSetting<T extends Setting> implements Iterable<T>, Setting {
     public Iterator<T> iterator() {
         return list.iterator();
     }
+
+    @Override
+    public SettingType getType() {
+        return SettingType.LIST;
+    }
 }

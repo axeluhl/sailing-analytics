@@ -11,4 +11,9 @@ public class EnumSetting<T extends Enum<T>> implements Setting {
     public Enum<T> getValue() {
         return value;
     }
+
+    @Override
+    public SettingType getType() {
+        return SettingType.ENUM;
+    }
 }

@@ -1,8 +1,8 @@
 package com.sap.sse.common.settings;
 
 /**
- * A setting as contained as values in the map returned by {@link Settings#getSettings()}. This generic
- * view on a {@link Settings} object can then be used by one or more serializer / de-serializer combos
+ * A setting as contained as values in the map returned by {@link AbstractSettings#getSettings()}. This generic
+ * view on a {@link AbstractSettings} object can then be used by one or more serializer / de-serializer combos
  * for different serialized formats such as URLs, human-readable strings, obfuscated strings, JSON, or
  * a binary format.
  * 
@@ -10,5 +10,5 @@ package com.sap.sse.common.settings;
  *
  */
 public interface Setting {
-
+    SettingType getType();
 }

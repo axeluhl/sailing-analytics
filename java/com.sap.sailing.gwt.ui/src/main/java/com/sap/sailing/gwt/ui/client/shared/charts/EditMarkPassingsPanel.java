@@ -40,7 +40,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -48,7 +48,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Settings>, RaceSelectionChangeListener,
+public class EditMarkPassingsPanel extends AbsolutePanel implements Component<AbstractSettings>, RaceSelectionChangeListener,
         CompetitorSelectionChangeListener {
 
     private static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -435,12 +435,12 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Se
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Settings newSettings) {
+    public void updateSettings(AbstractSettings newSettings) {
     }
 
     @Override

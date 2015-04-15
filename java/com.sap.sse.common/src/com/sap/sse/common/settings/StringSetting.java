@@ -11,4 +11,9 @@ public class StringSetting implements Setting {
     public String getString() {
         return string;
     }
+
+    @Override
+    public SettingType getType() {
+        return SettingType.STRING;
+    }
 }
