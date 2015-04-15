@@ -15,8 +15,6 @@ package com.sap.sse.common.settings;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Settings {
-//    String serialize();
-//    
-//    String getType();
+public interface Settings extends Setting {
+    // Map<String, Setting> getSettings();
 }
