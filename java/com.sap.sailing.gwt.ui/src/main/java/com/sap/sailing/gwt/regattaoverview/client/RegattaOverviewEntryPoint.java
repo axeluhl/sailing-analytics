@@ -10,13 +10,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.theme.client.resources.ThemeResources;
@@ -29,6 +30,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private final static String PARAM_REGATTA = "regatta";
     private final static String PARAM_COURSE_AREA = "coursearea";
     
+    private HeaderPanel headerPanel;
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
@@ -41,15 +43,19 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         ThemeResources.INSTANCE.mainCss().ensureInjected();
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
+        
+        headerPanel = new HeaderPanel();
+        rootPanel.add(headerPanel);
+        
         containerPanel = new DockLayoutPanel(Unit.PX);
-        rootPanel.add(containerPanel);
+        headerPanel.setContentWidget(containerPanel);
         
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().eventOverview(), getStringMessages(), this, getUserService());
+            SAPHeader logoAndTitlePanel = new SAPHeader(getStringMessages().eventOverview(), false);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            containerPanel.addNorth(logoAndTitlePanel, 68);
+            headerPanel.setHeaderWidget(logoAndTitlePanel);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
             RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
