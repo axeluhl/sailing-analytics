@@ -54,7 +54,7 @@
                 android:layout_marginRight="@dimen/default_margin_half"
                 android:layout_toLeftOf="@+id/time_start"
                 android:layout_toStartOf="@+id/time_start"
-                android:src="@drawable/lock_outline"
+                android:src="?lock_outline"
                 android:visibility="gone" />
         </RelativeLayout>
 

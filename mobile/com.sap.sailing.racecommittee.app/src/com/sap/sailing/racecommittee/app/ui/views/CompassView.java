@@ -1,17 +1,23 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.*;
 
-import android.widget.TextView;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.DialogBuilder;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+
+import java.util.zip.Inflater;
 
 public class CompassView extends RelativeLayout {
 
@@ -24,7 +30,7 @@ public class CompassView extends RelativeLayout {
     private ImageView needleView = null;
     private TextView degreeView = null;
     private float currentDegrees = 0.0f;
-    private Float deferredToDegress = null;
+    private Float deferredToDegrees = null;
 
     private float getNeedlePivotX() { return needleView.getMeasuredWidth() / 2; }
     private float getNeedlePivotY() { return needleView.getMeasuredHeight() / 2; }
@@ -47,6 +53,11 @@ public class CompassView extends RelativeLayout {
     private void inflate() {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.compass_view, this);
+
+        View numbers = findViewById(R.id.numbers);
+        if (numbers != null) {
+            numbers.setOnLongClickListener(new ManualEntry());
+        }
     }
 
     @Override
@@ -77,7 +88,7 @@ public class CompassView extends RelativeLayout {
 
     public void setDirection(float toDegrees) {
         if (isNeedleReady()) {
-            deferredToDegress = toDegrees;
+            deferredToDegrees = toDegrees;
         } else {
             cancelAndStartAnimation(toDegrees, 500);
         }
@@ -122,9 +133,9 @@ public class CompassView extends RelativeLayout {
     }
     
     private void doDeferredRotation() {
-        if (deferredToDegress != null) {
-            float toDegrees = deferredToDegress;
-            deferredToDegress = null;
+        if (deferredToDegrees != null) {
+            float toDegrees = deferredToDegrees;
+            deferredToDegrees = null;
             setDirection(toDegrees);
         }
     }
@@ -156,7 +167,29 @@ public class CompassView extends RelativeLayout {
         @Override
         public void onAnimationStart(Animation animation) {
         }
-
     }
 
+    private class ManualEntry implements OnLongClickListener {
+
+        @Override
+        public boolean onLongClick(View v) {
+            final EditText input = new EditText(getContext());
+            input.setInputType(InputType.TYPE_CLASS_NUMBER);
+            input.setText(String.valueOf(currentDegrees));
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle(R.string.degrees);
+            builder.setView(input);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    setDirection(Float.parseFloat(input.getText().toString()));
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.setCancelable(true);
+            builder.create().show();
+            return false;
+        }
+    }
 }

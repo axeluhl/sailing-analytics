@@ -33,8 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/lock_outline"
-                android:tint="?sap_light_gray"
+                android:src="?lock_outline"
                 android:visibility="visible" />
         </LinearLayout>
 
@@ -96,8 +95,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/lock_outline"
-                android:tint="?sap_light_gray"
+                android:src="?lock_outline"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -159,9 +157,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/lock_outline"
-                android:tint="?sap_light_gray"
-                android:visibility="visible" />
+                android:src="?lock_outline"
+                android:visibility="gone" />
         </LinearLayout>
 
         <RelativeLayout

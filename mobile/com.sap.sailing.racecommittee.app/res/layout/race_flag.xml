@@ -35,7 +35,8 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/default_margin"
             android:layout_marginTop="@dimen/default_margin"
-            android:textSize="@dimen/textSize_22"
+            android:textAppearance="?textSmall"
+            android:textColor="?white"
             tools:text="@string/time_up" />
 
         <ImageView

@@ -1,8 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +86,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         return position;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -90,10 +98,29 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
         final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
         if (flagImage != null) {
+            Drawable flagDrawable = null;
             flagImage.setVisibility(View.INVISIBLE);
             int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
             if (flagResId != 0) {
-                Drawable flagDrawable = mContext.getResources().getDrawable(flagResId);
+                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    flagDrawable = mContext.getDrawable(flagResId);
+                } else {
+                    flagDrawable = mContext.getResources().getDrawable(flagResId);
+                }
+            } else {
+                TypedValue value = new TypedValue();
+                // R.attr.flag_ap_alpha_96dp
+                flagResId = mContext.getResources().getIdentifier(item.file_name, "attr", mContext.getPackageName());
+                if (mContext.getTheme().resolveAttribute(flagResId, value, true)) {
+                    // res/drawable/flag_ap_alpha_96dp_light.xml
+                    String[] data = String.valueOf(value.string).split("/");
+                    flagResId = mContext.getResources().getIdentifier(data[2].replace(".xml", ""), data[1], mContext.getPackageName());
+                    if (flagResId != 0) {
+                        flagDrawable = mContext.getResources().getDrawable(flagResId);
+                    }
+                }
+            }
+            if (flagDrawable != null) {
                 flagImage.setImageDrawable(flagDrawable);
                 flagImage.setVisibility(View.VISIBLE);
             }

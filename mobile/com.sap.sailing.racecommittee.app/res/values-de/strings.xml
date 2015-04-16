@@ -364,5 +364,6 @@
     <string name="no_camera">Keine Kamera App gefunden</string>
     <string name="delete_file">Das löscht das Foto</string>
     <string name="delete_file_title">Datei löschen</string>
+    <string name="degrees">Grad</string>
 
 </resources>

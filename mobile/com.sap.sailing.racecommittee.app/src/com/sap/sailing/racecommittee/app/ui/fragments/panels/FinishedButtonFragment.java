@@ -165,14 +165,14 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOOGLE_LIST);
+                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_LIST);
                 switch (toggleMarker(v, R.id.list_marker)) {
                     case 0:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
                     case 1:
-                        // TODO
+                        replaceFragment(PositioningFragment.newInstance(getRecentArguments()), R.id.finished_content);
                         break;
 
                     default:
@@ -199,7 +199,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         uncheckMarker(mRecord);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_PHOTOS.equals(data)) {
                         uncheckMarker(mPhoto);
-                    } else if (AppConstants.INTENT_ACTION_TOOGLE_LIST.equals(data)) {
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_LIST.equals(data)) {
                         uncheckMarker(mList);
                     } else {
                         uncheckMarker(new View(context));

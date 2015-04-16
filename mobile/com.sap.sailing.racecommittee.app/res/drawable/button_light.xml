@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- pressed -->
-    <item android:drawable="@color/light_sap_gray_black_40" android:state_pressed="true" />
+    <item android:drawable="@color/constant_sap_yellow_1" android:state_pressed="true" />
 
     <!-- focused -->
     <item android:drawable="@color/light_sap_gray_black_40" android:state_focused="true" />

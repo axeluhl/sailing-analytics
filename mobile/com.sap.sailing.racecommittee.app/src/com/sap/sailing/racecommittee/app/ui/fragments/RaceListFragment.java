@@ -140,7 +140,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             }
 
             int id;
-            if (AppPreferences.on(getActivity()).getTheme().equals(AppConstants.LIGHT_THEME)) {
+            if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
                 id = R.drawable.nav_drawer_tab_button_light;
             } else {
                 id = R.drawable.nav_drawer_tab_button_dark;

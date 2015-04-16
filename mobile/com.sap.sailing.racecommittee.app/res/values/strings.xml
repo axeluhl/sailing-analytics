@@ -381,6 +381,7 @@
     <string name="finished_text_02">Your evaluation has been published. Changes need to be re-submitted to be in effect.</string>
 
     <string name="protest_time">Protest Time</string>
+    <string name="degrees">Degrees</string>
 
     <string name="no_camera">No Camera App found</string>
     <string name="delete_file_title">Delete file</string>

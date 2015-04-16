@@ -126,7 +126,7 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
 
     protected String getDisplayValueForRounding(PassingInstruction direction) {
         if (PassingInstruction.Gate.equals(direction)) {
-            return "Gate";
+            return "G";
         }
         if (PassingInstruction.Port.equals(direction)) {
             return "P";
@@ -135,10 +135,10 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
             return "S";
         }
         if (PassingInstruction.Line.equals(direction)) {
-            return "Line";
+            return "L";
         }
         if (PassingInstruction.Offset.equals(direction)) {
-            return "Offset";
+            return "O";
         }
         return "";
     }

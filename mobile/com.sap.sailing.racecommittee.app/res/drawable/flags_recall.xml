@@ -14,7 +14,7 @@
         android:top="0dp">
         <bitmap
             android:gravity="top"
-            android:src="@drawable/flag_shape_04_96dp" />
+            android:src="@drawable/flag_shape_04_96dp_dark" />
     </item>
 
     <item

@@ -351,7 +351,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         super.onResume();
 
         setupLocationClient();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+//        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
     @Override

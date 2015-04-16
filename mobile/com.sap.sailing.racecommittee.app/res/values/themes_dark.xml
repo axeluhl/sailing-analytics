@@ -39,6 +39,8 @@
         <item name="textXLarge">@style/AppTheme.Dark.Text.XLarge</item>
 
         <!-- drawable -->
+        <item name="compass_back">@drawable/compass_back_dark</item>
+        <item name="compass_needle">@drawable/compass_needle_dark</item>
         <item name="access_time_36dp">@drawable/ic_access_time_white_36dp</item>
         <item name="check_18dp">@drawable/ic_check_white_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
@@ -46,6 +48,15 @@
         <item name="hearing_48dp">@drawable/ic_hearing_white_48dp</item>
         <item name="mic_48dp">@drawable/ic_mic_white_48dp</item>
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_white_48dp</item>
+        <item name="lock_outline">@drawable/lock_outline_dark</item>
+        <item name="wind_off">@drawable/wind_off_dark</item>
+        <item name="wind_on">@drawable/wind_on_dark</item>
+
+        <!-- flag drawable -->
+        <item name="flag_ap_alpha_96dp">@drawable/flag_ap_alpha_96dp_dark</item>
+        <item name="flag_ap_hotel_96dp">@drawable/flag_ap_hotel_96dp_dark</item>
+        <item name="flag_november_alpha_96dp">@drawable/flag_november_alpha_96dp_dark</item>
+        <item name="flag_november_hotel_96dp">@drawable/flag_november_hotel_96dp_dark</item>
     </style>
 
     <style name="AppTheme.Dark.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">

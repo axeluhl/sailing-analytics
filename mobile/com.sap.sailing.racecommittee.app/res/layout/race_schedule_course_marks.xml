@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:baselineAligned="false"
-    android:orientation="vertical"
-    tools:ignore="ResAuto">
-
-    <include
-        android:id="@+id/header"
-        layout="@layout/race_schedule_course_header"/>
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -21,15 +14,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:orientation="horizontal"
             android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginRight="@dimen/default_margin">
+            android:layout_marginRight="@dimen/default_margin"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_vertical|center_horizontal"
+                android:gravity="center"
                 android:text="@string/previous_course"
                 android:textAppearance="?textNormal"
                 android:textStyle="bold"/>
@@ -37,19 +30,19 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/default_margin"
+                android:layout_marginRight="@dimen/default_margin"
                 android:layout_weight="1"
-                android:gravity="center_vertical|center_horizontal"
+                android:gravity="center"
                 android:text="@string/make_new_course"
                 android:textAppearance="?textNormal"
-                android:textStyle="bold"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"/>
+                android:textStyle="bold"/>
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_vertical|center_horizontal"
+                android:gravity="center"
                 android:text="@string/course_design_assets"
                 android:textAppearance="?textNormal"
                 android:textStyle="bold"/>
@@ -61,10 +54,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
-            android:paddingBottom="10dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="20dp">
+            android:paddingBottom="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
+            android:paddingTop="@dimen/default_padding">
 
             <Button
                 android:id="@+id/publishCourse"
@@ -95,40 +88,40 @@
             android:layout_height="match_parent"
             android:layout_above="@id/bottom_bar"
             android:layout_below="@id/header_bar"
-            android:gravity="center"
-            android:orientation="horizontal"
             android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginRight="@dimen/default_margin">
+            android:layout_marginRight="@dimen/default_margin"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/previous_course"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:gravity="center"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/new_course"
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
                 android:layout_gravity="left"
-                android:gravity="center_horizontal|center_vertical"
-                android:verticalSpacing="5dp"
-                android:layout_weight="1"
                 android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"/>
+                android:layout_marginRight="@dimen/default_margin"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:verticalSpacing="5dp"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/assets"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:columnWidth="100dp"
                 android:gravity="center"
                 android:horizontalSpacing="10dp"
                 android:numColumns="auto_fit"
                 android:stretchMode="columnWidth"
-                android:verticalSpacing="10dp"
-                android:layout_weight="1"/>
+                android:verticalSpacing="10dp"/>
         </LinearLayout>
     </RelativeLayout>
-</LinearLayout>
+</RelativeLayout>

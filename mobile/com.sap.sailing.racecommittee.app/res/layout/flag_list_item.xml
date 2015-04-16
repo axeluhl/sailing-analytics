@@ -12,7 +12,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:padding="5dp"
-        tools:src="@drawable/flag_ap_alpha_96dp" />
+        tools:src="?flag_ap_hotel_96dp" />
 
     <ImageView
         android:id="@+id/more_data"
@@ -53,7 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textSize="@dimen/textSize_26"
+            android:textAppearance="?textNormal"
             tools:text="Xray" />
 
         <TextView
@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textSize="@dimen/textSize_18"
+            android:textAppearance="?textXSmall"
             tools:text="Individual Recall" />
     </LinearLayout>
 

@@ -47,7 +47,7 @@ public class AppConstants {
 
     public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
     public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";
-    public final static String INTENT_ACTION_TOOGLE_LIST = "list";
+    public final static String INTENT_ACTION_TOGGLE_LIST = "list";
 
     private final static String INTENT_ACTION_TIME = PACKAGE_NAME + "action.time";
     public final static String INTENT_ACTION_TIME_HIDE = INTENT_ACTION_TIME + ".hide";
