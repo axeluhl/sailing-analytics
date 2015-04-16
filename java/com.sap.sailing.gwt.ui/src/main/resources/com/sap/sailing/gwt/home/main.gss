@@ -268,13 +268,13 @@ figcaption {
   border-right-color: #f0ab00;
 }
 .label[data-labeltype='upcoming'] {
-  color: #333;
-  background-color: #eee;
+  color: #fff;
+  background-color: #777;
   vertical-align: middle;
   margin-top: -0.416666666666667em;
 }
 .label[data-labeltype='upcoming']:before {
-  border-right-color: #eee;
+  border-right-color: #777;
 }
 .label[data-labeltype='new'],
 .label[data-labeltype='updated'] {
