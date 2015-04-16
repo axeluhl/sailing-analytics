@@ -2,8 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
@@ -12,9 +11,7 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
         AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType> {
 
     private final int retrievalLevel;
-    
-    private final Lock retrievedDataAmountLock;
-    private int retrievedDataAmount;
+    private final AtomicInteger retrievedDataAmount;
 
     /**
      * 
@@ -28,7 +25,7 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
             ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers, int retrievalLevel) {
         super(inputType, resultType, executor, resultReceivers);
         this.retrievalLevel = retrievalLevel;
-        retrievedDataAmountLock = new ReentrantLock(); 
+        retrievedDataAmount = new AtomicInteger();
     }
 
     @Override
@@ -36,7 +33,7 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
         return new AbstractProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
             @Override
             public ResultType computeResult() {
-                incrementRetrievedDataAmount();
+                retrievedDataAmount.incrementAndGet();
                 return convertWorkingToResultType(partialElement);
             }
         };
@@ -52,18 +49,9 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
 
     protected abstract Iterable<WorkingType> retrieveData(InputType element);
 
-    private void incrementRetrievedDataAmount() {
-        retrievedDataAmountLock.lock();
-        try {
-            retrievedDataAmount++;
-        } finally {
-            retrievedDataAmountLock.unlock();
-        }
-    }
-
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount);
+        additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount.get());
     }
 
 }
