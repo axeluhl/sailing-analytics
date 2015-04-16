@@ -56,7 +56,6 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         if (!embedded) {
 
             SAPHeader logoAndTitlePanel = new SAPHeader(getStringMessages().eventOverview(), "", false);
-            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             headerPanel.setHeaderWidget(logoAndTitlePanel);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
