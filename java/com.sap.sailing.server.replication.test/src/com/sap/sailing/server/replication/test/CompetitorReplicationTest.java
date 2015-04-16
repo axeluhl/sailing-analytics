@@ -76,7 +76,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
         Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
-                123, competitorName, Color.RED, "someone@nowhere.de",
+                123, competitorName, Color.RED, "someone@nowhere.de", null,
                 new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
@@ -107,7 +107,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         // now update competitor on master using replicating operation
         final String newCompetitorName = "Der Vogel, der mit dem Kiel zieht";
         master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, competitor.getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
-                competitor.getTeam().getImage()));
+                competitor.getTeam().getImage(), competitor.getFlagImage()));
         Thread.sleep(1000);
         assertEquals(newCompetitorName, replicatedCompetitor.getName()); // expect in-place update of existing competitor in replica
         
@@ -115,7 +115,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
         master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, Color.RED, competitor.getEmail(),
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), competitor.getTeam().getImage());
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage());
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,

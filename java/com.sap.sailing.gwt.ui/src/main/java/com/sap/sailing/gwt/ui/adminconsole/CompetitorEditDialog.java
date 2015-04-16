@@ -20,6 +20,7 @@ import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -40,8 +41,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final TextBox sailId;
     private final TextBox email;
     private final StringMessages stringMessages;
-    private final TextBox imageURL;
-//    private final URLFieldWithFileUpload imageUrlAndUploadComposite;
+    private final TextBox flagImageURL;
+    private final URLFieldWithFileUpload imageUrlAndUploadComposite;
     
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
             DialogCallback<CompetitorDTO> callback) {
@@ -122,9 +123,9 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         this.sailId = createTextBox(competitorToEdit.getSailID());
-        this.imageURL = createTextBox(competitorToEdit.getImageURL(), 100);
-        // imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        // imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
+        this.flagImageURL = createTextBox(competitorToEdit.getFlagImageURL(), 100);
+        imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
     }
 
     
@@ -181,14 +182,13 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
-                imageURL.getText(), boatClass);
-                // imageUrlAndUploadComposite.getURL(), boatClass);
+                imageUrlAndUploadComposite.getURL(), flagImageURL.getText(), boatClass);
         return result;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(7, 2);
+        Grid result = new Grid(8, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
@@ -201,9 +201,10 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(4, 1, email);
         result.setWidget(5, 0, new Label(stringMessages.boatClass()));
         result.setWidget(5, 1, boatClassName);
-        result.setWidget(6, 0, new Label(stringMessages.imageURL()));
-        result.setWidget(6, 1, imageURL);
-//        result.setWidget(6, 1, imageUrlAndUploadComposite);
+        result.setWidget(6, 0, new Label(stringMessages.flagImageURL()));
+        result.setWidget(6, 1, flagImageURL);
+        result.setWidget(7, 0, new Label(stringMessages.imageURL()));
+        result.setWidget(7, 1, imageUrlAndUploadComposite);
         return result;
     }
 
