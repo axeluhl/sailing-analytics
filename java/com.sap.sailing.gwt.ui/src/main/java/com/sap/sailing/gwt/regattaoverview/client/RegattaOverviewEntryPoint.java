@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
+import com.sap.sse.gwt.theme.client.resources.ThemeResources;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
@@ -35,6 +36,9 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
+        
+        ThemeResources.INSTANCE.mediaCss().ensureInjected();
+        ThemeResources.INSTANCE.mainCss().ensureInjected();
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         containerPanel = new DockLayoutPanel(Unit.PX);
