@@ -11,6 +11,7 @@ public interface RegattaOverviewResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String container();
         String titleLabel();
         String eventLabel();
         String venueLabel();

@@ -33,6 +33,11 @@ table {
   border-collapse: separate;
 }
 
+.container {
+	width: 100%;
+	height: 100%;
+}
+
 .titleLabel {
   font-size: 18px;
   font-weight: 500;

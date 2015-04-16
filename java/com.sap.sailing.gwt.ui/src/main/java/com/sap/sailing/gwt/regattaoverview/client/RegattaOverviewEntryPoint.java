@@ -49,6 +49,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         rootPanel.add(headerPanel);
         
         containerPanel = new DockLayoutPanel(Unit.PX);
+        containerPanel.addStyleName(RegattaOverviewResources.INSTANCE.css().container());
         headerPanel.setContentWidget(containerPanel);
         
         boolean embedded = Window.Location.getParameter("embedded") != null
