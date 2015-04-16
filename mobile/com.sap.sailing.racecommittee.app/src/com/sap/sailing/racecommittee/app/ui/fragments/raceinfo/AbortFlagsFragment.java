@@ -15,6 +15,7 @@ import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -55,11 +56,13 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             case AP:
                 logFlag(flag);
                 state.setAborted(now, /* postponed */ true, flag);
+                setProtestTime();
                 break;
 
             case NOVEMBER:
                 logFlag(flag);
                 state.setAborted(now, /* postponed */ false, flag);
+                setProtestTime();
                 break;
 
             default:
@@ -86,6 +89,11 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                 ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString());
                 break;
         }
+    }
+
+    private void setProtestTime() {
+        ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(getRace());
+        fragment.show(getFragmentManager(), null);
     }
 
     @Override
