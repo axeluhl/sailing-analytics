@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/default_margin"
-            android:src="@drawable/arrow_up_large"
+            android:src="?arrow_up_large"
             android:visibility="gone" />
 
         <ImageView
@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/arrow_down_large"
+            android:src="?arrow_down_large"
             android:visibility="gone" />
     </LinearLayout>
 

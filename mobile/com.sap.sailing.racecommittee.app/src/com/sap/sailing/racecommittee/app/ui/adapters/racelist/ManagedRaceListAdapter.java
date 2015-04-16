@@ -10,12 +10,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +30,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
@@ -335,14 +333,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
                 String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
                 flag_timer.setText(text.replace("-", ""));
-                Resources resources = getContext().getResources();
-                Bitmap arrow;
+                Drawable arrow;
                 if (changePole.isDisplayed()) {
-                    arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_up);
+                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
                 } else {
-                    arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_down);
+                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
                 }
-                arrow_direction.setImageBitmap(arrow);
+                arrow_direction.setImageDrawable(arrow);
                 race_flag.setVisibility(View.VISIBLE);
             }
         }

@@ -26,6 +26,12 @@
 
     <!-- drawable -->
     <attr name="access_time_36dp" format="reference"/>
+    <attr name="arrow_down" format="reference"/>
+    <attr name="arrow_down_large" format="reference"/>
+    <attr name="arrow_down_normal" format="reference"/>
+    <attr name="arrow_up" format="reference"/>
+    <attr name="arrow_up_large" format="reference"/>
+    <attr name="arrow_up_normal" format="reference"/>
     <attr name="check_18dp" format="reference"/>
     <attr name="chevron_left_24dp" format="reference"/>
     <attr name="compass_back" format="reference"/>

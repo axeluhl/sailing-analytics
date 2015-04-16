@@ -6,9 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 import java.text.SimpleDateFormat;
 
@@ -25,6 +29,11 @@ public class RaceFinishingFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finishing, container, false);
+
+        ImageView flag = ViewHolder.get(layout, R.id.flag);
+        if (flag != null) {
+            flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), 96));
+        }
 
         Button down = ViewHolder.get(layout, R.id.flag_down);
         if (down != null) {
