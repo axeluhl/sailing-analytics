@@ -3,10 +3,13 @@ package com.sap.sailing.simulator.impl;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
@@ -105,7 +108,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     // generate step in one of the possible directions
     // default: L - left, R - right
     // extended: M - wide left, S - wide right
-    TimedPosition getStep(TimedPosition pos, Wind posWind, long timeStep, long turnLoss, boolean sameBaseDirection,
+    TimedPosition getStep(TimedPosition pos, Wind posWind, Position posEnd, long timeStep, long turnLoss, boolean sameBaseDirection,
             char nextDirection) {
 
         TimePoint curTime = pos.getTimePoint();
@@ -119,14 +122,17 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         if (nextDirection == 'L') {
             travelBearing = pd.optimalDirectionsUpwind()[0];
         }
-        if (nextDirection == 'l') {
+        if (nextDirection == 'r') {
             travelBearing = pd.optimalDirectionsDownwind()[0];
         }
         if (nextDirection == 'R') {
             travelBearing = pd.optimalDirectionsUpwind()[1];
         }
-        if (nextDirection == 'r') {
+        if (nextDirection == 'l') {
             travelBearing = pd.optimalDirectionsDownwind()[1];
+        }
+        if ((nextDirection == 'D')||(nextDirection == 'E')) {
+            travelBearing = curPosition.getBearingGreatCircle(posEnd);
         }
 
         // determine beat-speed left and right
@@ -146,9 +152,16 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
     // check whether nextDirection is same base direction as previous direction, i.e. no turn
     boolean isSameDirection(char prevDirection, char nextDirection) {
-        return ((nextDirection == prevDirection) || (prevDirection == '0'));
+        char tmpPrevDirection = getBaseDirection(prevDirection);
+        char tmpNextDirection = getBaseDirection(nextDirection);
+        return ((tmpNextDirection == tmpPrevDirection) || (tmpPrevDirection == '0'));
     }
 
+    char getBaseDirection(char direction) {
+        char tmpDirection = direction;
+        return (tmpDirection=='D'?'L':(tmpDirection=='E'?'R':(tmpDirection=='l'?'L':(tmpDirection=='r'?'R':tmpDirection))));
+    }
+    
     // get path candidate measuring height towards (local, current-apparent) wind
     PathCandidate getPathCandWind(PathCandidate path, char nextDirection, long timeStep, long turnLoss,
             Position posStart, Position posEnd, double tgtHeight) {
@@ -162,7 +175,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         }
 
         // calculate next path position (taking turn-loss into account)
-        TimedPosition pathPos = this.getStep(path.pos, path.wind, timeStep, turnLoss, sameBaseDirection, nextDirection);
+        TimedPosition pathPos = this.getStep(path.pos, path.wind, posEnd, timeStep, turnLoss, sameBaseDirection, nextDirection);
 
         // determine apparent wind at next path position & time
         Wind posWind = this.parameters.getWindField().getWind(pathPos);
@@ -212,7 +225,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, posWind));
+        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, getBaseDirection(nextDirection), posWind));
     }
 
     // generate path candidates based on bearing to target
@@ -229,8 +242,9 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         Bearing upwindLeftTarget = bearOptimalUpwind[0].getDifferenceTo(bearTarget);
         // check whether boat is in "tacking area"
         PointOfSail pointOfSail = PointOfSail.REACHING;
-        if ((upwindLeftTarget.getDegrees() >= 0) && (upwindLeftTarget.getDegrees() <= upwindLeftRight.getDegrees())) {
-            logger.info("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees() + ", diffLeftRight: "
+        char reachingSide = ' ';
+        if ((upwindLeftTarget.getDegrees() >= -1) && (upwindLeftTarget.getDegrees() <= upwindLeftRight.getDegrees()+1)) {
+            logger.fine("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees() + ", diffLeftRight: "
                     + upwindLeftRight.getDegrees() + ", " + path.path + ")");
             pointOfSail = PointOfSail.TACKING;
         } else {
@@ -238,20 +252,18 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
             Bearing downwindLeftRight = bearOptimalDownwind[0].getDifferenceTo(bearOptimalDownwind[1]);
             Bearing downwindLeftTarget = bearOptimalDownwind[0].getDifferenceTo(bearTarget);
             // check whether boat is in "non-sailable area"
-            if ((downwindLeftTarget.getDegrees() >= 0) && (downwindLeftTarget.getDegrees() <= downwindLeftRight.getDegrees())) {
-                logger.info("point-of-sail: jibing (diffLeftTarget: " + downwindLeftTarget.getDegrees()
+            if ((downwindLeftTarget.getDegrees() >= -1) && (downwindLeftTarget.getDegrees() <= downwindLeftRight.getDegrees()+1)) {
+                logger.fine("point-of-sail: jibing (diffLeftTarget: " + downwindLeftTarget.getDegrees()
                         + ", diffLeftRight: " + downwindLeftRight.getDegrees() + ", " + path.path + ")");
                 pointOfSail = PointOfSail.JIBING;
             } else {
-                //logger.info("point-of-sail: reaching");
-            }
-        }
-        
-        if (pointOfSail == PointOfSail.REACHING) {
-            if (this.upwindLeg) {
-                pointOfSail = PointOfSail.TACKING;
-            } else {
-                pointOfSail = PointOfSail.JIBING;
+                //logger.info("path: "+path.path);
+                Bearing windBoat = path.wind.getBearing().getDifferenceTo(bearTarget);
+                if (windBoat.getDegrees() > 0) {
+                    reachingSide = 'D'; // left-sided reaching
+                } else {
+                    reachingSide = 'E'; // right-sided reaching
+                }
             }
         }
         
@@ -261,33 +273,71 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         if (this.maxTurns > 0) {
 
             char prevDirection = path.path.charAt(path.path.length() - 1);
-            if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, (this.upwindLeg?'L':'l')))) {
-                newPathCand = getPathCandWind(path, (this.upwindLeg?'L':'l'), timeStep, turnLoss, posStart, posEnd, tgtHeight);
-                result.add(newPathCand);
+            
+            if (pointOfSail == PointOfSail.TACKING) {
+                // left step
+                if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, 'L'))) {
+                    newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
+                // right step
+                if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, 'R'))) {
+                    newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
             }
 
-            if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, (this.upwindLeg?'R':'r')))) {
-                newPathCand = getPathCandWind(path, (this.upwindLeg?'R':'r'), timeStep, turnLoss, posStart, posEnd, tgtHeight);
+            if (pointOfSail == PointOfSail.JIBING) {
+                // left step
+                if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, 'l'))) {
+                    newPathCand = getPathCandWind(path, 'l', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
+                // right step
+                if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, 'r'))) {
+                    newPathCand = getPathCandWind(path, 'r', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
+            }
+
+            if (pointOfSail == PointOfSail.REACHING) {
+                // direct step (to target)
+                if ((path.trn < this.maxTurns) || (this.isSameDirection(prevDirection, reachingSide))) {
+                    newPathCand = getPathCandWind(path, reachingSide, timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
+                // continuing step (may be required to reach target at all)
+                newPathCand = getPathCandWind(path, prevDirection, timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
             }
 
         } else {
 
             if (pointOfSail == PointOfSail.TACKING) {
-                // step left
+                // left step
                 newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
-                // step right
+                // right step
                 newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
             }
 
             if (pointOfSail == PointOfSail.JIBING) {
-                // step left
+                // left step
                 newPathCand = getPathCandWind(path, 'l', timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
-                // step right
+                // right step
                 newPathCand = getPathCandWind(path, 'r', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                result.add(newPathCand);
+            }
+
+            if (pointOfSail == PointOfSail.REACHING) {
+                // direct step (to target)
+                newPathCand = getPathCandWind(path, reachingSide, timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                result.add(newPathCand);
+                // continuing step (may be required to reach target at all)
+                char prevDirection = path.path.charAt(path.path.length() - 1);
+                newPathCand = getPathCandWind(path, prevDirection, timeStep, turnLoss, posStart, posEnd, tgtHeight);
                 result.add(newPathCand);
             }
 
@@ -316,9 +366,9 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                     continue; // ignore curPath
                 }
 
-                if (curNewPath.sid == (this.upwindLeg?'L':'l')) {
+                if (curNewPath.sid == 'L') {
                     leftPaths.add(curNewPath);
-                } else if (curNewPath.sid == (this.upwindLeg?'R':'r')) {
+                } else if (curNewPath.sid == 'R') {
                     rightPaths.add(curNewPath);
                 }
 
@@ -556,9 +606,14 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0,
                 0.0, 0, "0", '0', wndStart);
         if (initPathStr.length() > 1) {
+            String initPathStrCaps = initPathStr.toUpperCase();
+            if (!this.upwindLeg) {
+                initPathStrCaps = initPathStrCaps.replace('L', 'r');
+                initPathStrCaps = initPathStrCaps.replace('R', 'l');
+            }
             char nextDirection = '0';
-            for (int idx = 1; idx < initPathStr.length(); idx++) {
-                nextDirection = initPathStr.charAt(idx);
+            for (int idx = 1; idx < initPathStrCaps.length(); idx++) {
+                nextDirection = initPathStrCaps.charAt(idx);
                 PathCandidate newPathCand = getPathCandWind(initPath, nextDirection, usedTimeStep, turnLoss, startPos,
                         endPos, distStartEndMeters);
                 initPath = newPathCand;
@@ -568,10 +623,10 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         List<PathCandidate> trgPaths = new ArrayList<PathCandidate>();
         allPaths.add(initPath);
 
-        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, usedTimeStep,
+        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, endPos, usedTimeStep,
                 turnLoss, true, (this.upwindLeg?'L':'l'));
         double tstDist1 = startPos.getDistance(tstPosition.getPosition()).getMeters();
-        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, usedTimeStep, turnLoss, true,
+        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, endPos, usedTimeStep, turnLoss, true,
                 (this.upwindLeg?'R':'r'));
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
@@ -642,7 +697,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
             // check for time-out
             if (this.isTimedOut()) {
-                reachedEnd = true;
+                //reachedEnd = true;
             }
             
         } // main while-loop
@@ -735,20 +790,16 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
         // debug output
         for (PathCandidate curPath : trgPaths) {
-            logger.fine("\nPath: " + curPath.path + "\n      Time: "
+            logger.fine("\nPath: " + curPath.path + " (" + curPath.trn + ")\n      Time: "
                     + (curPath.pos.getTimePoint().asMillis() - startTime.asMillis()) + ", Height: " + curPath.vrt
                     + " of " + (Math.round(startPos.getDistance(endPos).getMeters() * 100.0) / 100.0) + ", Dist: "
                     + curPath.hrz + "m ~ "
                     + (Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters() * 100.0) / 100.0) + "m");
-            // System.out.print(""+curPath.path+": "+curPath.pos.getTimePoint().asMillis()+", "+curPath.pos.getPosition().getLatDeg()+", "+curPath.pos.getPosition().getLngDeg()+", ");
-            // System.out.println(" height:"+curPath.vrt+" of "+startPos.getDistance(endPos).getMeters()+", dist:"+curPath.hrz+" ~ "+curPath.pos.getPosition().getDistance(endPos));
         }
 
         //
-        // fill gwt-path
+        // reconstruct best path
         //
-
-        // generate intermediate steps
         bestCand = trgPaths.get(0); // target-path ending closest to target
         long endTime = bestCand.pos.getTimePoint().asMillis();
         TimedPositionWithSpeed curPosition = null;
@@ -767,7 +818,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
                 boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
                 Wind curWind = wf.getWind(curPosition);
-                TimedPosition newPosition = this.getStep(curPosition, curWind, usedTimeStep, turnLoss,
+                TimedPosition newPosition = this.getStep(curPosition, curWind, endPos, usedTimeStep, turnLoss,
                         sameBaseDirection, nextDirection);
                 if (newPosition.getTimePoint().asMillis() < endTime) {
                     curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(),
@@ -795,6 +846,18 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                 maxTurnTime = turnMiddle * this.usedTimeStep;
             }
         }
+        
+        // logging information about best found course
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(bestCand.pos.getTimePoint().asMillis() - startTime.asMillis());
+        SimpleDateFormat racetimeFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+        racetimeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String racetimeFormatted = racetimeFormat.format(cal.getTime());
+        logger.info("\nPath: " + bestCand.path +"\n      Time: "
+                +  racetimeFormatted + ", Distance: "
+                + String.format("%.2f", Math.round(bestCand.pos.getPosition().getDistance(endPos).getMeters() * 100.0) / 100.0) + "meters"
+                + ", " + bestCand.trn + " Turn" + (bestCand.trn>1?"s":""));
+        
         return new PathImpl(path, wf, maxTurnTime, this.algorithmTimedOut);
     }
 
