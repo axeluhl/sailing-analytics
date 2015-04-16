@@ -1,101 +1,146 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
+import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+
+import java.util.ArrayList;
 
 public class FlagsResources {
 
-    private static int getResId(Context context, String res, int size) {
-        String fileName;
+    private static ArrayList<Integer> getResId(Context context, String res, int size) {
+        ArrayList<Integer> result = new ArrayList<>();
+        String flag;
+        String outline = "flag_shape_XX_outline_" + size + "dp";
 
         switch (Flags.valueOf(res)) {
-            case ALPHA:
-                fileName = "flag_alpha_" + size + "dp";
-                break;
+        case ALPHA:
+            flag = "flag_alpha_" + size + "dp";
+            outline = outline.replace("XX", "03");
+            break;
 
-            case AP:
-                fileName = "flag_ap_" + size + "dp";
-                break;
+        case AP:
+            flag = "flag_ap_" + size + "dp";
+            outline = outline.replace("XX", "02");
+            break;
 
-            case BLACK:
-                fileName = "flag_black_" + size + "dp";
-                break;
+        case BLACK:
+            flag = "flag_black_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case BRAVO:
-                fileName = "flag_bravo_" + size + "dp";
-                break;
+        case BLUE:
+            flag = "flag_blue_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case BLUE:
-                fileName = "flag_blue_" + size + "dp";
-                break;
+        case BRAVO:
+            flag = "flag_bravo_" + size + "dp";
+            outline = outline.replace("XX", "03");
+            break;
 
-            case CLASS:
-                fileName = "flag_class_" + size + "dp";
-                break;
+        case CLASS:
+            flag = "flag_class_" + size + "dp";
+            outline = outline.replace("XX", "02");
+            break;
 
-            case ESSONE:
-                fileName = "flag_ess1_" + size + "dp";
-                break;
+        case ESSONE:
+            flag = "flag_ess1_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case ESSTHREE:
-                fileName = "flag_ess3_" + size + "dp";
-                break;
+        case ESSTHREE:
+            flag = "flag_ess3_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case ESSTWO:
-                fileName = "flag_ess2_" + size + "dp";
-                break;
+        case ESSTWO:
+            flag = "flag_ess2_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case FIRSTSUBSTITUTE:
-                fileName = "flag_first_substitute_" + size + "dp";
-                break;
+        case FIRSTSUBSTITUTE:
+            flag = "flag_first_substitute_" + size + "dp";
+            outline = outline.replace("XX", "04");
+            break;
 
-            case FOXTROTT:
-                fileName = "flag_foxtrott_" + size + "dp";
-                break;
+        case FOXTROTT:
+            flag = "flag_foxtrott_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case GOLF:
-                fileName = "flag_golf_" + size + "dp";
-                break;
+        case GOLF:
+            flag = "flag_golf_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case HOTEL:
-                fileName = "flag_hotel_" + size + "dp";
-                break;
+        case HOTEL:
+            flag = "flag_hotel_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case INDIA:
-                fileName = "flag_india_" + size + "dp";
-                break;
+        case INDIA:
+            flag = "flag_india_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case JURY:
-                fileName = "flag_jury_" + size + "dp";
-                break;
+        case JURY:
+            flag = "flag_jury_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case NOVEMBER:
-                fileName = "flag_november_" + size + "dp";
-                break;
+        case NOVEMBER:
+            flag = "flag_november_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case PAPA:
-                fileName = "flag_papa_" + size + "dp";
-                break;
+        case PAPA:
+            flag = "flag_papa_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case XRAY:
-                fileName = "flag_xray_" + size + "dp";
-                break;
+        case XRAY:
+            flag = "flag_xray_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            case ZULU:
-                fileName = "flag_zulu_" + size + "dp";
-                break;
+        case ZULU:
+            flag = "flag_zulu_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
 
-            default:
-                fileName = "flag_alpha_32dp";
+        default:
+            flag = "flag_alpha_32dp";
+            outline = "flag_shape_03_outline_32dp";
         }
 
-        return context.getResources().getIdentifier(fileName, "drawable", context.getPackageName());
+        result.add(context.getResources().getIdentifier(flag, "drawable", context.getPackageName()));
+
+        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(context).getTheme())) {
+            result.add(context.getResources().getIdentifier(outline, "drawable", context.getPackageName()));
+        }
+
+        return result;
     }
 
-    public static Drawable getFlagDrawable(Context context, String flag, int size) {
-        return context.getResources().getDrawable(FlagsResources.getResId(context, flag, size));
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static LayerDrawable getFlagDrawable(Context context, String flag, int size) {
+        ArrayList<Integer> drawables = FlagsResources.getResId(context, flag, size);
+        ArrayList<Drawable> layers = new ArrayList<>();
+        for (Integer resId : drawables) {
+            if (resId != 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    layers.add(context.getDrawable(resId));
+                } else {
+                    layers.add(context.getResources().getDrawable(resId));
+                }
+            }
+        }
+        return new LayerDrawable(layers.toArray(new Drawable[layers.size()]));
     }
 }
