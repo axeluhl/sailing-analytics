@@ -386,5 +386,7 @@
     <string name="no_camera">No Camera App found</string>
     <string name="delete_file_title">Delete file</string>
     <string name="delete_file">This will delete the picture</string>
+    <string name="start_time">Start Time</string>
+    <string name="start_time_value">At #TIME# in #COUNTDOWN#</string>
 
 </resources>

@@ -26,8 +26,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
-public class MainScheduleFragment extends RaceFragment implements View.OnClickListener {
+public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
     public static final String STARTTIME = "StartTime";
 
@@ -45,6 +46,12 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     private ImageView mStartModeFlag;
     private TextView mCourseValue;
     private ImageView mCourseSymbol;
+    private SimpleDateFormat mDateFormat;
+    private Calendar mCalendar;
+
+    public MainScheduleFragment() {
+        mCalendar = Calendar.getInstance();
+    }
 
     public static MainScheduleFragment newInstance() {
         MainScheduleFragment fragment = new MainScheduleFragment();
@@ -54,6 +61,8 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule, container, false);
+
+        mDateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
 
         View startTime = ViewHolder.get(layout, R.id.start_time);
         if (startTime != null) {
@@ -219,18 +228,29 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
         super.notifyTick();
 
         if (mStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
-            mStartTime.setText(mStartTimeString);
+            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString).replace("#COUNTDOWN#", calcCountdown());
+            mStartTime.setText(startTimeValue);
         }
 
         if (mWindValue != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             String sensorData = getString(R.string.wind_sensor);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
-            sensorData = sensorData.replace("#AT#", dateFormat.format(wind.getTimePoint().asDate()));
+            sensorData = sensorData.replace("#AT#", mDateFormat.format(wind.getTimePoint().asDate()));
             sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
             sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
             mWindValue.setText(sensorData);
         }
+    }
+
+    private String calcCountdown() {
+        Calendar now = (Calendar) mCalendar.clone();
+        now.setTime(MillisecondsTimePoint.now().asDate());
+
+        RacingActivity activity = (RacingActivity) getActivity();
+        Calendar startTime = (Calendar) mCalendar.clone();
+        startTime.setTime(activity.getStartTime().asDate());
+
+        return calcDuration(floorTime(now), floorTime(startTime));
     }
 
     private void openFragment(RaceFragment fragment) {

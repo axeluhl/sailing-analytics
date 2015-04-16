@@ -118,32 +118,4 @@ public class RaceSummaryFragment extends BaseFragment {
             }
         }
     }
-
-    private String calcDuration(Calendar from, Calendar to) {
-        String retValue;
-
-        long millis = to.getTimeInMillis() - from.getTimeInMillis();
-
-        long min = millis / (1000 * 60);
-        long sec = (millis - (min * 60 * 1000)) / 1000;
-
-        retValue = String.valueOf(sec) + "\"";
-        if (retValue.length() == 2) {
-            retValue = "0" + retValue;
-        }
-        if (min > 0) {
-            retValue = String.valueOf(min) + "' " + retValue;
-        }
-
-        return retValue;
-    }
-
-    private Calendar floorTime(Calendar calendar) {
-        if (calendar == null) {
-            calendar = Calendar.getInstance();
-        }
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        return calendar;
-    }
 }
