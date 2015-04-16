@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.regattaoverview;
+package com.sap.sailing.gwt.regattaoverview.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

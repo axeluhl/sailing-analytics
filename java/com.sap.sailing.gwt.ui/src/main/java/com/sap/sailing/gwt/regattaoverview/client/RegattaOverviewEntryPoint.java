@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.regattaoverview;
+package com.sap.sailing.gwt.regattaoverview.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
-import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
 
