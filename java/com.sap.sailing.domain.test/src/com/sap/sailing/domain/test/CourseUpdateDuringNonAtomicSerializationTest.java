@@ -80,7 +80,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
                 EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
                 /* delayToLiveInMillis */10000, /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */
-                7000) {
+                7000, /*useMarkPassingCalculator*/ false) {
             private static final long serialVersionUID = 9114777576548711763L;
 
             @Override

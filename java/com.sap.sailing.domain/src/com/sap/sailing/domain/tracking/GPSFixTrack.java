@@ -3,13 +3,16 @@ package com.sap.sailing.domain.tracking;
 import java.util.Iterator;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 
 /**
@@ -118,7 +121,7 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *         <code>new MillisecondsTimePoint(0)</code>). If no fix after <code>fix</code> is found, the second
      *         component is the end of time (<code>new MillisecondsTimePoint(Long.MAX_VALUE)</code>).
      */
-    Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
+    TimeRange getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
 
     /**
      * Same as {@link #getEstimatedPosition(TimePoint, boolean)}, but produces an iterator for all {@link Timed} objects

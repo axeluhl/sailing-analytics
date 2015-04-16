@@ -13,14 +13,22 @@ import junit.framework.Assert;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
-import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -47,49 +55,57 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
 
     @Test
     public void testFinder() {
-        CandidateFinder f = new CandidateFinder(trackedRace);
+        CandidateFinder f = new CandidateFinderImpl(race);
         List<GPSFix> fixesAdded = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             GPSFixMoving fix = rndFix();
-            trackedRace.recordFix(bob, fix);
+            race.recordFix(ron, fix);
             fixesAdded.add(fix);
         }
         time = System.currentTimeMillis();
-        f.getCandidateDeltas(bob, fixesAdded);
+        f.getCandidateDeltas(ron, fixesAdded);
         time = System.currentTimeMillis() - time;
         result.put("FinderPerformance", time);
         System.out.println(time);
-        Assert.assertTrue(time < 3000);
+        Assert.assertTrue(time < 5000);
     }
 
     @Test
     public void testChooser() {
-        long time = timeToAddCandidatesToChooser(100, 1, 25);
+        long time = timeToAddCandidatesToChooser(500, 1, 25);
         System.out.println(time);
         result.put("ChooserPerformance", time);
-        assertTrue(time < 2000);
+        assertTrue(time < 5000);
     }
 
     private long timeToAddCandidatesToChooser(int numberOfTimesAdding, int numberToAddEachTime, int numberOfRepititions) {
         long totalTime = 0;
         for (int i = 0; i < numberOfRepititions; i++) {
-            CandidateChooser c = new CandidateChooser(trackedRace);
+            CandidateChooserImpl c = new CandidateChooserImpl(race);
             for (int j = 0; j < numberOfTimesAdding; j++) {
                 List<Candidate> newCandidates = new ArrayList<>();
                 for (int k = 0; k < numberToAddEachTime; k++) {
                     newCandidates.add(randomCan());
                 }
                 time = System.currentTimeMillis();
-                c.calculateMarkPassDeltas(bob, new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCandidates, new ArrayList<Candidate>()));
+                c.calculateMarkPassDeltas(ron, newCandidates, new ArrayList<Candidate>());
                 totalTime += System.currentTimeMillis() - time;
             }
         }
         return totalTime / numberOfRepititions;
     }
 
-    private Candidate randomCan() {
+    private CandidateImpl randomCan() {
         int id = rnd.nextInt(3);
-        return new Candidate(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)),
-                0.5 + 0.5 * rnd.nextDouble(),  Util.get(trackedRace.getRace().getCourse().getWaypoints(), id), true, true, null);
+        return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)),
+                0.5 + 0.5 * rnd.nextDouble(),  Util.get(race.getRace().getCourse().getWaypoints(), id));
+    }
+
+    private GPSFixMoving rndFix() {
+        DegreePosition position = new DegreePosition(0.001 - rnd.nextDouble() * 0.001,
+                0.0002 - rnd.nextDouble() * 0.0004);
+        TimePoint p = new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000));
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
+        return new GPSFixMovingImpl(position, p, speed);
     }
 }

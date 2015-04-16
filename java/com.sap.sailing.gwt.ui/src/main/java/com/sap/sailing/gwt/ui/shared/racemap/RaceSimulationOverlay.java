@@ -10,7 +10,6 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.GetSimulationAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
@@ -55,8 +55,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private Date prevStartTime;
     private Canvas simulationLegend;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
-        super(map, zIndex);
+    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -154,8 +154,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             ctxt.setStrokeStyle(this.colors.getColor(colorIdx));
             ctxt.beginPath();
             for (SimulatorWindDTO point : points) {
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
-                        point.position.lngDeg));
+                Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
                 if (first) {
                     ctxt.moveTo(px.getX(), px.getY());
                     first = false;
@@ -170,9 +169,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
                     continue;
                 }
-
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
-                        point.position.lngDeg));
+                Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
                 ctxt.beginPath();
                 ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2 * Math.PI);
                 ctxt.closePath();

@@ -1,0 +1,469 @@
+package com.sap.sailing.gwt.ui.client.shared.charts;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+
+public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Settings>, RaceSelectionChangeListener,
+        CompetitorSelectionChangeListener {
+
+    private static class AnchorCell extends AbstractCell<SafeHtml> {
+        @Override
+        public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
+            sb.append(safeHtml);
+        }
+    }
+
+    private final SailingServiceAsync sailingService;
+    private RegattaAndRaceIdentifier raceIdentifier;
+    private final AsyncActionsExecutor asyncExecutor;
+    private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
+    private final CompetitorSelectionProvider competitorSelectionModel;
+    private String leaderboardName;
+    private RaceColumnDTO column;
+
+    private CompetitorDTO competitor;
+    
+    /**
+     * The fixed mark passings; keys are zero-based waypoint indexes
+     */
+    private Map<Integer, Date> currentCompetitorEdits = new HashMap<>();
+    
+    private Integer zeroBasedIndexOfFirstSuppressedWaypoint;
+
+    /**
+     * The waypoints table uses pairs of zero-based waypoint numbers and current passing times.
+     */
+    private final CellTable<Util.Pair<Integer, Date>> wayPointSelectionTable;
+    private final ListDataProvider<Util.Pair<Integer, Date>> waypointList;
+    private final SingleSelectionModel<Util.Pair<Integer, Date>> waypointSelectionModel;
+    private List<WaypointDTO> currentWaypoints;
+
+    private final Button setTimeAsMarkPassingsButton;
+    private final Button removeFixedMarkPassingsButton;
+    private final Button suppressPassingsButton;
+    private final Button removeSuppressedPassingButton;
+
+    public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
+            final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
+            final Timer timer) {
+        this.sailingService = sailingService;
+        this.raceIdentifier = raceIdentifier;
+        this.asyncExecutor = asyncActionsExecutor;
+        this.errorReporter = errorReporter;
+        this.competitorSelectionModel = competitorSelectionModel;
+        this.stringMessages = stringMessages;
+        competitorSelectionModel.addCompetitorSelectionChangeListener(this);
+
+        setVisible(false);
+
+        // Waypoint list
+        currentWaypoints = new ArrayList<>();
+        waypointList = new ListDataProvider<>();
+        waypointSelectionModel = new SingleSelectionModel<Util.Pair<Integer, Date>>();
+        waypointSelectionModel.addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                Pair<Integer, Date> selectedObject = waypointSelectionModel.getSelectedObject();
+                if (selectedObject != null) {
+                    Date timePoint = selectedObject.getB();
+                    if (timePoint != null) {
+                        timer.setTime(timePoint.getTime());
+                    }
+                }
+                enableButtons();
+            }
+        });
+        wayPointSelectionTable = new CellTable<Util.Pair<Integer, Date>>();
+        wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
+            @Override
+            public SafeHtml getValue(final Util.Pair<Integer, Date> object) {
+                return new SafeHtml() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public String asString() {
+                        return currentWaypoints.get(object.getA()).getName();
+                    }
+                };
+            }
+        }, stringMessages.waypoint());
+        final DateTimeFormat timeFormat = DateTimeFormat.getFormat("HH:mm:ss");
+        wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
+            @Override
+            public SafeHtml getValue(final Pair<Integer, Date> object) {
+                final Date date;
+                date = object.getB();
+                return new SafeHtml() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public String asString() {
+                        // TODO this is really unclean (Problem: no calendar)
+                        String string;
+                        if (date != null) {
+                            string = timeFormat.format(date);
+                            if (currentCompetitorEdits.containsKey(object.getA())) {
+                                string += " "+stringMessages.fixedMarkPassing();
+                            }
+                        } else if (zeroBasedIndexOfFirstSuppressedWaypoint != null
+                                && !(object.getA() < zeroBasedIndexOfFirstSuppressedWaypoint)) {
+                            string = " "+stringMessages.suppressedMarkPassing();
+                        } else {
+                            string = "";
+                        }
+                        return string;
+                    }
+                };
+            }
+        }, stringMessages.markPassing());
+
+        waypointList.addDataDisplay(wayPointSelectionTable);
+        wayPointSelectionTable.setSelectionModel(waypointSelectionModel);
+
+        // Buttons for fixing
+        removeFixedMarkPassingsButton = new Button(stringMessages.removeFixedPassings());
+        removeFixedMarkPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateFixedMarkPassing(leaderboardName, column, column.getFleet(raceIdentifier),
+                                waypointSelectionModel.getSelectedObject().getA(), null, competitor, callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorRemovingFixedPassing(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+        setTimeAsMarkPassingsButton = new Button(stringMessages.setFixedPassing());
+        setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateFixedMarkPassing(leaderboardName, column, column.getFleet(raceIdentifier),
+                                waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor,
+                                callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+
+        // Button for suppressing
+        suppressPassingsButton = new Button(stringMessages.setSuppressedPassing());
+        suppressPassingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateSuppressedMarkPassings(leaderboardName, column,
+                                column.getFleet(raceIdentifier), waypointSelectionModel.getSelectedObject().getA(),
+                                competitor, callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorSuppressingPassing(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+
+        removeSuppressedPassingButton = new Button(stringMessages.removeSuppressedPassing());
+        removeSuppressedPassingButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                asyncExecutor.execute(new AsyncAction<Void>() {
+                    @Override
+                    public void execute(AsyncCallback<Void> callback) {
+                        sailingService.updateSuppressedMarkPassings(leaderboardName, column,
+                                column.getFleet(raceIdentifier), null, competitor, callback);
+                    }
+                }, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorRemovingSupressedPassing(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            }
+        });
+        refreshWaypoints();
+        HorizontalPanel tableAndButtons = new HorizontalPanel();
+        add(tableAndButtons, 0, 0);
+        tableAndButtons.setSpacing(3);
+        tableAndButtons.add(wayPointSelectionTable);
+        VerticalPanel buttonPanel = new VerticalPanel();
+        buttonPanel.setSpacing(3);
+        tableAndButtons.add(buttonPanel);
+        buttonPanel.add(setTimeAsMarkPassingsButton);
+        buttonPanel.add(removeFixedMarkPassingsButton);
+        buttonPanel.add(suppressPassingsButton);
+        buttonPanel.add(removeSuppressedPassingButton);
+        enableButtons();
+    }
+
+    @Override
+    public void addedToSelection(CompetitorDTO competitor) {
+        processCompetitorSelectionChange();
+    }
+
+    @Override
+    public void removedFromSelection(CompetitorDTO competitor) {
+        processCompetitorSelectionChange();
+    }
+
+    private void processCompetitorSelectionChange() {
+        waypointSelectionModel.clear();
+        if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+            refillList();
+        } else {
+            disableEditing();
+        }
+    }
+
+    private void disableEditing() {
+        waypointList.getList().clear();
+        clearInfo();
+    }
+
+    private void refillList() {
+        clearInfo();
+        competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
+        // Get current mark passings
+        asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
+            @Override
+            public void execute(AsyncCallback<Map<Integer, Date>> callback) {
+                sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, callback);
+            }
+        }, new AsyncCallback<Map<Integer, Date>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Map<Integer, Date> result) {
+                List<Util.Pair<Integer, Date>> newMarkPassings = new ArrayList<>();
+                for (WaypointDTO waypoint : currentWaypoints) {
+                    int index = currentWaypoints.indexOf(waypoint);
+                    newMarkPassings.add(new Util.Pair<Integer, Date>(index, result.get(index)));
+                }
+                waypointList.getList().clear();
+                waypointList.getList().addAll(newMarkPassings);
+            }
+        });
+        // Get current edits
+        asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
+            @Override
+            public void execute(AsyncCallback<Map<Integer, Date>> callback) {
+                sailingService.getCompetitorRaceLogMarkPassingData(leaderboardName, column,
+                        column.getFleet(raceIdentifier), competitor, callback);
+            }
+        }, new AsyncCallback<Map<Integer, Date>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorTryingToObtainRaceLogMarkPassingData(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Map<Integer, Date> result) {
+                for (Entry<Integer, Date> data : result.entrySet()) {
+                    if (data.getValue() == null) {
+                        zeroBasedIndexOfFirstSuppressedWaypoint = data.getKey();
+                    } else {
+                        currentCompetitorEdits.put(data.getKey(), data.getValue());
+                    }
+                }
+                enableButtons();
+                wayPointSelectionTable.redraw();
+            }
+        });
+    }
+
+    /**
+     * Removes all competitor selection-specific data, particularly the fixed and suppressed mark
+     * passings and the reference to the competitor selected.
+     */
+    private void clearInfo() {
+        currentCompetitorEdits.clear();
+        competitor = null;
+        zeroBasedIndexOfFirstSuppressedWaypoint = null;
+    }
+
+    private void refreshWaypoints() {
+        asyncExecutor.execute(new AsyncAction<RaceCourseDTO>() {
+            @Override
+            public void execute(AsyncCallback<RaceCourseDTO> callback) {
+                sailingService.getRaceCourse(raceIdentifier, new Date(), callback);
+            }
+        }, new AsyncCallback<RaceCourseDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(RaceCourseDTO result) {
+                currentWaypoints = result.waypoints;
+            }
+        });
+    }
+
+    private void enableButtons() {
+        setTimeAsMarkPassingsButton.setEnabled(false);
+        removeFixedMarkPassingsButton.setEnabled(false);
+        suppressPassingsButton.setEnabled(false);
+        removeSuppressedPassingButton.setEnabled(false);
+        if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+            if (zeroBasedIndexOfFirstSuppressedWaypoint != null) {
+                removeSuppressedPassingButton.setEnabled(true);
+            }
+            Pair<Integer, Date> selectedWaypoint = waypointSelectionModel.getSelectedObject();
+            if (selectedWaypoint != null) {
+                setTimeAsMarkPassingsButton.setEnabled(true);
+                suppressPassingsButton.setEnabled(true);
+                if (currentCompetitorEdits.containsKey(selectedWaypoint.getA())) {
+                    removeFixedMarkPassingsButton.setEnabled(true);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
+        raceIdentifier = selectedRaces.iterator().next();
+        refreshWaypoints();
+    }
+
+    public void setLeaderboardNameAndColumn(LeaderboardDTO leaderboard) {
+        if (leaderboard != null) {
+            leaderboardName = leaderboard.name;
+            for (RaceColumnDTO columnDTO : leaderboard.getRaceList()) {
+                if (columnDTO.containsRace(raceIdentifier)) {
+                    column = columnDTO;
+                }
+            }
+        }
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return this;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Settings newSettings) {
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return null;
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return null;
+    }
+
+    @Override
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+    }
+
+    @Override
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    }
+
+}

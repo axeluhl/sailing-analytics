@@ -50,15 +50,18 @@ public interface SwissTimingFactory {
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, int port);
     
-    SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
-    		StartList startList, long delayToLiveInMillis, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-    		WindStore windStore, GPSFixStore gpsFixStore,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException,
+    SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription,
+            BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
+            boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException,
             IOException, ParseException;
 
-    RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
-    		StartList startList, long delayToLiveInMillis, WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException, InterruptedException,
-            IOException, ParseException;
+    RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
+            BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
+            WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
+            InterruptedException, IOException, ParseException;
 
     Race createRace(String raceId, String raceName, String description, BoatClass boatClass);
 

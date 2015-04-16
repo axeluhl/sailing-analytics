@@ -13,12 +13,6 @@ interface LeaderboardResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/arrow-gain-loss.png")
     ImageResource arrowGainLossIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/settings.png")
-    ImageResource settingsIcon();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/leaderboardsettings.png")
-    ImageResource leaderboardSettingsIcon();
-    
     @Source("com/sap/sailing/gwt/ui/client/images/autorefresh_enabled.png")
     ImageResource autoRefreshEnabledIcon();
 

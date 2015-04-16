@@ -91,21 +91,21 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port,
             StartList startList, long delayToLiveInMillis, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException,
+            WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(raceID, raceName, raceDescription, boatClass, hostname, port, startList,
                 raceLogStore, regattaLogStore, windStore, gpsFixStore, domainFactory, this,
-                trackedRegattaRegistry, delayToLiveInMillis);
+                trackedRegattaRegistry, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
-            int port, StartList startList, long delayToLiveInMillis, WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
+            int port, StartList startList, long delayToLiveInMillis, WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
             InterruptedException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore, gpsFixStore, domainFactory,
-                this, trackedRegattaRegistry, delayToLiveInMillis);
+                this, trackedRegattaRegistry, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
     }
 
     @Override

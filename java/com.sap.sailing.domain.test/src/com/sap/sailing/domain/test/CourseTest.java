@@ -303,7 +303,7 @@ public class CourseTest {
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
-                /* millisecondsOverWhichToAverageSpeed */8000);
+                /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false);
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -334,7 +334,7 @@ public class CourseTest {
                         hasso), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
-                        /* millisecondsOverWhichToAverageSpeed */ 8000);
+                        /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false);
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
         assertWaypointIndexes(course);

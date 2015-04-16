@@ -1,8 +1,6 @@
 package com.sap.sailing.dashboards.gwt.client;
 
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -11,8 +9,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventLogo extends Image {
-
-    private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     protected EventLogo() {
         super();
@@ -26,7 +22,6 @@ public class EventLogo extends Image {
             sailingServiceAsync.getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
                 @Override
                 public void onSuccess(final EventDTO event) {
-                    logger.log(Level.INFO, "GOT EVENT: ");
                     final String logoUrl = event.getLogoImageURL();
                             if (logoUrl != null) {
                                 eventLogo.getElement().setAttribute("src", logoUrl);

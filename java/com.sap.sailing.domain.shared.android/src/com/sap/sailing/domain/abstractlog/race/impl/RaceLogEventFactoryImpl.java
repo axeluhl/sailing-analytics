@@ -44,11 +44,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -276,7 +276,21 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogAdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id,
             AbstractLogEventAuthor author, int currentPassId, AdditionalScoringInformationType informationType) {
-        return new RaceLogAdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id, Collections.<Competitor>emptyList(), currentPassId,
-                informationType);
+        return new RaceLogAdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id,
+                Collections.<Competitor> emptyList(), currentPassId, informationType);
+    }
+
+    @Override
+    public RaceLogEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
+        return new FixedMarkPassingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, ofFixedPassing,
+                zeroBasedIndexOfWaypoint);
+    }
+
+    @Override
+    public RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
+            List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint) {
+        return new SuppressedMarkPassingsEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId,
+                zeroBasedIndexOfFirstSuppressedWaypoint);
     }
 }
