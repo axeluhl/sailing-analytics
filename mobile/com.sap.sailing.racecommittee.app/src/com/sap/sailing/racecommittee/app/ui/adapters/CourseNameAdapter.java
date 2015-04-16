@@ -80,6 +80,7 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
             if (drawable != null) {
                 flag.setImageDrawable(drawable);
             }
+            flag.setVisibility(View.GONE);
         }
 
         convertView.setOnClickListener(this);
