@@ -14,14 +14,15 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -75,16 +76,16 @@ public class TestDimensionsValuesQuery {
             protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = ComponentTestsUtil.getProcessorFactory().createGroupedDataCollectingAsSetProcessor(this); 
                 
-                Collection<Pair<Function<?>, ParameterProvider>> legDimensions = new ArrayList<>();
-                legDimensions.add(new Pair<>(dimensionLegNumber, ParameterProvider.NULL));
-                legDimensions.add(new Pair<>(dimensionCompetitorName, ParameterProvider.NULL));
-                legDimensions.add(new Pair<>(dimensionCompetitorSailID, ParameterProvider.NULL));
+                Collection<ParameterizedFunction<?>> legDimensions = new ArrayList<>();
+                legDimensions.add(new SimpleParameterizedFunction<>(dimensionLegNumber, ParameterProvider.NULL));
+                legDimensions.add(new SimpleParameterizedFunction<>(dimensionCompetitorName, ParameterProvider.NULL));
+                legDimensions.add(new SimpleParameterizedFunction<>(dimensionCompetitorSailID, ParameterProvider.NULL));
                 
-                Collection<Pair<Function<?>, ParameterProvider>> raceDimensions = new ArrayList<>();
-                raceDimensions.add(new Pair<>(dimensionRegattaName, ParameterProvider.NULL));
-                raceDimensions.add(new Pair<>(dimensionRaceName, ParameterProvider.NULL));
-                raceDimensions.add(new Pair<>(dimensionBoatClassName, ParameterProvider.NULL));
-                raceDimensions.add(new Pair<>(dimensionYear, ParameterProvider.NULL));
+                Collection<ParameterizedFunction<?>> raceDimensions = new ArrayList<>();
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionRegattaName, ParameterProvider.NULL));
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionRaceName, ParameterProvider.NULL));
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionBoatClassName, ParameterProvider.NULL));
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionYear, ParameterProvider.NULL));
                 
                 DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
                 chainBuilder.stepFurther(); //Initialization
