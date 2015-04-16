@@ -87,6 +87,7 @@ Concrete data retriever chain instances can be constructed with a `DataRetriever
 * The method `stepFurther` iterates over the retriever chain and sets the next retrieval processor as the one to modify.
 	* Is similar to the `next` method of `Iterator`.
 	* Initializes the builder, which is necessary to call the modifying methods.
+	* Throws an exception, if the builder can't step any further.
 * The method `canStepFurther` returns `true`, if `stepFurther` can be called at least once more.
 	* Is similar to the `hasNext` method of `Iterator`
 
