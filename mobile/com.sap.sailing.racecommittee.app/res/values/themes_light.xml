@@ -39,16 +39,18 @@
         <item name="textXLarge">@style/AppTheme.Light.Text.XLarge</item>
 
         <!-- drawables -->
-        <item name="compass_back">@drawable/compass_back_light</item>
-        <item name="compass_needle">@drawable/compass_needle_light</item>
         <item name="access_time_36dp">@drawable/ic_access_time_black_36dp</item>
         <item name="check_18dp">@drawable/ic_check_black_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_black_24dp</item>
+        <item name="compass_back">@drawable/compass_back_light</item>
+        <item name="compass_needle">@drawable/compass_needle_light</item>
         <item name="dns_48dp">@drawable/ic_dns_black_48dp</item>
         <item name="hearing_48dp">@drawable/ic_hearing_black_48dp</item>
+        <item name="lock_outline">@drawable/lock_outline_light</item>
         <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
-        <item name="lock_outline">@drawable/lock_outline_light</item>
+        <item name="value_next">@drawable/value_next_light</item>
+        <item name="value_prev">@drawable/value_prev_light</item>
         <item name="wind_off">@drawable/wind_off_light</item>
         <item name="wind_on">@drawable/wind_on_light</item>
 

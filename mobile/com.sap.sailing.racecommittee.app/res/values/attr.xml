@@ -25,16 +25,18 @@
     <attr name="textXLarge" format="reference"/>
 
     <!-- drawable -->
-    <attr name="compass_back" format="reference"/>
-    <attr name="compass_needle" format="reference"/>
     <attr name="access_time_36dp" format="reference"/>
     <attr name="check_18dp" format="reference"/>
     <attr name="chevron_left_24dp" format="reference"/>
+    <attr name="compass_back" format="reference"/>
+    <attr name="compass_needle" format="reference"/>
     <attr name="dns_48dp" format="reference"/>
     <attr name="hearing_48dp" format="reference"/>
+    <attr name="lock_outline" format="reference"/>
     <attr name="mic_48dp" format="reference"/>
     <attr name="photo_camera_48dp" format="reference"/>
-    <attr name="lock_outline" format="reference"/>
+    <attr name="value_next" format="reference"/>
+    <attr name="value_prev" format="reference"/>
     <attr name="wind_on" format="reference"/>
     <attr name="wind_off" format="reference"/>
 

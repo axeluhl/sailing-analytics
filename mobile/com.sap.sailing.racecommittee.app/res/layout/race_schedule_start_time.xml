@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
-                android:src="@drawable/value_next"
+                android:src="?value_next"
                 android:tag="+"/>
 
             <TextView
@@ -74,7 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
-                android:src="@drawable/value_prev"
+                android:src="?value_prev"
                 android:tag="-"/>
         </LinearLayout>
     </RelativeLayout>
