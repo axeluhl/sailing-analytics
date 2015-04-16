@@ -17,6 +17,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     
     private final List<Function<?>> functions;
     
+    private final String simpleName;
     private final int ordinal;
 
     public ConcatenatingCompoundFunction(List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
@@ -25,7 +26,18 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         
         this.functions = new ArrayList<>(functions);
         
-        this.ordinal = calculateOrdinal();
+        simpleName = buildSimpleName();
+        ordinal = calculateOrdinal();
+    }
+
+    private String buildSimpleName() {
+        Iterator<Function<?>> functionsIterator = functions.iterator();
+        StringBuilder builder = new StringBuilder(functionsIterator.next().getSimpleName());
+        while (functionsIterator.hasNext()) {
+            Function<?> function = functionsIterator.next();
+            builder.append(SIMPLE_NAME_CHAIN_CONNECTOR + function.getSimpleName());
+        }
+        return builder.toString();
     }
 
     private int calculateOrdinal() {
@@ -69,17 +81,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     
     @Override
     public String getSimpleName() {
-        return buildSimpleNameChain();
-    }
-
-    private String buildSimpleNameChain() {
-        Iterator<Function<?>> functionsIterator = functions.iterator();
-        StringBuilder builder = new StringBuilder(functionsIterator.next().getSimpleName());
-        while (functionsIterator.hasNext()) {
-            Function<?> function = functionsIterator.next();
-            builder.append(SIMPLE_NAME_CHAIN_CONNECTOR + function.getSimpleName());
-        }
-        return builder.toString();
+        return simpleName;
     }
 
     @Override
