@@ -24,16 +24,18 @@ public class MainMediaVideo extends Composite {
     @UiField Element videoTitleWrapper;
     
     public MainMediaVideo(String eventName, String youtubeId) {
+        this(eventName, youtubeId, false);
+    }
+    
+    public MainMediaVideo(String eventName, String youtubeId, boolean showInfo) {
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
-        youtubeEmbed.setSrc("//www.youtube.com/embed/" + youtubeId);
-
-        youtubeEmbed.setAttribute("modestbranding", "modestbranding");
-        youtubeEmbed.setAttribute("autohide", "1");
-        youtubeEmbed.setAttribute("allowfullscreen", "allowfullscreen");
-        youtubeEmbed.setAttribute("showinfo", "false");
-        youtubeEmbed.setAttribute("frameborder", "0");
+        
+        String youtubeUrl = "//www.youtube.com/embed/" + youtubeId + "?modestbranding=1&rel=0&autohide=1&fs=1";
+        if(!showInfo) {
+            youtubeUrl += "&showinfo=0";
+        }
+        youtubeEmbed.setSrc(youtubeUrl);
         
         if(eventName == null || eventName.isEmpty()) {
             videoTitleWrapper.removeFromParent();

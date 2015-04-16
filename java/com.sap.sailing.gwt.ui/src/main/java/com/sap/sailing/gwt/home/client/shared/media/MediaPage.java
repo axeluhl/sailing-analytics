@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.client.shared.media;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -36,6 +35,7 @@ public class MediaPage extends Composite {
     @UiField DivElement photoWrapper;
     @UiField DivElement videoWrapper;
     @UiField DivElement videosPanel;
+    private final SimplePanel contentPanel;
 
     public MediaPage() {
         MediaPageResources.INSTANCE.css().ensureInjected();
@@ -85,7 +85,8 @@ public class MediaPage extends Composite {
                 videoWrapper.addClassName(MediaPageResources.INSTANCE.css().dark());
             }
             for (VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
-                addVideoToVideoPanel(videoCandidateInfo.getRef(), videoCandidateInfo.getTitle());
+                MainMediaVideo video = new MainMediaVideo(videoCandidateInfo.getTitle(), videoCandidateInfo.getRef(), true);
+                videosPanel.appendChild(video.getElement());
             }
         }
         
@@ -95,20 +96,6 @@ public class MediaPage extends Composite {
         }
     }
     
- // TODO remove -> temporary solution to get contents on the page
-    private static final int MAX_VIDEO_COUNT = 3;
-    private final HashSet<String> addedVideoIds = new HashSet<String>(MAX_VIDEO_COUNT);
-    private SimplePanel contentPanel;
-    private void addVideoToVideoPanel(String youtubeId, String title) {
-        if (addedVideoIds.contains(youtubeId)) {
-            return;
-        }
-        if (youtubeId != null && !youtubeId.trim().isEmpty()) {
-            MainMediaVideo video = new MainMediaVideo(title, youtubeId);
-            videosPanel.appendChild(video.getElement());
-            addedVideoIds.add(youtubeId);
-        }
-    }
 
     // private ImageGalleryData mapPhotoData(ArrayList<MediaEntryDTO> photos) {
     // List<ImageDescriptor> images = new ArrayList<>();
