@@ -33,7 +33,7 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="@drawable/flags_postpone" />
+                    android:src="?flags_postpone" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -66,7 +66,7 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="@drawable/flags_abandon" />
+                    android:src="?flags_abandon" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -99,7 +99,7 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="@drawable/flags_recall" />
+                    android:src="?flags_recall" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -133,7 +133,7 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="@drawable/flags_course" />
+                    android:src="?flags_course" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -166,7 +166,7 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="@drawable/flags_more" />
+                    android:src="?flags_more" />
 
                 <TextView
                     android:layout_width="match_parent"

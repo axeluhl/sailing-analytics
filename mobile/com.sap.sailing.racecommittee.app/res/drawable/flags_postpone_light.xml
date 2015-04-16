@@ -6,6 +6,15 @@
         android:top="0dp">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/flag_first_blue_96dp" />
+            android:src="@drawable/flag_ap_96dp"/>
     </item>
+
+    <item
+        android:left="0dp"
+        android:top="0dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/flag_shape_02_outline_96dp"/>
+    </item>
+
 </layer-list>

@@ -49,5 +49,10 @@
     <attr name="flag_ap_hotel_96dp" format="reference"/>
     <attr name="flag_november_alpha_96dp" format="reference"/>
     <attr name="flag_november_hotel_96dp" format="reference"/>
+    <attr name="flags_abandon" format="reference"/>
+    <attr name="flags_course" format="reference"/>
+    <attr name="flags_more" format="reference"/>
+    <attr name="flags_postpone" format="reference"/>
+    <attr name="flags_recall" format="reference"/>
 
 </resources>
