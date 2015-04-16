@@ -10,6 +10,7 @@
 	<inherits name="com.google.gwt.logging.Logging"/>
 	
 	<!-- Other module inherits                                      -->
+	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
