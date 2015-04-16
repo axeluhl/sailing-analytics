@@ -30,6 +30,10 @@
     <attr name="chevron_left_24dp" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>
+    <attr name="course_triangle_48dp" format="reference"/>
+    <attr name="course_triangle_64dp" format="reference"/>
+    <attr name="course_updown_48dp" format="reference"/>
+    <attr name="course_updown_64dp" format="reference"/>
     <attr name="dns_48dp" format="reference"/>
     <attr name="hearing_48dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>

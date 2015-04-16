@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 import java.util.ArrayList;
 
@@ -108,17 +109,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
                     flagDrawable = mContext.getResources().getDrawable(flagResId);
                 }
             } else {
-                TypedValue value = new TypedValue();
-                // R.attr.flag_ap_alpha_96dp
-                flagResId = mContext.getResources().getIdentifier(item.file_name, "attr", mContext.getPackageName());
-                if (mContext.getTheme().resolveAttribute(flagResId, value, true)) {
-                    // res/drawable/flag_ap_alpha_96dp_light.xml
-                    String[] data = String.valueOf(value.string).split("/");
-                    flagResId = mContext.getResources().getIdentifier(data[2].replace(".xml", ""), data[1], mContext.getPackageName());
-                    if (flagResId != 0) {
-                        flagDrawable = mContext.getResources().getDrawable(flagResId);
-                    }
-                }
+                flagDrawable = BitmapHelper.getAttrDrawable(mContext, item.file_name);
             }
             if (flagDrawable != null) {
                 flagImage.setImageDrawable(flagDrawable);

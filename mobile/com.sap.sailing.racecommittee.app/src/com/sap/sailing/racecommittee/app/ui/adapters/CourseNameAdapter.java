@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,17 +71,15 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
         if (flag != null) {
             int resId;
             if (courseName.toLowerCase().startsWith("i")) {
-                resId = R.drawable.course_updown_48dp;
+                resId = R.attr.course_updown_48dp;
             } else {
-                resId = R.drawable.course_triangle_48dp;
+                resId = R.attr.course_triangle_48dp;
             }
-            Drawable flagDrawable;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                flagDrawable = mContext.getResources().getDrawable(resId, null);
-            } else {
-                flagDrawable = mContext.getResources().getDrawable(resId);
+            Drawable drawable;
+            drawable = BitmapHelper.getAttrDrawable(mContext, resId);
+            if (drawable != null) {
+                flag.setImageDrawable(drawable);
             }
-            flag.setImageDrawable(flagDrawable);
         }
 
         convertView.setOnClickListener(this);

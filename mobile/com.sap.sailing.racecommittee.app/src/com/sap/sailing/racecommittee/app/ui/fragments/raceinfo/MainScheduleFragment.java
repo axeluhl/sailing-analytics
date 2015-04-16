@@ -20,6 +20,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -145,17 +146,15 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                         if (mCourseSymbol != null && !TextUtils.isEmpty(courseName)) {
                             int resId;
                             if (courseName.toLowerCase().startsWith("i")) {
-                                resId = R.drawable.course_updown_48dp;
+                                resId = R.attr.course_updown_48dp;
                             } else {
-                                resId = R.drawable.course_triangle_48dp;
+                                resId = R.attr.course_triangle_48dp;
                             }
                             Drawable drawable;
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                drawable = getResources().getDrawable(resId, null);
-                            } else {
-                                drawable = getResources().getDrawable(resId);
+                            drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
+                            if (drawable != null) {
+                                mCourseSymbol.setImageDrawable(drawable);
                             }
-                            mCourseSymbol.setImageDrawable(drawable);
                         }
                     }
                 }

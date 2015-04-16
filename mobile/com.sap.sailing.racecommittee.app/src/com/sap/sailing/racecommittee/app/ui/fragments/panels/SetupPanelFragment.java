@@ -30,6 +30,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class SetupPanelFragment extends BasePanelFragment {
 
@@ -143,15 +144,11 @@ public class SetupPanelFragment extends BasePanelFragment {
                 if (!TextUtils.isEmpty(courseName)) {
                     int resId;
                     if (courseName.toLowerCase().startsWith("i")) {
-                        resId = R.drawable.course_updown_64dp;
+                        resId = R.attr.course_updown_64dp;
                     } else {
-                        resId = R.drawable.course_triangle_64dp;
+                        resId = R.attr.course_triangle_64dp;
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        drawable = getResources().getDrawable(resId, null);
-                    } else {
-                        drawable = getResources().getDrawable(resId);
-                    }
+                    drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
                 }
                 mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             }
