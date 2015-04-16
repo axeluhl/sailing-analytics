@@ -12,6 +12,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
@@ -58,7 +59,7 @@ public class EventTeaser extends Composite {
         Event.setEventListener(eventLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                if(event.getTypeInt() == Event.ONCLICK) {
+                if(LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
                     placeNavigation.goToPlace();
                 }
