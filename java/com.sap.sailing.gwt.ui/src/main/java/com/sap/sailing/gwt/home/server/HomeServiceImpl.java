@@ -16,8 +16,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -47,7 +45,6 @@ import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesSt
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
@@ -93,6 +90,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     }
     
     private static final long serialVersionUID = 3947782997746039939L;
+    @SuppressWarnings("unused")
     private static final Logger logger = Logger.getLogger(HomeServiceImpl.class.getName());
     
     private static final int MAX_STAGE_EVENTS = 5;
@@ -263,8 +261,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         dto.setLogoImageURL(event.getLogoImageURL() == null ? null : event.getLogoImageURL().toString());
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
-        
-        dto.setHasMedia(HomeServiceUtil.hasMedia(event));
+
+     // FIXME photo UI is currently broken -> we currently do not show any photos
+        dto.setHasMedia(HomeServiceUtil.hasVideos(event));
+//        dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(calculateEventState(event));
         dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
 
@@ -441,16 +441,17 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         String eventName = event.getName();
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
-        for(URL url : HomeServiceUtil.getPhotoGalleryImageURLs(event)) {
-            ImageSize imageSize = null;
-            try {
-                imageSize = event.getImageSize(url);
-            } catch (InterruptedException | ExecutionException e) {
-                logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
-            }
-            ImageMetadataDTO entry = new ImageMetadataDTO(url, imageSize, eventName);
-            media.addPhoto(entry);
-        }
+        // FIXME photo UI is currently broken -> we currently do not show any photos
+//        for(URL url : HomeServiceUtil.getPhotoGalleryImageURLs(event)) {
+//            ImageSize imageSize = null;
+//            try {
+//                imageSize = event.getImageSize(url);
+//            } catch (InterruptedException | ExecutionException e) {
+//                logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
+//            }
+//            ImageMetadataDTO entry = new ImageMetadataDTO(url, imageSize, eventName);
+//            media.addPhoto(entry);
+//        }
         for(URL url : event.getVideoURLs()) {
             media.addVideo(new VideoMetadataDTO(url, eventName));
         }

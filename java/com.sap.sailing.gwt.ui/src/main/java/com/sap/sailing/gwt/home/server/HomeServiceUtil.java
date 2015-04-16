@@ -339,15 +339,21 @@ public final class HomeServiceUtil {
     }
 
     public static boolean hasMedia(Event event) {
-       if(event.getVideoURLs().iterator().hasNext()) {
-           return true;
-       }
+        return hasVideos(event) || hasPhotos(event);
+    }
+    
+    public static boolean hasPhotos(Event event) {
+        // FIXME filter teaser images
         Iterator<URL> iterator = event.getImageURLs().iterator();
         if(!iterator.hasNext()) {
             return false;
         }
         iterator.next();
         return iterator.hasNext();
+    }
+    
+    public static boolean hasVideos(Event event) {
+        return event.getVideoURLs().iterator().hasNext();
     }
 
     public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
