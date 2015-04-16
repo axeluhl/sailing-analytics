@@ -150,7 +150,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     }
                     drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
                 }
-                mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
+                //mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             }
         }
 

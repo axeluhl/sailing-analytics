@@ -172,9 +172,9 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:gravity="center_horizontal"
-                    android:textAppearance="?textSmall"
-                    tools:drawableTop="@drawable/course_updown_64dp_dark"
+                    android:textAppearance="?textLarge"
                     tools:text="012" />
+                <!--tools:drawableTop="@drawable/course_updown_64dp_dark" -->
             </RelativeLayout>
         </RelativeLayout>
 

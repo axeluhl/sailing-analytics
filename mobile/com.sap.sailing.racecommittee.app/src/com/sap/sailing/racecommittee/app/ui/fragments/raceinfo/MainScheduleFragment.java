@@ -164,6 +164,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             if (drawable != null) {
                                 mCourseSymbol.setImageDrawable(drawable);
                             }
+                            mCourseSymbol.setVisibility(View.GONE);
                         }
                     }
                 }

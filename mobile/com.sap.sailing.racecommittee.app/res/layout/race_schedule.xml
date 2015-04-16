@@ -208,7 +208,8 @@
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/start_course_value"
             android:layout_toStartOf="@+id/start_course_value"
-            tools:src="@drawable/course_triangle_48dp_dark" />
+            tools:src="@drawable/course_triangle_48dp_dark"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/start_course_value"
