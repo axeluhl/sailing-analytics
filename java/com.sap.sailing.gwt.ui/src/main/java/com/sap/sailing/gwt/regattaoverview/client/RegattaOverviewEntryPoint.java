@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -56,7 +55,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
 
-            SAPHeader logoAndTitlePanel = new SAPHeader(TextMessages.INSTANCE.headerLogo(), getStringMessages().eventOverview(), false);
+            SAPHeader logoAndTitlePanel = new SAPHeader(getStringMessages().sapSailingAnalytics(), getStringMessages().eventOverview(), false);
             headerPanel.setHeaderWidget(logoAndTitlePanel);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
