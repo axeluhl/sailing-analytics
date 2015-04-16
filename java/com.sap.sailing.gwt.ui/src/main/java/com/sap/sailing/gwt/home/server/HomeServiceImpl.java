@@ -438,6 +438,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     @Override
     public MediaDTO getMediaForEvent(UUID eventId) {
         Event event = getService().getEvent(eventId);
+        @SuppressWarnings("unused")
         String eventName = event.getName();
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
@@ -453,7 +454,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
 //            media.addPhoto(entry);
 //        }
         for(URL url : event.getVideoURLs()) {
-            media.addVideo(new VideoMetadataDTO(url, eventName));
+            media.addVideo(new VideoMetadataDTO(url, null /* eventName */));
         }
         return media;
     }

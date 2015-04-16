@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.shared.mainmedia;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -20,6 +21,7 @@ public class MainMediaVideo extends Composite {
 
     @UiField IFrameElement youtubeEmbed;
     @UiField SpanElement videoTitle;
+    @UiField Element videoTitleWrapper;
     
     public MainMediaVideo(String eventName, String youtubeId) {
         MainMediaResources.INSTANCE.css().ensureInjected();
@@ -33,8 +35,12 @@ public class MainMediaVideo extends Composite {
         youtubeEmbed.setAttribute("showinfo", "false");
         youtubeEmbed.setAttribute("frameborder", "0");
         
-        SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(eventName);
-        videoTitle.setInnerSafeHtml(safeHtmlEventName); 
+        if(eventName == null || eventName.isEmpty()) {
+            videoTitleWrapper.removeFromParent();
+        } else {
+            SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(eventName);
+            videoTitle.setInnerSafeHtml(safeHtmlEventName); 
+        }
     }
     
 }
