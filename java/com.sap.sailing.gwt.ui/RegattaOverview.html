@@ -1,32 +1,17 @@
 <!doctype html>
-<!-- The DOCTYPE declaration above will set the    -->
-<!-- browser's rendering engine into               -->
-<!-- "Standards Mode". Replacing this declaration  -->
-<!-- with a "Quirks Mode" doctype may lead to some -->
-<!-- differences in layout.                        -->
-
 <html>
   <head>
     <!--[if lt IE 9]>
        <meta http-equiv="REFRESH" content="0; url=http://www.sapsailing.com/browser-info.html">
     <![endif]-->
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <!-- <meta name="viewport" content="width=device-width" />-->
     <meta content='width = device-width, initial-scale = 1.0, user-scalable = yes' name='viewport'>
     <meta content='yes' name='apple-mobile-web-app-capable'>
     <meta content='black' name='apple-mobile-web-app-status-bar-style'>
-    <!-- <link href='iphone-splash-screen.png' rel='apple-touch-startup-image'> -->
+
     <link href='images/sap-sailing-app-icon.png' rel='apple-touch-icon'>
 	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
     
-	<!--<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700,300italic,400italic,500italic,700italic' rel='stylesheet' type='text/css'>-->
-    <!--                                                               -->
-    <!-- Consider inlining CSS to reduce the number of requested files -->
-    <!--                                                               -->
-
-    <!--                                           -->
-    <!-- Any title is fine                         -->
-    <!--                                           -->
     <title>SAP Sailing Analytics Regatta Overview</title>
     
     <link rel="stylesheet" type="text/css" href="/clean/sailing-clean-1.0.cache.css">
@@ -34,24 +19,15 @@
     <link rel="stylesheet" type="text/css" href="CommonControls.css">
     <link rel="stylesheet" type="text/css" href="RegattaOverview.css">
     
-    <!--                                           -->
-    <!-- This script loads your compiled module.   -->
-    <!-- If you add any GWT meta tags, they must   -->
-    <!-- be added before this line.                -->
-    <!--                                           -->
-    <script type="text/javascript" language="javascript" src="com.sap.sailing.gwt.ui.RegattaOverview/com.sap.sailing.gwt.ui.RegattaOverview.nocache.js"></script>
+    <script 
+    		type="text/javascript" 
+    		language="javascript" 
+    		src="com.sap.sailing.gwt.regattaoverview.RegattaOverview/com.sap.sailing.gwt.regattaoverview.RegattaOverview.nocache.js"
+    		></script>
   </head>
-
-  <!--                                           -->
-  <!-- The body can have arbitrary html, or      -->
-  <!-- you can leave the body empty if you want  -->
-  <!-- to create a completely dynamic UI.        -->
-  <!--                                           -->
   <body>
-
     <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-    
     <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
     <noscript>
       <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
@@ -59,6 +35,5 @@
         in order for this application to display correctly.
       </div>
     </noscript>
-
   </body>
 </html>
