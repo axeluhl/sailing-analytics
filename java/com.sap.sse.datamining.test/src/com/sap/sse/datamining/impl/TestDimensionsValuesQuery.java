@@ -173,15 +173,15 @@ public class TestDimensionsValuesQuery {
         
         Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRegatta", new Class<?>[0]);
         Function<?> getRegatta = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRegattaMethod);
-        dimensionRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getRegatta, getName));
+        dimensionRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
 
         Method getRaceMethod = Test_HasRaceContext.class.getMethod("getRace", new Class<?>[0]);
         Function<?> getRace = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRaceMethod);
-        dimensionRaceName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getRace, getName));
+        dimensionRaceName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRace, getName));
         
         Method getBoatClassMethod = Test_HasRaceContext.class.getMethod("getBoatClass", new Class<?>[0]);
         Function<?> getBoatClass = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getBoatClassMethod);
-        dimensionBoatClassName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getBoatClass, getName));
+        dimensionBoatClassName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getBoatClass, getName));
         
         Method getYearMethod = Test_HasRaceContext.class.getMethod("getYear", new Class<?>[0]);
         dimensionYear = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getYearMethod);
@@ -194,13 +194,13 @@ public class TestDimensionsValuesQuery {
         
         Method getTeamMethod = Test_Competitor.class.getMethod("getTeam", new Class<?>[0]);
         Function<?> getTeam = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getTeamMethod);
-        dimensionCompetitorName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getCompetitor, getTeam, getName));
+        dimensionCompetitorName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getCompetitor, getTeam, getName));
         
         Method getBoatMethod = Test_Competitor.class.getMethod("getBoat", new Class<?>[0]);
         Function<?> getBoat = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getBoatMethod);
         Method getSailIDMethod = Test_Boat.class.getMethod("getSailID", new Class<?>[0]);
         Function<?> getSailID = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getSailIDMethod);
-        dimensionCompetitorSailID = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getCompetitor, getBoat, getSailID));
+        dimensionCompetitorSailID = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getCompetitor, getBoat, getSailID));
     }
     
     @Before

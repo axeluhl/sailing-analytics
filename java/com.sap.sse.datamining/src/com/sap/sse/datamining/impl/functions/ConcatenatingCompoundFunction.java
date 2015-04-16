@@ -15,16 +15,16 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
     private static final String LOCALIZED_NAME_CHAIN_CONNECTOR = " ";
     
-    private final String name;
     private final List<Function<?>> functions;
+    
     private final int ordinal;
 
-    public ConcatenatingCompoundFunction(String name, List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
+    public ConcatenatingCompoundFunction(List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isLastFunctionADimension(functions));
         checkThatReturnTypesMatch(functions, returnType);
         
-        this.name = name;
         this.functions = new ArrayList<>(functions);
+        
         this.ordinal = calculateOrdinal();
     }
 
@@ -69,10 +69,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     
     @Override
     public String getSimpleName() {
-        if (name != null && !name.isEmpty()) {
-            return name;
-        }
-        
         return buildSimpleNameChain();
     }
 
@@ -88,9 +84,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
 
     @Override
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
-        if (name != null && !name.isEmpty()) {
-            return name;
-        }
         if (!isLocalizable()) {
             return getSimpleName();
         }
@@ -180,7 +173,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         final int prime = 31;
         int result = 1;
         result = prime * result + ((functions == null) ? 0 : functions.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
 
@@ -197,11 +189,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
             if (other.functions != null)
                 return false;
         } else if (!functions.equals(other.functions))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
             return false;
         return true;
     }
