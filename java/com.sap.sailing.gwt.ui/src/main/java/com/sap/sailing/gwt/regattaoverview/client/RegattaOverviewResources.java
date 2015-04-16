@@ -13,5 +13,22 @@ public interface RegattaOverviewResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String titleLabel();
+        String eventLabel();
+        String venueLabel();
+        String clockLabel();
+        String refreshStopTime();
+        String functionBar();
+        String contentWrapper();
+        String circle();
+        String circleBlue();
+        String circleYellow();
+        String circleGreen();
+        String circleGrey();
+        String raceDetailPanel();
+        String raceDetailPanel_header();
+        String raceDetailPanel_content();
+        String leaderboards();
+        String viewerToolbar_innerElement();
     }
 }
