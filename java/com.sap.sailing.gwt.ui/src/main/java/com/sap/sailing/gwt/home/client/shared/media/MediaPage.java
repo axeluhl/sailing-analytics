@@ -84,23 +84,8 @@ public class MediaPage extends Composite {
             if(hasPhotos) {
                 videoWrapper.addClassName(MediaPageResources.INSTANCE.css().dark());
             }
-            final int numberOfCandidatesAvailable = media.getVideos().size();
-            if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - addedVideoIds.size())) {
-                // add all we have, no randomize
-                for (VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
-                    addVideoToVideoPanel(videoCandidateInfo.getRef(), videoCandidateInfo.getTitle());
-                }
-            } else {
-                // fill up the list randomly from videoCandidates
-                final Random videosRandomizer = new Random(numberOfCandidatesAvailable);
-                randomlyPick: for (int i = 0; i < numberOfCandidatesAvailable; i++) {
-                    int nextVideoindex = videosRandomizer.nextInt(numberOfCandidatesAvailable);
-                    final VideoMetadataDTO videoCandidateInfo = media.getVideos().get(nextVideoindex);
-                    addVideoToVideoPanel(videoCandidateInfo.getRef(), videoCandidateInfo.getTitle());
-                    if (addedVideoIds.size() == MAX_VIDEO_COUNT) {
-                        break randomlyPick;
-                    }
-                }
+            for (VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
+                addVideoToVideoPanel(videoCandidateInfo.getRef(), videoCandidateInfo.getTitle());
             }
         }
         
