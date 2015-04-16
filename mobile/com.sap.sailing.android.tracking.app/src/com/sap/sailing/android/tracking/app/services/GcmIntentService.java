@@ -74,8 +74,8 @@ public class GcmIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, StartActivity.class), 0);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_menu_share_sapsailing).setContentTitle("GCM Notification")
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg)).setContentText(msg);
+            .setSmallIcon(R.drawable.ic_menu_share_sapsailing).setContentTitle("GCM Notification")
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(msg)).setContentText(msg);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());

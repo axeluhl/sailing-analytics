@@ -1,6 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.adapter;
 
-
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.ResourceCursorAdapter;
@@ -14,7 +13,6 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 
 import java.text.DecimalFormat;
 import java.util.List;
-
 
 public class MarkAdapter extends ResourceCursorAdapter {
 
@@ -30,16 +28,15 @@ public class MarkAdapter extends ResourceCursorAdapter {
         String markID = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
         List<MarkPingInfo> markPings = DatabaseHelper.getInstance().getMarkPings(context, markID);
         String setText = "";
-        if(markPings.isEmpty()){
-        	setText = context.getString(R.string.not_set);
-        }
-        else{
+        if (markPings.isEmpty()) {
+            setText = context.getString(R.string.not_set);
+        } else {
             DecimalFormat df = new DecimalFormat("#.##");
-        	setText = context.getString(R.string.set);
+            setText = context.getString(R.string.set);
             double accuracy = markPings.get(0).getAccuracy();
-        	String accuracyString = context.getString(R.string.mark_list_accuracy);
-            accuracyString = String.format(accuracyString,df.format(accuracy));
-        	setText += " " +accuracyString;
+            String accuracyString = context.getString(R.string.mark_list_accuracy);
+            accuracyString = String.format(accuracyString, df.format(accuracy));
+            setText += " " + accuracyString;
         }
         markName.setText(name);
         markSet.setText(setText);

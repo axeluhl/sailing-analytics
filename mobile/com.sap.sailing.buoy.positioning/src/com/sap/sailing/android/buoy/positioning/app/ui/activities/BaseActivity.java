@@ -10,7 +10,7 @@ import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
 
 public class BaseActivity extends AbstractBaseActivity {
-	
+
     protected AppPreferences prefs;
 
     @Override

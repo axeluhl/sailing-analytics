@@ -141,28 +141,28 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS.");
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.options_menu_checkout:
-                ExLog.i(this, TAG, "Clicked CHECKOUT.");
-                checkout();
-                return true;
-            case R.id.options_menu_add_team_image:
-                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-                return true;
-            case R.id.options_menu_refresh:
-                manager.callServerAndGenerateCheckinData();
-                return true;
-            case R.id.options_menu_info:
-                ExLog.i(this, TAG, "Clicked INFO.");
-                AboutDialog dialog = new AboutDialog(this);
-                dialog.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        case R.id.options_menu_checkout:
+            ExLog.i(this, TAG, "Clicked CHECKOUT.");
+            checkout();
+            return true;
+        case R.id.options_menu_add_team_image:
+            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+            return true;
+        case R.id.options_menu_refresh:
+            manager.callServerAndGenerateCheckinData();
+            return true;
+        case R.id.options_menu_info:
+            ExLog.i(this, TAG, "Clicked INFO.");
+            AboutDialog dialog = new AboutDialog(this);
+            dialog.show();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -238,13 +238,12 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             userImageUpdated();
         }
 
-
         ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
-        Bitmap storedFlagImage = getStoredImage(getFlagImageFileName(competitor.countryCode.toLowerCase(Locale
-                .getDefault())));
+        Bitmap storedFlagImage = getStoredImage(
+            getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault())));
         if (storedFlagImage == null) {
             String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
-                    competitor.countryCode.toLowerCase(Locale.getDefault()));
+                competitor.countryCode.toLowerCase(Locale.getDefault()));
             new DownloadFlagImageTask(flagImageView, competitor.countryCode).execute(urlStr);
         } else {
             flagImageView.setImageBitmap(storedFlagImage);
@@ -317,8 +316,8 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Sending imageFile to server: " + imageFile);
         }
-        final String uploadURLStr = event.server
-                + prefs.getServerUploadTeamImagePath().replace("{competitor_id}", competitor.id);
+        final String uploadURLStr =
+            event.server + prefs.getServerUploadTeamImagePath().replace("{competitor_id}", competitor.id);
         new UploadTeamImageTask(imageFile).execute(uploadURLStr);
     }
 
@@ -351,8 +350,9 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         File mediaStorageDir;
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/Android/data/"
-                    + getApplicationContext().getPackageName() + "/Files");
+            mediaStorageDir = new File(
+                Environment.getExternalStorageDirectory() + "/Android/data/" + getApplicationContext().getPackageName()
+                    + "/Files");
         } else {
             mediaStorageDir = getApplicationContext().getCacheDir();
         }
@@ -369,11 +369,12 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     @Override
     public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
         if (checkinData != null) {
-        	CheckinData data = (CheckinData) checkinData;
+            CheckinData data = (CheckinData) checkinData;
             try {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(),
-                        data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
+                DatabaseHelper.getInstance()
+                    .storeCheckinRow(this, data.getEvent(), data.getCompetitor(), data.getLeaderboard(),
+                        data.getCheckinUrl());
                 competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
                 event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
                 leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
@@ -407,7 +408,8 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 if (imageFile != null) {
                     HttpClient httpclient = new DefaultHttpClient();
                     HttpPost httppost = new HttpPost(uploadUrl);
-                    InputStreamEntity reqEntity = new InputStreamEntity(new FileInputStream(imageFile), imageFile.length());
+                    InputStreamEntity reqEntity = new InputStreamEntity(new FileInputStream(imageFile),
+                        imageFile.length());
                     reqEntity.setContentType("image/jpeg");
                     reqEntity.setChunked(true); // Send in multiple parts if needed
                     httppost.setEntity(reqEntity);
@@ -425,7 +427,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         protected void onCancelled() {
             super.onCancelled();
             Toast.makeText(RegattaActivity.this, getString(R.string.error_sending_team_image_to_server),
-                    Toast.LENGTH_LONG).show();
+                Toast.LENGTH_LONG).show();
         }
 
         protected void onPostExecute(String result) {
@@ -513,8 +515,8 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
      * Check out from regatta;
      */
     public void checkout() {
-        final String checkoutURLStr = event.server
-                + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboard.name));
+        final String checkoutURLStr =
+            event.server + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboard.name));
 
         showProgressDialog(R.string.please_wait, R.string.checking_out);
 
@@ -531,14 +533,14 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
 
         try {
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkoutURLStr), checkoutData.toString(),
-                    this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(request,
-                    new NetworkHelperSuccessListener() {
+                this);
+            NetworkHelper.getInstance(this)
+                .executeHttpJsonRequestAsnchronously(request, new NetworkHelperSuccessListener() {
 
                         @Override
                         public void performAction(JSONObject response) {
-                            DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
-                                    event.checkinDigest);
+                            DatabaseHelper.getInstance()
+                                .deleteRegattaFromDatabase(RegattaActivity.this, event.checkinDigest);
                             deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
                             dismissProgressDialog();
                             finish();
@@ -549,7 +551,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                         public void performAction(NetworkHelperError e) {
                             dismissProgressDialog();
                             showErrorPopup(R.string.error,
-                                    R.string.error_could_not_complete_operation_on_server_try_again);
+                                R.string.error_could_not_complete_operation_on_server_try_again);
                         }
                     });
 
@@ -568,7 +570,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
         startActivity(intent);
     }
-    
+
     @Override
     protected int getOptionsMenuResId() {
         return R.menu.options_menu_with_checkout;

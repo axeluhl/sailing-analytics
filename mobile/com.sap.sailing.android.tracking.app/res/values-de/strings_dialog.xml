@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
     <string name="confirm_data_hello_name">Hallo {full_name}</string>
     <string name="confirm_data_you_are_signed_in_as_sail_id">Sie sind als {sail_id} gemeldet</string>
     <string name="confirm_data_is_correct">OK</string>
     <string name="decline_data_is_incorrect">Das bin nicht ich!</string>
-    
+
 </resources>

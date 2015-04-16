@@ -46,29 +46,21 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private boolean initialLocationUpdate;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_buoy_postion_detail,
-                container, false);
+        View view = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
-        markHeaderTextView = (OpenSansTextView) view
-                .findViewById(R.id.mark_header);
-        latitudeTextView = (OpenSansTextView) view
-                .findViewById(R.id.marker_gps_latitude);
-        longitudeTextView = (OpenSansTextView) view
-                .findViewById(R.id.marker_gps_longitude);
-        accuracyTextView = (OpenSansTextView) view
-                .findViewById(R.id.marker_gps_accuracy);
+        markHeaderTextView = (OpenSansTextView) view.findViewById(R.id.mark_header);
+        latitudeTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_latitude);
+        longitudeTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_longitude);
+        accuracyTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_accuracy);
         ClickListener clickListener = new ClickListener();
 
-        setPositionButton = (OpenSansButton) view
-                .findViewById(R.id.marker_set_position_button);
+        setPositionButton = (OpenSansButton) view.findViewById(R.id.marker_set_position_button);
         setPositionButton.setVisibility(View.GONE);
         setPositionButton.setOnClickListener(clickListener);
 
-        resetPositionButton = (OpenSansButton) view
-                .findViewById(R.id.marker_reset_position_button);
+        resetPositionButton = (OpenSansButton) view.findViewById(R.id.marker_reset_position_button);
         resetPositionButton.setOnClickListener(clickListener);
         resetPositionButton.setVisibility(View.GONE);
 
@@ -114,21 +106,21 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         if (location != null) {
             latitudeText += latlngFormatter.format(location.getLatitude());
             longitudeText += latlngFormatter.format(location.getLongitude());
-            accuracyText += String.format(accuracyString,accuracyFormatter.format(location.getAccuracy()));
+            accuracyText += String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
         } else {
             latitudeText += "n/a";
             longitudeText += "n/a";
             accuracyText += "n/a";
         }
-        MarkPingInfo markPing = ((PositioningActivity) getActivity())
-                .getMarkPing();
+        MarkPingInfo markPing = ((PositioningActivity) getActivity()).getMarkPing();
         if (markPing != null) {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
             savedPosition = new LatLng(savedLatitude, savedLongitude);
             latitudeText += " (" + latlngFormatter.format(savedLatitude) + ")";
             longitudeText += " (" + latlngFormatter.format(savedLongitude) + ")";
-            accuracyText += " (" + String.format(accuracyString,accuracyFormatter.format(markPing.getAccuracy())) + ")";
+            accuracyText +=
+                " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy())) + ")";
         }
         latitudeTextView.setText(latitudeText);
         longitudeTextView.setText(longitudeText);
@@ -145,7 +137,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             updateMap();
         }
 
-        if(initialLocationUpdate){
+        if (initialLocationUpdate) {
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
@@ -183,8 +175,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     private void initLocationProvider() {
-        locationManager = (LocationManager) getActivity().getSystemService(
-                Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10, this);
     }
@@ -247,14 +238,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 PingHelper helper = new PingHelper();
                 try {
                     if (lastKnownLocation != null) {
-                        MarkInfo mark = ((PositioningActivity) getActivity())
-                                .getMarkInfo();
-                        LeaderboardInfo leaderBoard = ((PositioningActivity) getActivity())
-                                .getLeaderBoard();
-                        helper.storePingInDatabase(getActivity(),
-                                lastKnownLocation, mark);
-                        helper.sendPingToServer(getActivity(),
-                                lastKnownLocation, leaderBoard, mark);
+                        MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
+                        LeaderboardInfo leaderBoard = ((PositioningActivity) getActivity()).getLeaderBoard();
+                        helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
+                        helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark);
                         ((PositioningActivity) getActivity()).updatePing();
                         savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                         pingListener.updatePing();

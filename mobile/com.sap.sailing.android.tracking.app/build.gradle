@@ -95,7 +95,7 @@ clean.doLast {
 build.doLast {
     // Copy APK file
     copy {
-        from ("build/outputs/apk") {
+        from("build/outputs/apk") {
             include "**/*debug.apk"
         }
         into "../../java/com.sap.sailing.www/apps"

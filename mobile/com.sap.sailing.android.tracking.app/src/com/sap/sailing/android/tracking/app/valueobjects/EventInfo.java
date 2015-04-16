@@ -2,25 +2,21 @@ package com.sap.sailing.android.tracking.app.valueobjects;
 
 public class EventInfo {
 
-	public String id;
-	public String name;
-	public String leaderboardName; // when using join-query
-	public String competitorId; // when using join-query
-	public String imageUrl;
-	public long startMillis;
-	public long endMillis;
-	public int rowId;
-	public String checkinDigest;
-	public String server;
+    public String id;
+    public String name;
+    public String leaderboardName; // when using join-query
+    public String competitorId; // when using join-query
+    public String imageUrl;
+    public long startMillis;
+    public long endMillis;
+    public int rowId;
+    public String checkinDigest;
+    public String server;
 
-	@Override
-	public String toString() {
-		return "eventName: " + name + ", leaderboardName: "
-				+ leaderboardName + ", competitorId: " + competitorId
-				+ ", eventImageUrl: " + imageUrl
-				+ ", eventStartMillis: " + startMillis
-				+ ", eventEndMillis: " + endMillis + ", eventRowId: "
-				+ ", checkinDigest: " + checkinDigest
-				+ rowId + ", server: " + server;
-	}
+    @Override
+    public String toString() {
+        return "eventName: " + name + ", leaderboardName: " + leaderboardName + ", competitorId: " + competitorId
+            + ", eventImageUrl: " + imageUrl + ", eventStartMillis: " + startMillis + ", eventEndMillis: " + endMillis
+            + ", eventRowId: " + ", checkinDigest: " + checkinDigest + rowId + ", server: " + server;
+    }
 }

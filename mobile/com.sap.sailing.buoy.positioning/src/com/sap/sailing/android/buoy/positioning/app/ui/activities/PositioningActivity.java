@@ -20,54 +20,48 @@ import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 public class PositioningActivity extends BaseActivity implements pingListener {
 
-	private MarkInfo markInfo;
-	private MarkPingInfo markPing;
-	private LeaderboardInfo leaderBoard;
+    private MarkInfo markInfo;
+    private MarkPingInfo markPing;
+    private LeaderboardInfo leaderBoard;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fragment_container);
-		Intent intent = getIntent();
-		String markerID = intent.getExtras().getString(
-				getString(R.string.mark_id));
-		String checkinDigest = intent.getExtras().getString(
-				getString(R.string.checkin_digest));
-		List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this,
-				checkinDigest);
-		setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this,
-				checkinDigest));
-		for (MarkInfo mark : marks) {
-			if (mark.getId().equals(markerID)) {
-				setMarkInfo(mark);
-				break;
-			}
-		}
-		if (markInfo != null) {
-			setPingFromDatabase(markerID);
-		}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_container);
+        Intent intent = getIntent();
+        String markerID = intent.getExtras().getString(getString(R.string.mark_id));
+        String checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
+        List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
+        setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
+        for (MarkInfo mark : marks) {
+            if (mark.getId().equals(markerID)) {
+                setMarkInfo(mark);
+                break;
+            }
+        }
+        if (markInfo != null) {
+            setPingFromDatabase(markerID);
+        }
 
-		OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
-		if (toolbar != null) {
+        OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
-			setSupportActionBar(toolbar);
-			toolbar.setBackgroundColor(getResources().getColor(
-					R.color.colorPrimary));
-		}
-		if (getSupportActionBar() != null) {
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-			getSupportActionBar().setHomeButtonEnabled(true);
-			toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
-			toolbar.setPadding(20, 0, 0, 0);
-			getSupportActionBar().setTitle(
-					getString(R.string.title_activity_positioning));
-		}
-		BuoyFragment fragment = new BuoyFragment();
-		fragment.setPingListener(this);
-		replaceFragment(R.id.content_frame, fragment);
+            setSupportActionBar(toolbar);
+            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setPadding(20, 0, 0, 0);
+            getSupportActionBar().setTitle(getString(R.string.title_activity_positioning));
+        }
+        BuoyFragment fragment = new BuoyFragment();
+        fragment.setPingListener(this);
+        replaceFragment(R.id.content_frame, fragment);
 
-	}
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -79,12 +73,12 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.about:
-                AboutDialog aboutDialog = new AboutDialog(this);
-                aboutDialog.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.about:
+            AboutDialog aboutDialog = new AboutDialog(this);
+            aboutDialog.show();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -93,50 +87,48 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         return R.menu.about_menu;
     }
 
-	public void setPingFromDatabase(String markerID) {
-		List<MarkPingInfo> markPings = DatabaseHelper.getInstance()
-				.getMarkPings(this, markerID);
-		if (!markPings.isEmpty()) {
-			setMarkPing(markPings.get(0));
-		}
-	}
+    public void setPingFromDatabase(String markerID) {
+        List<MarkPingInfo> markPings = DatabaseHelper.getInstance().getMarkPings(this, markerID);
+        if (!markPings.isEmpty()) {
+            setMarkPing(markPings.get(0));
+        }
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		BuoyFragment fragment = (BuoyFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
-		if (fragment != null) {
-			fragment.setPingListener(this);
-		}
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
+        BuoyFragment fragment = (BuoyFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        if (fragment != null) {
+            fragment.setPingListener(this);
+        }
+    }
 
-	public MarkInfo getMarkInfo() {
-		return markInfo;
-	}
+    public MarkInfo getMarkInfo() {
+        return markInfo;
+    }
 
-	public void setMarkInfo(MarkInfo markInfo) {
-		this.markInfo = markInfo;
-	}
+    public void setMarkInfo(MarkInfo markInfo) {
+        this.markInfo = markInfo;
+    }
 
-	public MarkPingInfo getMarkPing() {
-		return markPing;
-	}
+    public MarkPingInfo getMarkPing() {
+        return markPing;
+    }
 
-	public void setMarkPing(MarkPingInfo markPing) {
-		this.markPing = markPing;
-	}
+    public void setMarkPing(MarkPingInfo markPing) {
+        this.markPing = markPing;
+    }
 
-	public LeaderboardInfo getLeaderBoard() {
-		return leaderBoard;
-	}
+    public LeaderboardInfo getLeaderBoard() {
+        return leaderBoard;
+    }
 
-	public void setLeaderBoard(LeaderboardInfo leaderBoard) {
-		this.leaderBoard = leaderBoard;
-	}
+    public void setLeaderBoard(LeaderboardInfo leaderBoard) {
+        this.leaderBoard = leaderBoard;
+    }
 
-	@Override
-	public void updatePing() {
-		setPingFromDatabase(markInfo.getId());
-	}
+    @Override
+    public void updatePing() {
+        setPingFromDatabase(markInfo.getId());
+    }
 }

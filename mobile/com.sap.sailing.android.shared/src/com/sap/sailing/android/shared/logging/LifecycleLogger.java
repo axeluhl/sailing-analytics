@@ -24,9 +24,8 @@ public class LifecycleLogger implements LifecycleCallbacks {
             context = ((Fragment) activityOrFragment).getActivity();
         }
         if (isLifecycleLoggingEnabled) {
-            ExLog.i(context, TAG,
-                    String.format("%s %s %s", action, activityOrFragment.getClass().getSimpleName(),
-                            Integer.toHexString(System.identityHashCode(activityOrFragment))));
+            ExLog.i(context, TAG, String.format("%s %s %s", action, activityOrFragment.getClass().getSimpleName(),
+                Integer.toHexString(System.identityHashCode(activityOrFragment))));
         }
     }
 

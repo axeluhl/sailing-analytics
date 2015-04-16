@@ -2,8 +2,8 @@
 <resources>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-	<string name="empty"></string>
-	<string name="tracking_time">Tracking Zeit</string>
+    <string name="empty"></string>
+    <string name="tracking_time">Tracking Zeit</string>
     <string name="app_name">SAP Sailing Tracking App</string>
     <string name="options_menu_settings">Einstellungen</string>
     <string name="options_menu_checkout">Checkout</string>
@@ -56,20 +56,20 @@
     <string name="scan_qr">QR-Code scannen</string>
     <string name="close">Schließen</string>
     <string name="thank_you_you_successfully_participated">Vielen Dank, Sie haben erfolgreich an der Regatta teilgenommen.\n\nIhr SAP Sailing Team</string>
-	<string name="tracking_colon">Tracke:</string>
-	<string name="tracking_gps_accuracy">GPS Genauigkeit</string>
-	<string name="regatta_in_progress">Die Regatta findet gerade statt.</string>
-	<string name="heading">Kurs</string>
-	<string name="course_over_ground">Course over Ground</string>
+    <string name="tracking_colon">Tracke:</string>
+    <string name="tracking_gps_accuracy">GPS Genauigkeit</string>
+    <string name="regatta_in_progress">Die Regatta findet gerade statt.</string>
+    <string name="heading">Kurs</string>
+    <string name="course_over_ground">Course over Ground</string>
     <string name="speed_over_ground">Speed over Ground</string>
-	<string name="none">Keine</string>
-	<string name="show_leaderboard">Leaderboard</string>
-	<string name="desc_regatta_user_image">Benutzerdefiniertes Bild für Regatta</string>
-	<string name="desc_add_photo_button">Foto hinzufügen Button</string>
-	<string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>
-	<string name="info_already_checked_in_this_qr_code">Bereits für diese Regatta eingecheckt</string>
-	<string name="warning">Warnung</string>
-	<string name="gps_turned_off">GPS ist nicht aktiviert. Bitte aktivieren Sie den Standortzugriff (GPS) in Ihren Android-Einstellungen!</string>
+    <string name="none">Keine</string>
+    <string name="show_leaderboard">Leaderboard</string>
+    <string name="desc_regatta_user_image">Benutzerdefiniertes Bild für Regatta</string>
+    <string name="desc_add_photo_button">Foto hinzufügen Button</string>
+    <string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>
+    <string name="info_already_checked_in_this_qr_code">Bereits für diese Regatta eingecheckt</string>
+    <string name="warning">Warnung</string>
+    <string name="gps_turned_off">GPS ist nicht aktiviert. Bitte aktivieren Sie den Standortzugriff (GPS) in Ihren Android-Einstellungen!</string>
     <string name="knots">Knoten</string>
-	<string name="preferences">Einstellungen</string>
+    <string name="preferences">Einstellungen</string>
 </resources>

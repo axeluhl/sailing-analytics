@@ -19,14 +19,14 @@ public class FileBasedHttpGetRequest extends HttpGetRequest {
         super(url, listener, context);
         this.outputFile = outputFile;
     }
-    
+
     public File getOutputFile() {
         return outputFile;
     }
 
     @Override
     protected InputStream readAndCopyResponse(HttpURLConnection connection, BufferedInputStream inputStream)
-            throws IOException {
+        throws IOException {
         FileOutputStream outputStream = new FileOutputStream(outputFile);
         try {
             if (!readResponse(connection, inputStream, outputStream)) {

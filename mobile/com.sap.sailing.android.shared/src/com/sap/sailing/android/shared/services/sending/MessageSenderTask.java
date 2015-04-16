@@ -15,7 +15,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sse.common.Util;
 
 public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent, Boolean, InputStream>> {
-    
+
     private static String TAG = MessageSenderTask.class.getName();
 
     public interface MessageSendingListener {
@@ -55,7 +55,8 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
             if (responseStream != null) {
                 try {
                     responseStream.close();
-                } catch (IOException ie) { }
+                } catch (IOException ie) {
+                }
             }
             ExLog.e(context, TAG, String.format("Post not successful, exception occured: %s", e.toString()));
             result = new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);

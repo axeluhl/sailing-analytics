@@ -5,5 +5,5 @@ import android.support.v7.app.ActionBarActivity;
 public abstract class BaseActivity extends ActionBarActivity {
 
     // TODO what is this planned for?
-//    private static final String TAG = BaseActivity.class.getName();
+    //    private static final String TAG = BaseActivity.class.getName();
 }

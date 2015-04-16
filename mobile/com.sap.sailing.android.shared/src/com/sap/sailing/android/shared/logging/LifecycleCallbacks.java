@@ -2,7 +2,6 @@ package com.sap.sailing.android.shared.logging;
 
 /**
  * Stolen from API Level 14.
- * 
  */
 public interface LifecycleCallbacks {
     void onCreate(Object activityOrFragment);

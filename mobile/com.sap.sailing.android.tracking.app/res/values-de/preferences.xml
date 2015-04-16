@@ -11,6 +11,6 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Anzeige: Rechtweisend</string>
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Anzeige: Missweisend</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
-    
-    
+
+
 </resources>

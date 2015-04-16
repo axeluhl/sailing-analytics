@@ -17,12 +17,12 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-    OpenSansTextView name = (OpenSansTextView) view.findViewById(R.id.regattaName);
-       if (name != null) {
-           String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_NAME));
-           name.setText(text);
-           //String digestString = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
-           //System.out.println("BENNET: " + digestString);
-       }
+        OpenSansTextView name = (OpenSansTextView) view.findViewById(R.id.regattaName);
+        if (name != null) {
+            String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_NAME));
+            name.setText(text);
+            //String digestString = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
+            //System.out.println("BENNET: " + digestString);
+        }
     }
 }

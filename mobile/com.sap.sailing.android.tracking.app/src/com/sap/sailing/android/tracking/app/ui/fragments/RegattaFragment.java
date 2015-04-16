@@ -134,8 +134,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        if(watcher != null)
-        {
+        if (watcher != null) {
             watcher.onViewCreated();
         }
         timer = new TimerRunnable();
@@ -192,18 +191,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
      */
     public void showChooseExistingPictureOrTakeNewPhotoAlert() {
         AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.add_photo_select)
-                .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        pickExistingImage();
-                    }
-                }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        showTakePhotoActivity();
-                    }
-                }).create();
+            .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    pickExistingImage();
+                }
+            }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    showTakePhotoActivity();
+                }
+            }).create();
 
         dialog.show();
     }
@@ -264,7 +263,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     /**
      * Decode image with maximum size
-     * 
+     *
      * @param uri
      * @return
      * @throws IOException
@@ -281,10 +280,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         int scale = 1;
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
-            scale = (int) Math.pow(
-                    2,
-                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth))
-                            / Math.log(0.5)));
+            scale = (int) Math.pow(2, (int) Math.ceil(
+                    Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();
@@ -368,7 +365,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
     }
 
-    public void setFragmentWatcher(FragmentWatcher fWatcher){
+    public void setFragmentWatcher(FragmentWatcher fWatcher) {
         watcher = fWatcher;
     }
 
@@ -408,7 +405,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     }
 
-    public interface FragmentWatcher{
+    public interface FragmentWatcher {
         public void onViewCreated();
     }
 

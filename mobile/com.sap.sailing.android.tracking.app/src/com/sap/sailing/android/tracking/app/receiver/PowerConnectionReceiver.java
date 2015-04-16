@@ -13,7 +13,7 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class PowerConnectionReceiver extends BroadcastReceiver {
 
-	private final String TAG = PowerConnectionReceiver.class.getName();
+    private final String TAG = PowerConnectionReceiver.class.getName();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -22,22 +22,20 @@ public class PowerConnectionReceiver extends BroadcastReceiver {
             checkPluggedState(context, intent);
             storeBatteryIsCharging(context, true);
         } else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
-        	storeBatteryIsCharging(context, false);
+            storeBatteryIsCharging(context, false);
             Toast.makeText(context, "Power disconnected", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(context, "Unknown action: " + action, Toast.LENGTH_LONG).show();
         }
     }
-    
-    private void storeBatteryIsCharging(Context context, boolean batteryIsCharging)
-    {
-    	if (BuildConfig.DEBUG)
-    	{
-    		ExLog.i(context, TAG, "Storing battery is charging: " + batteryIsCharging);
-    	}
-    	new AppPreferences(context).setBatteryIsCharging(batteryIsCharging);
+
+    private void storeBatteryIsCharging(Context context, boolean batteryIsCharging) {
+        if (BuildConfig.DEBUG) {
+            ExLog.i(context, TAG, "Storing battery is charging: " + batteryIsCharging);
+        }
+        new AppPreferences(context).setBatteryIsCharging(batteryIsCharging);
     }
-    
+
     private void checkPluggedState(Context context, Intent intent) {
         Intent chargingIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         final int pluggedState = chargingIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);

@@ -4,5 +4,5 @@
     <string name="tracking_service_start" translatable="false">tracking_start</string>
     <string name="tracking_service_stop" translatable="false">tracking_stop</string>
     <string name="tracking_service_checkin_digest_parameter" translatable="false">trackingServiceCheckinDigest</string>
-    
+
 </resources>

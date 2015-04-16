@@ -1,19 +1,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" >
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="0dp" >
+            android:padding="0dp">
 
             <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
                 android:id="@+id/toolbar_title"
@@ -22,7 +22,7 @@
                 android:layout_gravity="center"
                 android:lines="1"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="16sp"/>
 
             <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
                 android:id="@+id/toolbar_subtitle"
@@ -31,23 +31,23 @@
                 android:layout_gravity="center"
                 android:lines="1"
                 android:singleLine="true"
-                android:textSize="12sp" />
+                android:textSize="12sp"/>
         </LinearLayout>
     </com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar>
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/title_page_indicator"
         android:layout_below="@id/toolbar"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <RelativeLayout
             android:id="@+id/tracking_linear_layout"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="0dp" >
+            android:padding="0dp">
         </RelativeLayout>
 
         <android.support.v4.view.ViewPager
@@ -55,33 +55,33 @@
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
-	</LinearLayout>
-    
-	<com.viewpagerindicator.CirclePageIndicator
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <com.viewpagerindicator.CirclePageIndicator
         android:id="@+id/title_page_indicator"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:paddingBottom="10dp"	
+        android:paddingBottom="10dp"
         android:background="@color/black"
-        android:paddingTop="10dp" />
-    
-    
-<!-- <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar" >
+        android:paddingTop="10dp"/>
 
-        <FrameLayout
-            android:id="@+id/content_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
 
-        <FrameLayout
-            android:id="@+id/hud_content_frame"
+    <!-- <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout> -->
+            android:layout_height="match_parent"
+            android:layout_below="@id/toolbar" >
+
+            <FrameLayout
+                android:id="@+id/content_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <FrameLayout
+                android:id="@+id/hud_content_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout> -->
 
 </RelativeLayout>

@@ -16,43 +16,38 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 
 public class PingHelper {
-	private static String TAG = PingHelper.class.getName();
-	
+    private static String TAG = PingHelper.class.getName();
 
-	public void sendPingToServer(final Context context, Location location, LeaderboardInfo leaderBoard, MarkInfo mark) {
-		AppPreferences prefs = new AppPreferences(context);
-		try {
-			JSONObject fixJson = new JSONObject();
+    public void sendPingToServer(final Context context, Location location, LeaderboardInfo leaderBoard, MarkInfo mark) {
+        AppPreferences prefs = new AppPreferences(context);
+        try {
+            JSONObject fixJson = new JSONObject();
 
-			fixJson.put("timestamp", location.getTime());
-			fixJson.put("longitude", location.getLongitude());
-			fixJson.put("latitude", location.getLatitude());
-			storePingInDatabase(context, location, mark);
+            fixJson.put("timestamp", location.getTime());
+            fixJson.put("longitude", location.getLongitude());
+            fixJson.put("latitude", location.getLatitude());
+            storePingInDatabase(context, location, mark);
 
-			String postUrlStr = leaderBoard.serverUrl
-					+ prefs.getServerMarkPingPath(leaderBoard.name, mark.getId());
+            String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId());
 
-            context.startService(MessageSendingService.createMessageIntent(context, postUrlStr,
-                    null, UUID.randomUUID(), fixJson.toString(), null));
+            context.startService(MessageSendingService
+                .createMessageIntent(context, postUrlStr, null, UUID.randomUUID(), fixJson.toString(), null));
 
+        } catch (JSONException ex) {
+            ExLog.i(context, TAG, "Error while building ping json " + ex.getMessage());
+        } catch (GeneralDatabaseHelperException e) {
+            e.printStackTrace();
+        }
+    }
 
-		} catch (JSONException ex) {
-			ExLog.i(context, TAG,
-					"Error while building ping json " + ex.getMessage());
-		} catch (GeneralDatabaseHelperException e) {
-			e.printStackTrace();
-		}
-	}
-
-
-	public void storePingInDatabase(Context context, Location location,
-			MarkInfo mark) throws GeneralDatabaseHelperException {
-		MarkPingInfo pingInfo = new MarkPingInfo();
-		pingInfo.setMarkId(mark.getId());
-		pingInfo.setLatitude("" + location.getLatitude());
-		pingInfo.setLongitude("" + location.getLongitude());
-		pingInfo.setAccuracy(location.getAccuracy());
-		pingInfo.setTimestamp((int) location.getTime());
-		DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
-	}
+    public void storePingInDatabase(Context context, Location location, MarkInfo mark)
+        throws GeneralDatabaseHelperException {
+        MarkPingInfo pingInfo = new MarkPingInfo();
+        pingInfo.setMarkId(mark.getId());
+        pingInfo.setLatitude("" + location.getLatitude());
+        pingInfo.setLongitude("" + location.getLongitude());
+        pingInfo.setAccuracy(location.getAccuracy());
+        pingInfo.setTimestamp((int) location.getTime());
+        DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
+    }
 }

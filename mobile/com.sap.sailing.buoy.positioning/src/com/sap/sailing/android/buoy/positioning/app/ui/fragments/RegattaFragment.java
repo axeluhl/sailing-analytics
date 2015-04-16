@@ -21,47 +21,42 @@ import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningAct
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
-public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cursor>{
-	private static final int MARKER_LOADER = 1;
-	private MarkAdapter adapter;
+public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cursor> {
+    private static final int MARKER_LOADER = 1;
+    private MarkAdapter adapter;
 
-	@SuppressLint("InflateParams")
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		super.onCreateView(inflater, container, savedInstanceState);
+    @SuppressLint("InflateParams")
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_buoy_postion_overview, container, false);
-		ListView markListView = (ListView) view.findViewById(R.id.listMarks);
-		adapter = new MarkAdapter(getActivity(), R.layout.mark_listview_row, null, 0);
-		markListView.setAdapter(adapter);
-		markListView.setOnItemClickListener(new ItemClickListener());
-		getLoaderManager().initLoader(MARKER_LOADER, null, this);
+        View view = inflater.inflate(R.layout.fragment_buoy_postion_overview, container, false);
+        ListView markListView = (ListView) view.findViewById(R.id.listMarks);
+        adapter = new MarkAdapter(getActivity(), R.layout.mark_listview_row, null, 0);
+        markListView.setAdapter(adapter);
+        markListView.setOnItemClickListener(new ItemClickListener());
+        getLoaderManager().initLoader(MARKER_LOADER, null, this);
 
-		return view;
-	}
-	
-	@Override
+        return view;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(MARKER_LOADER, null, this);
-        }
+    }
 
-    public MarkAdapter getAdapter()
-    {
+    public MarkAdapter getAdapter() {
         return adapter;
     }
 
-	@Override
+    @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
-        String checkinDigest = ((RegattaActivity)getActivity()).getCheckinDigest();
+        String checkinDigest = ((RegattaActivity) getActivity()).getCheckinDigest();
         switch (loaderId) {
         case MARKER_LOADER:
-            return new CursorLoader(getActivity(), AnalyticsContract.MarksLeaderBoardsJoined.CONTENT_URI,
-                    null,
-                    AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?",
-                    new String[]{checkinDigest},
-                    null);
+            return new CursorLoader(getActivity(), AnalyticsContract.MarksLeaderBoardsJoined.CONTENT_URI, null,
+                AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
 
         default:
             return null;
@@ -97,7 +92,6 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-
             Cursor cursor = (Cursor) adapter.getItem(position);
 
             String markerID = cursor.getString(cursor.getColumnIndex("mark_id"));
@@ -106,7 +100,7 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
             intent.putExtra(getString(R.string.mark_id), markerID);
             intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
             getActivity().startActivity(intent);
-            
+
         }
     }
 }

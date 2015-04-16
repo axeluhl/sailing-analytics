@@ -8,7 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class CheckinData extends AbstractCheckinData{
+public class CheckinData extends AbstractCheckinData {
     // public String gcmId;
     public String leaderboardName;
     public String eventId;
@@ -27,8 +27,8 @@ public class CheckinData extends AbstractCheckinData{
     public String uriString;
     public String checkinDigest;
 
-    public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
-            NoSuchAlgorithmException {
+    public void setCheckinDigestFromString(String checkinString)
+        throws UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(checkinString.getBytes("UTF-8"));
         byte[] digest = md.digest();
@@ -69,7 +69,7 @@ public class CheckinData extends AbstractCheckinData{
         return competitor;
     }
 
-    public CheckinUrlInfo getCheckinUrl(){
+    public CheckinUrlInfo getCheckinUrl() {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.urlString = uriString;
         checkinUrlInfo.checkinDigest = checkinDigest;

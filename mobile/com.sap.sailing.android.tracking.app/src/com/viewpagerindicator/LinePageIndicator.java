@@ -57,7 +57,6 @@ public class LinePageIndicator extends View implements PageIndicator {
     private int mActivePointerId = INVALID_POINTER;
     private boolean mIsDragging;
 
-
     public LinePageIndicator(Context context) {
         this(context, null);
     }
@@ -72,7 +71,8 @@ public class LinePageIndicator extends View implements PageIndicator {
     // Deprecated method will only be called if API level is below 16.
     public LinePageIndicator(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        if (isInEditMode()) return;
+        if (isInEditMode())
+            return;
 
         final Resources res = getResources();
 
@@ -96,8 +96,8 @@ public class LinePageIndicator extends View implements PageIndicator {
 
         Drawable background = a.getDrawable(R.styleable.LinePageIndicator_android_background);
         if (background != null) {
-        	if (background != null) {
-            	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            if (background != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     setBackground(background);
                 } else {
                     setBackgroundDrawable(background);
@@ -110,7 +110,6 @@ public class LinePageIndicator extends View implements PageIndicator {
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
     }
-
 
     public void setCentered(boolean centered) {
         mCentered = centered;
@@ -200,13 +199,14 @@ public class LinePageIndicator extends View implements PageIndicator {
         for (int i = 0; i < count; i++) {
             float dx1 = horizontalOffset + (i * lineWidthAndGap);
             float dx2 = dx1 + mLineWidth;
-            canvas.drawLine(dx1, verticalOffset, dx2, verticalOffset, (i == mCurrentPage) ? mPaintSelected : mPaintUnselected);
+            canvas.drawLine(dx1, verticalOffset, dx2, verticalOffset,
+                (i == mCurrentPage) ? mPaintSelected : mPaintUnselected);
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     // OnClick method is not overridden. This has no impact on the app.
-	public boolean onTouchEvent(android.view.MotionEvent ev) {
+    public boolean onTouchEvent(android.view.MotionEvent ev) {
         if (super.onTouchEvent(ev)) {
             return true;
         }
@@ -216,74 +216,75 @@ public class LinePageIndicator extends View implements PageIndicator {
 
         final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
         switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-                mLastMotionX = ev.getX();
-                break;
+        case MotionEvent.ACTION_DOWN:
+            mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+            mLastMotionX = ev.getX();
+            break;
 
-            case MotionEvent.ACTION_MOVE: {
-                final int activePointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-                final float x = MotionEventCompat.getX(ev, activePointerIndex);
-                final float deltaX = x - mLastMotionX;
+        case MotionEvent.ACTION_MOVE: {
+            final int activePointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+            final float x = MotionEventCompat.getX(ev, activePointerIndex);
+            final float deltaX = x - mLastMotionX;
 
-                if (!mIsDragging) {
-                    if (Math.abs(deltaX) > mTouchSlop) {
-                        mIsDragging = true;
-                    }
+            if (!mIsDragging) {
+                if (Math.abs(deltaX) > mTouchSlop) {
+                    mIsDragging = true;
                 }
-
-                if (mIsDragging) {
-                    mLastMotionX = x;
-                    if (mViewPager.isFakeDragging() || mViewPager.beginFakeDrag()) {
-                        mViewPager.fakeDragBy(deltaX);
-                    }
-                }
-
-                break;
             }
 
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                if (!mIsDragging) {
-                    final int count = mViewPager.getAdapter().getCount();
-                    final int width = getWidth();
-                    final float halfWidth = width / 2f;
-                    final float sixthWidth = width / 6f;
-
-                    if ((mCurrentPage > 0) && (ev.getX() < halfWidth - sixthWidth)) {
-                        if (action != MotionEvent.ACTION_CANCEL) {
-                            mViewPager.setCurrentItem(mCurrentPage - 1);
-                        }
-                        return true;
-                    } else if ((mCurrentPage < count - 1) && (ev.getX() > halfWidth + sixthWidth)) {
-                        if (action != MotionEvent.ACTION_CANCEL) {
-                            mViewPager.setCurrentItem(mCurrentPage + 1);
-                        }
-                        return true;
-                    }
+            if (mIsDragging) {
+                mLastMotionX = x;
+                if (mViewPager.isFakeDragging() || mViewPager.beginFakeDrag()) {
+                    mViewPager.fakeDragBy(deltaX);
                 }
-
-                mIsDragging = false;
-                mActivePointerId = INVALID_POINTER;
-                if (mViewPager.isFakeDragging()) mViewPager.endFakeDrag();
-                break;
-
-            case MotionEventCompat.ACTION_POINTER_DOWN: {
-                final int index = MotionEventCompat.getActionIndex(ev);
-                mLastMotionX = MotionEventCompat.getX(ev, index);
-                mActivePointerId = MotionEventCompat.getPointerId(ev, index);
-                break;
             }
 
-            case MotionEventCompat.ACTION_POINTER_UP:
-                final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-                final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
-                if (pointerId == mActivePointerId) {
-                    final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-                    mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+            break;
+        }
+
+        case MotionEvent.ACTION_CANCEL:
+        case MotionEvent.ACTION_UP:
+            if (!mIsDragging) {
+                final int count = mViewPager.getAdapter().getCount();
+                final int width = getWidth();
+                final float halfWidth = width / 2f;
+                final float sixthWidth = width / 6f;
+
+                if ((mCurrentPage > 0) && (ev.getX() < halfWidth - sixthWidth)) {
+                    if (action != MotionEvent.ACTION_CANCEL) {
+                        mViewPager.setCurrentItem(mCurrentPage - 1);
+                    }
+                    return true;
+                } else if ((mCurrentPage < count - 1) && (ev.getX() > halfWidth + sixthWidth)) {
+                    if (action != MotionEvent.ACTION_CANCEL) {
+                        mViewPager.setCurrentItem(mCurrentPage + 1);
+                    }
+                    return true;
                 }
-                mLastMotionX = MotionEventCompat.getX(ev, MotionEventCompat.findPointerIndex(ev, mActivePointerId));
-                break;
+            }
+
+            mIsDragging = false;
+            mActivePointerId = INVALID_POINTER;
+            if (mViewPager.isFakeDragging())
+                mViewPager.endFakeDrag();
+            break;
+
+        case MotionEventCompat.ACTION_POINTER_DOWN: {
+            final int index = MotionEventCompat.getActionIndex(ev);
+            mLastMotionX = MotionEventCompat.getX(ev, index);
+            mActivePointerId = MotionEventCompat.getPointerId(ev, index);
+            break;
+        }
+
+        case MotionEventCompat.ACTION_POINTER_UP:
+            final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+            final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+            if (pointerId == mActivePointerId) {
+                final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+                mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+            }
+            mLastMotionX = MotionEventCompat.getX(ev, MotionEventCompat.findPointerIndex(ev, mActivePointerId));
+            break;
         }
 
         return true;
@@ -364,8 +365,7 @@ public class LinePageIndicator extends View implements PageIndicator {
     /**
      * Determines the width of this view
      *
-     * @param measureSpec
-     *            A measureSpec packed into an int
+     * @param measureSpec A measureSpec packed into an int
      * @return The width of the view, honoring constraints from measureSpec
      */
     private int measureWidth(int measureSpec) {
@@ -385,14 +385,13 @@ public class LinePageIndicator extends View implements PageIndicator {
                 result = Math.min(result, specSize);
             }
         }
-        return (int)Math.ceil(result);
+        return (int) Math.ceil(result);
     }
 
     /**
      * Determines the height of this view
      *
-     * @param measureSpec
-     *            A measureSpec packed into an int
+     * @param measureSpec A measureSpec packed into an int
      * @return The height of the view, honoring constraints from measureSpec
      */
     private int measureHeight(int measureSpec) {
@@ -411,12 +410,12 @@ public class LinePageIndicator extends View implements PageIndicator {
                 result = Math.min(result, specSize);
             }
         }
-        return (int)Math.ceil(result);
+        return (int) Math.ceil(result);
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState savedState = (SavedState)state;
+        SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
         mCurrentPage = savedState.currentPage;
         requestLayout();
