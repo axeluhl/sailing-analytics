@@ -87,6 +87,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final VerticalPanel mainPanel;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT);
+    
+    private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
@@ -107,13 +109,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
     private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
-    
-    private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
-    private static final String STYLE_CIRCLE = STYLE_NAME_PREFIX + "circle";
-    private static final String STYLE_CIRCLE_BLUE = "circleBlue";
-    private static final String STYLE_CIRCLE_YELLOW = "circleYellow";
-    private static final String STYLE_CIRCLE_GREEN = "circleGreen";
-    private static final String STYLE_CIRCLE_GREY = "circleGrey";
     
     private EntryHandler entryClickedHandler;
     
@@ -238,21 +233,21 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public SafeHtml getValue(RegattaOverviewEntryDTO entryDTO) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                builder.append(SafeHtmlUtils.fromTrustedString("<div class=\"" + STYLE_CIRCLE + " "));
+                builder.append(SafeHtmlUtils.fromTrustedString("<div class=\"" + style.circle() + " "));
                 switch (entryDTO.raceInfo.lastStatus) {
                 case RUNNING:
                 case FINISHING:
-                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREEN));
+                    builder.append(SafeHtmlUtils.fromTrustedString(style.circleGreen()));
                     break;
                 case FINISHED:
-                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_BLUE));
+                    builder.append(SafeHtmlUtils.fromTrustedString(style.circleBlue()));
                     break;
                 case SCHEDULED:
                 case STARTPHASE:
-                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_YELLOW));
+                    builder.append(SafeHtmlUtils.fromTrustedString(style.circleYellow()));
                     break;
                 default:
-                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREY));
+                    builder.append(SafeHtmlUtils.fromTrustedString(style.circleGrey()));
                     break;
                 }
                 

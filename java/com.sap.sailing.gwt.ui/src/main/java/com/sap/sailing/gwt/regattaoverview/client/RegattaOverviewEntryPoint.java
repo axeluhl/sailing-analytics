@@ -41,6 +41,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         
         ThemeResources.INSTANCE.mediaCss().ensureInjected();
         ThemeResources.INSTANCE.mainCss().ensureInjected();
+        RegattaOverviewResources.INSTANCE.css().ensureInjected();
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         

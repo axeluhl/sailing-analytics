@@ -45,7 +45,6 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class RegattaOverviewPanel extends SimplePanel {
-    private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
     
     private final long serverUpdateRateInMs = 10000;
     private final long uiUpdateRateInMs = 450;
@@ -77,14 +76,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
     
-    private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
-    private static final String STYLE_REFRESH_STOP_TIME = STYLE_NAME_PREFIX + "RefreshStopTime";
-    private static final String STYLE_FUNCTION_BAR = STYLE_NAME_PREFIX + "functionBar";
-    private static final String STYLE_CONTENT_WRAPPER = STYLE_NAME_PREFIX + "contentWrapper";
-    private static final String STYLE_TITLE_LABEL = STYLE_NAME_PREFIX + "TitleLabel";
-    private static final String STYLE_EVENT_LABEL = STYLE_NAME_PREFIX + "EventLabel";
-    private static final String STYLE_VENUE_LABEL = STYLE_NAME_PREFIX + "VenueLabel";
-    private static final String STYLE_CLOCK_LABEL = STYLE_NAME_PREFIX + "ClockLabel";
+    private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
     
     public void setEntryClickedHandler(EntryHandler handler) {
         regattaRaceStatesComponent.setEntryClickedHandler(handler);
@@ -109,7 +101,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        mainPanel.addStyleName(STYLE_CONTENT_WRAPPER);
+        mainPanel.addStyleName(style.contentWrapper());
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventId, settings, uiUpdateTimer);
         this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
@@ -163,20 +155,20 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer.play();
         
         eventNameLabel = new Label();
-        eventNameLabel.addStyleName(STYLE_EVENT_LABEL);
-        eventNameLabel.addStyleName(STYLE_TITLE_LABEL);
+        eventNameLabel.addStyleName(style.eventLabel());
+        eventNameLabel.addStyleName(style.titleLabel());
         
         venueNameLabel = new Label();
-        venueNameLabel.addStyleName(STYLE_TITLE_LABEL);
-        venueNameLabel.addStyleName(STYLE_VENUE_LABEL);
+        venueNameLabel.addStyleName(style.titleLabel());
+        venueNameLabel.addStyleName(style.venueLabel());
         
         timeLabel = new Label();
-        timeLabel.addStyleName(STYLE_TITLE_LABEL);
-        timeLabel.addStyleName(STYLE_CLOCK_LABEL);
+        timeLabel.addStyleName(style.titleLabel());
+        timeLabel.addStyleName(style.clockLabel());
         
         FlexTable flexTable = new FlexTable();
         flexTable.setWidth("100%");
-        flexTable.addStyleName(STYLE_FUNCTION_BAR);
+        flexTable.addStyleName(style.functionBar());
         
         Grid eventVenueGrid = new Grid(1, 2);
         eventVenueGrid.setCellPadding(5);
@@ -203,7 +195,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         if (showLeaderboardButton) {
             leaderboardsTabPanel = new TabPanel();
-            leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
+            leaderboardsTabPanel.setStyleName(style.leaderboards());
             leaderboardsTabPanel.setVisible(false);
             mainPanel.add(leaderboardsTabPanel);
         } else {
@@ -221,7 +213,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         checkBox.setEnabled(true);
         checkBox.setValue(false);
         checkBox.setTitle(stringMessages.showHideComponent("Leaderboard"));
-        checkBox.addStyleName(STYLE_VIEWER_TOOLBAR_INNERELEMENT);
+        checkBox.addStyleName(style.viewerToolbar_innerElement());
 
         checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -279,7 +271,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     private HorizontalPanel getRefreshStartStopClockPanel() {
         HorizontalPanel refreshStartStopClockPanel = new HorizontalPanel();
         refreshStartStopClockPanel.setSpacing(5);
-        refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
+        refreshStartStopClockPanel.setStyleName(style.refreshStopTime());
         refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
         if (leaderboardCheckBox != null) {
