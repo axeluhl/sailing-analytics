@@ -17,4 +17,5 @@ Web-ContextPath: /theme
 Export-Package: com.sap.sse.gwt.theme.client,
  com.sap.sse.gwt.theme.client.component.imagegallery,
  com.sap.sse.gwt.theme.client.component.videogallery,
+ com.sap.sse.gwt.theme.client.component.sapheader,
  com.sap.sse.gwt.theme.client.resources

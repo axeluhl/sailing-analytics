@@ -15,11 +15,11 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
+import com.sap.sse.gwt.theme.client.component.sapheader.SAPHeader;
 import com.sap.sse.gwt.theme.client.resources.ThemeResources;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
@@ -53,7 +53,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            SAPHeader logoAndTitlePanel = new SAPHeader(getStringMessages().eventOverview(), false);
+
+            SAPHeader logoAndTitlePanel = new SAPHeader(getStringMessages().eventOverview(), "", false);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             headerPanel.setHeaderWidget(logoAndTitlePanel);
         } else {

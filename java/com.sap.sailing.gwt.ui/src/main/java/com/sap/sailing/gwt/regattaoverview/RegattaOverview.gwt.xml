@@ -30,7 +30,7 @@
 	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 	
 	<!-- Specify the app entry point class.                         -->
-	<entry-point class='com.sap.sailing.gwt.ui.regattaoverview.RegattaOverviewEntryPoint'/>
+	<entry-point class='com.sap.sailing.gwt.regattaoverview.client.RegattaOverviewEntryPoint'/>
 	
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
 	<set-property name="gwt.logging.logLevel" value="FINE"/>
@@ -45,8 +45,10 @@
 	
 	<source path='client'/>
 	
-<!-- 	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/> -->
-<!-- 	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/> -->
+	<inherits name="com.sap.sse.gwt.theme.SSEThemeLibrary"/>
+	
+	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
+	<inherits name="com.sap.sailing.gwt.ui.Leaderboard"/>
 <!-- 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/> -->
 	
 <!-- 	<inherits name='com.sap.sailing.gwt.ui.SourceControl'/> -->
