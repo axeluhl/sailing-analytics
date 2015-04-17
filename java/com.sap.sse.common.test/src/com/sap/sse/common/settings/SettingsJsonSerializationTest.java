@@ -20,12 +20,21 @@ public class SettingsJsonSerializationTest {
         settingsMap.put("trala", new EnumSetting<>(TextOperator.Operators.Contains));
         settingsMap.put("num", new NumberSetting(BigDecimal.TEN));
         settingsMap.put("l", new ListSetting<NumberSetting>(Arrays.asList(new NumberSetting(1), new NumberSetting(2), new NumberSetting(3))));
-        Settings settings = new AbstractSettings() {
-            @Override
-            public Map<String, Setting> getNonDefaultSettings() {
-                return settingsMap;
-            }
-        };
+        Settings settings = new MapSettings(settingsMap);
+        SettingsToJsonSerializer serializer = new SettingsToJsonSerializer();
+        JSONObject json = serializer.serialize(settings);
+        Settings deserializedSettings = serializer.deserialize(json);
+        assertEquals(settingsMap, deserializedSettings.getNonDefaultSettings());
+    }
+
+    @Test
+    public void testNestedJsonSerialization() throws ClassNotFoundException {
+        final Map<String, Setting> settingsMap = new HashMap<>();
+        final Map<String, Setting> innerMap = new HashMap<>();
+        settingsMap.put("humba", new StringSetting("trala"));
+        innerMap.put("num", new NumberSetting(123.4));
+        settingsMap.put("map", new MapSettings(innerMap));
+        Settings settings = new MapSettings(settingsMap);
         SettingsToJsonSerializer serializer = new SettingsToJsonSerializer();
         JSONObject json = serializer.serialize(settings);
         Settings deserializedSettings = serializer.deserialize(json);
