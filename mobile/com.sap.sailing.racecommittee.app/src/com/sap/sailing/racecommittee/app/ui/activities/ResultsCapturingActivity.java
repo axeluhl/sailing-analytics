@@ -75,8 +75,8 @@ public class ResultsCapturingActivity extends SessionActivity {
             }
         });
 
-        String subjectValue = "Scores";
-        String bodyValue = "No text.";
+        String subjectValue = getString(R.string.scores);
+        String bodyValue = getString(R.string.no_text);
         Bundle arguments = getIntent().getExtras();
         if (arguments != null) {
             if (arguments.containsKey(ARGUMENTS_KEY_SUBJECT)) {
@@ -212,7 +212,8 @@ public class ResultsCapturingActivity extends SessionActivity {
                 photoList.add(Uri.fromFile(currentImageFile));
                 createAndAdvanceImageFile();
             } catch (Exception e) {
-                Toast.makeText(ResultsCapturingActivity.this, "Error writing image file.", Toast.LENGTH_LONG).show();
+                String toastText = getString(R.string.error_picture_callback);
+                Toast.makeText(ResultsCapturingActivity.this, toastText, Toast.LENGTH_LONG).show();
             }
         }
     };

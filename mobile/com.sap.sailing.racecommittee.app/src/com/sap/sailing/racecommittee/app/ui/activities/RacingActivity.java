@@ -566,7 +566,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         @Override
         public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
-            Toast.makeText(RacingActivity.this, "Loading of CourseData succeeded", Toast.LENGTH_SHORT).show();
+            String toastText = getString(R.string.loading_of_course_area_succeeded);
+            Toast.makeText(RacingActivity.this, toastText, Toast.LENGTH_SHORT).show();
             setSupportProgressBarIndeterminateVisibility(false);
 
             for (CourseArea course : data) {
