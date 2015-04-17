@@ -64,7 +64,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -1100,17 +1099,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
-        try {
-            Competitor result = null;
-            List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
-            if (ranks != null && !ranks.isEmpty()) {
-                result = ranks.iterator().next();
-            }
-            return result;
-        } catch (NoWindError e) {
-            throw e.getCause();
+    public Competitor getOverallLeader(TimePoint timePoint) {
+        Competitor result = null;
+        List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
+        if (ranks != null && !ranks.isEmpty()) {
+            result = ranks.iterator().next();
         }
+        return result;
     }
 
     @Override
@@ -2756,8 +2751,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
-            throws NoWindException {
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
         final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
         return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode);
     }

@@ -500,7 +500,7 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -571,7 +571,7 @@ public interface TrackedRace extends Serializable {
 
     WindStore getWindStore();
 
-    Competitor getOverallLeader(TimePoint timePoint) throws NoWindException;
+    Competitor getOverallLeader(TimePoint timePoint);
 
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
