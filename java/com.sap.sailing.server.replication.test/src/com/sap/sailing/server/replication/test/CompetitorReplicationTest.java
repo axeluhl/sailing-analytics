@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -63,12 +65,14 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
      * the competitor with its modified state over to the replica where a
      * {@link DomainFactory#getOrCreateCompetitor(java.io.Serializable, String, com.sap.sailing.domain.base.impl.DynamicTeam, com.sap.sailing.domain.base.impl.DynamicBoat)}
      * will be triggered. This should also update the competitor on the client.
+     * @throws URISyntaxException 
      */
     @Test
-    public void testSimpleSpecificRegattaReplication() throws InterruptedException {
+    public void testSimpleSpecificRegattaReplication() throws InterruptedException, URISyntaxException {
         String baseEventName = "My Test Event";
         String boatClassName = "Kielzugvogel";
         Integer regattaId = 12345;
+        URI flagImageURI = new URI("http://www.sapsailing.com");
         Iterable<Series> series = Collections.emptyList();
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, regattaId, series,
@@ -76,7 +80,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
         Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
-                123, competitorName, Color.RED, "someone@nowhere.de", null,
+                123, competitorName, Color.RED, "someone@nowhere.de", flagImageURI,
                 new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
@@ -101,6 +105,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertEquals(competitor.getId(), replicatedCompetitor.getId());
         assertEquals(competitor.getName(), replicatedCompetitor.getName());
         assertEquals(competitor.getColor(), replicatedCompetitor.getColor());
+        assertEquals(competitor.getFlagImage(), replicatedCompetitor.getFlagImage());
         assertEquals(competitor.getBoat().getSailID(), replicatedCompetitor.getBoat().getSailID());
         assertEquals(competitor.getTeam().getNationality(), replicatedCompetitor.getTeam().getNationality());
         
