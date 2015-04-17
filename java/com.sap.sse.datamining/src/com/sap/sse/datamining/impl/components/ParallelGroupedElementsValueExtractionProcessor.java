@@ -9,7 +9,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 
 public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>
-             extends AbstractSimpleParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
+             extends AbstractParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
 
     private final Function<FunctionReturnType> extractionFunction;
     private final ParameterProvider parameterProvider;

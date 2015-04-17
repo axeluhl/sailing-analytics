@@ -49,6 +49,12 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
     }
+    
+    @Override
+    public boolean canProcessElements() {
+        // TODO Auto-generated method stub
+        return true;
+    }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {

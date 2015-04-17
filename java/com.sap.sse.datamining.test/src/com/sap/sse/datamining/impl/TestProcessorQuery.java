@@ -31,9 +31,9 @@ import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.functions.ParameterizedFunction;
+import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
-import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
@@ -141,7 +141,7 @@ public class TestProcessorQuery {
                 retrievalResultReceivers.add(filtrationProcessor);
                 
                 @SuppressWarnings("unchecked")
-                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
+                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
                                                                                                                                          ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 0) {
                     @Override
                     protected Iterable<Number> retrieveData(Iterable<Number> element) {
@@ -292,7 +292,7 @@ public class TestProcessorQuery {
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
-                return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
+                return new AbstractParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
                                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
                                                                                                     resultReceivers) {
@@ -332,7 +332,7 @@ public class TestProcessorQuery {
             protected Processor<Double, ?> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
-                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
                                                                                           (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                           ConcurrencyTestsUtil.getExecutor(),
                                                                                           resultReceivers) {
@@ -372,7 +372,7 @@ public class TestProcessorQuery {
             protected Processor<Double, ?> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
-                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
                                                                                           (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                           ConcurrencyTestsUtil.getExecutor(),
                                                                                           resultReceivers) {

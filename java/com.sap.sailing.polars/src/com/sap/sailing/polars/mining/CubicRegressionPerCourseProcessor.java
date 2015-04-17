@@ -25,6 +25,12 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
+    
+    @Override
+    public boolean canProcessElements() {
+        // TODO Auto-generated method stub
+        return true;
+    }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {

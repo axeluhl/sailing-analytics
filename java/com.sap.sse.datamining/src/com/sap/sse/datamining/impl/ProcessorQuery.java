@@ -224,6 +224,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
 
         @Override
+        public boolean canProcessElements() {
+            return true;
+        }
+
+        @Override
         public void processElement(Map<GroupKey, AggregatedType> groupedAggregations) {
             resultsLock.lock();
             try {

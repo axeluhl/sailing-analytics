@@ -3,6 +3,11 @@ package com.sap.sse.datamining.components;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 
 public interface Processor<InputType, ResultType> {
+    
+    /**
+     * @return <code>true</code>, if the processor accepts new elements to process.
+     */
+    public boolean canProcessElements();
 
     /**
      * Processes the given element and forwards the result.

@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 public abstract class AbstractProcessorInstruction<ResultType> implements Runnable, Comparable<AbstractProcessorInstruction<?>> {
     
-    private final AbstractPartitioningParallelProcessor<?, ?, ResultType> processor;
+    private final AbstractParallelProcessor<?, ResultType> processor;
     private final int priority;
 
     /**
@@ -10,12 +10,12 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
      * Use only, if <b>no processor</b> in the chain creates instruction <b>with</b> priorities other than 0 or
      * if the chain doesn't use priorities at all.
      * If this isn't the case use
-     * {@link #ProcessorInstruction(AbstractPartitioningParallelProcessor, ProcessorInstructionPriority)}
+     * {@link #ProcessorInstruction(AbstractParallelProcessor, ProcessorInstructionPriority)}
      * instead.
      * 
      * @param processor The processor, that processes this instruction
      */
-    public AbstractProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor) {
+    public AbstractProcessorInstruction(AbstractParallelProcessor<?, ResultType> processor) {
         this(processor, 0);
     }
     
@@ -25,7 +25,7 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
      * @param processor The processor, that processes this instruction
      * @param priority The priority of this instruction
      */
-    public AbstractProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
+    public AbstractProcessorInstruction(AbstractParallelProcessor<?, ResultType> processor,
                                 ProcessorInstructionPriority priority) {
         this(processor, priority.asIntValue());
     }
@@ -34,13 +34,13 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
      * Creates an instruction with the given priority as <code>int</code>.<br />
      * <b>Use only, if you need instructions with custom priorities and if you know what you're doing!</b>
      * If this isn't the case use
-     * {@link #ProcessorInstruction(AbstractPartitioningParallelProcessor, ProcessorInstructionPriority)}
+     * {@link #ProcessorInstruction(AbstractParallelProcessor, ProcessorInstructionPriority)}
      * instead.
      * 
      * @param processor The processor, that processes this instruction
      * @param priority The priority of this instruction. <code>0</code> is the highest priority.
      */
-    public AbstractProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
+    public AbstractProcessorInstruction(AbstractParallelProcessor<?, ResultType> processor,
                                 int priority) {
         this.processor = processor;
         this.priority = priority;
@@ -50,9 +50,7 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
     public void run() {
         try {
             ResultType result = computeResult();
-            if (processor.isResultValid(result) && !processor.isAborted()) {
-                processor.forwardResultToReceivers(result);
-            }
+            processor.forwardResultToReceivers(result);
         } catch (Exception e) {
             if (!processor.isAborted() || !(e instanceof InterruptedException)) {
                 processor.onFailure(e);

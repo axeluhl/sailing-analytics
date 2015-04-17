@@ -5,10 +5,10 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
+import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 
-public abstract class BlockingProcessor<InputType, ResultType> extends AbstractSimpleParallelProcessor<InputType, ResultType> {
+public abstract class BlockingProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
     private final long timeToBlockInMillis;
 
     public BlockingProcessor(Class<InputType> inputType, Class<ResultType> resultType,

@@ -35,6 +35,12 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
+    
+    @Override
+        public boolean canProcessElements() {
+            // TODO Auto-generated method stub
+            return true;
+        }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {

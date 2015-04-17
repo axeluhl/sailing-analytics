@@ -13,7 +13,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 
 public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>
-                      extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
+                      extends AbstractParallelProcessor<DataType, GroupedDataEntry<DataType>> {
 
     private Iterable<ParameterizedFunction<?>> parameterizedDimensions;
 

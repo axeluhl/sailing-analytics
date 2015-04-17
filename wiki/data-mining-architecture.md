@@ -142,6 +142,7 @@ This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be conf
 
 Processors are the main component of the framework to process the data and work with the [Pipes and Filter Architecture](http://de.wikipedia.org/wiki/Pipes_und_Filter). The interface `Processor<InputType, ResultType>` describes the functionality of processors, which combines pipes and filters. It has methods to process given elements or to react to a thrown failure and also methods to control the work-flow (for example to finish or abort the work), but it doesn't have methods to get the result of the data processing. The results of processors are forwarded to something, that depends on the concrete implementation (this will be other processors in most cases). Here are the most important methods of `Processor`:
 
+* The method `canProcessElements` returns `true`, if the processor will accept new elements.
 * The method `processElement` processes the given element and forwards the result.
 * The method `onFailure` handles failures during the processing.
 	* The standard implementation is forwarding them to the last processor, that collects the failures, until the processing is finished. Than the failures will be handled.
@@ -153,33 +154,31 @@ Processors are the main component of the framework to process the data and work 
 	* It won't accept new elements given with `processElement`.
 	* All result receivers will be told to abort.
 
-How this functionality is implemented, depends on the concrete implementation, but it should stick to this description, except for some special cases (like the last processor in a chain). New processors should extend `AbstractPartitioningParallelProcessor` or `AbstractSimpleParallelProcessor`. The main difference between these two abstract processors is that the partitioning processor allows to convert one element of the `InputType` to an iterable of elements of a `WorkingType`, which can be useful in some cases. These two abstract implementations implement most of the functionality defined by `Processor`, where the processing of the input elements is parallel. The parallelization is done by the method `processElement`:
+How this functionality is implemented, depends on the concrete implementation, but it should stick to this description, except for some special cases (like the last processor in a chain). New processors should extend `AbstractParallelProcessor`. This abstract implementation implements most of the functionality defined by `Processor`, with a parallel processing of the input elements. The parallelization is done in the method `processElement`:
 
-* The given input element gets partitioned to an iterable of elements of the `WorkingType`.
-	* This step simplified by the `AbstractSimpleParallelProcessor` in the way, that the `InputType` and `WorkingType` are the same and the resulting iterable contains exactly the given input element.
-* For each partial element in the resulting iterable is a `AbstractProcessorInstruction` created.
+* An `AbstractProcessorInstruction` created if for the given input element.
 * The instruction is given to an `ExecutorService`, if it is valid.
 	* For example are `null` instructions invalid.
 	* See [Processor Instructions](#Processor-Instructions) for detailed information about instructions.
-* The instruction forwards its result, after it has been executed.
+* The instruction forwards its result to the result receivers, after it has been executed.
 * The execution of instructions is handled by the `ExecutorService` of the processor.
 
 Abstract processors have the following abstract methods:
 
 * The method `createInstruction` creates an `AbstractProcessorInstruction` for the given input element, in which the concrete functionality of the instruction is implemented.
 	* See [Processor Instructions](#Processor-Instructions) for detailed information about instructions.
-* The method `partitionElement` converts the given input element to an iterable of elements of the `WorkingType`
-	* The `AbstractSimpleParallelProcessor` implements this method in the way, that the `InputType` and `WorkingType` are the same and the resulting iterable contains exactly the given input element.
 * The method `setAdditionalData` sets the additional result data for the processor.
 	* For example the amount of filtered or retrieved data elements.
 
 An useful method for concrete processors is the protected method `createInvalidResult`, that returns an instruction, that won't be passed to the `ExecutorService`. This can be used to stop the processing of a specific input element (for example to filter the data).
 
+**TODO:** *Describe the usage of prioritized instructions, with the `DataMiningExecutorService`*
+
 There are useful implementations of the abstract processors, that are more specialized. These special processors implement the creation of instructions and the setting of the additional data for their special case.
 
 #### Retrieval Processor
 
-Retrieval processors are used to get many result elements (as `ResultType`) from one input element (as `InputType`). The abstract class `AbstractSimpleRetrievalProcessor<InputType, ResultType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the `partitionElement` method, so the retrieval process isn't parallel, but the processing of each retrieved element will be parallel.
+Retrieval processors are used to get many result elements (as `ResultType`) from one input element (as `InputType`). The abstract class `AbstractRetrievalProcessor<InputType, ResultType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the created instructions, which forwards each retrieved data element to the result receivers. The instruction itself returns an invalid result (created with the method `createInvalidResult`).
 
 #### Filtering Processor
 

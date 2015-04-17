@@ -8,7 +8,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 
-public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParallelProcessor<InputType, InputType> {
+public class ParallelFilteringProcessor<InputType> extends AbstractParallelProcessor<InputType, InputType> {
 
     private final FilterCriterion<InputType> filterCriterion;
     private final AtomicInteger filteredDataAmount;
