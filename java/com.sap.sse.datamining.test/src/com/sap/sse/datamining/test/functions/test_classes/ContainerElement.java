@@ -4,7 +4,7 @@ import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public interface ContainerElement {
     
-    @Dimension(messageKey="name")
+    @Dimension(messageKey="Name")
     public String getName();
 
 }

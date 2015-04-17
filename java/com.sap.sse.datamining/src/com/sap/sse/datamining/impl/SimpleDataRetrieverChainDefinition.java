@@ -64,7 +64,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     public <ResultType> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
                                        Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (isInitialized()) {
-            throw new UnsupportedOperationException("This retriever chain definition already has been started with '"
+            throw new IllegalStateException("This retriever chain definition already has been started with '"
                                                     + dataRetrieverTypesWithInformation.get(0).getRetrieverType().getSimpleName() + "'");
         }
         checkThatRetrieverHasUsableConstructor(retrieverType);
@@ -83,10 +83,10 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
             Class<? extends Processor<NextInputType, NextResultType>> nextRetrieverType,
             Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (!isInitialized()) {
-            throw new UnsupportedOperationException("This retriever chain definition hasn't been started yet");
+            throw new IllegalStateException("This retriever chain definition hasn't been started yet");
         }
         if (isComplete) {
-            throw new UnsupportedOperationException("This retriever chain definition is already complete");
+            throw new IllegalStateException("This retriever chain definition is already complete");
         }
         DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
         @SuppressWarnings("unchecked")
@@ -129,7 +129,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     @Override
     public DataRetrieverChainBuilder<DataSourceType> startBuilding(ExecutorService executor) {
         if (!isComplete) {
-            throw new UnsupportedOperationException("This retriever chain definition hasn't been completed yet");
+            throw new IllegalStateException("This retriever chain definition hasn't been completed yet");
         }
         
         return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation);
