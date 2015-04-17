@@ -29,6 +29,9 @@ public abstract class BasePanelFragment extends RaceFragment {
                 if (AppPreferences.on(getActivity()).getTheme().equals(AppConstants.LIGHT_THEME)) {
                     level -= 10;
                 }
+                if (level < 0) {
+                    level = 0;
+                }
                 retValue = setMarkerLevel(v, resId, 1 - level);
             }
         }
@@ -46,7 +49,6 @@ public abstract class BasePanelFragment extends RaceFragment {
 
         ImageView view = (ImageView) v.findViewById(resId);
         if (view != null) {
-            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             Drawable drawable = view.getDrawable();
             if (drawable != null) {
                 drawable.setLevel(level + offset);
