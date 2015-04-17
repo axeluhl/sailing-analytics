@@ -50,7 +50,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
         json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
         json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
-
+        json.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+        if(competitor.getFlagImage() != null) {
+            json.put("flagImage", competitor.getFlagImage().toString());
+        }
+        
         return json;
     }
 
