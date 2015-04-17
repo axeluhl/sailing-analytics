@@ -391,4 +391,8 @@
     <string name="error_missing_passing_instructions">Ein Wegpunkt hat keine Anweisung zum Vorbeifahren. Bitte wählen Sie Anweisungen, indem Sie lange auf den Wegpunkt klicken.</string>
     <string name="error_no_way_point">Das Kursdesign erfordert mindestens einen Wegpunkt.</string>
     <string name="start_w_placeholder">Start %s</string>
+    <string name="events_waiting_to_be_sent"><![CDATA[Es müssen noch %1$d Events gesendet werden.\nDie letzte erfolgreiche Übertragung war am: %2$s.]]></string>
+    <string name="no_event_to_be_sent">Zur Zweit wartet kein Event auf die Übertragung.</string>
+    <string name="never">nie</string>
+    <string name="connected_to_wp"><![CDATA[Verbunden mit: %1$s\n%2$s]]></string>
 </resources>

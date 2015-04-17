@@ -95,11 +95,12 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         if (errorCount > 0) {
             menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, R.attr.sap_red_1));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
-            sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
-                    errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
+            String statusText = getString(R.string.events_waiting_to_be_sent);
+            sendingServiceStatus = String.format(statusText,
+                    errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
         } else {
             menuItemLive.setIcon(R.drawable.ic_share_white_36dp);
-            sendingServiceStatus = String.format("Currently no event waiting to be sent.", errorCount);
+            sendingServiceStatus = getString(R.string.no_event_to_be_sent);
         }
     }
     
@@ -138,7 +139,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", PrefUtils.getString(this, R.string.preference_server_url_key,
+        return String.format(getString(R.string.connected_to_wp), PrefUtils.getString(this, R.string.preference_server_url_key,
                 R.string.preference_server_url_default), sendingServiceStatus);
     }
     

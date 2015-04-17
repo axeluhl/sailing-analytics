@@ -412,4 +412,8 @@
     <string name="error_missing_passing_instructions">A waypoint has no passing instructions. Please select the passing instruction by clicking long on the waypoint.</string>
     <string name="error_no_way_point">The course design has to have at least one waypoint.</string>
     <string name="start_w_placeholder">Start %s</string>
+    <string name="events_waiting_to_be_sent"><![CDATA[Currently %1$d events waiting to be sent.\nLast successful sent was at: %2$s.]]></string>
+    <string name="no_event_to_be_sent">Currently no event waiting to be sent.</string>
+    <string name="never">never</string>
+    <string name="connected_to_wp"><![CDATA[Connected to: %1$s\n%2$s]]></string>
 </resources>
