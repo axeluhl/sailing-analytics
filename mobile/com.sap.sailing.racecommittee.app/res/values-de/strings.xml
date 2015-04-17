@@ -317,7 +317,7 @@
     <string name="race_reset_confirm">Rennen zurücksetzen</string>
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden.</string>
-    <string name="race_set_start">Start setzen</string>
+    <string name="race_set_start">Start Zeit setzen</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>

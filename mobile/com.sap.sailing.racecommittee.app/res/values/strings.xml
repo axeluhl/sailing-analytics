@@ -242,7 +242,7 @@
     <string name="race_start_in_1_minute">1 Minute</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
-    <string name="race_set_start">Set Start</string>
+    <string name="race_set_start">Set Start Time</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
     <string name="toggle_group_race_mode">Group Race?</string>
