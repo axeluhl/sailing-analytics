@@ -11,6 +11,7 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
@@ -40,24 +41,19 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     private String textColor = "Black";
     private String textFont = "10pt OpenSansRegular";
 
-    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode) {
-        super(map, zIndex);
-        
+    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
     	this.mode = mode;
-    	
     	if (this.mode == SailingSimulatorConstants.ModeEvent) {
     	    yOffset = 170;
     	}
-    	
         setPathOverlays(null);
     }
 
     @Override
     protected void draw() {
-
         if (mapProjection != null && pathOverlays != null && pathOverlays.size() > 0) {
             boolean containsPolyline = false;
-    
             for (PathCanvasOverlay overlay : this.pathOverlays) {
                 //TODO: Make course name a constant
                 if (overlay.getName().equals("What-If Course")) {
@@ -65,10 +61,8 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                     break;
                 }
             }
-    
             if (containsPolyline) {
                 List<PathCanvasOverlay> result = new ArrayList<PathCanvasOverlay>();
-    
                 int indexOfPolyline = 0;
                 for (int index = 0; index < this.pathOverlays.size(); index++) {
                     if (this.pathOverlays.get(index).getName().equals("What-If Course")) {
@@ -77,11 +71,9 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                         result.add(this.pathOverlays.get(index));
                     }
                 }
-    
                 result.add(0, this.pathOverlays.get(indexOfPolyline));
                 this.pathOverlays = result;
             }
-    
             setCanvasSettings();
             int index = 0;
             Context2d context2d = canvas.getContext2d();
@@ -99,14 +91,11 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                         path.getName(), getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
                 index++;
             }
-            
             //
             // TODO: draw current arrow
             //
             AbstractBearing curBear = new DegreeBearingImpl(this.curBearing);
-    
             //Context2d context2d = canvas.getContext2d();
-    
             if (this.curSpeed >= 0.0) {
                 //drawScaledArrow(windDTO, dbi.getRadians(), index, true);
                 double cFactor = 12.0;
@@ -123,16 +112,13 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 }
                 context2d.fillRect(cX - bgWidth/2.0, cY - 25.0 - 15.0, bgWidth, bgHeight);
                 context2d.setGlobalAlpha(1.0);
-    
                 context2d.setFont(textFont);
                 context2d.setFillStyle(textColor);
-    
                 //TextMetrics txtmet;
                 String cText = "Current: " + SimulatorMainPanel.formatSliderValue(curSpeed) + "kn";
                 txtmet = context2d.measureText(cText);
                 double txtwidth = txtmet.getWidth();
                 context2d.fillText(cText, cX-(txtwidth/2.0), cY-25);
-    
                 if (this.curSpeed > 0.0) {
                     drawArrowPx(cX, cY, curBear.getRadians(), cLength, cWidth, true, "Green");
                 }

@@ -3,15 +3,15 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class Response1TurnerDTO implements IsSerializable {
 
     public List<SimulatorWindDTO> path = null;
     public SimulatorWindDTO leftSide1Turner = null;
     public SimulatorWindDTO rightSide1Turner = null;
-    public PositionDTO startPosition = null;
-    public PositionDTO endPosition = null;
+    public Position startPosition = null;
+    public Position endPosition = null;
     public String notificationMessage = "";
 
     public Response1TurnerDTO() {
@@ -23,8 +23,8 @@ public class Response1TurnerDTO implements IsSerializable {
         this.notificationMessage = "";
     }
 
-    public Response1TurnerDTO(List<SimulatorWindDTO> path, SimulatorWindDTO leftSide1Turner, SimulatorWindDTO rightSide1Turner, PositionDTO startPosition,
-            PositionDTO endPosition, String notificationMessage) {
+    public Response1TurnerDTO(List<SimulatorWindDTO> path, SimulatorWindDTO leftSide1Turner, SimulatorWindDTO rightSide1Turner, Position startPosition,
+            Position endPosition, String notificationMessage) {
         this.path = path;
         this.leftSide1Turner = leftSide1Turner;
         this.rightSide1Turner = rightSide1Turner;

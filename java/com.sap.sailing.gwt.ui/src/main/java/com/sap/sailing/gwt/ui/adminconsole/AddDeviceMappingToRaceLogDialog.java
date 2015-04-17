@@ -66,6 +66,7 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                                 && valueToValidate.to.before(valueToValidate.from)) {
                             return stringMessages.startOfTimeRangeMustLieBeforeEnd();
                         }
+                        
                         if (valueToValidate.mappedTo == null) {
                             return stringMessages.pleaseSelectAnItemToMapTo();
                         }
@@ -108,12 +109,14 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
+                        selectedItem = mark;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
                         validate();
                     }
 
                     @Override
                     public void onSelectionChange(CompetitorDTO competitor) {
+                        selectedItem = competitor;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
                         validate();
@@ -138,17 +141,20 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
             @Override
             public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
                     throws QRCodeURLCreationException {
-                if (from.getValue() == null) {
-                    throw new QRCodeURLCreationException("from not set");
+                if (from.getValue() == null && to.getValue() == null) {
+                    throw new QRCodeURLCreationException(stringMessages.atMostOneEndOfTheTimeRangeMayBeOpen());
                 }
-                if (to.getValue() == null) {
-                    throw new QRCodeURLCreationException("to not set");
+                
+                Long fromMillis = null;
+                if (from.getValue() != null){
+                    fromMillis = from.getValue().getTime();
                 }
-                long fromMillis = from.getValue().getTime();
-                long toMillis = to.getValue().getTime();
-                if (fromMillis > toMillis) {
-                    throw new QRCodeURLCreationException("from can't lie after to");
+                
+                Long toMillis = null;
+                if (to.getValue() != null) {
+                    toMillis = to.getValue().getTime();
                 }
+                
                 return DeviceMappingConstants.getDeviceMappingForRaceLogUrl(baseUrlWithoutTrailingSlash,
                         leaderboardName, raceColumnName, fleetName, mappedItemType, mappedItemId, fromMillis, toMillis,
                         GwtUrlHelper.INSTANCE);
@@ -211,6 +217,19 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
         timeBox.setStartView(ViewMode.HOUR);
         timeBox.setFormat("dd/mm/yyyy hh:ii");
         return timeBox;
+    }
+    
+    
+
+    @Override
+    protected boolean validate() {
+        if (super.validate()){
+            qrWidget.generateQRCode();
+            return true;
+        } else {
+            qrWidget.clear();
+            return false;
+        }
     }
 
     @Override

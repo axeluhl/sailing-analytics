@@ -58,6 +58,10 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> stepFurther() {
+        if (!canStepFurther()) {
+            throw new IllegalStateException("The builder can't step any further");
+        }
+        
         currentRetrieverTypeIndex++;
         return this;
     }
@@ -65,7 +69,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter) {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         if (!filter.getElementType().isAssignableFrom(getCurrentRetrievedDataType())) {
@@ -80,7 +84,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver) {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         if (!resultReceiver.getInputType().isAssignableFrom(getCurrentRetrievedDataType())) {
@@ -98,7 +102,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public Class<?> getCurrentRetrievedDataType() {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         return dataRetrieverTypesWithInformation.get(currentRetrieverTypeIndex).getRetrievedDataType();
@@ -106,6 +110,10 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     
     @Override
     public int getCurrentRetrieverLevel() {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException("The builder hasn't been initialized");
+        }
+        
         return currentRetrieverTypeIndex;
     }
 
@@ -113,7 +121,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public Processor<DataSourceType, ?> build() {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         Processor<?, ?> firstRetriever = null;

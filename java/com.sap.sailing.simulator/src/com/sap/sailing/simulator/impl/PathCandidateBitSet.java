@@ -2,7 +2,7 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.BitSet;
 
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.simulator.TimedPosition;
 
 public class PathCandidateBitSet implements Comparable<PathCandidateBitSet> {

@@ -20,6 +20,8 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     
     /**
      * Steps to the next data retriever in the chain.
+     * 
+     * @throws IllegalStateException if {@link #canStepFurther()} would return <code>false</code>.
      */
     public DataRetrieverChainBuilder<DataSourceType> stepFurther();
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.simulator;
 
-import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.tracking.Positioned;
+import com.sap.sailing.domain.common.Positioned;
+import com.sap.sse.common.Timed;
 
 public interface TimedPosition extends Timed, Positioned {
 

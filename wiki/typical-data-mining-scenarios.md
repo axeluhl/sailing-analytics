@@ -20,9 +20,9 @@
 		* The `ResourceBundleStringMessages` needs the resource base name, which should be `<string messages package name>/<string messages base name>`
 		* A reference to this `ResourceBundleStringMessages` should be returned by the method `getStringMessages()`
 
-## Adding a completely new Data Type
+## Adding an absolute new Data Type
 
-A data type is an elementar unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](wiki/data-mining-architecture#Data-Mining-Functions).
+A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](wiki/data-mining-architecture#Data-Mining-Functions).
 
 ### Create the necessary Data Types
 
@@ -50,15 +50,15 @@ A data type is an elementar unit on which the processing components operate. A d
 
 * Add a `DataSourceProvider` to the `DataMiningBundleService`, if it doesn't contain one for the data source of the data type.
 * Implement a retrieval processor for each data type.
-	* Retrieval processors should extend `AbstractSimpleRetrievalProcessor`.
-	* Retrieval processors used by retriever chains need a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)`.
+	* Retrieval processors should extend `AbstractRetrievalProcessor`.
+	* Retrieval processors used by retriever chains need a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)`.
 	* A retrieval processor describes how to get from the input data type (like `RacingEventService` or `TrackedRace`) to the result data type (like `TrackedLeg`) with the method `retrieveData`.
 * Create a `DataRetrieverChainDefinition` and add it to the `DataMiningBundleService`.
 	* A retriever chain is created with its methods `startWith`, `addAfter` and `endWith`, that add `Classes` of your retrieval processors to the chain.
 	* Each method has a parameter for the `Class` of the retrieved data type of the next step and some also have a parameter for the `Class` of the retrieval processor of the previous step to ensure type safety.
 	* Each method has a parameter for a message key, that is needed for the internationalization of the chain.
 	* The call order of these methods has to match `startWith addAfter* endWith` or an exception will be thrown.
-	* Every retrieval processor needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)` or an exception will be thrown.
+	* Every retrieval processor needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)` or an exception will be thrown.
 	* See [Defining and building a Data Retriever Chain](wiki/data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain) for examples and more detailed information.
 
 ## Adding a new Data Type with a reusable Retriever Chain
@@ -86,7 +86,7 @@ A data type is an elementar unit on which the processing components operate. A d
             </tr>
 		  </table>
 		  than existing retriever chain should be splitted after the retrieval processor for the `TrackedRaces`.
-	* To split an existing retriever chain, create a new one after the split point with the usage of the existing one. Then move the `addAfter` and `endWith` calls to the new retriever chain. The first part of the splitted retriever chain can now be used to create the retriever chain for the new data type.
+	* To split an existing retriever chain, create a new one after the split point with the usage of the existing one. Then move the `addAfter` and `endWith` calls to the new retriever chain. The first part of the split retriever chain can now be used to create the retriever chain for the new data type.
 		* Note, that it's not necessary to call `startWith`, if a retriever chain is used to create a new one. 
 	* In pseudo code would this look like this:<br>
 	  Before:<br>
@@ -113,3 +113,16 @@ RetrieverChain markPassingRetrieverChain = new RetrieverChain(trackedRaceRetriev
 markPassingRetrieverChain.endWith(MarkPassingRetrievalProcessor.class);
 </pre>
 * Ensure, that all retriever chains are added to the `DataMiningBundleService`
+
+## Include a Type forcefully in the GWT Serialization Policy
+
+It can happen, that a necessary type isn't included in the GWT Serialization Policy, because of the generality of the framework. To enforce the include of a type, the GWT-Service has to use the type in one of its methods. To do this, follow these steps:
+
+* Create a dummy class in a shared bundle, if such a dummy class doesn't exist already in the scope of the type.
+	* For example like `SSEDataMiningSerializationDummy`.
+	* The class has to implement `Serializable` and should only have a private standard constructor, to prevent an accidental instantiation.
+* Add a private non-final instance variable of the type to the dummy.
+* Add a pseudo method to the GWT-Service, that uses the dummy class, if such a method doesn't exist already.
+	* For example like `SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy()`.
+
+The type will be included in the GWT Serialization Policy, because the GWT-Service has a method, that uses the dummy class, that uses the type.

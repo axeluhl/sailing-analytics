@@ -5,9 +5,8 @@ public class RaceColumnInSeriesDTO extends RaceColumnDTO {
     private String seriesName; 
     private String regattaName; 
 
-    // for GWT serialization
-    RaceColumnInSeriesDTO() {}
-
+    RaceColumnInSeriesDTO() {} // for GWT serialization
+    
     public RaceColumnInSeriesDTO(String seriesName, String regattaName) {
         super();
         this.seriesName = seriesName;

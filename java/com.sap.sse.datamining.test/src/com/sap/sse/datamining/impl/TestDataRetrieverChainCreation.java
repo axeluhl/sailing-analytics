@@ -75,7 +75,7 @@ public class TestDataRetrieverChainCreation {
     }
     
     @SuppressWarnings("unchecked")
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected=IllegalStateException.class)
     public void testCreationWithExistingChainDefinition() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, ?> chainClone = new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, Void.class, "TestRetrieverChain");
         assertThat(chainClone.getDataSourceType().equals(dataRetrieverChainDefinition.getDataSourceType()), is(true));
@@ -134,7 +134,7 @@ public class TestDataRetrieverChainCreation {
     }
     
     @SuppressWarnings("unchecked")
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected=IllegalStateException.class)
     public void testAddAfterWithoutStarting() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, ?> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Void.class, "TestRetrieverChain");
 
@@ -147,7 +147,7 @@ public class TestDataRetrieverChainCreation {
     }
     
     @SuppressWarnings("unchecked")
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected=IllegalStateException.class)
     public void testStartingTwice() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, ?> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Void.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
@@ -207,7 +207,7 @@ public class TestDataRetrieverChainCreation {
     }
     
     @SuppressWarnings("unchecked")
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected=IllegalStateException.class)
     public void testEndingTwice() {
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
@@ -217,7 +217,7 @@ public class TestDataRetrieverChainCreation {
     }
     
     @SuppressWarnings("unchecked")
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected=IllegalStateException.class)
     public void testAddingRetrieverAfterCompletion() {
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
@@ -227,7 +227,7 @@ public class TestDataRetrieverChainCreation {
     }
     
     @SuppressWarnings("unchecked")
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected=IllegalStateException.class)
     public void testStartBuildingWithIncompleteChain() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;

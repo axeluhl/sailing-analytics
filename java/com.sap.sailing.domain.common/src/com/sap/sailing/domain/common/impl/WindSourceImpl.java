@@ -6,10 +6,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 public class WindSourceImpl implements WindSource {
     private static final long serialVersionUID = 1695490791311456007L;
 
-    private WindSourceType type;
+    private final WindSourceType type;
 
-    WindSourceImpl() {} // for GWT serialization
-    
     public WindSourceImpl(WindSourceType type) {
         this.type = type;
     }

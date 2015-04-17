@@ -16,8 +16,9 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
@@ -51,8 +52,8 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
 
     private static Logger logger = Logger.getLogger(WindLineGuidesCanvasOverlay.class.getName());
 
-    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex, final Timer timer, int xRes) {
-        super(map, zIndex);
+    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex, final Timer timer, int xRes, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         
         this.timer = timer;
         this.xRes = xRes;
@@ -63,8 +64,8 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
         timePointWindDTOMap = new TreeMap<Long, List<SimulatorWindDTO>>();        
     }
 
-    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex) {
-        this(map, zIndex, null, 0);
+    public WindLineGuidesCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, null, 0, coordinateSystem);
     }
 
     @Override
@@ -144,8 +145,8 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
             Iterator<SimulatorWindDTO> windDTOIter = windDTOList.iterator();
             final SimulatorWindDTO w0 = windDTOIter.next();
             final SimulatorWindDTO w1 = windDTOIter.next();
-            final LatLng pg0 = LatLng.newInstance(w0.position.latDeg, w0.position.lngDeg);
-            final LatLng pg1 = LatLng.newInstance(w1.position.latDeg, w1.position.lngDeg);
+            final LatLng pg0 = coordinateSystem.toLatLng(w0.position);
+            final LatLng pg1 = coordinateSystem.toLatLng(w1.position);
             final Point px0 = mapProjection.fromLatLngToDivPixel(pg0);
             final Point px1 = mapProjection.fromLatLngToDivPixel(pg1);
             final double dx = px0.getX()-px1.getX();
@@ -173,42 +174,26 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
         final String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots + "knots "
                 + windDTO.trueWindBearingDeg;
         logger.fine(msg);
-
         final Context2d context2d = canvas.getContext2d();
         context2d.setGlobalAlpha(0.2);
-
-        final PositionDTO position = windDTO.position;
-
-        final LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        final Position position = windDTO.position;
+        final LatLng positionLatLng = coordinateSystem.toLatLng(position);
         final Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         final double x = canvasPositionInPx.getX() - getWidgetPosLeft();
         final double y = canvasPositionInPx.getY() - getWidgetPosTop();
-
         windFieldPoints.put(new ToolTip(x, y), windDTO);
-
         final double dx = length * Math.sin(angle);
         final double dy = -length * Math.cos(angle);
-
         final double x1 = x + dx / 2;
         final double y1 = y + dy / 2;
-
         drawLine(x - dx / 2, y - dy / 2, x1, y1, weight, arrowColor);
-
         final double theta = Math.atan2(-dy, dx);
-
         final double hLength = Math.max(6.,6.+(10./(60.-10.))*Math.max(length-6.,0));
         logger.finer("headlength: "+hLength+", arrowlength: "+length);
-
         if (drawHead) {
             drawHead(x1, y1, theta, hLength, weight);
         }
-        //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "�";
-        //drawPointWithText(x, y, text);
-        //drawPoint(x, y);
-        
         context2d.setGlobalAlpha(0.4);
-
     }
 
     protected void drawHead(final double x, final double y, final double theta, final double headLength, final double weight) {
