@@ -2757,6 +2757,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode, cache);
+    }
+
+    @Override
     public Iterable<Mark> getMarks() {
         while (true) {
             try {

@@ -266,8 +266,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}, only that a cache for leg type
      * calculation is passed.
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a

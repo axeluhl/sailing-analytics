@@ -503,6 +503,13 @@ public interface TrackedRace extends Serializable {
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
+     * Same as {@link #getWindwardDistanceToOverallLeader(Competitor, TimePoint, WindPositionMode)}, only with an additional
+     * cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups for the same
+     * time point.
+     */
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    
+    /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
      * {@link #getWindSourcesToExclude}.
      */

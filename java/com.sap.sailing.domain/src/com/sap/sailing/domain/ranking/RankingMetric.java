@@ -2,6 +2,8 @@ package com.sap.sailing.domain.ranking;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -23,5 +25,9 @@ import com.sap.sse.common.TimePoint;
  * @param <T>
  */
 public interface RankingMetric<T extends Comparable<T>> {
-    T getRankingMetric(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint);
+    default T getRankingMetric(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        return getRankingMetric(trackedRace, competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    T getRankingMetric(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 }

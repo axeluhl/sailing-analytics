@@ -908,4 +908,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             WindPositionMode windPositionMode) throws NoWindException {
         return null;
     }
+
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
 }

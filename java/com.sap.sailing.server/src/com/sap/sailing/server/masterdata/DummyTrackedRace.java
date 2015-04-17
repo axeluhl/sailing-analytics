@@ -586,4 +586,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
             WindPositionMode windPositionMode) {
         return null;
     }
+
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
 }
