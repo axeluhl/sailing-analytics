@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -11,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -19,13 +14,18 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartTimeFragment
-        extends BaseFragment
-        implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+public class StartTimeFragment extends BaseFragment
+    implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
     private static final String START_MODE = "startMode";
     private static final int MAX_DAYS = 30;
 
@@ -34,7 +34,7 @@ public class StartTimeFragment
     private TextView mCountdown;
     private TimePoint mStartTime;
     private boolean mListenerIgnore = true;
-    
+
     /**
      * Listens for start time changes
      */
@@ -99,36 +99,40 @@ public class StartTimeFragment
         if (getView() != null) {
             if (getArguments() != null) {
                 switch (getArguments().getInt(START_MODE, 0)) {
-                    case 1:
-                        View header = ViewHolder.get(getView(), R.id.header_text);
-                        if (header != null) {
-                            header.setOnClickListener(this);
-                        }
-                        View back = ViewHolder.get(getView(), R.id.header_back);
-                        if (back != null) {
-                            back.setVisibility(View.VISIBLE);
-                        }
-                        break;
+                case 1:
+                    View header = ViewHolder.get(getView(), R.id.header_text);
+                    if (header != null) {
+                        header.setOnClickListener(this);
+                    }
+                    View back = ViewHolder.get(getView(), R.id.header_back);
+                    if (back != null) {
+                        back.setVisibility(View.VISIBLE);
+                    }
+                    break;
 
-                    case 2:
-                        View frame = ViewHolder.get(getView(), R.id.header);
-                        if (frame != null) {
-                            frame.setVisibility(View.GONE);
-                        }
-                        break;
+                case 2:
+                    View frame = ViewHolder.get(getView(), R.id.header);
+                    if (frame != null) {
+                        frame.setVisibility(View.GONE);
+                    }
+                    break;
 
-                    default:
-                        break;
+                default:
+                    break;
                 }
             }
 
             mDatePicker = ViewHolder.get(getView(), R.id.start_date_picker);
             if (mDatePicker != null) {
+                ThemeHelper.setPickerTextColor(getActivity(), mDatePicker,
+                    ColorHelper.getThemedColor(getActivity(), R.attr.white));
                 mDatePicker.setOnValueChangedListener(this);
                 initDatePicker();
             }
             mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
+                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker,
+                    ColorHelper.getThemedColor(getActivity(), R.attr.white));
                 mTimePicker.setOnTimeChangedListener(this);
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);
@@ -162,10 +166,10 @@ public class StartTimeFragment
         }
         resId = R.string.race_start_time_ago;
         if (mStartTime.after(now)) {
-//            resId = R.string.race_start_time_in;
+            //            resId = R.string.race_start_time_in;
             time = TimeUtils.formatDurationUntil(mStartTime.minus(now.asMillis()).asMillis());
         } else {
-//            resId = R.string.race_start_time_ago;
+            //            resId = R.string.race_start_time_ago;
             time = TimeUtils.formatDurationSince(now.minus(mStartTime.asMillis()).asMillis());
         }
         if (mCountdown != null) {
@@ -177,37 +181,37 @@ public class StartTimeFragment
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.minute_inc:
-            case R.id.minute_dec:
-                String operator = String.valueOf(view.getTag());
-                if (!operator.equals("null")) {
-                    Calendar newStart = Calendar.getInstance();
-                    newStart.setTime(mStartTime.asDate());
-                    String secondsCountdown = mCountdown.getText().toString();
-                    secondsCountdown = secondsCountdown.substring(secondsCountdown.length() - 2);
-                    int seconds = Integer.parseInt(secondsCountdown);
-                    if (operator.equals("-")) {
-                        seconds = -1 * seconds;
-                    } else {
-                        seconds = 60 - seconds;
-                    }
-                    newStart.add(Calendar.SECOND, seconds);
-                    mStartTime = new MillisecondsTimePoint(newStart.getTimeInMillis());
-                    mListenerIgnore = true;
-                    setPickerTime();
+        case R.id.minute_inc:
+        case R.id.minute_dec:
+            String operator = String.valueOf(view.getTag());
+            if (!operator.equals("null")) {
+                Calendar newStart = Calendar.getInstance();
+                newStart.setTime(mStartTime.asDate());
+                String secondsCountdown = mCountdown.getText().toString();
+                secondsCountdown = secondsCountdown.substring(secondsCountdown.length() - 2);
+                int seconds = Integer.parseInt(secondsCountdown);
+                if (operator.equals("-")) {
+                    seconds = -1 * seconds;
+                } else {
+                    seconds = 60 - seconds;
                 }
-                break;
+                newStart.add(Calendar.SECOND, seconds);
+                mStartTime = new MillisecondsTimePoint(newStart.getTimeInMillis());
+                mListenerIgnore = true;
+                setPickerTime();
+            }
+            break;
 
-            case R.id.set_start_time:
-                changeFragment(mStartTime);
-                break;
+        case R.id.set_start_time:
+            changeFragment(mStartTime);
+            break;
 
-            case R.id.header_text:
-                changeFragment();
-                break;
+        case R.id.header_text:
+            changeFragment();
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
@@ -269,7 +273,7 @@ public class StartTimeFragment
     }
 
     private void changeFragment() {
-       changeFragment(null);
+        changeFragment(null);
     }
 
     private void changeFragment(TimePoint startTime) {
@@ -286,10 +290,8 @@ public class StartTimeFragment
             args.putSerializable(MainScheduleFragment.STARTTIME, startTime);
         }
         fragment.setArguments(args);
-        getFragmentManager()
-                .beginTransaction()
-                .replace(viewId, fragment)
-                .commit();
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+        getFragmentManager().beginTransaction().replace(viewId, fragment).commit();
+        LocalBroadcastManager.getInstance(getActivity())
+            .sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
     }
 }
