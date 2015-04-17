@@ -42,7 +42,6 @@ public class EditProfileEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
-                RemoteServiceMappingConstants.WEB_CONTEXT_PATH,
                 RemoteServiceMappingConstants.userManagementServiceRemotePath);
         final UserService userService = new UserService(userManagementService);
         final NewAccountValidator validator = new NewAccountValidator(stringMessages);

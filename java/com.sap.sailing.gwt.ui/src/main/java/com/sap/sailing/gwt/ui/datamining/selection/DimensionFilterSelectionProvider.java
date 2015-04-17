@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -103,7 +106,13 @@ class DimensionFilterSelectionProvider {
                             @Override
                             public void onSuccess(QueryResult<Set<Object>> result) {
                                 GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
-                                Collection<?> content = result.getResults().get(contentKey);
+                                List<?> content = new ArrayList<Object>(result.getResults().get(contentKey));
+                                Collections.sort(content, new Comparator<Object>() {
+                                    @Override
+                                    public int compare(Object o1, Object o2) {
+                                        return o1.toString().compareTo(o2.toString());
+                                    }
+                                });
                                 selectionTable.setContent(content == null ? new ArrayList<>() : content);
                                 if (selectionToBeApplied != null) {
                                     selectionTable.setSelection(selectionToBeApplied);
