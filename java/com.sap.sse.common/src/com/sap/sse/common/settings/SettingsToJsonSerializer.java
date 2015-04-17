@@ -2,6 +2,7 @@ package com.sap.sse.common.settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,15 +20,33 @@ public class SettingsToJsonSerializer {
         for (Entry<String, Setting> e : settingsToSerialize.entrySet()) {
             Object settingAsJson = serialize(e.getValue());
             jsonObject.put(escapePropertyName(e.getKey()), settingAsJson);
+            final String typePropertyName = getTypePropertyName(e.getKey());
             if (e.getValue() instanceof EnumSetting<?>) {
-                jsonObject.put(getTypePropertyName(e.getKey()), getEnumTypeName((EnumSetting<?>) e.getValue()));
+                jsonObject.put(typePropertyName, getEnumTypeName((EnumSetting<?>) e.getValue()));
+            } else if (e.getValue() instanceof ListSetting<?>) {
+                Iterator<?> i = ((ListSetting<?>) e.getValue()).iterator();
+                if (i.hasNext()) {
+                    Object o = i.next();
+                    if (o instanceof EnumSetting<?>) {
+                        jsonObject.put(typePropertyName, getEnumListTypeName(((EnumSetting<?>) o).getValue()));
+                    }
+                }
             }
         }
         return jsonObject;
     }
 
+    /**
+     * A list containing enum literals shall be represented as simply holding these literals as strings. However,
+     * when de-serializing, the list elements need to be constructed as the proper enum's literals again, so we need
+     * to store the enumeration class name together with the information that it's a list.
+     */
+    private Object getEnumListTypeName(Enum<?> literal) {
+        return SettingType.LIST.name()+"/"+literal.getClass().getName();
+    }
+
     private Object getEnumTypeName(EnumSetting<?> value) {
-        return SettingType.ENUM+"/"+value.getValue().getClass().getName();
+        return SettingType.ENUM.name()+"/"+value.getValue().getClass().getName();
     }
 
     private String getTypePropertyName(String unescapedKey) {
@@ -158,7 +177,7 @@ public class SettingsToJsonSerializer {
             JSONArray array = (JSONArray) obj;
             List<Setting> settingList = new ArrayList<>(); 
             for (Object o : array) {
-                settingList.add(createSettingFromObjectAndType(o, getSettingType(o), clazz));
+                settingList.add(createSettingFromObjectAndType(o, clazz==null?getSettingType(o):SettingType.ENUM, clazz));
             }
             setting = new ListSetting<>(settingList);
             break;
