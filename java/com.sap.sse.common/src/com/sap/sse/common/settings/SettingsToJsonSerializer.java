@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 
 public class SettingsToJsonSerializer {
     private final static String TYPE_PROPERTY_SUFFIX = "___TYPE";
+    private final static char TYPE_PROPERTY_SUFFIX_ESCAPE = ':';
     
     public JSONObject serialize(Settings settings) {
         final Map<String, Setting> settingsToSerialize = settings.getNonDefaultSettings();
@@ -34,7 +35,7 @@ public class SettingsToJsonSerializer {
     }
 
     private boolean isTypePropertyName(String unescapedKey) {
-        return unescapedKey.endsWith(TYPE_PROPERTY_SUFFIX);
+        return unescapedKey.endsWith(TYPE_PROPERTY_SUFFIX) && !unescapedKey.endsWith(TYPE_PROPERTY_SUFFIX_ESCAPE+TYPE_PROPERTY_SUFFIX);
     }
     
     /**
@@ -42,23 +43,11 @@ public class SettingsToJsonSerializer {
      * it does not more and that {@link #unescapePropertyName} will return <code>key</code>.<p>
      */
     String escapePropertyName(String key) {
-        final String result;
-        if (key.endsWith(TYPE_PROPERTY_SUFFIX)) {
-            result = key + TYPE_PROPERTY_SUFFIX; // duplicate the suffix; unescaping will remove one occurrence again
-        } else {
-            result = key;
-        }
-        return result;
+        return key.replaceAll(TYPE_PROPERTY_SUFFIX, TYPE_PROPERTY_SUFFIX_ESCAPE+TYPE_PROPERTY_SUFFIX);
     }
     
     String unescapePropertyName(String escapedKey) {
-        final String result;
-        if (escapedKey.endsWith(TYPE_PROPERTY_SUFFIX+TYPE_PROPERTY_SUFFIX)) {
-            result = escapedKey.substring(0, escapedKey.length()-TYPE_PROPERTY_SUFFIX.length());
-        } else {
-            result = escapedKey;
-        }
-        return result;
+        return escapedKey.replaceAll(TYPE_PROPERTY_SUFFIX_ESCAPE+TYPE_PROPERTY_SUFFIX, TYPE_PROPERTY_SUFFIX);
     }
     
     private Object serialize(Setting setting) {
@@ -103,7 +92,7 @@ public class SettingsToJsonSerializer {
         for (Entry<Object, Object> e : json.entrySet()) {
             String escapedKey = (String) e.getKey();
             String unescapedKey = unescapePropertyName(escapedKey);
-            if (!isTypePropertyName(unescapedKey)) {
+            if (!isTypePropertyName(escapedKey)) {
                 final Object value = e.getValue();
                 String typePropertyName = getTypePropertyName(unescapedKey);
                 // all properties must specify their type unless they are of type String, JSONArray or Number;
