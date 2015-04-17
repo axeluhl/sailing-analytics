@@ -19,7 +19,9 @@ public abstract class AbstractDistance implements Distance {
     
     @Override
     public int compareTo(Distance o) {
-        return getMeters() > o.getMeters() ? 1 : getMeters() == o.getMeters() ? 0 : -1;
+        final double meters = getMeters();
+        final double otherMeters = o.getMeters();
+        return meters > otherMeters ? 1 : meters == otherMeters ? 0 : -1;
     }
 
     @Override
