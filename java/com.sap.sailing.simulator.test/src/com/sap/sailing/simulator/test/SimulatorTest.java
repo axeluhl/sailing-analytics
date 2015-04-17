@@ -21,6 +21,7 @@ import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularGrid;
 import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.impl.SparsePolarDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -33,7 +34,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class SimulatorTest {
 
     @Test
-    public void testSailingSimulatorALL() {
+    public void testSailingSimulatorALL() throws SparsePolarDataException {
 
         // race course: copacabana, rio de janeiro, brasil
         Position start = new DegreePosition(-22.975779, -43.17421);

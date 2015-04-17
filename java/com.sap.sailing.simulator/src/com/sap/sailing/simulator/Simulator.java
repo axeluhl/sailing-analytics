@@ -3,6 +3,7 @@ package com.sap.sailing.simulator;
 import java.util.List;
 
 import com.sap.sailing.simulator.impl.MaximumTurnTimes;
+import com.sap.sailing.simulator.impl.SparsePolarDataException;
 
 
 public interface Simulator {
@@ -11,7 +12,7 @@ public interface Simulator {
 
     SimulationParameters getSimulationParameters();
 
-    Path getPath(PathType pathType, MaximumTurnTimes maxTurnTimes);
+    Path getPath(PathType pathType, MaximumTurnTimes maxTurnTimes) throws SparsePolarDataException;
     
     Path getRaceCourse();
 

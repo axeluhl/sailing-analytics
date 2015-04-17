@@ -34,7 +34,7 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPath() {
+    public Path getPath() throws SparsePolarDataException {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPathEvenTimed(long stepMilliseconds) {
+    public Path getPathEvenTimed(long stepMilliseconds) throws SparsePolarDataException {
 
         Path path = this.getPath();
 

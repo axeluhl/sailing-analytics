@@ -384,7 +384,7 @@ public class SimulationServiceImpl implements SimulationService {
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
                     simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
             Map<PathType, Path> paths = null;
-            if ((polarDiagram != null)&&(legType != LegType.REACHING)) {
+            if (polarDiagram != null) {
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
             }
             // prepare simulator-results
@@ -457,7 +457,9 @@ public class SimulationServiceImpl implements SimulationService {
         for (Entry<PathType, Path> entry : allPaths.entrySet()) {
             PathType pathType = entry.getKey();
             Path pathValue = entry.getValue();
-            allTimedPaths.put(pathType, pathValue.getEvenTimedPath(millisecondsStep));
+            if (pathValue != null) {
+                allTimedPaths.put(pathType, pathValue.getEvenTimedPath(millisecondsStep));
+            }
         }
         return allTimedPaths;
     }
