@@ -163,7 +163,7 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
             courseDesignComputer.setStartBoatPosition(lastWind.getPosition());
             recomputeCourseDesign();
         } else {
-            Toast.makeText(getActivity(), "Set the wind information, please!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.error_set_wind), Toast.LENGTH_LONG).show();
         }
     }
 

@@ -137,7 +137,8 @@ public class PreferenceActivity extends ActionBarActivity {
                     localConfiguration, preferences);
             loader.load();
         } else {
-            Toast.makeText(context, "No fitting race group found.", Toast.LENGTH_SHORT).show();
+            String toastText = context.getString(R.string.no_fitting_race_group_found);
+            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
         }
     }
 

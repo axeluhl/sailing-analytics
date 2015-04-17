@@ -38,7 +38,7 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
                 getRace().getState().setFinishingTime(finishingTime);
                 dismiss();
             }else{
-                Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.error_time_before_finish), Toast.LENGTH_LONG).show();
             }
         }
     }

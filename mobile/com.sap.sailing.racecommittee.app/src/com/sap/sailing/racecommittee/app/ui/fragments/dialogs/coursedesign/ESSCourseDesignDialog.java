@@ -397,8 +397,8 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 
     private void createUsePreviousCourseDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Use previous course design");
-        builder.setMessage("Use previously published course design?");
+        builder.setTitle(getString(R.string.use_previous_course_dialog_title));
+        builder.setMessage(getString(R.string.use_previous_course_dialog_message));
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
             @Override

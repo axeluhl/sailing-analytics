@@ -185,7 +185,8 @@ public class PositioningFragment extends RaceDialogFragment {
                     @Override
                     public void onLoadFailed(Exception reason) {
                         getActivity().setProgressBarIndeterminateVisibility(false);
-                        Toast.makeText(getActivity(), String.format("Competitors: %s", reason.toString()),
+                        String toastText = getString(R.string.competitor_load_error);
+                        Toast.makeText(getActivity(), String.format(toastText, reason.toString()),
                                 Toast.LENGTH_LONG).show();
                     }
 

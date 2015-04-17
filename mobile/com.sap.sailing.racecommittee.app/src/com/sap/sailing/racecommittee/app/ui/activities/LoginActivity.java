@@ -194,7 +194,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     @Override
     public void onPositionSelected(LoginType type) {
         if (mSelectedCourseAreaUUID == null) {
-            Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
+            String toastText = getString(R.string.selected_course_area_lost);
+            Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show();
             ExLog.e(LoginActivity.this, TAG, "Course area reference was not set - cannot start racing activity.");
             return;
         }
