@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
@@ -31,12 +30,14 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.QueryResultState;
@@ -122,9 +123,9 @@ public class TestProcessorQuery {
                 Function<Double> getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
                 Processor<GroupedDataEntry<Number>, GroupedDataEntry<Double>> crossSumExtractor = processorFactory.createExtractionProcessor(sumAggregator, getCrossSumFunction, ParameterProvider.NULL);
 
-                List<Pair<Function<?>, ParameterProvider>> dimensions = new ArrayList<>();
+                List<ParameterizedFunction<?>> dimensions = new ArrayList<>();
                 Function<Integer> getLengthFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
-                dimensions.add(new Pair<>(getLengthFunction, ParameterProvider.NULL));
+                dimensions.add(new SimpleParameterizedFunction<>(getLengthFunction, ParameterProvider.NULL));
                 Processor<Number, GroupedDataEntry<Number>> lengthGrouper = processorFactory.createGroupingProcessor(Number.class, crossSumExtractor, dimensions);
                 Collection<Processor<Number, ?>> filtrationResultReceivers = new ArrayList<>();
                 filtrationResultReceivers.add(lengthGrouper);
