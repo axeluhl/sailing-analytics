@@ -88,17 +88,17 @@ public class FinishedButtonFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mRecord)) {
-                resetFragment(null, StartProcedureFragment.class);
+                resetFragment(null, R.id.race_frame, StartProcedureFragment.class);
                 setMarkerLevel(mRecord, R.id.record_marker, 0);
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, StartModeFragment.class);
+                resetFragment(null, R.id.race_frame, StartModeFragment.class);
                 setMarkerLevel(mPhoto, R.id.photo_marker, 0);
             }
 
             if (!view.equals(mList)) {
-                resetFragment(null, CourseFragment.class);
+                resetFragment(null, R.id.race_frame, CourseFragment.class);
                 setMarkerLevel(mList, R.id.list_marker, 0);
             }
         }

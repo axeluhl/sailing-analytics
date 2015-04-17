@@ -137,7 +137,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mRaceHeader)) {
-                resetFragment(mTimeLock, this.getClass());
+                resetFragment(mTimeLock, R.id.race_frame, StartTimeFragment.class);
                 setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
             }
         }

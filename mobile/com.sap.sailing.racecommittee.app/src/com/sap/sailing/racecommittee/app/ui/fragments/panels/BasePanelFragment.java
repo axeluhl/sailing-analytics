@@ -15,6 +15,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
@@ -73,12 +74,13 @@ public abstract class BasePanelFragment extends RaceFragment {
         }
     }
 
-    protected void resetFragment(View lockIcon, Class cls) {
+    protected void resetFragment(View lockIcon, @IdRes int idRes, Class cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
-            Fragment fragment = getFragmentManager().findFragmentById(R.id.race_frame);
+            Fragment fragment = getFragmentManager().findFragmentById(idRes);
             if (fragment != null) {
-                //TODO Reset only if current fragment will be invalid
-//                replaceFragment(RaceFlagViewerFragment.newInstance());
+                if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                }
             }
         }
     }

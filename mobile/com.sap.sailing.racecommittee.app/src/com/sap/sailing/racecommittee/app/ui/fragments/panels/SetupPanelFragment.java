@@ -245,22 +245,22 @@ public class SetupPanelFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mStartProcedure)) {
-                resetFragment(mStartProcedureLock, StartProcedureFragment.class);
+                resetFragment(mStartProcedureLock, R.id.race_frame, StartProcedureFragment.class);
                 setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, 0);
             }
 
             if (!view.equals(mStartMode)) {
-                resetFragment(mStartModeLock, StartModeFragment.class);
+                resetFragment(mStartModeLock, R.id.race_frame, StartModeFragment.class);
                 setMarkerLevel(mStartMode, R.id.start_mode_marker, 0);
             }
 
             if (!view.equals(mCourse)) {
-                resetFragment(mCourseLock, CourseFragment.class);
+                resetFragment(mCourseLock, R.id.race_frame, CourseFragment.class);
                 setMarkerLevel(mCourse, R.id.course_marker, 0);
             }
 
             if (!view.equals(mWind)) {
-                resetFragment(mWindLock, WindFragment.class);
+                resetFragment(mWindLock, R.id.race_frame, WindFragment.class);
                 setMarkerLevel(mWind, R.id.wind_marker, 0);
             }
         }
