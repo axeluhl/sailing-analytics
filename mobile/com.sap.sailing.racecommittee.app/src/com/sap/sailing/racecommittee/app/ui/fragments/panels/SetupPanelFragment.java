@@ -137,21 +137,19 @@ public class SetupPanelFragment extends BasePanelFragment {
         if (mCourseValue != null) {
             mCourseValue.setText(null);
             mCourseValue.setCompoundDrawables(null, null, null, null);
-            if (getRaceState().getCourseDesign() != null) {
-                String courseName = getRaceState().getCourseDesign().getName();
-                mCourseValue.setText(courseName);
-                Drawable drawable = null;
-                if (!TextUtils.isEmpty(courseName)) {
-                    int resId;
-                    if (courseName.toLowerCase().startsWith("i")) {
-                        resId = R.attr.course_updown_64dp;
-                    } else {
-                        resId = R.attr.course_triangle_64dp;
-                    }
-                    drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
+            Drawable drawable = null;
+            String courseName = getCourseName();
+            if (!TextUtils.isEmpty(courseName)) {
+                int resId;
+                if (courseName.toLowerCase().startsWith("i")) {
+                    resId = R.attr.course_updown_64dp;
+                } else {
+                    resId = R.attr.course_triangle_64dp;
                 }
-                //mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
+                drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
             }
+            //mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
+            mCourseValue.setText(courseName);
         }
 
         if (mStartProcedureValue != null && getRaceState().getTypedRacingProcedure() != null) {

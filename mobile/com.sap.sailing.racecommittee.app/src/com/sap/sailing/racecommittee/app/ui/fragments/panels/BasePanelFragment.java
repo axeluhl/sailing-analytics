@@ -1,21 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
@@ -99,13 +93,5 @@ public abstract class BasePanelFragment extends RaceFragment {
                 .beginTransaction()
                 .replace(idRes, fragment)
                 .commit();
-    }
-
-    protected class NotYetImplemented implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(), "Function not yet implemented.", Toast.LENGTH_SHORT).show();
-        }
     }
 }

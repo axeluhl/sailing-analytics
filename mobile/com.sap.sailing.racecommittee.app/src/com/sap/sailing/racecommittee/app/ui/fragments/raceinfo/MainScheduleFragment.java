@@ -150,7 +150,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
                 if (mCourseValue != null) {
                     if (getRaceState().getCourseDesign() != null) {
-                        String courseName = getRaceState().getCourseDesign().getName();
+                        String courseName = getCourseName();
                         mCourseValue.setText(courseName);
                         if (mCourseSymbol != null && !TextUtils.isEmpty(courseName)) {
                             int resId;
