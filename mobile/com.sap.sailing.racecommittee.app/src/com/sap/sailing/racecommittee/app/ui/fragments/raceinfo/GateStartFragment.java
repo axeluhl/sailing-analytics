@@ -9,6 +9,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -216,24 +217,38 @@ public class GateStartFragment {
                     }
                 }
             }
-
+            final TextView totalTimeText = (TextView) getActivity().findViewById(R.id.total_time_text);
             ArrayList<String> timeValues = getTimeValues();
             final NumberPicker time_launch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
+            final NumberPicker time_golf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
             if (time_launch != null) {
                 time_launch.setMinValue(0);
                 time_launch.setMaxValue(timeValues.size() - 1);
                 time_launch.setDisplayedValues(timeValues.toArray(new String[timeValues.size()]));
                 int value = (int) GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
                 time_launch.setValue(value - 1);
+                time_launch.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                    @Override
+                    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                        totalTimeText.setText("" + ((newVal + 1) + (time_golf.getValue() + 1)) + " min");
+                    }
+                });
             }
 
-            final NumberPicker time_golf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
+
             if (time_golf != null) {
                 time_golf.setMinValue(0);
                 time_golf.setMaxValue(timeValues.size() - 1);
                 time_golf.setDisplayedValues(timeValues.toArray(new String[timeValues.size()]));
                 int value = (int) GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
                 time_golf.setValue(value - 1);
+                time_golf.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                    @Override
+                    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                        totalTimeText.setText("" + ((newVal + 1)  + (time_launch.getValue() + 1)) + " min");
+                    }
+                });
+                totalTimeText.setText("" + ((time_launch.getValue() + 1)  + (time_golf.getValue() + 1)) + " min");
             }
 
             View button = getActivity().findViewById(R.id.set_gate_time);

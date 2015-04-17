@@ -49,68 +49,108 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:id="@+id/linearLayout2"
+            android:layout_marginLeft="166dp"
+            android:layout_marginStart="166dp"
+            android:layout_alignTop="@+id/linearLayout"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_gravity="center_horizontal"
+                android:text="@string/time_launch"
+                android:textSize="@dimen/textSize_18"/>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="@string/time_launch"
-                        android:textSize="@dimen/textSize_18"/>
-
-                    <NumberPicker
-                        android:id="@+id/time_launch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="+"
-                    android:textSize="@dimen/textSize_18"/>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="@string/time_golf"
-                        android:textSize="@dimen/textSize_18"/>
-
-                    <NumberPicker
-                        android:id="@+id/time_golf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/set_gate_time"
-                style="?attr/buttonSolidSmall"
+            <NumberPicker
+                android:id="@+id/time_launch"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                android:text="@string/gate_start_set"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+"
+            android:textSize="@dimen/textSize_18"
+            android:id="@+id/textView"
+            android:layout_marginLeft="56dp"
+            android:layout_marginStart="56dp"
+            android:layout_alignTop="@+id/textView2"
+            android:layout_toRightOf="@+id/linearLayout2"
+            android:layout_toEndOf="@+id/linearLayout2"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:id="@+id/linearLayout"
+            android:layout_marginLeft="100dp"
+            android:layout_marginStart="100dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/textView"
+            android:layout_toEndOf="@+id/textView">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/time_golf"
+                android:textSize="@dimen/textSize_18"/>
+
+            <NumberPicker
+                android:id="@+id/time_golf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/set_gate_time"
+            style="?attr/buttonSolidSmall"
+            android:textColor="@color/constant_white"
+            android:background="@color/constant_sap_blue_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="169dp"
+            android:text="@string/gate_start_set"
+            android:layout_marginEnd="169dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="="
+            android:id="@+id/textView2"
+            android:textSize="@dimen/textSize_18"
+            android:layout_alignTop="@+id/total_time_text"
+            android:layout_centerHorizontal="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/time_total"
+            android:id="@+id/textView3"
+            android:layout_marginLeft="98dp"
+            android:layout_marginStart="98dp"
+            android:layout_alignTop="@+id/linearLayout"
+            android:layout_toRightOf="@+id/textView2"
+            android:layout_toEndOf="@+id/textView2"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/total_time_text"
+            android:layout_alignBottom="@+id/set_gate_time"
+            android:layout_alignLeft="@+id/textView3"
+            android:layout_alignStart="@+id/textView3"/>
     </RelativeLayout>
 </RelativeLayout>
