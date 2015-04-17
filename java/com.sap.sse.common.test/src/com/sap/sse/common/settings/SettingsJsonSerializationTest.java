@@ -77,4 +77,24 @@ public class SettingsJsonSerializationTest {
         Settings deserializedSettings = serializer.deserialize(json);
         assertEquals(settingsMap, deserializedSettings.getNonDefaultSettings());
     }
+    
+    /**
+     * A white-box test that tests property name escaping in case the property name conflicts with how type
+     * names (used particularly for enum settings) are represented in JSON.
+     */
+    @Test
+    public void testJsonSerializationWithStringifiedEnum() throws ClassNotFoundException {
+        final Map<String, Setting> settingsMap = new HashMap<>();
+        final List<StringSetting> list = new ArrayList<>();
+        list.add(new StringSetting(Operators.Contains));
+        list.add(new StringSetting(Operators.EndsWith));
+        settingsMap.put("l", new ListSetting<StringSetting>(list));
+        Settings settings = new MapSettings(settingsMap);
+        SettingsToJsonSerializer serializer = new SettingsToJsonSerializer();
+        JSONObject json = serializer.serialize(settings);
+        Settings deserializedSettings = serializer.deserialize(json);
+        ListSetting<?> l = (ListSetting<?>) deserializedSettings.getNonDefaultSettings().get("l");
+        assertEquals(Arrays.asList(Operators.Contains, Operators.EndsWith), l.getEnumList(Operators.class));
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.sap.sse.common.settings;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class ListSetting<T extends Setting> implements Iterable<T>, Setting {
     private final Iterable<T> list;
@@ -13,6 +15,17 @@ public class ListSetting<T extends Setting> implements Iterable<T>, Setting {
     @Override
     public Iterator<T> iterator() {
         return list.iterator();
+    }
+    
+    /**
+     * Precondition: this list holds {@link StringSetting}s. Otherwise, a {@link ClassCastException} will be thrown.
+     */
+    public <E extends Enum<E>> List<Enum<E>> getEnumList(Class<E> enumClass) {
+        final List<Enum<E>> result = new ArrayList<>();
+        for (T t : this) {
+            result.add(((StringSetting) t).getEnum(enumClass));
+        }
+        return result;
     }
 
     @Override

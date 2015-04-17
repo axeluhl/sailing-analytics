@@ -4,12 +4,33 @@ public class StringSetting implements Setting {
     private final String string;
 
     public StringSetting(String string) {
-        super();
         this.string = string;
+    }
+    
+    public StringSetting(Enum<?> literal) {
+        this.string = literal.name();
     }
 
     public String getString() {
         return string;
+    }
+    
+    public <T extends Enum<T>> Enum<T> getEnum(Class<T> enumClass) {
+        Enum<T> value = null;
+        if (getString() != null) {
+            boolean found = false;
+            for (Enum<T> literal : enumClass.getEnumConstants()) {
+                if (literal.name().equals(getString())) {
+                    value = literal;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new IllegalArgumentException("Couldn't find literal "+getString()+" in enum "+enumClass.getName());
+            }
+        }
+        return value;
     }
 
     @Override
@@ -44,6 +65,6 @@ public class StringSetting implements Setting {
 
     @Override
     public String toString() {
-        return string;
+        return "\""+string+"\"";
     }
 }
