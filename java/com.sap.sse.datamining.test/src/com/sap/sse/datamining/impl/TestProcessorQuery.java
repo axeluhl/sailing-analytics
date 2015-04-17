@@ -27,6 +27,7 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
@@ -297,7 +298,7 @@ public class TestProcessorQuery {
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
                                                                                                     resultReceivers) {
                     @Override
-                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             public Map<GroupKey, Double> computeResult() {
@@ -337,7 +338,7 @@ public class TestProcessorQuery {
                                                                                           ConcurrencyTestsUtil.getExecutor(),
                                                                                           resultReceivers) {
                     @Override
-                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             protected Map<GroupKey, Double> computeResult() throws Exception {
@@ -377,7 +378,7 @@ public class TestProcessorQuery {
                                                                                           ConcurrencyTestsUtil.getExecutor(),
                                                                                           resultReceivers) {
                     @Override
-                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             protected Map<GroupKey, Double> computeResult() throws Exception {

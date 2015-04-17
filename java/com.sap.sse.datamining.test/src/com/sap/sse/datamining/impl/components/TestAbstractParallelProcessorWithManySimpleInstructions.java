@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
@@ -38,7 +39,7 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         receivers.add(receiver);
         processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected AbstractProcessorInstruction<Integer> createInstruction(final Integer element) {
+            protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
                 return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
                     public Integer computeResult() {

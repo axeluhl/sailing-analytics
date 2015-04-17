@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 
 public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
 
@@ -28,7 +29,7 @@ public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends 
     }
 
     @Override
-    protected AbstractProcessorInstruction<ResultType> createInstruction(final InputType element) {
+    protected ProcessorInstruction<ResultType> createInstruction(final InputType element) {
         return new AbstractProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
             @Override
             public ResultType computeResult() {

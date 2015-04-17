@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 
@@ -30,7 +31,7 @@ public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionR
     }
 
     @Override
-    protected AbstractProcessorInstruction<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
+    protected ProcessorInstruction<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
         return new AbstractProcessorInstruction<GroupedDataEntry<FunctionReturnType>>(this, ProcessorInstructionPriority.Extraction) {
             @Override
             public GroupedDataEntry<FunctionReturnType> computeResult() {

@@ -15,9 +15,5 @@ public class NullProcessorInstruction<ResultType> extends AbstractProcessorInstr
     protected ResultType computeResult() throws Exception {
         return null;
     }
-    
-    public int getPriority() {
-        return super.getPriority();
-    }
 
 }

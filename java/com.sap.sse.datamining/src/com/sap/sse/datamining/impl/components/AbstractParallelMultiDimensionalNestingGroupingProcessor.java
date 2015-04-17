@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.functions.ParameterizedFunction;
@@ -46,7 +47,7 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
     }
 
     @Override
-    protected AbstractProcessorInstruction<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
+    protected ProcessorInstruction<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
         return new AbstractProcessorInstruction<GroupedDataEntry<DataType>>(this, ProcessorInstructionPriority.Grouping) {
             @Override
             public GroupedDataEntry<DataType> computeResult() {

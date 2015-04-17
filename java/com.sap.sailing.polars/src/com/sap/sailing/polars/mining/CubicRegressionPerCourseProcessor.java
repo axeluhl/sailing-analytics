@@ -154,10 +154,21 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
+    
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
+    }
+    
+    @Override
+    public boolean isAborted() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override

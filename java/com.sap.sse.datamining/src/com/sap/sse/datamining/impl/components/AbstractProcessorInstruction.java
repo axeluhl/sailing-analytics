@@ -1,33 +1,36 @@
 package com.sap.sse.datamining.impl.components;
 
-public abstract class AbstractProcessorInstruction<ResultType> implements Runnable, Comparable<AbstractProcessorInstruction<?>> {
+import com.sap.sse.datamining.components.ProcessorInstruction;
+import com.sap.sse.datamining.components.ProcessorInstructionHandler;
+
+public abstract class AbstractProcessorInstruction<ResultType> implements ProcessorInstruction<ResultType> {
     
-    private final AbstractParallelProcessor<?, ResultType> processor;
+    private final ProcessorInstructionHandler<ResultType> handler;
     private final int priority;
 
     /**
      * Creates an instruction with a priority of 0, which is the highest priority.<br />
-     * Use only, if <b>no processor</b> in the chain creates instruction <b>with</b> priorities other than 0 or
+     * Use only, if <b>no processor</b> in the chain creates instructions <b>with</b> priorities other than 0 or
      * if the chain doesn't use priorities at all.
      * If this isn't the case use
-     * {@link #ProcessorInstruction(AbstractParallelProcessor, ProcessorInstructionPriority)}
-     * instead.
+     * {@link #ProcessorInstruction(AbstractParallelProcessor, ProcessorInstructionPriority)} instead.
      * 
-     * @param processor The processor, that processes this instruction
+     * @param handler The handler, that handles the result of the instruction.
+     *                In most cases the processor, that processes the instruction.
      */
-    public AbstractProcessorInstruction(AbstractParallelProcessor<?, ResultType> processor) {
-        this(processor, 0);
+    public AbstractProcessorInstruction(ProcessorInstructionHandler<ResultType> handler) {
+        this(handler, 0);
     }
     
     /**
      * Creates an instruction with the given {@linkplain ProcessorInstructionPriority priority}.
      * 
-     * @param processor The processor, that processes this instruction
+     * @param handler The processor, that processes this instruction
      * @param priority The priority of this instruction
      */
-    public AbstractProcessorInstruction(AbstractParallelProcessor<?, ResultType> processor,
+    public AbstractProcessorInstruction(ProcessorInstructionHandler<ResultType> handler,
                                 ProcessorInstructionPriority priority) {
-        this(processor, priority.asIntValue());
+        this(handler, priority.asIntValue());
     }
 
     /**
@@ -40,9 +43,9 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
      * @param processor The processor, that processes this instruction
      * @param priority The priority of this instruction. <code>0</code> is the highest priority.
      */
-    public AbstractProcessorInstruction(AbstractParallelProcessor<?, ResultType> processor,
+    public AbstractProcessorInstruction(ProcessorInstructionHandler<ResultType> processor,
                                 int priority) {
-        this.processor = processor;
+        this.handler = processor;
         this.priority = priority;
     }
 
@@ -50,25 +53,24 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
     public void run() {
         try {
             ResultType result = computeResult();
-            processor.forwardResultToReceivers(result);
+            handler.instructionSucceeded(result);
         } catch (Exception e) {
-            if (!processor.isAborted() || !(e instanceof InterruptedException)) {
-                processor.onFailure(e);
-            }
+            handler.instructionFailed(e);
         } finally {
-            processor.getUnfinishedInstructionsCounter().getAndDecrement();
+            handler.afterInstructionFinished();
         }
     }
 
     protected abstract ResultType computeResult() throws Exception;
     
-    protected int getPriority() {
+    @Override
+    public int getPriority() {
         return priority;
     }
     
     @Override
-    public int compareTo(AbstractProcessorInstruction<?> instruction) {
-        return Integer.compare(priority, instruction.priority);
+    public int compareTo(ProcessorInstruction<?> instruction) {
+        return Integer.compare(getPriority(), instruction.getPriority());
     }
 
 }

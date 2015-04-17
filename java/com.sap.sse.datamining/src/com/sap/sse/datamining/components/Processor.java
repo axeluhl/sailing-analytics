@@ -32,12 +32,14 @@ public interface Processor<InputType, ResultType> {
      * @throws InterruptedException
      */
     public void finish() throws InterruptedException;
+    public boolean isFinished();
 
     /**
      * Aborts the processing immediately. The result will be <code>null</code>, incomplete or undefined.<br />
      * To shut down the process cleanly use {@link #finish()}.
      */
     public void abort();
+    public boolean isAborted();
     
     public Class<InputType> getInputType();
     

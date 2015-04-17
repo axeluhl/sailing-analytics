@@ -140,11 +140,22 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
+    
+    @Override
+        public boolean isFinished() {
+            return false;
+        }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
     }
+    
+    @Override
+        public boolean isAborted() {
+            // TODO Auto-generated method stub
+            return false;
+        }
 
     @Override
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {

@@ -11,8 +11,11 @@ import java.util.logging.Logger;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
+import com.sap.sse.datamining.components.ProcessorInstructionHandler;
 
-public abstract class AbstractParallelProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType> {
+public abstract class AbstractParallelProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType>
+                                                                       implements ProcessorInstructionHandler<ResultType> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
@@ -39,7 +42,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     @Override
     public void processElement(InputType element) {
         if (canProcessElements()) {
-            final AbstractProcessorInstruction<ResultType> instruction = createInstruction(element);
+            final ProcessorInstruction<ResultType> instruction = createInstruction(element);
             if (isInstructionValid(instruction)) {
                 unfinishedInstructionsCounter.getAndIncrement();
                 try {
@@ -53,12 +56,22 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         }
     }
 
-    private boolean isInstructionValid(AbstractProcessorInstruction<ResultType> instruction) {
+    private boolean isInstructionValid(ProcessorInstruction<ResultType> instruction) {
         return instruction != null;
     }
     
-    AtomicInteger getUnfinishedInstructionsCounter() {
-        return unfinishedInstructionsCounter;
+    public void instructionSucceeded(ResultType result) {
+        forwardResultToReceivers(result);
+    }
+    
+    public void instructionFailed(Exception e) {
+        if (!isAborted() || !(e instanceof InterruptedException)) {
+            onFailure(e);
+        }
+    }
+    
+    public void afterInstructionFinished() {
+        unfinishedInstructionsCounter.getAndDecrement();
     }
     
     /**
@@ -93,7 +106,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         return null;
     }
 
-    protected abstract AbstractProcessorInstruction<ResultType> createInstruction(final InputType element);
+    protected abstract ProcessorInstruction<ResultType> createInstruction(final InputType element);
 
     @Override
     public void onFailure(Throwable failure) {
@@ -102,7 +115,8 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         }
     }
     
-    protected boolean isFinished() {
+    @Override
+    public boolean isFinished() {
         return isFinished;
     }
 
@@ -141,7 +155,8 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         }
     }
 
-    protected boolean isAborted() {
+    @Override
+    public boolean isAborted() {
         return isAborted;
     }
     
