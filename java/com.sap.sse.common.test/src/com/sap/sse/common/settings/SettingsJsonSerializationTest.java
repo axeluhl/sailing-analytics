@@ -26,7 +26,7 @@ public class SettingsJsonSerializationTest {
                 return settingsMap;
             }
         };
-        SettingsToStringSerializer serializer = new SettingsToStringSerializer();
+        SettingsToJsonSerializer serializer = new SettingsToJsonSerializer();
         JSONObject json = serializer.serialize(settings);
         Settings deserializedSettings = serializer.deserialize(json);
         assertEquals(settingsMap, deserializedSettings.getNonDefaultSettings());

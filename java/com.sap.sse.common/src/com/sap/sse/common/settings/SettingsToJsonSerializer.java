@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class SettingsToStringSerializer {
+public class SettingsToJsonSerializer {
     private final static String TYPE_PROPERTY_SUFFIX = "___TYPE";
     
     public JSONObject serialize(Settings settings) {
@@ -18,9 +18,15 @@ public class SettingsToStringSerializer {
         for (Entry<String, Setting> e : settingsToSerialize.entrySet()) {
             Object settingAsJson = serialize(e.getValue());
             jsonObject.put(escapePropertyName(e.getKey()), settingAsJson);
-            jsonObject.put(getTypePropertyName(e.getKey()), e.getValue().getType().name());
+            if (e.getValue() instanceof EnumSetting<?>) {
+                jsonObject.put(getTypePropertyName(e.getKey()), getEnumTypeName((EnumSetting<?>) e.getValue()));
+            }
         }
         return jsonObject;
+    }
+
+    private Object getEnumTypeName(EnumSetting<?> value) {
+        return SettingType.ENUM+"/"+value.getValue().getClass().getName();
     }
 
     private String getTypePropertyName(String unescapedKey) {
@@ -73,7 +79,7 @@ public class SettingsToStringSerializer {
     }
     
     private <T extends Enum<T>> String serialize(EnumSetting<T> enumSetting) {
-        return enumSetting.getValue().getClass().getName()+"/"+enumSetting.getValue().name();
+        return enumSetting.getValue().name();
     }
 
     private <T extends Setting> JSONArray serialize(ListSetting<T> listSetting) {
@@ -103,12 +109,20 @@ public class SettingsToStringSerializer {
                 // all properties must specify their type unless they are of type String, JSONArray or Number;
                 // however, properties of type enum will be represented as strings
                 final SettingType type;
+                final Class<?> clazz;
                 if (json.containsKey(typePropertyName)) {
-                    type = SettingType.valueOf((String) json.get(typePropertyName));
+                    String[] typeNameAndClassName = ((String) json.get(typePropertyName)).split("/");
+                    type = SettingType.valueOf(typeNameAndClassName[0]);
+                    if (typeNameAndClassName.length > 1) {
+                        clazz = Class.forName(typeNameAndClassName[1]);
+                    } else {
+                        clazz = null;
+                    }
                 } else {
                     type = getSettingType(value);
+                    clazz = null;
                 }
-                Setting setting = createSettingFromObjectAndType(value, type);
+                Setting setting = createSettingFromObjectAndType(value, type, clazz);
                 settings.put(unescapePropertyName(escapedKey), setting);
             }
         }
@@ -136,17 +150,16 @@ public class SettingsToStringSerializer {
         return type;
     }
 
-    private Setting createSettingFromObjectAndType(Object obj, final SettingType type)
+    private Setting createSettingFromObjectAndType(Object obj, final SettingType type, Class<?> clazz)
             throws ClassNotFoundException {
         final Setting setting;
         switch (type) {
         case ENUM:
-            String[] enumClassNameAndLiteral = ((String) obj).split("/");
             Enum<?> value = null;
             @SuppressWarnings("unchecked")
-            Class<Enum<?>> enumClass = (Class<Enum<?>>) Class.forName(enumClassNameAndLiteral[0]);
+            Class<Enum<?>> enumClass = (Class<Enum<?>>) clazz;
             for (Enum<?> literal : enumClass.getEnumConstants()) {
-                if (literal.name().equals(enumClassNameAndLiteral[1])) {
+                if (literal.name().equals((String) obj)) {
                     value = literal;
                 }
             }
@@ -156,7 +169,7 @@ public class SettingsToStringSerializer {
             JSONArray array = (JSONArray) obj;
             List<Setting> settingList = new ArrayList<>(); 
             for (Object o : array) {
-                settingList.add(createSettingFromObjectAndType(o, getSettingType(o)));
+                settingList.add(createSettingFromObjectAndType(o, getSettingType(o), clazz));
             }
             setting = new ListSetting<>(settingList);
             break;
