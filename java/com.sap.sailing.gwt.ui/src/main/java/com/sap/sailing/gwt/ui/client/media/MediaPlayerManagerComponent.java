@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -54,7 +54,7 @@ import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class MediaPlayerManagerComponent implements Component<Settings>, PlayStateListener, TimeListener,
+public class MediaPlayerManagerComponent implements Component<AbstractSettings>, PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
@@ -734,12 +734,12 @@ public class MediaPlayerManagerComponent implements Component<Settings>, PlaySta
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateSettings(Settings newSettings) {
+    public void updateSettings(AbstractSettings newSettings) {
         throw new UnsupportedOperationException();
     }
 

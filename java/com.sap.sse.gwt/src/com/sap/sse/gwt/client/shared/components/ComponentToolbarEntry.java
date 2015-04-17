@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.StringMessages;
 
 /**
@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.StringMessages;
  *
  * @param <SettingsType>
  */
-public class ComponentToolbarEntry<SettingsType extends Settings> extends HorizontalPanel {
+public class ComponentToolbarEntry<SettingsType extends AbstractSettings> extends HorizontalPanel {
     private static ComponentResources resources = GWT.create(ComponentResources.class);
 
     private final Component<SettingsType> component;
