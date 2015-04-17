@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,7 +9,6 @@ import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
@@ -22,6 +17,9 @@ import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -185,13 +183,18 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                     
                     new AutoUpdater(getActivity()).checkForUpdate(false);
                 } else {
-                    Toast.makeText(getActivity(), "Error scanning QRCode (malformed URL)", Toast.LENGTH_LONG).show();
+                    String toastText = getString(R.string.error_scanning_qr_malformed);
+                    Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                 }
             } catch (IllegalArgumentException e) {
-                Toast.makeText(getActivity(), "Error scanning QRCode (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
+                String toastText = getString(R.string.error_scanning_qr);
+                toastText = String.format(toastText, e.getMessage());
+                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
             }
         } else {
-            Toast.makeText(getActivity(), "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
+            String toastText = getString(R.string.error_scanning_qr);
+            toastText = String.format(toastText, "" + resultCode);
+            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
         }
     }
 

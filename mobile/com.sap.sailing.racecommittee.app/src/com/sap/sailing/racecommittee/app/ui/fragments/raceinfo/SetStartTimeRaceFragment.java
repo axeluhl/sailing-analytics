@@ -222,7 +222,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     public void notifyTick() {
         super.notifyTick();
 
-        textInfoText.setText(String.format("Start %s", getTimeStringToStart()));
+        textInfoText.setText(String.format(getString(R.string.start_w_placeholder), getTimeStringToStart()));
     }
 
     private Date getStartTime() {

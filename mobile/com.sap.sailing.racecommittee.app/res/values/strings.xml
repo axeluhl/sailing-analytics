@@ -402,4 +402,14 @@
     <string name="error_set_wind">Set the wind information, please!</string>
     <string name="use_previous_course_dialog_title">Use previous course design</string>
     <string name="use_previous_course_dialog_message">Use previously published course design?</string>
+    <string name="please_enter_valid_number">Please enter a valid number</string>
+    <string name="please_enter_valid_pathfinder">Please enter a valid pathfinder</string>
+    <string name="error_scanning_qr">Error scanning QRCode(%s)</string>
+    <string name="error_scanning_qr_malformed">Error scanning QRCode(malformed url)</string>
+    <string name="marks_w_placeholder">Marks: %s</string>
+    <string name="error_no_course_to_copy">No course available to copy</string>
+    <string name="error_missing_second_mark">The selected passing instructions require two buoys. Please select the second buoy.</string>
+    <string name="error_missing_passing_instructions">A waypoint has no passing instructions. Please select the passing instruction by clicking long on the waypoint.</string>
+    <string name="error_no_way_point">The course design has to have at least one waypoint.</string>
+    <string name="start_w_placeholder">Start %s</string>
 </resources>

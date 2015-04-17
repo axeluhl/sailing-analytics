@@ -381,4 +381,14 @@
     <string name="error_set_wind">Bitte setzen Sie die Windinformation!</string>
     <string name="use_previous_course_dialog_title">Bisheriges Kursdesign verwenden</string>
     <string name="use_previous_course_dialog_message">Soll das bisherige Kursdesign verwendet werden?</string>
+    <string name="please_enter_valid_number">Bitte geben Sie eine gültige Zahl ein</string>
+    <string name="please_enter_valid_pathfinder">Bitte tragen Sie einen gültigen Pathfinder ein</string>
+    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes(%s)</string>
+    <string name="error_scanning_qr_malformed">Fehler beim Scannen des QRCodes(Ungültige Url)</string>
+    <string name="marks_w_placeholder">Kursmarkierungen: %s</string>
+    <string name="error_no_course_to_copy">Kein Kurs zum Kopieren vorhanden</string>
+    <string name="error_missing_second_mark">Die gewählten Anweisungen zum Vorbeifahren benötigen zwei Bojen. Bitte Wählen Sie eine zweite Boje.</string>
+    <string name="error_missing_passing_instructions">Ein Wegpunkt hat keine Anweisung zum Vorbeifahren. Bitte wählen Sie Anweisungen, indem Sie lange auf den Wegpunkt klicken.</string>
+    <string name="error_no_way_point">Das Kursdesign erfordert mindestens einen Wegpunkt.</string>
+    <string name="start_w_placeholder">Start %s</string>
 </resources>

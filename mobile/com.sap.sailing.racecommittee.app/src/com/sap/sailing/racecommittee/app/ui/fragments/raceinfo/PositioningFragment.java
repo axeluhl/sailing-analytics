@@ -117,8 +117,9 @@ public class PositioningFragment extends BaseFragment {
                 @Override
                 public void onLoadFailed(Exception reason) {
                     getActivity().setProgressBarIndeterminateVisibility(false);
+                    String toastText = getString(R.string.marks_w_placeholder);
                     Toast
-                        .makeText(getActivity(), String.format("Competitors: %s", reason.toString()), Toast.LENGTH_LONG)
+                        .makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG)
                         .show();
                 }
 

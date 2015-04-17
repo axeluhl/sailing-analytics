@@ -179,7 +179,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
                             copyPreviousToNewCourseDesign();
                         }
                     } else {
-                        Toast.makeText(getActivity(), "No course available to copy", Toast.LENGTH_LONG).show();
+                        String toastText = getString(R.string.error_no_course_to_copy);
+                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -194,17 +195,20 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
                         sendCourseDataAndDismiss(courseData);
                     } catch (IllegalStateException ex) {
                         if (ex.getMessage().equals("Missing second mark")) {
+                            String toastText = getString(R.string.error_missing_second_mark);
                             Toast.makeText(getActivity(),
-                                "The selected passing instructions require two buoys. Please select the second buoy.",
+                                toastText,
                                 Toast.LENGTH_LONG).show();
                         } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
+                            String toastText = getString(R.string.error_missing_passing_instructions);
                             Toast.makeText(getActivity(),
-                                "A waypoint has no passing instructions. Please select the passing instruction by clicking long on the waypoint.",
+                                toastText,
                                 Toast.LENGTH_LONG).show();
                         }
 
                     } catch (IllegalArgumentException ex) {
-                        Toast.makeText(getActivity(), "The course design has to have at least one waypoint.",
+                        String toastText = getString(R.string.error_no_way_point);
+                        Toast.makeText(getActivity(), toastText,
                             Toast.LENGTH_LONG).show();
                     }
                 }
@@ -280,7 +284,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
             .restartLoader(0, null, mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
                 @Override
                 public void onLoadFailed(Exception reason) {
-                    Toast.makeText(getActivity(), String.format("Marks: %s", reason.toString()), Toast.LENGTH_LONG)
+                    String toastText = getString(R.string.marks_w_placeholder);
+                    Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG)
                         .show();
                 }
 
@@ -405,8 +410,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
 
     private void createUsePreviousCourseDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Use previous course design");
-        builder.setMessage("Use previously published course design?");
+        builder.setTitle(getString(R.string.use_previous_course_dialog_title));
+        builder.setMessage(R.string.use_previous_course_dialog_message);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
             @Override

@@ -67,7 +67,8 @@ public class RaceChoosePathFinderDialog extends PrerequisiteRaceDialog<Pathfinde
         chooseButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 if (sailingNationalityEditText.getText().length() == 0 || sailingNumberEditText.getText().length() == 0) {
-                    Toast.makeText(getActivity(), "Please enter a valid pathfinder", Toast.LENGTH_LONG).show();
+                    String toastText = getString(R.string.please_enter_valid_pathfinder);
+                    Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                 } else {
                     onChosen(composeSailingId());
                     dismiss();
