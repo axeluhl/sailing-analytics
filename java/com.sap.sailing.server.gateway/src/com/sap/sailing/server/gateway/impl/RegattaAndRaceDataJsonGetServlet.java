@@ -320,7 +320,7 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                             }
                             try {
                                 jsonCompetitorInLeg.put("gapToLeaderInSeconds",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
+                                        trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE));
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }

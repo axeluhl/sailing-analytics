@@ -901,7 +901,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public int getLastLegStarted(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) throws NoWindException {
+        return null;
     }
 }

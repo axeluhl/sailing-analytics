@@ -574,13 +574,17 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public boolean isUsingMarkPassingCalculator() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public int getLastLegStarted(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) {
+        return null;
     }
 }

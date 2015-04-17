@@ -24,6 +24,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -47,6 +49,7 @@ import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
@@ -810,5 +813,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
+    }
+
+    @Override
+    public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) throws NoWindException {
+        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
+        return getWindwardDistanceToOverallLeader(competitor, timePoint, windPositionMode);
     }
 }

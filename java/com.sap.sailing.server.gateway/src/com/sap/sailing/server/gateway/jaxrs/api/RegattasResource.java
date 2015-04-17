@@ -61,6 +61,7 @@ import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -823,7 +824,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 }
                                 try {
                                     jsonCompetitorInLeg.put("gapToLeader-s", trackedLegOfCompetitor
-                                            .getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
+                                            .getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE));
                                 } catch (NoWindException e1) {
                                     // well, we don't know the wind direction... then no gap to leader will be shown...
                                 }
@@ -929,10 +930,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("distanceTraveledConsideringGateStart-m", roundDouble(distanceTraveledConsideringGateStart.getMeters(), 2));
                             }
 
-                            Double gapToLeaderInSeconds = currentLegOfCompetitor.getGapToLeaderInSeconds(timePoint,
+                            Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
                                     WindPositionMode.LEG_MIDDLE);
-                            if (gapToLeaderInSeconds != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeaderInSeconds, 2));
+                            if (gapToLeader != null) {
+                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
                             }
 
                             Distance windwardDistanceToOverallLeader = currentLegOfCompetitor

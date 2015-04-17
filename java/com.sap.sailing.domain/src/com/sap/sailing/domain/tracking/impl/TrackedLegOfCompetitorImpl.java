@@ -479,13 +479,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode)
+    public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode)
             throws NoWindException {
-        return getGapToLeaderInSeconds(timePoint, leaderInLegAtTimePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
     @Override
-    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
+    public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache)
             throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
@@ -501,12 +501,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
-        return getGapToLeaderInSeconds(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+        return getGapToLeader(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindPositionMode windPositionMode,
+    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
@@ -516,14 +516,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
-    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    private Duration getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
         Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint, windPositionMode, cache);
-        Double result = null;
         // Has our competitor started the leg already? If not, we won't be able to compute a gap
         if (hasStartedLeg(timePoint)) {
             Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
@@ -547,18 +546,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (hasFinishedLeg(timePoint)) {
                             // Yes, so the gap is the time period between the time points at which the leader and
                             // our competitor finished this leg.
-                            return (getMarkPassingForLegEnd().getTimePoint().asMillis() - whenLeaderFinishedLeg
-                                    .asMillis()) / 1000.;
+                            return whenLeaderFinishedLeg.until(getMarkPassingForLegEnd().getTimePoint()); 
                         } else {
                             if (windwardSpeed == null) {
                                 return null;
                             } else {
                                 // leader has finished already; our competitor hasn't
                                 Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint, windPositionMode);
-                                long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()
-                                        - whenLeaderFinishedLeg.asMillis();
-                                return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond()
-                                        + millisSinceLeaderPassedMarkToTimePoint / 1000.;
+                                Duration durationSinceLeaderPassedMarkToTimePoint = whenLeaderFinishedLeg.until(timePoint);
+                                return windwardSpeed.getDuration(windwardDistanceToGo).plus(durationSinceLeaderPassedMarkToTimePoint);
                             }
                         }
                     }
@@ -567,7 +563,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 Competitor leader = leaderGetter.getLeader();
                 // Maybe our competitor is the leader. Check:
                 if (leader == getCompetitor()) {
-                    return 0.0; // the leader's gap to the leader
+                    return Duration.NULL; // the leader's gap to the leader
                 } else {
                     if (windwardSpeed == null) {
                         return null;
@@ -582,7 +578,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         } else {
                             Distance windwardDistanceToGo = getTrackedLeg().getAbsoluteWindwardDistance(ourEstimatedPosition,
                                     leaderEstimatedPosition, timePoint, windPositionMode);
-                            return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
+                            return windwardSpeed.getDuration(windwardDistanceToGo);
                         }
                     }
                 }
@@ -590,7 +586,35 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
         // else our competitor hasn't started the leg yet, so we can't compute a gap since we don't
         // have a speed estimate; leave result == null
-        return result;
+        return null;
+    }
+
+    @Override
+    public Duration getCorrectedGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode)
+            throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Duration getCorrectedGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Duration getCorrectedGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
+            WindPositionMode windPositionMode) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Duration getCorrectedGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override

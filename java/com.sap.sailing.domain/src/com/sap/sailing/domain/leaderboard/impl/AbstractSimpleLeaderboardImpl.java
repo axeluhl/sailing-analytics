@@ -1639,15 +1639,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT, cache);
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
-            result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint,
-                    legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey(), WindPositionMode.LEG_MIDDLE);
+            result.gapToLeaderInSeconds = trackedLeg.getGapToLeader(timePoint,
+                    legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey(), WindPositionMode.LEG_MIDDLE).asSeconds();
             if (result.gapToLeaderInSeconds != null) {
                 // FIXME problem: asking just after the beginning of the leg yields very different values from asking for the end of the previous leg.
                 // This is because for the previous leg it's decided based on the mark passings; for the next (current) leg it's decided based on
                 // windward distance and VMG
-                Double gapAtEndOfPreviousLegInSeconds = getGapAtEndOfPreviousLegInSeconds(trackedLeg, cache);
+                Duration gapAtEndOfPreviousLegInSeconds = getGapAtEndOfPreviousLegInSeconds(trackedLeg, cache);
                 if (gapAtEndOfPreviousLegInSeconds != null) {
-                    result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLegInSeconds;
+                    result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLegInSeconds.asSeconds();
                 }
             }
             LinkedHashMap<Competitor, Integer> legRanks = legRanksCache.get(trackedLeg.getLeg());
@@ -1730,8 +1730,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
-    private Double getGapAtEndOfPreviousLegInSeconds(TrackedLegOfCompetitor trackedLeg, WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        final Double result;
+    private Duration getGapAtEndOfPreviousLegInSeconds(TrackedLegOfCompetitor trackedLeg, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+        final Duration result;
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
         course.lockForRead();
         try {
@@ -1748,7 +1748,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 .getMarkPassing(trackedLeg.getCompetitor(), trackedLeg.getLeg().getFrom());
                         if (markPassingForFrom != null) {
                             TimePoint competitorStart = markPassingForFrom.getTimePoint();
-                            result = (double) (competitorStart.asMillis() - firstStart.asMillis()) / 1000.;
+                            result = firstStart.until(competitorStart);
                         } else {
                             result = null;
                         }
@@ -1761,7 +1761,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 TrackedLeg previousTrackedLeg = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLeg(course.getLegs().get(indexOfStartWaypoint-1));
                 TrackedLegOfCompetitor previousTrackedLegOfCompetitor = previousTrackedLeg.getTrackedLeg(trackedLeg.getCompetitor());
-                result = previousTrackedLegOfCompetitor.getGapToLeaderInSeconds(previousTrackedLegOfCompetitor.getFinishTime(), WindPositionMode.LEG_MIDDLE, cache);
+                result = previousTrackedLegOfCompetitor.getGapToLeader(previousTrackedLegOfCompetitor.getFinishTime(), WindPositionMode.LEG_MIDDLE, cache);
             }
             return result;
         } finally {

@@ -650,7 +650,7 @@ public class LeaderboardData extends ExportAction {
                 legConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " seems to not have finished this leg before end of tracking time.", 0.1, legConfidenceAndErrorMessages);
             }
             addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", timeSpentInThisLeg != null ? timeSpentInThisLeg.asMillis() : new MillisecondsDurationImpl(0).asMillis());
-            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime, WindPositionMode.LEG_MIDDLE));
+            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeader(legFinishTime, WindPositionMode.LEG_MIDDLE).asSeconds());
             Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE);
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());

@@ -770,4 +770,12 @@ public interface TrackedRace extends Serializable {
 
     boolean isUsingMarkPassingCalculator();
 
+    /**
+     * With a handicap system in place, computes the windward distance to the race's overall leader based on the correction factors
+     * introduced by the handicap's ranking and scoring system. For one-design classes, this method returns the same result as
+     * {@link #getWindwardDistanceToOverallLeader(Competitor, TimePoint, WindPositionMode)}.
+     */
+    Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) throws NoWindException;
+
 }

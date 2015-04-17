@@ -2758,7 +2758,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE, cache);
+                    result = trackedLeg.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, cache).asSeconds();
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:

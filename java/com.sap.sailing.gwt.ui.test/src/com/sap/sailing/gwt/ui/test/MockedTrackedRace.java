@@ -893,13 +893,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public long getGateStartGolfDownTime() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int getLastLegStarted(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) {
+        return null;
     }
 }
