@@ -25,9 +25,9 @@ import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 

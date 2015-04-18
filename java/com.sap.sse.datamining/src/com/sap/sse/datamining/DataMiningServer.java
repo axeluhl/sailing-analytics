@@ -11,8 +11,8 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 

@@ -24,8 +24,8 @@ import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 

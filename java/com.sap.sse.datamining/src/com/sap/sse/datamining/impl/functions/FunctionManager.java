@@ -27,7 +27,7 @@ import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFil
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
 import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
     

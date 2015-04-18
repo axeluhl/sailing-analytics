@@ -21,8 +21,8 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 

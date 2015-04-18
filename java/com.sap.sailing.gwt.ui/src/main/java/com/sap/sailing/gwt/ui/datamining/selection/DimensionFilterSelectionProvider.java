@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,8 +26,8 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 

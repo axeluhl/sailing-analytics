@@ -9,10 +9,10 @@ import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface DataMiningServiceAsync {
 

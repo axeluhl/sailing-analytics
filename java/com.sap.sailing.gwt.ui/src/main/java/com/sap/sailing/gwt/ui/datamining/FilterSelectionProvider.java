@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface FilterSelectionProvider extends Component<Settings> {

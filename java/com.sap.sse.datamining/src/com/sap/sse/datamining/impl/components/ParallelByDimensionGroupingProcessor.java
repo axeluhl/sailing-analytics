@@ -11,8 +11,8 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
