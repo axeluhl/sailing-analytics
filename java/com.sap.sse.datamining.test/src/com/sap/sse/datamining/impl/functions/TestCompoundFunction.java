@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElementImpl;
 import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;

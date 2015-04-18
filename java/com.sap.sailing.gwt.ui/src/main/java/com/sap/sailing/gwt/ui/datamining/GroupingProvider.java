@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.Collection;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface GroupingProvider extends Component<Settings> {
