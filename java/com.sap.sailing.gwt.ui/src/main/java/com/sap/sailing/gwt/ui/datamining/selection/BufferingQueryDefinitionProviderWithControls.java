@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
@@ -47,22 +48,27 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private static final int queryBufferTimeInMillis = 200;
     
     private final Timer queryDefinitionReleaseTimer;
+    private boolean isUpdatingComponents;
     
     private final DockLayoutPanel mainPanel;
     private FlowPanel controlsPanel;
     
     private StatisticProvider statisticProvider;
-    private SimpleDataRetrieverChainDefinitionProvider retrieverChainProvider;
-
+    private DataRetrieverChainDefinitionProvider retrieverChainProvider;
     private MultiDimensionalGroupingProvider groupBySelectionPanel;
-    
     private FilterSelectionProvider selectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
+        queryDefinitionReleaseTimer = new Timer() {
+            @Override
+            public void run() {
+                notifyQueryDefinitionChanged();
+            }
+        };
+        isUpdatingComponents = false;
         
         mainPanel = new DockLayoutPanel(Unit.PX);
-
         mainPanel.addNorth(createFunctionsPanel(), 92);
 
         selectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
@@ -73,13 +79,6 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         });
         mainPanel.add(selectionProvider.getEntryWidget());
-        
-        queryDefinitionReleaseTimer = new Timer() {
-            @Override
-            public void run() {
-                notifyQueryDefinitionChanged();
-            }
-        };
     }
 
     private Widget createFunctionsPanel() {
@@ -123,11 +122,40 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         });
         addControl(clearSelectionButton);
         
+        Button reloadButton = new Button(getStringMessages().reload());
+        reloadButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                //FIXME This is just a quick fix for bug 2176
+                isUpdatingComponents = true;
+                // This causes all other providers to update their components, if the selected
+                // statistic changed. If not, will the other providers update their components,
+                // when another statistic is selected.
+                // This works because, all other providers listen to the statistic provider in
+                // the current implementation.
+                statisticProvider.updateExtractionFunctions();
+            }
+        });
+        addControl(reloadButton);
+        
         SplitLayoutPanel controlsSplitPanel = new SplitLayoutPanel(15);
         controlsSplitPanel.addWest(new ScrollPanel(statisticAndRetrieverChainPanel), 800);
-        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 130);
+        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 150);
         controlsSplitPanel.add(groupBySelectionScrollPanel);
         return controlsSplitPanel;
+    }
+    
+    //FIXME This is just a quick fix for bug 2176
+    @Override
+    protected void notifyQueryDefinitionChanged() {
+        if (isUpdatingComponents) {
+            // This ensures, that the retriever chains are reloaded. This is necessary, because
+            // they have UUIDs, that change after a bundle refresh.
+            retrieverChainProvider.updateRetrieverChains();
+            isUpdatingComponents = false;
+        } else {
+            super.notifyQueryDefinitionChanged();
+        }
     }
     
     private void scheduleQueryDefinitionChanged() {

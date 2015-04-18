@@ -7,6 +7,8 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface StatisticProvider extends Component<Settings> {
+
+    public void updateExtractionFunctions();
     
     public FunctionDTO getStatisticToCalculate();
 

@@ -84,12 +84,13 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
             String currentSourceType = currentStatisticToCalculate == null ? null : currentStatisticToCalculate.getSourceTypeName();
             currentStatisticToCalculate = newStatisticToCalculate;
             if (!Objects.equals(currentSourceType, newStatisticToCalculate.getSourceTypeName())) {
-                updateAvailableRetrieverChains();
+                updateRetrieverChains();
             }
         }
     }
     
-    private void updateAvailableRetrieverChains() {
+    @Override
+    public void updateRetrieverChains() {
         dataMiningService.getDataRetrieverChainDefinitionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>>() {
                     @Override

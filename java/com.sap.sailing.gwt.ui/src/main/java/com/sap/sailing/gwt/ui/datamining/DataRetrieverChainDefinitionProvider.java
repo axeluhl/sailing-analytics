@@ -7,6 +7,8 @@ import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface DataRetrieverChainDefinitionProvider extends Component<Settings> {
     
+    public void updateRetrieverChains();
+    
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
 
     public void addDataRetrieverChainDefinitionChangedListener(DataRetrieverChainDefinitionChangedListener listener);

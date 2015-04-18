@@ -69,7 +69,8 @@ public class SimpleStatisticProvider implements StatisticProvider {
         updateExtractionFunctions();
     }
 
-    private void updateExtractionFunctions() {
+    @Override
+    public void updateExtractionFunctions() {
         dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             
             @Override
@@ -78,24 +79,14 @@ public class SimpleStatisticProvider implements StatisticProvider {
                 
                 if (extractionFunctions.iterator().hasNext()) {
                     extractionFunctionSet.addAll(extractionFunctions);
-
-                    StrippedFunctionDTO previousExtractionFunction = extractionFunctionListBox.getValue();
                     updateExtractionFunctionListBox();
-                    StrippedFunctionDTO newExtractionFunction = extractionFunctionListBox.getValue();
-
-                    String previousBaseDataType = baseDataTypeListBox.getValue();
                     updateBaseDataTypeListBox();
-                    String newBaseDataType = baseDataTypeListBox.getValue();
-
-                    if (!newExtractionFunction.equals(previousExtractionFunction) ||
-                        !newBaseDataType.equals(previousBaseDataType)) {
-                        notifyListeners();
-                    }
                 } else {
                     clearListBox(extractionFunctionListBox);
                     clearListBox(baseDataTypeListBox);
-                    notifyListeners();
                 }
+
+                notifyListeners();
             }
             
             @Override
