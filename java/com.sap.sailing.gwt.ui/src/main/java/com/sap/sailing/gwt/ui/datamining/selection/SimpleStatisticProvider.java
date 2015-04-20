@@ -68,9 +68,18 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
         updateExtractionFunctions();
     }
-
+    
     @Override
-    public void updateExtractionFunctions() {
+    public void awaitReloadComponents() {
+        // Nothing to do here.
+    }
+    
+    @Override
+    public void reloadComponents() {
+        updateExtractionFunctions();
+    }
+
+    private void updateExtractionFunctions() {
         dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             
             @Override

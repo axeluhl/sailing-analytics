@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -31,7 +31,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Settings
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final Set<SelectionChangedListener> listeners;
+    private final Set<FilterSelectionChangedListener> listeners;
     
     private final DataMiningSession session;
     private final FilterSelectionProvider selectionProvider;
@@ -182,12 +182,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Settings
         initializeDimensionSelectionProviders();
     }
     
-    public void addSelectionChangedListener(SelectionChangedListener listener) {
+    public void addSelectionChangedListener(FilterSelectionChangedListener listener) {
         listeners.add(listener);
     }
 
     private void notifyListeners() {
-        for (SelectionChangedListener listener : listeners) {
+        for (FilterSelectionChangedListener listener : listeners) {
             listener.selectionChanged();
         }
     }

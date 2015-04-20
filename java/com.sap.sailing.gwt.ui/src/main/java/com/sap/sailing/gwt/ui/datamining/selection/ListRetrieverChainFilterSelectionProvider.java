@@ -26,11 +26,10 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
-import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -41,17 +40,18 @@ import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider, DataRetrieverChainDefinitionChangedListener {
+public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final Set<SelectionChangedListener> listeners;
+    private final Set<FilterSelectionChangedListener> listeners;
 
+    private boolean isAwaitingReload;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrieverLevel;
-    private final SelectionChangedListener retrieverLevelSelectionChangedListener;
+    private final FilterSelectionChangedListener retrieverLevelSelectionChangedListener;
     
     private final DockLayoutPanel mainPanel;
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
@@ -71,9 +71,10 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         listeners = new HashSet<>();
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
         
+        isAwaitingReload = false;
         retrieverChain = null;
         selectionProvidersMappedByRetrieverLevel = new HashMap<>();
-        retrieverLevelSelectionChangedListener = new SelectionChangedListener() {
+        retrieverLevelSelectionChangedListener = new FilterSelectionChangedListener() {
             @Override
             public void selectionChanged() {
                 mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
@@ -104,12 +105,24 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     @Override
+    public void awaitReloadComponents() {
+        isAwaitingReload = true;
+    }
+    
+    @Override
+    public void reloadComponents() {
+        updateRetrievalLevels();
+        isAwaitingReload = false;
+        notifyListeners();
+    }
+    
+    @Override
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
-            if (retrieverChain != null) {
+            if (!isAwaitingReload && retrieverChain != null) {
                 updateRetrievalLevels();
-            } else {
+            } else if (!isAwaitingReload) {
                 clearContent();
             }
         }
@@ -201,12 +214,12 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public void addSelectionChangedListener(SelectionChangedListener listener) {
+    public void addSelectionChangedListener(FilterSelectionChangedListener listener) {
         listeners.add(listener);
     }
     
     private void notifyListeners() {
-        for (SelectionChangedListener listener : listeners) {
+        for (FilterSelectionChangedListener listener : listeners) {
             listener.selectionChanged();
         }
     }

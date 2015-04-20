@@ -22,9 +22,10 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
-import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.settings.Settings;
@@ -47,68 +48,57 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
      */
     private static final int queryBufferTimeInMillis = 200;
     
+    private final ProviderListener providerListener;
+    /**
+     * This effects the incoming change notifications.<br>
+     * If <code>true</code>, the outgoing change notification is blocked and the next provider (in
+     * the hierarchy) is told to update its components. This will automatically be set to <code>false</code>
+     * when the last provider notifies a change and then the listeners will be notified.<br>
+     * See {@link BufferingQueryDefinitionProviderWithControls#ProviderListener} for the concrete implemenation.
+     */
+    private boolean isReloading;
     private final Timer queryDefinitionReleaseTimer;
-    private boolean isUpdatingComponents;
     
     private final DockLayoutPanel mainPanel;
     private FlowPanel controlsPanel;
     
     private StatisticProvider statisticProvider;
     private DataRetrieverChainDefinitionProvider retrieverChainProvider;
-    private MultiDimensionalGroupingProvider groupBySelectionPanel;
-    private FilterSelectionProvider selectionProvider;
+    private GroupingProvider groupingProvider;
+    private FilterSelectionProvider filterSelectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
+        providerListener = new ProviderListener();
+        isReloading = false;
         queryDefinitionReleaseTimer = new Timer() {
             @Override
             public void run() {
                 notifyQueryDefinitionChanged();
             }
         };
-        isUpdatingComponents = false;
         
         mainPanel = new DockLayoutPanel(Unit.PX);
         mainPanel.addNorth(createFunctionsPanel(), 92);
 
-        selectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
-        selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
-            @Override
-            public void selectionChanged() {
-                scheduleQueryDefinitionChanged();
-            }
-        });
-        mainPanel.add(selectionProvider.getEntryWidget());
+        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        filterSelectionProvider.addSelectionChangedListener(providerListener);
+        mainPanel.add(filterSelectionProvider.getEntryWidget());
     }
 
     private Widget createFunctionsPanel() {
         FlowPanel statisticAndRetrieverChainPanel = new FlowPanel();
         statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
-        statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
-            @Override
-            public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
-                scheduleQueryDefinitionChanged();
-            }
-        });
+        statisticProvider.addStatisticChangedListener(providerListener);
         statisticAndRetrieverChainPanel.add(statisticProvider.getEntryWidget());
         
         retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
-        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(new DataRetrieverChainDefinitionChangedListener() {
-            @Override
-            public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
-                scheduleQueryDefinitionChanged();
-            }
-        });
+        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
         statisticAndRetrieverChainPanel.add(retrieverChainProvider.getEntryWidget());
 
-        groupBySelectionPanel = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
-        groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
-            @Override
-            public void groupingChanged() {
-                scheduleQueryDefinitionChanged();
-            }
-        });
-        ScrollPanel groupBySelectionScrollPanel = new ScrollPanel(groupBySelectionPanel.getEntryWidget());
+        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
+        groupingProvider.addGroupingChangedListener(providerListener);
+        ScrollPanel groupBySelectionScrollPanel = new ScrollPanel(groupingProvider.getEntryWidget());
         
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("definitionProviderControls");
@@ -117,7 +107,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         clearSelectionButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                selectionProvider.clearSelection();
+                filterSelectionProvider.clearSelection();
             }
         });
         addControl(clearSelectionButton);
@@ -126,14 +116,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         reloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                //FIXME This is just a quick fix for bug 2176
-                isUpdatingComponents = true;
-                // This causes all other providers to update their components, if the selected
-                // statistic changed. If not, will the other providers update their components,
-                // when another statistic is selected.
-                // This works because, all other providers listen to the statistic provider in
-                // the current implementation.
-                statisticProvider.updateExtractionFunctions();
+                reloadComponents();
             }
         });
         addControl(reloadButton);
@@ -145,21 +128,23 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         return controlsSplitPanel;
     }
     
-    //FIXME This is just a quick fix for bug 2176
-    @Override
-    protected void notifyQueryDefinitionChanged() {
-        if (isUpdatingComponents) {
-            // This ensures, that the retriever chains are reloaded. This is necessary, because
-            // they have UUIDs, that change after a bundle refresh.
-            retrieverChainProvider.updateRetrieverChains();
-            isUpdatingComponents = false;
-        } else {
-            super.notifyQueryDefinitionChanged();
-        }
-    }
-    
     private void scheduleQueryDefinitionChanged() {
         queryDefinitionReleaseTimer.schedule(queryBufferTimeInMillis);
+    }
+    
+    @Override
+    public void awaitReloadComponents() {
+        // Nothing to do here
+    }
+    
+    @Override
+    public void reloadComponents() {
+        isReloading = true;
+        statisticProvider.awaitReloadComponents();
+        groupingProvider.awaitReloadComponents();
+        retrieverChainProvider.awaitReloadComponents();
+        filterSelectionProvider.awaitReloadComponents();
+        statisticProvider.reloadComponents();
     }
     
     @Override
@@ -167,11 +152,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         QueryDefinitionDTOImpl queryDTO = new QueryDefinitionDTOImpl(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
                                                                statisticProvider.getAggregatorType(), retrieverChainProvider.getDataRetrieverChainDefinition());
         
-        for (FunctionDTO dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
+        for (FunctionDTO dimension : groupingProvider.getDimensionsToGroupBy()) {
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : selectionProvider.getSelection().entrySet()) {
+        for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelectionEntry : filterSelectionProvider.getSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
         
@@ -183,8 +168,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         setBlockChangeNotification(true);
         statisticProvider.applyQueryDefinition(queryDefinition);
         retrieverChainProvider.applyQueryDefinition(queryDefinition);
-        groupBySelectionPanel.applyQueryDefinition(queryDefinition);
-        selectionProvider.applySelection(queryDefinition);
+        groupingProvider.applyQueryDefinition(queryDefinition);
+        filterSelectionProvider.applySelection(queryDefinition);
         setBlockChangeNotification(false);
         
         scheduleQueryDefinitionChanged();
@@ -232,6 +217,50 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     @Override
     public String getDependentCssClassName() {
         return "queryDefinitionProviderWithControls";
+    }
+    
+    private class ProviderListener implements StatisticChangedListener, DataRetrieverChainDefinitionChangedListener,
+                                              GroupingChangedListener, FilterSelectionChangedListener {
+
+        @Override
+        public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
+            if (isReloading) {
+                groupingProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorType());
+                groupingProvider.reloadComponents();
+                
+                retrieverChainProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorType());
+                retrieverChainProvider.reloadComponents();
+            } else {
+                scheduleQueryDefinitionChanged();
+            }
+        }
+
+        @Override
+        public void groupingChanged() {
+            if (!isReloading) {
+                scheduleQueryDefinitionChanged();
+            }
+        }
+
+        @Override
+        public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
+            if (isReloading) {
+                filterSelectionProvider.dataRetrieverChainDefinitionChanged(retrieverChainProvider.getDataRetrieverChainDefinition());
+                filterSelectionProvider.reloadComponents();
+            } else {
+                scheduleQueryDefinitionChanged();
+            }
+        }
+
+        @Override
+        public void selectionChanged() {
+            if (isReloading) {
+                isReloading = false;
+            }
+            
+            scheduleQueryDefinitionChanged();
+        }
+        
     }
 
 }

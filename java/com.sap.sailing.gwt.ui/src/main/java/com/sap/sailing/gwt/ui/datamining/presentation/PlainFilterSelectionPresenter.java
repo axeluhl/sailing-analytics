@@ -19,14 +19,14 @@ import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedList
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, SelectionChangedListener,
+public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, FilterSelectionChangedListener,
                                                       DataRetrieverChainDefinitionChangedListener {
 
     private final FilterSelectionProvider filterSelectionProvider;
