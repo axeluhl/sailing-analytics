@@ -23,4 +23,6 @@ public interface Path {
     int getTurnCount();
     
     boolean getAlgorithmTimedOut();
+
+    boolean getMixedLeg();
 }

@@ -8,6 +8,7 @@ public class PathDTO extends NamedDTO {
     private static final long serialVersionUID = 2381814072763342186L;
     private List<SimulatorWindDTO> points;
     private boolean algorithmTimedOut;
+    private boolean mixedLeg;
 
     public PathDTO() {
     }
@@ -38,6 +39,14 @@ public class PathDTO extends NamedDTO {
 
     public void setAlgorithmTimedOut(boolean algorithmTimedOut) {
         this.algorithmTimedOut = algorithmTimedOut;
+    }
+
+    public boolean getMixedLeg() {
+        return this.mixedLeg;
+    }
+
+    public void setMixedLeg(boolean mixedLeg) {
+        this.mixedLeg = mixedLeg;
     }
 
 }

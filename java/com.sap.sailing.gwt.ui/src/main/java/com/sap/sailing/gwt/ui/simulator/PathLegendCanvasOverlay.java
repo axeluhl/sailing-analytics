@@ -40,6 +40,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     private String textColor = "Black";
     private String textFont = "10pt OpenSansRegular";
     private String algorithmTimedOutText = "out-of-bounds";
+    private String mixedLegText = "ambiguous wind";
 
     public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode) {
         super(map, zIndex);
@@ -92,24 +93,43 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
             double timewidth = txtmet.getWidth();
             double txtmaxwidth = 0.0;
             boolean containsTimeOut = false;
+            boolean containsMixedLeg = false;
             for (PathCanvasOverlay path : pathOverlays) {
                 if (path.getAlgorithmTimedOut()) {
                     containsTimeOut = true;
                 }
+                if (path.getMixedLeg()) {
+                    containsMixedLeg = true;
+                }
                 txtmet = context2d.measureText(path.getName());
                 txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
             }
-            double xOOBDelta = 0;
+            double newwidth = 0;
+            double deltaTime = 0;
+            double deltaMixedLeg = 0;
+            double deltaTimeOut = 0;
+            double mixedLegWidth = 0;
+            if (containsMixedLeg) {
+                txtmet = context2d.measureText(mixedLegText);
+                mixedLegWidth = txtmet.getWidth();
+                newwidth = Math.max(timewidth, mixedLegWidth);
+            }
+            double timeOutWidth = 0;
             if (containsTimeOut) {
                 txtmet = context2d.measureText(algorithmTimedOutText);
-                xOOBDelta = timewidth;
-                timewidth = Math.max(timewidth, txtmet.getWidth());
-                xOOBDelta = timewidth - xOOBDelta;
+                timeOutWidth = txtmet.getWidth();
+                newwidth = Math.max(newwidth, timeOutWidth);
+            }
+            if (containsMixedLeg||containsTimeOut) {
+                deltaTime = newwidth - timewidth;
+                deltaMixedLeg = newwidth - mixedLegWidth;
+                deltaTimeOut = newwidth - timeOutWidth;
+                timewidth = newwidth;
             }
             for (PathCanvasOverlay path : pathOverlays) {
-                String timeText = (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime()));
+                String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
                 drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.getPathColor(),
-                        path.getName(), timeText, txtmaxwidth, timewidth, (path.getAlgorithmTimedOut()?0:xOOBDelta));
+                        path.getName(), timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)));
                 index++;
             }
             

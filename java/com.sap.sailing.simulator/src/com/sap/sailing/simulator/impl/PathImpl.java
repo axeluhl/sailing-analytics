@@ -30,6 +30,7 @@ public class PathImpl implements Path, Serializable {
     private int turnCount;
     private long maxTurnTime;
     private boolean algorithmTimedOut;
+    private boolean mixedLeg = false;
 
     private static final double TRESHOLD_DEGREES = 25.0;
     private static final double THRESHOLD_DISTANCE_METERS = 15.0;
@@ -42,12 +43,22 @@ public class PathImpl implements Path, Serializable {
         this.algorithmTimedOut = algorithmTimedOut;
     }
 
-    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime, boolean algorithmTimedOut) {
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, boolean algorithmTimedOut, boolean mixedLeg) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
+    }
+
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime, boolean algorithmTimedOut, boolean mixedLeg) {
         this.pathPoints = pointsList;
         this.windField = wf;
         this.turnCount = 0;
         this.maxTurnTime = maxTurnTime;
         this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
     }
 
     public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, int turnCount, boolean algorithmTimedOut) {
@@ -62,7 +73,12 @@ public class PathImpl implements Path, Serializable {
     public boolean getAlgorithmTimedOut() {
         return this.algorithmTimedOut;
     }
-    
+
+    @Override
+    public boolean getMixedLeg() {
+        return this.mixedLeg;
+    }
+
     @Override
     public List<TimedPositionWithSpeed> getPathPoints() {
         return this.pathPoints;
@@ -90,7 +106,7 @@ public class PathImpl implements Path, Serializable {
     
     @Override
     public Path getEvenTimedPath(long timestep) {
-        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField, this.algorithmTimedOut);
+        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField, this.algorithmTimedOut, this.mixedLeg);
     }
 
     private List<TimedPositionWithSpeed> getEvenTimedPathAsList(long timeStep) {

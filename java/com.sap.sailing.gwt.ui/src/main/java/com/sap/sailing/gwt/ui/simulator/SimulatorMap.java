@@ -170,15 +170,17 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     pathPolyline = createPathPolyline(currentPath);
                 } else if (pathName.equals("GPS Poly")) {
                     continue;
-                }
-                else {
+                } else {
 
                     /* TODO Revisit for now creating a WindFieldDTO from the path */
-                    WindFieldDTO pathWindDTO = new WindFieldDTO();
-                    pathWindDTO.setMatrix(currentPath.getPoints());
+                    WindFieldDTO pathWindDTO = null;
+                    if (!currentPath.getMixedLeg()) {
+                        pathWindDTO = new WindFieldDTO();
+                        pathWindDTO.setMatrix(currentPath.getPoints());
+                    }
 
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
-                            pathName.split("#")[1], timer, windParams, algorithmTimedOut);
+                            pathName.split("#")[1], timer, windParams, algorithmTimedOut, currentPath.getMixedLeg());
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
 
@@ -205,7 +207,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
 
                     long tmpDurationTime = currentPath.getPathTime();
-                    if (tmpDurationTime > maxDurationTime) {
+                    if ((!currentPath.getMixedLeg())&&(!currentPath.getAlgorithmTimedOut())&&(tmpDurationTime > maxDurationTime)) {
                         maxDurationTime = tmpDurationTime;
                     }
                 }

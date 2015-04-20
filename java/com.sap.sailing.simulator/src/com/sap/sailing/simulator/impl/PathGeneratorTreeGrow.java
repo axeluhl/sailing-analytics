@@ -768,7 +768,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
                 maxTurnTime = turnMiddle * this.usedTimeStep;
             }
         }
-        return new PathImpl(path, wf, maxTurnTime, this.algorithmTimedOut);
+        return new PathImpl(path, wf, maxTurnTime, this.algorithmTimedOut, false);
     }
 
 }

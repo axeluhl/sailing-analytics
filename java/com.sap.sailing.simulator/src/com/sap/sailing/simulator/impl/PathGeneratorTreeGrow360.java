@@ -791,7 +791,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
             // trgPaths = allPaths; // TODO: only for testing; remove lateron
             TimedPositionWithSpeed curPosition = new TimedPositionWithSpeedImpl(startTime, startPos, null);
             path.add(curPosition);
-            return new PathImpl(path, wf, true /* out-of-bounds spatially||timely */); // return empty path
+            return new PathImpl(path, wf, true /* out-of-bounds spatially||timely */, false /* mixed leg */); // return empty path
         }
 
         // sort target-paths ascending by distance-to-target
@@ -842,6 +842,11 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         // add final position (rescaled before to end on height of target)
         path.add(new TimedPositionWithSpeedImpl(bestCand.pos.getTimePoint(), bestCand.pos.getPosition(), null));
 
+        // identify type of course
+        boolean containsTacks = bestCand.path.contains("L")||bestCand.path.contains("R");
+        boolean containsJibes = bestCand.path.contains("l")||bestCand.path.contains("r");
+        
+        
         // maximum turn time for one-turner simulation, otherwise zero
         long maxTurnTime = 0;
         if (this.maxTurns == 1) {
@@ -867,7 +872,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                 + String.format("%.2f", Math.round(bestCand.pos.getPosition().getDistance(endPos).getMeters() * 100.0) / 100.0) + " meters"
                 + ", " + bestCand.trn + " Turn" + (bestCand.trn>1?"s":""));
         
-        return new PathImpl(path, wf, maxTurnTime, this.algorithmTimedOut);
+        return new PathImpl(path, wf, maxTurnTime, this.algorithmTimedOut, containsTacks&&containsJibes&&(this.maxTurns==1));
     }
 
 }

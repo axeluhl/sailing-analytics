@@ -972,6 +972,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
             pathDTOs[index].setPoints(wList);
             pathDTOs[index].setAlgorithmTimedOut(entry.getValue().getAlgorithmTimedOut());
+            pathDTOs[index].setMixedLeg(entry.getValue().getMixedLeg());
 
             index--;
         }
@@ -1045,7 +1046,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         List<TimedPositionWithSpeed> polylinePoints = gpsTrackPoints.subList(startPointIndex, endPointIndex + 1);
 
-        List<TimedPositionWithSpeed> turns = (new PathImpl(polylinePoints, null, false /* algorithmTimedOut */)).getTurns();
+        List<TimedPositionWithSpeed> turns = (new PathImpl(polylinePoints, null, false /* algorithmTimedOut */, false /* mixedLeg */)).getTurns();
         // PathImpl.saveToGpxFile(new PathImpl(turns, null), "C:\\gps_path_turns_20deg_not_even_timed.gpx");
 
         List<SimulatorWindDTO> points = new ArrayList<SimulatorWindDTO>();

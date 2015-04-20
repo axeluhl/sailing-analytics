@@ -44,6 +44,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
     private String name;
     private boolean algorithmTimedOut;
+    private boolean mixedLeg;
 
     private String pathColor = "Green";
 
@@ -57,10 +58,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.name = name;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, boolean algorithmTimedOut) {
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, boolean algorithmTimedOut, boolean mixedLeg) {
         super(map, zIndex, timer, windParams);
         this.name = name;
         this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
     }
 
     public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds) {
@@ -274,6 +276,10 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
     public boolean getAlgorithmTimedOut() {
         return algorithmTimedOut;
+    }
+
+    public boolean getMixedLeg() {
+        return mixedLeg;
     }
     
     public long getPathTime() {

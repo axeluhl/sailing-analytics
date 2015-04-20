@@ -1471,6 +1471,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 pathDTOs[index].setPoints(wList);
                 pathDTOs[index].setAlgorithmTimedOut(entry.getValue().getAlgorithmTimedOut());
+                pathDTOs[index].setMixedLeg(entry.getValue().getMixedLeg());
                 index--;
             }
             RaceMapDataDTO rcDTO;

@@ -43,6 +43,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private final String textColor = "Black";
     private final String textFont = "10pt OpenSansRegular";
     private String algorithmTimedOutText = "out-of-bounds";
+    private String mixedLegText = "ambiguous wind";
     private int xOffset = 0;
     private int yOffset = 0; //150;
     private double rectWidth = 20;
@@ -160,8 +161,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         Context2d ctxt = canvas.getContext2d();
         PathDTO[] paths = simulationResult.getPaths();
         boolean first = true;
-        int colorIdx = paths.length - 1;
+        int colorIdx = paths.length;
         for (PathDTO path : paths) {
+            colorIdx--;
+            if (path.getMixedLeg()) {
+                continue;
+            }
             List<SimulatorWindDTO> points = path.getPoints();
             ctxt.setLineWidth(3.0);
             ctxt.setGlobalAlpha(0.7);
@@ -192,7 +197,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 ctxt.closePath();
                 ctxt.stroke();
             }
-            colorIdx--;
         }
     }
 
@@ -212,20 +216,39 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
         boolean containsTimeOut = false;
+        boolean containsMixedLeg = false;
         PathDTO[] paths = this.simulationResult.getPaths();
         for (PathDTO path : paths) {
             if (path.getAlgorithmTimedOut()) {
                 containsTimeOut = true;
             }
+            if (path.getMixedLeg()) {
+                containsMixedLeg = true;
+            }
             txtmet = context2d.measureText(path.getName().split("#")[1]);
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
-        double xOOBDelta = 0;
+        double newwidth = 0;
+        double deltaTime = 0;
+        double deltaMixedLeg = 0;
+        double deltaTimeOut = 0;
+        double mixedLegWidth = 0;
+        if (containsMixedLeg) {
+            txtmet = context2d.measureText(mixedLegText);
+            mixedLegWidth = txtmet.getWidth();
+            newwidth = Math.max(timewidth, mixedLegWidth);
+        }
+        double timeOutWidth = 0;
         if (containsTimeOut) {
             txtmet = context2d.measureText(algorithmTimedOutText);
-            xOOBDelta = timewidth;
-            timewidth = Math.max(timewidth, txtmet.getWidth());
-            xOOBDelta = timewidth - xOOBDelta;
+            timeOutWidth = txtmet.getWidth();
+            newwidth = Math.max(newwidth, timeOutWidth);
+        }
+        if (containsMixedLeg||containsTimeOut) {
+            deltaTime = newwidth - timewidth;
+            deltaMixedLeg = newwidth - mixedLegWidth;
+            deltaTimeOut = newwidth - timeOutWidth;
+            timewidth = newwidth;
         }
         //canvas.setSize(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0+"px", rectHeight*(paths.length+1)+"px");
         int canvasWidth = (int)Math.ceil(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0 + 10.0);
@@ -233,12 +256,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         setCanvasSize(canvas, canvasWidth, canvasHeight);
         if (racePath != null) {
             drawRectangleWithText(context2d, xOffset, yOffset, null,
-                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, xOOBDelta);
+                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime);
         }
         for (PathDTO path : paths) {
-            String timeText = (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime()));
+            String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
             drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index-(racePath==null?1:0)) * rectHeight, this.colors.getColor(paths.length-1-index),
-                path.getName().split("#")[1], timeText, txtmaxwidth, timewidth, (path.getAlgorithmTimedOut()?0:xOOBDelta));
+                path.getName().split("#")[1], timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)));
             index++;
         }
     }
