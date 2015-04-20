@@ -27,7 +27,7 @@ public class SeriesOverviewTabView extends Composite implements SeriesTabView<Se
     
     @Override
     public TabView.State getState() {
-        return TabView.State.NOT_AVAILABLE;
+        return TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
     }
 
     @Override

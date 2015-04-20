@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 public interface TabView<PLACE extends Place, PRESENTER> {
     
     public enum State {
-        VISIBLE, INVISIBLE, NOT_AVAILABLE
+        VISIBLE, INVISIBLE, NOT_AVAILABLE_REDIRECT, NOT_AVAILABLE_SHOW_NEXT_AVAILABLE
     }
 
     /**
