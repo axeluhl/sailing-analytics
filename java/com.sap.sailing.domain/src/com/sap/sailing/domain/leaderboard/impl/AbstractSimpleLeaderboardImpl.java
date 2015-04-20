@@ -1569,7 +1569,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 legDetails.add(legEntry);
             }
             final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace
-                    .getWindwardDistanceToOverallLeader(competitor, timePoint, WindPositionMode.LEG_MIDDLE);
+                    .getWindwardDistanceToOverallLeader(competitor, timePoint, WindPositionMode.LEG_MIDDLE, cache);
             Distance averageAbsoluteCrossTrackError;
             try {
                 averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(

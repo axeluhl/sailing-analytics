@@ -486,9 +486,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache)
-            throws NoWindException {
-        return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        return getGapToLeader(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
                 return leaderInLegAtTimePoint;
@@ -508,7 +507,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
+        return getGapToLeader(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
                 return getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint);
@@ -516,7 +515,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
-    private Duration getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion

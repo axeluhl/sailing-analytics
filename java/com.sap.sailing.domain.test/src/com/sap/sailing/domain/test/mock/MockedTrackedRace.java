@@ -914,4 +914,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
+
+    @Override
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
 }

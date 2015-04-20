@@ -579,12 +579,20 @@ public interface TrackedRace extends Serializable {
     WindStore getWindStore();
 
     Competitor getOverallLeader(TimePoint timePoint);
+    
+    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+
+    /**
+     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
+     * bearing values.
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will

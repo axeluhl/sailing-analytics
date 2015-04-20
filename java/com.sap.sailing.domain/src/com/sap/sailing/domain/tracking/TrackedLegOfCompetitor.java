@@ -172,7 +172,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * all can use the same basic information.
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes the gap in seconds to the leader / winner of this leg based on corrected times according to the handicap

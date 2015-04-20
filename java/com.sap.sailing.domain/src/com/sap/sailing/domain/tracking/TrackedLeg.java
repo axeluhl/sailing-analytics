@@ -85,7 +85,7 @@ public interface TrackedLeg extends Serializable {
      * @param at
      *            the wind estimation is performed for this point in time
      */
-    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException;
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode);
 
     /**
      * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, only that a cache

@@ -1100,6 +1100,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Competitor getOverallLeader(TimePoint timePoint) {
+        return getOverallLeader(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Competitor result = null;
         List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
         if (ranks != null && !ranks.isEmpty()) {
@@ -1121,6 +1126,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorst(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         NamedReentrantReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
@@ -1144,7 +1154,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // RaceRankComparator requires course read lock
                         getRace().getCourse().lockForRead();
                         try {
-                            RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                            RaceRankComparator comparator = new RaceRankComparator(this, timePoint, cache);
                             rankedCompetitors = new ArrayList<Competitor>();
                             for (Competitor c : getRace().getCompetitors()) {
                                 rankedCompetitors.add(c);
