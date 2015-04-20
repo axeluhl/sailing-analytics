@@ -11,11 +11,13 @@ import java.util.logging.Logger;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
+import com.sap.sse.datamining.components.ProcessorInstructionHandler;
 
-public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType>
-                      extends AbstractProcessor<InputType, ResultType> {
+public abstract class AbstractParallelProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType>
+                                                                       implements ProcessorInstructionHandler<ResultType> {
 
-    private static final Logger LOGGER = Logger.getLogger(AbstractPartitioningParallelProcessor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
 
     private final Set<Processor<ResultType, ?>> resultReceivers;
@@ -25,42 +27,76 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     private boolean isFinished = false;
     private boolean isAborted = false;
 
-    public AbstractPartitioningParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
+    public AbstractParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
         super(inputType, resultType);
         this.executor = executor;
         this.resultReceivers = new HashSet<Processor<ResultType, ?>>(resultReceivers);
         unfinishedInstructionsCounter = new AtomicInteger();
     }
+    
+    @Override
+    public boolean canProcessElements() {
+        return !isFinished() && !isAborted();
+    }
 
     @Override
     public void processElement(InputType element) {
-        if (!isFinished && !isAborted) {
-            for (WorkingType partialElement : partitionElement(element)) {
-                final AbstractProcessorInstruction<ResultType> instruction = createInstruction(partialElement);
-                if (isInstructionValid(instruction)) {
-                    unfinishedInstructionsCounter.getAndIncrement();
-                    try {
-                        executor.execute(instruction);
-                    } catch (RejectedExecutionException exc){
-                        LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName() +
-                                                  " appeared during the processing.");
-                        instruction.run();
-                    }
+        if (canProcessElements()) {
+            final ProcessorInstruction<ResultType> instruction = createInstruction(element);
+            if (isInstructionValid(instruction)) {
+                unfinishedInstructionsCounter.getAndIncrement();
+                try {
+                    executor.execute(instruction);
+                } catch (RejectedExecutionException exc) {
+                    LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName()
+                            + " appeared during the processing.");
+                    instruction.run();
                 }
             }
         }
     }
 
-    private boolean isInstructionValid(AbstractProcessorInstruction<ResultType> instruction) {
+    private boolean isInstructionValid(ProcessorInstruction<ResultType> instruction) {
         return instruction != null;
     }
-
-    boolean isResultValid(ResultType result) {
-        return result != null;
+    
+    public void instructionSucceeded(ResultType result) {
+        forwardResultToReceivers(result);
     }
     
-    AtomicInteger getUnfinishedInstructionsCounter() {
-        return unfinishedInstructionsCounter;
+    public void instructionFailed(Exception e) {
+        if (!isAborted() || !(e instanceof InterruptedException)) {
+            onFailure(e);
+        }
+    }
+    
+    public void afterInstructionFinished() {
+        unfinishedInstructionsCounter.getAndDecrement();
+    }
+    
+    /**
+     * Forwards the given <code>result</code> to the result receivers, if it's {@link #isResultValid(Object) valid}
+     * and if the processor hasn't been {@link #abort() aborted}.
+     * 
+     * @param result the element to forward to the result receivers
+     */
+    protected void forwardResultToReceivers(ResultType result) {
+        if (isResultValid(result) && !isAborted()) {
+            for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
+                resultReceiver.processElement(result);
+            }
+        }
+    }
+
+    /**
+     * Checks if the given <code>result</code> valid. For example a valid element has to be not <code>null</code>.
+     * If the element is valid, it can be forwarded to the result receivers.
+     * 
+     * @param result the element to check
+     * @return <code>true</code>, if the result is valid, so it can be forwarded to the result receivers
+     */
+    private boolean isResultValid(ResultType result) {
+        return result != null;
     }
     
     /**
@@ -69,22 +105,19 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     protected ResultType createInvalidResult() {
         return null;
     }
-    
-    protected void forwardResultToReceivers(ResultType result) {
-        for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
-            resultReceiver.processElement(result);
-        }
-    }
 
-    protected abstract AbstractProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement);
-
-    protected abstract Iterable<WorkingType> partitionElement(InputType element);
+    protected abstract ProcessorInstruction<ResultType> createInstruction(final InputType element);
 
     @Override
     public void onFailure(Throwable failure) {
         for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
             resultReceiver.onFailure(failure);
         }
+    }
+    
+    @Override
+    public boolean isFinished() {
+        return isFinished;
     }
 
     @Override
@@ -122,7 +155,8 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    boolean isAborted() {
+    @Override
+    public boolean isAborted() {
         return isAborted;
     }
     

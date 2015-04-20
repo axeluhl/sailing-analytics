@@ -22,6 +22,9 @@ public interface Function<ReturnType> {
      */
     public boolean isLocalizable();
     
+    /**
+     * @return the localized name of this function, if it can be {@link #isLocalizable() localized} and the {@link #getSimpleName() simple name} if not.
+     */
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages);
     
     /**

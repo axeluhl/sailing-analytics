@@ -3,10 +3,10 @@ package com.sap.sse.datamining.impl.components;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
@@ -25,8 +25,8 @@ public class ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>
     public ParallelMultiDimensionsValueNestingGroupingProcessor(Class<DataType> dataType,
                                                                 ExecutorService executor,
                                                                 Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
-                                                                Iterable<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvider) {
-        super(dataType, executor, resultReceivers, dimensionsWithParameterProvider);
+                                                                Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
+        super(dataType, executor, resultReceivers, parameterizedDimensions);
     }
 
     protected GroupKey createGroupKeyFor(DataType input, Function<?> dimension, ParameterProvider parameterProvider) {
