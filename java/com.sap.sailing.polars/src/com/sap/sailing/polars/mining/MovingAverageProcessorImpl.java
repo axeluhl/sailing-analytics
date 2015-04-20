@@ -49,6 +49,12 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
     }
+    
+    @Override
+    public boolean canProcessElements() {
+        // TODO Auto-generated method stub
+        return true;
+    }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
@@ -89,10 +95,21 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
+    
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
+    }
+    
+    @Override
+    public boolean isAborted() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
