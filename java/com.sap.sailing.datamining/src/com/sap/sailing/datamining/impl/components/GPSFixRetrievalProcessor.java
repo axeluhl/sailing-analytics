@@ -12,9 +12,9 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class GPSFixRetrievalProcessor extends AbstractSimpleRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasGPSFixContext> {
+public class GPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasGPSFixContext> {
 
     public GPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixContext, ?>> resultReceivers, int retrievalLevel) {
         super(HasTrackedLegOfCompetitorContext.class, HasGPSFixContext.class, executor, resultReceivers, retrievalLevel);

@@ -188,7 +188,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         String competitorName = "Tina Maximiliane Lutz";
-        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),

@@ -4,7 +4,7 @@ import com.google.gwt.http.client.URL;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.QRCodeComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeComposite;
 
 public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
     
