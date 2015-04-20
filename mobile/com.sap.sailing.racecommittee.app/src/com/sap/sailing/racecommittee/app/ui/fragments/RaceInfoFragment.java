@@ -93,18 +93,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     public void onResume() {
         super.onResume();
-        getRace().getState().addChangedListener(stateChangedListener);
         switchToInfoFragment();
-    }
-
-    @Override
-    public void onStop() {
-        getRace().getState().removeChangedListener(stateChangedListener);
-        super.onStop();
-    }
-
-    public RaceFragment getInfoFragment() {
-        return infoFragment;
     }
 
     protected void switchToInfoFragment() {
@@ -202,34 +191,5 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     public void onResetTime() {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
-
-    private RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
-
-        @Override
-        public void onRacingProcedureChanged(ReadonlyRaceState state) {
-            infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
-            switchToInfoFragment();
-        };
-
-        @Override
-        public void onStatusChanged(ReadonlyRaceState state) {
-            switchToInfoFragment();
-        };
-
-        @Override
-        public void onStartTimeChanged(ReadonlyRaceState state) {
-            switchToInfoFragment();
-        };
-
-        @Override
-        public void onCourseDesignChanged(ReadonlyRaceState state) {
-            updateCourseDesignLabel();
-        };
-
-        @Override
-        public void onWindFixChanged(ReadonlyRaceState state) {
-            updateWindLabel();
-        };
-    };
 
 }
