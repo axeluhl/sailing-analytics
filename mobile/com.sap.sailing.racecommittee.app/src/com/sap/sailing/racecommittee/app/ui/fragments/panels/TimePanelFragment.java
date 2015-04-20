@@ -88,6 +88,8 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
         filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+
+        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
     }
 
     @Override

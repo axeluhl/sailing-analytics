@@ -264,12 +264,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     private void loadNavDrawer(CourseArea courseArea, EventBase event) {
-        String race = getResources().getString(R.string.nav_header).replace("#AREA#", courseArea.getName())
-                .replace("#EVENT#", event.getName()).replace("#AUTHOR#", preferences.getAuthor().getName());
-        SpannableString header = new SpannableString(race);
-        StyleSpan spanBold = new StyleSpan(Typeface.BOLD);
-        header.setSpan(spanBold, 0, event.getName().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        mRaceList.setUp((DrawerLayout) findViewById(R.id.drawer_layout), header);
+        mRaceList.setUp((DrawerLayout) findViewById(R.id.drawer_layout), courseArea.getName(), event.getName(), preferences.getAuthor().getName());
     }
 
     private void loadWelcomeFragment() {

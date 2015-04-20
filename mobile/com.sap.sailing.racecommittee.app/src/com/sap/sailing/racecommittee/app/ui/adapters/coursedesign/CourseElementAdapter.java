@@ -17,7 +17,8 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
+import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolder;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
 import com.sap.sailing.racecommittee.app.utils.ColorHelper;
@@ -25,21 +26,19 @@ import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdapter.ViewHolder>
-    implements DraggableItemAdapter<CourseElementAdapter.ViewHolder>,
-    SwipeableItemAdapter<CourseElementAdapter.ViewHolder> {
+public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElementAdapter.ViewHolder> {
 
     private final static String TAG = CourseElementAdapter.class.getName();
 
     private Context mContext;
-    private List<CourseListDataElementWithId> mElements;
+    private List<CourseListDataElementWithIdImpl> mElements;
     private MarkImageHelper mImageHelper;
     private ElementLongClick mListener;
     private EventListener mEventListener;
 
     private boolean mEditable;
 
-    public CourseElementAdapter(Context context, ArrayList<CourseListDataElementWithId> elements,
+    public CourseElementAdapter(Context context, ArrayList<CourseListDataElementWithIdImpl> elements,
         MarkImageHelper imageHelper, boolean editable) {
         mContext = context;
         mElements = elements;
@@ -143,17 +142,6 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
         return "";
     }
 
-    public boolean hitTest(View v, int x, int y) {
-        int tx = (int) (ViewCompat.getTranslationX(v) + 0.5f);
-        int ty = (int) (ViewCompat.getTranslationY(v) + 0.5f);
-        int left = v.getLeft() + tx;
-        int right = v.getRight() + tx;
-        int top = v.getTop() + ty;
-        int bottom = v.getBottom() + ty;
-
-        return (x >= left) && (x <= right) && (y >= top) && (y <= bottom);
-    }
-
     @Override
     public boolean onCheckCanStartDrag(ViewHolder holder, int x, int y) {
         ExLog.i(mContext, TAG, "onCheckCanStartDrag(" + x + ", " + y);
@@ -181,7 +169,7 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
             return;
         }
 
-        CourseListDataElementWithId item = mElements.get(fromPosition);
+        CourseListDataElementWithIdImpl item = mElements.get(fromPosition);
         mElements.remove(item);
         mElements.add(toPosition, item);
 
@@ -217,7 +205,7 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
     @Override
     public void onPerformAfterSwipeReaction(ViewHolder holder, int result, int reaction) {
         int position = holder.getAdapterPosition();
-        CourseListDataElementWithId element = mElements.get(position);
+        CourseListDataElementWithIdImpl element = mElements.get(position);
 
         switch (reaction) {
         case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
@@ -235,7 +223,7 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
     }
 
     public interface ElementLongClick {
-        void onItemLongClick(CourseListDataElementWithId element);
+        void onItemLongClick(CourseListDataElementWithIdImpl element);
     }
 
     public interface EventListener {
@@ -270,8 +258,6 @@ public class CourseElementAdapter extends RecyclerView.Adapter<CourseElementAdap
 
         @Override
         public boolean onLongClick(View v) {
-            Toast.makeText(mContext, "Id " + getItemId(), Toast.LENGTH_SHORT).show();
-
             if (mListener != null) {
                 mListener.onItemLongClick(mElements.get(getAdapterPosition()));
                 return true;

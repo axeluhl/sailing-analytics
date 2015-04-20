@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.ElementLongClick;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.EventListener;
@@ -57,8 +57,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     private RecyclerViewSwipeManager mSwipeManager;
     private RecyclerViewTouchActionGuardManager mGuardManager;
     private ReadonlyDataManager mDataManager;
-    private ArrayList<CourseListDataElementWithId> mHistory;
-    private ArrayList<CourseListDataElementWithId> mElements;
+    private ArrayList<CourseListDataElementWithIdImpl> mHistory;
+    private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
@@ -304,21 +304,21 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
         mMarkAdapter.notifyDataSetChanged();
     }
 
-    protected List<CourseListDataElementWithId> convertCourseDesignToCourseElements(CourseBase courseData) {
-        List<CourseListDataElementWithId> elementList = new ArrayList<>();
+    protected List<CourseListDataElementWithIdImpl> convertCourseDesignToCourseElements(CourseBase courseData) {
+        List<CourseListDataElementWithIdImpl> elementList = new ArrayList<>();
 
         for (Waypoint waypoint : courseData.getWaypoints()) {
             ControlPoint controlPoint = waypoint.getControlPoint();
 
             if (controlPoint instanceof Mark) {
-                CourseListDataElementWithId element = new CourseListDataElementWithId();
+                CourseListDataElementWithIdImpl element = new CourseListDataElementWithIdImpl();
                 element.setId(mId);
                 element.setLeftMark((Mark) controlPoint);
                 element.setPassingInstructions(waypoint.getPassingInstructions());
                 elementList.add(element);
             } else if (controlPoint instanceof ControlPointWithTwoMarks) {
                 ControlPointWithTwoMarks controlPointTwoMarks = (ControlPointWithTwoMarks) controlPoint;
-                CourseListDataElementWithId element = new CourseListDataElementWithId();
+                CourseListDataElementWithIdImpl element = new CourseListDataElementWithIdImpl();
                 element.setId(mId);
                 element.setLeftMark(controlPointTwoMarks.getLeft());
                 element.setRightMark(controlPointTwoMarks.getRight());
@@ -332,7 +332,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     }
 
     @Override
-    public void onItemLongClick(CourseListDataElementWithId element) {
+    public void onItemLongClick(CourseListDataElementWithIdImpl element) {
         createPassingInstructionDialog(element);
         mCourseAdapter.notifyDataSetChanged();
     }
@@ -364,14 +364,14 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     }
 
     private void addNewCourseElementToList(Mark mark) {
-        CourseListDataElementWithId courseElement = new CourseListDataElementWithId();
+        CourseListDataElementWithIdImpl courseElement = new CourseListDataElementWithIdImpl();
         courseElement.setId(mId);
         courseElement.setLeftMark(mark);
         createPassingInstructionDialog(courseElement);
         mId++;
     }
 
-    private void createPassingInstructionDialog(final CourseListDataElementWithId courseElement) {
+    private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.pick_a_rounding_direction)
             .setItems(R.array.rounding_directions, new DialogInterface.OnClickListener() {
@@ -384,7 +384,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
             .showColoredDialog(builder.create(), ColorHelper.getThemedColor(getActivity(), R.attr.colorAccent));
     }
 
-    protected void onPassingInstructionPicked(CourseListDataElementWithId courseElement,
+    protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement,
         PassingInstruction pickedDirection) {
         courseElement.setPassingInstructions(pickedDirection);
         if (!mElements.contains(courseElement)) {

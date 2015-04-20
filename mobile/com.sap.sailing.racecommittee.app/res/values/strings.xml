@@ -271,7 +271,6 @@
     <string name="race_show_all">show all</string>
     <string name="race_show_less">show less</string>
 
-    <string name="nav_header">#EVENT#\n#AREA# / #AUTHOR#</string>
     <string name="races_current">CURRENT RACES</string>
     <string name="races_all">ALL RACES</string>
 

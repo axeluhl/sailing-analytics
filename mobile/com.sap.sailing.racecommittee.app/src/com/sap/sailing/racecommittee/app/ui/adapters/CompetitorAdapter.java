@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +18,7 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
 
     private Context mContext;
     private ArrayList<Competitor> mData;
+    private CompetitorClick mListener;
 
     public CompetitorAdapter(Context context, ArrayList<Competitor> data) {
         mContext = context;
@@ -31,7 +35,11 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, int position) {
         Competitor competitor = mData.get(position);
 
-        holder.competitor.setText(competitor.getName());
+        if (competitor != null) {
+            if (holder.competitor != null) {
+                holder.competitor.setText(competitor.getName());
+            }
+        }
     }
 
     @Override
@@ -42,7 +50,11 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         return 0;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public void setListener(CompetitorClick listener) {
+        mListener = listener;
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public View container;
         public TextView competitor;
@@ -50,8 +62,23 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         public ViewHolder(View itemView) {
             super(itemView);
 
+            itemView.setOnClickListener(this);
             container = itemView.findViewById(R.id.container);
             competitor = (TextView) itemView.findViewById(R.id.competitor);
         }
+
+        @Override
+        public void onClick(View v) {
+            if (mListener != null) {
+                Competitor competitor = mData.get(getAdapterPosition());
+                if (competitor != null) {
+                    mListener.onCompetitorClick(competitor);
+                }
+            }
+        }
+    }
+
+    public interface CompetitorClick {
+        void onCompetitorClick(Competitor competitor);
     }
 }

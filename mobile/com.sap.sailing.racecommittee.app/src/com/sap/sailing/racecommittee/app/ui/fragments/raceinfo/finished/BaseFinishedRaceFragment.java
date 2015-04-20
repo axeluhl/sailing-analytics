@@ -39,6 +39,4 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
     protected void setupUi() {
 
     }
-
-
 }

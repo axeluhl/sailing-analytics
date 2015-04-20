@@ -10,10 +10,10 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:paddingTop="@dimen/default_padding_half"
-        android:paddingBottom="@dimen/default_padding_half"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/default_padding_half"
+        android:paddingTop="@dimen/default_padding_half">
 
         <TextView
             android:layout_width="0dp"
@@ -22,8 +22,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/positionings"
-            android:textAppearance="?textNormal"
-            android:textStyle="bold"/>
+            android:textAppearance="?textNormal"/>
 
         <TextView
             android:layout_width="0dp"
@@ -32,8 +31,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/availableFinishingCompetitors"
-            android:textAppearance="?textNormal"
-            android:textStyle="bold"/>
+            android:textAppearance="?textNormal"/>
     </LinearLayout>
 
     <LinearLayout

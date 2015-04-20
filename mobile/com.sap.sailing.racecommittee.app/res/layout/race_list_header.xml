@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/navigation_drawer_image_height">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/navigation_drawer_image_height">
 
     <ImageView
         android:layout_width="match_parent"
@@ -34,8 +35,24 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@id/nav_button"
         android:layout_toStartOf="@id/nav_button"
-        android:padding="10dp"
-        android:text="@string/nav_header"
+        tools:text="Marina Bay / Viewer"
+        android:textSize="@dimen/textSize_32"
+        android:paddingLeft="@dimen/default_padding_half"
+        android:paddingRight="@dimen/default_padding_half"
         android:textColor="@color/constant_white"
+        />
+
+    <TextView
+        android:id="@+id/regatta_course"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/nav_button"
+        android:layout_toStartOf="@id/nav_button"
+        android:layout_above="@id/regatta_data"
+        android:paddingLeft="@dimen/default_padding_half"
+        android:paddingRight="@dimen/default_padding_half"
+        android:singleLine="true"
+        android:textColor="@color/constant_white"
+        tools:text="Extreme Sailing Series 2015 Act 1 Singapore"
         android:textSize="@dimen/textSize_32" />
 </RelativeLayout>

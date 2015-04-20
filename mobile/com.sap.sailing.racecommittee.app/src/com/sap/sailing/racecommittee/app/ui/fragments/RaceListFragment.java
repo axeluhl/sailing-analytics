@@ -9,7 +9,10 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,12 +53,12 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
-    private final static String HEADER = "header";
     private ManagedRaceListAdapter mAdapter;
     private RaceListCallbacks mCallbacks;
     private Button mCurrent;
     private Button mAll;
-    private TextView mHeader;
+    private TextView mCourse;
+    private TextView mData;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
@@ -94,13 +97,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         Bundle args = new Bundle();
         args.putInt(LAYOUT, layout);
         fragment.setArguments(args);
-        return fragment;
-    }
-
-    public static RaceListFragment newInstance(int layout, SpannableString header) {
-        RaceListFragment fragment = newInstance(layout);
-        Bundle args = fragment.getArguments();
-        args.putString(HEADER, header.toString());
         return fragment;
     }
 
@@ -251,10 +247,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             });
         }
 
-        mHeader = (TextView) view.findViewById(R.id.regatta_data);
-        if (getArguments() != null && getArguments().getString(HEADER) != null) {
-            mHeader.setText(getArguments().getString(HEADER));
-        }
+        mCourse = (TextView) view.findViewById(R.id.regatta_course);
+        mData = (TextView) view.findViewById(R.id.regatta_data);
 
         ImageView imageView = (ImageView) view.findViewById(R.id.nav_button);
         if (imageView != null) {
@@ -362,7 +356,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
-    public void setUp(DrawerLayout drawerLayout, SpannableString header) {
+    public void setUp(DrawerLayout drawerLayout, String course, String event, String author) {
         mDrawerLayout = drawerLayout;
         mDrawerLayout.setStatusBarBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.colorPrimaryDark));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity().findViewById(
@@ -391,8 +385,15 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         });
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        if (mHeader != null) {
-            mHeader.setText(header);
+        if (mCourse != null) {
+            SpannableString header = new SpannableString(event);
+            StyleSpan spanBold = new StyleSpan(Typeface.BOLD);
+            header.setSpan(spanBold, 0, header.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mCourse.setText(header);
+        }
+
+        if (mData != null) {
+            mData.setText(String.format("%s / %s", course, author));
         }
     }
 

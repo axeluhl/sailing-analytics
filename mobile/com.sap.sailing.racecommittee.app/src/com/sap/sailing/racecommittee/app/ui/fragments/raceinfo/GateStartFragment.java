@@ -14,6 +14,8 @@ import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
@@ -221,6 +223,8 @@ public class GateStartFragment {
             ArrayList<String> timeValues = getTimeValues();
             final NumberPicker time_launch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
             final NumberPicker time_golf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
+            ThemeHelper.setPickerTextColor(getActivity(), time_launch, ColorHelper.getThemedColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerTextColor(getActivity(), time_golf, ColorHelper.getThemedColor(getActivity(), R.attr.white));
             if (time_launch != null) {
                 time_launch.setMinValue(0);
                 time_launch.setMaxValue(timeValues.size() - 1);

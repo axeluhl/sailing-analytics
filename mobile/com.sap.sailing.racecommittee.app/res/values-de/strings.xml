@@ -266,7 +266,6 @@
     <string name="login_text">Willkommen in der SAP Sailing\nRace Committee App</string>
     <string name="nav_drawer_close">Navigation Drawer Schließen</string>
     <string name="nav_drawer_open">Navigation Drawer Öffnen</string>
-    <string name="nav_header">#EVENT#\n#AREA# / #AUTHOR#</string>
     <string name="sign_up">Anmelden</string>
     <string name="start_mode">Modus</string>
     <string name="start_procedure">Prozedur</string>

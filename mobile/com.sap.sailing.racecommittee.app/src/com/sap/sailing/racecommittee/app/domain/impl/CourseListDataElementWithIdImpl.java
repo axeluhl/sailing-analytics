@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 
-public class CourseListDataElementWithId extends CourseListDataElement {
+public class CourseListDataElementWithIdImpl extends CourseListDataElement {
 
     private long mId;
 

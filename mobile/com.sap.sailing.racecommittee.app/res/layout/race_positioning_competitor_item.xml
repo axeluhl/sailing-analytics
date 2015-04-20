@@ -19,7 +19,6 @@
             android:id="@+id/competitor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
             android:textAppearance="?textSmall"
             tools:text="Gazprom Team Russia"/>
     </LinearLayout>

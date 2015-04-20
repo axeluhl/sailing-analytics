@@ -55,5 +55,4 @@ public class BaseFragment extends RaceFragment {
 
         return calendar;
     }
-
 }

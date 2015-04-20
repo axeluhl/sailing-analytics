@@ -48,6 +48,7 @@ public class RaceSummaryFragment extends BaseFragment {
 
             Calendar finished = (Calendar) calendar.clone();
             finished.setTime(getRaceState().getFinishedTime().asDate());
+
             Calendar finishedTime = floorTime(finished);
 
             final ImageView button = ViewHolder.get(getView(), R.id.edit_summary);
