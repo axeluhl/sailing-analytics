@@ -3,6 +3,8 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
@@ -31,12 +33,14 @@ import com.sap.sse.common.TimePoint;
  * @param <T>
  */
 public interface RankingMetric<T extends Comparable<T>> {
-    default Comparator<Competitor> getRankingComparator(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        return getRankingComparator(trackedRace, competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    default Comparator<Competitor> getRankingComparator(TrackedRace trackedRace, TimePoint timePoint) {
+        return getRaceRankingComparator(trackedRace, null, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
-    Comparator<Competitor> getRankingComparator(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
-    
+    Comparator<Competitor> getRaceRankingComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+    Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
     /**
      * Calculates the time that the <code>trailing</code> competitor needs to "catch up" to reach the <code>leading</code> competitor,
      * measured in the <code>trailing</code> competitor's "time system." For one-design ranking this will be the gap based on the
