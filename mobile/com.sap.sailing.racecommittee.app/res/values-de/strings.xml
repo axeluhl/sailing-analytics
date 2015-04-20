@@ -27,7 +27,7 @@
     <string name="abort_running_race">Abbruch</string>
     <string name="choose_xray_flag_up">Einzelrückruf</string>
     <string name="choose_first_substitute_flag">Gesamtrückruf</string>
-    <string name="confirm_general_recall">General Recall ausführen?</string>
+    <string name="confirm_general_recall">Gesamtrückruf ausführen?</string>
     <string name="confirm">Bestätigen</string>
     <string name="abort">Abbruch</string>
     <string name="choose_blue_flag">Zieleinlauf beginnen</string>
@@ -44,7 +44,7 @@
     <string name="racelist_running">Gestartet um %s</string>
     <string name="racelist_finishing">Zieleinlauf</string>
     <string name="racelist_finished">Beendet</string>
-    <string name="racelist_unknown">Unknown</string>
+    <string name="racelist_unknown">Unbekannt</string>
     <string name="currentlyLoading">Lädt &#8230;</string>
     <string name="racingview_header">Wettfahrten auf Bahn \'%s\'</string>
     <string name="running_on_unknown">(Kurs setzen)</string>
@@ -72,7 +72,7 @@
     <string name="no_line_opening_time_selected">Keine Zeit gesetzt</string>
     <string name="set_gate_line_opening_time_title">Gate Launch Zeit setzen</string>
     <string name="choose_line_open_min">min</string>
-    <string name="previous_course">Vorherigen Kurs</string>
+    <string name="previous_course">Vorheriger Kurs</string>
     <string name="make_new_course">Kurs erstellen</string>
     <string name="course_design_assets">Kurselemente</string>
     <string name="course_design_dialog_title">Kursdesign erstellen</string>
@@ -251,10 +251,10 @@
     <string name="race_finished">Beendet %s</string>
     <string name="wind">Wind</string>
     <string name="wind_display">dd</string>
-    <string name="flags_abandon">Aufgeben</string>
+    <string name="flags_abandon">Abbrechen</string>
     <string name="flags_recall">Rückruf</string>
     <string name="flags_course">Kurs</string>
-    <string name="flags_more">Ziel</string>
+    <string name="flags_more">Zieleinlauf</string>
     <string name="flags_postpone">Verschieben</string>
     <string name="wind_info">%2$s / %1$s kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
@@ -267,7 +267,7 @@
     <string name="nav_drawer_close">Navigation Drawer Schließen</string>
     <string name="nav_drawer_open">Navigation Drawer Öffnen</string>
     <string name="nav_header">#EVENT#\n#AREA# / #AUTHOR#</string>
-    <string name="sign_up">Schreib mich ein</string>
+    <string name="sign_up">Anmelden</string>
     <string name="start_mode">Modus</string>
     <string name="start_procedure">Prozedur</string>
     <string name="start_procedure_change">Ändere Start Prozedur</string>
@@ -275,7 +275,7 @@
     <string name="start_procedure_ess">ESS</string>
     <string name="start_procedure_gate_start">Gate Start</string>
     <string name="start_procedure_line_start">Line Start</string>
-    <string name="start_procedure_simplified">Simplified</string>
+    <string name="start_procedure_simplified">Vereinfacht</string>
     <string name="race_select">Wähle ein Rennen</string>
     <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
     <string name="gate_start_timing">Gate Start Timing</string>
@@ -286,7 +286,7 @@
     <string name="wind_from">Kommt aus</string>
     <string name="wind_off">Keine Wind Sensoren</string>
     <string name="wind_on">Wind Sensoren aktiv</string>
-    <string name="wind_position">Position Vermessung</string>
+    <string name="wind_position">Position</string>
     <string name="wind_set_data">Winddaten setzen</string>
     <string name="wind_set_position">Position Setzen</string>
     <string name="wind_speed">Geschwindigkeit</string>
@@ -309,11 +309,11 @@
     <string name="flag_first_subst_desc">Allgemeiner Rückruf</string>
     <string name="flag_blue">Blau</string>
     <string name="flag_blue_desc">Beginn der Ziel Phase</string>
-    <string name="flag_november_desc">Alle gestarteten Rennen aufgeben</string>
+    <string name="flag_november_desc">Alle gestarteten Rennen abbrechen</string>
     <string name="flag_november_alpha"><![CDATA[November & Alpha]]></string>
     <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
-    <string name="flag_november_alpha_desc">Aufgeben, heute keine Rennen mehr</string>
-    <string name="flag_november_hotel_desc">Aufgeben, weitere Informationen an Land</string>
+    <string name="flag_november_alpha_desc">Abbrechen, heute keine Rennen mehr</string>
+    <string name="flag_november_hotel_desc">Abbrechen, weitere Informationen an Land</string>
     <string name="race_reset_confirm">Rennen zurücksetzen</string>
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden.</string>
@@ -323,7 +323,7 @@
     <string name="tomorrow">Morgen</string>
     <string name="race_begin_finish_header">Ziel Beginn</string>
     <string name="race_begin_finish_current">Aktuelle Zeit Verwenden</string>
-    <string name="race_begin_finish_custom">Spezielle Zeit Verwenden</string>
+    <string name="race_begin_finish_custom">Angegebene Zeit Verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #AT#° / #SPEED# kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
     <string name="wind_panel"><![CDATA[von #AT#°\n#SPEED# kn]]></string>
@@ -338,17 +338,17 @@
     <string name="preference_theme_default">dunkel</string>
     <string name="race_setup_confirm">Setup Bestätigen</string>
     <string name="race_end_finish_header">Ende Ziel</string>
-    <string name="race_summary_finish_begin">Ziel Beginnen</string>
+    <string name="race_summary_finish_begin">Ziel Beginn</string>
     <string name="race_summary_finish_duration">Ziel Dauer</string>
     <string name="race_summary_finish_end">Ziel Ende</string>
     <string name="race_summary_individual_recalls">Individuelle Rückrufe</string>
     <string name="race_summary_start">Renn Start</string>
     <string name="race_summary_title">Renn Zusammenfassung</string>
-    <string name="race_summary_wind_direction">Durschnittnliche Wind Richtung</string>
-    <string name="race_summary_wind_speed">Durschnittliche Wind Geschwindigkeit</string>
+    <string name="race_summary_wind_direction">Durschnittliche Windrichtung</string>
+    <string name="race_summary_wind_speed">Durschnittliche Windgeschwindigkeit</string>
     <string name="record_voice">Stimme Aufzeichnen</string>
     <string name="finishing_started">Erstes Schiff im Ziel um #TIME#</string>
-    <string name="finishing_done">Runter jetzt</string>
+    <string name="finishing_done">Jetzt Runter</string>
     <string name="finished_edit">Liste Bearbeiten</string>
     <string name="finished_list">Zielliste</string>
     <string name="finished_photos">Fotos Aufnehmen</string>
@@ -359,7 +359,7 @@
     <string name="finished_submit">Übermitteln</string>
     <string name="finished_text_01">Bitte evaluieren und übermitteln Sie die Zusammenfassung des Rennens.</string>
     <string name="finished_text_02">Ihre Zusammenfassung wurde veröffentlicht. Änderungen müssen erneut gesendet werden.</string>
-    <string name="protest_time">Protest Zeit</string>
+    <string name="protest_time">Protestzeit</string>
     <string name="finished_duration">#TIME# min</string>
     <string name="no_camera">Keine Kamera App gefunden</string>
     <string name="delete_file">Das löscht das Foto</string>
@@ -376,8 +376,8 @@
     <string name="no_text">Kein Text.</string>
     <string name="error_picture_callback">Fehler beim Speichern des Bildes.</string>
     <string name="competitor_load_error">Teilnehmer: %s</string>
-    <string name="error_announced_finish_time">Die vorliegende Zielankunftszeit is früher als die des Erstplatzierten. Bitte überprüfen Sie die Zeit noch einmal.</string>
-    <string name="error_time_before_finish">Die vorliegende Zeit ist fürher als die Startzeit des Rennens.</string>
+    <string name="error_announced_finish_time">Die gewählte Zielankunftszeit ist früher als die des Erstplatzierten. Bitte überprüfen Sie die Zeit noch einmal.</string>
+    <string name="error_time_before_finish">Die gewählte Zeit ist früher als die Startzeit des Rennens.</string>
     <string name="error_set_wind">Bitte setzen Sie die Windinformation!</string>
     <string name="use_previous_course_dialog_title">Bisheriges Kursdesign verwenden</string>
     <string name="use_previous_course_dialog_message">Soll das bisherige Kursdesign verwendet werden?</string>
@@ -392,7 +392,7 @@
     <string name="error_no_way_point">Das Kursdesign erfordert mindestens einen Wegpunkt.</string>
     <string name="start_w_placeholder">Start %s</string>
     <string name="events_waiting_to_be_sent"><![CDATA[Es müssen noch %1$d Events gesendet werden.\nDie letzte erfolgreiche Übertragung war am: %2$s.]]></string>
-    <string name="no_event_to_be_sent">Zur Zweit wartet kein Event auf die Übertragung.</string>
+    <string name="no_event_to_be_sent">Derzeit wartet kein Event auf die Übertragung.</string>
     <string name="never">nie</string>
     <string name="connected_to_wp"><![CDATA[Verbunden mit: %1$s\n%2$s]]></string>
 </resources>
