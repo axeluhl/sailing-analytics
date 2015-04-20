@@ -20,12 +20,13 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true">
 
-        <TextView
+        <EditText
             android:id="@+id/compass_view_degree"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textAppearance="?textXLarge"
+            android:inputType="number"
+            android:textAppearance="?textLarge"
             tools:text="0"/>
 
         <TextView
@@ -35,7 +36,7 @@
             android:layout_toEndOf="@+id/compass_view_degree"
             android:layout_toRightOf="@+id/compass_view_degree"
             android:text="°"
-            android:textAppearance="?textXLarge"/>
+            android:textAppearance="?textLarge"/>
     </RelativeLayout>
 
     <ImageView
