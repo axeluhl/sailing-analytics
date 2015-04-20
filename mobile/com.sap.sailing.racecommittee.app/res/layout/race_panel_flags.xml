@@ -33,11 +33,14 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="?flags_postpone" />
+                    android:src="?flags_postpone"
+                    android:layout_gravity="center_horizontal"
+                    />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="125dp"
                     android:gravity="center_horizontal"
                     android:text="@string/flags_postpone"
                     android:textAppearance="?textSmall" />
