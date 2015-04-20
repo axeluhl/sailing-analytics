@@ -209,27 +209,26 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         public void onRacingProcedureChanged(ReadonlyRaceState state) {
             infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
             switchToInfoFragment();
-        };
+        }
 
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
-            switchToInfoFragment();
-        };
+//            switchToInfoFragment();
+        }
 
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
             switchToInfoFragment();
-        };
+        }
 
         @Override
         public void onCourseDesignChanged(ReadonlyRaceState state) {
             updateCourseDesignLabel();
-        };
+        }
 
         @Override
         public void onWindFixChanged(ReadonlyRaceState state) {
             updateWindLabel();
-        };
+        }
     };
-
 }
