@@ -321,7 +321,7 @@
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
-    <string name="race_begin_finish_header">Ziel Beginnen</string>
+    <string name="race_begin_finish_header">Ziel Beginn</string>
     <string name="race_begin_finish_current">Aktuelle Zeit Verwenden</string>
     <string name="race_begin_finish_custom">Spezielle Zeit Verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #AT#° / #SPEED# kn]]></string>
@@ -343,15 +343,15 @@
     <string name="race_summary_finish_end">Ziel Ende</string>
     <string name="race_summary_individual_recalls">Individuelle Rückrufe</string>
     <string name="race_summary_start">Renn Start</string>
-    <string name="race_summary_title">Renn Zusammenfassung Summary</string>
+    <string name="race_summary_title">Renn Zusammenfassung</string>
     <string name="race_summary_wind_direction">Durschnittnliche Wind Richtung</string>
     <string name="race_summary_wind_speed">Durschnittliche Wind Geschwindigkeit</string>
     <string name="record_voice">Stimme Aufzeichnen</string>
     <string name="finishing_started">Erstes Schiff im Ziel um #TIME#</string>
     <string name="finishing_done">Runter jetzt</string>
     <string name="finished_edit">Liste Bearbeiten</string>
-    <string name="finished_list">Ziel Liste</string>
-    <string name="finished_photos">Nimm Photos Auf</string>
+    <string name="finished_list">Zielliste</string>
+    <string name="finished_photos">Fotos Aufnehmen</string>
     <string name="finished_recording">Aufzeichnen</string>
     <string name="finished_replay">Stimme Abspielen</string>
     <string name="finished_tracking">Tracking</string>
