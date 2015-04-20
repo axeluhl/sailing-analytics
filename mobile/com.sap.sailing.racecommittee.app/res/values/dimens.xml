@@ -12,6 +12,8 @@
 
     <dimen name="preference_margin">0dp</dimen>
 
+    <dimen name="panel_text_padding">5dp</dimen>
+
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
 

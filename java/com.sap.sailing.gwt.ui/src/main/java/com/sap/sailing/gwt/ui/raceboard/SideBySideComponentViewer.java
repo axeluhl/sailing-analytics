@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
@@ -227,7 +227,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         }
     }
 
-    public <SettingsType extends Settings> void showSettingsDialog(Component<SettingsType> component) {
+    public <SettingsType extends AbstractSettings> void showSettingsDialog(Component<SettingsType> component) {
         if (component.hasSettings()) {
             new SettingsDialog<SettingsType>(component, stringMessages).show();
         }

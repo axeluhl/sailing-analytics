@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining.settings;
 
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 
-public class QueryRunnerSettings implements Settings {
+public class QueryRunnerSettings extends AbstractSettings {
     
     private boolean runAutomatically;
     
