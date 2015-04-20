@@ -224,13 +224,12 @@ public class GateStartFragment {
             if (time_launch != null) {
                 time_launch.setMinValue(0);
                 time_launch.setMaxValue(timeValues.size() - 1);
-                time_launch.setDisplayedValues(timeValues.toArray(new String[timeValues.size()]));
                 int value = (int) GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
                 time_launch.setValue(value - 1);
                 time_launch.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                        totalTimeText.setText("" + ((newVal + 1) + (time_golf.getValue() + 1)) + " min");
+                        totalTimeText.setText("" + ((newVal) + (time_golf.getValue())) + " min");
                     }
                 });
             }
@@ -239,16 +238,15 @@ public class GateStartFragment {
             if (time_golf != null) {
                 time_golf.setMinValue(0);
                 time_golf.setMaxValue(timeValues.size() - 1);
-                time_golf.setDisplayedValues(timeValues.toArray(new String[timeValues.size()]));
                 int value = (int) GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
                 time_golf.setValue(value - 1);
                 time_golf.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                        totalTimeText.setText("" + ((newVal + 1)  + (time_launch.getValue() + 1)) + " min");
+                        totalTimeText.setText("" + ((newVal)  + (time_launch.getValue() )) + " min");
                     }
                 });
-                totalTimeText.setText("" + ((time_launch.getValue() + 1)  + (time_golf.getValue() + 1)) + " min");
+                totalTimeText.setText("" + ((time_launch.getValue() )  + (time_golf.getValue())) + " min");
             }
 
             View button = getActivity().findViewById(R.id.set_gate_time);
@@ -282,7 +280,7 @@ public class GateStartFragment {
         private ArrayList<String> getTimeValues() {
             ArrayList<String> timeValue = new ArrayList<>();
             for (int i = 1; i < 20; i++) {
-                timeValue.add(String.format("%02d min", i));
+                timeValue.add(String.format("%02d", i));
             }
             return timeValue;
         }

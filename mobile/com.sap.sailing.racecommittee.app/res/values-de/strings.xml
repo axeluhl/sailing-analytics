@@ -279,8 +279,8 @@
     <string name="race_select">Wähle ein Rennen</string>
     <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
     <string name="gate_start_timing">Gate Start Timing</string>
-    <string name="time_golf">Golf</string>
-    <string name="time_launch">Gate Launch</string>
+    <string name="time_golf">Golf (Minuten)</string>
+    <string name="time_launch">Gate Launch (Minuten)</string>
     <string name="time_total">Gesamt</string>
     <string name="wind_enter_position">Setze Deine Position</string>
     <string name="wind_from">Kommt aus</string>
