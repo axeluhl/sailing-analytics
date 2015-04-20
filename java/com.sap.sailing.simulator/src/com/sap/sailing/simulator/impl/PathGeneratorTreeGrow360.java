@@ -245,9 +245,9 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         Bearing[] bearOptimalUpwind = pd.optimalDirectionsUpwind();
         Bearing upwindLeftRight = bearOptimalUpwind[0].getDifferenceTo(bearOptimalUpwind[1]);
         Bearing upwindLeftTarget = bearOptimalUpwind[0].getDifferenceTo(bearTarget);
-        // check whether boat is in "tacking area"
         PointOfSail pointOfSail = PointOfSail.REACHING;
         char reachingSide = ' ';
+        // check whether boat is in "tacking area"
         if ((upwindLeftTarget.getDegrees() >= -1) && (upwindLeftTarget.getDegrees() <= upwindLeftRight.getDegrees()+1)) {
             logger.fine("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees() + ", diffLeftRight: "
                     + upwindLeftRight.getDegrees() + ", " + path.path + ")");

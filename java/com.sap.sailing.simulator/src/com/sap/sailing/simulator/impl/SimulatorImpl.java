@@ -40,9 +40,9 @@ public class SimulatorImpl implements Simulator {
     }
 
     @Override
-    public Path getPath(PathType pathType, MaximumTurnTimes maxTurnTimes) throws SparsePolarDataException {
+    public Path getPath(PathType pathType) throws SparsePolarDataException {
         PathGeneratorTreeGrow360 genTreeGrow;
-        PathGeneratorOpportunistEuclidian genOpportunistic;
+        PathGeneratorOpportunistEuclidian360 genOpportunistic;
         Path path = null;
         switch (pathType) {
         case OMNISCIENT:
@@ -61,13 +61,13 @@ public class SimulatorImpl implements Simulator {
             path = genTreeGrow.getPath();
             break;
         case OPPORTUNIST_LEFT:
-            genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters); // instantiate greedy searcher
-            genOpportunistic.setEvaluationParameters(maxTurnTimes, true); // use maxTurnTimes of 1-turners to avoid passing of lay lines
+            genOpportunistic = new PathGeneratorOpportunistEuclidian360(this.simulationParameters); // instantiate greedy searcher
+            genOpportunistic.setEvaluationParameters(true); // use maxTurnTimes of 1-turners to avoid passing of lay lines
             path = genOpportunistic.getPath();
             break;
         case OPPORTUNIST_RIGHT:
-            genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters); // instantiate greedy searcher
-            genOpportunistic.setEvaluationParameters(maxTurnTimes, false); // use maxTurnTimes of 1-turners to avoid passing of lay lines
+            genOpportunistic = new PathGeneratorOpportunistEuclidian360(this.simulationParameters); // instantiate greedy searcher
+            genOpportunistic.setEvaluationParameters(false); // use maxTurnTimes of 1-turners to avoid passing of lay lines
             path = genOpportunistic.getPath();
             break;
         }

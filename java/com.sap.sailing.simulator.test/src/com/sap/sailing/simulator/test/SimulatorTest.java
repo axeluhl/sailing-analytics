@@ -19,8 +19,8 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularGrid;
-import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SparsePolarDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
@@ -61,8 +61,8 @@ public class SimulatorTest {
                 SailingSimulatorConstants.ModeFreestyle, true, true);
         SimulatorImpl sailingSim = new SimulatorImpl(param);
 
-        Path pathOmniscient = sailingSim.getPath(PathType.OMNISCIENT, null);
-        Path pathOpportunist = sailingSim.getPath(PathType.OPPORTUNIST_LEFT, null);
+        Path pathOmniscient = sailingSim.getPath(PathType.OMNISCIENT);
+        Path pathOpportunist = sailingSim.getPath(PathType.OPPORTUNIST_LEFT);
         Map<PathType, Path> paths = new HashMap<PathType, Path>();
         paths.put(PathType.OMNISCIENT, pathOmniscient);
         paths.put(PathType.OPPORTUNIST_LEFT, pathOpportunist);

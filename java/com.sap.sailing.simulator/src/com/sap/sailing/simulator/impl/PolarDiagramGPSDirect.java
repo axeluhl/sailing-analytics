@@ -13,7 +13,10 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.simulator.BoatDirection;
+import com.sap.sailing.simulator.PointOfSail;
 import com.sap.sailing.simulator.PolarDiagram;
+import com.sap.sse.common.Util.Pair;
 
 public class PolarDiagramGPSDirect implements PolarDiagram, Serializable  {
 
@@ -232,5 +235,11 @@ public class PolarDiagramGPSDirect implements PolarDiagram, Serializable  {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public Pair<PointOfSail, BoatDirection> getPointOfSail(Bearing bearTarget) {
+        // TODO Auto-generated method stub
+        return null;
+    }
   
 }

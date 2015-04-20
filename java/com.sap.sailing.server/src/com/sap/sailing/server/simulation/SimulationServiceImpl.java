@@ -46,7 +46,6 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.Simulator;
-import com.sap.sailing.simulator.impl.MaximumTurnTimes;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.SimulatorImpl;
@@ -403,32 +402,31 @@ public class SimulationServiceImpl implements SimulationService {
         FutureTask<Path> taskOmniscient = null;
         if (simulationParameters.showOmniscient()) {
             // schedule omniscient task
-            taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT, null));
+            taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT));
             executor.execute(taskOmniscient);
         }
 
         // schedule 1-turner tasks
-        FutureTask<Path> task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT, null));
-        FutureTask<Path> task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT, null));
+        FutureTask<Path> task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
+        FutureTask<Path> task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
         executor.execute(task1TurnerLeft);
         executor.execute(task1TurnerRight);
+
+        FutureTask<Path> taskOpportunistLeft = null;
+        FutureTask<Path> taskOpportunistRight = null;
+        if (simulationParameters.showOpportunist()) {        
+            // schedule opportunist tasks (which depend on 1-turner results)
+            taskOpportunistLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
+            taskOpportunistRight = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
+            executor.execute(taskOpportunistLeft);
+            executor.execute(taskOpportunistRight);
+        }
 
         // collect 1-turner results
         result.put(PathType.ONE_TURNER_LEFT, task1TurnerLeft.get());
         result.put(PathType.ONE_TURNER_RIGHT, task1TurnerRight.get());
 
-        FutureTask<Path> taskOpportunistLeft = null;
-        FutureTask<Path> taskOpportunistRight = null;
-        if (simulationParameters.showOpportunist()) {        
-            // maximum turn times
-            MaximumTurnTimes maxTurnTimes = new MaximumTurnTimes(task1TurnerLeft.get().getMaxTurnTime(), task1TurnerRight.get().getMaxTurnTime());
-
-            // schedule opportunist tasks (which depend on 1-turner results)
-            taskOpportunistLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT, maxTurnTimes));
-            taskOpportunistRight = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT, maxTurnTimes));
-            executor.execute(taskOpportunistLeft);
-            executor.execute(taskOpportunistRight);
-
+        if (simulationParameters.showOpportunist()) {
             // collect opportunist results
             Path pathOpportunistLeft = taskOpportunistLeft.get();
             if (pathOpportunistLeft.getTurnCount() == 1) {
@@ -444,7 +442,14 @@ public class SimulationServiceImpl implements SimulationService {
 
         if (simulationParameters.showOmniscient()) {
             // collect omniscient result (last, since usually slowest calculation)
-            result.put(PathType.OMNISCIENT, taskOmniscient.get());
+            Path pathOmniscient = taskOmniscient.get();
+            if (pathOmniscient.getFinalTime().after(result.get(PathType.ONE_TURNER_LEFT).getFinalTime())) {
+                pathOmniscient = result.get(PathType.ONE_TURNER_LEFT);
+            }
+            if (pathOmniscient.getFinalTime().after(result.get(PathType.ONE_TURNER_RIGHT).getFinalTime())) {
+                pathOmniscient = result.get(PathType.ONE_TURNER_RIGHT);
+            }
+            result.put(PathType.OMNISCIENT, pathOmniscient);
         }
         // return combined result
         return result;

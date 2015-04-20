@@ -19,7 +19,10 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sailing.simulator.BoatDirection;
+import com.sap.sailing.simulator.PointOfSail;
 import com.sap.sailing.simulator.PolarDiagram;
+import com.sap.sse.common.Util.Pair;
 
 public class PolarDiagramBase implements PolarDiagram, Serializable {
 
@@ -900,6 +903,42 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     @Override
     public void setTargetDirection(Bearing newTargetDirection) {
         targetDirection = newTargetDirection;
+    }
+
+    @Override
+    public Pair<PointOfSail, BoatDirection> getPointOfSail(Bearing bearTarget) {
+        double offSet = 1;
+        Bearing[] bearOptimalUpwind = this.optimalDirectionsUpwind();
+        Bearing[] bearOptimalDownwind = this.optimalDirectionsDownwind();
+        // compare target bearing to upwind bearings
+        Bearing upwindLeftRight = bearOptimalUpwind[0].getDifferenceTo(bearOptimalUpwind[1]);
+        Bearing upwindLeftTarget = bearOptimalUpwind[0].getDifferenceTo(bearTarget);
+        PointOfSail pointOfSail = PointOfSail.REACHING;
+        BoatDirection reachingSide = BoatDirection.NONE;
+        // check whether boat is in "tacking area"
+        if ((upwindLeftTarget.getDegrees() >= -offSet) && (upwindLeftTarget.getDegrees() <= upwindLeftRight.getDegrees() + offSet)) {
+            //logger.fine("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees()
+            //        + ", diffLeftRight: " + upwindLeftRight.getDegrees() + ", " + currentPosition + ")");
+            pointOfSail = PointOfSail.TACKING;
+        } else {
+            Bearing downwindLeftRight = bearOptimalDownwind[0].getDifferenceTo(bearOptimalDownwind[1]);
+            Bearing downwindLeftTarget = bearOptimalDownwind[0].getDifferenceTo(bearTarget);
+            // check whether boat is in "non-sailable area"
+            if ((downwindLeftTarget.getDegrees() >= -offSet) && (downwindLeftTarget.getDegrees() <= downwindLeftRight.getDegrees() + offSet)) {
+                //logger.fine("point-of-sail: jibing (diffLeftTarget: " + downwindLeftTarget.getDegrees()
+                //        + ", diffLeftRight: " + downwindLeftRight.getDegrees() + ", " + currentPosition + ")");
+                pointOfSail = PointOfSail.JIBING;
+            } else {
+                // logger.info("path: "+path.path);
+                Bearing windBoat = wind.getBearing().getDifferenceTo(bearTarget);
+                if (windBoat.getDegrees() > 0) {
+                    reachingSide = BoatDirection.REACH_LEFT; // left-sided reaching
+                } else {
+                    reachingSide = BoatDirection.REACH_RIGHT; // right-sided reaching
+                }
+            }
+        }
+        return new Pair<PointOfSail, BoatDirection>(pointOfSail, reachingSide);
     }
 
 }

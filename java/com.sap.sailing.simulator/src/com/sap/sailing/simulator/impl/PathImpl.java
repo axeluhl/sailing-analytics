@@ -429,4 +429,15 @@ public class PathImpl implements Path, Serializable {
 
         return !((diff >= 0 && diff <= TRESHOLD_DEGREES) || (diff >= (180 - TRESHOLD_DEGREES) && diff <= (180 + TRESHOLD_DEGREES)) || (diff >= (360 - TRESHOLD_DEGREES) && diff <= 360));
     }
+
+    @Override
+    public TimePoint getFinalTime() {
+        TimePoint finalTime = null;
+        if (this.pathPoints != null) {
+            if (this.pathPoints.size() > 0) {
+                finalTime = this.pathPoints.get(this.pathPoints.size()-1).getTimePoint();
+            }
+        }
+        return finalTime;
+    }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.simulator;
 import java.util.List;
 
 import com.sap.sailing.simulator.windfield.WindField;
+import com.sap.sse.common.TimePoint;
 
 public interface Path {
 
@@ -17,6 +18,8 @@ public interface Path {
     void setWindField(WindField wf);
 
     List<TimedPositionWithSpeed> getTurns();
+    
+    TimePoint getFinalTime();
 
     Path getEvenTimedPath(long timeStep);
     
