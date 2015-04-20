@@ -25,7 +25,7 @@
                 android:src="@drawable/marker"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
@@ -33,16 +33,15 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
+                    android:src="?flags_postpone"
                     android:layout_gravity="center_horizontal"
-                    android:src="?flags_postpone"/>
+                    />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
                     android:maxWidth="125dp"
-                    android:paddingLeft="@dimen/panel_text_padding"
-                    android:paddingRight="@dimen/panel_text_padding"
+                    android:gravity="center_horizontal"
                     android:text="@string/flags_postpone"
                     android:textAppearance="?textSmall"/>
             </LinearLayout>
@@ -62,7 +61,7 @@
                 android:src="@drawable/marker"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
@@ -70,15 +69,15 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:layout_gravity="center_horizontal"
-                    android:src="?flags_abandon"/>
+                    android:src="?flags_abandon"
+                    android:gravity="center_horizontal"
+                    />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="125dp"
                     android:gravity="center_horizontal"
-                    android:paddingLeft="@dimen/panel_text_padding"
-                    android:paddingRight="@dimen/panel_text_padding"
                     android:text="@string/flags_abandon"
                     android:textAppearance="?textSmall"/>
             </LinearLayout>
@@ -98,7 +97,7 @@
                 android:src="@drawable/marker"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
@@ -106,15 +105,14 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
                     android:src="?flags_recall"/>
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="125dp"
                     android:gravity="center_horizontal"
-                    android:paddingLeft="@dimen/panel_text_padding"
-                    android:paddingRight="@dimen/panel_text_padding"
                     android:text="@string/flags_recall"
                     android:textAppearance="?textSmall"/>
             </LinearLayout>
@@ -135,7 +133,7 @@
                 android:src="@drawable/marker"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
@@ -147,11 +145,10 @@
                     android:src="?flags_course"/>
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="125dp"
                     android:gravity="center_horizontal"
-                    android:paddingLeft="@dimen/panel_text_padding"
-                    android:paddingRight="@dimen/panel_text_padding"
                     android:text="@string/flags_course"
                     android:textAppearance="?textSmall"/>
             </LinearLayout>
@@ -168,10 +165,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
+
                 android:src="@drawable/marker"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
@@ -179,15 +177,14 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
                     android:src="?flags_more"/>
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="125dp"
                     android:gravity="center_horizontal"
-                    android:paddingLeft="@dimen/panel_text_padding"
-                    android:paddingRight="@dimen/panel_text_padding"
                     android:text="@string/flags_more"
                     android:textAppearance="?textSmall"/>
             </LinearLayout>
@@ -208,23 +205,22 @@
                 android:src="@drawable/marker"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="@dimen/side_button_imageSize"
-                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:src="?mic_48dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="125dp"
                     android:gravity="center_horizontal"
-                    android:paddingLeft="@dimen/panel_text_padding"
-                    android:paddingRight="@dimen/panel_text_padding"
                     android:text="@string/record_voice"
                     android:textAppearance="?textSmall"/>
             </LinearLayout>
