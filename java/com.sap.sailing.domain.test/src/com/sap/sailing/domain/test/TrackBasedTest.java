@@ -60,7 +60,7 @@ public abstract class TrackBasedTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
