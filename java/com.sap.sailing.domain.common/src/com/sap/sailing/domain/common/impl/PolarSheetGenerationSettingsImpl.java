@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sse.common.settings.AbstractSettings;
 
-public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
+public class PolarSheetGenerationSettingsImpl extends AbstractSettings implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };

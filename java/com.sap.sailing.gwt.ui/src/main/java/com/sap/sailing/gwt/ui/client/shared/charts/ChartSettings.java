@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 
-public class ChartSettings implements Settings {
+public class ChartSettings extends AbstractSettings {
     private final long stepSize;
     
     public ChartSettings(long stepSize) {

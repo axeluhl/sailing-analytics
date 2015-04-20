@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -21,7 +22,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
      * component and when confirmed, updates that component's settings. The button has no CSS style attached to
      * give callers full flexibility as to how to style the button.
      */
-    public static <T extends Settings> Button createSettingsButton(final Component<T> component, final StringMessages stringMessages) {
+    public static <T extends AbstractSettings> Button createSettingsButton(final Component<T> component, final StringMessages stringMessages) {
         Button settingsButton = new Button();
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
