@@ -62,8 +62,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="35dp"
                 android:text="@string/time_launch"
-                android:textAppearance="?textXSmall"/>
+                android:textSize="@dimen/textSize_22"/>
 
             <NumberPicker
                 android:id="@+id/time_launch"
@@ -77,13 +78,13 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/textView2"
-            android:layout_marginLeft="56dp"
-            android:layout_marginStart="56dp"
-            android:layout_toEndOf="@+id/linearLayout2"
-            android:layout_toRightOf="@+id/linearLayout2"
             android:text="+"
-            android:textAppearance="?textXSmall"/>
+            android:layout_marginBottom="85dp"
+            android:layout_alignBottom="@+id/linearLayout"
+            android:textSize="@dimen/textSize_22"
+            android:layout_gravity="center_vertical"
+            android:layout_toRightOf="@+id/linearLayout2"
+            android:layout_toEndOf="@+id/linearLayout2"/>
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -101,8 +102,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="35dp"
                 android:text="@string/time_golf"
-                android:textAppearance="?textXSmall"/>
+                android:textSize="@dimen/textSize_22"/>
 
             <NumberPicker
                 android:id="@+id/time_golf"
@@ -117,22 +119,27 @@
             style="?attr/buttonSolidNormal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="169dp"
-            android:layout_marginRight="169dp"
-            android:text="@string/gate_start_set"/>
+            android:layout_marginBottom="65dp"
+            android:text="@string/gate_start_set"
+            android:layout_marginLeft="77dp"
+            android:layout_alignBottom="@+id/linearLayout"
+            android:layout_toRightOf="@+id/total_time_text"
+            android:layout_toEndOf="@+id/total_time_text"/>
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/total_time_text"
-            android:layout_centerHorizontal="true"
             android:text="="
-            android:textAppearance="?textXSmall"/>
+            android:textSize="@dimen/textSize_22"
+            android:layout_marginBottom="85dp"
+            android:layout_gravity="center_vertical"
+            android:layout_toRightOf="@+id/linearLayout"
+            android:layout_toEndOf="@+id/linearLayout"
+            android:layout_alignBottom="@+id/linearLayout"
+            android:layout_marginLeft="53dp"
+            android:layout_marginStart="53dp"/>
 
         <TextView
             android:id="@+id/textView3"
@@ -144,15 +151,17 @@
             android:layout_toEndOf="@+id/textView2"
             android:layout_toRightOf="@+id/textView2"
             android:text="@string/time_total"
-            android:textAppearance="?textXSmall"/>
+            android:textSize="@dimen/textSize_22"/>
 
         <TextView
             android:id="@+id/total_time_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/set_gate_time"
+            android:textSize="@dimen/textSize_22"
+            android:layout_marginBottom="85dp"
+            android:layout_gravity="center_vertical"
+            android:layout_alignBottom="@+id/linearLayout"
             android:layout_alignLeft="@+id/textView3"
-            android:layout_alignStart="@+id/textView3"
-            android:textAppearance="?textXSmall"/>
+            android:layout_alignStart="@+id/textView3"/>
     </RelativeLayout>
 </RelativeLayout>
