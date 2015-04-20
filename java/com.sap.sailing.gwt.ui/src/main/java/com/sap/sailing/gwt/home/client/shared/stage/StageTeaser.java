@@ -6,6 +6,8 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -66,7 +68,12 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
                 teaserImage.getStyle().setOpacity(progress);
 
             }
-        }.run(1000);
+        }.run(500);
+
+
+    }
+
+    protected void handleUserAction() {
 
     }
 
@@ -85,7 +92,17 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
 
         };
         new Countdown(eventStart, countdownListener);
+       
+        addDomHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                handleUserAction();
+            }
+        }, ClickEvent.getType());
+        
     }
+
 
     private void updateCountdown(RemainingTime major, RemainingTime minor) {
         if (major == null && minor == null) {

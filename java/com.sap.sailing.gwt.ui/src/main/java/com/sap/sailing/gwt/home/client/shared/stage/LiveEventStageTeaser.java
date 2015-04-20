@@ -7,6 +7,8 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class LiveEventStageTeaser extends StageTeaser {
 
+    private final LiveStageTeaserBand teaserBand;
+
     public LiveEventStageTeaser(EventStageDTO event, HomePlacesNavigator placeNavigator) {
         super(event);
 
@@ -18,7 +20,13 @@ public class LiveEventStageTeaser extends StageTeaser {
         
         bandCount.setAttribute("data-bandcount", "1");
         
-        stageTeaserBandsPanel.getElement().appendChild(new LiveStageTeaserBand(event, placeNavigator).getElement());
+        teaserBand = new LiveStageTeaserBand(event, placeNavigator);
+        stageTeaserBandsPanel.getElement().appendChild(teaserBand.getElement());
+    }
+
+    @Override
+    protected void handleUserAction() {
+        teaserBand.actionLinkClicked(null);
     }
 
 }
