@@ -12,7 +12,7 @@
         <item name="colorAccent">@color/light_colorAccent</item>
 
         <item name="drawerArrowStyle">@style/AppTheme.Light.Widget.DrawerArrowStyle</item>
-        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
+        <item name="android:editTextStyle">@style/AppTheme.Light.EditText</item>
 
         <!-- custom attributes because of custom themes -->
         <!-- colors -->
@@ -92,6 +92,11 @@
     </style>
 
     <!-- custom styles -->
+    <style name="AppTheme.Light.EditText" parent="android:Widget.EditText">
+        <item name="android:background">@drawable/edit_text_light</item>
+        <item name="android:textColor">?white</item>
+    </style>
+
     <style name="AppTheme.Light.Button.Small">
         <item name="android:textSize">@dimen/textSize_22</item>
     </style>
