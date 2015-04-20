@@ -287,7 +287,7 @@
     <string name="wind_off">Keine Wind Sensoren</string>
     <string name="wind_on">Wind Sensoren aktiv</string>
     <string name="wind_position">Position Vermessung</string>
-    <string name="wind_set_data">Wind Daten setzen</string>
+    <string name="wind_set_data">Winddaten setzen</string>
     <string name="wind_set_position">Position Setzen</string>
     <string name="wind_speed">Geschwindigkeit</string>
     <string name="wind_kn">kn</string>
@@ -317,14 +317,14 @@
     <string name="race_reset_confirm">Rennen zurücksetzen</string>
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden.</string>
-    <string name="race_set_start">Start Zeit setzen</string>
+    <string name="race_set_start">Startzeit setzen</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
     <string name="race_begin_finish_header">Ziel Beginnen</string>
     <string name="race_begin_finish_current">Aktuelle Zeit Verwenden</string>
     <string name="race_begin_finish_custom">Spezielle Zeit Verwenden</string>
-    <string name="wind_sensor"><![CDATA[um #UM# / von #AT#° / #SPEED# kn]]></string>
+    <string name="wind_sensor"><![CDATA[um #AT# / von #AT#° / #SPEED# kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
     <string name="wind_panel"><![CDATA[von #AT#°\n#SPEED# kn]]></string>
     <string name="settings_category_developer">Entwickler Optionen</string>
