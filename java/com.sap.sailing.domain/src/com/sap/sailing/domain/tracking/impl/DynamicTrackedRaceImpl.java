@@ -94,7 +94,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             Function<TrackedRace, RankingMetric> rankingMetricConstructor) {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForCacheInvalidationOfWindEstimation, useInternalMarkPassingAlgorithm);
+                delayForCacheInvalidationOfWindEstimation, useInternalMarkPassingAlgorithm, rankingMetricConstructor);
         this.logListener = new DynamicTrackedRaceLogListener(this);
         if (markPassingCalculator != null) {
             logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());

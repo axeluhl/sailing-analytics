@@ -8,6 +8,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -37,8 +38,16 @@ public interface RankingMetric extends Serializable {
      * @return the tracked race to which this ranking metric is specific
      */
     TrackedRace getTrackedRace();
-    
+
+    default Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint) {
+        return getRaceRankingComparator(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
     Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+    default Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
+        return getLegRankingComparator(trackedLeg, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
 
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
@@ -53,6 +62,14 @@ public interface RankingMetric extends Serializable {
      * reference for comparison. This may not be the overall leader of the race at that time, but anything else would require an
      * uncertain prediction of the <code>trailing</code> competitor's performance in the next leg which is not considered to be
      * useful here.
+     */
+    default Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint) {
+        return getTimeToImprove(trailing, leading, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    /**
+     * Same as {@link #getTimeToImprove(Competitor, Competitor, TimePoint)}, but allowing the caller to pass a cache
+     * that accelerates some calculations.
      */
     Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
     
@@ -71,6 +88,14 @@ public interface RankingMetric extends Serializable {
      * 
      * This method can also be used to calculate the corrected times at the end of each leg, simply by passing the time
      * when the competitor finished the respective leg as <code>timePoint</code>.
+     */
+    default Duration getCorrectedTime(Competitor competitor, TimePoint timePoint) {
+        return getCorrectedTime(competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    /**
+     * Same as {@link #getCorrectedTime(Competitor, TimePoint)}, but allowing the caller to pass a cache that
+     * accelerates some calculations.
      */
     Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 }

@@ -42,7 +42,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                            Double.valueOf(getAverageCorrectedVMGAsSecondsPerNauticalMile(c2, timePoint)));
     }
 
-    private double getAverageCorrectedVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
+    double getAverageCorrectedVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
         final double tSec = getActualTimeSinceStartOfRace(competitor, timePoint).asSeconds();
         final double diNM = getWindwardDistanceTraveled(competitor, timePoint).getNauticalMiles();
         final double dNM = getTrackedRace().getCourseLength().getNauticalMiles();

@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -328,13 +329,34 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private final RankingMetric rankingMetric;
 
+    /**
+     * Constructs the tracked race with one-design ranking.
+     */
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
             final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm) {
+        this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                delayForWindEstimationCacheInvalidation, useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new);
+    }
+    
+    /**
+     * Constructs the tracked race with a configurable ranking metric.
+     * 
+     * @param rankingMetricConstructor
+     *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
+     *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
+     *            {@link TrackedRace} argument.
+     */
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
+            final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
+            long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
+            boolean useInternalMarkPassingAlgorithm, Function<TrackedRace, RankingMetric> rankingMetricConstructor) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
-        rankingMetric = new OneDesignRankingMetric(this); // for now we can only do one-design classes; see bug 1018
+        rankingMetric = rankingMetricConstructor.apply(this);
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
