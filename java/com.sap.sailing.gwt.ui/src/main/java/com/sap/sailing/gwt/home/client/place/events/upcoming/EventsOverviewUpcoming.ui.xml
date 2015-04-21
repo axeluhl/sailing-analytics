@@ -26,10 +26,7 @@
               <tr>
                 <td>
                   <div class="{local_res.css.eventsoverviewupcoming_header_info_item}">
-                    <span class="{local_res.css.eventsoverviewupcoming_header_info_item_value}">
-                      <span ui:field="eventsCount" />
-                      <ui:text from='{i18n.events}' />
-                    </span>
+                    <span ui:field="eventsCount" class="{local_res.css.eventsoverviewupcoming_header_info_item_value}" />
                   </div>
                 </td>
                 <td>
