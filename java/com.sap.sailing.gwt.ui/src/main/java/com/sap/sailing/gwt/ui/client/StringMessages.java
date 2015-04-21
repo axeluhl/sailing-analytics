@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
+import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
@@ -106,6 +107,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String historyOfConnections();
     String defineNewConnection();
     String trackedRaces();
+    String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String canSendRequests();
     String connectAndReadRaces();
     String trackSettings();
@@ -207,6 +209,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noSelection();
     String raceIsKnownToStartUpwind();
     String events();
+    String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();
