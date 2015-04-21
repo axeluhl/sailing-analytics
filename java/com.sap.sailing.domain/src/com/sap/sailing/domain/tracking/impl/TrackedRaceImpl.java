@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
@@ -102,6 +103,8 @@ import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
@@ -315,6 +318,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Caches wind requests for a few seconds to accelerate access in live mode
      */
     private transient ShortTimeWindCache shortTimeWindCache;
+    
+    /**
+     * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
+     * this will usually happen by projecting the competitors to the wind direction for upwind and downwind legs or to
+     * the leg's rhumb line for reaching legs, then comparing positions. For handicap races using a time-on-time,
+     * time-on-distance, combination thereof or a more complicated scheme such as ORC Performance Curve, the ranking
+     * process needs to take into account the competitor-specific correction factors defined in the measurement
+     * certificate.
+     */
+    private final RankingMetric rankingMetric;
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
             final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
@@ -322,6 +335,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        rankingMetric = new OneDesignRankingMetric(); // for now we can only do one-design classes; see bug 1018
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
@@ -453,6 +467,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
+    @Override
+    public RankingMetric getRankingMetric() {
+        return rankingMetric;
+    }
+    
     private LinkedHashMap<TimePoint, NamedReentrantReadWriteLock> createCompetitorRankingsLockMap() {
         return new LinkedHashMap<TimePoint, NamedReentrantReadWriteLock>() {
             private static final long serialVersionUID = 6298801656693955386L;
@@ -1154,7 +1173,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // RaceRankComparator requires course read lock
                         getRace().getCourse().lockForRead();
                         try {
-                            RaceRankComparator comparator = new RaceRankComparator(this, timePoint, cache);
+                            Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(this, timePoint, cache);
                             rankedCompetitors = new ArrayList<Competitor>();
                             for (Competitor c : getRace().getCompetitors()) {
                                 rankedCompetitors.add(c);

@@ -117,7 +117,7 @@ public class TrackedLegImpl implements TrackedLeg {
             // race may be updated while calculation is going on, but each individual calculation is properly
             // synchronized, usually by read-write locks, so there is no major difference in synchronization issues
             // an the asynchronous nature of how the data is being received
-            Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint, cache));
+            Collections.sort(rankedCompetitorList, getTrackedRace().getRankingMetric().getLegRankingComparator(this, timePoint, cache));
             rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
             synchronized (competitorTracksOrderedByRank) {
                 competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);

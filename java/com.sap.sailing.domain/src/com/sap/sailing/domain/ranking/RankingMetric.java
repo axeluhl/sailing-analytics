@@ -32,7 +32,7 @@ import com.sap.sse.common.TimePoint;
  *
  * @param <T>
  */
-public interface RankingMetric<T extends Comparable<T>> {
+public interface RankingMetric {
     default Comparator<Competitor> getRankingComparator(TrackedRace trackedRace, TimePoint timePoint) {
         return getRaceRankingComparator(trackedRace, null, new NoCachingWindLegTypeAndLegBearingCache());
     }
@@ -79,7 +79,4 @@ public interface RankingMetric<T extends Comparable<T>> {
      * at <code>timePoint</code>.
      */
     Duration getCorrectedTime(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
-
-    // TODO provide comparators per race / leg
-    // TODO add methods for corrected time and windward distance calculation
 }
