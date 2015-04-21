@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 public class EventsOverviewUpcoming extends Composite {
@@ -36,6 +37,8 @@ public class EventsOverviewUpcoming extends Composite {
     @UiField SpanElement eventsCount;
     @UiField SpanElement ticker;
     @UiField SpanElement colon;
+    
+    @UiField StringMessages i18n;
     
     private boolean isContentVisible = true;
     
@@ -79,7 +82,7 @@ public class EventsOverviewUpcoming extends Composite {
                     + EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
             eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }
-        eventsCount.setInnerText(""+arrayList.size());
+        eventsCount.setInnerText(i18n.eventsCount(arrayList.size()));
     }
     
     private void onHeaderCicked() {

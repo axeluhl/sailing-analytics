@@ -55,12 +55,12 @@ public class EventsOverviewRecentYear extends Composite {
         this.year.setInnerText(String.valueOf(yearDTO.getYear()));
         this.eventsCount.setInnerText(i18n.eventsCount(events.size()));
         if(yearDTO.getSailorCount() > 0) {
-            sailorsCount.setInnerText("" + yearDTO.getSailorCount());
+            sailorsCount.setInnerText(i18n.competitorsCount(yearDTO.getSailorCount()));
         } else {
             sailorsContainer.removeFromParent();
         }
         if(yearDTO.getCountryCount() > 0) {
-            countriesCount.setInnerText("" + yearDTO.getCountryCount());
+            countriesCount.setInnerText(i18n.countriesCount(yearDTO.getCountryCount()));
         } else {
             countriesContainer.removeFromParent();
         }
@@ -69,9 +69,6 @@ public class EventsOverviewRecentYear extends Composite {
         } else {
             trackedRacesContainer.removeFromParent();
         }
-//        this.countriesCount.setInnerText("tbd.");
-//        this.sailorsCount.setInnerText("tbd.");
-//        this.trackedRacesCount.setInnerText("tbd.");
         for (EventListEventDTO eventDTO : events) {
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());

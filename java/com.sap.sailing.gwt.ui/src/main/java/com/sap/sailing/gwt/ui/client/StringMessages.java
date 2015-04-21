@@ -107,7 +107,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String historyOfConnections();
     String defineNewConnection();
     String trackedRaces();
-    String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String canSendRequests();
     String connectAndReadRaces();
     String trackSettings();
@@ -209,7 +208,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noSelection();
     String raceIsKnownToStartUpwind();
     String events();
-    String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();
@@ -1239,4 +1237,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String startLineToFirstMarkTriangle(String distanceInMeters);
     
     String noDataForEvent();
+    String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String racesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
 }
