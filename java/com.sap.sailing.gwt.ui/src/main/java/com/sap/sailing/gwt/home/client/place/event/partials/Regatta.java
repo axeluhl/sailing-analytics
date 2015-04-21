@@ -115,7 +115,7 @@ public class Regatta extends Composite {
             leaderboardGroupName.setInnerText(LongNamesUtil.shortenLeaderboardGroupName(event.getDisplayName(), leaderboardGroup.getName()));
             leaderboardGroupName.setAttribute("data-labeltype", "group1");
         } else {
-            leaderboardGroupNameDiv.getStyle().setDisplay(Display.NONE);
+            leaderboardGroupNameDiv.removeFromParent();
         }
         
         if(leaderboard.competitorsCount > 0) {

@@ -9,7 +9,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -19,7 +18,6 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.partials.Regatta;
@@ -44,7 +42,6 @@ public class EventRegattaList extends Composite {
     @UiField DivElement regattaListNavigationDiv;
     @UiField HTMLPanel regattaListItemsPanel;
     @UiField AnchorElement filterNoLeaderboardGroupsAnchor;
-    @UiField SpanElement allBoatClassesSelected;
     
     private final Map<String, List<Regatta>> regattaElementsByLeaderboardGroup;
     private final List<AnchorElement> leaderboardGroupFilterAnchors;
@@ -71,7 +68,7 @@ public class EventRegattaList extends Composite {
                 registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
                 for(LeaderboardGroupDTO leaderboardGroup: presenter.getCtx().getLeaderboardGroups()) {
                     AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
-                    filterLeaderboardGroupAnchor.setClassName(SharedResources.INSTANCE.mainCss().navbar_button());
+                    filterLeaderboardGroupAnchor.addClassName(EventRegattaListResources.INSTANCE.css().item());
                     filterLeaderboardGroupAnchor.setHref("javascript:;");
                     
                     String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getDisplayName(), leaderboardGroup.getName());
@@ -110,14 +107,13 @@ public class EventRegattaList extends Composite {
             @Override
             public void onBrowserEvent(Event event) {
                 switch (DOM.eventGetType(event)) {
-                    case Event.ONCLICK:
-                         filterRegattaListByLeaderboardGroup(leaderboardGroup);
-                         
-                         for(AnchorElement anchor: leaderboardGroupFilterAnchors) {
-                             anchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-                         }
-                         filterLeaderboardGroupAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-                         break;
+                case Event.ONCLICK:
+                    filterRegattaListByLeaderboardGroup(leaderboardGroup);
+                    for (AnchorElement anchor : leaderboardGroupFilterAnchors) {
+                        anchor.removeClassName(EventRegattaListResources.INSTANCE.css().selectedItem());
+                    }
+                    filterLeaderboardGroupAnchor.addClassName(EventRegattaListResources.INSTANCE.css().selectedItem());
+                    break;
                 }
             }
         });
@@ -125,8 +121,7 @@ public class EventRegattaList extends Composite {
 
     private void filterRegattaListByLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
         if (leaderboardGroup != null) {
-            allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
-            filterNoLeaderboardGroupsAnchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
+            filterNoLeaderboardGroupsAnchor.removeClassName(EventRegattaListResources.INSTANCE.css().selectedItem());
             // hide all regattas of the not selected leaderboardgroup
             for (LeaderboardGroupDTO lg : presenter.getCtx().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
@@ -137,8 +132,7 @@ public class EventRegattaList extends Composite {
             }
         } else {
             // make all regattas visible
-            allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
-            filterNoLeaderboardGroupsAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
+            filterNoLeaderboardGroupsAnchor.addClassName(EventRegattaListResources.INSTANCE.css().selectedItem());
             for (LeaderboardGroupDTO lg : presenter.getCtx().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {
