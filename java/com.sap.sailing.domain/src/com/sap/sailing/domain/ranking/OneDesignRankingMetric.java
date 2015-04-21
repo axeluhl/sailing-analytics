@@ -32,10 +32,9 @@ public class OneDesignRankingMetric implements RankingMetric<Distance> {
     public Duration getTimeToImprove(TrackedRace trackedRace, Competitor trailing, Competitor leading,
             TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final Duration result;
-        // TODO find the last leg both competitors have already started and compute the gap in that leg;
-        final TrackedLegOfCompetitor tlocTrailing = null;
-        if (tlocTrailing != null) {
-            result = tlocTrailing.getGapToLeader(timePoint, leading, WindPositionMode.LEG_MIDDLE, cache);
+        final TrackedLegOfCompetitor currentLeg = trackedRace.getCurrentLeg(trailing, timePoint);
+        if (currentLeg != null) {
+            result = currentLeg.getGapToLeader(timePoint, leading, WindPositionMode.LEG_MIDDLE, cache);
         } else {
             result = null;
         }
