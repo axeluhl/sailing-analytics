@@ -90,7 +90,6 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -3351,24 +3350,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Distance getCourseLength() {
-        List<Leg> legs = getRace().getCourse().getLegs();
-        Distance raceDistance = new NauticalMileDistance(0);
-        for (Leg leg : legs) {
-            Waypoint from = leg.getFrom();
-            Iterable<MarkPassing> markPassings = getMarkPassingsInOrder(from);
-            Iterator<MarkPassing> markPassingsIterator = markPassings.iterator();
-            if (!markPassingsIterator.hasNext()) {
-                return null;
-            }
-            MarkPassing firstPassing = markPassingsIterator.next();
-            TimePoint timePointOfFirstPassing = firstPassing.getTimePoint();
-            Waypoint to = leg.getTo();
-            Position fromPos = getApproximatePosition(from, timePointOfFirstPassing);
-            Position toPos = getApproximatePosition(to, timePointOfFirstPassing);
-            Distance legDistance = fromPos.getDistance(toPos);
-            raceDistance = raceDistance.add(legDistance);
+        Distance d = Distance.NULL;
+        for (TrackedLeg trackedLeg : getTrackedLegs()) {
+            d = d.add(trackedLeg.getWindwardDistance());
         }
-        return raceDistance;
+        return d;
     }
     
     @Override
