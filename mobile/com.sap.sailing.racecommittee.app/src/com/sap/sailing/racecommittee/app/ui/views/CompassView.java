@@ -23,7 +23,7 @@ public class CompassView extends RelativeLayout {
     private CompassDirectionListener changeListener = null;
     private RotateAnimation rotation = null;
     private ImageView needleView = null;
-    private EditText degreeView = null;
+    private TextView degreeView = null;
     private float currentDegrees = 0.0f;
     private Float deferredToDegrees = null;
 
@@ -55,16 +55,7 @@ public class CompassView extends RelativeLayout {
         super.onFinishInflate();
 
         needleView = (ImageView) findViewById(R.id.compass_view_needle);
-        degreeView = (EditText) findViewById(R.id.compass_view_degree);
-        if (degreeView != null) {
-            degreeView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    setDirection(Float.parseFloat(v.getText().toString()));
-                    return true;
-                }
-            });
-        }
+        degreeView = (TextView) findViewById(R.id.compass_view_degree);
     }
 
     @Override

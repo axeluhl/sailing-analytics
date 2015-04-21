@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true">
 
-        <EditText
+        <TextView
             android:id="@+id/compass_view_degree"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
