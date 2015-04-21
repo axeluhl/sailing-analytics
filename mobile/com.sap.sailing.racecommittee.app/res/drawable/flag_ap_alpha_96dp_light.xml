@@ -18,14 +18,6 @@
     </item>
 
     <item
-        android:left="-35dp"
-        android:top="2dp">
-        <bitmap
-            android:gravity="top"
-            android:src="@drawable/flag_shape_02_96dp_light"/>
-    </item>
-
-    <item
         android:left="-40dp"
         android:top="-30dp">
         <bitmap
