@@ -129,12 +129,18 @@ figcaption {
           transition: background-color 0.2s;
   text-decoration: none;
 }
-.button:hover,
-.button:focus {
+.button:hover {
   background-color: #d89a00;
   outline: none;
   text-decoration: none;
 }
+
+.button:focus {
+  outline: none;
+  text-decoration: none;
+}
+
+
 .buttonsmall {
   visibility: inherit;
 }
@@ -154,8 +160,7 @@ figcaption {
 .buttonprimary {
   background-color: #008fcc;
 }
-.buttonprimary:hover,
-.buttonprimary:focus {
+.buttonprimary:hover {
   background-color: #0081b8;
 }
 .buttonred {
