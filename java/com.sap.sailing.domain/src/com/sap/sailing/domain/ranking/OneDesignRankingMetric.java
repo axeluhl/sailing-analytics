@@ -41,12 +41,6 @@ public class OneDesignRankingMetric implements RankingMetric {
     }
 
     @Override
-    public Duration getCorrectedTime(TrackedLegOfCompetitor leg, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
-        return leg.getTime(timePoint);
-    }
-
-    @Override
     public Duration getCorrectedTime(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingCache cache) {
         final Duration result;
