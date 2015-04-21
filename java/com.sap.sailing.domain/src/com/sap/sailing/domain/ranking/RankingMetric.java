@@ -55,6 +55,30 @@ public interface RankingMetric<T extends Comparable<T>> {
      */
     Duration getTimeToImprove(TrackedRace trackedRace, Competitor trailing, Competitor leading, TimePoint timePoint,
             WindLegTypeAndLegBearingCache cache);
+    
+    /**
+     * How much time did the {@link TrackedLegOfCompetitor#getCompetitor() competitor} spend in the
+     * {@link TrackedLegOfCompetitor#getLeg() leg} at <code>timePoint</code>, corrected by the handicapping rules
+     * defined by this ranking metric? If the competitor hasn't started the leg yet at <code>timePoint</code>,
+     * <code>null</code> is returned. If the competitor has finished the leg already at <code>timePoint</code>, the time
+     * it took the competitor to complete the leg, corrected by any handicap, is returned. If the competitor didn't
+     * finish the leg before the end of tracking, <code>null</code> is returned because this indicates that the tracker
+     * stopped sending valid data.
+     */
+    Duration getCorrectedTime(TrackedLegOfCompetitor leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+    /**
+     * How much time did the <code>competitor</code> spend in the {@link TrackedRace#getRace() race} described by
+     * <code>trackedRace</code> at <code>timePoint</code>, corrected by the handicapping rules defined by this ranking
+     * metric? If the competitor hasn't started the race yet at <code>timePoint</code>, <code>null</code> is returned. If
+     * the competitor has finished the race already at <code>timePoint</code>, the time it took the competitor to
+     * complete the race, corrected by any handicap, is returned. If the competitor didn't finish the leg before the end
+     * of tracking, <code>null</code> is returned because this indicates that the tracker stopped sending valid data.<p>
+     * 
+     * The result will also be <code>null</code> if the course does not have any waypoints or the race hasn't started yet
+     * at <code>timePoint</code>.
+     */
+    Duration getCorrectedTime(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     // TODO provide comparators per race / leg
     // TODO add methods for corrected time and windward distance calculation

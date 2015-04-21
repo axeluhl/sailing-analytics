@@ -3,7 +3,9 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -36,6 +38,35 @@ public class OneDesignRankingMetric implements RankingMetric<Distance> {
             result = tlocTrailing.getGapToLeader(timePoint, leading, WindPositionMode.LEG_MIDDLE, cache);
         } else {
             result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getCorrectedTime(TrackedLegOfCompetitor leg, TimePoint timePoint,
+            WindLegTypeAndLegBearingCache cache) {
+        return leg.getTime(timePoint);
+    }
+
+    @Override
+    public Duration getCorrectedTime(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingCache cache) {
+        final Duration result;
+        final TimePoint startOfRace = trackedRace.getStartOfRace();
+        if (startOfRace == null) {
+            result = null;
+        } else {
+            final Waypoint finish = trackedRace.getRace().getCourse().getLastWaypoint();
+            if (finish == null) {
+                result = null;
+            } else {
+                final MarkPassing finishingMarkPassing = trackedRace.getMarkPassing(competitor, finish);
+                if (finishingMarkPassing != null) {
+                    result = startOfRace.until(finishingMarkPassing.getTimePoint());
+                } else {
+                    result = startOfRace.until(timePoint);
+                }
+            }
         }
         return result;
     }
