@@ -38,6 +38,9 @@
         <item name="textLarge">@style/AppTheme.Dark.Text.Large</item>
         <item name="textXLarge">@style/AppTheme.Dark.Text.XLarge</item>
 
+        <item name="textPanelCaption">@style/AppTheme.Light.Text.PanelCaption</item>
+        <item name="textPanelHeader">@style/AppTheme.Light.Text.PanelHeader</item>
+
         <!-- drawable -->
         <item name="access_time_36dp">@drawable/ic_access_time_white_36dp</item>
         <item name="arrow_down">@drawable/arrow_down_dark</item>
@@ -126,6 +129,17 @@
 
     <style name="AppTheme.Dark.Text.XLarge">
         <item name="android:textSize">@dimen/textSize_40</item>
+    </style>
+
+    <style name="AppTheme.Dark.Text.PanelHeader">
+        <item name="android:textColor">?sap_light_gray</item>
+        <item name="android:textSize">@dimen/textSize_20</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppTheme.Dark.Text.PanelCaption">
+        <item name="android:textSize">@dimen/textSize_22</item>
+        <item name="android:gravity">center_horizontal</item>
     </style>
 
 </resources>

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="@dimen/side_button_width"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/side_button_width"
+    android:layout_height="match_parent"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    tools:ignore="UseCompoundDrawables">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,17 +36,14 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="?flags_postpone"
                     android:layout_gravity="center_horizontal"
-                    />
+                    android:src="?flags_postpone"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="125dp"
-                    android:gravity="center_horizontal"
                     android:text="@string/flags_postpone"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?textPanelCaption"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -69,17 +69,15 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="?flags_abandon"
                     android:gravity="center_horizontal"
-                    />
+                    android:src="?flags_abandon"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="125dp"
-                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/flags_abandon"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?textPanelCaption"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -111,10 +109,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="125dp"
-                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/flags_recall"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?textPanelCaption"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -147,10 +144,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="125dp"
-                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/flags_course"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?textPanelCaption"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -165,7 +161,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-
                 android:src="@drawable/marker"/>
 
             <LinearLayout
@@ -183,10 +178,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="125dp"
-                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/flags_more"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?textPanelCaption"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -219,10 +213,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="125dp"
-                    android:gravity="center_horizontal"
                     android:text="@string/record_voice"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?textPanelCaption"/>
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>

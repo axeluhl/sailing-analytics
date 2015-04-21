@@ -23,16 +23,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/finished_recording"
-                android:textAllCaps="true"
-                android:textColor="?sap_light_gray"
-                android:textSize="@dimen/textSize_22" />
+                android:textAppearance="?textPanelHeader"/>
 
             <ImageView
                 android:id="@+id/voice_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginLeft="@dimen/lock_margin"
+                android:layout_marginRight="@dimen/lock_margin"
                 android:src="?lock_outline"
                 android:visibility="visible" />
         </LinearLayout>
@@ -49,7 +47,7 @@
                 android:drawablePadding="@dimen/default_padding"
                 android:drawableTop="?hearing_48dp"
                 android:text="@string/finished_replay"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textPanelCaption" />
         </RelativeLayout>
 
         <View
@@ -85,9 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/finished_list"
-                android:textAllCaps="true"
-                android:textColor="?sap_light_gray"
-                android:textSize="@dimen/textSize_22" />
+                android:textAppearance="?textPanelHeader"/>
 
             <ImageView
                 android:id="@+id/photo_lock"
@@ -111,7 +107,7 @@
                 android:drawablePadding="@dimen/default_padding"
                 android:drawableTop="?photo_camera_48dp"
                 android:text="@string/finished_photos"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textPanelCaption" />
         </RelativeLayout>
 
         <View
@@ -147,9 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/finished_tracking"
-                android:textAllCaps="true"
-                android:textColor="?sap_light_gray"
-                android:textSize="@dimen/textSize_22" />
+                android:textAppearance="?textPanelHeader"/>
 
             <ImageView
                 android:id="@+id/list_lock"
@@ -173,7 +167,7 @@
                 android:drawablePadding="@dimen/default_padding"
                 android:drawableTop="?dns_48dp"
                 android:text="@string/finished_edit"
-                android:textAppearance="?textNormal" />
+                android:textAppearance="?textPanelCaption" />
         </RelativeLayout>
 
         <View

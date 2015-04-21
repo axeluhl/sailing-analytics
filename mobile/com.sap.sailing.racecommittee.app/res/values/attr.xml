@@ -24,6 +24,9 @@
     <attr name="textLarge" format="reference"/>
     <attr name="textXLarge" format="reference"/>
 
+    <attr name="textPanelHeader" format="reference"/>
+    <attr name="textPanelCaption" format="reference"/>
+
     <!-- drawable -->
     <attr name="access_time_36dp" format="reference"/>
     <attr name="arrow_down" format="reference"/>

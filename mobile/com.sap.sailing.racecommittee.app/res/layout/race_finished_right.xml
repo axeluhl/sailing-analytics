@@ -45,19 +45,18 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/default_margin"
             android:text="@string/finished_publishing"
-            android:textAllCaps="true"
-            android:textColor="?sap_light_gray"
-            android:textSize="@dimen/textSize_20" />
+            android:textAllCaps="false"
+            android:textAppearance="?textPanelHeader"/>
 
         <TextView
             android:id="@+id/publish_advice"
-            style="?textSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin"
             android:gravity="center"
-            android:text="@string/finished_text_01" />
+            android:text="@string/finished_text_01"
+            android:textAppearance="?textPanelCaption"/>
 
         <Button
             android:id="@+id/submit_button"
