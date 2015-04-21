@@ -335,7 +335,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
-        rankingMetric = new OneDesignRankingMetric(); // for now we can only do one-design classes; see bug 1018
+        rankingMetric = new OneDesignRankingMetric(this); // for now we can only do one-design classes; see bug 1018
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
@@ -1173,7 +1173,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // RaceRankComparator requires course read lock
                         getRace().getCourse().lockForRead();
                         try {
-                            Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(this, timePoint, cache);
+                            Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
                             rankedCompetitors = new ArrayList<Competitor>();
                             for (Competitor c : getRace().getCompetitors()) {
                                 rankedCompetitors.add(c);

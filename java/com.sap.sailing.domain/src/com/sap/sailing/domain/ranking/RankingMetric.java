@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.ranking;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -7,7 +8,6 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
-import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -32,12 +32,13 @@ import com.sap.sse.common.TimePoint;
  *
  * @param <T>
  */
-public interface RankingMetric {
-    default Comparator<Competitor> getRankingComparator(TrackedRace trackedRace, TimePoint timePoint) {
-        return getRaceRankingComparator(trackedRace, null, new NoCachingWindLegTypeAndLegBearingCache());
-    }
-
-    Comparator<Competitor> getRaceRankingComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+public interface RankingMetric extends Serializable {
+    /**
+     * @return the tracked race to which this ranking metric is specific
+     */
+    TrackedRace getTrackedRace();
+    
+    Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
@@ -53,8 +54,7 @@ public interface RankingMetric {
      * uncertain prediction of the <code>trailing</code> competitor's performance in the next leg which is not considered to be
      * useful here.
      */
-    Duration getTimeToImprove(TrackedRace trackedRace, Competitor trailing, Competitor leading, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache);
+    Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
     
     /**
      * How much time did the <code>competitor</code> spend in the {@link TrackedRace#getRace() race} described by
@@ -72,5 +72,5 @@ public interface RankingMetric {
      * This method can also be used to calculate the corrected times at the end of each leg, simply by passing the time
      * when the competitor finished the respective leg as <code>timePoint</code>.
      */
-    Duration getCorrectedTime(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 }

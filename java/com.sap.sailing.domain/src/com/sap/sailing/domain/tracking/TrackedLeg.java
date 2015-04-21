@@ -100,11 +100,35 @@ public interface TrackedLeg extends Serializable {
      * leg's direction, or a positive distance otherwise.
      */
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode);
+    
+    /**
+     * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
+     * that competitors need to travel in this leg. Due to the dynamics of the wind direction and the mark positions,
+     * the result is time dependent. The wind direction is determined at the leg's middle at the time point <code>at</code>.
+     */
+    Distance getWindwardDistance(TimePoint at);
+
+    /**
+     * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
+     * that competitors need to travel in this leg. Due to the dynamics of the wind direction and the mark positions,
+     * the result is time dependent. As time point, the middle of the interval defined by the first mark passing starting the
+     * leg and the last mark passing finishing the leg is used, where both time points default to "now."
+     * 
+     * @see #getWindwardDistance(TimePoint)
+     */
+    Distance getWindwardDistance();
 
     /**
      * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start
      * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
      */
     Position getMiddleOfLeg(TimePoint at);
+
+    /**
+     * Computes the windward distance (for upwind/downwind legs) or the along-course distance (for reaching legs) at a reference time point
+     * between the leg's start waypoint position and <code>pos</code>. The reference time point is chosen as the middle between the first
+     * leg entry and the last leg exit, both defaulting to "now" if no such time point exists.
+     */
+    Distance getWindwardDistanceFromLegStart(Position pos);
 
 }

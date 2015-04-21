@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedLegImpl implements TrackedLeg {
     private static final long serialVersionUID = -1944668527284130545L;
@@ -337,10 +340,67 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
+    public Distance getWindwardDistanceFromLegStart(Position pos) {
+        final TimePoint referenceTimePoint = getReferenceTimePoint();
+        return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), referenceTimePoint),
+                pos, referenceTimePoint, WindPositionMode.LEG_MIDDLE);
+    }
+    
+    @Override
     public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
         return getWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
+    @Override
+    public Distance getWindwardDistance() {
+        final TimePoint middle = getReferenceTimePoint();
+        return getWindwardDistance(middle);
+    }
+
+    /**
+     * Computes a reference time point for this leg that is the same for all competitors and that is the middle between
+     * the time points of first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
+     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
+     * "now" is used.
+     */
+    private TimePoint getReferenceTimePoint() {
+        Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
+        Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+        getTrackedRace().lockForRead(legStartMarkPassings);
+        final TimePoint firstLegStartMarkPassingTimePoint;
+        final TimePoint lastLegFinishMarkPassingTimePoint;
+        try {
+            Iterator<MarkPassing> i = legStartMarkPassings.iterator();
+            if (i.hasNext()) {
+                firstLegStartMarkPassingTimePoint = i.next().getTimePoint();
+            } else {
+                firstLegStartMarkPassingTimePoint = MillisecondsTimePoint.now();
+            }
+        } finally {
+            getTrackedRace().unlockAfterRead(legStartMarkPassings);
+        }
+        getTrackedRace().lockForRead(legFinishMarkPassings);
+        try {
+            Iterator<MarkPassing> i = legFinishMarkPassings.iterator();
+            if (i.hasNext()) {
+                lastLegFinishMarkPassingTimePoint = i.next().getTimePoint();
+            } else {
+                lastLegFinishMarkPassingTimePoint = MillisecondsTimePoint.now();
+            }
+        } finally {
+            getTrackedRace().unlockAfterRead(legFinishMarkPassings);
+        }
+        final TimePoint middle = firstLegStartMarkPassingTimePoint.plus(firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(2));
+        return middle;
+    }
+
+    @Override
+    public Distance getWindwardDistance(final TimePoint middle) {
+        final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
+        final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
+        return getWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE);
+    }
+
     Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Distance result;
         try {
