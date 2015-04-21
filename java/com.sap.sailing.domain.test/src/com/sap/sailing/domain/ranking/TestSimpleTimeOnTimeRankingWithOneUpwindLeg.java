@@ -144,8 +144,8 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
-        assertEquals(tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
-                tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.00001);
+        assertEquals(tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
+                tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.00001);
     }
 
     @Test
@@ -172,4 +172,30 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         Comparator<Competitor> comparator = tot.getRaceRankingComparator(middleOfFirstLeg);
         assertEquals(1, comparator.compare(c1, c2)); // c1 is "greater" than c2; better competitors rank less
     }
+
+    @Test
+    public void testTimeOnDistanceWithFactorTwoC1TwiceAsFarAsC2() {
+        setUp(c -> 1.0, c -> c==c1 ? 180. : 360.); // c1 is twice as fast (350s instead of 700s to the mile) as c2
+        final TimePoint startOfRace = MillisecondsTimePoint.now();
+        final TimePoint middleOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
+        trackedRace.updateMarkPassings(
+                c1,
+                Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
+                        .getFirstWaypoint(), c1)));
+        trackedRace.updateMarkPassings(
+                c2,
+                Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
+                        .getFirstWaypoint(), c2)));
+        trackedRace.getTrack(c1).add(
+                new GPSFixMovingImpl(new DegreePosition(1.0, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(45))));
+        trackedRace.getTrack(c2).add(
+                new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(315))));
+        // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other,
+        // in this case .05 seconds per nautical mile for the reciproke VMG measured in seconds per nautical mile
+        assertEquals(tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
+                tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.05);
+    }
+
 }
