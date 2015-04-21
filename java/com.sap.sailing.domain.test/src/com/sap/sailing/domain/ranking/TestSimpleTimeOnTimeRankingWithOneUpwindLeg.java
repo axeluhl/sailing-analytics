@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -39,8 +38,6 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
-import com.sap.sailing.domain.ranking.RankingMetric;
-import com.sap.sailing.domain.ranking.TimeOnTimeAndDistanceRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -59,15 +56,13 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
     private DynamicTrackedRace trackedRace;
     private Competitor c1, c2;
     
-    @Before
-    public void setUp() {
+    private void setUp(Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         c1 = TrackBasedTest.createCompetitor("FastBoat");
         c2 = TrackBasedTest.createCompetitor("SlowBoat");
-        trackedRace = createTrackedRace(tot, Arrays.asList(c1, c2), c -> c==c1 ? 2.0 : 1.0, c -> 0.0);
+        trackedRace = createTrackedRace(tot, Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
         tot = (TimeOnTimeAndDistanceRankingMetric) trackedRace.getRankingMetric();
         assertEquals(60, trackedRace.getCourseLength().getNauticalMiles(), 0.01);
     }
-    
     
     private DynamicTrackedRace createTrackedRace(RankingMetric rankingMetric, Iterable<Competitor> competitors, Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         final TimePoint timePointForFixes = MillisecondsTimePoint.now();
@@ -106,6 +101,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
 
     @Test
     public void testTimeOnTimeWithFactorTwoBoatsAtEqualHeight() {
+        setUp(c -> c==c1 ? 2.0 : 1.0, c -> 0.0);
         final TimePoint startOfRace = MillisecondsTimePoint.now();
         final TimePoint middleOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
         trackedRace.updateMarkPassings(
@@ -130,6 +126,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
 
     @Test
     public void testTimeOnTimeWithFactorTwoC1TwiceAsFarAsC2() {
+        setUp(c -> c==c1 ? 2.0 : 1.0, c -> 0.0);
         final TimePoint startOfRace = MillisecondsTimePoint.now();
         final TimePoint middleOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
         trackedRace.updateMarkPassings(
@@ -149,5 +146,30 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
         assertEquals(tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
                 tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.00001);
+    }
+
+    @Test
+    public void testTimeOnDistanceWithFactorTwoBoatsAtEqualHeight() {
+        setUp(c -> 1.0, c -> c==c1 ? 350. : 700.); // c1 is twice as fast (350s instead of 700s to the mile) as c2
+        final TimePoint startOfRace = MillisecondsTimePoint.now();
+        final TimePoint middleOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
+        trackedRace.updateMarkPassings(
+                c1,
+                Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
+                        .getFirstWaypoint(), c1)));
+        trackedRace.updateMarkPassings(
+                c2,
+                Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
+                        .getFirstWaypoint(), c2)));
+        trackedRace.getTrack(c1).add(
+                new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(45))));
+        trackedRace.getTrack(c2).add(
+                new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(315))));
+        // Both boats have climbed half of the first upwind beat; c1 is rated the faster boat (2.0), c2 has time-on-time factor 1.0.
+        // Therefore, c2 is expected to lead after applying the corrections.
+        Comparator<Competitor> comparator = tot.getRaceRankingComparator(middleOfFirstLeg);
+        assertEquals(1, comparator.compare(c1, c2)); // c1 is "greater" than c2; better competitors rank less
     }
 }
