@@ -37,7 +37,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.competitorsFilterSet = competitorsFilterSet;
-        this.allCompetitors = new HashSet<CompetitorDTO>();
+        this.allCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.selectedCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
         this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
