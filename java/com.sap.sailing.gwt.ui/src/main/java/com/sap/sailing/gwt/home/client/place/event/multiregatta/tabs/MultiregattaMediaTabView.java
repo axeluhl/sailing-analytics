@@ -29,7 +29,8 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return TabView.State.INVISIBLE;
+        // TODO return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
