@@ -1234,4 +1234,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String serverUrl();
     String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
     String startLineToFirstMarkTriangle(String distanceInMeters);
+    
+    String noDataForEvent();
 }

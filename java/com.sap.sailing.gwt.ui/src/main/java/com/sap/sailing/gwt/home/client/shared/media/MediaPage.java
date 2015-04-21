@@ -7,13 +7,14 @@ import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
+import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
@@ -26,7 +27,6 @@ public class MediaPage extends Composite {
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
     }
     
-    @UiField HeadingElement noContent;
     // TODO use this when ImageGallery and VideoGallery is implemented correctly
 //    @UiField ImageGallery photos;
 //    @UiField VideoGallery videos;
@@ -36,6 +36,8 @@ public class MediaPage extends Composite {
     @UiField DivElement videoWrapper;
     @UiField DivElement videosPanel;
     private final SimplePanel contentPanel;
+    
+    @UiField StringMessages i18n;
 
     public MediaPage() {
         MediaPageResources.INSTANCE.css().ensureInjected();
@@ -44,7 +46,7 @@ public class MediaPage extends Composite {
     }
     
     public void setMedia(MediaDTO media) {
-        contentPanel.setWidget(uiBinder.createAndBindUi(this));
+        Widget mediaUi = uiBinder.createAndBindUi(this);
         
         boolean hasPhotos = !media.getPhotos().isEmpty();
      // TODO use this when ImageGallery is implemented correctly
@@ -92,7 +94,9 @@ public class MediaPage extends Composite {
         
         
         if(!hasPhotos && !hasVideos) {
-            noContent.getStyle().clearDisplay();
+            contentPanel.setWidget(new InfoPlaceholder(i18n.mediaNoContent()));
+        } else {
+            contentPanel.setWidget(mediaUi);
         }
     }
     

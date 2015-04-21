@@ -4,10 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-public interface PlaceholderResources extends ClientBundle {
-    public static final PlaceholderResources INSTANCE = GWT.create(PlaceholderResources.class);
+public interface InfoPlaceholderResources extends ClientBundle {
+    public static final InfoPlaceholderResources INSTANCE = GWT.create(InfoPlaceholderResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/shared/placeholder/InfoPlaceholder.gss")
+    @Source("com/sap/sailing/gwt/home/client/shared/placeholder/Placeholder.css")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

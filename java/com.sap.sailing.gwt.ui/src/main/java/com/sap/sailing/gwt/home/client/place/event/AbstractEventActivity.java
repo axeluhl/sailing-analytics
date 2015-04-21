@@ -24,8 +24,10 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -195,9 +197,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                             ctx.withRaceGroups(raceGroups);
                             callback.onSuccess(raceGroups);
                         } else {
-                            // TODO @FM: extract error message
-                            ErrorView errorView = clientFactory.createErrorView("No race data available", null);
-                            getView().showErrorInCurrentTab(errorView);
+                            getView().showErrorInCurrentTab(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
                         }
                     }
                     
