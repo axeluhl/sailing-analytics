@@ -41,7 +41,7 @@ public class ExampleContent extends Widget implements RefreshableWidget<LiveRace
         
         for(LiveRaceDTO race : data.getRaces()) {
             DivElement raceDiv = Document.get().createDivElement();
-            raceDiv.setInnerText(race.getName());
+            raceDiv.setInnerText(race.getRaceName());
             liveRaces.appendChild(raceDiv);
         }
     }
