@@ -148,6 +148,6 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
         assertEquals(tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
-                tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg), 0.00001);
+                tot.getAverageCorrectedVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.00001);
     }
 }
