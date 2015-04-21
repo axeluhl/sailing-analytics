@@ -3486,4 +3486,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
+    @Override
+    public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) throws NoWindException {
+        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
+        return getWindwardDistanceToOverallLeader(competitor, timePoint, windPositionMode);
+    }
 }
