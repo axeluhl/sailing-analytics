@@ -48,6 +48,8 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
             return new RRS26RacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getRRS26Configuration());
         case BASIC:
             return new BasicRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getBasicConfiguration());
+        case LEAGUE:
+            return new BasicRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getBasicConfiguration());
         default:
             throw new UnsupportedOperationException("Unknown racing procedure " + type.toString());
         }
