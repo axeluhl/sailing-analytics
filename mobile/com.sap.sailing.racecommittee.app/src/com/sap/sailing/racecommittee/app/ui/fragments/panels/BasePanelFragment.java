@@ -37,18 +37,19 @@ public abstract class BasePanelFragment extends RaceFragment {
     protected int setMarkerLevel(View v, @IdRes int resId, int level) {
         int retValue = -1;
 
-        int offset = 0;
-        if (AppPreferences.on(getActivity()).getTheme().equals(AppConstants.LIGHT_THEME)) {
-            offset = 10;
-        }
+        if (isAdded()) {
+            int offset = 0;
+            if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
+                offset = 10;
+            }
 
-        ImageView view = (ImageView) v.findViewById(resId);
-        if (view != null) {
-            Drawable drawable = view.getDrawable();
-            if (drawable != null) {
-                drawable.setLevel(level + offset);
-                retValue = drawable.getLevel() - offset;
-                switch (retValue) {
+            ImageView view = (ImageView) v.findViewById(resId);
+            if (view != null) {
+                Drawable drawable = view.getDrawable();
+                if (drawable != null) {
+                    drawable.setLevel(level + offset);
+                    retValue = drawable.getLevel() - offset;
+                    switch (retValue) {
                     case 1:
                         v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray_black_20));
                         break;
@@ -56,6 +57,7 @@ public abstract class BasePanelFragment extends RaceFragment {
                     default:
                         v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray));
                         break;
+                    }
                 }
             }
         }
