@@ -1,6 +1,7 @@
 package com.sap.sse.datamining;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,8 @@ public interface DataMiningServer {
     public ResourceBundleStringMessages getStringMessages();
     
     public FunctionProvider getFunctionProvider();
+
+    public Date getComponentsChangedTimepoint();
 
     public Iterable<Function<?>> getAllStatistics();
     

@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     private final CompoundResourceBundleStringMessages stringMessages;
     private final ExecutorService executorService;
+    private Date componentsChangedTimepoint;
     
     private final QueryFactory queryFactory;
     private final DataMiningQueryManager dataMiningQueryManager;
@@ -46,12 +48,22 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
         this.stringMessages = new CompoundResourceBundleStringMessages();
         this.executorService = executorService;
+        componentsChangedTimepoint = new Date();
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
         dataSourceProviderMappedByDataSourceType = new HashMap<>();
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
+    }
+    
+    @Override
+    public Date getComponentsChangedTimepoint() {
+        return componentsChangedTimepoint;
+    }
+    
+    private void updateComponentsChangedTimepoint() {
+        componentsChangedTimepoint = new Date();
     }
 
     @Override
@@ -66,12 +78,18 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public void addStringMessages(ResourceBundleStringMessages stringMessages) {
-        this.stringMessages.addStringMessages(stringMessages);
+        boolean componentsChanged = this.stringMessages.addStringMessages(stringMessages);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
 
     @Override
     public void removeStringMessages(ResourceBundleStringMessages stringMessages) {
-        this.stringMessages.removeStringMessages(stringMessages);
+        boolean componentsChanged = this.stringMessages.removeStringMessages(stringMessages);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
 
     @Override
@@ -81,17 +99,26 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     @Override
     public void registerAllClasses(Iterable<Class<?>> classesToScan) {
-        functionRegistry.registerAllClasses(classesToScan);
+        boolean componentsChanged = functionRegistry.registerAllClasses(classesToScan);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
     public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
-        functionRegistry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
+        boolean componentsChanged = functionRegistry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
     public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
-        functionRegistry.unregisterAllFunctionsOf(classesToUnregister);
+        boolean componentsChanged = functionRegistry.unregisterAllFunctionsOf(classesToUnregister);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
 
     @Override
@@ -132,11 +159,15 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
         dataSourceProviderMappedByDataSourceType.put(dataSourceProvider.getDataSourceType(), dataSourceProvider);
+        updateComponentsChangedTimepoint();
     }
     
     @Override
     public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        dataSourceProviderMappedByDataSourceType.remove(dataSourceProvider.getDataSourceType());
+        boolean componentsChanged = dataSourceProviderMappedByDataSourceType.remove(dataSourceProvider.getDataSourceType()) != null;
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
@@ -146,12 +177,18 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     @Override
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
+        boolean componentsChanged = dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
     public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        dataRetrieverChainDefinitionRegistry.unregister(dataRetrieverChainDefinition);
+        boolean componentsChanged = dataRetrieverChainDefinitionRegistry.unregister(dataRetrieverChainDefinition);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override

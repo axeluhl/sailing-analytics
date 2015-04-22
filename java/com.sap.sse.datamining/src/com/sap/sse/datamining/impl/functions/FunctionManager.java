@@ -86,97 +86,110 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public void registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
+    public boolean registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
+        boolean functionsHaveBeenRegistered = false;
         for (Class<?> internalClass : internalClassesToScan) {
-            scanInternalClass(internalClass);
+            boolean functionsOfClassHaveBeenRegistered = scanInternalClass(internalClass);
+            functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionsOfClassHaveBeenRegistered;
         }
+        return functionsHaveBeenRegistered;
     }
     
-    private void scanInternalClass(Class<?> internalClass) {
-        scanInternalClass(internalClass, new ArrayList<Function<?>>(), true);
+    private boolean scanInternalClass(Class<?> internalClass) {
+        return scanInternalClass(internalClass, new ArrayList<Function<?>>(), true);
     }
 
-    private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions, boolean scanForStatistics) {
+    private boolean scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions, boolean scanForStatistics) {
+        boolean functionsHaveBeenRegistered = false;
         for (Method method : internalClass.getMethods()) {
+            boolean functionHasBeenRegistered = false;
             if (isValidDimension.matches(method) || (scanForStatistics && isValidStatistic.matches(method) )) {
-                registerFunction(previousFunctions, method);
-                continue;
+                functionHasBeenRegistered = registerFunction(previousFunctions, method);
+            } else if (isValidConnector.matches(method)) {
+                functionHasBeenRegistered = handleConnectorMethod(method, previousFunctions, scanForStatistics);
             }
-            
-            if (isValidConnector.matches(method)) {
-                handleConnectorMethod(method, previousFunctions, scanForStatistics);
-            }
+            functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionHasBeenRegistered;
         }
+        return functionsHaveBeenRegistered;
     }
 
-    private void registerFunction(List<Function<?>> previousFunctions, Method method) {
+    private boolean registerFunction(List<Function<?>> previousFunctions, Method method) {
         Function<?> function = functionFactory.createMethodWrappingFunction(method);
         if (!previousFunctions.isEmpty()) {
             function = functionFactory.createCompoundFunction(previousFunctions, function);
         }
         
         if (function.isDimension()) {
-            addDimension(function);
+            return addDimension(function);
         } else {
-            addStatistic(function);
+            return addStatistic(function);
         }
     }
 
-    private void addDimension(Function<?> dimension) {
+    private boolean addDimension(Function<?> dimension) {
         Class<?> declaringType = dimension.getDeclaringType();
         if (!dimensions.containsKey(declaringType)) {
             dimensions.put(declaringType, new HashSet<Function<?>>());
         }
-        dimensions.get(declaringType).add(dimension);
+        return dimensions.get(declaringType).add(dimension);
     }
 
-    private void addStatistic(Function<?> statistic) {
+    private boolean addStatistic(Function<?> statistic) {
         Class<?> declaringType = statistic.getDeclaringType();
         if (!statistics.containsKey(declaringType)) {
             statistics.put(declaringType, new HashSet<Function<?>>());
         }
-        statistics.get(declaringType).add(statistic);
+        return statistics.get(declaringType).add(statistic);
     }
 
-    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions, boolean scanForStatistics) {
+    private boolean handleConnectorMethod(Method method, List<Function<?>> previousFunctions, boolean scanForStatistics) {
         Function<?> function = functionFactory.createMethodWrappingFunction(method);
         Class<?> returnType = method.getReturnType();
         List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
         previousFunctionsClone.add(function);
-        scanInternalClass(returnType, previousFunctionsClone, !scanForStatistics ? false : method.getAnnotation(Connector.class).scanForStatistics()); 
+        return scanInternalClass(returnType, previousFunctionsClone, !scanForStatistics ? false : method.getAnnotation(Connector.class).scanForStatistics()); 
     }
 
     @Override
-    public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
+    public boolean registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
+        boolean functionsHaveBeenRegistered = false;
         for (Class<?> externalClass : externalClassesToScan) {
             for (Method method : externalClass.getMethods()) {
                 if (isValidExternalFunction.matches(method)) {
                     Function<?> function = functionFactory.createMethodWrappingFunction(method);
-                    addExternalFunction(function);
+                    boolean functionsOfClassHaveBeenRegistered = addExternalFunction(function);
+                    functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionsOfClassHaveBeenRegistered;
                 }
             }
         }
+        return functionsHaveBeenRegistered;
     }
     
-    private void addExternalFunction(Function<?> function) {
+    private boolean addExternalFunction(Function<?> function) {
         Class<?> declaringType = function.getDeclaringType();
         if (!externalFunctions.containsKey(declaringType)) {
             externalFunctions.put(declaringType, new HashSet<Function<?>>());
         }
-        externalFunctions.get(declaringType).add(function);
+        return externalFunctions.get(declaringType).add(function);
     }
 
     @Override
-    public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
+    public boolean unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
+        boolean functionsHaveBeenUnregistered = false;
         for (Class<?> classToUnregister : classesToUnregister) {
-            unregisterAllFunctionsOf(classToUnregister);
+            boolean functionsOfClassHaveBeenUnregistered = unregisterAllFunctionsOf(classToUnregister);
+            functionsHaveBeenUnregistered = functionsHaveBeenUnregistered ? true : functionsOfClassHaveBeenUnregistered;
         }
+        return functionsHaveBeenUnregistered;
     }
 
-    private void unregisterAllFunctionsOf(Class<?> classToUnregister) {
+    private boolean unregisterAllFunctionsOf(Class<?> classToUnregister) {
+        boolean functionsHaveBeenUnregistered = false;
         for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            functionMap.remove(classToUnregister);
+            boolean functionsOfClassHaveBeenUnregistered = functionMap.remove(classToUnregister) != null;
+            functionsHaveBeenUnregistered = functionsHaveBeenUnregistered ? true : functionsOfClassHaveBeenUnregistered;
         }
+        return functionsHaveBeenUnregistered;
     }
 
     private Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {

@@ -48,12 +48,14 @@ public class TestI18N {
             compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
             fail("There shouldn't be a string message in an empty compound string messages");
         } catch (MissingResourceException e) { }
-        
-        compoundStringMessages.addStringMessages(testStringMessages);
+
+        assertThat(compoundStringMessages.addStringMessages(testStringMessages), is(true));
+        assertThat(compoundStringMessages.addStringMessages(testStringMessages), is(false));
         assertThat(testStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
         assertThat(testStringMessages.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
-        
-        compoundStringMessages.removeStringMessages(testStringMessages);
+
+        assertThat(compoundStringMessages.removeStringMessages(testStringMessages), is(true));
+        assertThat(compoundStringMessages.removeStringMessages(testStringMessages), is(false));
         try {
             compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
             fail("There shouldn't be a string message in an empty compound string messages");

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,8 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface DataMiningService extends RemoteService {
+
+    Date getComponentsChangedTimepoint();
 
     Iterable<FunctionDTO> getAllStatistics(String localeInfoName);
     

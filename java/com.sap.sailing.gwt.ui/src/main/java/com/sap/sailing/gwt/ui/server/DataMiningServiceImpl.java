@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +57,11 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
+    }
+    
+    @Override
+    public Date getComponentsChangedTimepoint() {
+        return getDataMiningServer().getComponentsChangedTimepoint();
     }
     
     @Override

@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
@@ -67,8 +66,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private GroupingProvider groupingProvider;
     private FilterSelectionProvider filterSelectionProvider;
 
-    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
-        super(stringMessages, sailingService, dataMiningService, errorReporter);
+    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+        super(stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         isReloading = false;
         queryDefinitionReleaseTimer = new Timer() {
