@@ -64,8 +64,6 @@ android {
 }
 
 dependencies {
-    compile "net.hockeyapp.android:HockeySDK:3.5.0"
-
     /* support libraries */
     compile "com.android.support:appcompat-v7:22.0.0"
 
