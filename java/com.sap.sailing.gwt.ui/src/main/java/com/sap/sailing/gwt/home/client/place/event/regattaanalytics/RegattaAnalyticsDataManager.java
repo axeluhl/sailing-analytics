@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardCha
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -125,7 +125,7 @@ public class RegattaAnalyticsDataManager {
         showComponentSettingsDialog(multiCompetitorChart, null);
     }
     
-    protected <SettingsType extends Settings> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
+    protected <SettingsType extends AbstractSettings> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
         String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
         String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
         SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component, StringMessages.INSTANCE);

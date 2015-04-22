@@ -16,9 +16,9 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
-import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -27,7 +27,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RetrieverLevelFilterSelectionProvider implements Component<Settings> {
+public class RetrieverLevelFilterSelectionProvider implements Component<AbstractSettings> {
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -210,12 +210,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Settings
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Settings newSettings) {
+    public void updateSettings(AbstractSettings newSettings) {
     }
 
     @Override
