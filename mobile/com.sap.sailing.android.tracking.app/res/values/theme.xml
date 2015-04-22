@@ -19,6 +19,7 @@
 
         <!-- You can also set colorControlNormal, colorControlActivated colorControlHighlight & colorSwitchThumbNormal. -->
 
+        <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
 
