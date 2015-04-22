@@ -616,6 +616,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
+	ANDROID="$ANDROID_HOME/tools/android"
+	if [ \! -x "$ANDROID" ]; then
+	  ANDROID="$ANDROID_HOME/tools/android.bat"
+	fi
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
@@ -631,17 +635,17 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         ANDROID_ABI=armeabi-v7a
         AVD_NAME=androidTest
         echo "Updating Android SDK (tools)..."
-        echo yes | android update sdk --filter tools --no-ui --force --all > /dev/null
+        echo yes | "$ANDROID" update sdk --filter tools --no-ui --force --all > /dev/null
         echo "Updating Android SDK (platform-tools)..."
-        echo yes | android update sdk --filter platform-tools --no-ui --force --all > /dev/null
+        echo yes | "$ANDROID" update sdk --filter platform-tools --no-ui --force --all > /dev/null
         echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..."
-        echo yes | android update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        echo yes | "$ANDROID" update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
         echo "Updating Android SDK (android-${TARGET_API})..."
-        echo yes | android update sdk --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        echo yes | "$ANDROID" update sdk --filter android-${TARGET_API} --no-ui --force --all > /dev/null
         echo "Updating Android SDK (extra-android-m2repository)..."
-        echo yes | android update sdk --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        echo yes | "$ANDROID" update sdk --filter extra-android-m2repository --no-ui --force --all > /dev/null
         echo "Updating Android SDK (extra-google-m2repository)..."
-        echo yes | android update sdk --filter extra-google-m2repository --no-ui --force --all > /dev/null
+        echo yes | "$ANDROID" update sdk --filter extra-google-m2repository --no-ui --force --all > /dev/null
         ./gradlew clean build
         if [[ $? != 0 ]]; then
             exit 100
@@ -649,8 +653,8 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         if [ $testing -eq 1 ]; then
             adb emu kill
             echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..."
-            echo yes | android update sdk --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
-            echo no | android create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force
+            echo yes | "$ANDROID" update sdk --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
+            echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force
             echo "Starting emulator..."
             emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
             echo "Waiting for startup..."
@@ -659,18 +663,18 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             $PROJECT_HOME/configuration/androidWaitForEmulator.sh
             if [[ $? != 0 ]]; then
                 adb emu kill
-                android delete avd --name ${AVD_NAME}
+                "$ANDROID" delete avd --name ${AVD_NAME}
                 exit 102
             fi
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck
             if [[ $? != 0 ]]; then
               adb emu kill
-              android delete avd --name ${AVD_NAME}
+              "$ANDROID" delete avd --name ${AVD_NAME}
               exit 101
             fi
             adb emu kill
-            android delete avd --name ${AVD_NAME}
+            "$ANDROID" delete avd --name ${AVD_NAME}
         fi
     else
         echo "INFO: Deactivating mobile modules"
