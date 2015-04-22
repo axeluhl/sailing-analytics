@@ -71,8 +71,8 @@ dependencies {
     compile "com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.2"
 
     /* support libraries */
-    compile "com.android.support:appcompat-v7:22.0.0"
-    compile "com.android.support:recyclerview-v7:22.0.0"
+    compile "com.android.support:appcompat-v7:22.1.0"
+    compile "com.android.support:recyclerview-v7:22.1.0"
 
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:7.0.0"

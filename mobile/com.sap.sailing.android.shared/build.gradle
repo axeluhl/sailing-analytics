@@ -35,7 +35,7 @@ android {
 
 dependencies {
     /* support libraries */
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile 'com.android.support:appcompat-v7:22.1.0'
     /* local dependencies */
     compile project(':java:com.sap.sailing.domain.common')
     compile project(':java:com.sap.sailing.domain.shared.android')

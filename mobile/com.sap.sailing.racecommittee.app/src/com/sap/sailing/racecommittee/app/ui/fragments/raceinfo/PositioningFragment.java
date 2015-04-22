@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,8 +36,6 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorsWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.utils.DialogBuilder;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -290,7 +288,9 @@ public class PositioningFragment extends BaseFragment
     @Override
     public void onItemRemoved(CompetitorsWithIdImpl item) {
         Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getKey());
-        addNewCompetitorToCompetitorList(competitor);
+        if (competitor != null) {
+            addNewCompetitorToCompetitorList(competitor);
+        }
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
 
@@ -311,8 +311,7 @@ public class PositioningFragment extends BaseFragment
                     mFinishedAdapter.notifyDataSetChanged();
                 }
             });
-        DialogBuilder
-            .showColoredDialog(builder.create(), ColorHelper.getThemedColor(getActivity(), R.attr.colorAccent));
+        builder.create().show();
     }
 
     private CharSequence[] getAllMaxPointsReasons() {

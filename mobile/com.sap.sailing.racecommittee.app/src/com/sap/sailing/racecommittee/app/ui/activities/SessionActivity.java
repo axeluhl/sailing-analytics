@@ -1,15 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
-
+import android.support.v7.app.AlertDialog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class SessionActivity extends BaseActivity {
 
@@ -43,24 +42,24 @@ public abstract class SessionActivity extends BaseActivity {
     protected boolean logoutSession() {
         ExLog.i(this, TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(getString(R.string.logout_dialog_title))
-                .setMessage(getString(R.string.logout_dialog_message))
-                .setPositiveButton(getString(R.string.logout), new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        doLogout();
-                    }
-                }).setNegativeButton(getString(R.string.cancel), new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            .setMessage(getString(R.string.logout_dialog_message))
+            .setPositiveButton(getString(R.string.logout), new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    doLogout();
+                }
+            }).setNegativeButton(getString(R.string.cancel), new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
                         /* nothing here */
-                    }
-                }).create();
+                }
+            }).create();
         dialog.show();
         return true;
     }
 
     private void doLogout() {
-    	preferences.isSetUp(false);
+        preferences.isSetUp(false);
         unloadAllRaces();
         fadeActivity(LoginActivity.class, true);
     }
@@ -71,5 +70,4 @@ public abstract class SessionActivity extends BaseActivity {
         intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
         this.startService(intent);
     }
-
 }

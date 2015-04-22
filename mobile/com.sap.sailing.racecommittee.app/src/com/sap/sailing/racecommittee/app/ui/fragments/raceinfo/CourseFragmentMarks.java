@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,9 +40,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListData
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkLongClick;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.utils.DialogBuilder;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -196,20 +194,15 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
                     } catch (IllegalStateException ex) {
                         if (ex.getMessage().equals("Missing second mark")) {
                             String toastText = getString(R.string.error_missing_second_mark);
-                            Toast.makeText(getActivity(),
-                                toastText,
-                                Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                         } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
                             String toastText = getString(R.string.error_missing_passing_instructions);
-                            Toast.makeText(getActivity(),
-                                toastText,
-                                Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                         }
 
                     } catch (IllegalArgumentException ex) {
                         String toastText = getString(R.string.error_no_way_point);
-                        Toast.makeText(getActivity(), toastText,
-                            Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -380,8 +373,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
                     onPassingInstructionPicked(courseElement, pickedDirection);
                 }
             });
-        DialogBuilder
-            .showColoredDialog(builder.create(), ColorHelper.getThemedColor(getActivity(), R.attr.colorAccent));
+        builder.create().show();
     }
 
     protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement,
@@ -426,7 +418,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
                 // do nothing
             }
         });
-        DialogBuilder.showColoredDialog(builder.create(), ColorHelper.getThemedColor(getActivity(), R.attr.colorAccent));
+        builder.create().show();
     }
 
     protected void copyPreviousToNewCourseDesign() {
@@ -441,12 +433,13 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
         List<Waypoint> waypoints = new ArrayList<>();
 
         for (CourseListDataElement courseElement : mElements) {
-            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
-                || courseElement.getPassingInstructions().equals(PassingInstruction.Line) || courseElement
-                .getPassingInstructions().equals(PassingInstruction.Offset))) {
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement
+                .getPassingInstructions().equals(PassingInstruction.Line) || courseElement.getPassingInstructions()
+                .equals(PassingInstruction.Offset))) {
                 if (courseElement.getRightMark() != null) {
-                    String cpwtmName = "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / "
-                        + courseElement.getRightMark().getName();
+                    String cpwtmName =
+                        "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement
+                            .getRightMark().getName();
                     ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(),
                         courseElement.getRightMark(), cpwtmName);
                     Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
