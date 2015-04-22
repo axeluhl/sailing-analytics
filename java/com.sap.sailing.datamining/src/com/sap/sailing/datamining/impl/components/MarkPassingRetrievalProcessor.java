@@ -1,11 +1,11 @@
 package com.sap.sailing.datamining.impl.components;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import java.util.HashSet;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.data.MarkPassingWithContext;
@@ -13,10 +13,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class MarkPassingRetrievalProcessor extends
-        AbstractSimpleRetrievalProcessor<HasTrackedRaceContext, HasMarkPassingContext> {
+public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasMarkPassingContext> {
 
     public MarkPassingRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel) {

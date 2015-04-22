@@ -96,9 +96,6 @@ import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
@@ -132,6 +129,9 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
@@ -362,6 +362,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private boolean autoZoomInProgress;
     
+    /**
+     * Tells whether currently an orientation change is in progress; this is required handle map events during the configuration of the map
+     * during an orientation change.
+     */
+    private boolean orientationChangeInProgress;
+    
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -404,6 +410,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
+        orientationChangeInProgress = false;
     }
     
     /**
@@ -426,6 +433,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void updateCoordinateSystemFromSettings() {
         final MapOptions mapOptions;
+        orientationChangeInProgress = true;
         if (getSettings().isWindUp()) {
             final Position centerOfCourse = getCenterOfCourse();
             if (centerOfCourse != null) {
@@ -469,6 +477,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     final LatLngBounds newBounds = getDefaultZoomBounds();
                     zoomMapToNewBounds(newBounds);
                     trueNorthIndicatorPanel.redraw();
+                    orientationChangeInProgress = false;
                 }
             }
         });
@@ -500,7 +509,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
-                      if (!autoZoomIn && !autoZoomOut) {
+                      if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                           // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                           settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);

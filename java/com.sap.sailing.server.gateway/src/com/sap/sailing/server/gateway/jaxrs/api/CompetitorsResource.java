@@ -53,7 +53,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
         json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
         json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
-
+        json.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+        if(competitor.getFlagImage() != null) {
+            json.put("flagImage", competitor.getFlagImage().toString());
+        }
+        
         return json;
     }
 
@@ -153,7 +157,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         }
 
         getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(), competitor.getEmail(), 
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri);
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage());
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
 
         JSONObject result = new JSONObject();

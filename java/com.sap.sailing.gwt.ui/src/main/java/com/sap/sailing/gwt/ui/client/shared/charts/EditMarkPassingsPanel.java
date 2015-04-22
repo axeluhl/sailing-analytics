@@ -34,20 +34,21 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Void>, RaceSelectionChangeListener,
+public class EditMarkPassingsPanel extends AbsolutePanel implements Component<AbstractSettings>, RaceSelectionChangeListener,
         CompetitorSelectionChangeListener {
 
     private static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -434,12 +435,12 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Vo
     }
 
     @Override
-    public SettingsDialogComponent<Void> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Void newSettings) {
+    public void updateSettings(AbstractSettings newSettings) {
     }
 
     @Override
