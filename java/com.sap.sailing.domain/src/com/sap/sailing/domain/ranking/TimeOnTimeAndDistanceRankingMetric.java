@@ -69,7 +69,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 Double.valueOf(getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c2, timePoint)));
     }
 
-    double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
+    protected double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
         final double tSec = getActualTimeSinceStartOfRace(competitor, timePoint).asSeconds();
         final double diNM = getWindwardDistanceTraveled(competitor, timePoint).getNauticalMiles();
         final double gi = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);

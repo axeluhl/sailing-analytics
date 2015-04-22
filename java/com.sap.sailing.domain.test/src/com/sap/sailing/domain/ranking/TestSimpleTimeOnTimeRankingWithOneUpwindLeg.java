@@ -42,6 +42,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -52,19 +53,34 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
-    private TimeOnTimeAndDistanceRankingMetric tot;
+    private TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG tot;
     private DynamicTrackedRace trackedRace;
     private Competitor c1, c2;
+    
+    private class TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG extends TimeOnTimeAndDistanceRankingMetric {
+        public TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG(TrackedRace trackedRace,
+                Function<Competitor, Double> timeOnTimeFactor,
+                Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
+            super(trackedRace, timeOnTimeFactor, timeOnDistanceFactorInSecondsPerNauticalMile);
+        }
+
+        private static final long serialVersionUID = 2450762527282968347L;
+
+        @Override
+        public double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
+            return super.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(competitor, timePoint);
+        }
+    }
     
     private void setUp(Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         c1 = TrackBasedTest.createCompetitor("FastBoat");
         c2 = TrackBasedTest.createCompetitor("SlowBoat");
-        trackedRace = createTrackedRace(tot, Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
-        tot = (TimeOnTimeAndDistanceRankingMetric) trackedRace.getRankingMetric();
+        trackedRace = createTrackedRace(Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
+        tot = (TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG) trackedRace.getRankingMetric();
         assertEquals(60, trackedRace.getCourseLength().getNauticalMiles(), 0.01);
     }
     
-    private DynamicTrackedRace createTrackedRace(RankingMetric rankingMetric, Iterable<Competitor> competitors, Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
+    private DynamicTrackedRace createTrackedRace(Iterable<Competitor> competitors, Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         final TimePoint timePointForFixes = MillisecondsTimePoint.now();
         BoatClassImpl boatClass = new BoatClassImpl("Some Handicap Boat Class", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
@@ -85,7 +101,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
-                tr->new TimeOnTimeAndDistanceRankingMetric(tr,
+                tr->new TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG(tr,
                         timeOnTimeFactors, // time-on-time
                         timeOnDistanceFactors));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
