@@ -2880,7 +2880,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                         (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
                                         competitor);
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                                logger.log(Level.WARNING, "Could not load track for " + competitor);
+                                logger.log(Level.WARNING, "Could not load track for " + competitor, e);
                             }
                         }
                         logger.info("Finished loading competitor tracks for " + getRace().getName());
