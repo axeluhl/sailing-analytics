@@ -2890,7 +2890,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                 gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), log,
                                         mark);
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                                logger.log(Level.WARNING, "Could not load track for " + mark);
+                                logger.log(Level.WARNING, "Could not load track for " + mark, e);
                             }
                         }
                         logger.info("Finished loading mark tracks for " + getRace().getName());
