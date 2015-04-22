@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.net.URI;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -26,5 +27,5 @@ public interface CompetitorFactory {
      */
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, DynamicTeam team, DynamicBoat boat);
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImageURI, DynamicTeam team, DynamicBoat boat);
 }

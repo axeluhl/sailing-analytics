@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
@@ -42,7 +42,7 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
                 }
             }
 
-            private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+            private <SettingsType extends AbstractSettings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
                 componentAndSettings.getA().updateSettings(componentAndSettings.getB());
             }
 

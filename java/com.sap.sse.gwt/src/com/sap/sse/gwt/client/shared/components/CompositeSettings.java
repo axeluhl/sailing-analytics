@@ -1,10 +1,10 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 
-public class CompositeSettings implements Settings {
-    public static class ComponentAndSettingsPair<SettingsType extends Settings> extends Util.Pair<Component<SettingsType>, SettingsType> {
+public class CompositeSettings extends AbstractSettings {
+    public static class ComponentAndSettingsPair<SettingsType extends AbstractSettings> extends Util.Pair<Component<SettingsType>, SettingsType> {
         private static final long serialVersionUID = -569811233041583043L;
 
         public ComponentAndSettingsPair(Component<SettingsType> a, SettingsType b) {

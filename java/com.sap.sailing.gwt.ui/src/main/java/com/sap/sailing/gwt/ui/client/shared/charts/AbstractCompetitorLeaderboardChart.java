@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -54,7 +54,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
  */
-public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Settings> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
+public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends AbstractSettings> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
     CompetitorSelectionChangeListener, RequiresResize, TimeListener {
     public static final String LODA_LEADERBOARD_CHART_DATA_CATEGORY = "loadLeaderboradChartData";
     
