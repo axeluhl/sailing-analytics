@@ -18,9 +18,8 @@ public class StringContext {
 
     /**
      * Return a localized string from the application's package's default string table.
-     * 
-     * @param resId
-     *            Resource id for the string
+     *
+     * @param resId Resource id for the string
      * @return the string
      */
     public final String getString(int resId) {

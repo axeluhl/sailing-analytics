@@ -17,45 +17,45 @@
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
     <string name="do_you_really_want_to_stop_tracking">Do you really want to stop tracking?</string>
-	<string name="add_team_photo">Add Team Photo</string>
-	<string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Do you want to use an existing image or take a new one?</string>
-	<string name="existing_image">Existing</string>
-	<string name="take_photo">Take Photo</string>
-	<string name="add_photo_select">Photo</string>
-	<string name="checking_in">Checking in..</string>
-	<string name="checking_out">Checking out..</string>
-	<string name="getting_event">Getting event informatiopn..</string>
-	<string name="getting_leaderboard">Getting leaderboard information..</string>
-	<string name="getting_competitor">Getting competitor information..</string>
-	<string name="error">Error</string>
-	<string name="error_could_not_complete_operation_on_server_try_again">Could not complete operation on server. Please try again.</string>
-	<string name="error_sending_team_image_to_server">Error: Could not send team image to server.</string>
-	<string name="regatta_starts_in">Regatta starts in:</string>
-	<string name="hours">Hours</string>
-	<string name="minutes">Minutes</string>
-	<string name="days">Days</string>
-	<string name="hour">Hour</string>
-	<string name="minute">Minute</string>
-	<string name="day">Day</string>
-	<string name="please_listen_to_announcements">Please listen to the announcements</string>
-	<string name="close">Close</string>
-	<string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
-	<string name="tracking_colon">Tracking:</string>
-	<string name="regatta_in_progress">The regatta is in progress.</string>
-	<string name="heading">Heading</string>
-	<string name="course_over_ground">Course over Ground</string>
+    <string name="add_team_photo">Add Team Photo</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Do you want to use an existing image or take a new one?</string>
+    <string name="existing_image">Existing</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="add_photo_select">Photo</string>
+    <string name="checking_in">Checking in..</string>
+    <string name="checking_out">Checking out..</string>
+    <string name="getting_event">Getting event informatiopn..</string>
+    <string name="getting_leaderboard">Getting leaderboard information..</string>
+    <string name="getting_competitor">Getting competitor information..</string>
+    <string name="error">Error</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">Could not complete operation on server. Please try again.</string>
+    <string name="error_sending_team_image_to_server">Error: Could not send team image to server.</string>
+    <string name="regatta_starts_in">Regatta starts in:</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="days">Days</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="day">Day</string>
+    <string name="please_listen_to_announcements">Please listen to the announcements</string>
+    <string name="close">Close</string>
+    <string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
+    <string name="tracking_colon">Tracking:</string>
+    <string name="regatta_in_progress">The regatta is in progress.</string>
+    <string name="heading">Heading</string>
+    <string name="course_over_ground">Course over Ground</string>
     <string name="speed_over_ground">Speed over Ground</string>
-	<string name="none">None</string>
-	<string name="show_leaderboard">Leader board</string>
-	<string name="error_while_receiving_server_data">Error while receiving server data</string>
-	<string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
-	<string name="warning">Warning</string>
-	<string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
-	<string name="knots">knots</string>
-	<string name="preferences">Preferences</string>
-	
-	<string name="initial_timer_text_zerozero" translatable="false">00:00:00</string>
-	<string name="initial_hyphen" translatable="false">-</string>
-	<string name="initial_hyphen_degrees" translatable="false">-°</string>
-	<string name="content_description_flag_icon" translatable="false">flag icon</string>
+    <string name="none">None</string>
+    <string name="show_leaderboard">Leader board</string>
+    <string name="error_while_receiving_server_data">Error while receiving server data</string>
+    <string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
+    <string name="warning">Warning</string>
+    <string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
+    <string name="knots">knots</string>
+    <string name="preferences">Preferences</string>
+
+    <string name="initial_timer_text_zerozero" translatable="false">00:00:00</string>
+    <string name="initial_hyphen" translatable="false">-</string>
+    <string name="initial_hyphen_degrees" translatable="false">-°</string>
+    <string name="content_description_flag_icon" translatable="false">flag icon</string>
 </resources>

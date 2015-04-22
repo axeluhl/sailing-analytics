@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android" >
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <solid android:color="@color/sap_yellow" />
+    <solid android:color="@color/sap_yellow"/>
 
     <corners
         android:bottomLeftRadius="5dip"
         android:bottomRightRadius="5dip"
         android:topLeftRadius="5dip"
-        android:topRightRadius="5dip" />
+        android:topRightRadius="5dip"/>
 </shape>

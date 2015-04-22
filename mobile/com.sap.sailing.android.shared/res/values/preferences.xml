@@ -2,19 +2,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="preference_messageResendIntervalMillis_key">messageResendIntervalMillis</string>
     <integer name="preference_messageResendIntervalMillis_default">30000</integer>
-    
+
     <string name="preference_isSendingActive_key">isSendingActive</string>
     <bool name="preference_isSendingActive_default">true</bool>
-    
+
     <string name="preference_server_url_key">webserviceUrlPref</string>
     <string name="preference_server_url_default">http://dev.sapsailing.com/</string>
-    
+
     <string name="preference_enableLifecycleLogging_key">enableLifecycleLogging</string>
     <bool name="preference_enableLifecycleLogging_default">false</bool>
-    
+
     <string name="preference_eventid_key">event</string>
     <string name="preference_eventid_default">-1</string>
-    
+
     <string name="preference_competitor_key">competitor</string>
     <string name="preference_competitor_default">-1</string>
     <string name="preference_last_scanned_qr_code">lastScannedQRCode</string>

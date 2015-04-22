@@ -5,10 +5,10 @@
     <color name="welter_selection_bottom">#ff0062a9</color>
     <color name="welter_extralight_gray">#ffe6e6e6</color>
     <color name="welter_extralight_gray_transparent">#eee6e6e6</color>
-    
+
     <color name="welter_light_gray">#ffcccccc</color>
     <color name="welter_light_gray_transparent">#eecccccc</color>
-    
+
     <color name="welter_medium_gray">#ff999999</color>
     <color name="welter_medium_darkgray">#ff808080</color>
     <color name="welter_dark_gray">#ff666666</color>
@@ -18,29 +18,29 @@
     <color name="welter_medium_blue">#ff226ca9</color>
     <color name="welter_black">#ff000000</color>
     <color name="welter_title_bar_background">#323232</color>
-    
+
     <color name="sapstore_background_gray">#FFD5D5D6</color>
     <color name="sapstore_background_light_gray">#FFF3F3F3</color>
-    
+
     <!-- 
     <color name="tabMedium">#D6D6D7</color>
 	<color name="tabDark">#CBCBCC</color>
     -->
     <color name="tabMedium">#2B2B2B</color>
-	<color name="tabDark">#000000</color>
-	
-	<color name="tabTransparent">#10ffffff</color>
-	<color name="welter_red">#ffff0000</color>
-	<color name="welter_yellow">#ffffff00</color>
-	<color name="welter_green">#ff00ff00</color>
-	<color name="welter_blue">#ff0000ff</color>
-	
-	<color name="black">#000000</color>
-	<color name="black_transparent">#55000000</color>
+    <color name="tabDark">#000000</color>
+
+    <color name="tabTransparent">#10ffffff</color>
+    <color name="welter_red">#ffff0000</color>
+    <color name="welter_yellow">#ffffff00</color>
+    <color name="welter_green">#ff00ff00</color>
+    <color name="welter_blue">#ff0000ff</color>
+
+    <color name="black">#000000</color>
+    <color name="black_transparent">#55000000</color>
     <color name="black_slightly_transparent">#D8000000</color>
-	<color name="white">#FFFFFF</color>
-	<color name="white_less_transparent">#CCFFFFFF</color>
-	<color name="sap_green">#8AB54E</color>
+    <color name="white">#FFFFFF</color>
+    <color name="white_less_transparent">#CCFFFFFF</color>
+    <color name="sap_green">#8AB54E</color>
     <color name="sap_red">#E94A1B</color>
     <color name="sap_yellow">#EEAA29</color>
     <color name="gray">#333333</color>

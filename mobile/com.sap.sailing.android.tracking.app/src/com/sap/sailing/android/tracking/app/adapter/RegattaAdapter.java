@@ -17,11 +17,11 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-       TextView name = (TextView) view.findViewById(R.id.regattaName);
-       if (name != null) {
-           String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_NAME));
-           //text += " (" + cursor.getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME)) + ")";
-           name.setText(text);
-       }
+        TextView name = (TextView) view.findViewById(R.id.regattaName);
+        if (name != null) {
+            String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_NAME));
+            //text += " (" + cursor.getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME)) + ")";
+            name.setText(text);
+        }
     }
 }

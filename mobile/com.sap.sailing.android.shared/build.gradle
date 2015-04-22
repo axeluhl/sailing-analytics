@@ -43,7 +43,7 @@ dependencies {
     compile project(':java:com.sap.sailing.server.gateway.serialization.shared.android')
     compile project(':java:com.sap.sse.common')
     compile project(':java:org.json.simple')
-    
+
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:6.5.87"
     /* all local jar-libs */

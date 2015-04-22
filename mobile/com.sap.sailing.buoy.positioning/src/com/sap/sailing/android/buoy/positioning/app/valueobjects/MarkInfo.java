@@ -1,51 +1,51 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
 public class MarkInfo {
-	
-	private String markId;
-	private String name;
-	private String type;
-	private String className;
-	private String checkinDigest;
 
-	public String getId() {
-		return markId;
-	}
+    private String markId;
+    private String name;
+    private String type;
+    private String className;
+    private String checkinDigest;
 
-	public void setId(String id) {
-		this.markId = id;
-	}
+    public String getId() {
+        return markId;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setId(String id) {
+        this.markId = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public String getClassName() {
-		return className;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public void setClassName(String className) {
-		this.className = className;
-	}
+    public String getClassName() {
+        return className;
+    }
 
-	public String getCheckinDigest() {
-		return checkinDigest;
-	}
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
-	public void setCheckinDigest(String checkinDigest) {
-		this.checkinDigest = checkinDigest;
-	}
-	
+    public String getCheckinDigest() {
+        return checkinDigest;
+    }
+
+    public void setCheckinDigest(String checkinDigest) {
+        this.checkinDigest = checkinDigest;
+    }
+
 }

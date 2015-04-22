@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black"
-    android:orientation="vertical"
-    android:paddingLeft="0dp"
-    android:paddingRight="0dp">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/black"
+              android:orientation="vertical"
+              android:paddingLeft="0dp"
+              android:paddingRight="0dp">
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="4dp"
-        android:background="@color/sap_yellow" />
+        android:background="@color/sap_yellow"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            class="com.google.android.gms.maps.MapFragment" />
+            class="com.google.android.gms.maps.MapFragment"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/mark_header"
@@ -39,14 +39,14 @@
             android:paddingLeft="16dp"
             android:paddingTop="7dp"
             android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:textSize="14sp"/>
 
     </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/white" />
+        android:background="@color/white"/>
 
 
     <!-- Begin of detailed mark information -->
@@ -65,14 +65,14 @@
             android:layout_height="wrap_content"
             android:text="@string/signal_accuracy_indicator_view_description"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
 
         <!-- Empty view to right align the following element -->
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_accuracy"
@@ -81,7 +81,7 @@
             android:layout_marginRight="5dp"
             android:textColor="@color/white"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
 
         <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
             android:layout_width="wrap_content"
@@ -89,7 +89,7 @@
             android:id="@+id/signal_quality_indicator"/>
     </LinearLayout>
 
-    <View style="@style/Divider" />
+    <View style="@style/Divider"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -105,24 +105,24 @@
             android:layout_height="wrap_content"
             android:text="@string/latitude"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
 
         <!-- Empty view to right align the following element -->
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_latitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
     </LinearLayout>
 
-    <View style="@style/Divider" />
+    <View style="@style/Divider"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -138,24 +138,24 @@
             android:layout_height="wrap_content"
             android:text="@string/longitude"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
 
         <!-- Empty view to right align the following element -->
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_longitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
     </LinearLayout>
 
-    <View style="@style/Divider" />
+    <View style="@style/Divider"/>
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
         android:id="@+id/marker_set_position_button"
@@ -167,7 +167,7 @@
         android:background="@drawable/rounded_btn_yellow"
         android:text="@string/set_position"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"/>
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
         android:id="@+id/marker_reset_position_button"
@@ -180,6 +180,6 @@
         android:background="@drawable/rounded_btn_transparent"
         android:text="@string/reset_position"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"/>
 
 </LinearLayout>

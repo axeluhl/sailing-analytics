@@ -115,17 +115,17 @@ public class RegattaActivity extends AbstractRegattaActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.refresh:
-                ExLog.i(this, TAG, "Clicked REFRESH.");
-                CheckinManager manager = new CheckinManager(checkinUrl, this);
-                manager.callServerAndGenerateCheckinData();
-                return true;
-            case R.id.about:
-                AboutDialog aboutDialog = new AboutDialog(this);
-                aboutDialog.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.refresh:
+            ExLog.i(this, TAG, "Clicked REFRESH.");
+            CheckinManager manager = new CheckinManager(checkinUrl, this);
+            manager.callServerAndGenerateCheckinData();
+            return true;
+        case R.id.about:
+            AboutDialog aboutDialog = new AboutDialog(this);
+            aboutDialog.show();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -134,30 +134,26 @@ public class RegattaActivity extends AbstractRegattaActivity {
         return R.menu.regatta_menu;
     }
 
-
     @Override
     public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
         CheckinData data = (CheckinData) checkinData;
         try {
             DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, data.checkinDigest);
-            DatabaseHelper.getInstance().storeCheckinRow(this,
-                    data.marks, data.getLeaderboard(),
-                    data.getCheckinUrl(), data.pings);
+            DatabaseHelper.getInstance()
+                .storeCheckinRow(this, data.marks, data.getLeaderboard(), data.getCheckinUrl(), data.pings);
             getRegattaFragment().getAdapter().notifyDataSetChanged();
         } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
-            ExLog.e(this, TAG,
-                    "Batch insert failed: " + e.getMessage());
+            ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
             displayDatabaseError();
             return;
         }
 
         if (BuildConfig.DEBUG) {
-            ExLog.i(this, TAG,
-                    "Batch-insert of checkinData completed.");
+            ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
     }
 
-    public String getCheckinDigest(){
+    public String getCheckinDigest() {
         return checkinDigest;
     }
 
@@ -165,17 +161,17 @@ public class RegattaActivity extends AbstractRegattaActivity {
         return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
-
     public List<MarkInfo> getMarks() {
         return marks;
     }
-
 
     public void setMarks(List<MarkInfo> marks) {
         this.marks = marks;
     }
 
-    /** Defines callbacks for service binding, passed to bindService() */
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
     private ServiceConnection messageSendingServiceConnection = new ServiceConnection() {
 
         @Override

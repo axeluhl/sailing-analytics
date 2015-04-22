@@ -14,7 +14,8 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
     public void setUp() throws Exception {
         super.setUp();
 
-        ContextThemeWrapper context = new ContextThemeWrapper(getInstrumentation().getTargetContext(), R.style.AppTheme);
+        ContextThemeWrapper context = new ContextThemeWrapper(getInstrumentation().getTargetContext(),
+            R.style.AppTheme);
         setActivityContext(context);
     }
 

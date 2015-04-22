@@ -15,46 +15,46 @@ import java.text.NumberFormat;
 
 public class SpeedFragment extends BaseFragment {
 
-	//private String TAG = SpeedFragment.class.getName();
+    //private String TAG = SpeedFragment.class.getName();
 
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		super.onCreateView(inflater, container, savedInstanceState);
-		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_speed, container, false);
-		return view;
-	}
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_speed, container, false);
+        return view;
+    }
 
-	public void setSpeed(float speedInMetersPerSecond) {
-		if (isAdded()) {
-			float speedInKnots = speedInMetersPerSecond * 1.9438444924574f;
+    public void setSpeed(float speedInMetersPerSecond) {
+        if (isAdded()) {
+            float speedInKnots = speedInMetersPerSecond * 1.9438444924574f;
 
-			NumberFormat df = DecimalFormat.getInstance();
-			df.setMinimumFractionDigits(0);
-			df.setMaximumFractionDigits(2);
-			df.setRoundingMode(RoundingMode.HALF_UP);
-			String formattedSpeed = df.format(speedInKnots);
+            NumberFormat df = DecimalFormat.getInstance();
+            df.setMinimumFractionDigits(0);
+            df.setMaximumFractionDigits(2);
+            df.setRoundingMode(RoundingMode.HALF_UP);
+            String formattedSpeed = df.format(speedInKnots);
 
-			TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
-			speedText.setText(formattedSpeed);
-			TrackingActivity activity = (TrackingActivity) getActivity();
+            TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
+            speedText.setText(formattedSpeed);
+            TrackingActivity activity = (TrackingActivity) getActivity();
 
-			if (activity != null) {
-				activity.lastSpeedIndicatorText = speedText.getText().toString();
-			}
-		}
-	}
+            if (activity != null) {
+                activity.lastSpeedIndicatorText = speedText.getText().toString();
+            }
+        }
+    }
 
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-		TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
+        TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
 
-		TrackingActivity activity = (TrackingActivity) getActivity();
-		if (activity != null) {
-			speedText.setText(activity.lastSpeedIndicatorText);
-		} else {
-			speedText.setText("0");
-		}
+        TrackingActivity activity = (TrackingActivity) getActivity();
+        if (activity != null) {
+            speedText.setText(activity.lastSpeedIndicatorText);
+        } else {
+            speedText.setText("0");
+        }
 
-	}
+    }
 }

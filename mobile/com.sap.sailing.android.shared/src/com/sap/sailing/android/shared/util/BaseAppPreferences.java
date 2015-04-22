@@ -19,13 +19,11 @@ public class BaseAppPreferences {
         return UniqueDeviceUuid.getUniqueId(context);
     }
 
-    public String getLastScannedQRCode()
-    {
+    public String getLastScannedQRCode() {
         return preferences.getString(context.getString(R.string.preference_last_scanned_qr_code), null);
     }
 
-    public void setLastScannedQRCode(String lastQRCode)
-    {
+    public void setLastScannedQRCode(String lastQRCode) {
         preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
     }
 }

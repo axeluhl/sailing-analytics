@@ -9,13 +9,13 @@ import android.support.v4.app.FragmentTransaction;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 
-public abstract class AbstractBaseActivity extends SendingServiceAwareActivity{
+public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
 
-	private static final String TAG = AbstractBaseActivity.class.getName();
+    private static final String TAG = AbstractBaseActivity.class.getName();
 
     protected ProgressDialog progressDialog;
-	
-	public void replaceFragment(int view, Fragment fragment) {
+
+    public void replaceFragment(int view, Fragment fragment) {
         ExLog.i(this, TAG, "Set new Fragment: " + fragment.toString());
 
         FragmentManager manager = getSupportFragmentManager();
@@ -43,12 +43,12 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity{
 
     public void showErrorPopup(String title, String message) {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(title).setMessage(message)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();
-                    }
-                }).create();
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    dialog.dismiss();
+                }
+            }).create();
 
         dialog.show();
     }

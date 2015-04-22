@@ -4,8 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CheckinHelper {
-    public static JSONObject getCheckinJson(String competitorId, String deviceUuid, String pushDeviceId, long fromMillis)
-            throws JSONException {
+    public static JSONObject getCheckinJson(String competitorId, String deviceUuid, String pushDeviceId,
+        long fromMillis) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("competitorId", competitorId);
         jsonObject.put("deviceType", "android");

@@ -13,19 +13,18 @@ import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
-
 public class StartActivity extends AbstractStartActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getSupportActionBar() != null) {
-			getSupportActionBar().setTitle(getString(R.string.title_activity_start));
+            getSupportActionBar().setTitle(getString(R.string.title_activity_start));
             OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
-			getSupportActionBar().setTitle(getString(R.string.title_activity_start));
-			getSupportActionBar().setHomeButtonEnabled(false);
+            getSupportActionBar().setTitle(getString(R.string.title_activity_start));
+            getSupportActionBar().setHomeButtonEnabled(false);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
     }
@@ -40,12 +39,12 @@ public class StartActivity extends AbstractStartActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.about:
-                AboutDialog aboutDialog = new AboutDialog(this);
-                aboutDialog.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.about:
+            AboutDialog aboutDialog = new AboutDialog(this);
+            aboutDialog.show();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -54,15 +53,14 @@ public class StartActivity extends AbstractStartActivity {
         return R.menu.about_menu;
     }
 
-	public AbstractHomeFragment getHomeFragment() {
-		HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
-		return homeFragment;
-	}
-	
-	public void startRegatta(String leaderboardName) {
-		Intent intent = new Intent(this, RegattaActivity.class);
-		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
-		startActivity(intent);
-	}
+    public AbstractHomeFragment getHomeFragment() {
+        HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        return homeFragment;
+    }
+
+    public void startRegatta(String leaderboardName) {
+        Intent intent = new Intent(this, RegattaActivity.class);
+        intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
+        startActivity(intent);
+    }
 }

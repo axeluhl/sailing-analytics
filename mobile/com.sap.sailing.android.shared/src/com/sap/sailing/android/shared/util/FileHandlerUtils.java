@@ -31,31 +31,32 @@ public class FileHandlerUtils {
                 stringBuilder.append(line + "\n");
             }
         } catch (IOException e) {
-            ExLog.e(context, TAG, "In Method convertStreamToString while converting stream to string: " + e.getMessage());
+            ExLog.e(context, TAG,
+                "In Method convertStreamToString while converting stream to string: " + e.getMessage());
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                ExLog.e(context, TAG, "In Method convertStreamToString while closing the input stream: " + e.getMessage());
+                ExLog.e(context, TAG,
+                    "In Method convertStreamToString while closing the input stream: " + e.getMessage());
             }
         }
         return stringBuilder.toString();
     }
-    
+
     public static File getExternalApplicationFolder(Context context) {
         String appFolder = context.getResources().getString(R.string.app_folder);
         File dir = new File(Environment.getExternalStorageDirectory() + File.separator + appFolder);
         dir.mkdirs();
         return dir;
     }
-    
+
     public static File getExternalFileFolder(Context context) {
         return new File(context.getExternalFilesDir(null).getPath() + "/");
     }
-    
+
     public static File getExternalCacheFolder(Context context) {
         return new File(context.getExternalCacheDir().getPath() + "/");
     }
-    
-    
+
 }

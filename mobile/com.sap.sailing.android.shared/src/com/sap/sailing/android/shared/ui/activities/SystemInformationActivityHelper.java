@@ -34,12 +34,13 @@ public class SystemInformationActivityHelper {
         ListView waitingView = (ListView) activity.findViewById(R.id.system_information_persistence_waiting);
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
-            statusView.setText(String.format("Currently %d events waiting to be sent.\nLast successful sent was at: %s.", 
-                    activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? "never" : lastSuccessfulSend));
-            
-            waitingView.setAdapter(new ArrayAdapter<String>(activity, 
-                    android.R.layout.simple_list_item_1, 
-                    activity.sendingService.getDelayedIntentsContent()));
+            statusView.setText(String
+                .format("Currently %d events waiting to be sent.\nLast successful sent was at: %s.",
+                    activity.sendingService.getDelayedIntentsCount(),
+                    lastSuccessfulSend == null ? "never" : lastSuccessfulSend));
+
+            waitingView.setAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,
+                activity.sendingService.getDelayedIntentsContent()));
         } else {
             statusView.setText(activity.getString(R.string.generic_error));
         }
@@ -63,7 +64,7 @@ public class SystemInformationActivityHelper {
     private void setupVersionView(String deviceIdentifier) {
         TextView identifierView = (TextView) activity.findViewById(R.id.system_information_application_identifier);
         identifierView.setText(deviceIdentifier);
-        
+
         TextView versionView = (TextView) activity.findViewById(R.id.system_information_application_version);
         PackageInfo info = AppUtils.getPackageInfo(activity);
         if (info == null) {
@@ -81,7 +82,7 @@ public class SystemInformationActivityHelper {
         } else {
             Date installDate = new Date(info.lastUpdateTime);
             installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
-                    DateFormat.getTimeFormat(activity).format(installDate)));
+                DateFormat.getTimeFormat(activity).format(installDate)));
         }
     }
 

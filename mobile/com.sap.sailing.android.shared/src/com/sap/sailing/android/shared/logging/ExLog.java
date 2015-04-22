@@ -13,14 +13,13 @@ import android.util.Log;
 
 /**
  * Simple wrapper for logging to various targets.
- * 
+ * <p/>
  * Log by using {@link ExLog#i(String, String)}, {@link ExLog#w(String, String)} and {@link ExLog#e(String, String)}.
  * Activate a set of targets by using {@link ExLog#activate(Target)} or {@link ExLog#activate(EnumSet)}. Currently
  * available are logging to android.util.Log LogCat and logging to a file on SD-card.
- * 
+ * <p/>
  * The file logging in very defensive in a way that opening and writing to the file is secured by various exception
  * handlers trying to silence all possible errors.
- * 
  */
 public class ExLog {
     private final static String TAG = "ExLogInternal";
@@ -46,8 +45,8 @@ public class ExLog {
         if (UNIQUE_ID == null) {
             UNIQUE_ID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
         }
-        i(context, "ID: " + String.valueOf(eventID), System.currentTimeMillis() + ":" + (UNIQUE_ID == null ? "" : UNIQUE_ID)
-                + ":" + (msg == null ? "" : msg));
+        i(context, "ID: " + String.valueOf(eventID),
+            System.currentTimeMillis() + ":" + (UNIQUE_ID == null ? "" : UNIQUE_ID) + ":" + (msg == null ? "" : msg));
     }
 
     public static String UNIQUE_ID = null;
@@ -63,7 +62,7 @@ public class ExLog {
     public synchronized static void e(Context context, String tag, String msg) {
         getInstance().error(context, tag, msg);
     }
-    
+
     public synchronized static void ex(Context context, String tag, Exception e) {
         getInstance().exception(context, tag, e);
     }
@@ -119,13 +118,13 @@ public class ExLog {
         if (isTargetActive(Target.FILE))
             logToFile(context, LogLevel.ERROR, tag, msg);
     }
-    
+
     private void exception(Context context, String tag, Exception e) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter stream = new PrintWriter(stringWriter);
         e.printStackTrace(stream);
         String msg = stringWriter.toString();
-        
+
         if (isTargetActive(Target.LOGCAT))
             Log.e(tag, msg);
 

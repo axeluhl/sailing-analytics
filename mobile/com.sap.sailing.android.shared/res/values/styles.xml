@@ -6,10 +6,10 @@
         <item name="android:layout">@layout/welter_timepicker</item>
     </style>
     -->
-    
-	<style name="MyDropDownNav" parent="@android:style/Widget.Holo.Light.Spinner">
-	    <item name="android:background">@drawable/spinner_background_holo_dark</item>
-	</style>
+
+    <style name="MyDropDownNav" parent="@android:style/Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/spinner_background_holo_dark</item>
+    </style>
 
     <style name="Widget.Welter.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@drawable/title_bar_bg</item>
@@ -60,7 +60,7 @@
         <item name="android:textSize">@dimen/Welter.BigTitleTextSize</item>
         <item name="android:textColor">@color/welter_deep_gray</item>
     </style>
-    
+
     <style name="TextAppearance.Welter.BoldBigTitleLabel" parent="TextAppearance.Welter.BigTitleLabel">
         <item name="android:textStyle">bold</item>
     </style>
@@ -80,7 +80,7 @@
     <style name="TextAppearance.Welter.ExtraBigTitleLabel" parent="TextAppearance.Welter.BigTitleLabel">
         <item name="android:textSize">@dimen/Welter.ExtraBigTitleTextSize</item>
     </style>
-    
+
     <style name="TextAppearance.Welter.TextLabel" parent="TextAppearance.Welter.BigTitleLabel">
         <item name="android:textSize">@dimen/Welter.LabelTextSize</item>
     </style>
