@@ -8,5 +8,6 @@ sourceSets {
 
 dependencies {
     /* local dependencies */
+    compile project(":java:org.json.simple")
     compile project(":java:com.sap.sse.datamining.shared")
 }
