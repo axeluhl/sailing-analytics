@@ -2711,10 +2711,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Fetches the boat class-specific parameter
      */
     private double getManeuverDegreeAngleThreshold() {
+        //FIXME use polar service
         return getRace().getBoatClass().getManeuverDegreeAngleThreshold();
     }
 
     private double getMinimumAngleBetweenDifferentTacksDownwind() {
+        //FIXME use polar service
         return getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksDownwind();
     }
 

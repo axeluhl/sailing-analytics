@@ -1,4 +1,4 @@
-package com.sap.sailing.polars;
+package com.sap.sailing.domain.polars;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -20,8 +20,6 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.mining.MovingAverageProcessor;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
 
 /**

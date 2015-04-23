@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
-import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;

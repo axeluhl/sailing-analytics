@@ -27,12 +27,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -124,6 +121,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -153,8 +151,6 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.polars.factory.PolarDataServiceFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
@@ -351,7 +347,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final AbstractLogEventAuthor raceLogEventAuthorForServer = new LogEventAuthorImpl(
             RacingEventService.class.getName(), 0);
 
-    private final PolarDataService polarDataService;
+    private PolarDataService polarDataService;
 
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
@@ -504,13 +500,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-        // TODO find out how many executors we have on server side and how to manage them
-        Executor polarExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
-        /* maximumPoolSize */THREAD_POOL_SIZE,
-        /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>());
-        polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -1539,14 +1528,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
-            polarDataService.competitorPositionChanged(fix, item, race);
+            if (polarDataService != null) {
+                polarDataService.competitorPositionChanged(fix, item, race);
+            }
         }
         
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING
                     && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
-                polarDataService.raceFinishedLoading(race);
+                if (polarDataService != null) {
+                    polarDataService.raceFinishedLoading(race);
+                }
             }
         }
 
@@ -3112,5 +3105,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public ClassLoader getCombinedMasterDataClassLoader() {
         JoinedClassLoader joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         return joinedClassLoader;
+    }
+
+    public void setPolarDataService(PolarDataService service) {
+        polarDataService = service;
+    }
+    
+    public void unsetPolarDataService(PolarDataService service) {
+        if (this.polarDataService.equals(service)) {
+            polarDataService = null;
+        }
     }
 }

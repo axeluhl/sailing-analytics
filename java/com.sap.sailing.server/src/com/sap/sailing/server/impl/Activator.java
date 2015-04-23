@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
@@ -55,6 +56,8 @@ public class Activator implements BundleActivator {
     
     private ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> masterDataImportClassLoaderServiceTracker;
     
+    private ServiceTracker<PolarDataService, PolarDataService> polarDataServiceTracker;
+    
     public Activator() {
         clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
         logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
@@ -77,6 +80,10 @@ public class Activator implements BundleActivator {
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
         masterDataImportClassLoaderServiceTracker.open();
+        
+        polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
+                PolarDataService.class, new PolarDataServiceTrackerCustomizer(context, racingEventService));
+        polarDataServiceTracker.open();
 
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
@@ -153,6 +160,35 @@ public class Activator implements BundleActivator {
         public void removedService(ServiceReference<MasterDataImportClassLoaderService> reference,
                 MasterDataImportClassLoaderService service) {
             racingEventService.removeMasterDataClassLoader(service.getClassLoader());
+        }
+
+    }
+
+    private class PolarDataServiceTrackerCustomizer implements
+            ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
+
+        private final BundleContext context;
+        private RacingEventServiceImpl racingEventService;
+
+        public PolarDataServiceTrackerCustomizer(BundleContext context, RacingEventServiceImpl racingEventService) {
+            this.context = context;
+            this.racingEventService = racingEventService;
+        }
+
+        @Override
+        public PolarDataService addingService(ServiceReference<PolarDataService> reference) {
+            PolarDataService service = context.getService(reference);
+            racingEventService.setPolarDataService(service);
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<PolarDataService> reference, PolarDataService service) {
+        }
+
+        @Override
+        public void removedService(ServiceReference<PolarDataService> reference, PolarDataService service) {
+            racingEventService.unsetPolarDataService(service);
         }
 
     }

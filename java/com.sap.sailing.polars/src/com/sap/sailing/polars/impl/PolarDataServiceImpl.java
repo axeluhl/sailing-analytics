@@ -20,15 +20,15 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.PolarDataMiner;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.SmartFutureCache;
 
@@ -44,7 +44,7 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarDataMiner polarDataMiner;
     
-    public PolarDataServiceImpl(Executor executor) {
+    public PolarDataServiceImpl() {
         this.polarDataMiner = new PolarDataMiner();
     }
 
