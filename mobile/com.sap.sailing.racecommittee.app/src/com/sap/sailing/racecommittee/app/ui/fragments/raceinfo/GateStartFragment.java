@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -157,11 +158,16 @@ public class GateStartFragment {
                         }
                     }
                 });
+
+                if (!TextUtils.isEmpty(mNat.getText()) && !TextUtils.isEmpty(mNum.getText())) {
+                    mButton.setEnabled(true);
+                }
             }
         }
 
+
         private void enableSetButton(View view, View button) {
-            if (view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
+            if (view != null && view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
                 button.setEnabled(
                     (Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
             }
