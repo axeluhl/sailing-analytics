@@ -24,7 +24,7 @@ public class ThemeHelper {
 
     public static void setTheme(Activity activity) {
         String theme = AppPreferences.on(activity).getTheme();
-        if (theme.equals(AppConstants.LIGHT_THEME)) {
+        if (AppConstants.LIGHT_THEME.equals(theme)) {
             activity.setTheme(R.style.AppTheme_Light);
         } else {
             activity.setTheme(R.style.AppTheme_Dark);

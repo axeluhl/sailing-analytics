@@ -334,7 +334,6 @@
     <string name="gate_start_number">Nummer</string>
     <string name="gate_start_set_pathfinder">Pathfinder setzen</string>
     <string name="gate_start_set">Gate Time setzen</string>
-    <string name="preference_theme_default">dunkel</string>
     <string name="race_setup_confirm">Setup Bestätigen</string>
     <string name="race_end_finish_header">Ende Ziel</string>
     <string name="race_summary_finish_begin">Ziel Beginn</string>

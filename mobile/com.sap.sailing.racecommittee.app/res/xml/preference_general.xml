@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Connection" >
+    <PreferenceCategory android:title="Connection">
         <!--
         This is a somewhat special preference, because when set to an empty
         string the getter on AppPreferences will return the device's unique identifier
@@ -10,70 +10,71 @@
             android:defaultValue="@string/empty"
             android:key="@string/preference_identifier_key"
             android:summary="@string/empty"
-            android:title="@string/device_identifier" />
+            android:title="@string/device_identifier"/>
         <EditTextPreference
             android:defaultValue="@string/preference_server_url_default"
             android:key="@string/preference_server_url_key"
             android:summary="@string/empty"
-            android:title="@string/settings_advanced_service_header" />
+            android:title="@string/settings_advanced_service_header"/>
         <Preference
             android:key="@string/preference_sync_key"
             android:summary="@string/synchronize_connection_settings_description"
-            android:title="@string/synchronize_connection_settings_header" />
+            android:title="@string/synchronize_connection_settings_header"/>
         <Preference
             android:key="@string/preference_update_key"
             android:summary="@string/update_app_description"
-            android:title="@string/update_app_header" />
+            android:title="@string/update_app_header"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/settings_category_polling" >
+    <PreferenceCategory android:title="@string/settings_category_polling">
         <CheckBoxPreference
             android:defaultValue="@bool/preference_polling_active_default"
             android:key="@string/preference_polling_active_key"
             android:summary="@string/settings_polling_active_description"
-            android:title="@string/settings_polling_active_header" />
+            android:title="@string/settings_polling_active_header"/>
 
         <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
             android:defaultValue="@integer/preference_polling_interval_default"
             android:key="@string/preference_polling_interval_key"
-            android:title="@string/settings_polling_interval_header"
-            android:numeric="integer"/>
+            android:numeric="integer"
+            android:title="@string/settings_polling_interval_header"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_category_general">
         <Preference
             android:key="languagePref"
             android:summary="@string/settings_general_language_description"
-            android:title="@string/settings_general_language_header" />
+            android:title="@string/settings_general_language_header"/>
+
+        <ListPreference
+            android:defaultValue="@string/preference_theme_default"
+            android:entries="@array/preference_theme_entries"
+            android:entryValues="@array/preference_theme_values"
+            android:key="@string/preference_theme_key"
+            android:title="@string/preference_theme_header"/>
 
         <com.sap.sailing.android.shared.ui.views.EditSetPreference
             android:defaultValue="@array/preference_course_areas_default"
             android:key="@string/preference_course_areas_key"
             android:summary="@string/empty"
-            android:title="@string/settings_general_manageareas_header" />
+            android:title="@string/settings_general_manageareas_header"/>
 
         <EditTextPreference
             android:defaultValue="@string/preference_mail_default"
             android:key="@string/preference_mail_key"
             android:summary="@string/empty"
-            android:title="@string/settings_advanced_mail_header" />
+            android:title="@string/settings_advanced_mail_header"/>
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_wakelock_default"
             android:key="@string/preference_wakelock_key"
             android:summary="@string/preference_wakelock_summary"
-            android:title="@string/preference_wakelock_header" />
+            android:title="@string/preference_wakelock_header"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/settings_category_developer"
-        android:key="@string/preference_developer_key">
-        <ListPreference
-            android:key="@string/preference_theme_key"
-            android:title="@string/preference_theme_header"
-            android:defaultValue="@string/preference_theme_default"
-            android:entries="@array/preference_theme_entries"
-            android:entryValues="@array/preference_theme_values"/>
-
+    <PreferenceCategory
+        android:key="@string/preference_developer_key"
+        android:title="@string/settings_category_developer">
         <CheckBoxPreference
             android:defaultValue="@bool/preference_offline_default"
             android:key="@string/preference_offline_key"
