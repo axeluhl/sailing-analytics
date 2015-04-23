@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -58,63 +59,53 @@
                 android:layout_margin="@dimen/default_margin_twice">
 
                 <LinearLayout
-                    android:id="@+id/label_area"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/gate_start_nationality"
-                        android:textAppearance="?textXSmall"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/gate_start_number"
-                        android:textAppearance="?textXSmall"/>
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-                </LinearLayout>
-
-                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/label_area"
                     android:orientation="horizontal">
 
-                    <EditText
-                        android:id="@+id/pathfinder_nat"
+                    <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
                         android:layout_weight="1"
-                        android:hint="@string/gate_start_nationality"
-                        android:inputType="textCapCharacters"
-                        android:textAppearance="?textNormal"
-                        android:textColor="?white"/>
+                        app:floatLabelTextAppearance="?floatLabel"
+                        app:floatLabelPaddingLeft="9dp">
 
-                    <EditText
-                        android:id="@+id/pathfinder_num"
+                        <EditText
+                            android:id="@+id/pathfinder_nat"
+                            style="?editText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:hint="@string/gate_start_nationality"
+                            android:inputType="textCapCharacters"
+                            android:textAppearance="?textNormal"
+                            android:textColor="?white"/>
+                    </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+
+                    <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
                         android:layout_weight="1"
-                        android:hint="@string/gate_start_number"
-                        android:inputType="textCapCharacters"
-                        android:textAppearance="?textNormal"
-                        android:textColor="?white"
-                        />
+                        app:floatLabelTextAppearance="?floatLabel"
+                        app:floatLabelPaddingLeft="9dp">
+
+                        <EditText
+                            android:id="@+id/pathfinder_num"
+                            style="?editText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:hint="@string/gate_start_number"
+                            android:inputType="textCapCharacters"
+                            android:textAppearance="?textNormal"
+                            android:textColor="?white"/>
+                    </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
 
                     <RelativeLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="1">
 
                         <Button

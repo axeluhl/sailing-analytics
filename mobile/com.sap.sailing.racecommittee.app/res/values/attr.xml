@@ -26,6 +26,8 @@
 
     <attr name="textPanelHeader" format="reference"/>
     <attr name="textPanelCaption" format="reference"/>
+    <attr name="editText" format="reference"/>
+    <attr name="floatLabel" format="reference"/>
 
     <!-- drawable -->
     <attr name="access_time_36dp" format="reference"/>

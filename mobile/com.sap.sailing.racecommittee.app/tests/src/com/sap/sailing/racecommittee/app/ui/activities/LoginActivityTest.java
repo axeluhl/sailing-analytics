@@ -1,24 +1,26 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.support.test.espresso.Espresso;
-import android.support.test.espresso.action.ViewActions;
-import android.support.test.espresso.matcher.ViewMatchers;
-import android.test.ActivityInstrumentationTestCase2;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.sap.sailing.racecommittee.app.R;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginActivity> {
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
-    public LoginActivityTest() {
-        super(LoginActivity.class);
-    }
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class LoginActivityTest {
 
-    public void setUp() throws Exception {
-        super.setUp();
+    @Rule
+    public ActivityTestRule<LoginActivity> mActivityRule = new ActivityTestRule<>(LoginActivity.class);
 
-        getActivity();
-    }
-
-    public void testActivity() throws Exception {
-        Espresso.onView(ViewMatchers.withId(R.id.login_view_backdrop)).perform(ViewActions.click());
+    @Test
+    public void photoListNotVisible() throws Exception {
+        onView(withId(R.id.photo_list)).check(doesNotExist());
     }
 }

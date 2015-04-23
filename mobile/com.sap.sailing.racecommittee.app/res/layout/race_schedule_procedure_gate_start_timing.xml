@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -47,121 +48,115 @@
         android:background="?sap_gray_black_30">
 
         <LinearLayout
-            android:id="@+id/linearLayout2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignTop="@+id/linearLayout"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="166dp"
-            android:layout_marginStart="166dp"
-            android:orientation="vertical">
+            android:layout_centerInParent="true"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/time_launch"
+                        android:textAppearance="?textSmall"
+                        android:gravity="center_horizontal"/>
+
+                    <NumberPicker
+                        android:id="@+id/time_launch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:scaleX="1.55"
+                        android:scaleY="1.55"
+                        android:layout_marginBottom="@dimen/default_margin_twice"
+                        android:layout_marginTop="@dimen/default_margin_twice"/>
+                </LinearLayout>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="35dp"
-                android:text="@string/time_launch"
-                android:textSize="@dimen/textSize_22"/>
+                android:layout_gravity="center_vertical"
+                android:layout_margin="@dimen/default_margin_twice"
+                android:text="+"
+                android:textAppearance="?textXLarge"/>
 
-            <NumberPicker
-                android:id="@+id/time_launch"
+            <LinearLayout
+                android:id="@+id/linearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scaleX="1.55"
-                android:scaleY="1.55"/>
-        </LinearLayout>
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="+"
-            android:layout_marginBottom="85dp"
-            android:layout_alignBottom="@+id/linearLayout"
-            android:textSize="@dimen/textSize_22"
-            android:layout_gravity="center_vertical"
-            android:layout_toRightOf="@+id/linearLayout2"
-            android:layout_toEndOf="@+id/linearLayout2"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/time_golf"
+                    android:textAppearance="?textSmall"
+                    android:gravity="center_horizontal"/>
 
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="100dp"
-            android:layout_marginStart="100dp"
-            android:layout_toEndOf="@+id/textView"
-            android:layout_toRightOf="@+id/textView"
-            android:orientation="vertical">
+                <NumberPicker
+                    android:id="@+id/time_golf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:scaleX="1.55"
+                    android:scaleY="1.55"
+                    android:layout_marginBottom="@dimen/default_margin_twice"
+                    android:layout_marginTop="@dimen/default_margin_twice"/>
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="35dp"
-                android:text="@string/time_golf"
-                android:textSize="@dimen/textSize_22"/>
+                android:layout_gravity="center_vertical"
+                android:layout_margin="@dimen/default_margin_twice"
+                android:text="="
+                android:textAppearance="?textXLarge"/>
 
-            <NumberPicker
-                android:id="@+id/time_golf"
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time_total"
+                    android:textAppearance="?textSmall"
+                    android:gravity="center_horizontal"/>
+
+                <TextView
+                    android:id="@+id/total_time_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:textAppearance="?textXLarge"
+                    tools:text="12"/>
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/set_gate_time"
+                style="?attr/buttonSolidNormal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scaleX="1.55"
-                android:scaleY="1.55"/>
+                android:layout_gravity="center_vertical"
+                android:layout_margin="@dimen/default_margin_twice"
+                android:text="@string/gate_start_set"/>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/set_gate_time"
-            style="?attr/buttonSolidNormal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginBottom="65dp"
-            android:text="@string/gate_start_set"
-            android:layout_marginLeft="77dp"
-            android:layout_alignBottom="@+id/linearLayout"
-            android:layout_toRightOf="@+id/total_time_text"
-            android:layout_toEndOf="@+id/total_time_text"/>
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="="
-            android:textSize="@dimen/textSize_22"
-            android:layout_marginBottom="85dp"
-            android:layout_gravity="center_vertical"
-            android:layout_toRightOf="@+id/linearLayout"
-            android:layout_toEndOf="@+id/linearLayout"
-            android:layout_alignBottom="@+id/linearLayout"
-            android:layout_marginLeft="53dp"
-            android:layout_marginStart="53dp"/>
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/linearLayout"
-            android:layout_marginLeft="98dp"
-            android:layout_marginStart="98dp"
-            android:layout_toEndOf="@+id/textView2"
-            android:layout_toRightOf="@+id/textView2"
-            android:text="@string/time_total"
-            android:textSize="@dimen/textSize_22"/>
-
-        <TextView
-            android:id="@+id/total_time_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/textSize_22"
-            android:layout_marginBottom="85dp"
-            android:layout_gravity="center_vertical"
-            android:layout_alignBottom="@+id/linearLayout"
-            android:layout_alignLeft="@+id/textView3"
-            android:layout_alignStart="@+id/textView3"/>
     </RelativeLayout>
 </RelativeLayout>
