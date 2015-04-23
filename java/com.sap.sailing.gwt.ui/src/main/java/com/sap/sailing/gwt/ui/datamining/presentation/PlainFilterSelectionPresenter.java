@@ -69,7 +69,7 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
         boolean first = true;
         for (Integer levelIndex : sortedLevels) {
             Map<FunctionDTO, Collection<? extends Serializable>> levelSelection = selection.get(levelIndex);
-            LocalizedTypeDTO level = retrieverChain.getRetrievedDataTypesChain().get(levelIndex);
+            LocalizedTypeDTO level = retrieverChain.getRetrievedDataType(levelIndex);
             RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(level, levelSelection);
             if (!first) {
                 levelSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(5, Unit.PX);

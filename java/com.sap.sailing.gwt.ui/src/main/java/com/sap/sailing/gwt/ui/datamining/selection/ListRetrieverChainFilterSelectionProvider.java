@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     private boolean isAwaitingReload;
     private DataRetrieverChainDefinitionDTO retrieverChain;
-    private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrieverLevel;
+    private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrievedDataType;
     private final FilterSelectionChangedListener retrieverLevelSelectionChangedListener;
     
     private final DockLayoutPanel mainPanel;
@@ -73,7 +74,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         
         isAwaitingReload = false;
         retrieverChain = null;
-        selectionProvidersMappedByRetrieverLevel = new HashMap<>();
+        selectionProvidersMappedByRetrievedDataType = new HashMap<>();
         retrieverLevelSelectionChangedListener = new FilterSelectionChangedListener() {
             @Override
             public void selectionChanged() {
@@ -141,24 +142,24 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             @Override
             public void onSuccess(Iterable<FunctionDTO> dimensions) {
                 Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = mapBySourceType(dimensions);
-                int retrieverLevelIndex = 0;
-                LocalizedTypeDTO firstFilterableRetrieverLevel = null;
-                for (LocalizedTypeDTO retrieverLevel : retrieverChain.getRetrievedDataTypesChain()) {
-                    String sourceTypeName = retrieverLevel.getTypeName();
-                    if (dimensionsMappedBySourceType.containsKey(sourceTypeName) &&
-                        !dimensionsMappedBySourceType.get(sourceTypeName).isEmpty()) {
-                        firstFilterableRetrieverLevel = firstFilterableRetrieverLevel == null ? retrieverLevel : firstFilterableRetrieverLevel;
+                Map<Integer, Collection<FunctionDTO>> reducedDimensionsMappedByRetrieverLevel = reduceAndMapByRetrieverLevel(dimensionsMappedBySourceType);
+                int firstFilterableRetrieverLevel = Integer.MAX_VALUE;
+                for (Entry<Integer, Collection<FunctionDTO>> dimensionsEntry : reducedDimensionsMappedByRetrieverLevel.entrySet()) {
+                    if (!dimensionsEntry.getValue().isEmpty()) {
+                        int retrieverLevel = dimensionsEntry.getKey();
+                        LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
                         RetrieverLevelFilterSelectionProvider selectionProvider =
                                 new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, ListRetrieverChainFilterSelectionProvider.this, retrieverChain,
-                                                                          retrieverLevel, retrieverLevelIndex, selectionPanel);
-                        selectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
+                                                                          retrievedDataType, retrieverLevel, selectionPanel);
+                        selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());
                         selectionProvider.addSelectionChangedListener(retrieverLevelSelectionChangedListener);
-                        selectionProvidersMappedByRetrieverLevel.put(retrieverLevel, selectionProvider);
+                        selectionProvidersMappedByRetrievedDataType.put(retrievedDataType, selectionProvider);
+                        
+                        firstFilterableRetrieverLevel = retrieverLevel < firstFilterableRetrieverLevel ? retrieverLevel : firstFilterableRetrieverLevel;
                     }
-                    retrieverLevelIndex++;
                 }
                 
-                retrieverLevelSelectionModel.setSelected(firstFilterableRetrieverLevel, true);
+                retrieverLevelSelectionModel.setSelected(retrieverChain.getRetrievedDataType(firstFilterableRetrieverLevel), true);
             }
         });
     }
@@ -173,19 +174,60 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         }
         return dimensionsMappedBySourceType;
     }
+    
+    private Map<Integer, Collection<FunctionDTO>> reduceAndMapByRetrieverLevel(Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType) {
+        Map<Integer, Collection<FunctionDTO>> reducedDimensionsMappedBySourceType = new HashMap<>();
+        for (int retrieverLevel = 0; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
+            LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
+            Collection<FunctionDTO> dimensions = dimensionsMappedBySourceType.get(retrievedDataType.getTypeName());
+            Collection<FunctionDTO> previousDimensions =
+                    retrieverLevel > 0 ? dimensionsMappedBySourceType.get(retrieverChain.getRetrievedDataType(retrieverLevel - 1).getTypeName()) : null;
+            if (dimensions != null && !dimensions.isEmpty()) {
+                if (reducedDimensionsMappedBySourceType.isEmpty() || previousDimensions == null || previousDimensions.isEmpty()) {
+                    reducedDimensionsMappedBySourceType.put(retrieverLevel, dimensions);
+                } else {
+                    reducedDimensionsMappedBySourceType.put(retrieverLevel, reduce(dimensions, previousDimensions));
+                }
+            }
+        }
+        return reducedDimensionsMappedBySourceType;
+    }
+
+    private Collection<FunctionDTO> reduce(Collection<FunctionDTO> dimensionsToReduce, Collection<FunctionDTO> byDimensions) {
+        Collection<FunctionDTO> reducedDimensions = new HashSet<>();
+        for (FunctionDTO dimension : dimensionsToReduce) {
+            boolean isDimensionAllowed = true;
+            for (FunctionDTO forbiddenDimension : byDimensions) {
+                if (areDimensionsLogicalEqual(dimension, forbiddenDimension)) {
+                    isDimensionAllowed = false;
+                    break;
+                }
+            }
+            if (isDimensionAllowed) {
+                reducedDimensions.add(dimension);
+            }
+        }
+        return reducedDimensions;
+    }
+
+    private boolean areDimensionsLogicalEqual(FunctionDTO dimension1, FunctionDTO dimension2) {
+        return dimension1.getDisplayName().equals(dimension2.getDisplayName()) &&
+               dimension1.getParameterTypeNames().equals(dimension2.getParameterTypeNames()) &&
+               dimension1.getReturnTypeName().equals(dimension2.getReturnTypeName());
+    }
 
     private void clearContent() {
         retrieverLevelDataProvider.getList().clear();
         retrieverLevelSelectionModel.clear();
         selectionPanel.clear();
         clearSelection();
-        selectionProvidersMappedByRetrieverLevel.clear();
+        selectionProvidersMappedByRetrievedDataType.clear();
     }
 
     @Override
     public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getSelection() {
         Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = new HashMap<>();
-        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
+        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
             Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = selectionProvider.getFilterSelection();
             if (!levelFilterSelection.isEmpty()) {
                 filterSelection.put(selectionProvider.getRetrieverLevel(),
@@ -197,7 +239,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     @Override
     public void applySelection(QueryDefinitionDTO queryDefinition) {
-        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
+        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
             Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
             int retrieverLevel = selectionProvider.getRetrieverLevel();
             if (filterSelection.containsKey(retrieverLevel)) {
@@ -208,7 +250,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     @Override
     public void clearSelection() {
-        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrieverLevel.values()) {
+        for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
             selectionProvider.clearSelection();
         }
     }
@@ -249,14 +291,14 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
-                    selectionPanel.setWidget(selectionProvidersMappedByRetrieverLevel.get(retrieverLevelSelectionModel.getSelectedObject()).getEntryWidget());
+                    selectionPanel.setWidget(selectionProvidersMappedByRetrievedDataType.get(retrieverLevelSelectionModel.getSelectedObject()).getEntryWidget());
                 }
             });
         }
         
         @Override
         public void setSelected(LocalizedTypeDTO item, boolean selected) {
-            if (!selected || !selectionProvidersMappedByRetrieverLevel.containsKey(item)) {
+            if (!selected || !selectionProvidersMappedByRetrievedDataType.containsKey(item)) {
                 //Prevents the selection of retriever levels, that don't have any dimensions and can't filter
                 return;
             }
