@@ -84,7 +84,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             eventName = event.getName();
             ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
             preferences.setEventID(eventId);
-            setupDataManager();
             showCourseAreaListFragment(eventId);
             if (loginListViews != null) {
                 loginListViews.closeAll();
