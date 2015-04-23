@@ -63,7 +63,7 @@
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/signal_accuracy_indicator_view_description"
+            android:text="@string/accuracy"
             android:textColor="@color/white"
             android:textSize="20sp"/>
 

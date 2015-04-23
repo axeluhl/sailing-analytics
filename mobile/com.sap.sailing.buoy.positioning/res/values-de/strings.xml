@@ -10,5 +10,6 @@
     <string name="set">Gesetzt</string>
     <string name="not_set">Nicht gesetzt</string>
     <string name="mark_list_accuracy">(Genauigkeit ca. %1$sm)</string>
+    <string name="accuracy">Genauigkeit</string>
 
 </resources>
