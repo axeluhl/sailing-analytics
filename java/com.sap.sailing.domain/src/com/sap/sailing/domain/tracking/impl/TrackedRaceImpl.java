@@ -97,6 +97,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -314,6 +315,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Caches wind requests for a few seconds to accelerate access in live mode
      */
     private transient ShortTimeWindCache shortTimeWindCache;
+
+    private transient PolarDataService polarDataService;
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
             final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
@@ -3455,6 +3458,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = Distance.NULL;
         }
         return result;
+    }
+    
+    @Override
+    public void setPolarDataService(PolarDataService polarDataService) {
+        this.polarDataService = polarDataService;
     }
 
 }

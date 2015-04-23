@@ -1515,6 +1515,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
+            
+            if (polarDataService != null) {
+                trackedRace.setPolarDataService(polarDataService);
+            }
         }
     }
 
@@ -3108,12 +3112,29 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setPolarDataService(PolarDataService service) {
-        polarDataService = service;
+        if (this.polarDataService == null) {
+            polarDataService = service;
+            setPolarDataServiceOnAllTrackedRaces(service);
+        }
+    }
+
+    private void setPolarDataServiceOnAllTrackedRaces(PolarDataService service) {
+        Iterable<Regatta> allRegattas = getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                for (TrackedRace trackedRace : trackedRaces) {
+                    trackedRace.setPolarDataService(service);
+                }
+            }
+        }
     }
     
     public void unsetPolarDataService(PolarDataService service) {
-        if (this.polarDataService.equals(service)) {
+        if (polarDataService == service) {
             polarDataService = null;
+            setPolarDataService(null);
         }
     }
 }

@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -766,5 +767,7 @@ public interface TrackedRace extends Serializable {
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
     boolean isUsingMarkPassingCalculator();
+
+    void setPolarDataService(PolarDataService polarDataService);
 
 }

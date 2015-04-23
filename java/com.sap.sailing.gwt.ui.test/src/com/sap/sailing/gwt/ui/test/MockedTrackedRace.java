@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
@@ -901,5 +902,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public int getLastLegStarted(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public void setPolarDataService(PolarDataService polarDataService) {
     }
 }
