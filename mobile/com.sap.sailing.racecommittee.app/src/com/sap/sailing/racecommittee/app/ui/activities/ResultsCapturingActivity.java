@@ -28,6 +28,9 @@ import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
 import com.sap.sailing.racecommittee.app.ui.views.CameraView;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
+// Deprecation of Camera API.
+// New Camera API in Android 5.0
+// New handling for camera in new RC App.
 @SuppressWarnings("deprecation")
 public class ResultsCapturingActivity extends SessionActivity {
     private static String ARGUMENTS_KEY_SUBJECT = "subject";

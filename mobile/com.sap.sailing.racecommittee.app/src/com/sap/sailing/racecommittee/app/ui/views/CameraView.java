@@ -12,6 +12,9 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+// Deprecation of Camera API.
+// New Camera API in Android 5.0
+// New handling for camera in new RC App.
 @SuppressWarnings("deprecation")
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "CameraPreview";

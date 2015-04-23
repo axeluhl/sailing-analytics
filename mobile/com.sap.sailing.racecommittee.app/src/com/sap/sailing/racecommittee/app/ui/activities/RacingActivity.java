@@ -34,6 +34,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragm
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
+// Deprecation of onNavigationListener of Actionbar.
+// Can be ignored since actionbar is replaced by toolbar with API 21.
+// Will be replaced in new version of RC App.
 @SuppressWarnings("deprecation")
 public class RacingActivity extends SessionActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();
