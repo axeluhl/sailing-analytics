@@ -152,10 +152,11 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                 // get point-of-sail and reaching-side
                 Util.Pair<PointOfSail, BoatDirection> pointOfSailAndReachingSide = polarDiagram.getPointOfSail(bearTarget);
                 PointOfSail pointOfSail = pointOfSailAndReachingSide.getA();
-                if (pointOfSail == PointOfSail.REACHING) {
+                BoatDirection reachingSide = pointOfSailAndReachingSide.getB();
+                if (reachingSide == (leftSide?BoatDirection.REACH_RIGHT:BoatDirection.REACH_LEFT)) {
                     pointOfSail = prevPointOfSail;
                 }
-                if ((pointOfSail == PointOfSail.TACKING) || (pointOfSail == PointOfSail.JIBING)) {
+                if ((pointOfSail == PointOfSail.TACKING) || (pointOfSail == PointOfSail.JIBING) || (reachingSide == (leftSide?BoatDirection.REACH_LEFT:BoatDirection.REACH_RIGHT))) {
                     if (pointOfSail == PointOfSail.TACKING) {
                         if (leftSide) {
                             direction = polarDiagram.optimalDirectionsUpwind()[0];
@@ -163,13 +164,15 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                             direction = polarDiagram.optimalDirectionsUpwind()[1];
                         }
                         prevPointOfSail = pointOfSail;
-                    } else {
+                    } else if (pointOfSail == PointOfSail.JIBING) {
                         if (leftSide) {
-                            direction = polarDiagram.optimalDirectionsDownwind()[0];
-                        } else {
                             direction = polarDiagram.optimalDirectionsDownwind()[1];
+                        } else {
+                            direction = polarDiagram.optimalDirectionsDownwind()[0];
                         }
                         prevPointOfSail = pointOfSail;
+                    } else {
+                        direction = bearTarget;                                                
                     }
                     SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
                     nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
@@ -220,9 +223,9 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                         }
                     } else if (pointOfSail == PointOfSail.JIBING) {
                         if (leftSide) {
-                            direction = polarDiagram.optimalDirectionsDownwind()[1];
-                        } else {
                             direction = polarDiagram.optimalDirectionsDownwind()[0];
+                        } else {
+                            direction = polarDiagram.optimalDirectionsDownwind()[1];
                         }
                     } else {
                         direction = bearTarget;                        
