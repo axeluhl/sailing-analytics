@@ -13,10 +13,8 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorsWithIdImpl;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
-import com.sap.sse.common.Util;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
@@ -60,7 +58,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
             int bgColor;
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
-                bgColor = ColorHelper.getThemedColor(mContext, R.attr.sap_gray);
+                bgColor = ThemeHelper.getColor(mContext, R.attr.sap_gray);
             } else {
                 bgColor = mContext.getResources().getColor(android.R.color.transparent);
             }

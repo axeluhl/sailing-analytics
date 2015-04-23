@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
@@ -41,7 +40,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.ManagedRaceStartTimeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
@@ -123,8 +122,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.notifyDataSetChanged();
 
         if (mCurrent != null && mAll != null) {
-            int colorGrey = ColorHelper.getThemedColor(getActivity(), R.attr.sap_light_gray);
-            int colorOrange = ColorHelper.getThemedColor(getActivity(), R.attr.sap_yellow_1);
+            int colorGrey = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            int colorOrange = ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1);
             mCurrent.setTextColor(colorGrey);
             mAll.setTextColor(colorGrey);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -358,7 +357,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     public void setUp(DrawerLayout drawerLayout, String course, String event, String author) {
         mDrawerLayout = drawerLayout;
-        mDrawerLayout.setStatusBarBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.colorPrimaryDark));
+        mDrawerLayout.setStatusBarBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.colorPrimaryDark));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity().findViewById(
                 R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
             @Override

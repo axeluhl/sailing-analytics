@@ -8,12 +8,10 @@
 
         <item name="android:windowTranslucentStatus">true</item>
 
-        <item name="android:alertDialogTheme">@style/AppTheme.Dark.AlertDialog</item>
+        <item name="android:alertDialogTheme">@style/AppTheme.Dark.AlertDialog.v21</item>
     </style>
 
-    <style name="AppTheme.Dark.AlertDialog" parent="Theme.AppCompat.Dialog">
-        <item name="android:colorPrimary">@color/dark_colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/dark_colorPrimaryDark</item>
+    <style name="AppTheme.Dark.AlertDialog.v21" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:colorAccent">@color/dark_colorAccent</item>
     </style>
 

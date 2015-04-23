@@ -10,4 +10,9 @@
     <color name="constant_black_light">#ff242424</color>
     <color name="constant_black_transparent">#99000000</color>
 
+    <color name="dialog_background">#eeeeee</color>
+    <color name="dialog_color_header">#000000</color>
+    <color name="dialog_color_text">#777777</color>
+    <color name="dialog_color_button">#0091d2</color>
+
 </resources>

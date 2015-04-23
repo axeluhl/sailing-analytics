@@ -365,7 +365,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     }
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(R.string.pick_a_rounding_direction)
             .setItems(R.array.rounding_directions, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int position) {
@@ -401,7 +401,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     }
 
     private void createUsePreviousCourseDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(getString(R.string.use_previous_course_dialog_title));
         builder.setMessage(R.string.use_previous_course_dialog_message);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {

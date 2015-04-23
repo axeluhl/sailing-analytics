@@ -428,11 +428,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             title += race.getRaceName();
         }
 
-        getSupportActionBar().setTitle(title);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
     }
 
     public void resetRace() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
         builder.setTitle(getString(R.string.race_reset_confirmation_title));
         builder.setMessage(getString(R.string.race_reset_message));
         builder.setCancelable(true);
@@ -476,7 +478,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         @Override
         public void onLoadFailed(Exception ex) {
             setSupportProgressBarIndeterminateVisibility(false);
-            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
                 .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_warning_grey600_36dp)
                 .setCancelable(true)
@@ -521,7 +523,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         @Override
         public void onLoadFailed(Exception ex) {
             setSupportProgressBarIndeterminateVisibility(false);
-            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
                 .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_warning_grey600_36dp)
                 .setCancelable(true)

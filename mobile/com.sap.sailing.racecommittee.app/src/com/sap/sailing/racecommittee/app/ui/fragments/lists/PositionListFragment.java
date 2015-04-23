@@ -13,7 +13,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import java.util.ArrayList;
 
@@ -111,7 +111,7 @@ public class PositionListFragment extends LoggableListFragment {
         if (lastSelected != null) {
             textView = (TextView) lastSelected.findViewById(R.id.list_item_subtitle);
             if (textView != null) {
-                textView.setTextColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_light_gray));
+                textView.setTextColor(ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray));
             }
 
             imageView = (ImageView) lastSelected.findViewById(R.id.checked);
@@ -123,7 +123,7 @@ public class PositionListFragment extends LoggableListFragment {
         // set new styles
         textView = (TextView) view.findViewById(R.id.list_item_subtitle);
         if (textView != null) {
-            textView.setTextColor(ColorHelper.getThemedColor(getActivity(), R.attr.white));
+            textView.setTextColor(ThemeHelper.getColor(getActivity(), R.attr.white));
         }
         imageView = (ImageView) view.findViewById(R.id.checked);
         if (imageView != null) {

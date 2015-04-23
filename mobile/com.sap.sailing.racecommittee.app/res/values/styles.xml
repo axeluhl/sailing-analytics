@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.AlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/dialog_color_button</item>
+        <item name="android:textColorPrimary">@color/dialog_color_text</item>
+        <item name="android:background">@color/dialog_background</item>
+
+        <item name="android:windowTitleStyle">@style/AlertDialogHeader</item>
+    </style>
+
+    <style name="AlertDialogHeader">
+        <item name="android:textColor">@color/dialog_color_header</item>
+        <item name="android:textSize">@dimen/textSize_18</item>
+    </style>
+</resources>

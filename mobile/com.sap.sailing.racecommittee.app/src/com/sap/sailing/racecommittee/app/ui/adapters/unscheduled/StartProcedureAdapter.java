@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class StartProcedureAdapter extends BaseAdapter implements OnClickListener {
 
@@ -55,9 +55,9 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
         TextView startProcedure = ViewHolder.get(convertView, R.id.start_procedure);
         if (startProcedure != null) {
             startProcedure.setText(getItem(position).toString());
-            startProcedure.setTextColor(ColorHelper.getThemedColor(mContext, R.attr.sap_light_gray));
+            startProcedure.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
             if (getItem(position).isChecked()) {
-                startProcedure.setTextColor(ColorHelper.getThemedColor(mContext, R.attr.white));
+                startProcedure.setTextColor(ThemeHelper.getColor(mContext, R.attr.white));
             }
         }
 

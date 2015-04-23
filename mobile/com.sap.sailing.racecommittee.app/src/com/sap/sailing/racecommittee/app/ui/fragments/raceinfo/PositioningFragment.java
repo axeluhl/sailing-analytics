@@ -302,7 +302,7 @@ public class PositioningFragment extends BaseFragment
 
     @Override
     public void onLongClick(final CompetitorsWithIdImpl item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
         builder.setTitle(R.string.select_penalty_reason)
             .setItems(maxPointsReasons, new DialogInterface.OnClickListener() {

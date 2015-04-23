@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -460,7 +460,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         for (PassingInstruction instruction : PassingInstruction.relevantValues()) {
             instructions.add(instruction.name());
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int position) {
@@ -468,8 +468,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
                         onPassingInstructionPicked(courseElement, pickedDirection);
                     }
                 });
-        builder.create();
-        builder.show();
+        builder.create().show();
     }
 
 

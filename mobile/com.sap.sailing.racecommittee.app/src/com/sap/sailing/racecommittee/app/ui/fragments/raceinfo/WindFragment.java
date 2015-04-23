@@ -43,7 +43,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.maps.WindMap;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import org.json.JSONException;
@@ -237,7 +236,8 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
      */
     public void setupWindSpeedPicker() {
         String nums[] = generateNumbers();
-        ThemeHelper.setPickerTextColor(getActivity(), mWindSpeed, ColorHelper.getThemedColor(getActivity(), R.attr.white));
+        ThemeHelper.setPickerTextColor(getActivity(), mWindSpeed, ThemeHelper
+            .getColor(getActivity(), R.attr.white));
         mWindSpeed.setMaxValue(nums.length - 1);
         mWindSpeed.setMinValue(0);
         mWindSpeed.setWrapSelectorWheel(false);

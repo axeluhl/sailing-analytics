@@ -7,10 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -240,7 +240,7 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private void createMaxPointsReasonSelectionDialog(final com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
         builder.setTitle(R.string.select_penalty_reason).setItems(maxPointsReasons,
                 new DialogInterface.OnClickListener() {
@@ -248,8 +248,7 @@ public class PositioningFragment extends RaceDialogFragment {
                         setMaxPointsReasonForItem(item, maxPointsReasons[position]);
                     }
                 });
-        builder.create();
-        builder.show();
+        builder.create().show();
     }
 
     private CharSequence[] getAllMaxPointsReasons() {

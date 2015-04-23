@@ -17,7 +17,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -120,7 +119,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             mTimePicker = ViewHolder.get(layout, R.id.time_picker);
             if (mTimePicker != null) {
                 ThemeHelper.setPickerTextColor(getActivity(), mTimePicker,
-                    ColorHelper.getThemedColor(getActivity(), R.attr.white));
+                    ThemeHelper.getColor(getActivity(), R.attr.white));
                 mTimePicker.setIs24HourView(true);
             }
 

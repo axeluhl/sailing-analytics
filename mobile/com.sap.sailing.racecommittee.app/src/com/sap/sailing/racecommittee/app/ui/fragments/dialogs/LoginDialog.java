@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
+import android.support.v7.app.AlertDialog;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -52,7 +52,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
     }
 
     @Override
-    protected Builder createDialog(Builder builder) {
+    protected AlertDialog.Builder createDialog(AlertDialog.Builder builder) {
         return builder
                 .setTitle(getString(R.string.login))
                 .setIcon(R.drawable.ic_assignment_ind_grey600_36dp)

@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -179,7 +179,7 @@ public class AutoUpdaterChecker {
         @Override
         public void onError() {
             dialog.dismiss();
-            AlertDialog.Builder errorDialog = new AlertDialog.Builder(context);
+            AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
             errorDialog
                 .setTitle(R.string.auto_update)
                 .setMessage(R.string.auto_update_error)
@@ -190,6 +190,7 @@ public class AutoUpdaterChecker {
                             dialog.dismiss();
                         }
                     })
+                .create()
                 .show();
         }
         

@@ -10,7 +10,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
@@ -51,11 +51,11 @@ public abstract class BasePanelFragment extends RaceFragment {
                     retValue = drawable.getLevel() - offset;
                     switch (retValue) {
                     case 1:
-                        v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray_black_20));
+                        v.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
                         break;
 
                     default:
-                        v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray));
+                        v.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
                         break;
                     }
                 }

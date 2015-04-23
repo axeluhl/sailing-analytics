@@ -38,8 +38,8 @@
         <item name="textLarge">@style/AppTheme.Dark.Text.Large</item>
         <item name="textXLarge">@style/AppTheme.Dark.Text.XLarge</item>
 
-        <item name="textPanelCaption">@style/AppTheme.Light.Text.PanelCaption</item>
-        <item name="textPanelHeader">@style/AppTheme.Light.Text.PanelHeader</item>
+        <item name="textPanelCaption">@style/AppTheme.Dark.Text.PanelCaption</item>
+        <item name="textPanelHeader">@style/AppTheme.Dark.Text.PanelHeader</item>
 
         <!-- drawable -->
         <item name="access_time_36dp">@drawable/ic_access_time_white_36dp</item>

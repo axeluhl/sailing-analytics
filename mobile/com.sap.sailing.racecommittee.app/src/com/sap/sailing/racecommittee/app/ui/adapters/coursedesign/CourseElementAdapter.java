@@ -2,18 +2,14 @@ package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
 import android.content.Context;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
@@ -21,7 +17,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolder;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +90,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
         if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
             int bgColor;
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
-                bgColor = ColorHelper.getThemedColor(mContext, R.attr.sap_gray);
+                bgColor = ThemeHelper.getColor(mContext, R.attr.sap_gray);
             } else {
                 bgColor = mContext.getResources().getColor(android.R.color.transparent);
             }

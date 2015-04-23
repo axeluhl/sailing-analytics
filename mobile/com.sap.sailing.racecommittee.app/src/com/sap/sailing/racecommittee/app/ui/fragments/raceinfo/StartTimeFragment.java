@@ -14,7 +14,6 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -125,14 +124,14 @@ public class StartTimeFragment extends BaseFragment
             mDatePicker = ViewHolder.get(getView(), R.id.start_date_picker);
             if (mDatePicker != null) {
                 ThemeHelper.setPickerTextColor(getActivity(), mDatePicker,
-                    ColorHelper.getThemedColor(getActivity(), R.attr.white));
+                    ThemeHelper.getColor(getActivity(), R.attr.white));
                 mDatePicker.setOnValueChangedListener(this);
                 initDatePicker();
             }
             mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
                 ThemeHelper.setPickerTextColor(getActivity(), mTimePicker,
-                    ColorHelper.getThemedColor(getActivity(), R.attr.white));
+                    ThemeHelper.getColor(getActivity(), R.attr.white));
                 mTimePicker.setOnTimeChangedListener(this);
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);

@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
+import android.support.annotation.AttrRes;
+import android.support.annotation.ColorRes;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -76,5 +79,15 @@ public class ThemeHelper {
             }
         }
         return false;
+    }
+
+    public static @ColorRes int getColor(Context context, @AttrRes int colorId) {
+        int color = 0;
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        if (theme.resolveAttribute(colorId, typedValue, true)) {
+            color = context.getResources().getColor(typedValue.resourceId);
+        }
+        return color;
     }
 }

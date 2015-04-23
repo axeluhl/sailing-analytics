@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.finishing;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,7 +93,7 @@ public class FinishListPhotoAdapter extends RecyclerView.Adapter<FinishListPhoto
 
         @Override
         public void onClick(View v) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AppTheme_AlertDialog);
             builder.setTitle(mContext.getString(R.string.delete_file_title));
             builder.setMessage(mContext.getString(R.string.delete_file));
             builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

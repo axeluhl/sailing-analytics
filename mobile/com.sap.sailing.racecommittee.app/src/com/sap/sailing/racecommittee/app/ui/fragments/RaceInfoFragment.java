@@ -2,11 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.Serializable;
 
-import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -132,7 +132,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     private void showRaceResetConfirmationDialog() {
         prepareResetRaceView();
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setView(resetRaceDialogView).setTitle(R.string.race_reset_confirmation_title)
                 .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.race_reset_reset_button), new DialogInterface.OnClickListener() {
@@ -148,9 +148,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                         dialog.cancel();
                     }
                 });
-        AlertDialog alert = builder.create();
         ExLog.i(getActivity(), LogEvent.RACE_RESET_DIALOG_BUTTON, getRace().getId().toString());
-        alert.show();
+        builder.create().show();
     }
 
     private void prepareResetRaceView() {

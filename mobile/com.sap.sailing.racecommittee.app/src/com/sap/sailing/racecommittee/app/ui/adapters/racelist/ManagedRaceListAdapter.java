@@ -8,8 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -31,7 +29,6 @@ import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -193,9 +190,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (convertView != null) {
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
                     setMarker(1 - getLevel());
-                    convertView.setBackgroundColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_gray_black_20));
+                    convertView.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20));
                 } else {
-                    convertView.setBackgroundColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_gray));
+                    convertView.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray));
                 }
             }
 
@@ -235,10 +232,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_unscheduled.setVisibility(View.VISIBLE);
                 } else {
                     if (group_name != null) {
-                        group_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.white));
+                        group_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                     }
                     if (race_name != null) {
-                        race_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.white));
+                        race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                     }
                 }
             }
@@ -309,10 +306,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 race_unscheduled.setVisibility(View.GONE);
             }
             if (race_name != null) {
-                race_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_light_gray));
+                race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
             }
             if (group_name != null) {
-                group_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_light_gray));
+                group_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
             }
             setMarker(0);
         }

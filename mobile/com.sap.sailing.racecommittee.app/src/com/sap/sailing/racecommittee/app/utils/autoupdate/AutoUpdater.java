@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -13,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
+import android.support.v7.app.AlertDialog;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -65,7 +65,7 @@ public class AutoUpdater {
     }
 
     protected void showUpdatedNotification() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
 
         OnClickListener okListener = new OnClickListener() {
             @Override
@@ -85,10 +85,11 @@ public class AutoUpdater {
         };
 
         builder.setTitle(R.string.auto_update_completed)
-                .setMessage(
-                        R.string.auto_update_completed_text)
-                .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
-                .setNegativeButton(android.R.string.cancel, cancelListener).create().show();
+            .setMessage(R.string.auto_update_completed_text)
+            .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
+            .setNegativeButton(android.R.string.cancel, cancelListener)
+            .create()
+            .show();
     }
 
     private void setWasUpdated(SharedPreferences updatedPreferences, boolean wasUpdated) {
