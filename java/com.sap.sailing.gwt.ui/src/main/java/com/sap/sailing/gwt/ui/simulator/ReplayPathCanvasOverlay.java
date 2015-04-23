@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.maps.client.MapWidget;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -16,8 +17,9 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
     private List<SimulatorWindDTO> windDTOToDraw;
 
-    public ReplayPathCanvasOverlay(MapWidget map, int zIndex, final String name, final Timer timer, WindFieldGenParamsDTO windParams, boolean algorithmTimedOut, boolean mixedLeg) {
-        super(map, zIndex, name, timer, windParams, algorithmTimedOut, mixedLeg);
+    public ReplayPathCanvasOverlay(MapWidget map, int zIndex, final String name, final Timer timer,
+            WindFieldGenParamsDTO windParams, boolean algorithmTimedOut, boolean mixedLeg, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, name, timer, windParams, algorithmTimedOut, mixedLeg, coordinateSystem);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
         canvas.setStyleName("replayPanel");

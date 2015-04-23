@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 /**
  * The class is an UI component that should be used to display the direction and the distance from the users device to a
@@ -87,7 +87,7 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
         distanceToPointetLocationLabel.setText(distanceFormatted + " m");
     }
 
-    public void windBotPositionChanged(PositionDTO positionDTO) {
+    public void windBotPositionChanged(Position positionDTO) {
         locationPointerCompassAngleDistance.windBotPositionChanged(positionDTO);
     }
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sse.common.Timed;
 
 public class DynamicTrackImpl<FixType extends Timed> extends TrackImpl<FixType> implements DynamicTrack<FixType> {
     private static final long serialVersionUID = 917778209274148097L;

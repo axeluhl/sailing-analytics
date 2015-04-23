@@ -8,8 +8,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -47,9 +48,9 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
             } else if(windDTO.measureTimepoint == null) {
                 errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.position != null) {
-                if(windDTO.position.latDeg < -90.0 || windDTO.position.latDeg > 90.0){
+                if(windDTO.position.getLatDeg() < -90.0 || windDTO.position.getLatDeg() > 90.0){
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.latitude(), "-90", "90");
-                } else if(windDTO.position.lngDeg < -180.0 || windDTO.position.lngDeg > 180.0){
+                } else if(windDTO.position.getLngDeg() < -180.0 || windDTO.position.getLngDeg() > 180.0){
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.longitude(), "-180", "180");
                 }
             } 
@@ -64,9 +65,9 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
         speedInKnotsBox = createDoubleBox(5);
         fromInDegBox = createDoubleBox(5);
         if(courseDTO != null && courseDTO.waypointPositions != null && courseDTO.waypointPositions.size() > 0 && courseDTO.waypointPositions.get(0) != null) {
-            PositionDTO positionDTO = courseDTO.waypointPositions.get(0);
-            latDegBox = createDoubleBox(positionDTO.latDeg, 10);
-            lngDegBox = createDoubleBox(positionDTO.lngDeg, 10);
+            Position positionDTO = courseDTO.waypointPositions.get(0);
+            latDegBox = createDoubleBox(positionDTO.getLatDeg(), 10);
+            lngDegBox = createDoubleBox(positionDTO.getLngDeg(), 10);
         } else {
             latDegBox = createDoubleBox(10);
             lngDegBox = createDoubleBox(10);
@@ -107,7 +108,7 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
         result.trueWindFromDeg = fromInDegBox.getValue();
         result.measureTimepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : null;
         if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
-            result.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
+            result.position = new DegreePosition(latDegBox.getValue(), lngDegBox.getValue());
         }
 
         return result;

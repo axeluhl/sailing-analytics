@@ -190,16 +190,17 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
 
     private void logOccuredFailuresAndThrowSevereFailure() {
         for (Throwable failure : resultReceiver.getOccuredFailures()) {
-            LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
+            LOGGER.log(Level.SEVERE, "A failure occured during the processing of an instruction: ", failure);
         }
         if (state == QueryState.ERROR) {
-            throw new RuntimeException("A severe failure occured during the processing of an instruction", resultReceiver.getSevereFailure());
+            throw new RuntimeException("An error occured during the processing of an instruction", resultReceiver.getSevereFailure());
         }
     }
     
     @Override
     public void abort() {
         synchronized (monitorObject) {
+            LOGGER.log(Level.INFO, "Aborting the query processing");
             state = QueryState.ABORTED;
             monitorObject.notify();
         }
@@ -220,6 +221,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
             resultsLock = new ReentrantLock();
             results = new HashMap<>();
             occuredFailures = new ArrayList<>();
+        }
+
+        @Override
+        public boolean canProcessElements() {
+            return true;
         }
 
         @Override
@@ -259,9 +265,19 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
         
         @Override
+        public boolean isFinished() {
+            return false;
+        }
+        
+        @Override
         public void abort() {
             results = new HashMap<>();
             occuredFailures = new ArrayList<>();
+        }
+        
+        @Override
+        public boolean isAborted() {
+            return false;
         }
         
         public Map<GroupKey, AggregatedType> getResult() {

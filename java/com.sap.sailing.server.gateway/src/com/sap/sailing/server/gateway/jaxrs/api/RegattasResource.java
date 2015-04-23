@@ -35,8 +35,8 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -201,8 +201,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                         jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                         jsonCompetitor.put("name", competitor.getName());
                         jsonCompetitor.put("sailNumber", competitor.getBoat().getSailID());
-                        jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
-                                : null);
+                        jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+                        if(competitor.getFlagImage() != null) {
+                            jsonCompetitor.put("flagImage", competitor.getFlagImage().toString());
+                        }
                         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                         JSONArray jsonFixes = new JSONArray();
                         track.lockForRead();

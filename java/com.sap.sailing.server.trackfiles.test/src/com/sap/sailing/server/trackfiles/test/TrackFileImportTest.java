@@ -8,11 +8,11 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.trackfiles.impl.RouteConverterGPSFixImporterImpl;
 
 public class TrackFileImportTest {

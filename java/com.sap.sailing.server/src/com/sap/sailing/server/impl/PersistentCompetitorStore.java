@@ -97,9 +97,9 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
 
     @Override
     public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newEmail, String newSailId,
-            Nationality newNationality, URI newTeamImageUri) {
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri) {
         Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newEmail, newSailId, newNationality,
-                newTeamImageUri);
+                newTeamImageUri, newFlagImageUri);
         storeTo.storeCompetitor(result);
         return result;
     }

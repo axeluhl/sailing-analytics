@@ -22,13 +22,12 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
@@ -118,24 +117,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     
     
     @Override
-    public PositionDTO[] getRaceLocations() {
-        PositionDTO lakeGarda = new PositionDTO();
-        lakeGarda.latDeg = 45.57055337226086;
-        lakeGarda.lngDeg = 10.693345069885254;
-
-        PositionDTO lakeGeneva = new PositionDTO();
-        lakeGeneva.latDeg = 46.23376539670794;
-        lakeGeneva.lngDeg = 6.168651580810547;
-
-        PositionDTO kiel = new PositionDTO();
-        kiel.latDeg = 54.3232927;
-        kiel.lngDeg = 10.122765200000003;
-
-        PositionDTO travemuende = new PositionDTO();
-        travemuende.latDeg = 53.978276;
-        travemuende.lngDeg = 10.880156;
-
-        return new PositionDTO[] { kiel, lakeGeneva, lakeGarda, travemuende };
+    public Position[] getRaceLocations() {
+        Position lakeGarda = new DegreePosition(45.57055337226086, 10.693345069885254);
+        Position lakeGeneva = new DegreePosition(46.23376539670794, 6.168651580810547);
+        Position kiel = new DegreePosition(54.3232927, 10.122765200000003);
+        Position travemuende = new DegreePosition(53.978276, 10.880156);
+        return new Position[] { kiel, lakeGeneva, lakeGarda, travemuende };
     }
 
     @Override
@@ -149,11 +136,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         double ySize = params.getySize();
         int gridsizeX = params.getGridsizeX();
         int gridsizeY = params.getGridsizeY();
-
-        Position center = new DegreePosition(params.getCenter().latDeg, params.getCenter().lngDeg);
-
+        Position center = params.getCenter();
         WindLatticeDTO wl = new WindLatticeDTO();
-        PositionDTO[][] matrix = new PositionDTO[gridsizeY][gridsizeX];
+        Position[][] matrix = new Position[gridsizeY][gridsizeX];
 
         Distance deastwest = new NauticalMileDistance((gridsizeX - 1.) / (2 * gridsizeX) * xSize);
         Distance dnorthsouth = new NauticalMileDistance((gridsizeY - 1.) / (2 * gridsizeY) * ySize);
@@ -187,7 +172,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                     }
                 }
 
-                PositionDTO pdto = new PositionDTO(crt.getLatDeg(), crt.getLngDeg());
+                Position pdto = new DegreePosition(crt.getLatDeg(), crt.getLngDeg());
                 matrix[i][j] = pdto;
             }
 
@@ -202,8 +187,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
             throws WindPatternNotFoundException {
         LOGGER.info("Entering getWindField");
-        Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
-        Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
+        Position start = params.getRaceCourseStart();
+        Position end = params.getRaceCourseEnd();
         List<Position> course = new ArrayList<Position>();
         course.add(start);
         course.add(end);
@@ -283,8 +268,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         if (mode != SailingSimulatorConstants.ModeMeasured) {
-            Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
-            Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
+            Position start = params.getRaceCourseStart();
+            Position end = params.getRaceCourseEnd();
             course = new ArrayList<Position>();
             course.add(start);
             course.add(end);
@@ -566,11 +551,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        Position edgeStart = SimulatorServiceUtils.toPosition(requestData.edgeStart);
-        Position edgeEnd = SimulatorServiceUtils.toPosition(requestData.edgeEnd);
+        Position edgeStart = requestData.edgeStart;
+        Position edgeEnd = requestData.edgeEnd;
 
-        Position oldMovedPosition = SimulatorServiceUtils.toPosition(requestData.oldMovedPoint);
-        Position newMovedPosition = SimulatorServiceUtils.toPosition(requestData.newMovedPoint);
+        Position oldMovedPosition = requestData.oldMovedPoint;
+        Position newMovedPosition = requestData.newMovedPoint;
         Bearing oldMovedToNewMovedBearing = oldMovedPosition.getBearingGreatCircle(newMovedPosition);
         boolean areTowardsSameDirection = SimulatorServiceUtils.areTowardsSameDirection(oldMovedToNewMovedBearing,
                 new DegreeBearingImpl(requestData.startToEndBearingDegrees));
@@ -606,13 +591,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         rightSide1Turner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, realStart, realEnd, startTime,
                 false, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
 
-        boolean isLeftSide1TurnerOnTheInside = SimulatorServiceUtils.isPointInsideTriangle(
-                SimulatorServiceUtils.toPositionDTO(leftSide1Turner.getPosition()), requestData.beforeMovedPoint,
+        boolean isLeftSide1TurnerOnTheInside = SimulatorServiceUtils.isPointInsideTriangle(leftSide1Turner.getPosition(),
+                requestData.beforeMovedPoint,
                 requestData.newMovedPoint, requestData.edgeStart);
         System.out.println("isLeftSide1TurnerOnTheInside = " + isLeftSide1TurnerOnTheInside);
 
         boolean isRightSide1TurnerOnTheInside = SimulatorServiceUtils.isPointInsideTriangle(
-                SimulatorServiceUtils.toPositionDTO(rightSide1Turner.getPosition()), requestData.beforeMovedPoint,
+                rightSide1Turner.getPosition(),
+                requestData.beforeMovedPoint,
                 requestData.newMovedPoint, requestData.edgeStart);
         System.out.println("isRightSide1TurnerOnTheInside = " + isRightSide1TurnerOnTheInside);
 
@@ -644,11 +630,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<TimedPositionWithSpeed> path = pathGenerator.getIntersectionOptimalTowardWind(windFieldGenerator,
                 polarDiagram, edgeStart, edgeEnd, correct1Turner, true, timeStepMilliseconds, minimumDistanceMeters);
 
-        return new Response1TurnerDTO(SimulatorServiceUtils.toSimulatorWindDTOList(path),
-                SimulatorServiceUtils.toSimulatorWindDTO(leftSide1Turner),
-                SimulatorServiceUtils.toSimulatorWindDTO(rightSide1Turner),
-                SimulatorServiceUtils.toPositionDTO(oldMovedPosition),
-                SimulatorServiceUtils.toPositionDTO(newMovedPosition), notificationMessage);
+        return new Response1TurnerDTO(SimulatorServiceUtils.toSimulatorWindDTOList(path), SimulatorServiceUtils.toSimulatorWindDTO(leftSide1Turner),
+                SimulatorServiceUtils.toSimulatorWindDTO(rightSide1Turner), oldMovedPosition,
+                newMovedPosition,
+                notificationMessage);
     }
 
     @Override
@@ -724,7 +709,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         result.trueWindSpeedInKnots = wind.getKnots();
 
         if (position != null) {
-            result.position = SimulatorServiceUtils.toPositionDTO(position);
+            result.position = position;
         }
         if (timePoint != null) {
             result.timepoint = timePoint.asMillis();
@@ -749,7 +734,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         if (position != null) {
-            result.position = SimulatorServiceUtils.toPositionDTO(position);
+            result.position = position;
         }
 
         if (timePoint != null) {
@@ -814,20 +799,19 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 TimePoint t = startTime;
                 Position p0 = positionGrid[0][j];
                 Position p1 = positionGrid[1][j];
-                Position seed = new DegreePosition(p0.getLatDeg() + 0.5 * (p0.getLatDeg() - p1.getLatDeg()),
-                        p0.getLngDeg() + 0.5 * (p0.getLngDeg() - p1.getLngDeg()));
-                PositionDTO startPosition = new PositionDTO(seed.getLatDeg(), seed.getLngDeg());
+                Position seed = new DegreePosition(p0.getLatDeg() + 0.5 * (p0.getLatDeg() - p1.getLatDeg()), p0.getLngDeg() + 0.5
+                        * (p0.getLngDeg() - p1.getLngDeg()));
+                Position startPosition = new DegreePosition(seed.getLatDeg(), seed.getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
                     TimedPosition tp = new TimedPositionImpl(t, seed);
                     Path p = wf.getLine(tp, false /* forward */);
                     if (p != null) {
-                        List<PositionDTO> positions = new ArrayList<PositionDTO>();
+                        List<Position> positions = new ArrayList<>();
                         for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
                             Position position = pathPoint.getPosition();
-                            PositionDTO positionDTO = new PositionDTO(position.getLatDeg(), position.getLngDeg());
+                            DegreePosition positionDTO = new DegreePosition(position.getLatDeg(), position.getLngDeg());
                             positions.add(positionDTO);
                         }
-
                         windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);
                     }
                     t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
@@ -854,17 +838,17 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 TimePoint t = startTime;
                 Position p0 = positionGrid[lastRowIndex][j];
                 Position p1 = positionGrid[lastRowIndex - 1][j];
-                Position seed = new DegreePosition(p0.getLatDeg() + 0.5 * (p0.getLatDeg() - p1.getLatDeg()),
-                        p0.getLngDeg() + 0.5 * (p0.getLngDeg() - p1.getLngDeg()));
-                PositionDTO startPosition = new PositionDTO(seed.getLatDeg(), seed.getLngDeg());
+                Position seed = new DegreePosition(p0.getLatDeg() + 0.5 * (p0.getLatDeg() - p1.getLatDeg()), p0.getLngDeg() + 0.5
+                        * (p0.getLngDeg() - p1.getLngDeg()));
+                Position startPosition = new DegreePosition(seed.getLatDeg(), seed.getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
                     TimedPosition tp = new TimedPositionImpl(t, seed);
                     Path p = wf.getLine(tp, true /* forward */);
                     if (p != null) {
-                        List<PositionDTO> positions = new ArrayList<PositionDTO>();
+                        List<Position> positions = new ArrayList<>();
                         for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
                             Position position = pathPoint.getPosition();
-                            PositionDTO positionDTO = new PositionDTO(position.getLatDeg(), position.getLngDeg());
+                            Position positionDTO = new DegreePosition(position.getLatDeg(), position.getLngDeg());
                             positions.add(positionDTO);
                         }
 
@@ -888,15 +872,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
              * Currently create only a single line from the start position at the start time.
              */
             TimedPosition tp = new TimedPositionImpl(wf.getStartTime(), course[0]);
-            PositionDTO startPosition = new PositionDTO(course[0].getLatDeg(), course[0].getLngDeg());
+            Position startPosition = course[0];
 
             Path p = wf.getLine(tp, false);
             if (p != null) {
-                List<PositionDTO> positions = new ArrayList<PositionDTO>();
+                List<Position> positions = new ArrayList<>();
                 for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
                     Position position = pathPoint.getPosition();
-                    PositionDTO positionDTO = new PositionDTO(position.getLatDeg(), position.getLngDeg());
-                    positions.add(positionDTO);
+                    positions.add(position);
                 }
                 WindLinesDTO windLinesDTO = new WindLinesDTO();
                 windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);
@@ -981,12 +964,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         if (mode == SailingSimulatorConstants.ModeMeasured) {
             rcDTO = new RaceMapDataDTO();
             rcDTO.coursePositions = new CoursePositionsDTO();
-            rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
-            PositionDTO posDTO;
-            posDTO = SimulatorServiceUtils.toPositionDTO(course.get(0));
-            rcDTO.coursePositions.waypointPositions.add(posDTO);
-            posDTO = SimulatorServiceUtils.toPositionDTO(course.get(1));
-            rcDTO.coursePositions.waypointPositions.add(posDTO);
+            rcDTO.coursePositions.waypointPositions = new ArrayList<>();
+            rcDTO.coursePositions.waypointPositions.add(course.get(0));
+            rcDTO.coursePositions.waypointPositions.add(course.get(1));
         } else {
             rcDTO = null;
         }
@@ -1088,7 +1068,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return this.averageWind;
     }
 
-    public List<Integer> GetIndexesOfTurnPointsInBigList(List<PositionDTO> turnPoints, List<SimulatorWindDTO> bigList) {
+    public List<Integer> GetIndexesOfTurnPointsInBigList(List<DegreePosition> turnPoints, List<SimulatorWindDTO> bigList) {
 
         List<Integer> result = new ArrayList<Integer>();
         result.add(0);
@@ -1096,7 +1076,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         int noOfTurnPoints = turnPoints.size();
         int noOfAllPoints = bigList.size();
 
-        PositionDTO turnPoint = null;
+        Position turnPoint = null;
         SimulatorWindDTO point = null;
 
         int lastIndex = 0;
@@ -1108,7 +1088,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 turnPoint = turnPoints.get(index1);
                 point = bigList.get(index2);
 
-                if (point.position.latDeg == turnPoint.latDeg && point.position.lngDeg == turnPoint.lngDeg) {
+                if (point.position.getLatDeg() == turnPoint.getLatDeg() && point.position.getLngDeg() == turnPoint.getLngDeg()) {
 
                     result.add(index2);
                     lastIndex = index2;
@@ -1140,11 +1120,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    public long getTimeMillisecondsBetween(PositionDTO turn1, PositionDTO turn2, double stepSizeMeters,
-            boolean useRealAverageWindSpeed, Path gpsTrack, PolarDiagram polarDiagram, long startTimePoint2) {
+    public long getTimeMillisecondsBetween(Position turn1, Position turn2, double stepSizeMeters, boolean useRealAverageWindSpeed, Path gpsTrack,
+            PolarDiagram polarDiagram, long startTimePoint2) {
 
-        Position p1 = new DegreePosition(turn1.latDeg, turn1.lngDeg);
-        Position p2 = new DegreePosition(turn2.latDeg, turn2.lngDeg);
+        Position p1 = turn1;
+        Position p2 = turn2;
 
         List<Position> points = getIntermediatePoints(p1, p2, stepSizeMeters);
         int noOfPointsMinus1 = points.size() - 1;

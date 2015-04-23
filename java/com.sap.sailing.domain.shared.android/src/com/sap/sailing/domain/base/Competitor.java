@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.net.URI;
+
 import com.sap.sse.common.Color;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
@@ -18,7 +20,13 @@ public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomain
     String getEmail();
     
     boolean hasEmail();
-    
+
+    /**
+     * an alternative flag image (per default the nation flag
+     * @return the URI of the flag image
+     */
+    URI getFlagImage();
+
     /**
      * Adds a listener to this competitor. The listener is also added to the boat and the team for changes.
      * Adding a listener that is already part of this competitor's listeners set remains without effect.

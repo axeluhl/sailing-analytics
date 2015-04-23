@@ -3,6 +3,11 @@ package com.sap.sse.datamining.components;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 
 public interface Processor<InputType, ResultType> {
+    
+    /**
+     * @return <code>true</code>, if the processor accepts new elements to process.
+     */
+    public boolean canProcessElements();
 
     /**
      * Processes the given element and forwards the result.
@@ -27,12 +32,14 @@ public interface Processor<InputType, ResultType> {
      * @throws InterruptedException
      */
     public void finish() throws InterruptedException;
+    public boolean isFinished();
 
     /**
      * Aborts the processing immediately. The result will be <code>null</code>, incomplete or undefined.<br />
      * To shut down the process cleanly use {@link #finish()}.
      */
     public void abort();
+    public boolean isAborted();
     
     public Class<InputType> getInputType();
     

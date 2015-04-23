@@ -3,8 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sse.common.Timed;
 
 /**
  * Compares two {@link Wind} objects first by their {@link Wind#getTimePoint() time point}. Only if both

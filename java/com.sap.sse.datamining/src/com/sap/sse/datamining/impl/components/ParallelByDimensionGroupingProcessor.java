@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -31,18 +31,18 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
     public ParallelByDimensionGroupingProcessor(Class<DataType> dataType,
                                                 ExecutorService executor,
                                                 Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
-                                                Function<?> dimension,
+                                                ParameterizedFunction<?> parameterizedDimension,
                                                 ResourceBundleStringMessages stringMessages, Locale locale) {
-        super(dataType, executor, resultReceivers, asIterable(dimension));
+        super(dataType, executor, resultReceivers, asIterable(parameterizedDimension));
         this.stringMessages = stringMessages;
         this.locale = locale;
         
         functionDTOFactory = new FunctionDTOFactory();
     }
 
-    private static Iterable<Pair<Function<?>, ParameterProvider>> asIterable(Function<?> dimension) {
-        Collection<Pair<Function<?>, ParameterProvider>> collection = new ArrayList<>();
-        collection.add(new Pair<Function<?>, ParameterProvider>(dimension, ParameterProvider.NULL));
+    private static Iterable<ParameterizedFunction<?>> asIterable(ParameterizedFunction<?> parameterizedDimension) {
+        Collection<ParameterizedFunction<?>> collection = new ArrayList<>();
+        collection.add(parameterizedDimension);
         return collection;
     }
 

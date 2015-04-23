@@ -35,12 +35,14 @@ import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -107,7 +109,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathPolyline pathPolyline = null;
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
-    private char raceCourseDirection; 
+    private char raceCourseDirection;
+    private final CoordinateSystem coordinateSystem; 
 
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
@@ -141,10 +144,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             long maxDurationTime = 0;
 
             if (mode == SailingSimulatorConstants.ModeMeasured) {
-                PositionDTO pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
-                PositionDTO pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
-                
-                raceCourseCanvasOverlay.setStartEndPoint(LatLng.newInstance(pos1.latDeg, pos1.lngDeg), LatLng.newInstance(pos2.latDeg, pos2.lngDeg));
+                Position pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
+                Position pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
+                raceCourseCanvasOverlay.setStartEndPoint(coordinateSystem.toLatLng(pos1), coordinateSystem.toLatLng(pos2));
             }
 
             raceCourseCanvasOverlay.draw();
@@ -180,7 +182,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     }
 
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
-                            pathName.split("#")[1], timer, windParams, algorithmTimedOut, currentPath.getMixedLeg());
+                            pathName.split("#")[1], timer, windParams, algorithmTimedOut, currentPath.getMixedLeg(), coordinateSystem);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
 
@@ -330,8 +332,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.parent = parent;    
     }*/
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
-            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls) {
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
+            int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
+            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams,
+            SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls, CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -556,47 +561,42 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private void initializeOverlays() {
         if (mode == SailingSimulatorConstants.ModeEvent) {
             if (regattaAreaCanvasOverlay == null) {
-                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent(), this);
+                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent(), this, coordinateSystem);
                 regattaAreaCanvasOverlay.addToMap();
                 
                 int offsetLeft = 50;
                 int offsetTop = 25;
-                windRoseCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseBackground());
+                windRoseCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseBackground(), coordinateSystem);
                 windRoseCanvasOverlay.setOffset(offsetLeft, offsetTop);
                 windRoseCanvasOverlay.addToMap();
-                windNeedleCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseNeedle());
+                windNeedleCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseNeedle(), coordinateSystem);
                 windNeedleCanvasOverlay.setOffset(offsetLeft, offsetTop);                
                 windNeedleCanvasOverlay.setBearing(180.0);
                 windNeedleCanvasOverlay.addToMap();
             }
         }
-    	
-        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode);
-
+        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode, coordinateSystem);
         if (mode == SailingSimulatorConstants.ModeEvent) {
             regattaAreaCanvasOverlay.setRaceCourseCanvas(raceCourseCanvasOverlay);
         }
-
         if (windParams.isShowArrows()) {
-            windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams);
+            windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams, coordinateSystem);
         }
         if (windParams.isShowLineGuides()) {
-            windLineGuidesCanvasOverlay = new WindLineGuidesCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes);
+            windLineGuidesCanvasOverlay = new WindLineGuidesCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes, coordinateSystem);
         }
         if (windParams.isShowStreamlets()) {
-        	windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, streamletPars, windParams);
+        	windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, streamletPars, windParams, coordinateSystem);
         }
         if (windParams.isShowGrid()) {
-            windGridCanvasOverlay = new WindGridCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDGRID_ZINDEX, timer, xRes, yRes);
+            windGridCanvasOverlay = new WindGridCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDGRID_ZINDEX, timer, xRes, yRes, coordinateSystem);
         }
         if (windParams.isShowLines()) {
-            windLineCanvasOverlay = new WindLineCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDLINE_ZINDEX, timer);
+            windLineCanvasOverlay = new WindLineCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDLINE_ZINDEX, timer, coordinateSystem);
         }
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
-        legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode);
-
+        legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode, coordinateSystem);
         Window.addResizeHandler(new ResizeHandler() {
-
             @Override
             public void onResize(ResizeEvent event) {
                 regattaAreaCanvasOverlay.onResize();
@@ -619,9 +619,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 legendCanvasOverlay.onResize();
                 timePanel.resetTimeSlider();
             }
-
         });
-
         overlaysInitialized = true;
     }
 
@@ -636,9 +634,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         	windStreamletsCanvasOverlay.setVisible(false);
         }
 
-        PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.getStartPoint().getLatitude(),
+        Position startPointDTO = new DegreePosition(raceCourseCanvasOverlay.getStartPoint().getLatitude(),
                 raceCourseCanvasOverlay.getStartPoint().getLongitude());
-        PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(),
+        Position endPointDTO = new DegreePosition(raceCourseCanvasOverlay.getEndPoint().getLatitude(),
                 raceCourseCanvasOverlay.getEndPoint().getLongitude());
         LOGGER.info("StartPoint:" + startPointDTO);
         windParams.setRaceCourseStart(startPointDTO);
@@ -756,11 +754,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
 
         if (mode != SailingSimulatorConstants.ModeMeasured) {
-            PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.getStartPoint().getLatitude(), 
+            Position startPointDTO = new DegreePosition(raceCourseCanvasOverlay.getStartPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getStartPoint().getLongitude());
             windParams.setRaceCourseStart(startPointDTO);
 
-            PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.getEndPoint().getLatitude(), 
+            Position endPointDTO = new DegreePosition(raceCourseCanvasOverlay.getEndPoint().getLatitude(), 
                     raceCourseCanvasOverlay.getEndPoint().getLongitude());
             windParams.setRaceCourseEnd(endPointDTO);
         }
@@ -1032,12 +1030,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(parent.getSelectedBoatClassIndex(), parent.getSelectedRaceIndex(),
                 parent.getSelectedCompetitorIndex(), parent.getSelectedLegIndex());
 
-        return PathPolyline.createPathPolyline(pathDTO.getPoints(), errorReporter, simulatorService, map, this, parent, selection);
+        return PathPolyline.createPathPolyline(pathDTO.getPoints(), errorReporter, simulatorService, map, this, parent, selection, coordinateSystem);
     }
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {
         PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX,
-                PathPolyline.END_USER_NAME, totalTimeMilliseconds, PathPolyline.DEFAULT_COLOR);
+                PathPolyline.END_USER_NAME, totalTimeMilliseconds, PathPolyline.DEFAULT_COLOR, coordinateSystem);
         legendCanvasOverlay.addPathOverlay(pathCanvasOverlay);
     }
 
