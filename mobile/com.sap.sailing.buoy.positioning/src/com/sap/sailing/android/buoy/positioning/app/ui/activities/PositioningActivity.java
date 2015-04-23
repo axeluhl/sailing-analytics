@@ -55,7 +55,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(getString(R.string.title_activity_positioning));
+            getSupportActionBar().setTitle(getString(R.string.set_position));
         }
         BuoyFragment fragment = new BuoyFragment();
         fragment.setPingListener(this);

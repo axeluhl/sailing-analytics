@@ -249,6 +249,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                         pingListener.updatePing();
                         setUpTextUI(lastKnownLocation);
                         updateMap();
+                        Toast.makeText(getActivity(),getString(R.string.position_set),Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }
