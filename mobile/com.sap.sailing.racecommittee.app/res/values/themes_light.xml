@@ -12,7 +12,7 @@
         <item name="colorAccent">@color/light_colorAccent</item>
 
         <item name="drawerArrowStyle">@style/AppTheme.Light.Widget.DrawerArrowStyle</item>
-        <item name="android:editTextStyle">@style/AppTheme.Light.EditText</item>
+        <item name="editText">@style/AppTheme.Light.EditText</item>
 
         <!-- custom attributes because of custom themes -->
         <!-- colors -->
@@ -40,6 +40,7 @@
 
         <item name="textPanelCaption">@style/AppTheme.Light.Text.PanelCaption</item>
         <item name="textPanelHeader">@style/AppTheme.Light.Text.PanelHeader</item>
+        <item name="floatLabel">@style/AppTheme.Light.Text.FloatLabel</item>
 
         <!-- drawables -->
         <item name="access_time_36dp">@drawable/ic_access_time_black_36dp</item>
@@ -98,6 +99,7 @@
     <style name="AppTheme.Light.EditText" parent="android:Widget.EditText">
         <item name="android:background">@drawable/edit_text_light</item>
         <item name="android:textColor">?white</item>
+        <item name="android:textColorHint">?sap_light_gray</item>
     </style>
 
     <style name="AppTheme.Light.Button.Small">
@@ -110,6 +112,10 @@
 
     <style name="AppTheme.Light.Text">
         <item name="android:textColor">?white</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.FloatLabel">
+        <item name="android:textSize">@dimen/textSize_18</item>
     </style>
 
     <style name="AppTheme.Light.Text.XXSmall">

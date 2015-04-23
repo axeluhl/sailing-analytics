@@ -12,7 +12,7 @@
         <item name="colorAccent">@color/dark_colorAccent</item>
 
         <item name="drawerArrowStyle">@style/AppTheme.Dark.Widget.DrawerArrowStyle</item>
-        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
+        <item name="editText">@style/AppTheme.Dark.EditText</item>
 
         <!-- custom attributes because of custom themes -->
         <!-- colors -->
@@ -40,6 +40,7 @@
 
         <item name="textPanelCaption">@style/AppTheme.Dark.Text.PanelCaption</item>
         <item name="textPanelHeader">@style/AppTheme.Dark.Text.PanelHeader</item>
+        <item name="floatLabel">@style/AppTheme.Dark.Text.FloatLabel</item>
 
         <!-- drawable -->
         <item name="access_time_36dp">@drawable/ic_access_time_white_36dp</item>
@@ -95,6 +96,12 @@
     </style>
 
     <!-- custom styles -->
+    <style name="AppTheme.Dark.EditText" parent="android:Widget.EditText">
+        <item name="android:background">@drawable/edit_text_dark</item>
+        <item name="android:textColor">?white</item>
+        <item name="android:textColorHint">?sap_light_gray</item>
+    </style>
+
     <style name="AppTheme.Dark.Button.Small">
         <item name="android:textSize">@dimen/textSize_22</item>
     </style>
@@ -105,6 +112,10 @@
 
     <style name="AppTheme.Dark.Text">
         <item name="android:textColor">?white</item>
+    </style>
+
+    <style name="AppTheme.Dark.Text.FloatLabel">
+        <item name="android:textSize">@dimen/textSize_18</item>
     </style>
 
     <style name="AppTheme.Dark.Text.XXSmall">

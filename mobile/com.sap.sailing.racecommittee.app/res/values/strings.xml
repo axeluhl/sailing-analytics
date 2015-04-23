@@ -302,9 +302,9 @@
     <string name="gate_start_timing">Gate Start Timing</string>
     <string name="gate_start_set">Set Gate Time</string>
 
-    <string name="time_launch">Gate Launch (Minutes)</string>
-    <string name="time_golf">Golf (Minutes)</string>
-    <string name="time_total">Total</string>
+    <string name="time_launch">Gate Launch\n(Minutes)</string>
+    <string name="time_golf">Golf\n(Minutes)</string>
+    <string name="time_total">Total\n(Minutes)</string>
 
     <string name="wind_from">Coming from</string>
     <string name="wind_speed">Speed</string>

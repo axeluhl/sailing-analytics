@@ -17,8 +17,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.ArrayList;
-
 public class GateStartFragment {
 
     private final static int ONE_MINUTE_MILLISECONDS = 60000;
@@ -57,7 +55,8 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            final View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
+            final View layout = inflater
+                .inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
 
             mNat = ViewHolder.get(layout, R.id.pathfinder_nat);
             mNum = ViewHolder.get(layout, R.id.pathfinder_num);
@@ -163,7 +162,8 @@ public class GateStartFragment {
 
         private void enableSetButton(View view, View button) {
             if (view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
-                button.setEnabled((Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
+                button.setEnabled(
+                    (Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
             }
         }
     }
@@ -171,6 +171,9 @@ public class GateStartFragment {
     public static class Timing extends BaseFragment {
 
         private final static String START_MODE = "startMode";
+
+        private final int MIN_VALUE = 0;
+        private final int MAX_VALUE = 20;
 
         public static Timing newInstance(String nat, String num) {
             return newInstance(0, nat, num);
@@ -196,7 +199,8 @@ public class GateStartFragment {
 
                     @Override
                     public void onClick(View v) {
-                        replaceFragment(Pathfinder.newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
+                        replaceFragment(Pathfinder
+                            .newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
                     }
                 });
             }
@@ -219,39 +223,38 @@ public class GateStartFragment {
                 }
             }
             final TextView totalTimeText = (TextView) getActivity().findViewById(R.id.total_time_text);
-            ArrayList<String> timeValues = getTimeValues();
             final NumberPicker time_launch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
             final NumberPicker time_golf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
-            ThemeHelper.setPickerTextColor(getActivity(), time_launch, ThemeHelper
-                .getColor(getActivity(), R.attr.white));
-            ThemeHelper.setPickerTextColor(getActivity(), time_golf, ThemeHelper
-                .getColor(getActivity(), R.attr.white));
+            ThemeHelper
+                .setPickerTextColor(getActivity(), time_launch, ThemeHelper.getColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerTextColor(getActivity(), time_golf, ThemeHelper.getColor(getActivity(), R.attr.white));
             if (time_launch != null) {
-                time_launch.setMinValue(0);
-                time_launch.setMaxValue(timeValues.size() - 1);
+                time_launch.setMinValue(MIN_VALUE);
+                time_launch.setMaxValue(MAX_VALUE);
+                time_launch.setWrapSelectorWheel(false);
                 int value = (int) GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
                 time_launch.setValue(value - 1);
                 time_launch.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                        totalTimeText.setText("" + ((newVal) + (time_golf.getValue())) + " min");
+                        totalTimeText.setText("" + (newVal + time_golf.getValue()));
                     }
                 });
             }
 
-
             if (time_golf != null) {
-                time_golf.setMinValue(0);
-                time_golf.setMaxValue(timeValues.size() - 1);
+                time_golf.setMinValue(MIN_VALUE);
+                time_golf.setMaxValue(MAX_VALUE);
+                time_golf.setWrapSelectorWheel(false);
                 int value = (int) GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
                 time_golf.setValue(value - 1);
                 time_golf.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                        totalTimeText.setText("" + ((newVal)  + (time_launch.getValue() )) + " min");
+                        totalTimeText.setText("" + (newVal + (time_launch.getValue())));
                     }
                 });
-                totalTimeText.setText("" + ((time_launch.getValue() )  + (time_golf.getValue())) + " min");
+                totalTimeText.setText("" + (time_launch.getValue() + time_golf.getValue()));
             }
 
             View button = getActivity().findViewById(R.id.set_gate_time);
@@ -280,14 +283,6 @@ public class GateStartFragment {
                     }
                 });
             }
-        }
-
-        private ArrayList<String> getTimeValues() {
-            ArrayList<String> timeValue = new ArrayList<>();
-            for (int i = 1; i < 20; i++) {
-                timeValue.add(String.format("%02d", i));
-            }
-            return timeValue;
         }
     }
 }
