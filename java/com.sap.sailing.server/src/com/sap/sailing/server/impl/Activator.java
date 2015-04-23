@@ -86,14 +86,22 @@ public class Activator implements BundleActivator {
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
         context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
+        final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
+                racingEventService.getDomainObjectFactory());
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
         registrations.add(context.registerService(GPSFixMongoHandler.class,
-                        new GPSFixMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
-                                racingEventService.getDomainObjectFactory()), properties));
-        properties.put(TypeBasedServiceFinder.TYPE, GPSFixMovingImpl.class.getName());
+                        gpsFixMongoHandler, properties));
+        // legacy type name; some DBs may still contain fixes marked with this old package name:
+        properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixImpl");
         registrations.add(context.registerService(GPSFixMongoHandler.class,
-                        new GPSFixMovingMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
-                                racingEventService.getDomainObjectFactory()), properties));
+                        gpsFixMongoHandler, properties));
+        final GPSFixMovingMongoHandlerImpl gpsFixMovingMongoHandler = new GPSFixMovingMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
+                racingEventService.getDomainObjectFactory());
+        properties.put(TypeBasedServiceFinder.TYPE, GPSFixMovingImpl.class.getName());
+        registrations.add(context.registerService(GPSFixMongoHandler.class, gpsFixMovingMongoHandler, properties));
+        // legacy type name; some DBs may still contain fixes marked with this old package name:
+        properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl");
+        registrations.add(context.registerService(GPSFixMongoHandler.class, gpsFixMovingMongoHandler, properties));
         // Add an MBean for the service to the JMX bean server:
         RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
