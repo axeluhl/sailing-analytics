@@ -79,13 +79,15 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
-            initialLocationUpdate = false;
             markHeaderTextView.setText(mark.getName());
             setUpTextUI(null);
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
             updateMap();
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
+            if(savedPosition != null) {
+                initialLocationUpdate = false;
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
+            }
         }
     }
 
