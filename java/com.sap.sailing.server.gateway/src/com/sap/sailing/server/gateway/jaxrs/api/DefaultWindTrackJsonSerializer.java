@@ -6,8 +6,8 @@ import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 import com.sap.sse.common.TimePoint;

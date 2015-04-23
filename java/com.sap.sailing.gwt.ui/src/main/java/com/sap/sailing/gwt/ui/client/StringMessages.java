@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
+    String general();
     String listRaces();
     String listRegattas();
     String wind();
@@ -1048,6 +1049,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
+    String image();
+    String video();
+    String flagImageURL();
     String imageURLs();
     String videoURLs();
     String sponsorImageURLs();
@@ -1211,7 +1215,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardSpeedInKts();
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String windUp();
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();
     String serverUrl();
+    String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
+    String startLineToFirstMarkTriangle(String distanceInMeters);
 }

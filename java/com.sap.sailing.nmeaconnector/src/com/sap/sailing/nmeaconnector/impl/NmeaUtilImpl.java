@@ -8,12 +8,12 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.nmeaconnector.NmeaUtil;
 import com.sap.sse.common.TimePoint;
 

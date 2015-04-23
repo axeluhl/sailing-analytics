@@ -6,18 +6,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.sap.sailing.domain.common.Bounds;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -43,11 +42,12 @@ import com.sap.sse.common.Util;
  */
 public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeProvider {
     private static final double MAX_WIND_SPEED_IN_KNOTS = 40;
-    private final Bounds infiniteBounds = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
-    private final Weigher<PositionDTO> weigher;
+    private final LatLngBounds infiniteBounds = LatLngBounds.newInstance(LatLng.newInstance(-90, -180), LatLng.newInstance(90, 180));
+    private final Weigher<Position> weigher;
     private double averageLatitudeDeg;
     private double averageLatitudeCosine;
     private double knotsInDegreePerFrame;
+    private final CoordinateSystem coordinateSystem;
     
     private final Comparator<WindDTO> windByRequestTimePointComparator = new Comparator<WindDTO>() {
         @Override
@@ -57,7 +57,8 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     };
     private final WindInfoForRaceDTO windInfoForRace;
     
-    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace, double framesPerSecond) {
+    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace, double framesPerSecond, CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         this.windInfoForRace = windInfoForRace;
         this.knotsInDegreePerFrame = 1.0 / (60*3600) / framesPerSecond; // 1kn = 1/60 deg/h = 1/(60*3600) deg/s
         weigher = new PositionDTOWeigher(/* halfConfidenceDistance */new MeterDistance(100), this);
@@ -89,11 +90,17 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     }
 
     @Override
-    public Vector getVector(Position p, Date at) {
-        final PositionDTO request = new PositionDTO(p.getLatDeg(), p.getLngDeg());
+    public boolean inBounds(LatLng p) {
+        // all positions are always considered in bounds as we'll always try to interpolate/extrapolate
+        return true;
+    }
+
+    @Override
+    public Vector getVector(final LatLng mappedPosition, final Date at) {
+        final Position p = coordinateSystem.getPosition(mappedPosition);
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
-        final BearingWithConfidenceCluster<PositionDTO> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
+        final BearingWithConfidenceCluster<Position> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
                 continue;
@@ -102,22 +109,22 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue(), at);
                 if (timewiseClosestFixForWindSource != null) {
                     final double confidence = (timewiseClosestFixForWindSource.confidence == null ? 1 : timewiseClosestFixForWindSource.confidence) *
-                            weigher.getConfidence(timewiseClosestFixForWindSource.position, request);
+                            weigher.getConfidence(timewiseClosestFixForWindSource.position, p);
                     if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
                         speedConfidenceSum += confidence;
                         knotSpeedSumScaledByConfidence += confidence * timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
                     }
-                    bearingCluster.add(new BearingWithConfidenceImpl<PositionDTO>(
+                    bearingCluster.add(new BearingWithConfidenceImpl<Position>(
                             new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), confidence, timewiseClosestFixForWindSource.position));
                 }
             }
         }
-        final BearingWithConfidence<PositionDTO> bearing = bearingCluster.getAverage(request);
+        final BearingWithConfidence<Position> bearing = bearingCluster.getAverage(p);
         final Vector result;
         if (bearing != null && bearing.getObject() != null) {
-            final double bearingRad = bearing.getObject().getRadians();
+            final double mappedBearingRad = coordinateSystem.map(bearing.getObject()).getRadians();
             final double speedInKnots = knotSpeedSumScaledByConfidence / speedConfidenceSum;
-            result = new Vector(speedInKnots * Math.sin(bearingRad), speedInKnots * Math.cos(bearingRad));
+            result = new Vector(speedInKnots * Math.sin(mappedBearingRad), speedInKnots * Math.cos(mappedBearingRad));
         } else {
             result = null;
         }
@@ -185,7 +192,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     }
     
     @Override
-    public double getParticleWeight(Position p, Vector v) {
+    public double getParticleWeight(LatLng p, Vector v) {
         return v == null ? 0 : (v.length() / MAX_WIND_SPEED_IN_KNOTS);
     }
 
@@ -199,7 +206,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     }
 
     @Override
-    public Bounds getFieldCorners() {
+    public LatLngBounds getFieldCorners() {
         return infiniteBounds;
     }
 

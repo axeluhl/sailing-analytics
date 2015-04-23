@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.IdentityCoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -228,12 +229,12 @@ public class SimulatorMainPanel extends SimplePanel {
         return NumberFormat.getFormat("0.0").format(value);
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate,
-            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showLineGuides, boolean showStreamlets, boolean showMapControls) {
-        super();
-
+    SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
+            int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate, char mode,
+            char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows,
+            boolean showLineGuides, boolean showStreamlets, boolean showMapControls) {
+       super();
         this.macroWeather = streamletPars.macroWeather;
-        
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -313,7 +314,7 @@ public class SimulatorMainPanel extends SimplePanel {
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars, timer, timePanel,
-                windParams, busyIndicator, mode, this, showMapControls);
+                windParams, busyIndicator, mode, this, showMapControls, new IdentityCoordinateSystem());
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);

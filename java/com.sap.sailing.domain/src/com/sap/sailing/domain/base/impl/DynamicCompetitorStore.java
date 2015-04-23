@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
+import java.net.URI;
 
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sse.common.Color;
@@ -10,7 +11,8 @@ public interface DynamicCompetitorStore extends CompetitorStore {
     DynamicCompetitor getExistingCompetitorById(Serializable competitorId);
 
     @Override
-    DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, DynamicTeam team, DynamicBoat boat);
+    DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImage, 
+            DynamicTeam team, DynamicBoat boat);
 
     @Override
     Iterable<? extends DynamicCompetitor> getCompetitors();

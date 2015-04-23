@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.QRCodeComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeComposite;
 
 public abstract class BaseQRIdentifierWidget implements IsWidget {
     

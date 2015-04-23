@@ -15,8 +15,6 @@ public class WindSourceWithAdditionalID extends WindSourceImpl {
 
     private String id;
 
-    WindSourceWithAdditionalID() {} // for GWT serialization
-    
     public WindSourceWithAdditionalID(WindSourceType type, String id) {
         super(type);
         this.id = id;

@@ -17,6 +17,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private final String newEmail;
     private final Nationality newNationality;
     private final URI newTeamImageUri;
+    private final URI newFlagImageUri;
     
     /**
      * @param idAsString
@@ -26,7 +27,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
      *            flag
      */
     public UpdateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail, String newSailId,
-            Nationality newNationality, URI newTeamImageUri) {
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri) {
         super();
         this.idAsString = idAsString;
         this.newName = newName;
@@ -35,6 +36,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
         this.newNationality = newNationality;
         this.newTeamImageUri = newTeamImageUri;
         this.newEmail = newEmail;
+        this.newFlagImageUri = newFlagImageUri;
     }
 
     /**
@@ -49,7 +51,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
         Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
                 .updateCompetitor(idAsString, newName, newDisplayColor, newEmail, newSailId, newNationality,
-                        newTeamImageUri);
+                        newTeamImageUri, newFlagImageUri);
         return result;
     }
 

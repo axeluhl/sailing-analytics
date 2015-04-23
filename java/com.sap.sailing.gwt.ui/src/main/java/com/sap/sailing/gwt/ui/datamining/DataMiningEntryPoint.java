@@ -17,7 +17,6 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
@@ -26,10 +25,12 @@ import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
-    private static DataMiningResources resources = GWT.create(DataMiningResources.class);
+    private static final ComponentResources resources = GWT.create(ComponentResources.class);
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     
@@ -65,7 +66,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
 
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(resources.darkSettingsIcon()).getSafeHtml());
         settingsAnchor.addStyleName("settingsAnchor");
         settingsAnchor.setTitle(getStringMessages().settings());
         settingsAnchor.addClickHandler(new ClickHandler() {

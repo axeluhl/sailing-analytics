@@ -10,5 +10,4 @@ import com.sap.sse.gwt.client.StringMessages;
  */
 public interface TextMessages extends StringMessages {
     public static final TextMessages INSTANCE = GWT.create(TextMessages.class);
-
 }

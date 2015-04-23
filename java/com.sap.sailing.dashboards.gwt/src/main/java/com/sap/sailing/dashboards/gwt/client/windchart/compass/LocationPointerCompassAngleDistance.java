@@ -9,12 +9,13 @@ import com.sap.sailing.dashboards.gwt.client.device.Location;
 import com.sap.sailing.dashboards.gwt.client.device.LocationListener;
 import com.sap.sailing.dashboards.gwt.client.device.Orientation;
 import com.sap.sailing.dashboards.gwt.client.device.OrientationListener;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 /**
  * The classes task is to notify its listeners about changes in distance and angle from the actual device to a pointed
  * location. It receives location and compass heading changes from the classes {@link Location} and {@link Compass} and
- * has a public method {@link #windBotPositionChanged(PositionDTO)} to get changes of the wind bots position the
+ * has a public method {@link #windBotPositionChanged(DegreePosition)} to get changes of the wind bots position the
  * application receives from the backend.
  * 
  * @author Alexander Ries (D062114)
@@ -123,9 +124,9 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
         calulateNewAngleAndDistance();
     }
 
-    public void windBotPositionChanged(PositionDTO positionDTO) {
-        latBot = positionDTO.latDeg;
-        lonBot = positionDTO.lngDeg;
+    public void windBotPositionChanged(Position positionDTO) {
+        latBot = positionDTO.getLatDeg();
+        lonBot = positionDTO.getLngDeg();
         calulateNewAngleAndDistance();
     }
 

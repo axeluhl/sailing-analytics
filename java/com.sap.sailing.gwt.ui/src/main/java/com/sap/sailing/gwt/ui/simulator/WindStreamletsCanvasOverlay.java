@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
@@ -34,8 +35,8 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private Swarm swarm;
 
     public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final StreamletParameters streamletPars,
-            final WindFieldGenParamsDTO windParams) {
-        super(simulatorMap.getMap(), zIndex);
+            final WindFieldGenParamsDTO windParams, CoordinateSystem coordinateSystem) {
+        super(simulatorMap.getMap(), zIndex, coordinateSystem);
         this.simulatorMap = simulatorMap;
         this.timer = timer;
         this.windParams = windParams;
@@ -56,7 +57,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     public void startStreamlets() {
         if (swarm == null) {
-            final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams(), streamletPars);
+            final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams(), streamletPars, coordinateSystem);
             setCanvasSettings();
             this.swarm = new Swarm(this, map, timer, field, streamletPars);
         }
@@ -126,7 +127,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
                 macroWeather = false;
                 SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
                 String jsonStr = bundle.windStreamletsDataJS().getText();
-                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars);
+                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars, coordinateSystem);
                 map.setZoom(5);
                 map.panTo(f.getCenter());
                 this.swarm = new Swarm(this, map, timer, f, streamletPars);
