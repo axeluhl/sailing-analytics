@@ -6,7 +6,7 @@
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <h2>Content 1</h2>
-        <o:ExampleContent ui:field="content1" />
+        <o:LiveRacesContent ui:field="liveRaces" />
         <h2>Content 2</h2>
         <o:OtherContent ui:field="content2" />
       </div>

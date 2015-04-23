@@ -67,10 +67,10 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                         LiveRaceDTO liveRaceDTO = new LiveRaceDTO();
                         liveRaceDTO.setRegattaName(regattaName);
                         liveRaceDTO.setFleetName(fleet.getName());
-                        liveRaceDTO.setFleetColor(fleet.getColor().getAsHtml());
+                        liveRaceDTO.setFleetColor(fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
                         liveRaceDTO.setRaceName(raceColumn.getName());
                         
-                        liveRaceDTO.setStart(state.getStartTime().asDate());
+//                        liveRaceDTO.setStart(state.getStartTime().asDate());
                         
                         result.addRace(liveRaceDTO);
                     }

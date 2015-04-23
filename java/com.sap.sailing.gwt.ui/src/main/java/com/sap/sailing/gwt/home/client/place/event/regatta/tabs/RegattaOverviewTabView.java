@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview.ExampleContent;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview.LiveRacesContent;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview.OtherContent;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.shared.dispatch.AutomaticBatchingDispatch;
@@ -44,7 +44,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         // TODO CF
         RefreshManager refreshManager = new RefreshManager(this, new AutomaticBatchingDispatch(new SimpleDispatch(null)));
         
-        refreshManager.add(content1, new GetLiveRacesAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(liveRaces, new GetLiveRacesAction(currentPresenter.getCtx().getEventDTO().getId()));
         refreshManager.add(content2, new OtherAction());
 
         contentArea.setWidget(this);
@@ -61,7 +61,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
     
-    @UiField ExampleContent content1;
+    @UiField LiveRacesContent liveRaces;
     @UiField OtherContent content2;
 
     @Override

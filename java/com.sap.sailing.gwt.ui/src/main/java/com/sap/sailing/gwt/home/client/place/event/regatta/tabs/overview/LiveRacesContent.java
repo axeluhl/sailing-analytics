@@ -16,12 +16,12 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.Refreshab
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
 
-public class ExampleContent extends Widget implements RefreshableWidget<LiveRacesDTO> {
+public class LiveRacesContent extends Widget implements RefreshableWidget<LiveRacesDTO> {
 
     private static final DateTimeFormat FORMAT = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL);
-    private static ExampleContentUiBinder uiBinder = GWT.create(ExampleContentUiBinder.class);
+    private static LiveRacesContentUiBinder uiBinder = GWT.create(LiveRacesContentUiBinder.class);
 
-    interface ExampleContentUiBinder extends UiBinder<Element, ExampleContent> {
+    interface LiveRacesContentUiBinder extends UiBinder<Element, LiveRacesContent> {
     }
     
     @UiField SpanElement lastUpdate;
@@ -29,7 +29,7 @@ public class ExampleContent extends Widget implements RefreshableWidget<LiveRace
     @UiField SpanElement updateNo;
     @UiField DivElement liveRaces;
 
-    public ExampleContent() {
+    public LiveRacesContent() {
         setElement(uiBinder.createAndBindUi(this));
     }
 
@@ -39,6 +39,7 @@ public class ExampleContent extends Widget implements RefreshableWidget<LiveRace
         this.nextUpdate.setInnerText(FORMAT.format(new Date(nextUpdate)));
         this.updateNo.setInnerText("" + updateNo);
         
+        liveRaces.removeAllChildren();
         for(LiveRaceDTO race : data.getRaces()) {
             DivElement raceDiv = Document.get().createDivElement();
             raceDiv.setInnerText(race.getRaceName());
