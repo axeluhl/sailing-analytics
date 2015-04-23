@@ -22,6 +22,7 @@ public interface SeriesHeaderResources extends ClientBundle {
         String eventheader_intro_name();
         String eventheader_intro_details();
         String eventheader_intro_details_item();
+        String eventheader_intro_details_item_inactive();
         String eventheader_intro_details_itemlink();
         String eventheader_status();
         String eventheader_status_title();

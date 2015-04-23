@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.igtimiadapter.datatypes;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 public abstract class Fix implements Timed {
     private static final long serialVersionUID = -486253194440558670L;

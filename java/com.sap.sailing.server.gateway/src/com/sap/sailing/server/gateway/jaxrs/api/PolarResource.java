@@ -26,12 +26,12 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
@@ -94,6 +94,14 @@ public class PolarResource extends AbstractSailingServerResource {
                     } catch (NotEnoughDataHasBeenAddedException e) {
                         stringBuilder.append("No data for " + boatClass + " " + legType + " " + tack + "\n");
                     }
+                }
+            }
+            for (double trueWindAngle = -177.5; trueWindAngle < 180; trueWindAngle = trueWindAngle + 5) {
+                try {
+                    PolynomialFunction speedForTWAFunction = polarDataService.getSpeedRegressionFunction(boatClass, trueWindAngle);
+                    stringBuilder.append("Speed for TWA: " + boatClass + " " + trueWindAngle + ": " + speedForTWAFunction.toString() + "\n");
+                } catch (NotEnoughDataHasBeenAddedException e) {
+                    stringBuilder.append("No data for " + boatClass + " " + trueWindAngle + "\n");
                 }
             }
             stringBuilder.append("\n\n");

@@ -124,7 +124,6 @@
             <configuration>
               <!-- <userAgents>chrome</userAgents> -->
               <modules>
-                <module>com.sap.sailing.gwt.ui.EmulatedJRE</module>
                 <module>com.sap.sailing.gwt.Home</module>
                 <module>com.sap.sailing.gwt.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>

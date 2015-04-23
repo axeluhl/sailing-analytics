@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesOverviewPlace;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
@@ -33,7 +33,7 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
         } else {
             final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
             
-            clientFactory.getSailingService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
+            clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
                 @Override
                 public void onSuccess(final EventSeriesViewDTO event) {
                     ctx.updateContext(event);
@@ -70,6 +70,6 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
     }
     
     private AbstractSeriesPlace getRealPlace() {
-        return new SeriesEventsPlace(ctx);
+        return new SeriesOverviewPlace(ctx);
     }
 }

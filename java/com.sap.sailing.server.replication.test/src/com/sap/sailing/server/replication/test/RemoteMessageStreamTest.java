@@ -57,7 +57,7 @@ public class RemoteMessageStreamTest {
     }
 
     @Test
-    public void testBasicCddonnectivityInMultiplePackets() throws IOException {
+    public void testBasicConnectivityInMultiplePackets() throws IOException {
         setupStreams(/* messageSizeInBytes */ 5, /* syncAfterTimeout */ false);
         final String message = "Hello World!";
         outputStream.write(message.getBytes());

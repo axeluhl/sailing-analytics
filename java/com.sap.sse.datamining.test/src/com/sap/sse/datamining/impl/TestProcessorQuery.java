@@ -21,22 +21,24 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
+import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
-import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.QueryResultState;
@@ -122,9 +124,9 @@ public class TestProcessorQuery {
                 Function<Double> getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
                 Processor<GroupedDataEntry<Number>, GroupedDataEntry<Double>> crossSumExtractor = processorFactory.createExtractionProcessor(sumAggregator, getCrossSumFunction, ParameterProvider.NULL);
 
-                List<Pair<Function<?>, ParameterProvider>> dimensions = new ArrayList<>();
+                List<ParameterizedFunction<?>> dimensions = new ArrayList<>();
                 Function<Integer> getLengthFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
-                dimensions.add(new Pair<>(getLengthFunction, ParameterProvider.NULL));
+                dimensions.add(new SimpleParameterizedFunction<>(getLengthFunction, ParameterProvider.NULL));
                 Processor<Number, GroupedDataEntry<Number>> lengthGrouper = processorFactory.createGroupingProcessor(Number.class, crossSumExtractor, dimensions);
                 Collection<Processor<Number, ?>> filtrationResultReceivers = new ArrayList<>();
                 filtrationResultReceivers.add(lengthGrouper);
@@ -140,7 +142,7 @@ public class TestProcessorQuery {
                 retrievalResultReceivers.add(filtrationProcessor);
                 
                 @SuppressWarnings("unchecked")
-                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
+                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
                                                                                                                                          ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 0) {
                     @Override
                     protected Iterable<Number> retrieveData(Iterable<Number> element) {
@@ -291,12 +293,12 @@ public class TestProcessorQuery {
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
-                return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
+                return new AbstractParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
                                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
                                                                                                     resultReceivers) {
                     @Override
-                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             public Map<GroupKey, Double> computeResult() {
@@ -331,12 +333,12 @@ public class TestProcessorQuery {
             protected Processor<Double, ?> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
-                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
                                                                                           (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                           ConcurrencyTestsUtil.getExecutor(),
                                                                                           resultReceivers) {
                     @Override
-                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             protected Map<GroupKey, Double> computeResult() throws Exception {
@@ -371,12 +373,12 @@ public class TestProcessorQuery {
             protected Processor<Double, ?> createFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
-                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
                                                                                           (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                           ConcurrencyTestsUtil.getExecutor(),
                                                                                           resultReceivers) {
                     @Override
-                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             protected Map<GroupKey, Double> computeResult() throws Exception {

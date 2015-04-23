@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
+import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
@@ -12,6 +13,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
+    String general();
     String listRaces();
     String listRegattas();
     String wind();
@@ -1053,7 +1055,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
-
     String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
     String eventSharingShortText(String eventName, String venue, String dateString);
     String eventSharingLongText(String eventName, String venue, String dateString, String url);
@@ -1064,6 +1065,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String media();
     String photos();
     String videos();
+    String image();
+    String video();
+    String flagImageURL();
     String imageURLs();
     String videoURLs();
     String sponsorImageURLs();
@@ -1227,5 +1231,17 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardSpeedInKts();
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String windUp();
     String currentFilterSelection();
+    String notCapableOfGeneratingACodeForIdentifier();
+    String serverUrl();
+    String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
+    String startLineToFirstMarkTriangle(String distanceInMeters);
+    
+    String noDataForEvent();
+    String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String racesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
 }

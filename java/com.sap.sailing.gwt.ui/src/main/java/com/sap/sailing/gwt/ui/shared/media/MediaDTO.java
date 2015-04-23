@@ -6,22 +6,22 @@ import java.util.ArrayList;
 public class MediaDTO implements Serializable {
     private static final long serialVersionUID = 4932700214423641309L;
     
-    private ArrayList<MediaEntryDTO> photos = new ArrayList<>();
-    private ArrayList<MediaEntryDTO> videos = new ArrayList<>();
+    private ArrayList<ImageMetadataDTO> photos = new ArrayList<>();
+    private ArrayList<VideoMetadataDTO> videos = new ArrayList<>();
 
-    public ArrayList<MediaEntryDTO> getPhotos() {
+    public ArrayList<ImageMetadataDTO> getPhotos() {
         return photos;
     }
     
-    public void addPhoto(MediaEntryDTO photo) {
+    public void addPhoto(ImageMetadataDTO photo) {
         photos.add(photo);
     }
     
-    public ArrayList<MediaEntryDTO> getVideos() {
+    public ArrayList<VideoMetadataDTO> getVideos() {
         return videos;
     }
     
-    public void addVideo(MediaEntryDTO video) {
+    public void addVideo(VideoMetadataDTO video) {
         videos.add(video);
     }
 }

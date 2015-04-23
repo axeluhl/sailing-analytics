@@ -17,7 +17,7 @@ public class PlaceNavigation<T extends Place> {
         this.placeNavigator = placeNavigator;
         this.destinationPlace = destinationPlace;
         String locationURL = getLocationURL();
-        this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
+        this.isDestinationOnRemoteServer = !(isLocationOnLocalhostOrDevServer(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL;
     }
 
@@ -27,9 +27,6 @@ public class PlaceNavigation<T extends Place> {
         this.isDestinationOnRemoteServer = isDestinationOnRemoteServer;
         this.placeNavigator = placeNavigator;
         this.baseUrl = isDestinationOnRemoteServer ? baseUrl : getLocationURL();
-    }
-
-    public void gotoPlace() {
     }
 
     public String getTargetUrl() {
@@ -75,8 +72,9 @@ public class PlaceNavigation<T extends Place> {
         return urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER);
     }
 
-    private boolean isLocationOnLocalhost(String urlToCheck) {
-        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1");
+    private boolean isLocationOnLocalhostOrDevServer(String urlToCheck) {
+        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1")
+                || urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_DEV_SERVER);
     }
 
     private String getLocationURL() {

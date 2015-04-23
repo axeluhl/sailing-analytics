@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -60,7 +61,7 @@ public class WidgetCarousel extends Composite {
     /**
      * slick slider property: infiniteScrolling
      */
-    private boolean infiniteScrolling = false;
+    private boolean infiniteScrolling = true;
 
     private final String uniqueId;
 
@@ -74,6 +75,17 @@ public class WidgetCarousel extends Composite {
         uniqueId = Document.get().createUniqueId();
         sliderMainUi.addStyleName(uniqueId);
         init();
+
+    }
+
+    @Override
+    public void onBrowserEvent(Event event) {
+        super.onBrowserEvent(event);
+        if ("afterChange".equals(event.getType())) {
+            onAfterChange();
+        } else if ("init".equals(event.getType())) {
+            onAfterChange();
+        }
     }
 
     public void onAfterChange() {
@@ -103,27 +115,38 @@ public class WidgetCarousel extends Composite {
     native void setupSlider(WidgetCarousel sliderReference) /*-{
 
 	$wnd
-		.$(document)
-		.ready(
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+		.on(
+			'afterChange',
 			function() {
-			    $wnd
-				    .$(
-					    '.'
-						    + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-				    .slick(
-					    {
-						dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
-						infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
-						swipeToSlide : false,
-						arrows : true,
-						responsive : false,
-						onAfterChange : function() {
-						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-						},
-						onInit : function() {
-						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-						}
-					    });
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+			});
+	$wnd
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+		.on(
+			'init',
+			function() {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+			});
+
+	$wnd
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+		.slick(
+			{
+			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
+			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
+			    swipeToSlide : false,
+			    responsive : false,
+			    arrows : true,
+			    prevArrow : "<div class='slick-prev'/>",
+			    nextArrow : "<div class='slick-next'/>"
+
 			});
 
     }-*/;

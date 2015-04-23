@@ -21,11 +21,11 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 
 /**

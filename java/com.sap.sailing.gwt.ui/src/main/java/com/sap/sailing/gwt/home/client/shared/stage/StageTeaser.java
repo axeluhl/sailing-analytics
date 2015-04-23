@@ -6,6 +6,8 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -14,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.Countdown;
 import com.sap.sailing.gwt.home.client.shared.Countdown.CountdownListener;
 import com.sap.sailing.gwt.home.client.shared.Countdown.RemainingTime;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.carousel.LazyLoadable;
@@ -49,7 +51,7 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
     }
 
     private static StageTeaserUiBinder uiBinder = GWT.create(StageTeaserUiBinder.class);
-    private final EventBaseDTO event;
+    private final EventStageDTO event;
 
     @Override
     public void doInitializeLazyComponents() {
@@ -66,28 +68,41 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
                 teaserImage.getStyle().setOpacity(progress);
 
             }
-        }.run(1000);
+        }.run(500);
+
 
     }
 
-    public StageTeaser(EventBaseDTO event) {
+    protected void handleUserAction() {
+
+    }
+
+    public StageTeaser(EventStageDTO event) {
         this.event = event;
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
-        if (event.startDate != null) {
-            TimePoint eventStart = new MillisecondsTimePoint(event.startDate);
-            CountdownListener countdownListener = new CountdownListener() {
+        TimePoint eventStart = new MillisecondsTimePoint(event.getStartDate());
+        CountdownListener countdownListener = new CountdownListener() {
 
-                @Override
-                public void changed(RemainingTime major, RemainingTime minor) {
-                    updateCountdown(major, minor);
-                }
+            @Override
+            public void changed(RemainingTime major, RemainingTime minor) {
+                updateCountdown(major, minor);
+            }
 
-            };
-            new Countdown(eventStart, countdownListener);
-        }
+        };
+        new Countdown(eventStart, countdownListener);
+       
+        addDomHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                handleUserAction();
+            }
+        }, ClickEvent.getType());
+        
     }
+
 
     private void updateCountdown(RemainingTime major, RemainingTime minor) {
         if (major == null && minor == null) {

@@ -29,7 +29,8 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return TabView.State.INVISIBLE;
+        // TODO return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
@@ -62,9 +63,11 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
 
     }
 
+    // TODO delete UiBinder if we do not need it for the new media page implementation
     interface MyBinder extends UiBinder<HTMLPanel, MultiregattaMediaTabView> {
     }
 
+    @SuppressWarnings("unused")
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
 

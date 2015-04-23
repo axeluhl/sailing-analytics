@@ -7,11 +7,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
@@ -80,8 +82,8 @@ public class SeriesHeader extends Composite {
         for (EventMetadataDTO eventOfSeries : series.getEvents()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
                 InlineLabel eventLabel = new InlineLabel(eventOfSeries.getLocationOrVenue());
-                // TODO light gray color
                 eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
+                eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item_inactive());
                 venues.add(eventLabel);
             } else {
                 Anchor eventAnchor = new Anchor(eventOfSeries.getLocationOrVenue());
@@ -92,8 +94,10 @@ public class SeriesHeader extends Composite {
                 eventAnchor.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        event.preventDefault();
-                        eventNavigation.goToPlace();
+                        if(LinkUtil.handleLinkClick(Event.as(event.getNativeEvent()))) {
+                            event.preventDefault();
+                            eventNavigation.goToPlace();
+                        }
                     }
                 });
             }

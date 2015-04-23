@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.common.dto;
 
+import com.sap.sailing.domain.common.Position;
+
 public class PlacemarkDTO extends NamedDTO {
     private static final long serialVersionUID = -6734956459060435983L;
     private String countryCode;
-    private PositionDTO position;
+    private Position position;
     private long population;
     
     /**
@@ -11,7 +13,7 @@ public class PlacemarkDTO extends NamedDTO {
      */
     PlacemarkDTO() {}
 
-    public PlacemarkDTO(String name, String countryCode, PositionDTO position, long population) {
+    public PlacemarkDTO(String name, String countryCode, Position position, long population) {
         super(name);
         this.countryCode = countryCode;
         this.position = position;
@@ -26,11 +28,11 @@ public class PlacemarkDTO extends NamedDTO {
         this.countryCode = countryCode;
     }
 
-    public PositionDTO getPosition() {
+    public Position getPosition() {
         return position;
     }
 
-    public void setPosition(PositionDTO position) {
+    public void setPosition(Position position) {
         this.position = position;
     }
 

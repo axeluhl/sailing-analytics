@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.RacingEventService;
 
 public class RecordMarkGPSFixForExistingTrack extends RecordMarkGPSFix {

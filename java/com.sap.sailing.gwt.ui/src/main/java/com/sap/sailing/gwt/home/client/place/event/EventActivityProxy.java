@@ -42,7 +42,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
         } else {
             final UUID eventUUID = UUID.fromString(ctx.getEventId());
             
-            clientFactory.getSailingService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
+            clientFactory.getHomeService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
                 @Override
                 public void onSuccess(final EventViewDTO event) {
                     ctx.updateContext(event);
@@ -109,9 +109,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
             if(place instanceof MultiregattaMediaPlace) {
                 return new RegattaMediaPlace(contextWithoutRegatta);
             }
-            // TODO Overview isn't implemented yet
-//            return new RegattaOverviewPlace(ctxToUse);
-            return new RegattaRacesPlace(contextWithoutRegatta);
+            return new RegattaOverviewPlace(contextWithoutRegatta);
         }
         
         if(place instanceof AbstractEventRegattaPlace) {

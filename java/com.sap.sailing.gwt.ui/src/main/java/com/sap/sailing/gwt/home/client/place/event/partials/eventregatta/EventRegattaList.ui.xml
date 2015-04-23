@@ -10,9 +10,10 @@
 <div class="{local_res.css.eventregattalist}">
     <div ui:field="regattaListNavigationDiv" class="{local_res.css.eventregattalist_navigation} {res.mainCss.navbar}">
     <div class="{res.mediaCss.grid}">
-      <div ui:field="regattaGroupsNavigationPanel" class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <a ui:field="filterNoLeaderboardGroupsAnchor" href="javascript:;" class="{res.mainCss.navbar_button} {res.mainCss.navbar_buttonactive}"><span ui:field="allBoatClassesSelected">&#10003;&nbsp;</span><ui:text from='{i18n.eventRegattaListAllBoatClasses}'/></a>
-      </div>
+      <div ui:field="regattaGroupsNavigationPanel" class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.regattaGroupsNavigationPanel}">
+          <a ui:field="filterNoLeaderboardGroupsAnchor" 
+          	href="javascript:;" 
+          	class="{local_res.css.item} {local_res.css.selectedItem}"><ui:text from='{i18n.eventRegattaListAllBoatClasses}'/></a></div>
     </div>
   </div>
   <g:HTMLPanel ui:field="regattaListItemsPanel" />

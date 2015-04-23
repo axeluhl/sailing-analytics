@@ -4,9 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
+import com.sap.sse.common.settings.AbstractSettings;
 
-public class RaceMapSettings {
+public class RaceMapSettings extends AbstractSettings {
 
     private boolean showDouglasPeuckerPoints = false;
 
@@ -27,6 +29,16 @@ public class RaceMapSettings {
     private boolean showWindStreamletOverlay = false;
 
     private boolean showSimulationOverlay = false;
+    
+    /**
+     * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
+     * bearings / headings so that an assumed average wind direction for the race is coming from the top of the map
+     * ("wind-up display"). The implementation hinges on
+     * {@link Position#getLocalCoordinates(Position, com.sap.sailing.domain.common.Bearing)} which can transform
+     * positions to any other coordinate space that is translated and rotated compared to the original
+     * coordinate space.
+     */
+    private boolean windUp = false;
 
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
@@ -128,5 +140,13 @@ public class RaceMapSettings {
 
     public void setBuoyZoneRadiusInMeters(double buoyZoneRadiusInMeters) {
         this.buoyZoneRadiusInMeters = buoyZoneRadiusInMeters;
+    }
+
+    public boolean isWindUp() {
+        return windUp;
+    }
+
+    public void setWindUp(boolean windUp) {
+        this.windUp = windUp;
     }
 }

@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.HomeServiceAsync;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
@@ -35,6 +36,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         void forPlaceSelection(PlaceCallback callback);
         Timer getTimerForClientServerOffset();
         SailingServiceAsync getSailingService();
+        HomeServiceAsync getHomeService();
         
         AbstractEventRegattaPlace getPlaceForRegatta(String regattaId);
         AbstractEventRegattaPlace getPlaceForRegattaRaces(String regattaId);

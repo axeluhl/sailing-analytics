@@ -16,12 +16,14 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
 public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesList {
+    private static final ComponentResources resources = GWT.create(ComponentResources.class);
 
     private Button btnPolarSheetGeneration;
     private Anchor settingsAnchor;
@@ -44,11 +46,9 @@ public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesLis
     }
     
     public Anchor createSettingsLink(final StringMessages stringMessages) {
-        PolarSheetResources resources = GWT.create(PolarSheetResources.class);
-        ImageResource leaderboardSettingsIcon = resources.settingsIcon();
+        ImageResource leaderboardSettingsIcon = resources.darkSettingsIcon();
         settingsAnchor = new Anchor(AbstractImagePrototype.create(leaderboardSettingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
-
         return settingsAnchor;
     }
     

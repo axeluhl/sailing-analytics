@@ -5,22 +5,24 @@ import java.util.Date;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
-import com.sap.sailing.domain.common.Bounds;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 
 public class RectField implements VectorField {
 
     private final Vector[][] field;
 
+    // coordinates in the real-world coordinate system; a CoordinateSystem instance is required to map to the map's
+    // coordinate system
     private final double x0;
     private final double x1;
     private final double y0;
     private final double y1;
 
-	private double motionFactor;
+    private double motionFactor;
 
     private final int w;
     private final int h;
@@ -29,13 +31,16 @@ public class RectField implements VectorField {
     private final double particleFactor;
     private final String[] colorsForSpeeds;
 
-    public RectField(Vector[][] field, double x0, double y0, double x1, double y1, StreamletParameters parameters) {
+    private final CoordinateSystem coordinateSystem;
+
+    public RectField(Vector[][] field, double x0, double y0, double x1, double y1, StreamletParameters parameters, CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         colorsForSpeeds = createColorsForSpeeds();
         this.x0 = x0;
         this.x1 = x1;
         this.y0 = y0;
         this.y1 = y1;
-		this.motionFactor = 0.009 * parameters.motionScale;
+        this.motionFactor = 0.009 * parameters.motionScale;
         this.field = field;
         this.w = field.length;
         this.h = field[0].length;
@@ -58,7 +63,7 @@ public class RectField implements VectorField {
         my = (my / this.h) * (y1 - y0) + y0;
     }
 
-    public static RectField read(String jsonData, boolean correctForSphere, StreamletParameters parameters) {
+    public static RectField read(String jsonData, boolean correctForSphere, StreamletParameters parameters, CoordinateSystem coordinateSystem) {
         JSONObject data = JSONParser.parseLenient(jsonData).isObject();
         int w = (int) data.get("gridWidth").isNumber().doubleValue();
         int h = (int) data.get("gridHeight").isNumber().doubleValue();
@@ -83,7 +88,7 @@ public class RectField implements VectorField {
             }
         }
         RectField result = new RectField(field, data.get("x0").isNumber().doubleValue(), data.get("y0").isNumber()
-                .doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue(), parameters);
+                .doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue(), parameters, coordinateSystem);
         return result;
     }
 
@@ -91,6 +96,14 @@ public class RectField implements VectorField {
     public boolean inBounds(Position p) {
         return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0
                 && p.getLatDeg() < this.y1;
+    }
+
+    @Override
+    public boolean inBounds(LatLng p) {
+        final LatLng ll0 = coordinateSystem.toLatLng(new DegreePosition(y0, x0));
+        final LatLng ll1 = coordinateSystem.toLatLng(new DegreePosition(y1, x1));
+        return p.getLongitude() >= ll0.getLongitude() && p.getLongitude() < ll1.getLongitude() && p.getLatitude() >= ll0.getLatitude()
+                && p.getLatitude() < ll1.getLatitude();
     }
 
     private Vector interpolate(Position p) {
@@ -109,7 +122,8 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Vector getVector(Position p, Date at) {
+    public Vector getVector(final LatLng mappedPosition, final Date at) {
+        final Position p = coordinateSystem.getPosition(mappedPosition);
         double lngDeg = (this.w - 1 - 1e-6) * (p.getLngDeg() - this.x0) / (this.x1 - this.x0);
         double latDeg = (this.h - 1 - 1e-6) * (p.getLatDeg() - this.y0) / (this.y1 - this.y0);
         if ((lngDeg < 0) || (lngDeg > (this.w - 1)) || (latDeg < 0) || (latDeg > (this.h - 1))) {
@@ -121,7 +135,7 @@ public class RectField implements VectorField {
     }
 
     public LatLng getCenter() {
-        return LatLng.newInstance((y0 + y1) / 2.0, (x0 + x1) / 2.0);
+        return coordinateSystem.toLatLng(new DegreePosition((y0 + y1) / 2.0, (x0 + x1) / 2.0));
     }
 
     @Override
@@ -130,7 +144,7 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public double getParticleWeight(Position p, Vector v) {
+    public double getParticleWeight(LatLng p, Vector v) {
         return v == null ? 0 : (1.0 - v.length() / this.maxLength);
     }
     
@@ -160,11 +174,11 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Bounds getFieldCorners() {
-        // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
-        Position sw = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
-        Position ne = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
-        return new BoundsImpl(sw, ne);
+    public LatLngBounds getFieldCorners() {
+        // FIXME this is not date line-safe. If the field crosses +180deg (the international date line), this will fail
+        LatLng sw = coordinateSystem.toLatLng(new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1)));
+        LatLng ne = coordinateSystem.toLatLng(new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1)));
+        return LatLngBounds.newInstance(sw, ne);
     }
 
     @Override

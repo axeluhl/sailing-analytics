@@ -12,7 +12,7 @@ import net.sf.marineapi.nmea.util.Time;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixNmeaDTOJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;

@@ -115,7 +115,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
             callback.onSuccess(ctx.getMedia());
             return;
         }
-        clientFactory.getSailingService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
+        clientFactory.getHomeService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);

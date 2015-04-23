@@ -78,6 +78,9 @@
   padding-left: 0.666666666666667em;
   color: #666;
 }
+.eventheader_intro_details_item_inactive {
+  color: #AAA;
+}
 .eventheader_intro_details_itemlink {
   color: inherit;
 }

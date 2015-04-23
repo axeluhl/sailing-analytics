@@ -2,9 +2,9 @@ package com.sap.sailing.simulator.windfield.impl;
 
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;

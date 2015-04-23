@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
+import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.RaceResultOfCompetitorWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
-        AbstractSimpleRetrievalProcessor<HasLeaderboardContext, HasRaceResultOfCompetitorContext> {
+        AbstractRetrievalProcessor<HasLeaderboardContext, HasRaceResultOfCompetitorContext> {
 
     public CompetitorOfRaceInLeaderboardRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasRaceResultOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {

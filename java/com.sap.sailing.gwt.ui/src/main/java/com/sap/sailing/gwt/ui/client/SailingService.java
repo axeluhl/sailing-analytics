@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -33,7 +34,6 @@ import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherTyp
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -86,10 +86,6 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -499,7 +495,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     /**
      * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
      */
-    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
+    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, Position position);
     
     /**
      * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
@@ -604,24 +600,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
-
-    EventViewDTO getEventViewById(UUID id);
-
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
-
-    EventSeriesViewDTO getEventSeriesViewById(UUID id);
-    
-    MediaDTO getMediaForEvent(UUID eventId);
-    
-    MediaDTO getMediaForEventSeries(UUID seriesId);
-
-    EventListViewDTO getEventListView() throws Exception;
-
-    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
+    
+    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 }

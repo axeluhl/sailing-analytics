@@ -130,7 +130,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
 
                             @Override
                             public void onSuccess(CompetitorDTO updatedCompetitor) {
-                                allCompetitorsTable.getFilterField().add(updatedCompetitor);
+                                registeredCompetitorsTable.getFilterField().add(updatedCompetitor);
                             }
                         });
                     }

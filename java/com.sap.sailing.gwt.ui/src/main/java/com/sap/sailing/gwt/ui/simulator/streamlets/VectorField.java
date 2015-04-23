@@ -3,7 +3,8 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import java.util.Date;
 
 import com.google.gwt.maps.client.MapWidget;
-import com.sap.sailing.domain.common.Bounds;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sailing.domain.common.Position;
 
 /**
@@ -19,13 +20,22 @@ import com.sap.sailing.domain.common.Position;
  */
 public interface VectorField {
     /**
-     * Tells whether <code>p</code> is within the bounds of this field.
+     * Tells whether the real-world position <code>p</code> is within the bounds of this field.
      */
     boolean inBounds(Position p);
+    
+    /**
+     * Tells whether the map position <code>p</code> which may have undergone rotation and translation
+     * is within the bounds of this field.
+     */
+    boolean inBounds(LatLng p);
 
     /**
      * The vector field's value at position <code>p</code>.
      * 
+     * @param p
+     *            position in the map's coordinate system; needs to be mapped backwards through a
+     *            {@link CoordinateSystem} to produce a real-world {@link Position}
      * @param at
      *            the time at which to query the vector field
      * 
@@ -34,7 +44,7 @@ public interface VectorField {
      *         particle would fly at this position. An implementation that does not cleverly extrapolate outside the
      *         field's {@link #inBounds(Position) bounds} should return <code>null</code> for out-of-bounds positions.
      */
-    Vector getVector(Position p, Date at);
+    Vector getVector(LatLng p, Date at);
 
     /**
      * @param zoomLevel the zoom level as returned by {@link MapWidget#getZoom()}
@@ -47,12 +57,13 @@ public interface VectorField {
      * means it will certainly not be shown.
      * 
      * @param p
-     *            the particle's position
+     *            the particle's position in the map's coordinate system; needs to be mapped backwards through a
+     *            {@link CoordinateSystem} to produce a real-world {@link Position}
      * @param v
      *            the particle's speed/direction vector which may be <code>null</code>; in this case, an implementation
      *            should return 0.0 as the particle's weight.
      */
-    double getParticleWeight(Position p, Vector v);
+    double getParticleWeight(LatLng p, Vector v);
 
     /**
      * Computes a line width for a particle flying at a certain speed.
@@ -68,7 +79,7 @@ public interface VectorField {
      *         {@link #inBounds(Position) bounds} are not necessarily defined as a rectangle on a Mercator map. There
      *         may be a rotation or some other shape in place.
      */
-    Bounds getFieldCorners();
+    LatLngBounds getFieldCorners();
 
     double getParticleFactor();
 

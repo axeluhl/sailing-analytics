@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.HomeServiceAsync;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
@@ -23,8 +24,10 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -60,6 +63,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.clientFactory = clientFactory;
     }
 
+    public HomeServiceAsync getHomeService() {
+        return clientFactory.getHomeService();
+    }
+    
     public SailingServiceAsync getSailingService() {
         return clientFactory.getSailingService();
     }
@@ -190,9 +197,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                             ctx.withRaceGroups(raceGroups);
                             callback.onSuccess(raceGroups);
                         } else {
-                            // TODO @FM: extract error message
-                            ErrorView errorView = clientFactory.createErrorView("No race data available", null);
-                            getView().showErrorInCurrentTab(errorView);
+                            getView().showErrorInCurrentTab(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
                         }
                     }
                     
@@ -251,7 +256,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             return;
         }
 
-        getSailingService().getMediaForEvent(ctx.getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
+        getHomeService().getMediaForEvent(ctx.getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO @FM: extract error message

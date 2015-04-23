@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sse.common.Util.Pair;

@@ -25,5 +25,10 @@ public class BearingClusterGroupTest {
         Cluster<Bearing> cluster2 = group.getClusterFor(new DegreeBearingImpl(-178));
         
         assertTrue(cluster1.equals(cluster2));
+        
+        cluster1 = group.getClusterFor(new DegreeBearingImpl(-90));
+        cluster2 = group.getClusterFor(new DegreeBearingImpl(-91));
+        
+        assertTrue(cluster1.equals(cluster2));
     }
 }

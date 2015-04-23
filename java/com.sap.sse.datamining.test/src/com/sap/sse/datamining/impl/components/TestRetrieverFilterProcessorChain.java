@@ -71,7 +71,7 @@ public class TestRetrieverFilterProcessorChain {
         Collection<Processor<Iterable<Integer>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(retrievalProcessor);
         @SuppressWarnings("unchecked")
-        Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
+        Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
                                                                                                                                                                                     ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0) {
             @Override
             protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
@@ -114,7 +114,7 @@ public class TestRetrieverFilterProcessorChain {
         
         Collection<Processor<Integer, ?>> retrievalResultReceivers = new ArrayList<>();
         retrievalResultReceivers.add(filtrationProcessor);
-        retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 1) {
+        retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 1) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;

@@ -51,20 +51,19 @@
   margin-top: 0.333333333333333em;
 }
 .eventteaser_title_name {
-  float: left;
-  width: 80%;
   font-size: 22px;
   font-weight: bold;
   color: #008fcc;
 }
 .eventteaser_title_label {
-  width: 20%;
   float: right;
   text-align: right;
+  margin-left: 20px;
 }
 .eventteaser_title_label .label {
   margin-top: 0;
 }
 .eventteaser_location {
+  clear: right;
   color: #222;
 }

@@ -4,7 +4,7 @@ import net.sf.marineapi.nmea.parser.RMCParser;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingNmeaDTOJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixNmeaDTOJsonDeserializer;

@@ -7,8 +7,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -35,7 +35,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @Override
     public TabView.State getState() {
         // TODO activate
-        return TabView.State.NOT_AVAILABLE;
+        return TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
     }
 
     @Override
