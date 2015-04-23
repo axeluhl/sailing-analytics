@@ -84,7 +84,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
             updateMap();
-            if(savedPosition != null) {
+            if (savedPosition != null) {
                 initialLocationUpdate = false;
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
             }
@@ -232,7 +232,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     private class ClickListener implements OnClickListener {
-
         @Override
         public void onClick(View v) {
             int id = v.getId();
@@ -259,9 +258,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             } else if (id == R.id.marker_reset_position_button) {
                 // Reset position
             }
-
         }
-
     }
-
 }
