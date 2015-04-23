@@ -6,9 +6,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,7 +67,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     }
 
     @Override
-    protected Builder createDialog(Builder builder) {
+    protected AlertDialog.Builder createDialog(AlertDialog.Builder builder) {
         getRacesFromArguments();
         customView = setupView();
         return builder.setTitle(getString(R.string.protest_dialog_title)).setView(customView);
