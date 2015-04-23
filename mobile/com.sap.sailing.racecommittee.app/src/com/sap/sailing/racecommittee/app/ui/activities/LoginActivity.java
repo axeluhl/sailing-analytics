@@ -10,7 +10,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -285,6 +284,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                             ExLog.ex(LoginActivity.this, TAG, reason);
                         }
+                        showLogin();
                     }
 
                     @Override
@@ -297,6 +297,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                         Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                         // showCourseAreaListFragment(eventId);
+                        showLogin();
+
+                    }
+
+                    private void showLogin() {
                         Handler handler = new Handler();
                         Runnable runnable = new Runnable() {
                             @Override
@@ -305,7 +310,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             }
                         };
                         handler.postDelayed(runnable, 1000);
-
                     }
                 });
 
