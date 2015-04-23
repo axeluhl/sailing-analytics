@@ -89,6 +89,11 @@ public class FlagsResources {
             outline = outline.replace("XX", "01");
             break;
 
+        case INDIA_ZULU:
+            flag = "flag_india_zulu_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
         case JURY:
             flag = "flag_jury_" + size + "dp";
             outline = outline.replace("XX", "01");
@@ -101,6 +106,11 @@ public class FlagsResources {
 
         case PAPA:
             flag = "flag_papa_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case UNIFORM:
+            flag = "flag_uniform_" + size + "dp";
             outline = outline.replace("XX", "01");
             break;
 

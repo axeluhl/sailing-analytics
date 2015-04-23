@@ -14,13 +14,13 @@ public class FlagsMeaningExplanator {
             return stringMessages.papaDisplayed();
         } else if (upperFlag.equals(Flags.BLACK) && displayed) {
             return stringMessages.blackDisplayed();
-        } else if ((upperFlag.equals(Flags.ZULU) || upperFlag.equals(Flags.INDIA)) && displayed) {
+        } else if ((upperFlag.equals(Flags.ZULU) || upperFlag.equals(Flags.INDIA) || upperFlag.equals(Flags.INDIA_ZULU) || upperFlag.equals(Flags.UNIFORM)) && displayed) {
             return stringMessages.zuluIndiaDisplayed();
         } else if (upperFlag.equals(Flags.PAPA) && !displayed) {
             return stringMessages.papaRemoved();
         } else if (upperFlag.equals(Flags.BLACK) && !displayed) {
             return stringMessages.blackRemoved();
-        } else if ((upperFlag.equals(Flags.ZULU) || upperFlag.equals(Flags.INDIA)) && !displayed) {
+        } else if ((upperFlag.equals(Flags.ZULU) || upperFlag.equals(Flags.INDIA) || upperFlag.equals(Flags.INDIA_ZULU) || upperFlag.equals(Flags.UNIFORM)) && !displayed) {
             return stringMessages.zuluIndiaRemoved();
         } else if (upperFlag.equals(Flags.CLASS) && !displayed) {
             return stringMessages.classFlagRemoved();
