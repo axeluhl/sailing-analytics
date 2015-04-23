@@ -97,6 +97,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -1862,40 +1863,62 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         BearingWithConfidence<TimePoint> resultBearing = null;
         ScalablePosition scaledPosition = null;
         int numberOfFixesConsideredForScaledPosition = 0;
+        Set<WindSource> estimationExcluded = new HashSet<>();
+        estimationExcluded.addAll(getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+        estimationExcluded.addAll(getWindSources(WindSourceType.COURSE_BASED));
         if (bearings != null) {
-            BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings.get(LegType.UPWIND).getA().splitInTwo(
-                    getMinimumAngleBetweenDifferentTacksUpwind(), timePoint);
-            if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
-                BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
-                BearingWithConfidence<TimePoint> average1 = bearingClustersUpwind[1].getAverage(timePoint);
-                upwindNumberOfRelevantBoats = Math
-                        .min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
-                confidence = Math.min(average0.getConfidence(), average1.getConfidence())
-                        * getRace().getBoatClass().getUpwindWindEstimationConfidence(upwindNumberOfRelevantBoats);
-                reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
-                        .middle(average1.getObject()).reverse(), confidence, timePoint);
-                scaledPosition = bearings.get(LegType.UPWIND).getB();
-                numberOfFixesConsideredForScaledPosition += bearings.get(LegType.UPWIND).getA().size();
+            int numberOfFixesUpwind = bearings.get(LegType.UPWIND).getA().size();
+            if (numberOfFixesUpwind > 0) {
+                ScalablePosition upwindPosition = bearings.get(LegType.UPWIND).getB();
+                BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings
+                        .get(LegType.UPWIND)
+                        .getA()
+                        .splitInTwo(
+                                getMinimumAngleBetweenDifferentTacksUpwind(getWind(
+                                        upwindPosition.divide(numberOfFixesUpwind), timePoint, estimationExcluded)),
+                                timePoint);
+                if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
+                    BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
+                    BearingWithConfidence<TimePoint> average1 = bearingClustersUpwind[1].getAverage(timePoint);
+                    upwindNumberOfRelevantBoats = Math.min(bearingClustersUpwind[0].size(),
+                            bearingClustersUpwind[1].size());
+                    confidence = Math.min(average0.getConfidence(), average1.getConfidence())
+                            * getRace().getBoatClass().getUpwindWindEstimationConfidence(upwindNumberOfRelevantBoats);
+                    reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
+                            .middle(average1.getObject()).reverse(), confidence, timePoint);
+                    scaledPosition = upwindPosition;
+                    numberOfFixesConsideredForScaledPosition += bearings.get(LegType.UPWIND).getA().size();
+                }
             }
             BearingWithConfidenceImpl<TimePoint> downwindAverage = null;
             int downwindNumberOfRelevantBoats = 0;
-            BearingWithConfidenceCluster<TimePoint>[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).getA()
-                    .splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind(), timePoint);
-            if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
-                BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
-                BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
-                downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
-                        bearingClustersDownwind[1].size());
-                confidence = Math.min(average0.getConfidence(), average1.getConfidence())
-                        * getRace().getBoatClass().getDownwindWindEstimationConfidence(downwindNumberOfRelevantBoats);
-                downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
-                        average1.getObject()), confidence, timePoint);
-                if (scaledPosition == null) {
-                    scaledPosition = bearings.get(LegType.DOWNWIND).getB();
-                } else {
-                    scaledPosition.add(bearings.get(LegType.DOWNWIND).getB());
+            int numberOfFixesDownwind = bearings.get(LegType.DOWNWIND).getA().size();
+            if (numberOfFixesDownwind > 0) {
+                ScalablePosition downwindPosition = bearings.get(LegType.DOWNWIND).getB();
+                BearingWithConfidenceCluster<TimePoint>[] bearingClustersDownwind = bearings
+                        .get(LegType.DOWNWIND)
+                        .getA()
+                        .splitInTwo(
+                                getMinimumAngleBetweenDifferentTacksDownwind(getWind(
+                                        downwindPosition.divide(numberOfFixesDownwind), timePoint, estimationExcluded)),
+                                timePoint);
+                if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
+                    BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
+                    BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
+                    downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
+                            bearingClustersDownwind[1].size());
+                    confidence = Math.min(average0.getConfidence(), average1.getConfidence())
+                            * getRace().getBoatClass().getDownwindWindEstimationConfidence(
+                                    downwindNumberOfRelevantBoats);
+                    downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
+                            average1.getObject()), confidence, timePoint);
+                    if (scaledPosition == null) {
+                        scaledPosition = downwindPosition;
+                    } else {
+                        scaledPosition.add(downwindPosition);
+                    }
+                    numberOfFixesConsideredForScaledPosition += bearings.get(LegType.DOWNWIND).getA().size();
                 }
-                numberOfFixesConsideredForScaledPosition += bearings.get(LegType.DOWNWIND).getA().size();
             }
             BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
             assert upwindNumberOfRelevantBoats == 0 || reversedUpwindAverage != null;
@@ -2714,17 +2737,43 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Fetches the boat class-specific parameter
      */
     private double getManeuverDegreeAngleThreshold() {
-        //FIXME use polar service
         return getRace().getBoatClass().getManeuverDegreeAngleThreshold();
     }
 
-    private double getMinimumAngleBetweenDifferentTacksDownwind() {
-        //FIXME use polar service
-        return getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksDownwind();
+    private double getMinimumAngleBetweenDifferentTacksDownwind(Speed windSpeed) {
+        double result;
+        double defaultAngle = getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksDownwind();
+        if (polarDataService != null) {
+            try {
+                double average = polarDataService
+                        .getManeuverAngle(getRace().getBoatClass(), LegType.DOWNWIND, windSpeed).getObject()
+                        .getDegrees();
+                result = Math.max(defaultAngle, average - 20); 
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                result = defaultAngle;
+            }
+        } else {
+            result = defaultAngle;
+        }
+        return result;
     }
 
-    private double getMinimumAngleBetweenDifferentTacksUpwind() {
-        return getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind();
+    private double getMinimumAngleBetweenDifferentTacksUpwind(Wind wind) {
+        double result;
+        double defaultAngle = getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind();
+        if (polarDataService != null) {
+            try {
+                double average = polarDataService
+                        .getManeuverAngle(getRace().getBoatClass(), LegType.UPWIND, wind).getObject()
+                        .getDegrees();
+                result = Math.max(defaultAngle, average - 10); 
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                result = defaultAngle;
+            }
+        } else {
+            result = defaultAngle;
+        }
+        return result;
     }
 
     private long getApproximateManeuverDurationInMilliseconds() {
