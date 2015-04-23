@@ -50,6 +50,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
                     public void onFailure(Throwable caught) {
                         AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
                                 + caught.getMessage());
+                        dataminingComponentsChangedTimer.schedule(timerDelayInMillis);
                     }
                     @Override
                     public void onSuccess(Date componentsChangedTimepoint) {
