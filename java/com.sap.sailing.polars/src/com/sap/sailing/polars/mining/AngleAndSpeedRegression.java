@@ -48,7 +48,7 @@ public class AngleAndSpeedRegression {
         double estimatedAngle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedInKnots);
         Bearing bearing = new DegreeBearingImpl(estimatedAngle);
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed, bearing);
-        return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, /*FIXME*/ 0.5, null);
+        return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, Math.min(1, speedRegression.getNumberOfAddedPoints() / 100.0), null);
     }
 
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround) throws NotEnoughDataHasBeenAddedException {

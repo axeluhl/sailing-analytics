@@ -30,4 +30,6 @@ public interface IncrementalLeastSquares {
      */
     public abstract PolynomialFunction getOrCreatePolynomialFunction() throws NotEnoughDataHasBeenAddedException;
 
+    public abstract long getNumberOfAddedPoints();
+
 }

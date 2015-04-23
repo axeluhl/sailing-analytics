@@ -297,4 +297,9 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
 
     }
 
+    @Override
+    public long getNumberOfAddedPoints() {
+        return numberOfPointsAdded.get();
+    }
+
 }
