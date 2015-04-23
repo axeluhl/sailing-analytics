@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import android.widget.TextView;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.adapter.MarkAdapter;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
@@ -24,6 +25,7 @@ import com.sap.sailing.android.ui.fragments.BaseFragment;
 public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cursor> {
     private static final int MARKER_LOADER = 1;
     private MarkAdapter adapter;
+    private TextView courseTypeTextView;
 
     @SuppressLint("InflateParams")
     @Override
@@ -31,6 +33,7 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         super.onCreateView(inflater, container, savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_buoy_postion_overview, container, false);
+        courseTypeTextView = (TextView) view.findViewById(R.id.course_type_text);
         ListView markListView = (ListView) view.findViewById(R.id.listMarks);
         adapter = new MarkAdapter(getActivity(), R.layout.mark_listview_row, null, 0);
         markListView.setAdapter(adapter);
@@ -44,6 +47,8 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(MARKER_LOADER, null, this);
+        // TODO: Set course type, once backend is ready
+        courseTypeTextView.setText(getString(R.string.no_information));
     }
 
     public MarkAdapter getAdapter() {

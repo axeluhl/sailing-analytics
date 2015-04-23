@@ -15,5 +15,6 @@
     <string name="buoy_detail_accuracy_ca" translatable="false">ca. %1$sm</string>
     <string name="accuracy">Accuracy</string>
     <string name="position_set">The position has been set</string>
+    <string name="no_information">No information</string>
 
 </resources>
