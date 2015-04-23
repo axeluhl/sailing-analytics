@@ -1055,7 +1055,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
-
     String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
     String eventSharingShortText(String eventName, String venue, String dateString);
     String eventSharingLongText(String eventName, String venue, String dateString, String url);
@@ -1066,6 +1065,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String media();
     String photos();
     String videos();
+    String image();
+    String video();
+    String flagImageURL();
     String imageURLs();
     String videoURLs();
     String sponsorImageURLs();
