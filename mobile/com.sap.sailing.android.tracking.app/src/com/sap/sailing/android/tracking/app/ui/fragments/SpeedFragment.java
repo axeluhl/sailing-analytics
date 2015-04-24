@@ -15,7 +15,7 @@ import java.text.NumberFormat;
 
 public class SpeedFragment extends BaseFragment {
 
-    //private String TAG = SpeedFragment.class.getName();
+    // private String TAG = SpeedFragment.class.getName();
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);

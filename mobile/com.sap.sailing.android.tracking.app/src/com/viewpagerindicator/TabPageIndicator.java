@@ -33,8 +33,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
- * This widget implements the dynamic action bar tab behavior that can change
- * across different configurations or circumstances.
+ * This widget implements the dynamic action bar tab behavior that can change across different configurations or
+ * circumstances.
  */
 public class TabPageIndicator extends HorizontalScrollView implements PageIndicator {
     /**
@@ -49,7 +49,8 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
         /**
          * Callback when the selected tab has been reselected.
          *
-         * @param position Position of the current center item.
+         * @param position
+         *            Position of the current center item.
          */
         void onTabReselected(int position);
     }

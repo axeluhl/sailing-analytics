@@ -14,6 +14,6 @@ public class GpsFix {
     @Override
     public String toString() {
         return "ID: " + id + ", T: " + timestamp + ", LAT: " + latitude + ", LON: " + longitude + ", SPD: " + speed
-            + ", CRS: " + course + ", SYN: " + synced + ", HOST: " + host + ", EVENT-ID: " + eventId;
+                + ", CRS: " + course + ", SYN: " + synced + ", HOST: " + host + ", EVENT-ID: " + eventId;
     }
 }

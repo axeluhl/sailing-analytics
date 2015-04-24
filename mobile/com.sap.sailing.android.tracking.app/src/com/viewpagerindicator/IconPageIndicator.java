@@ -32,8 +32,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
- * This widget implements the dynamic action bar tab behavior that can change
- * across different configurations or circumstances.
+ * This widget implements the dynamic action bar tab behavior that can change across different configurations or
+ * circumstances.
  */
 public class IconPageIndicator extends HorizontalScrollView implements PageIndicator {
     private final IcsLinearLayout mIconsLayout;

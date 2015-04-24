@@ -11,7 +11,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
 public class CompassFragment extends BaseFragment {
 
-    //private String TAG = CompassFragment.class.getName();
+    // private String TAG = CompassFragment.class.getName();
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);

@@ -34,8 +34,8 @@ import org.json.JSONObject;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class TrackingService extends Service
-    implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
@@ -73,7 +73,7 @@ public class TrackingService extends Service
         locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
 
         googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this).build();
+                .addOnConnectionFailedListener(this).build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
@@ -90,8 +90,8 @@ public class TrackingService extends Service
                     stopTracking();
                 } else {
                     if (intent.getExtras() != null) {
-                        checkinDigest = intent.getExtras()
-                            .getString(getString(R.string.tracking_service_checkin_digest_parameter));
+                        checkinDigest = intent.getExtras().getString(
+                                getString(R.string.tracking_service_checkin_digest_parameter));
 
                         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
 
@@ -156,11 +156,11 @@ public class TrackingService extends Service
     }
 
     public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude,
-        double longitude, double altitude) {
+            double longitude, double altitude) {
 
         if (prefs.getDisplayHeadingWithSubtractedDeclination()) {
             GeomagneticField geomagneticField = new GeomagneticField((float) latitude, (float) longitude,
-                (float) altitude, System.currentTimeMillis());
+                    (float) altitude, System.currentTimeMillis());
             bearing = bearing - geomagneticField.getDeclination();
         }
 
@@ -183,7 +183,7 @@ public class TrackingService extends Service
     public void onLocationChanged(Location location) {
         updateResendIntervalSetting();
         reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
-            location.getLatitude(), location.getLongitude(), location.getAltitude());
+                location.getLatitude(), location.getLongitude(), location.getAltitude());
 
         JSONObject json = new JSONObject();
         try {
@@ -203,23 +203,22 @@ public class TrackingService extends Service
 
             String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
 
-            startService(MessageSendingService
-                .createMessageIntent(this, postUrlStr, null, UUID.randomUUID(), json.toString(), null));
+            startService(MessageSendingService.createMessageIntent(this, postUrlStr, null, UUID.randomUUID(),
+                    json.toString(), null));
 
         } catch (JSONException ex) {
             ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
         }
 
-        //		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
-        //				location.getLongitude(), location.getSpeed(),
-        //				location.getBearing(), location.getProvider(),
-        //				location.getTime(), eventRowId);
-        //		ensureTransmittingServiceIsRunning();
+        // DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
+        // location.getLongitude(), location.getSpeed(),
+        // location.getBearing(), location.getProvider(),
+        // location.getTime(), eventRowId);
+        // ensureTransmittingServiceIsRunning();
     }
 
     /**
-     * Update whether message sending service should retry every 3 seconds or
-     * every 30.
+     * Update whether message sending service should retry every 3 seconds or every 30.
      */
     private void updateResendIntervalSetting() {
         float batteryPct = getBatteryPercentage();
@@ -264,17 +263,16 @@ public class TrackingService extends Service
     }
 
     /**
-     * start transmitting service when a new fix arrives, because it ends
-     * itself, if there's no data to send.
+     * start transmitting service when a new fix arrives, because it ends itself, if there's no data to send.
      */
-    //	private void ensureTransmittingServiceIsRunning() {
-    //		if (BuildConfig.DEBUG) {
-    //			ExLog.i(this, TAG,
-    //					"ensureTransmittingServiceIsRunning, starting TransmittingService");
-    //		}
+    // private void ensureTransmittingServiceIsRunning() {
+    // if (BuildConfig.DEBUG) {
+    // ExLog.i(this, TAG,
+    // "ensureTransmittingServiceIsRunning, starting TransmittingService");
+    // }
     //
-    //		ServiceHelper.getInstance().startTransmittingService(this);
-    //	}
+    // ServiceHelper.getInstance().startTransmittingService(this);
+    // }
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -331,7 +329,7 @@ public class TrackingService extends Service
 
     public interface GPSQualityListener {
         public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing,
-            float gpsSpeed);
+                float gpsSpeed);
     }
 
 }

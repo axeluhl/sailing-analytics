@@ -31,16 +31,15 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String EVENTS_COMPETITORS = "events_competitors";
         String LEADERBOARDS = "leaderboards";
         String CHECKIN_URIS = "checkin_uris";
-        String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS +
-            " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "."
-            + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + ") " +
-            " INNER JOIN " + Tables.COMPETITORS + " ON (" + Tables.LEADERBOARDS + "."
-            + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
-            + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
+        String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
+                + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
+                + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.COMPETITORS + " ON ("
+                + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
+                + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
 
-        String LEADERBOARDS_JOIN_EVENTS =
-            "events LEFT JOIN leaderboards ON " + Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + " = "
-                + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST;
+        String LEADERBOARDS_JOIN_EVENTS = "events LEFT JOIN leaderboards ON " + Tables.EVENTS + "."
+                + Event.EVENT_CHECKIN_DIGEST + " = " + Tables.LEADERBOARDS + "."
+                + Leaderboard.LEADERBOARD_CHECKIN_DIGEST;
     }
 
     public AnalyticsDatabase(Context context) {
@@ -50,27 +49,26 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(
-            "CREATE TABLE " + Tables.LEADERBOARDS + " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, " + LeaderboardColumns.LEADERBOARD_NAME
-                + " TEXT );");
+        db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " (" + BaseColumns._ID
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
+                + LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
 
-        db.execSQL(
-            "CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + CheckinUriColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, " + CheckinUriColumns.CHECKIN_URI_VALUE
-                + " TEXT );");
+        db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinUriColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
+                + CheckinUriColumns.CHECKIN_URI_VALUE + " TEXT );");
 
-        db.execSQL(
-            "CREATE TABLE " + Tables.COMPETITORS + " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + CompetitorColumns.COMPETITOR_ID + " TEXT, " + CompetitorColumns.COMPETITOR_DISPLAY_NAME + " TEXT, "
-                + CompetitorColumns.COMPETITOR_COUNTRY_CODE + " TEXT, " + CompetitorColumns.COMPETITOR_NATIONALITY
-                + " TEXT, " + CompetitorColumns.COMPETITOR_SAIL_ID + " TEXT, "
-                + CompetitorColumns.COMPETITOR_CHECKIN_DIGEST + " TEXT )");
+        db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " (" + BaseColumns._ID
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CompetitorColumns.COMPETITOR_ID + " TEXT, "
+                + CompetitorColumns.COMPETITOR_DISPLAY_NAME + " TEXT, " + CompetitorColumns.COMPETITOR_COUNTRY_CODE
+                + " TEXT, " + CompetitorColumns.COMPETITOR_NATIONALITY + " TEXT, "
+                + CompetitorColumns.COMPETITOR_SAIL_ID + " TEXT, " + CompetitorColumns.COMPETITOR_CHECKIN_DIGEST
+                + " TEXT )");
 
         db.execSQL("CREATE TABLE " + Tables.EVENTS + " ( " + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + EventColumns.EVENT_ID + " TEXT, " + EventColumns.EVENT_NAME + " TEXTL, " + EventColumns.EVENT_DATE_START
-            + " INTEGER, " + EventColumns.EVENT_DATE_END + " INTEGER, " + EventColumns.EVENT_SERVER + " TEXT, "
-            + EventColumns.EVENT_IMAGE_URL + " TEXT, " + EventColumns.EVENT_CHECKIN_DIGEST + " TEXT )");
+                + EventColumns.EVENT_ID + " TEXT, " + EventColumns.EVENT_NAME + " TEXTL, "
+                + EventColumns.EVENT_DATE_START + " INTEGER, " + EventColumns.EVENT_DATE_END + " INTEGER, "
+                + EventColumns.EVENT_SERVER + " TEXT, " + EventColumns.EVENT_IMAGE_URL + " TEXT, "
+                + EventColumns.EVENT_CHECKIN_DIGEST + " TEXT )");
     }
 
     @Override

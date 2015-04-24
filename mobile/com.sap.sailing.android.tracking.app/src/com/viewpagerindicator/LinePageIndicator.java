@@ -37,8 +37,7 @@ import android.view.ViewConfiguration;
 import com.sap.sailing.android.tracking.app.R;
 
 /**
- * Draws a line for each page. The current page line is colored differently
- * than the unselected page lines.
+ * Draws a line for each page. The current page line is colored differently than the unselected page lines.
  */
 public class LinePageIndicator extends View implements PageIndicator {
     private static final int INVALID_POINTER = -1;
@@ -76,7 +75,7 @@ public class LinePageIndicator extends View implements PageIndicator {
 
         final Resources res = getResources();
 
-        //Load defaults from resources
+        // Load defaults from resources
         final int defaultSelectedColor = res.getColor(R.color.default_line_indicator_selected_color);
         final int defaultUnselectedColor = res.getColor(R.color.default_line_indicator_unselected_color);
         final float defaultLineWidth = res.getDimension(R.dimen.default_line_indicator_line_width);
@@ -84,7 +83,7 @@ public class LinePageIndicator extends View implements PageIndicator {
         final float defaultStrokeWidth = res.getDimension(R.dimen.default_line_indicator_stroke_width);
         final boolean defaultCentered = res.getBoolean(R.bool.default_line_indicator_centered);
 
-        //Retrieve styles attributes
+        // Retrieve styles attributes
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LinePageIndicator, defStyle, 0);
 
         mCentered = a.getBoolean(R.styleable.LinePageIndicator_centered, defaultCentered);
@@ -195,12 +194,12 @@ public class LinePageIndicator extends View implements PageIndicator {
             horizontalOffset += ((getWidth() - paddingLeft - paddingRight) / 2.0f) - (indicatorWidth / 2.0f);
         }
 
-        //Draw stroked circles
+        // Draw stroked circles
         for (int i = 0; i < count; i++) {
             float dx1 = horizontalOffset + (i * lineWidthAndGap);
             float dx2 = dx1 + mLineWidth;
-            canvas.drawLine(dx1, verticalOffset, dx2, verticalOffset,
-                (i == mCurrentPage) ? mPaintSelected : mPaintUnselected);
+            canvas.drawLine(dx1, verticalOffset, dx2, verticalOffset, (i == mCurrentPage) ? mPaintSelected
+                    : mPaintUnselected);
         }
     }
 
@@ -296,7 +295,7 @@ public class LinePageIndicator extends View implements PageIndicator {
             return;
         }
         if (mViewPager != null) {
-            //Clear us from the old pager.
+            // Clear us from the old pager.
             mViewPager.setOnPageChangeListener(null);
         }
         if (viewPager.getAdapter() == null) {
@@ -365,7 +364,8 @@ public class LinePageIndicator extends View implements PageIndicator {
     /**
      * Determines the width of this view
      *
-     * @param measureSpec A measureSpec packed into an int
+     * @param measureSpec
+     *            A measureSpec packed into an int
      * @return The width of the view, honoring constraints from measureSpec
      */
     private int measureWidth(int measureSpec) {
@@ -374,13 +374,13 @@ public class LinePageIndicator extends View implements PageIndicator {
         int specSize = MeasureSpec.getSize(measureSpec);
 
         if ((specMode == MeasureSpec.EXACTLY) || (mViewPager == null)) {
-            //We were told how big to be
+            // We were told how big to be
             result = specSize;
         } else {
-            //Calculate the width according the views count
+            // Calculate the width according the views count
             final int count = mViewPager.getAdapter().getCount();
             result = getPaddingLeft() + getPaddingRight() + (count * mLineWidth) + ((count - 1) * mGapWidth);
-            //Respect AT_MOST value if that was what is called for by measureSpec
+            // Respect AT_MOST value if that was what is called for by measureSpec
             if (specMode == MeasureSpec.AT_MOST) {
                 result = Math.min(result, specSize);
             }
@@ -391,7 +391,8 @@ public class LinePageIndicator extends View implements PageIndicator {
     /**
      * Determines the height of this view
      *
-     * @param measureSpec A measureSpec packed into an int
+     * @param measureSpec
+     *            A measureSpec packed into an int
      * @return The height of the view, honoring constraints from measureSpec
      */
     private int measureHeight(int measureSpec) {
@@ -400,12 +401,12 @@ public class LinePageIndicator extends View implements PageIndicator {
         int specSize = MeasureSpec.getSize(measureSpec);
 
         if (specMode == MeasureSpec.EXACTLY) {
-            //We were told how big to be
+            // We were told how big to be
             result = specSize;
         } else {
-            //Measure the height
+            // Measure the height
             result = mPaintSelected.getStrokeWidth() + getPaddingTop() + getPaddingBottom();
-            //Respect AT_MOST value if that was what is called for by measureSpec
+            // Respect AT_MOST value if that was what is called for by measureSpec
             if (specMode == MeasureSpec.AT_MOST) {
                 result = Math.min(result, specSize);
             }

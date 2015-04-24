@@ -20,7 +20,8 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
         TextView name = (TextView) view.findViewById(R.id.regattaName);
         if (name != null) {
             String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_NAME));
-            //text += " (" + cursor.getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME)) + ")";
+            // text += " (" +
+            // cursor.getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME)) + ")";
             name.setText(text);
         }
     }

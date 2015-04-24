@@ -85,19 +85,18 @@ public class AnalyticsProvider extends ContentProvider {
         return true;
     }
 
-    //    private void deleteDatabase() {
-    //        Context context = getContext();
-    //        mOpenHelper.close();
-    //        AnalyticsDatabase.deleteDatabase(context);
-    //        mOpenHelper = new AnalyticsDatabase(context);
-    //    }
+    // private void deleteDatabase() {
+    // Context context = getContext();
+    // mOpenHelper.close();
+    // AnalyticsDatabase.deleteDatabase(context);
+    // mOpenHelper = new AnalyticsDatabase(context);
+    // }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
-            String message =
-                "query: uri=" + uri + " projection=" + Arrays.toString(projection) + " selection=[" + selection
-                    + "] args=" + Arrays.toString(selectionArgs) + " order=[" + sortOrder + "]";
+            String message = "query: uri=" + uri + " projection=" + Arrays.toString(projection) + " selection=["
+                    + selection + "] args=" + Arrays.toString(selectionArgs) + " order=[" + sortOrder + "]";
             ExLog.i(getContext(), TAG, message);
         }
 
@@ -198,8 +197,8 @@ public class AnalyticsProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
-            String message =
-                "delete: uri=" + uri + " selection=[" + selection + "] args=" + Arrays.toString(selectionArgs);
+            String message = "delete: uri=" + uri + " selection=[" + selection + "] args="
+                    + Arrays.toString(selectionArgs);
             ExLog.i(getContext(), TAG, message);
         }
 
@@ -233,13 +232,12 @@ public class AnalyticsProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
-            String message = "update: uri=" + uri + " values=[" + values == null ?
-                "null" :
-                values.toString() + "] selection=[" + selection + "]" + " args=" + Arrays.toString(selectionArgs);
+            String message = "update: uri=" + uri + " values=[" + values == null ? "null" : values.toString()
+                    + "] selection=[" + selection + "]" + " args=" + Arrays.toString(selectionArgs);
             ExLog.i(getContext(), TAG, message);
         }
 
-        //final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        // final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         switch (sUriMatcher.match(uri)) {
         default:

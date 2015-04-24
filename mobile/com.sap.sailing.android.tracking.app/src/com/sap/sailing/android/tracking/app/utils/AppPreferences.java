@@ -18,22 +18,22 @@ public class AppPreferences extends BaseAppPreferences {
 
     public String getServerUploadTeamImagePath() {
         return PrefUtils.getString(context, R.string.preference_server_team_image_upload_path,
-            R.string.preference_server_team_image_upload_path);
+                R.string.preference_server_team_image_upload_path);
     }
 
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path,
-            R.string.preference_server_gps_fixes_post_path);
+                R.string.preference_server_gps_fixes_post_path);
     }
 
     public String getServerCheckinPath() {
-        return PrefUtils
-            .getString(context, R.string.preference_server_checkin_path, R.string.preference_server_checkin_path);
+        return PrefUtils.getString(context, R.string.preference_server_checkin_path,
+                R.string.preference_server_checkin_path);
     }
 
     public String getServerCheckoutPath() {
-        return PrefUtils
-            .getString(context, R.string.preference_server_checkout_path, R.string.preference_server_checkout_path);
+        return PrefUtils.getString(context, R.string.preference_server_checkout_path,
+                R.string.preference_server_checkout_path);
     }
 
     public String getServerEventPath(String eventId) {
@@ -41,26 +41,26 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards")
-            .replace("{leaderboard_name}", leaderboardName);
+        return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards").replace(
+                "{leaderboard_name}", leaderboardName);
     }
 
     public String getServerCompetitorPath(String competitorId) {
-        return context.getString(R.string.preference_server_competitor_path, "/competitors")
-            .replace("{competitor_id}", competitorId);
+        return context.getString(R.string.preference_server_competitor_path, "/competitors").replace("{competitor_id}",
+                competitorId);
     }
 
     public int getGPSFixInterval() {
-        //EditTextPreference saves value as string, even if android:inputType="number" is set
+        // EditTextPreference saves value as string, even if android:inputType="number" is set
         String value = PrefUtils.getString(context, R.string.preference_gps_fix_interval_ms_key,
-            R.string.preference_gps_fix_interval_ms_default);
+                R.string.preference_gps_fix_interval_ms_default);
         return value == null ? -1 : Integer.valueOf(value);
     }
 
     public int getGPSFixFastestInterval() {
-        //EditTextPreference saves value as string, even if android:inputType="number" is set
+        // EditTextPreference saves value as string, even if android:inputType="number" is set
         String value = PrefUtils.getString(context, R.string.preference_gps_fix_fastest_interval_ms_key,
-            R.string.preference_gps_fastest_fix_interval_ms_default);
+                R.string.preference_gps_fastest_fix_interval_ms_default);
         return value == null ? -1 : Integer.valueOf(value);
     }
 
@@ -78,7 +78,7 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setBatteryIsCharging(boolean batteryIsCharging) {
         preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging)
-            .commit();
+                .commit();
     }
 
     public boolean getBatteryIsCharging() {
@@ -91,7 +91,7 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setEnergySavingEnabledByUser(boolean newValue) {
         preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue)
-            .commit();
+                .commit();
     }
 
     public boolean getEnergySavingEnabledByUser() {
@@ -100,18 +100,18 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
         preferences.edit()
-            .putBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), newValue)
-            .commit();
+                .putBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), newValue)
+                .commit();
     }
 
     public boolean getDisplayHeadingWithSubtractedDeclination() {
-        return preferences
-            .getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), true);
+        return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key),
+                true);
     }
 
     public void setTrackingTimerStarted(long milliseconds) {
         preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds)
-            .commit();
+                .commit();
     }
 
     public long getTrackingTimerStarted() {
@@ -128,8 +128,8 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setTrackerIsTrackingCheckinDigest(String checkinDigest) {
         preferences.edit()
-            .putString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), checkinDigest)
-            .commit();
+                .putString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), checkinDigest)
+                .commit();
     }
 
     public String getTrackerIsTrackingCheckinDigest() {
@@ -142,6 +142,6 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setMessageResendInterval(int interval) {
         preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval)
-            .commit();
+                .commit();
     }
 }

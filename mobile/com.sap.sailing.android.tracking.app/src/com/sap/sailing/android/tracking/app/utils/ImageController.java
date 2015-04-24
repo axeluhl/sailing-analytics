@@ -372,7 +372,7 @@ public class ImageController {
     }
 
     public static Bitmap decodeSampledBitmapFromFile(ContentResolver contentResolver, Uri uri, String filename,
-        int reqWidth, int reqHeight) {
+            int reqWidth, int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -429,8 +429,8 @@ public class ImageController {
                 if (angle != 0) {
                     Matrix matrix = new Matrix();
                     matrix.postRotate(90);
-                    Bitmap rotatedBitmap = Bitmap
-                        .createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                            matrix, true);
                     bitmap.recycle();
                     bitmap = rotatedBitmap;
                 }
@@ -445,13 +445,12 @@ public class ImageController {
 
     // http://stackoverflow.com/a/8557147
     private final static String[] projection = new String[] { MediaStore.Images.ImageColumns._ID,
-        MediaStore.Images.ImageColumns.DATA, MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
-        MediaStore.Images.ImageColumns.DATE_TAKEN, MediaStore.Images.ImageColumns.MIME_TYPE };
+            MediaStore.Images.ImageColumns.DATA, MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+            MediaStore.Images.ImageColumns.DATE_TAKEN, MediaStore.Images.ImageColumns.MIME_TYPE };
 
     public static File latestImage(Context context) {
-        final Cursor cursor = context.getContentResolver()
-            .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null,
-                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        final Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
 
         // Put it in the image view
         if (cursor.moveToFirst()) {

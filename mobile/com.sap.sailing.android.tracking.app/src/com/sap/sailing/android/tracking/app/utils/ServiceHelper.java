@@ -13,7 +13,7 @@ import com.sap.sailing.android.tracking.app.services.TrackingService;
  */
 public class ServiceHelper {
 
-    //private final static String TAG = ServiceHelper.class.getName();
+    // private final static String TAG = ServiceHelper.class.getName();
 
     protected static ServiceHelper mInstance;
 
@@ -25,10 +25,11 @@ public class ServiceHelper {
     }
 
     /**
-     * Start tracking service with a given checkinDigest. The checkinDigest is used to determine
-     * the event from the database in order to set the host-address correctly.
+     * Start tracking service with a given checkinDigest. The checkinDigest is used to determine the event from the
+     * database in order to set the host-address correctly.
      *
-     * @param checkinDigest of the event
+     * @param checkinDigest
+     *            of the event
      */
     public void startTrackingService(Context context, String checkinDigest) {
         Intent intent = new Intent(context, TrackingService.class);

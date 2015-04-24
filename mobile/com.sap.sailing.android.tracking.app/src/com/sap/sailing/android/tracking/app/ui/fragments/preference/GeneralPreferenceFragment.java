@@ -19,8 +19,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         AppPreferences prefs = new AppPreferences(getActivity());
         String currentDeviceId = prefs.getDeviceIdentifier();
 
-        Preference deviceIdPreference = (Preference) findPreference(
-            getString(R.string.preference_device_identifier_key));
+        Preference deviceIdPreference = (Preference) findPreference(getString(R.string.preference_device_identifier_key));
 
         if (currentDeviceId != null && currentDeviceId.length() > 0) {
             deviceIdPreference.setSummary(currentDeviceId);
@@ -37,8 +36,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         super.onPause();
 
         SwitchPreference prefEnergy = (SwitchPreference) findPreference(R.string.preference_energy_saving_enabled_key);
-        SwitchPreference prefDeclination = (SwitchPreference) findPreference(
-            R.string.preference_heading_with_declination_subtracted_key);
+        SwitchPreference prefDeclination = (SwitchPreference) findPreference(R.string.preference_heading_with_declination_subtracted_key);
 
         AppPreferences prefs = new AppPreferences(getActivity());
 

@@ -63,8 +63,8 @@ public class TrackingFragment extends BaseFragment {
         if (savedInstanceState != null) {
             TextView modeText = (TextView) getActivity().findViewById(R.id.mode);
             TextView statusText = (TextView) getActivity().findViewById(R.id.tracking_status);
-            SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView) getActivity()
-                .findViewById(R.id.gps_quality_indicator);
+            SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView) getActivity().findViewById(
+                    R.id.gps_quality_indicator);
             TextView accuracyText = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
             TextView unsentFixesText = (TextView) getActivity().findViewById(R.id.tracking_unsent_fixes);
 
@@ -82,8 +82,8 @@ public class TrackingFragment extends BaseFragment {
 
         TextView modeText = (TextView) getActivity().findViewById(R.id.mode);
         TextView statusText = (TextView) getActivity().findViewById(R.id.tracking_status);
-        SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView) getActivity()
-            .findViewById(R.id.gps_quality_indicator);
+        SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView) getActivity().findViewById(
+                R.id.gps_quality_indicator);
         TextView accuracyText = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
         TextView unsentFixesText = (TextView) getActivity().findViewById(R.id.tracking_unsent_fixes);
 
@@ -101,7 +101,7 @@ public class TrackingFragment extends BaseFragment {
         if (System.currentTimeMillis() - lastGPSQualityUpdate > 3000 && !isLocationEnabled(getActivity())) {
             if (BuildConfig.DEBUG) {
                 ExLog.i(getActivity(), TAG,
-                    "Setting GPS Quality to 0 because timeout occurred and location is reported as disabled.");
+                        "Setting GPS Quality to 0 because timeout occurred and location is reported as disabled.");
             }
             setGPSQualityAndAcurracy(GPSQuality.noSignal, 0);
         }
@@ -186,8 +186,8 @@ public class TrackingFragment extends BaseFragment {
                 return locationMode != Settings.Secure.LOCATION_MODE_OFF;
 
             } else {
-                locationProviders = Settings.Secure
-                    .getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+                locationProviders = Settings.Secure.getString(context.getContentResolver(),
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
                 return !TextUtils.isEmpty(locationProviders);
             }
         } else {
@@ -204,7 +204,7 @@ public class TrackingFragment extends BaseFragment {
         if (isAdded()) {
             Activity activity = getActivity();
             SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity
-                .findViewById(R.id.gps_quality_indicator);
+                    .findViewById(R.id.gps_quality_indicator);
             indicatorView.setSignalQuality(quality.toInt());
 
             TextView accuracyTextView = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);

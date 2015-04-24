@@ -16,7 +16,7 @@ public class EventInfo {
     @Override
     public String toString() {
         return "eventName: " + name + ", leaderboardName: " + leaderboardName + ", competitorId: " + competitorId
-            + ", eventImageUrl: " + imageUrl + ", eventStartMillis: " + startMillis + ", eventEndMillis: " + endMillis
-            + ", eventRowId: " + ", checkinDigest: " + checkinDigest + rowId + ", server: " + server;
+                + ", eventImageUrl: " + imageUrl + ", eventStartMillis: " + startMillis + ", eventEndMillis: "
+                + endMillis + ", eventRowId: " + ", checkinDigest: " + checkinDigest + rowId + ", server: " + server;
     }
 }

@@ -37,8 +37,7 @@ import android.view.ViewConfiguration;
 import com.sap.sailing.android.tracking.app.R;
 
 /**
- * Draws a line for each page. The current page line is colored differently
- * than the unselected page lines.
+ * Draws a line for each page. The current page line is colored differently than the unselected page lines.
  */
 public class UnderlinePageIndicator extends View implements PageIndicator {
     private static final int INVALID_POINTER = -1;
@@ -96,13 +95,13 @@ public class UnderlinePageIndicator extends View implements PageIndicator {
 
         final Resources res = getResources();
 
-        //Load defaults from resources
+        // Load defaults from resources
         final boolean defaultFades = res.getBoolean(R.bool.default_underline_indicator_fades);
         final int defaultFadeDelay = res.getInteger(R.integer.default_underline_indicator_fade_delay);
         final int defaultFadeLength = res.getInteger(R.integer.default_underline_indicator_fade_length);
         final int defaultSelectedColor = res.getColor(R.color.default_underline_indicator_selected_color);
 
-        //Retrieve styles attributes
+        // Retrieve styles attributes
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.UnderlinePageIndicator, defStyle, 0);
 
         setFades(a.getBoolean(R.styleable.UnderlinePageIndicator_fades, defaultFades));
@@ -288,7 +287,7 @@ public class UnderlinePageIndicator extends View implements PageIndicator {
             return;
         }
         if (mViewPager != null) {
-            //Clear us from the old pager.
+            // Clear us from the old pager.
             mViewPager.setOnPageChangeListener(null);
         }
         if (viewPager.getAdapter() == null) {

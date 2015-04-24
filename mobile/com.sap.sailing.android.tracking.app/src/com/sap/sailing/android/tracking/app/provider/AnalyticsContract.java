@@ -46,21 +46,21 @@ public class AnalyticsContract {
 
     public static class LeaderboardsEventsJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("leaderboards_events_joined")
-            .build();
+                .build();
     }
 
     public static class EventLeaderboardCompetitorJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-            .appendPath("event_leaderboard_competitor_joined").build();
+                .appendPath("event_leaderboard_competitor_joined").build();
     }
 
     public static class Competitor implements CompetitorColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_COMPETITOR).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.competitor";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.competitor";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.competitor";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.competitor";
         public static final String DEFAULT_SORT = CompetitorColumns.COMPETITOR_ID + " COLLATE NOCASE ASC";
 
         public static Uri buildCompetitorUri(String competitorId) {
@@ -79,10 +79,10 @@ public class AnalyticsContract {
     public static class Event implements EventColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_EVENT).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.event";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.event";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.event";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.event";
         public static final String DEFAULT_SORT = EventColumns.EVENT_NAME + " COLLATE NOCASE ASC ";
 
         public static Uri buildEventUri(String eventId) {
@@ -101,10 +101,10 @@ public class AnalyticsContract {
     public static class Leaderboard implements LeaderboardColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LEADERBOARD).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.leaderboard";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.leaderboard";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.leaderboard";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.leaderboard";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri buildLeaderboardUri(String leaderboardId) {
@@ -119,10 +119,10 @@ public class AnalyticsContract {
     public static class CheckinUri implements CheckinUriColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN_URI).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics.uri";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics.uri";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.uri";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics.uri";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri builCheckInUri(String checkinUriId) {

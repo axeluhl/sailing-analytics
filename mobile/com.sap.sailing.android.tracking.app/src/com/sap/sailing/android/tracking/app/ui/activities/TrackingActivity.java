@@ -64,11 +64,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     private int lastViewPagerItem;
 
     /**
-     * This isn't nice. The callbacks for fragments inside a
-     * view pager are unreliable, but I want the values
-     * to be displayed immediately after device rotation.
-     * Thus they are cached here and the fragments can pick
-     * them up.
+     * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
+     * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
     public String lastSpeedIndicatorText = "-";
     public String lastCompassIndicatorText = "-°";
@@ -79,8 +76,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
         prefs = new AppPreferences(this);
 
-        checkinDigest = getIntent().getExtras()
-            .getString(getString(R.string.tracking_activity_checkin_digest_parameter));
+        checkinDigest = getIntent().getExtras().getString(
+                getString(R.string.tracking_activity_checkin_digest_parameter));
 
         setContentView(R.layout.fragment_hud_container);
 
@@ -93,8 +90,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
 
         if (getSupportActionBar() != null) {
-            EventInfo eventInfo = DatabaseHelper.getInstance()
-                .getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
+            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this,
+                    checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
@@ -368,13 +365,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
     public void showStopTrackingConfirmationDialog() {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm)
-            .setMessage(R.string.do_you_really_want_to_stop_tracking).setIcon(android.R.drawable.ic_dialog_alert)
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setMessage(R.string.do_you_really_want_to_stop_tracking).setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    stopTracking();
-                }
-            }).setNegativeButton(android.R.string.no, null).create();
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        stopTracking();
+                    }
+                }).setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }
@@ -386,8 +383,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     /**
-     * Update UI with a string containing the time since tracking started, e.g.
-     * 01:22:45
+     * Update UI with a string containing the time since tracking started, e.g. 01:22:45
      */
     public void updateTimer() {
         long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();

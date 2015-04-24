@@ -38,8 +38,8 @@ public class SettingsActivity extends ActionBarActivity {
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();
     }
 
-    /* (non-javadoc)
-     * Seems to be new for this target API level, fixing a security hole.
+    /*
+     * (non-javadoc) Seems to be new for this target API level, fixing a security hole.
      */
     protected boolean isValidFragment(String fragmentName) {
         return GeneralPreferenceFragment.class.getName().equals(fragmentName);

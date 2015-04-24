@@ -90,12 +90,11 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      * @param deviceMappingData
      */
     private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
-        if (DatabaseHelper.getInstance()
-            .eventLeaderboardCompetitorCombnationAvailable(getActivity(), checkinData.checkinDigest)) {
+        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(),
+                checkinData.checkinDigest)) {
             try {
-                DatabaseHelper.getInstance()
-                    .storeCheckinRow(getActivity(), checkinData.getEvent(), checkinData.getCompetitor(),
-                        checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
+                        checkinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
 
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
@@ -110,7 +109,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         } else {
             ExLog.w(getActivity(), TAG, "Combination of eventId, leaderboardName and competitorId already exists!");
             Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG)
-                .show();
+                    .show();
         }
         performAPICheckin(checkinData);
     }
@@ -125,14 +124,13 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         StartActivity startActivity = (StartActivity) getActivity();
         startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
         try {
-            JSONObject requestObject = CheckinHelper
-                .getCheckinJson(checkinData.competitorId, checkinData.deviceUid, "TODO push device ID!!",
-                    date.getTime());
+            JSONObject requestObject = CheckinHelper.getCheckinJson(checkinData.competitorId, checkinData.deviceUid,
+                    "TODO push device ID!!", date.getTime());
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
-                requestObject.toString(), getActivity());
+                    requestObject.toString(), getActivity());
             NetworkHelper.getInstance(getActivity())
-                .executeHttpJsonRequestAsnchronously(request, new CheckinListener(checkinData.checkinDigest),
-                    new CheckinErrorListener(checkinData.checkinDigest));
+                    .executeHttpJsonRequestAsnchronously(request, new CheckinListener(checkinData.checkinDigest),
+                            new CheckinErrorListener(checkinData.checkinDigest));
         } catch (JSONException e) {
             ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
             displayAPIErrorRecommendRetry();
@@ -158,9 +156,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public void displayUserConfirmationScreen(final AbstractCheckinData data) {
         final CheckinData checkinData = (CheckinData) data;
         String message1 = getString(R.string.confirm_data_hello_name)
-            .replace("{full_name}", checkinData.competitorName);
-        String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id)
-            .replace("{sail_id}", checkinData.competitorSailId);
+                .replace("{full_name}", checkinData.competitorName);
+        String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
+                checkinData.competitorSailId);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(message1 + "\n\n" + message2);
@@ -198,11 +196,11 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         switch (loaderId) {
         case REGATTA_LOADER:
             String[] projection = new String[] { "events.event_checkin_digest", "events.event_id", "events._id",
-                "events.event_name", "events.event_server", "competitors.competitor_display_name",
-                "competitors.competitor_id", "leaderboards.leaderboard_name", "competitors.competitor_country_code",
-                "competitors.competitor_sail_id" };
+                    "events.event_name", "events.event_server", "competitors.competitor_display_name",
+                    "competitors.competitor_id", "leaderboards.leaderboard_name",
+                    "competitors.competitor_country_code", "competitors.competitor_sail_id" };
             return new CursorLoader(getActivity(), AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
-                projection, null, null, null);
+                    projection, null, null, null);
 
         default:
             return null;
@@ -285,12 +283,12 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
             StartActivity startActivity = (StartActivity) getActivity();
             startActivity.dismissProgressDialog();
-            startActivity
-                .showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
+            startActivity.showErrorPopup(R.string.error,
+                    R.string.error_could_not_complete_operation_on_server_try_again);
 
             DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
             Toast.makeText(getActivity(), getString(R.string.error_while_receiving_server_data), Toast.LENGTH_LONG)
-                .show();
+                    .show();
         }
     }
 
