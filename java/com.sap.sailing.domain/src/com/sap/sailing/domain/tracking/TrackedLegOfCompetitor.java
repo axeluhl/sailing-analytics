@@ -315,4 +315,13 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
+    /**
+     * If the {@link #getCompetitor() competitor} hasn't started the {@link #getTrackedLeg() leg} yet at
+     * <code>timePoint</code>, <code>null</code> is returned. Otherwise, if <code>timePoint</code> is before the finishing
+     * of the leg, it is returned unchanged; else the time point at which the competitor has finished the leg is returned.
+     * If the competitor hasn't finished the leg, <code>timePoint</code> or the end of the race's tracking is returned,
+     * whichever is earlier.
+     */
+    TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
+
 }

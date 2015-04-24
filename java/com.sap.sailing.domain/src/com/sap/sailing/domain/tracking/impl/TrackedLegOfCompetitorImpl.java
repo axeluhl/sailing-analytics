@@ -73,25 +73,37 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getTime(TimePoint timePoint) {
-        Duration result;
+    public TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint) {
+        final TimePoint result;
         MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                 getTrackedLeg().getLeg().getFrom());
         if (passedStartWaypoint != null && !passedStartWaypoint.getTimePoint().after(timePoint)) {
-            MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
-                    getTrackedLeg().getLeg().getTo());
+            MarkPassing passedEndWaypoint = getMarkPassingForLegEnd();
             if (passedEndWaypoint != null && timePoint.after(passedEndWaypoint.getTimePoint())) {
                 // the query asks for a time point after the competitor has finished the leg; return the total leg time
-                result = passedStartWaypoint.getTimePoint().until(passedEndWaypoint.getTimePoint());
+                result = passedEndWaypoint.getTimePoint();
             } else {
                 if (getTrackedRace().getEndOfTracking() != null && timePoint.after(getTrackedRace().getEndOfTracking())) {
-                    result = passedStartWaypoint.getTimePoint().until(getTrackedRace().getEndOfTracking());
+                    result = getTrackedRace().getEndOfTracking();
                 } else {
-                    result = passedStartWaypoint.getTimePoint().until(timePoint);
+                    result = timePoint;
                 }
             }
         } else {
             result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public Duration getTime(TimePoint timePoint) {
+        final Duration result;
+        MarkPassing passedStartWaypoint = getMarkPassingForLegStart();
+        if (passedStartWaypoint == null) {
+            result = null;
+        } else {
+            final TimePoint timePointNotAfterFinishingOfLeg = getTimePointNotAfterFinishingOfLeg(timePoint);
+            result = timePointNotAfterFinishingOfLeg == null ? null : passedStartWaypoint.getTimePoint().until(timePoint);
         }
         return result;
     }
@@ -444,36 +456,32 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
-        Distance result = null;
-        final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
-        if (legStartMarkPassing != null) {
-            TimePoint legStart = legStartMarkPassing.getTimePoint();
-            final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
-            TimePoint to;
-            if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(timePoint) > 0) {
-                to = timePoint;
+        final Distance result;
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart != null) {
+            final TimePoint to = getTimePointNotAfterFinishingOfLeg(timePoint);
+            if (to != null) {
+                result = getTrackedRace().getAverageAbsoluteCrossTrackError(competitor, legStart.getTimePoint(), to,
+                        /* upwindOnly */ false, waitForLatestAnalysis);
             } else {
-                to = legEndMarkPassing.getTimePoint();
+                result = null;
             }
-            result = getTrackedRace().getAverageAbsoluteCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+        } else {
+            result = null;
         }
         return result;
     }
 
     @Override
     public Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
-        Distance result = null;
-        final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
+        final Distance result;
+        final MarkPassing legStartMarkPassing = getMarkPassingForLegStart();
         if (legStartMarkPassing != null) {
             TimePoint legStart = legStartMarkPassing.getTimePoint();
-            final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
-            TimePoint to;
-            if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(timePoint) > 0) {
-                to = timePoint;
-            } else {
-                to = legEndMarkPassing.getTimePoint();
-            }
+            final TimePoint to = getTimePointNotAfterFinishingOfLeg(timePoint);
             result = getTrackedRace().getAverageSignedCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+        } else {
+            result = null;
         }
         return result;
     }
