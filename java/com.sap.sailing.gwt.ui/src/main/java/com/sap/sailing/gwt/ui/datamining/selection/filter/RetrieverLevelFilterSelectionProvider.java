@@ -5,18 +5,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
-import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -30,10 +26,9 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final Set<SelectionChangedListener> listeners;
     
     private final DataMiningSession session;
-    private final FilterSelectionProvider selectionProvider;
+    private final ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider;
     private final DataRetrieverChainDefinitionDTO retrieverChain;
     private final LocalizedTypeDTO retrievedDataType;
     private final int retrieverLevel;
@@ -41,18 +36,16 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     
     private final HorizontalLayoutPanel mainPanel;
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
-    private final SelectionChangeEvent.Handler dimensionSelectionChangedListener;
     private final SizeProvider sizeProvider;
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, FilterSelectionProvider selectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
+            ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
             LocalizedTypeDTO retrievedDataType, int retrieverLevel, SizeProvider sizeProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
-        listeners = new HashSet<>();
         
         this.session = session;
-        this.selectionProvider = selectionProvider;
+        this.retrieverChainSelectionProvider = retrieverChainSelectionProvider;
         this.retrieverChain = retrieverChain;
         this.retrievedDataType = retrievedDataType;
         this.retrieverLevel = retrieverLevel;
@@ -60,12 +53,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         
         mainPanel = new HorizontalLayoutPanel();
         dimensionSelectionProviders = new ArrayList<>();
-        dimensionSelectionChangedListener = new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                notifyListeners();
-            }
-        };
 
         this.sizeProvider = sizeProvider;
     }
@@ -94,7 +81,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     private DimensionFilterSelectionProvider createDimensionSelectionProvider() {
         DimensionFilterSelectionProvider dimensionFilter = new DimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
-        dimensionFilter.addSelectionChangeHandler(dimensionSelectionChangedListener);
         return dimensionFilter;
     }
     
@@ -148,8 +134,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         }
     }
 
+    void dimensionFilterSelectionChanged(DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
+        retrieverChainSelectionProvider.retrieverLevelFilterSelectionChanged(this);
+    }
+
     Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getCompleteFilterSelection() {
-        return selectionProvider.getSelection();
+        return retrieverChainSelectionProvider.getSelection();
     }
 
     public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
@@ -185,16 +175,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         }
         dimensionSelectionProviders.clear();
         initializeDimensionSelectionProviders();
-    }
-    
-    public void addSelectionChangedListener(SelectionChangedListener listener) {
-        listeners.add(listener);
-    }
-
-    private void notifyListeners() {
-        for (SelectionChangedListener listener : listeners) {
-            listener.selectionChanged(retrieverLevel);
-        }
     }
 
     DataRetrieverChainDefinitionDTO getDataRetrieverChain() {
@@ -246,12 +226,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     @Override
     public String getDependentCssClassName() {
         return "singleRetrieverLevelSelectionPanel";
-    }
-    
-    public interface SelectionChangedListener {
-        
-        public void selectionChanged(int onLevel);
-        
     }
     
     private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {

@@ -87,6 +87,12 @@ class DimensionFilterSelectionProvider {
         mainPanel.add(busyIndicator);
         
         selectionTable = new FilterableSelectionTable<>();
+        selectionTable.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                DimensionFilterSelectionProvider.this.retrieverLevelSelectionProvider.dimensionFilterSelectionChanged(DimensionFilterSelectionProvider.this);
+            }
+        });
         selectionTable.setVisible(false);
         mainPanel.add(selectionTable);
     }
@@ -181,10 +187,6 @@ class DimensionFilterSelectionProvider {
         dimensionChangedHandler.firstChange = false;
         selectionToBeApplied = selection;
         dimensionListBox.setValue(functionDTO, true);
-    }
-    
-    void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
-        selectionTable.addSelectionChangeHandler(handler);
     }
     
     public Widget getEntryWidget() {

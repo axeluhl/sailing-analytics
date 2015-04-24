@@ -52,7 +52,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private boolean isAwaitingReload;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrievedDataType;
-    private final RetrieverLevelFilterSelectionProvider.SelectionChangedListener retrieverLevelSelectionChangedListener;
     
     private final DockLayoutPanel mainPanel;
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
@@ -75,14 +74,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         isAwaitingReload = false;
         retrieverChain = null;
         selectionProvidersMappedByRetrievedDataType = new HashMap<>();
-        retrieverLevelSelectionChangedListener = new RetrieverLevelFilterSelectionProvider.SelectionChangedListener() {
-            @Override
-            public void selectionChanged(int onLevel) {
-//                updateFilterSelectionProviders(onLevel);
-                mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
-                notifyListeners();
-            }
-        };
         
         retrieverLevelList = new CellList<LocalizedTypeDTO>(new RetrieverLevelCell());
         retrieverLevelSelectionModel = new RetrieverLevelSelectionModel();
@@ -153,7 +144,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                                 new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, ListRetrieverChainFilterSelectionProvider.this, retrieverChain,
                                                                           retrievedDataType, retrieverLevel, selectionPanel);
                         selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());
-                        selectionProvider.addSelectionChangedListener(retrieverLevelSelectionChangedListener);
                         selectionProvidersMappedByRetrievedDataType.put(retrievedDataType, selectionProvider);
                         
                         firstFilterableRetrieverLevel = retrieverLevel < firstFilterableRetrieverLevel ? retrieverLevel : firstFilterableRetrieverLevel;
@@ -224,6 +214,12 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                dimension1.getParameterTypeNames().equals(dimension2.getParameterTypeNames()) &&
                dimension1.getReturnTypeName().equals(dimension2.getReturnTypeName());
     }
+    
+    void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider selectionProvider) {
+//      updateFilterSelectionProviders(selectionProvider.getRetrieverLevel());
+      mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
+      notifyListeners();
+  }
     
     private void updateFilterSelectionProviders(int beginningWithLevel) {
         for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
