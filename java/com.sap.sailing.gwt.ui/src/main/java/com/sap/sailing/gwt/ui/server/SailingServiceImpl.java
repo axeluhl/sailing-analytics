@@ -4697,7 +4697,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             LeagueConfigurationImpl config = new LeagueConfigurationImpl();
             config.setClassFlag(dto.leagueConfiguration.classFlag);
             config.setHasInidividualRecall(dto.leagueConfiguration.hasInidividualRecall);
-            configuration.setBasicConfiguration(config);
+            configuration.setLeagueConfiguration(config);
         }
         return configuration;
     }
