@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining.selection;
+package com.sap.sailing.gwt.ui.datamining.selection.filter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
