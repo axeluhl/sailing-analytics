@@ -110,8 +110,8 @@
 
                 <ImageView
                     android:id="@+id/start_mode_flag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
                     android:layout_centerHorizontal="true"
                     android:layout_centerInParent="true"
                     tools:src="@drawable/flag_papa_64dp"/>
