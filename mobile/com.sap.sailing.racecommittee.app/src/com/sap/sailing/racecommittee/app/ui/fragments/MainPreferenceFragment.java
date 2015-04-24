@@ -4,14 +4,13 @@ import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.R;
 
@@ -54,9 +53,8 @@ public class MainPreferenceFragment extends LoggableFragment implements OnClickL
             if (tag != null) {
                 try {
                     Fragment fragment = (Fragment) Class.forName(tag).newInstance();
-                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(((Button) view).getText());
-                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null)
-                            .commit();
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(((Button) view).getText());
+                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
                 } catch (ClassNotFoundException ex) {
                     ExLog.ex(getActivity(), TAG, ex);
                 } catch (java.lang.InstantiationException ex) {
