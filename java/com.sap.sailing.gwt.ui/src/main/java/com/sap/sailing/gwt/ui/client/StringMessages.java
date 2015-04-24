@@ -938,6 +938,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pathfinderHelpText();
     String essStart();
     String basicStart();
+    String leagueStart();
     String configured();
     String overwriteRacingProceduresConfiguration();
     String overwriteRacingProceduresConfigurationHelpText();
