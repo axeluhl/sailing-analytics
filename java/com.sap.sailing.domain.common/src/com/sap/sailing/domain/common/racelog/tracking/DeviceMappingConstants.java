@@ -21,7 +21,8 @@ public class DeviceMappingConstants {
     // schema and host are case insensitive.
     // But to adhere to best practices, and due to the deficiencies of some web servers and clients,
     // all URL components should be treated as case insensitive, preferring _underscores_ to CamelCase.
-    public static final String URL_BASE = "/tracking/checkin";
+    public static final String TRACKING_URL_BASE = "/tracking/checkin";
+    public static final String BUOY_TENDER_URL_BASE = "/buoy-tender/checkin";
     public static final String URL_EVENT_ID = "event_id";
     public static final String URL_LEADERBOARD_NAME = "leaderboard_name";
     public static final String URL_COMPETITOR_ID_AS_STRING = "competitor_id";
@@ -43,23 +44,39 @@ public class DeviceMappingConstants {
 
     public static String getDeviceMappingForRegattaLogUrl(String serverUrlWithoutTrailingSlash, String eventId,
             String leaderboardName, String mappedItemType, String mappedItemId, UrlHelper helper) {
-        return helper.encodeUrl(serverUrlWithoutTrailingSlash + URL_BASE + "?" + URL_EVENT_ID + "=" + eventId + "&"
+        return helper.encodeUrl(serverUrlWithoutTrailingSlash + TRACKING_URL_BASE + "?" + URL_EVENT_ID + "=" + eventId + "&"
                 + URL_LEADERBOARD_NAME + "=" + leaderboardName + "&" + mappedItemType + "="
                 + mappedItemId);
+    }
+    
+    public static String getBuoyTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
+            String leaderboardName, String eventId, UrlHelper helper) {
+        return helper.encodeUrl(serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_EVENT_ID + "="
+                + eventId + "&" + URL_LEADERBOARD_NAME + "=" + leaderboardName);
     }
 
     @Deprecated
     public static String getDeviceMappingForRaceLogUrl(String serverUrlWithoutTrailingSlash, String leaderboardName,
-            String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, long fromMillis,
-            long toMillis, UrlHelper helper) throws QRCodeURLCreationException {
-        if (fromMillis > toMillis) {
-            throw new QRCodeURLCreationException("from can't lie after to");
+            String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, Long fromMillis,
+            Long toMillis, UrlHelper helper) throws QRCodeURLCreationException {
+        
+        if (toMillis != null && fromMillis != null){
+            if (fromMillis > toMillis) {
+                throw new QRCodeURLCreationException("from can't lie after to");
+            }
         }
-        return helper.encodeUrl(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
+        
+        StringBuilder urlToEncode = new StringBuilder();
+        
+        urlToEncode.append(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
                 + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + leaderboardName + "&"
                 + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
                 + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName + "&" + mappedItemType + "="
-                + mappedItemId + "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis + "&"
-                + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis);
+                + mappedItemId);
+    
+        urlToEncode.append((fromMillis != null) ? "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis : "");
+        urlToEncode.append((toMillis != null) ? "&" + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis : "");
+        
+        return helper.encodeUrl(urlToEncode.toString());
     }
 }

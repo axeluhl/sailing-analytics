@@ -4,7 +4,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,7 +27,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
 
     
     public MetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace,
+            Timer timer, LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, 
             boolean autoExpandLastRaceColumn, boolean showCharts, DetailType chartDetailType, boolean showSeriesLeaderboards) {
@@ -39,7 +39,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
     
     private MetaLeaderboardViewer(CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer, LeaderboardSettings leaderboardSettings,
-            String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
+            String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn,
             boolean showCharts, DetailType chartDetailType, boolean showSeriesLeaderboards) {

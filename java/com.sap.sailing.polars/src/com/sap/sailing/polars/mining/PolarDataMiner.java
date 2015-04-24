@@ -6,11 +6,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
@@ -27,6 +30,7 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -34,37 +38,56 @@ import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 
 public class PolarDataMiner {
 
+    private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
-    private static final ThreadPoolExecutor executor = createExecutor();
+    private final ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
+    private final Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new HashMap<>();
+    
+    private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
+    
+    private static final Logger logger = Logger.getLogger(PolarDataMiner.class.getSimpleName());
 
-    private static ThreadPoolExecutor createExecutor() {
+    private ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(100), new RejectedExecutionHandler() {
+                new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new RejectedExecutionHandler() {
+                    @Override
+                    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                        logger.warning("Polar Data Miner Executor rejected execution. Running sequentially.");
+                        r.run();
+                    }
+                }) {
             @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                r.run();
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                synchronized (fixQueue) {
+                    while (this.getQueue().size() < (EXECUTOR_QUEUE_SIZE / 10) && !fixQueue.isEmpty()) {
+                        GPSFixMovingWithOriginInfo fix = fixQueue.poll();
+                        preFilteringProcessor.processElement(fix);
+                    }
+                }
             }
-        });
+        };
     }
-
-
-    private AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor;
+    
+    
     
     /**
      * This processor keeps track of the moving average of the speed values and the average angle for each course (legtype tack combination)
@@ -78,6 +101,7 @@ public class PolarDataMiner {
     private CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor;
     
     private SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor;
+    private ParallelFilteringProcessor<GPSFixMovingWithOriginInfo> preFilteringProcessor;
 
     public PolarDataMiner() {
         this(PolarSheetGenerationSettingsImpl.createBackendPolarSettings());
@@ -102,38 +126,38 @@ public class PolarDataMiner {
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> movingAverageGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         movingAverageGrouperResultReceivers.add(movingAverageProcessor);
 
-        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProviders = new ArrayList<>();
+        Collection<ParameterizedFunction<?>> parameterizedDimensions = new ArrayList<>();
         for (Function<?> function : PolarDataDimensionCollectionFactory.getMovingAverageClusterKeyDimensions()) {
-            dimensionsWithParameterProviders.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+            parameterizedDimensions.add(new SimpleParameterizedFunction<>(function, ParameterProvider.NULL));
         }
 
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> movingAverageGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, dimensionsWithParameterProviders);
+                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, parameterizedDimensions);
         
 
         cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerCourseGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerCourseGrouperResultReceivers.add(cubicRegressionPerCourseProcessor);
 
-        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvidersForCubicRegression = new ArrayList<>();
+        Collection<ParameterizedFunction<?>> parameterizedDimensionsForCubicRegression = new ArrayList<>();
         for (Function<?> function : PolarDataDimensionCollectionFactory.getCubicRegressionPerCourseClusterKeyDimensions()) {
-            dimensionsWithParameterProvidersForCubicRegression.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+            parameterizedDimensionsForCubicRegression.add(new SimpleParameterizedFunction<>(function, ParameterProvider.NULL));
         }
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> cubicRegressionPerCourseGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, dimensionsWithParameterProvidersForCubicRegression);
+                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, parameterizedDimensionsForCubicRegression);
         
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
         speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerAngleClusterGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerAngleClusterGrouperResultReceivers.add(speedRegressionPerAngleClusterProcessor);
 
-        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvidersForRegressionPerAngleCluster = new ArrayList<>();
+        Collection<ParameterizedFunction<?>> parameterizedDimensionsForRegressionPerAngleCluster = new ArrayList<>();
         for (Function<?> function : PolarDataDimensionCollectionFactory.getSpeedRegressionPerAngleClusterClusterKeyDimensions()) {
-            dimensionsWithParameterProvidersForRegressionPerAngleCluster.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+            parameterizedDimensionsForRegressionPerAngleCluster.add(new SimpleParameterizedFunction<>(function, ParameterProvider.NULL));
         }
         
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> regressionPerAngleClusterGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, dimensionsWithParameterProvidersForRegressionPerAngleCluster);
+                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, parameterizedDimensionsForRegressionPerAngleCluster);
 
           
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = new ArrayList<>();
@@ -142,21 +166,48 @@ public class PolarDataMiner {
         filteringResultReceivers.add(regressionPerAngleClusterGroupingProcessor);
            
         Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(backendPolarSheetGenerationSettings.getNumberOfLeadingCompetitorsToInclude()));
+                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude()));
 
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);
 
 
-        enrichingProcessor = new AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithOriginInfo.class, GPSFixMovingWithPolarContext.class, executor, enrichingResultReceivers) {
+        AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor = new AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithOriginInfo.class, GPSFixMovingWithPolarContext.class, executor,
+                enrichingResultReceivers) {
 
             @Override
             protected GPSFixMovingWithPolarContext enrich(GPSFixMovingWithOriginInfo element) {
-                return new GPSFixMovingWithPolarContext(element.getFix(), element.getTrackedRace(), element.getCompetitor(),
-                        speedClusterGroup, angleClusterGroup);
+                GPSFixMovingWithPolarContext result = null;
+                result = new GPSFixMovingWithPolarContext(element.getFix(), element.getTrackedRace(),
+                        element.getCompetitor(), speedClusterGroup, angleClusterGroup);
+                return result;
             }
         };
+        
+        Collection<Processor<GPSFixMovingWithOriginInfo, ?>> preFilterResultReceivers = Arrays
+                .asList(enrichingProcessor);
+        
+        preFilteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithOriginInfo>(
+                GPSFixMovingWithOriginInfo.class, executor, preFilterResultReceivers, new FilterCriterion<GPSFixMovingWithOriginInfo>() {
+
+                    @Override
+                    public boolean matches(GPSFixMovingWithOriginInfo element) {
+                        boolean result = false;
+                        if (PolarFixFilterCriteria.isInLeadingCompetitors(element.getTrackedRace(), element.getCompetitor(),
+                                backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
+                            result = true;
+                        }
+                        return result;
+                    }
+
+                    @Override
+                    public Class<GPSFixMovingWithOriginInfo> getElementType() {
+                        return GPSFixMovingWithOriginInfo.class;
+                    }
+                });
+
+
     }
 
 
@@ -165,8 +216,34 @@ public class PolarDataMiner {
     }
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
-        enrichingProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, trackedRace,
-                competitor));
+        GPSFixMovingWithOriginInfo fixWithOriginInfo = new GPSFixMovingWithOriginInfo(fix, trackedRace, competitor);
+        if (trackedRace.getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+            /*
+             * logger.info("Received fix for replay race which has not finished loading. Queuing. " +
+             * (trackedRace.getRace() != null ? trackedRace.getRace().getName() : trackedRace.getRaceIdentifier()
+             * .getRaceName()));
+             */
+            synchronized (fixesForRacesWhichAreStillLoading) {
+                Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
+                if (fixes == null) {
+                    fixes = new HashSet<>();
+                    fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
+                }
+                fixes.add(fixWithOriginInfo);
+            }
+        } else {
+            processFix(trackedRace, fixWithOriginInfo);
+        }
+    }
+
+    private void processFix(TrackedRace trackedRace, GPSFixMovingWithOriginInfo fixWithOriginInfo) {
+        synchronized (fixQueue) {
+            if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
+                fixQueue.add(fixWithOriginInfo);
+            } else {
+                preFilteringProcessor.processElement(fixWithOriginInfo);
+            }
+        }
     }
 
     public boolean isCurrentlyActiveAndOrHasQueue() {
@@ -333,5 +410,24 @@ public class PolarDataMiner {
     public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
             throws NotEnoughDataHasBeenAddedException {
         return cubicRegressionPerCourseProcessor.getAngleRegressionFunction(boatClass, legType, tack);
+    }
+    
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        return speedRegressionPerAngleClusterProcessor.getSpeedRegressionFunction(boatClass, trueWindAngle);
+    }
+
+    public void raceFinishedTracking(TrackedRace race) {
+        Set<GPSFixMovingWithOriginInfo> fixes = null;
+        synchronized (fixesForRacesWhichAreStillLoading) {
+            fixes = fixesForRacesWhichAreStillLoading.remove(race);
+        }
+        if (fixes != null) {
+            logger.info("All queued fixes for newly loaded race will process now. " + (race.getRace() != null ? race
+                    .getRace().getName() : race.getRaceIdentifier().getRaceName()));
+            for (GPSFixMovingWithOriginInfo fix : fixes) {
+                processFix(race, fix);
+            }
+        }
     }
 }

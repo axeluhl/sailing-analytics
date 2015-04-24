@@ -24,6 +24,7 @@ import com.sap.sailing.dashboards.gwt.shared.SinWave;
 import com.sap.sailing.dashboards.gwt.shared.WindType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -56,6 +57,9 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
 
     interface WindBotComponentStyle extends CssResource {
     }
+    
+    @UiField
+    public HTMLPanel windBotComponent;
 
     /**
      * The header of the widget displaying the name of the wind bot.
@@ -67,14 +71,14 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * One of two {@link LiveAverageComponent}s that display in big font the live and the average value of the measured
      * wind speed.
      * */
-    @UiField
+    @UiField(provided = true)
     public LiveAverageComponent trueWindSpeedLiveAverageComponent;
 
     /**
      * One of two {@link LiveAverageComponent}s that display in big font the live and the average value of the measured
      * wind direction.
      * */
-    @UiField
+    @UiField(provided = true)
     public LiveAverageComponent trueWindDirectionLiveAverageComponent;
 
     /**
@@ -99,9 +103,11 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
     public LocationPointerCompass locationPointerCompass;
 
     private String windBotId;
+    private StringMessages stringConstants;
 
     public WindBotComponent(String windBotId) {
         this.windBotId = windBotId;
+        stringConstants = StringMessages.INSTANCE;
         String inSimulationModeParameter = Window.Location.getParameter(IN_SIMULATION_MODE);
         if (inSimulationModeParameter != null && inSimulationModeParameter.equals("true")) {
             inSimulationMode = true;
@@ -112,8 +118,10 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
         }
         movingAverageSpeed = new MovingAverage(500);
         movingAverageDirection = new MovingAverage(500);
+        trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeed(), stringConstants.dashboardTrueWindSpeedUnit());
+        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), stringConstants.dashboardTrueWindDirectionUnit());
         initWidget(uiBinder.createAndBindUi(this));
-        windBotNamePanel.getElement().setInnerText("Wind Bot " + windBotId);
+        windBotNamePanel.getElement().setInnerText(stringConstants.dashboardWindBot()+" "+ windBotId);
         trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
         trueWindDirectionVerticalWindChart.addVerticalWindChartClickListener(trueWindDirectionLiveAverageComponent);
     }

@@ -112,7 +112,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private void registerFunction(List<Function<?>> previousFunctions, Method method) {
         Function<?> function = functionFactory.createMethodWrappingFunction(method);
         if (!previousFunctions.isEmpty()) {
-            function = functionFactory.createCompoundFunction(null, previousFunctions, function);
+            function = functionFactory.createCompoundFunction(previousFunctions, function);
         }
         
         if (function.isDimension()) {

@@ -1,7 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class GPSFixMovingWithOriginInfo {
@@ -27,7 +27,4 @@ public class GPSFixMovingWithOriginInfo {
     public Competitor getCompetitor() {
         return competitor;
     }
-    
-    
-
 }

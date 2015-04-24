@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.common.AbstractBearing;
@@ -42,19 +41,21 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MaxSpeedCache;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -1069,10 +1070,10 @@ public class TrackTest {
                 speed.travel(firstFixSoFar.getTimePoint(), firstFixSoFar.getTimePoint().plus(timespan)));
         GPSFixMoving newFirstFix = new GPSFixMovingImpl(newPosition, slightlyBeforeFirstFix, speed);
         track.addGPSFix(newFirstFix);
-        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
+        TimeRange intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
         Position newPositionAtBeginningOfTime = track.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
         assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));
-        assertTrue(!intervalAffected.getA().after(beginningOfTime));
+        assertTrue(!intervalAffected.from().after(beginningOfTime));
     }
 
     @Test
@@ -1088,10 +1089,10 @@ public class TrackTest {
                 speed.travel(lastFixSoFar.getTimePoint(), lastFixSoFar.getTimePoint().plus(timespan)));
         GPSFixMoving newLastFix = new GPSFixMovingImpl(newPosition, slightlyAfterLastFix, speed);
         track.addGPSFix(newLastFix);
-        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
+        TimeRange intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
         Position newPositionAtEndOfTime = track.getEstimatedPosition(endOfTime, /* extrapolate */false);
         assertFalse(newPositionAtEndOfTime.equals(positionAtEndOfTime));
-        assertTrue(!intervalAffected.getB().before(endOfTime));
+        assertTrue(!intervalAffected.to().before(endOfTime));
     }
 
     @Test
@@ -1106,13 +1107,13 @@ public class TrackTest {
         assertNull(positionAtEndOfTime);
         GPSFixMoving newFix = new GPSFixMovingImpl(new DegreePosition(12, 34), now, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
         myTrack.addGPSFix(newFix);
-        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
+        TimeRange intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
         Position newPositionAtBeginningOfTime = myTrack.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
         Position newPositionAtEndOfTime = myTrack.getEstimatedPosition(now, /* extrapolate */false);
         assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));
-        assertTrue(!intervalAffected.getA().after(beginningOfTime));
+        assertTrue(!intervalAffected.from().after(beginningOfTime));
         assertFalse(newPositionAtEndOfTime.equals(positionAtEndOfTime));
-        assertTrue(!intervalAffected.getB().before(endOfTime));
+        assertTrue(!intervalAffected.to().before(endOfTime));
     }
 
     @Test

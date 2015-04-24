@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO.RaceLiveState;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -23,8 +24,6 @@ import com.sap.sse.gwt.client.player.Timer;
 public class EventRegattaRacesRace extends Composite {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
 
-    private enum SimpleRaceStates { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
-    
     interface EventRegattaRacesRaceUiBinder extends UiBinder<Widget, EventRegattaRacesRace> {
     }
 
@@ -49,6 +48,7 @@ public class EventRegattaRacesRace extends Composite {
 
     @UiField DivElement raceFeaturesDiv;
     @UiField DivElement legProgressDiv;
+    @UiField DivElement legProgressPanel;
     @UiField DivElement raceFlagDiv;
     @UiField DivElement windStatusDiv;
     
@@ -62,16 +62,12 @@ public class EventRegattaRacesRace extends Composite {
     
     private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
     
-    private final FleetDTO fleet;
-    private final RaceColumnDTO raceColumn;
     private final RaceDTO race;
     private final Timer timerForClientServerOffset;
 
     private Element[] allConditionalElements;
     
     public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
-        this.fleet = fleet;
-        this.raceColumn = raceColumn;
         this.timerForClientServerOffset = timerForClientServerOffset;
         race = raceColumn.getRace(fleet);
         
@@ -97,25 +93,6 @@ public class EventRegattaRacesRace extends Composite {
         updateUI();    
     }
     
-    private SimpleRaceStates getSimpleRaceState() {
-        SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
-        
-        if(race != null && race.trackedRace != null && race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
-            simpleRaceState = SimpleRaceStates.TRACKED;
-            if(isLive()) {
-                simpleRaceState = SimpleRaceStates.TRACKED_AND_LIVE;
-                if(race.startOfRace == null) {
-                    simpleRaceState = SimpleRaceStates.TRACKED_BUT_NOT_SCHEDULED;
-                }                    
-            }
-        }
-        return simpleRaceState;
-    }
-
-    private boolean isLive() {
-        return raceColumn.isLive(fleet, timerForClientServerOffset.getLiveTimePointInMillis());
-    }
-    
     private void updateUI() {
         averageRaceWind.setInnerText("tbd.");
         
@@ -123,7 +100,8 @@ public class EventRegattaRacesRace extends Composite {
             hideElement(el);
         }
         
-        switch(getSimpleRaceState()) {
+        RaceLiveState liveState = race != null ? race.getLiveState(timerForClientServerOffset.getLiveTimePointInMillis()) : RaceLiveState.NOT_TRACKED;       
+        switch(liveState) {
             case NOT_TRACKED:
                 showElement(raceNotTrackedDiv);
                 break;
@@ -140,6 +118,12 @@ public class EventRegattaRacesRace extends Composite {
                     showElement(legProgressDiv);
                     currentLegNo.setInnerText(String.valueOf(race.trackedRaceStatistics.currentLegNo));
                     totalLegsCount.setInnerText(String.valueOf(race.trackedRaceStatistics.totalLegsCount));
+                    
+                    for(int i = 0; i < race.trackedRaceStatistics.totalLegsCount; i++) {
+                        boolean isLive = i <= race.trackedRaceStatistics.currentLegNo; 
+                        EventRegattaRacesRaceProgressItem item = new EventRegattaRacesRaceProgressItem(isLive);
+                        legProgressPanel.appendChild(item.getElement());
+                    }
                 }
                 if(race.trackedRaceStatistics.hasLeaderOrWinnerData && race.trackedRaceStatistics.leaderOrWinner != null) {
                     showElement(raceLeaderDiv);

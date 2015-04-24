@@ -12,7 +12,6 @@ import java.util.Set;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sse.common.Util;
 
 public class RaceColumnDTO extends NamedDTO implements Serializable {
@@ -25,13 +24,25 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private double effectiveFactor;
     private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos;
     
+    public enum RaceColumnLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE };
+
     public RaceColumnDTO() {
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
     }
-    
+
+    public RaceColumnLiveState getLiveState(long serverTimePointAsMillis) {
+        RaceColumnLiveState result = RaceColumnLiveState.NOT_TRACKED;       
+        if (hasLiveRaces(serverTimePointAsMillis) && hasGPSData() && hasWindData()) {
+            result = RaceColumnLiveState.TRACKED_AND_LIVE;
+        } else if (hasTrackedRaces()) {
+            result = RaceColumnLiveState.TRACKED;
+        }
+        return result;
+    }
+
     public String getRaceColumnName() {
         return getName();
     }
@@ -144,42 +155,11 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
      *         point of the "live" interval as defined above.
      */
     public boolean isLive(FleetDTO fleet, long serverTimePointAsMillis) {
-        final Date startOfLivePeriod;
-        final Date endOfLivePeriod;
+        boolean result = false;
         final RaceDTO raceDTO = racesPerFleet.get(fleet);
-        if (raceDTO == null || raceDTO.trackedRace == null || !raceDTO.trackedRace.hasGPSData || !raceDTO.trackedRace.hasWindData) {
-            startOfLivePeriod = null;
-            endOfLivePeriod = null;
-        } else {
-            if (raceDTO.startOfRace == null) {
-                startOfLivePeriod = raceDTO.trackedRace.startOfTracking;
-            } else {
-                startOfLivePeriod = new Date(raceDTO.startOfRace.getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
-            }
-            if (raceDTO.endOfRace == null) {
-                if (raceDTO.trackedRace.timePointOfNewestEvent != null) {
-                    endOfLivePeriod = new Date(raceDTO.trackedRace.timePointOfNewestEvent.getTime()
-                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
-                } else {
-                    endOfLivePeriod = null;
-                }
-            } else {
-                endOfLivePeriod = new Date(raceDTO.endOfRace.getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
-            }
+        if(raceDTO != null) {
+            result = raceDTO.isLive(serverTimePointAsMillis);
         }
-        
-        // if an empty timepoint is given then take the start of the race
-        if (serverTimePointAsMillis == 0) {
-            serverTimePointAsMillis = startOfLivePeriod.getTime()+1;
-        }
-        
-        // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
-        // when this DTO was assembled, or there were no GPS or wind data
-        final boolean result =
-                startOfLivePeriod != null &&
-                endOfLivePeriod != null &&
-                startOfLivePeriod.getTime() <= serverTimePointAsMillis &&
-                serverTimePointAsMillis <= endOfLivePeriod.getTime();
         return result;
     }
     

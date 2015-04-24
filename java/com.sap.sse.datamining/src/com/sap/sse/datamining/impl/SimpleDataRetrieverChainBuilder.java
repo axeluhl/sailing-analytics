@@ -58,6 +58,10 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> stepFurther() {
+        if (!canStepFurther()) {
+            throw new IllegalStateException("The builder can't step any further");
+        }
+        
         currentRetrieverTypeIndex++;
         return this;
     }
@@ -65,7 +69,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter) {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         if (!filter.getElementType().isAssignableFrom(getCurrentRetrievedDataType())) {
@@ -80,7 +84,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver) {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         if (!resultReceiver.getInputType().isAssignableFrom(getCurrentRetrievedDataType())) {
@@ -98,7 +102,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public Class<?> getCurrentRetrievedDataType() {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         return dataRetrieverTypesWithInformation.get(currentRetrieverTypeIndex).getRetrievedDataType();
@@ -107,7 +111,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public int getCurrentRetrieverLevel() {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         return currentRetrieverTypeIndex;
@@ -117,7 +121,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     @Override
     public Processor<DataSourceType, ?> build() {
         if (!hasBeenInitialized()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The builder hasn't been initialized");
         }
         
         Processor<?, ?> firstRetriever = null;
@@ -146,24 +150,24 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         FilterCriterion<ResultType> filter = (FilterCriterion<ResultType>) filters.get(retrieverTypeIndex);
         
         Class<Processor<?, ResultType>> retrieverType = (Class<Processor<?, ResultType>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
-        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter);
+        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, retrieverTypeIndex);
     }
 
     private <ResultType> Processor<?, ResultType> createRetriever(Class<Processor<?, ResultType>> retrieverType, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, int retrieverTypeIndex) {
         Constructor<Processor<?, ResultType>> retrieverConstructor = null;
         try {
-            retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class);
+            retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given retrieverType '"
                     + retrieverType.getSimpleName() + "'", e);
         }
         
-        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter);
+        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, retrieverTypeIndex);
     }
 
     private <ResultType> Processor<?, ResultType> constructRetriever(Constructor<Processor<?, ResultType>> retrieverConstructor, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, int retrieverTypeIndex) {
         try {
             Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
             if (filter != null) {
@@ -173,7 +177,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                 retrievalResultReceivers.add(filteringProcessor);
             }
 
-            return retrieverConstructor.newInstance(executor, retrievalResultReceivers);
+            return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
             throw new UnsupportedOperationException("Couldn't create a data retriever instance with the constructor "

@@ -137,7 +137,7 @@ public class LeaderboardCourseChangeTest {
         TrackedRegatta mockedTrackedRegatta = createMockedTrackedRegatta(regatta);
         RaceDefinition mockedRace = createMockedRace(course, boatClass);
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
-                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000));
+                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false));
 
         return spyedTrackedRace;
     }
@@ -157,7 +157,7 @@ public class LeaderboardCourseChangeTest {
         Set<Competitor> competitors = new HashSet<>();
         DynamicBoat mockedBoat = mock(DynamicBoat.class);
         when(mockedBoat.getBoatClass()).thenReturn(boatClass);
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null,
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null, null,
                 mock(DynamicTeam.class), mockedBoat));
         return competitors;
     }

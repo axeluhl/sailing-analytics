@@ -6,7 +6,10 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
 
 
@@ -50,5 +53,5 @@ public interface RaceChangeListener extends CourseListener {
 
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
 
-    void statusChanged(TrackedRaceStatus newStatus);
+    void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus);
 }

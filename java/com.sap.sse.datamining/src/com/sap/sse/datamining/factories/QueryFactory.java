@@ -10,21 +10,24 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.Query.QueryType;
 import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.ProcessorQuery;
+import com.sap.sse.datamining.impl.SimpleAdditionalQueryData;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.FunctionValuesFilterCriterion;
 import com.sap.sse.datamining.impl.functions.LocalizationParameterProvider;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -32,7 +35,7 @@ public class QueryFactory {
 
     public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale()) {
+        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), new SimpleAdditionalQueryData(QueryType.STATISTIC, queryDefinition.getDataRetrieverChainDefinition().getID())) {
             @Override
             protected Processor<DataSourceType, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
@@ -62,10 +65,10 @@ public class QueryFactory {
         };
     }
     
-    private Iterable<Pair<Function<?>, ParameterProvider>> getParameterProvidersFor(Iterable<Function<?>> functions, ResourceBundleStringMessages stringMessages, Locale locale) {
-        Collection<Pair<Function<?>, ParameterProvider>> functionsWithParameterProvider = new ArrayList<>();
+    private Iterable<ParameterizedFunction<?>> getParameterProvidersFor(Iterable<Function<?>> functions, ResourceBundleStringMessages stringMessages, Locale locale) {
+        Collection<ParameterizedFunction<?>> functionsWithParameterProvider = new ArrayList<>();
         for (Function<?> function : functions) {
-            functionsWithParameterProvider.add(new Pair<>(function, getParameterProviderFor(function, stringMessages, locale)));
+            functionsWithParameterProvider.add(new SimpleParameterizedFunction<>(function, getParameterProviderFor(function, stringMessages, locale)));
         }
         return functionsWithParameterProvider;
     }
@@ -118,7 +121,7 @@ public class QueryFactory {
             DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale,
             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale) {
+        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, new SimpleAdditionalQueryData(QueryType.DIMENSION_VALUES, dataRetrieverChainDefinition.getID())) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);

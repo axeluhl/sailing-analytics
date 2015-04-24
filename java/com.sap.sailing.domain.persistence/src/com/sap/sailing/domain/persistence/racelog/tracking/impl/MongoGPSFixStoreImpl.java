@@ -20,6 +20,8 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFind
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -32,8 +34,6 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -80,14 +80,15 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
             TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
             TransformationException {
-        long fromMillis = from.asMillis() - (inclusive ? 1 : 0);
-        long toMillis = to.asMillis() + (inclusive ? 1 : 0);
-
         Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
-
-        DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
-                .and(FieldNames.TIME_AS_MILLIS.name()).greaterThan(fromMillis)
-                .and(FieldNames.TIME_AS_MILLIS.name()).lessThan(toMillis).get();
+        final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
+                .and(FieldNames.TIME_AS_MILLIS.name());
+        if (inclusive) {
+            queryBuilder.greaterThanEquals(from.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThanEquals(to.asMillis());
+        } else {
+            queryBuilder.greaterThan(from.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(to.asMillis());
+        }
+        DBObject query = queryBuilder.get();
 
         DBCursor result = fixesCollection.find(query);
         for (DBObject fixObject : result) {
@@ -120,7 +121,6 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
         List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder<>(log).analyze().get(mark);
-
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);

@@ -35,6 +35,8 @@ public class RaceMapSettingsTypeFormatter {
             return stringConstants.buoyZone();
         case BOATTAILS:
             return stringConstants.boatTails();
+        case STARTLINETOFIRSTMARKTRIANGLE:
+            return stringConstants.startFirstMarkTriangle();
         }
         return null;
     }

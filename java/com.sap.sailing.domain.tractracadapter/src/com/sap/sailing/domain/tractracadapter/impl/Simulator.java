@@ -10,18 +10,18 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -32,7 +32,6 @@ public class Simulator {
     private final WindStore windStore;
     private long advanceInMillis = -1;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
-    private boolean stopped;
     
     public Simulator(WindStore windStore) {
         super();
@@ -77,9 +76,6 @@ public class Simulator {
                     windTrack.lockForRead();
                     try {
                         for (Wind wind : windTrack.getRawFixes()) {
-                            if (stopped) {
-                                break;
-                            }
                             trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
                         }
                     } finally {
@@ -88,10 +84,6 @@ public class Simulator {
                 }
             }.start();
         }
-    }
-    
-    public void stop() {
-        stopped = true;
     }
     
     private Wind delayWind(Wind wind) {

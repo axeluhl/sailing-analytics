@@ -1,17 +1,18 @@
 package com.sap.sse.datamining.impl.components.aggregators;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
+import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
+import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
+import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 
 public abstract class AbstractParallelStoringAggregationProcessor<InputType, AggregatedType> 
-                      extends AbstractSimpleParallelProcessor<InputType, AggregatedType> {
+                      extends AbstractParallelProcessor<InputType, AggregatedType> {
 
     private final Lock storeLock;
     private final String aggregationNameMessageKey;
@@ -27,10 +28,10 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
     }
 
     @Override
-    protected Callable<AggregatedType> createInstruction(final InputType element) {
-        return new Callable<AggregatedType>() {
+    protected AbstractProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
+        return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
             @Override
-            public AggregatedType call() throws Exception {
+            public AggregatedType computeResult() {
                 storeLock.lock();
                 try {
                     storeElement(element);

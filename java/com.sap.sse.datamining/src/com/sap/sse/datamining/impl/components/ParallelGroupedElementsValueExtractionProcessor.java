@@ -1,16 +1,16 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 
 public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>
-             extends AbstractSimpleParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
+             extends AbstractParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
 
     private final Function<FunctionReturnType> extractionFunction;
     private final ParameterProvider parameterProvider;
@@ -31,10 +31,10 @@ public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionR
     }
 
     @Override
-    protected Callable<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
-        return new Callable<GroupedDataEntry<FunctionReturnType>>() {
+    protected ProcessorInstruction<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
+        return new AbstractProcessorInstruction<GroupedDataEntry<FunctionReturnType>>(this, ProcessorInstructionPriority.Extraction) {
             @Override
-            public GroupedDataEntry<FunctionReturnType> call() throws Exception {
+            public GroupedDataEntry<FunctionReturnType> computeResult() {
                 FunctionReturnType value = extractionFunction.tryToInvoke(element.getDataEntry(), parameterProvider);
                 return value != null ? new GroupedDataEntry<FunctionReturnType>(element.getKey(), value) :
                                        ParallelGroupedElementsValueExtractionProcessor.super.createInvalidResult();

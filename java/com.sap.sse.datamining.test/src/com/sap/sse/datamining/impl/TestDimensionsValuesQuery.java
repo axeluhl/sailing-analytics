@@ -14,15 +14,17 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
@@ -64,7 +66,8 @@ public class TestDimensionsValuesQuery {
     public void testDimensionsValuesQuery() throws InterruptedException, ExecutionException {
         Query<Set<Object>> dimensionsValueQuery = createDimensionsValuesQuery();
         Map<GroupKey, Set<Object>> expectedResultData = buildExpectedResultData();
-        ConcurrencyTestsUtil.verifyResultData(dimensionsValueQuery.run().getResults(), (Map<GroupKey, Set<Object>>) expectedResultData);
+        QueryResult<Set<Object>> result = dimensionsValueQuery.run();
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedResultData);
     }
 
     private Query<Set<Object>> createDimensionsValuesQuery() {
@@ -73,16 +76,16 @@ public class TestDimensionsValuesQuery {
             protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = ComponentTestsUtil.getProcessorFactory().createGroupedDataCollectingAsSetProcessor(this); 
                 
-                Collection<Pair<Function<?>, ParameterProvider>> legDimensions = new ArrayList<>();
-                legDimensions.add(new Pair<>(dimensionLegNumber, ParameterProvider.NULL));
-                legDimensions.add(new Pair<>(dimensionCompetitorName, ParameterProvider.NULL));
-                legDimensions.add(new Pair<>(dimensionCompetitorSailID, ParameterProvider.NULL));
+                Collection<ParameterizedFunction<?>> legDimensions = new ArrayList<>();
+                legDimensions.add(new SimpleParameterizedFunction<>(dimensionLegNumber, ParameterProvider.NULL));
+                legDimensions.add(new SimpleParameterizedFunction<>(dimensionCompetitorName, ParameterProvider.NULL));
+                legDimensions.add(new SimpleParameterizedFunction<>(dimensionCompetitorSailID, ParameterProvider.NULL));
                 
-                Collection<Pair<Function<?>, ParameterProvider>> raceDimensions = new ArrayList<>();
-                raceDimensions.add(new Pair<>(dimensionRegattaName, ParameterProvider.NULL));
-                raceDimensions.add(new Pair<>(dimensionRaceName, ParameterProvider.NULL));
-                raceDimensions.add(new Pair<>(dimensionBoatClassName, ParameterProvider.NULL));
-                raceDimensions.add(new Pair<>(dimensionYear, ParameterProvider.NULL));
+                Collection<ParameterizedFunction<?>> raceDimensions = new ArrayList<>();
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionRegattaName, ParameterProvider.NULL));
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionRaceName, ParameterProvider.NULL));
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionBoatClassName, ParameterProvider.NULL));
+                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionYear, ParameterProvider.NULL));
                 
                 DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
                 chainBuilder.stepFurther(); //Initialization
@@ -171,15 +174,15 @@ public class TestDimensionsValuesQuery {
         
         Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRegatta", new Class<?>[0]);
         Function<?> getRegatta = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRegattaMethod);
-        dimensionRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getRegatta, getName));
+        dimensionRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
 
         Method getRaceMethod = Test_HasRaceContext.class.getMethod("getRace", new Class<?>[0]);
         Function<?> getRace = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRaceMethod);
-        dimensionRaceName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getRace, getName));
+        dimensionRaceName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRace, getName));
         
         Method getBoatClassMethod = Test_HasRaceContext.class.getMethod("getBoatClass", new Class<?>[0]);
         Function<?> getBoatClass = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getBoatClassMethod);
-        dimensionBoatClassName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getBoatClass, getName));
+        dimensionBoatClassName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getBoatClass, getName));
         
         Method getYearMethod = Test_HasRaceContext.class.getMethod("getYear", new Class<?>[0]);
         dimensionYear = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getYearMethod);
@@ -192,13 +195,13 @@ public class TestDimensionsValuesQuery {
         
         Method getTeamMethod = Test_Competitor.class.getMethod("getTeam", new Class<?>[0]);
         Function<?> getTeam = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getTeamMethod);
-        dimensionCompetitorName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getCompetitor, getTeam, getName));
+        dimensionCompetitorName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getCompetitor, getTeam, getName));
         
         Method getBoatMethod = Test_Competitor.class.getMethod("getBoat", new Class<?>[0]);
         Function<?> getBoat = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getBoatMethod);
         Method getSailIDMethod = Test_Boat.class.getMethod("getSailID", new Class<?>[0]);
         Function<?> getSailID = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getSailIDMethod);
-        dimensionCompetitorSailID = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getCompetitor, getBoat, getSailID));
+        dimensionCompetitorSailID = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getCompetitor, getBoat, getSailID));
     }
     
     @Before

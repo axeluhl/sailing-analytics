@@ -11,21 +11,23 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
+import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
@@ -79,6 +81,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
     }
     
+    /**
+     * By default, wind tracks respond with a valid result to {@link #getAveragedWindWithConfidence(Position, TimePoint)},
+     * so <code>null</code> is the result of this default implementation.
+     */
+    @Override
+    public Duration getResolutionOutsideOfWhichNoFixWillBeReturned() {
+        return null;
+    }
+
     @Override
     protected Wind getDummyFix(TimePoint timePoint) {
         return new DummyWind(timePoint);
@@ -344,6 +355,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         @Override
         public Distance travel(TimePoint from, TimePoint to) {
+            return null;
+        }
+        @Override
+        public Duration getDuration(Distance distance) {
             return null;
         }
         @Override

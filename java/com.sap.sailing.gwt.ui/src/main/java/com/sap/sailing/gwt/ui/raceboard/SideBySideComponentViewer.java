@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -16,17 +15,24 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
+import com.sap.sailing.domain.common.security.Roles;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentViewer;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Component Viewer that uses a {@link TouchSplitLayoutPanel} to display its components.
@@ -34,7 +40,7 @@ import com.sap.sse.common.Util.Pair;
  * TODO: Refactor to make sure it is really only performing operations that are related to view. Currently it is digging
  * too deep into components and setting titles or even creating video buttons.
  */
-public class SideBySideComponentViewer implements ComponentViewer {
+public class SideBySideComponentViewer implements ComponentViewer, UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = 432; // works well for 505 and ESS
@@ -60,6 +66,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private final StringMessages stringMessages;
     private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
+    private final EditMarkPassingsPanel markPassingsPanel;
 
     private LayoutPanel mainPanel;
 
@@ -69,13 +76,16 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
-            final StringMessages stringMessages) {
+            final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel) {
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
         this.components = components;
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
+        this.markPassingsPanel = markPassingsPanel;
+        
+        userService.addUserStatusEventHandler(this);
 
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
 
@@ -84,7 +94,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                 String tooltip;
                 switch (mediaPlayerManagerComponent.getAssignedMediaTracks().size()) {
                 case 0:
-                    caption = "No Videos";
+                    caption = stringMessages.mediaNoVideosCaption();
                     tooltip = caption;
                     mediaSelectionButton.setVisible(false);
                     break;
@@ -105,11 +115,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
                     tooltip = stringMessages.mediaSelectVideoTooltip();
                     break;
                 }
-                if (Document.get().getClientWidth() <= 1024) {
-                    mediaSelectionButton.setHTML("&nbsp;");
+                if (mediaPlayerManagerComponent.isPlaying()) {
+                    mediaSelectionButton.addStyleDependentName("mediaplaying");
                 } else {
-                    mediaSelectionButton.setText(caption);
+                    mediaSelectionButton.removeStyleDependentName("mediaplaying");
                 }
+                mediaSelectionButton.setText(caption);
                 mediaSelectionButton.setTitle(tooltip);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
             }
@@ -146,6 +157,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
             additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
                     "managemedia"));
         }
+        onUserStatusChange(userService.getCurrentUser());
 
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
@@ -215,7 +227,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         }
     }
 
-    public <SettingsType> void showSettingsDialog(Component<SettingsType> component) {
+    public <SettingsType extends AbstractSettings> void showSettingsDialog(Component<SettingsType> component) {
         if (component.hasSettings()) {
             new SettingsDialog<SettingsType>(component, stringMessages).show();
         }
@@ -275,5 +287,19 @@ public class SideBySideComponentViewer implements ComponentViewer {
             forceLayout();
         }
         layoutForLeftComponentForcedOnce = true;
+    }
+
+    @Override
+    public void onUserStatusChange(UserDTO user) {
+        Button toggleButton = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel).getToggleButton();
+        if (user != null
+                && (user.hasRole(DefaultRoles.ADMIN.getRolename()) || user.hasRole(Roles.eventmanager.getRolename()))) {
+            toggleButton.setVisible(true);
+            forceLayout();
+        } else {
+            markPassingsPanel.setVisible(false);
+            toggleButton.setVisible(false);
+            forceLayout();
+        }
     }
 }

@@ -1,0 +1,30 @@
+@CHARSET "UTF-8";
+
+.combinedWindPanel {
+	margin-top: 10pt;
+	margin-left: 10pt;
+	right: 0pt;
+	width: 45pt;
+	height: 45pt;
+	border-radius: 22.5pt;
+	background-color: white;
+}
+
+.combinedWindPanelTextLabel {
+	margin-top: 15pt;
+	width: 45pt;
+	height: 25pt;
+	background-color: white;
+	line-height: 25pt;
+	vertical-align: middle;
+	font-size: 11pt;
+	font-family: "Arial";
+	text-align: center;
+}
+
+.combinedWindPanelCanvas {
+	width: 35pt;
+	height: 35pt;
+	margin-top: 5pt;
+	margin-left: 5pt;
+}

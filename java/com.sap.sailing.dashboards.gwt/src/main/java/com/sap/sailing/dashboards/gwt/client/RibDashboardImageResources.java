@@ -33,9 +33,6 @@ public interface RibDashboardImageResources extends ClientBundle {
     @Source("images/rightarrow_disabled.png")
     ImageResource rightdisabled();
     
-    @Source("images/windarrow.png")
-    ImageResource windarrow();
-    
     @Source("images/compass.png")
     ImageResource compass();
     

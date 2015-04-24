@@ -42,7 +42,7 @@ public class MasterDataImporter {
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
         RegattaImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(TopLevelMasterData.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(racingEventService.getCombinedMasterDataClassLoader());
 
         @SuppressWarnings("unchecked")
         final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();

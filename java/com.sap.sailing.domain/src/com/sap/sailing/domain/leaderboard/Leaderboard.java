@@ -20,9 +20,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.Duration;
@@ -195,7 +195,7 @@ public interface Leaderboard extends LeaderboardBase {
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -209,7 +209,7 @@ public interface Leaderboard extends LeaderboardBase {
      * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
      *         <code>timePoint</code>
      */
-    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
+    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
@@ -278,7 +278,7 @@ public interface Leaderboard extends LeaderboardBase {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException 
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
     
     /**
      * Returns the total rank of the given competitor.
@@ -460,7 +460,7 @@ public interface Leaderboard extends LeaderboardBase {
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+            Set<RaceColumn> discardedRaceColumns);
 
     TimePoint getNowMinusDelay();
     

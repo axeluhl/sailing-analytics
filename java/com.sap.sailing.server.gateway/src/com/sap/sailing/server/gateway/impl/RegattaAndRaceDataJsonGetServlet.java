@@ -25,13 +25,13 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.InvalidDateException;
@@ -341,18 +341,14 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                     jsonLegs.add(jsonLeg);
                 }
                 jsonRace.put("legs", jsonLegs);
-                try {
-                    JSONArray jsonRaceRanking = new JSONArray();
-                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        JSONObject competitorRank = new JSONObject();
-                        competitorRank.put("competitor", competitor.getName());
-                        competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
-                        jsonRaceRanking.add(competitorRank);
-                    }
-                    jsonRace.put("ranks", jsonRaceRanking);
-                } catch (NoWindException e) {
-                    // well, we don't know the wind direction... then no windward distance will be shown...
+                JSONArray jsonRaceRanking = new JSONArray();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    JSONObject competitorRank = new JSONObject();
+                    competitorRank.put("competitor", competitor.getName());
+                    competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
+                    jsonRaceRanking.add(competitorRank);
                 }
+                jsonRace.put("ranks", jsonRaceRanking);
                 setJsonResponseHeader(resp);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {

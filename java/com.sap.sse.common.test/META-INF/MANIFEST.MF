@@ -4,6 +4,7 @@ Bundle-Name: Tests for SSE common
 Bundle-SymbolicName: com.sap.sse.common.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
+Fragment-Host: com.sap.sse.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.mockito.mockito-core;bundle-version="1.9.5",
  org.hamcrest;bundle-version="1.1.0",

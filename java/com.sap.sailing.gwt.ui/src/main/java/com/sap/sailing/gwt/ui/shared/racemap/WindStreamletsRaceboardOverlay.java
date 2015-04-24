@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -61,8 +62,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages) {
-        super(map, zIndex);
+            AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.scheduler = Scheduler.get();
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
@@ -73,7 +74,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         windInfoForRace.windSourcesToExclude = new HashSet<>();
         windInfoForRace.windTrackInfoByWindSource = new HashMap<>();
         updateAverageLatitudeDeg(windInfoForRace);
-        this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis);
+        this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis, coordinateSystem);
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
     }
@@ -86,7 +87,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
                 if (wind.position != null) {
-                    latitudeSum += wind.position.latDeg;
+                    latitudeSum += wind.position.getLatDeg();
                     latitudeCount++;
                 }
             }
@@ -190,16 +191,18 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                         // confidences
                         for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
                             WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
+                            final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
+                            windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
                             if (windTrackForSource.windFixes == null) {
-                                windTrackForSource.windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;
+                                windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
                             } else {
-                                windTrackForSource.windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
+                                windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
                             }
-                            if (result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                windTrackForSource.maxWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence;
+                            if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
                             }
-                            if (result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence < windTrackForSource.minWindConfidence) {
-                                windTrackForSource.minWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence;
+                            if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
+                                windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
                             }
                         }
                     }

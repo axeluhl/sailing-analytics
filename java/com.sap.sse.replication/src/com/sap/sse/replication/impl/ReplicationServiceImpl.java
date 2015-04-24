@@ -246,7 +246,12 @@ public class ReplicationServiceImpl implements ReplicationService {
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
-        
+    }
+    
+    @Override
+    protected void finalize() {
+        logger.info("terminating timer "+timer);
+        timer.cancel();
     }
 
     protected ServiceTracker<Replicable<?, ?>, Replicable<?, ?>> getReplicableTracker() {

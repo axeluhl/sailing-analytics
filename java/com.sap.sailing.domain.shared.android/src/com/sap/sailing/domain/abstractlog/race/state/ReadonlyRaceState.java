@@ -10,8 +10,8 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -47,9 +47,17 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
     RaceLog getRaceLog();
 
     /**
-     * Gets the currently attached {@link ReadonlyRacingProcedure}.
+     * Gets the currently attached {@link ReadonlyRacingProcedure}, providing a default in case there is none provided
+     * in the race log nor the regatta configuration.
      */
     ReadonlyRacingProcedure getRacingProcedure();
+
+    /**
+     * If no racing procedure is defined in the underlying race log, <code>null</code> is returned; otherwise
+     * the racing procedure as it would be returned by {@link #getRacingProcedure()}.
+     * @return
+     */
+    ReadonlyRacingProcedure getRacingProcedureNoFallback();
 
     /**
      * Gets the currently attached {@link ReadonlyRacingProcedure}. Use this method to avoid casting in cases you are

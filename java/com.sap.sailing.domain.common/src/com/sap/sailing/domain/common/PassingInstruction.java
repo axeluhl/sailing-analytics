@@ -32,8 +32,9 @@ public enum PassingInstruction {
     }
 
     public static PassingInstruction valueOfIgnoringCase(String value) {
+        final String lowerCaseValue = value.toLowerCase();
         for (PassingInstruction p : PassingInstruction.values()) {
-            if (value.toLowerCase().equals(p.toString().toLowerCase())) {
+            if (lowerCaseValue.equals(p.toString().toLowerCase())) {
                 return p;
             }
         }

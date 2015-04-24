@@ -48,9 +48,6 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -60,6 +57,9 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
@@ -75,6 +75,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private final Map<WindSource, Series> windSourceSpeedSeries;
     private final Map<WindSource, Point[]> windSourceDirectionPoints;
     private final Map<WindSource, Point[]> windSourceSpeedPoints;
+    private Point firstPointOfFirstSeries;
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
@@ -96,6 +97,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         windSourceSpeedSeries = new HashMap<WindSource, Series>();
         windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
         windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
+        firstPointOfFirstSeries = null;
         colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
@@ -323,7 +325,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         Long newMinTimepoint = timeOfEarliestRequestInMillis;
         Long newMaxTimepoint = timeOfLatestRequestInMillis;
-        
+
         for (WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
             WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(windSource);
             Series directionSeries = getOrCreateDirectionSeries(windSource);
@@ -333,6 +335,10 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             }
 
             Point previousDirectionPoint = null;
+            if (append && windSourceDirectionPoints.get(windSource) != null
+                       && windSourceDirectionPoints.get(windSource).length != 0) {
+                previousDirectionPoint = windSourceDirectionPoints.get(windSource)[windSourceDirectionPoints.get(windSource).length - 1];
+            }
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
@@ -357,6 +363,9 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                     if (previousDirectionPoint != null) {
                         newDirectionPoint = ChartPointRecalculator.stayClosestToPreviousPoint(previousDirectionPoint,
                                 newDirectionPoint);
+                    } else if (firstPointOfFirstSeries != null && windSourceDirectionPoints.get(windSource) == null) {
+                        //This Point is the first point of a new series
+                        newDirectionPoint = ChartPointRecalculator.stayClosestToPreviousPoint(firstPointOfFirstSeries, newDirectionPoint);
                     }
                     directionPoints[currentPointIndex] = newDirectionPoint;
                     previousDirectionPoint = newDirectionPoint;
@@ -390,12 +399,16 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 setSeriesPoints(speedSeries, newSpeedPoints);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
+            
+            if (firstPointOfFirstSeries == null && newDirectionPoints.length != 0) { //If firstPointOfFirstSeries is null, than this series is the first
+                firstPointOfFirstSeries = newDirectionPoints[0];
+            }
         }
         
         timeOfEarliestRequestInMillis = newMinTimepoint;
         timeOfLatestRequestInMillis = newMaxTimepoint;
     }
-    
+
     @Override
     public boolean hasSettings() {
         return true;
@@ -431,6 +444,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         timeOfLatestRequestInMillis = null;
         windSourceDirectionPoints.clear();
         windSourceSpeedPoints.clear();
+        firstPointOfFirstSeries = null;
         
         loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
     }

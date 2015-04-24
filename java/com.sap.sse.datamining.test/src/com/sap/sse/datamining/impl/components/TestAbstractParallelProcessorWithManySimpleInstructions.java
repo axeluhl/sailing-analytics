@@ -5,13 +5,13 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
@@ -37,12 +37,12 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         
         Collection<Processor<Integer, ?>> receivers = new ArrayList<>();
         receivers.add(receiver);
-        processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
+        processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected Callable<Integer> createInstruction(final Integer element) {
-                return new Callable<Integer>() {
+            protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
+                return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
-                    public Integer call() throws Exception {
+                    public Integer computeResult() {
                         return element;
                     }
                 };

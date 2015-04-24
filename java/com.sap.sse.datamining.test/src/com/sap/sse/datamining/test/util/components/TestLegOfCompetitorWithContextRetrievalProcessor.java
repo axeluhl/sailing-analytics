@@ -5,18 +5,17 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Leg;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContextImpl;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 
-public class TestLegOfCompetitorWithContextRetrievalProcessor extends
-        AbstractSimpleRetrievalProcessor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>{
+public class TestLegOfCompetitorWithContextRetrievalProcessor extends AbstractRetrievalProcessor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>{
 
-    public TestLegOfCompetitorWithContextRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_HasLegOfCompetitorContext, ?>> resultReceivers) {
-        super(Test_HasRaceContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers);
+    public TestLegOfCompetitorWithContextRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_HasLegOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
+        super(Test_HasRaceContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override

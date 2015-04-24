@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneUuidServiceFinderFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -40,7 +41,7 @@ public abstract class AbstractJaxRsApiTest {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
 
-        racingEventService = new RacingEventServiceImpl();
+        racingEventService = new RacingEventServiceImpl(true, new MockSmartphoneUuidServiceFinderFactory());
     }
 
     protected <T extends AbstractSailingServerResource> T spyResource(T resource) {
@@ -70,7 +71,7 @@ public abstract class AbstractJaxRsApiTest {
         BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(123, competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+            Competitor competitor = new CompetitorImpl(123, competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                     new PersonImpl(competitorName, new NationalityImpl("GER"),
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

@@ -28,9 +28,9 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -92,7 +92,18 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private final LastPublishedCourseDesignFinder courseDesignerAnalyzer;
     private final LastWindFixFinder lastWindFixAnalyzer;
 
+    /**
+     * The cached racing procedure type. If no racing procedure type specification is found in the underlying race log,
+     * a default is taken from {@link #fallbackInitialProcedureType}.
+     */
     private RacingProcedureType cachedRacingProcedureType;
+    
+    /**
+     * The result of {@link #determineInitialProcedureType()}; may be {@link RacingProcedureType#UNKNOWN} in case no
+     * specification is found in the underlying race log.
+     */
+    private RacingProcedureType cachedRacingProcedureTypeNoFallback;
+    
     private RaceLogRaceStatus cachedRaceStatus;
     private int cachedPassId;
     private TimePoint cachedStartTime;
@@ -130,10 +141,16 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
 
-        this.cachedRacingProcedureType = determineInitialProcedureType();
+        this.cachedRacingProcedureTypeNoFallback = determineInitialProcedureType();
+        if (this.cachedRacingProcedureTypeNoFallback == null || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
+            this.cachedRacingProcedureType = fallbackInitialProcedureType;
+        } else {
+            cachedRacingProcedureType = cachedRacingProcedureTypeNoFallback;
+        }
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
         this.cachedPassId = raceLog.getCurrentPassId();
-        // TODO bug 2083: make sure the listener registration is "weak" in the sense that it is removed when this race state is no longer strongly referenced
+        // see resolved bug 2083: make sure the listener registration is "weak" in the sense that it is removed when
+        // this race state is no longer strongly referenced
         this.raceLog.addListener(new WeakRaceLogChangedVisitor(this.raceLog, this));
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
@@ -147,11 +164,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
         if (inRaceLogType != RacingProcedureType.UNKNOWN) {
             return inRaceLogType;
-        } else if (configuration.getDefaultRacingProcedureType() != null
-                && configuration.getDefaultRacingProcedureType() != RacingProcedureType.UNKNOWN) {
-            return configuration.getDefaultRacingProcedureType();
         } else {
-            return fallbackInitialProcedureType;
+            return configuration.getDefaultRacingProcedureType();
         }
     }
 
@@ -163,6 +177,17 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     @Override
     public ReadonlyRacingProcedure getRacingProcedure() {
         return racingProcedure;
+    }
+    
+    @Override
+    public ReadonlyRacingProcedure getRacingProcedureNoFallback() {
+        final ReadonlyRacingProcedure result;
+        if (cachedRacingProcedureTypeNoFallback == null || cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
+            result = null;
+        } else {
+            result = getRacingProcedure();
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")

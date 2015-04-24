@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -85,10 +85,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
@@ -112,6 +108,11 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -142,6 +143,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
         SafeHtml cellFrameWithTextColor(String textColor);
+
+        @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
+        SafeHtml cellWithImageResourceAndText(ImageResource image, String text);
     }
 
     private static RaceColumnTemplates raceColumnTemplate = GWT.create(RaceColumnTemplates.class);
@@ -284,8 +288,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     private boolean isEmbedded;
 
-    private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
-    private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
+    private static final LeaderboardResources resources = GWT.create(LeaderboardResources.class);
+    private static final ComponentResources componentResources = GWT.create(ComponentResources.class);
+    private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
 
     private ImageResource pauseIcon;
     private ImageResource playIcon;
@@ -385,7 +390,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     protected ImageResource getSettingsIcon() {
-        return resources.settingsIcon();
+        return componentResources.settingsIcon();
     }
 
     public void updateSettings(final LeaderboardSettings newSettings) {
@@ -659,18 +664,26 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).getTwoLetterIsoCountryCode();
-            final ImageResource flagImageResource;
-            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
-            } else {
-                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-            }
-            if (flagImageResource != null) {
-                sb.append(renderer.render(flagImageResource));
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+            final String imageURL = competitor.getImageURL();
+
+            if (imageURL != null && !imageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + imageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
+            } else {
+                final ImageResource flagImageResource;
+                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                } else {
+                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                }
+                if (flagImageResource != null) {
+                    sb.append(renderer.render(flagImageResource));
+                    sb.appendHtmlConstant("&nbsp;");
+                }
             }
-            sb.appendEscaped(competitorFetcher.getCompetitor(object).getSailID());
+            sb.appendEscaped(competitor.getSailID());
         }
 
         @Override
@@ -736,7 +749,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
                 if (entryBefore.totalPoints != null) {
                     addedScores += entryBefore.totalPoints;
-                } 
+                }
+                // else "add 0"
                 if (raceColumn.getName().equals(getRaceColumnName())) {
                     break; // we've reached the current column - stop here
                 }
@@ -762,19 +776,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             LeaderboardEntryDTO entry = object.fieldsByRaceColumnName.get(getRaceColumnName());
             if (entry != null) {
             	boolean isLive = isLive(entry.fleet);
-            	
-                String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
-                String totalOrAddedPointsAsText = isShowAddedScores() ? (entry.totalPoints != null ? scoreFormat.format(computeAddedScores(object)) : "")
+                final String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+                final String addedScores = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object)) : "";
+                String totalOrAddedPointsAsText = isShowAddedScores() ? addedScores
                         : entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
-                String netOrAddedPointsAsText = isShowAddedScores() ? (entry.netPoints != null ? scoreFormat.format(computeAddedScores(object)) : "")
+                String netOrAddedPointsAsText = isShowAddedScores() ? addedScores
                         : entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
-                
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
                     html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
                 } else {
                     html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
                 }
-                
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
@@ -807,19 +819,27 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
+                    final int result;
                     if (isShowAddedScores()) {
                         double o1AddedScore = computeAddedScores(o1);
                         double o2AddedScore = computeAddedScores(o2);
-                        double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? 1. : -1. : o2AddedScore - o1AddedScore;
-                        return result > 0 ? 1 : result < 0 ? -1 : 0;
+                        double intermediate_result = o1AddedScore == 0. ? (o2AddedScore == 0. ? -1.
+                                : isAscending() ? 1. : -1.) : o2AddedScore == 0. ? (isAscending() ? -1. : 1.)
+                                : o1AddedScore - o2AddedScore;
+                        if (!getLeaderboard().isHigherScoreBetter()) {
+                            result = intermediate_result > 0 ? 1 : intermediate_result < 0 ? -1 : 0;
+                        } else {
+                            result = intermediate_result > 0 ? -1 : intermediate_result < 0 ? 1 : 0;
+                        }
                     } else {
                         List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
                                 race);
                         int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
                         int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
-                        return o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1
+                        result = o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1
                                 : 1 : o1Rank - o2Rank;
                     }
+                    return result;
                 }
             };
         }
@@ -840,7 +860,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, 
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
                 DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
@@ -902,6 +922,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START, new RaceDistanceTraveledIncludingGateStartInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new RaceAverageSpeedInKnots(),
@@ -1246,6 +1269,35 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                                     result = 0.0;
                                 }
                                 result += legDetail.distanceTraveledInMeters;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Accumulates the distance traveled over all legs of a race and considers the specifics of a gate start. The
+         * first leg of a gate start gets as additional distance traveled the distance from the port side of the line to
+         * the point where the competitor started which helps normalize the distance traveled and make them comparable
+         * across early and late starters.
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceTraveledIncludingGateStartInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            if (legDetail.distanceTraveledIncludingGateStartInMeters != null) {
+                                if (result == null) {
+                                    result = 0.0;
+                                }
+                                result += legDetail.distanceTraveledIncludingGateStartInMeters;
                             }
                         }
                     }
@@ -1622,7 +1674,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, boolean isEmbedded, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
@@ -1635,9 +1687,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, boolean isEmbedded, RaceIdentifier preSelectedRace,
+            LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
@@ -1748,9 +1800,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
-        
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
+        
+
         // the information panel
         if (!isEmbedded) {
             Widget toolbarPanel = createToolbarPanel();
@@ -2065,7 +2118,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * adds the <code>column</code> to the right end of the {@link #getLeaderboardTable() leaderboard table} and sets
      * the column style according to the {@link LeaderboardSortableColumnWithMinMax#getColumnStyle() column's style definition}.
      */
-    protected void addColumn(LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
+    protected void addColumn(AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
         leaderboardTable.addColumn(column, column.getHeader(), column.getComparator(), column
                 .getPreferredSortingOrder().isAscending());
         String columnStyle = column.getColumnStyle();
@@ -2496,7 +2549,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         int columnIndex = 0;
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
-        columnIndex = ensureSailIDAndCompetitorColumn();
+        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
         columnIndex = updateCarryColumn(leaderboard, columnIndex);
         adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
@@ -2809,42 +2862,37 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     /**
      * @return the 0-based index for the next column
      */
-    private int ensureSailIDAndCompetitorColumn() {
-        SailIDColumn<LeaderboardRowDTO> sailIdColumn = new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-            @Override
-            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                return t.competitor;
+    private int ensureSailIDAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
+        if (isShowCompetitorSailId()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                    @Override
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                        return t.competitor;
+                    }
+                }));
             }
-        });
-        if (getLeaderboardTable().getColumnCount() >= 3) { // table already filled with columns
-            if (isShowCompetitorSailId()) {
-                if (!(getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>)) {
-                    insertColumn(2, sailIdColumn);
-                }
-            } else {
-                if (getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>) {
-                    removeColumn(2);
-                }
-            }
-            final int competitorFullNameColumnIndex = 2 + (isShowCompetitorSailId() ? 1 : 0);
-            if (isShowCompetitorFullName()) {
-                if (!(getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn)) {
-                    insertColumn(competitorFullNameColumnIndex, createCompetitorColumn());
-                }
-            } else {
-                if (getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn) {
-                    removeColumn(competitorFullNameColumnIndex);
-                }
-            }
-        } else { // table just being initialized
-            if (isShowCompetitorSailId()) {
-                addColumn(sailIdColumn);
-            }
-            if (isShowCompetitorFullName()) {
-                addColumn(createCompetitorColumn());
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
+                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
-        return (isShowRegattaRankColumn() ? 2 : 1) + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
+        if (isShowCompetitorFullName()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
+            }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
+                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
+            }
+        }
+        return columnIndexWhereToInsertTheNextColumn;
     }
 
     protected CompetitorColumn createCompetitorColumn() {
