@@ -61,7 +61,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         this.algorithmStartTime = MillisecondsTimePoint.now();
 
         WindFieldGenerator wf = simulationParameters.getWindField();
-        PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
+        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
 
         Position posStart = simulationParameters.getCourse().get(0);
         Position posEnd = simulationParameters.getCourse().get(1);
@@ -74,7 +74,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         double currentHeight = posStart.getDistance(posEnd).getMeters();
 
         BoatDirection prevDirection = BoatDirection.NONE;
-        long turnLoss = pd.getTurnLoss(); // time lost when doing a turn
+        long turnLoss = polarDiagram.getTurnLoss(); // time lost when doing a turn
         double fracFinishPhase = 0.05;
 
         TimePoint travelTimeLeft;
@@ -82,14 +82,12 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
         Wind wndStart = wf.getWind(new TimedPositionWithSpeedImpl(startTime, posStart, null));
         logger.finest("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
-        pd.setWind(wndStart);
+        polarDiagram.setWind(wndStart);
         Bearing bearStart = currentPosition.getBearingGreatCircle(posEnd);
-        // SpeedWithBearing spdStart = pd.getSpeedAtBearing(bearStart);
         path.add(new TimedPositionWithSpeedImpl(startTime, posStart, wndStart));
 
         long timeStep = wf.getTimeStep().asMillis() / 2;
         logger.fine("Time step :" + timeStep);
-        // while there is more than 5% of the total distance to the finish
 
         String legType = "none";
         if (this.simulationParameters.getLegType() == null) {
@@ -135,9 +133,9 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             // set wind at current position
             Wind currentWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
             logger.finest("cWind speed:" + currentWind.getKnots() + " angle:" + currentWind.getBearing().getDegrees());
-            pd.setWind(currentWind);
+            polarDiagram.setWind(currentWind);
             // get point-of-sail and reaching-side
-            Pair<PointOfSail, BoatDirection> pointOfSailAndReachingSide = pd.getPointOfSail(bearTarget);
+            Pair<PointOfSail, BoatDirection> pointOfSailAndReachingSide = polarDiagram.getPointOfSail(bearTarget);
             PointOfSail pointOfSail = pointOfSailAndReachingSide.getA();
             BoatDirection reachingSide = pointOfSailAndReachingSide.getB();
             
@@ -146,15 +144,15 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 Bearing bearLeft;
                 Bearing bearRight;
                 if (pointOfSail == PointOfSail.TACKING) {
-                    bearLeft = pd.optimalDirectionsUpwind()[0];
-                    bearRight = pd.optimalDirectionsUpwind()[1];
+                    bearLeft = polarDiagram.optimalDirectionsUpwind()[0];
+                    bearRight = polarDiagram.optimalDirectionsUpwind()[1];
                 } else {
-                    bearLeft = pd.optimalDirectionsDownwind()[1];
-                    bearRight = pd.optimalDirectionsDownwind()[0];
+                    bearLeft = polarDiagram.optimalDirectionsDownwind()[1];
+                    bearRight = polarDiagram.optimalDirectionsDownwind()[0];
                 }
                 // get boat speed at current position
-                SpeedWithBearing boatSpeedLeft = pd.getSpeedAtBearing(bearLeft);
-                SpeedWithBearing boatSpeedRight = pd.getSpeedAtBearing(bearRight);
+                SpeedWithBearing boatSpeedLeft = polarDiagram.getSpeedAtBearing(bearLeft);
+                SpeedWithBearing boatSpeedRight = polarDiagram.getSpeedAtBearing(bearRight);
                 logger.finest("left boat speed:" + boatSpeedLeft.getKnots() + " angle:" + boatSpeedLeft.getBearing().getDegrees()
                         + "  right boat speed:" + boatSpeedRight.getKnots() + " angle:" + boatSpeedRight.getBearing().getDegrees());
 
@@ -239,8 +237,13 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 } else {
                     travelTimeReach = new MillisecondsTimePoint(nextTimeVal - turnLoss);
                 }
-                // get boat speed for right-side
-                SpeedWithBearing boatSpeedTarget = pd.getSpeedAtBearing(bearTarget);
+                // get boat speed for reach
+                SpeedWithBearing boatSpeedTarget;
+                if (polarDiagram.hasCurrent()) {
+                    boatSpeedTarget = polarDiagram.getSpeedAtBearingOverGround(bearTarget);
+                } else {
+                    boatSpeedTarget = polarDiagram.getSpeedAtBearing(bearTarget);                    
+                }
                 // get next boat positions by travelling left and right
                 Position nextBoatPositionReach = boatSpeedTarget.travelTo(currentPosition, currentTime, travelTimeReach);
                 path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionReach, currentWind));

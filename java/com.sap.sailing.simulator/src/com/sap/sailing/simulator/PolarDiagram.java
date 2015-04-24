@@ -26,8 +26,10 @@ public interface PolarDiagram extends Serializable {
     void setWind(SpeedWithBearing newWind);
 
     // current
+    void initializeSOGwithCurrent();
     void setCurrent(SpeedWithBearing newCurrent);
     SpeedWithBearing getCurrent();
+    boolean hasCurrent();
 
     // target direction
     //     default is target bearing = 0;

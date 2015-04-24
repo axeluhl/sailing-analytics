@@ -104,6 +104,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         jibeAngles = pd.jibeAngles;
         jibeSOG = pd.jibeSOG;
         current = pd.current;
+        extTable = pd.extTable;
     }
 
     // a constructor that allows a generic set of parameters
@@ -254,7 +255,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         double crValue = values[level];
 
         Double hiDouble = map.ceilingKey(crValue);
-        if (level==3) {
+        if ((level==2)||(level==3)) {
             if (hiDouble == null) {
                 hiDouble = map.ceilingKey(crValue-360);
             }
@@ -290,6 +291,11 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     }
 
     @Override
+    public void initializeSOGwithCurrent() {
+        this.setCurrent(null);
+    }
+    
+    @Override
     public void setCurrent(SpeedWithBearing newCurrent) {
 
         if ((newCurrent == null)&&(extTable == null)) {
@@ -305,7 +311,19 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         return current;
     }
 
-
+    @Override
+    public boolean hasCurrent() {
+        if (current == null) {
+            return false;
+        }
+        if (current.getKnots() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    
     public SpeedWithBearing addVectorSpeeds(SpeedWithBearing a, SpeedWithBearing b) {
 
         if (a.getKnots() == 0.0) {

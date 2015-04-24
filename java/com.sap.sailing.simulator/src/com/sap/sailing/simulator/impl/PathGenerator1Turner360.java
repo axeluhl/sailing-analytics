@@ -174,7 +174,12 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     } else {
                         direction = bearTarget;                                                
                     }
-                    SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+                    SpeedWithBearing currSpeed;
+                    if ((pointOfSail != PointOfSail.REACHING) || !polarDiagram.hasCurrent()) {
+                        currSpeed = polarDiagram.getSpeedAtBearing(direction);
+                    } else {
+                        currSpeed = polarDiagram.getSpeedAtBearingOverGround(direction);
+                    }
                     nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                     Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
                     newDistance = nextPosition.getDistance(posEnd).getMeters();
@@ -230,7 +235,12 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     } else {
                         direction = bearTarget;                        
                     }
-                    SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+                    SpeedWithBearing currSpeed;
+                    if ((pointOfSail != PointOfSail.REACHING) || !polarDiagram.hasCurrent()) {
+                        currSpeed = polarDiagram.getSpeedAtBearing(direction);
+                    } else {
+                        currSpeed = polarDiagram.getSpeedAtBearingOverGround(direction);
+                    }
                     nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                     Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
                     newDistance = nextPosition.getDistance(posEnd).getMeters();

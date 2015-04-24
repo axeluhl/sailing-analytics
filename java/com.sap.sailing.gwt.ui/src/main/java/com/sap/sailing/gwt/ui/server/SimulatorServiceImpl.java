@@ -907,8 +907,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             LOGGER.info("base wind: " + pd.getWind().getKnots() + " kn, "
                     + ((wf.getWindParameters().baseWindBearing) % 360.0) + "\u00B0");
             // set water current
-            pd.setCurrent(new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf
-                    .getWindParameters().curBearing)));
+            SpeedWithBearing current = new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf.getWindParameters().curBearing));
+            if (wf.getWindParameters().curSpeed > 0) {
+                pd.initializeSOGwithCurrent(); // polar-diagram is extended with data to support water currents
+            }
+            pd.setCurrent(current);
             if (pd.getCurrent() != null) {
                 LOGGER.info("water current: " + pd.getCurrent().getKnots() + " kn, "
                         + pd.getCurrent().getBearing().getDegrees() + "\u00B0");

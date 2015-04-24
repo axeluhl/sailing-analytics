@@ -114,34 +114,46 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         TimePoint curTime = pos.getTimePoint();
         Position curPosition = pos.getPosition();
 
-        PolarDiagram pd = this.parameters.getBoatPolarDiagram();
-        pd.setWind(posWind);
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
+        polarDiagram.setWind(posWind);
 
         // get beat-angle left and right
         Bearing travelBearing = null;
+        SpeedWithBearing travelSpeed = null;
         if (nextDirection == 'L') {
-            travelBearing = pd.optimalDirectionsUpwind()[0];
+            travelBearing = polarDiagram.optimalDirectionsUpwind()[0];
+            travelSpeed = polarDiagram.getSpeedAtBearing(travelBearing);
         }
         if (nextDirection == 'r') {
-            travelBearing = pd.optimalDirectionsDownwind()[0];
+            travelBearing = polarDiagram.optimalDirectionsDownwind()[0];
+            travelSpeed = polarDiagram.getSpeedAtBearing(travelBearing);
         }
         if (nextDirection == 'R') {
-            travelBearing = pd.optimalDirectionsUpwind()[1];
+            travelBearing = polarDiagram.optimalDirectionsUpwind()[1];
+            travelSpeed = polarDiagram.getSpeedAtBearing(travelBearing);
         }
         if (nextDirection == 'l') {
-            travelBearing = pd.optimalDirectionsDownwind()[1];
+            travelBearing = polarDiagram.optimalDirectionsDownwind()[1];
+            travelSpeed = polarDiagram.getSpeedAtBearing(travelBearing);
         }
         if ((nextDirection == 'D')||(nextDirection == 'E')) {
             travelBearing = curPosition.getBearingGreatCircle(posEnd);
+            if (polarDiagram.hasCurrent()) {
+                travelSpeed = polarDiagram.getSpeedAtBearingOverGround(travelBearing);
+            } else {
+                travelSpeed = polarDiagram.getSpeedAtBearing(travelBearing);
+            }
         }
         
-        if (travelBearing == null) {
-            logger.severe("Travel Bearing for NextDirection '" + nextDirection + "' is NULL. This must NOT happen.");
+        if ((travelBearing == null)||(travelSpeed == null)) {
+            if (travelBearing == null) {
+                logger.severe("Travel Bearing for NextDirection '" + nextDirection + "' is NULL. This must NOT happen.");
+            }
+            if (travelSpeed == null) {
+                logger.severe("Travel Speed for NextDirection '" + nextDirection + "' is NULL. This must NOT happen.");
+            }
             throw new SparsePolarDataException();
-        }
-
-        // determine beat-speed left and right
-        SpeedWithBearing travelSpeed = pd.getSpeedAtBearing(travelBearing);
+        }     
 
         TimePoint travelTime;
         TimePoint nextTime = new MillisecondsTimePoint(curTime.asMillis() + timeStep);
@@ -162,6 +174,26 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         return ((tmpNextDirection == tmpPrevDirection) || (tmpPrevDirection == '0'));
     }
 
+    char getOppositeDirection(char direction) {
+        char oppositeDirection = ' ';
+        switch (direction) {
+        case 'L':
+            oppositeDirection = 'R';
+            break;
+        case 'R':
+            oppositeDirection = 'L';
+            break;
+        case 'l':
+            oppositeDirection = 'r';
+            break;
+        case 'r':
+            oppositeDirection = 'l';
+            break;
+        }
+        return oppositeDirection;
+    }
+    
+    
     char getBaseDirection(char direction) {
         char tmpDirection = direction;
         return (tmpDirection=='D'?'L':(tmpDirection=='E'?'R':(tmpDirection=='l'?'L':(tmpDirection=='r'?'R':tmpDirection))));
@@ -239,10 +271,10 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         
         // determine bearing of target
         Bearing bearTarget = path.pos.getPosition().getBearingGreatCircle(posEnd);
-        PolarDiagram pd = this.parameters.getBoatPolarDiagram();
-        pd.setWind(path.wind);
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
+        polarDiagram.setWind(path.wind);
         // compare target bearing to upwind bearings
-        Bearing[] bearOptimalUpwind = pd.optimalDirectionsUpwind();
+        Bearing[] bearOptimalUpwind = polarDiagram.optimalDirectionsUpwind();
         Bearing upwindLeftRight = bearOptimalUpwind[0].getDifferenceTo(bearOptimalUpwind[1]);
         Bearing upwindLeftTarget = bearOptimalUpwind[0].getDifferenceTo(bearTarget);
         PointOfSail pointOfSail = PointOfSail.REACHING;
@@ -253,7 +285,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                     + upwindLeftRight.getDegrees() + ", " + path.path + ")");
             pointOfSail = PointOfSail.TACKING;
         } else {
-            Bearing[] bearOptimalDownwind = pd.optimalDirectionsDownwind();
+            Bearing[] bearOptimalDownwind = polarDiagram.optimalDirectionsDownwind();
             Bearing downwindLeftRight = bearOptimalDownwind[0].getDifferenceTo(bearOptimalDownwind[1]);
             Bearing downwindLeftTarget = bearOptimalDownwind[0].getDifferenceTo(bearTarget);
             // check whether boat is in "non-sailable area"
@@ -316,6 +348,12 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                     newPathCand = getPathCandWind(path, prevDirection, timeStep, turnLoss, posStart, posEnd, tgtHeight);
                     result.add(newPathCand);
                 }
+                // opposite step (in order to be accurate for symmetric cases)
+                char oppositeDirection = this.getOppositeDirection(prevDirection);
+                if ((path.trn < this.maxTurns) && (oppositeDirection != ' ') && (prevDirection != '0')) {
+                    newPathCand = getPathCandWind(path, oppositeDirection, timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
             }
 
         } else {
@@ -346,6 +384,12 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                 char prevDirection = path.path.charAt(path.path.length() - 1);
                 if ((prevDirection != reachingSide) && (prevDirection != '0')) {
                     newPathCand = getPathCandWind(path, prevDirection, timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                    result.add(newPathCand);
+                }
+                // opposite step (in order to be accurate for symmetric cases)
+                char oppositeDirection = this.getOppositeDirection(prevDirection);
+                if ((oppositeDirection != ' ') && (prevDirection != '0')) {
+                    newPathCand = getPathCandWind(path, oppositeDirection, timeStep, turnLoss, posStart, posEnd, tgtHeight);
                     result.add(newPathCand);
                 }
             }
@@ -546,7 +590,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         this.algorithmStartTime = MillisecondsTimePoint.now();
         
         WindFieldGenerator wf = this.parameters.getWindField();
-        PolarDiagram pd = this.parameters.getBoatPolarDiagram();
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
 
         Position startPos = this.parameters.getCourse().get(0);
         Position endPos = this.parameters.getCourse().get(1);
@@ -566,7 +610,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
         Wind wndStart = wf.getWind(new TimedPositionWithSpeedImpl(startTime, startPos, null));
         logger.fine("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
-        pd.setWind(wndStart);
+        polarDiagram.setWind(wndStart);
         Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
         // Bearing bearHrz = bearVrt.add(new DegreeBearingImpl(90.0));
         Position middlePos = startPos.translateGreatCircle(bearVrt, distStartEnd.scale(0.5));
@@ -597,7 +641,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         }
         logger.fine("Leg Direction: " + legType);
 
-        long turnLoss = pd.getTurnLoss(); // time lost when doing a turn
+        long turnLoss = polarDiagram.getTurnLoss(); // time lost when doing a turn
         if (!this.upwindLeg) {
             turnLoss = turnLoss / 2;
         }
