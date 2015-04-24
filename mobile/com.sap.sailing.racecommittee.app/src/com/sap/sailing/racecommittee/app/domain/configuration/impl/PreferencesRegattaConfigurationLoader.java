@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -13,11 +14,11 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurati
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
@@ -108,6 +109,10 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         if (configuration.getBasicConfiguration() != null) {
             RacingProcedureConfiguration config = configuration.getBasicConfiguration();
             storeRacingProcedureConfiguration(RacingProcedureType.BASIC, config);
+        }
+        if (configuration.getLeagueConfiguration() != null) {
+            LeagueConfiguration config = configuration.getLeagueConfiguration();
+            storeRacingProcedureConfiguration(RacingProcedureType.LEAGUE, config);
         }
     }
 
