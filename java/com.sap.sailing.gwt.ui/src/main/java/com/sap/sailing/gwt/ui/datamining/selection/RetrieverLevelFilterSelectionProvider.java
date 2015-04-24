@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
-import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -31,7 +30,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final Set<FilterSelectionChangedListener> listeners;
+    private final Set<SelectionChangedListener> listeners;
     
     private final DataMiningSession session;
     private final FilterSelectionProvider selectionProvider;
@@ -142,6 +141,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         }
         return selectedDimensions;
     }
+    
+    void updateAvailableData() {
+        for (DimensionFilterSelectionProvider selectionProvider : dimensionSelectionProviders) {
+            selectionProvider.updateAvailableData();
+        }
+    }
 
     Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getCompleteFilterSelection() {
         return selectionProvider.getSelection();
@@ -182,13 +187,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         initializeDimensionSelectionProviders();
     }
     
-    public void addSelectionChangedListener(FilterSelectionChangedListener listener) {
+    public void addSelectionChangedListener(SelectionChangedListener listener) {
         listeners.add(listener);
     }
 
     private void notifyListeners() {
-        for (FilterSelectionChangedListener listener : listeners) {
-            listener.selectionChanged();
+        for (SelectionChangedListener listener : listeners) {
+            listener.selectionChanged(retrieverLevel);
         }
     }
 
@@ -241,6 +246,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     @Override
     public String getDependentCssClassName() {
         return "singleRetrieverLevelSelectionPanel";
+    }
+    
+    public interface SelectionChangedListener {
+        
+        public void selectionChanged(int onLevel);
+        
     }
     
     private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {

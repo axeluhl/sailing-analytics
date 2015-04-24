@@ -52,7 +52,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private boolean isAwaitingReload;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrievedDataType;
-    private final FilterSelectionChangedListener retrieverLevelSelectionChangedListener;
+    private final RetrieverLevelFilterSelectionProvider.SelectionChangedListener retrieverLevelSelectionChangedListener;
     
     private final DockLayoutPanel mainPanel;
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
@@ -75,9 +75,10 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         isAwaitingReload = false;
         retrieverChain = null;
         selectionProvidersMappedByRetrievedDataType = new HashMap<>();
-        retrieverLevelSelectionChangedListener = new FilterSelectionChangedListener() {
+        retrieverLevelSelectionChangedListener = new RetrieverLevelFilterSelectionProvider.SelectionChangedListener() {
             @Override
-            public void selectionChanged() {
+            public void selectionChanged(int onLevel) {
+//                updateFilterSelectionProviders(onLevel);
                 mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
                 notifyListeners();
             }
@@ -164,6 +165,14 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         });
     }
 
+    private void clearContent() {
+        retrieverLevelDataProvider.getList().clear();
+        retrieverLevelSelectionModel.clear();
+        selectionPanel.clear();
+        clearSelection();
+        selectionProvidersMappedByRetrievedDataType.clear();
+    }
+
     private Map<String, Collection<FunctionDTO>> mapBySourceType(Iterable<FunctionDTO> dimensions) {
         Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = new HashMap<>();
         for (FunctionDTO dimension : dimensions) {
@@ -215,13 +224,14 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                dimension1.getParameterTypeNames().equals(dimension2.getParameterTypeNames()) &&
                dimension1.getReturnTypeName().equals(dimension2.getReturnTypeName());
     }
-
-    private void clearContent() {
-        retrieverLevelDataProvider.getList().clear();
-        retrieverLevelSelectionModel.clear();
-        selectionPanel.clear();
-        clearSelection();
-        selectionProvidersMappedByRetrievedDataType.clear();
+    
+    private void updateFilterSelectionProviders(int beginningWithLevel) {
+        for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
+            final LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
+            if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
+                selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData();
+            }
+        }
     }
 
     @Override
