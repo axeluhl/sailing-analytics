@@ -411,7 +411,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks.values());
                     logger.info("Finished loading wind tracks for " + getRace().getName() + ". Found " + windTracks.size() + " wind tracks for this race.");
-                    
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         loadingFromWindStoreState = LoadingFromStoresState.FINISHED;
