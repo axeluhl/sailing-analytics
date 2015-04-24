@@ -53,8 +53,8 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private void showNoQRCodeMessage() {
-        ((AbstractStartActivity) getActivity())
-            .showErrorPopup(R.string.no_qr_code_popup_title, R.string.no_qr_code_popup_message);
+        ((AbstractStartActivity) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
+                R.string.no_qr_code_popup_message);
     }
 
     private boolean requestQRCodeScan() {
@@ -74,7 +74,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
                 startActivity(marketIntent);
             } else {
                 Toast.makeText(getActivity(), getString(R.string.error_play_store_and_scanning_not_available),
-                    Toast.LENGTH_LONG).show();
+                        Toast.LENGTH_LONG).show();
             }
             return false;
         }
@@ -91,7 +91,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
         } else {
             String templateString = getString(R.string.error_scanning_qrcode);
             Toast.makeText(getActivity(), templateString.replace("{result-code}", String.valueOf(resultCode)),
-                Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -104,8 +104,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     public abstract void handleScannedOrUrlMatchedUri(Uri uri);
 
     /**
-     * Display a confirmation-dialog in which the user confirms his full name
-     * and sail-id.
+     * Display a confirmation-dialog in which the user confirms his full name and sail-id.
      *
      * @param checkinData
      */
@@ -116,8 +115,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     /**
-     * Shows a pop-up-dialog that informs the user than an API-call has failed
-     * and recommends a retry.
+     * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     protected void displayAPIErrorRecommendRetry() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

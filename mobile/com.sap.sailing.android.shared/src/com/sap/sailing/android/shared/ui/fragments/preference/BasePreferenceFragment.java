@@ -53,23 +53,24 @@ public class BasePreferenceFragment extends PreferenceFragment {
     protected static void bindPreferenceSummaryToValue(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-            PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager
+                .getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
     }
 
     protected static void bindPreferenceSummaryToInteger(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-            PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getInt(preference.getKey(), 0));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager
+                .getDefaultSharedPreferences(preference.getContext()).getInt(preference.getKey(), 0));
     }
 
     protected static void bindPreferenceSummaryToSet(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-            PreferenceManager.getDefaultSharedPreferences(preference.getContext())
-                .getStringSet(preference.getKey(), new HashSet<String>()));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                preference,
+                PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getStringSet(
+                        preference.getKey(), new HashSet<String>()));
     }
 
     protected static void bindPreferenceToCheckbox(CheckBoxPreference checkboxPreference, final Preference target) {

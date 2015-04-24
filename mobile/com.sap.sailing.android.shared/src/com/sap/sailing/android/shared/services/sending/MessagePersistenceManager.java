@@ -49,7 +49,7 @@ public class MessagePersistenceManager {
     }
 
     private void persistMessage(String url, String callbackPayload, String payload, String callbackClass)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
         ExLog.i(context, TAG, String.format("Persisting message \"%s\".", messageLine));
         if (persistedMessages.contains(messageLine)) {
@@ -60,14 +60,14 @@ public class MessagePersistenceManager {
     }
 
     /**
-     * @param payload will be URL-encoded to ensure that the resulting string does not contain newlines
+     * @param payload
+     *            will be URL-encoded to ensure that the resulting string does not contain newlines
      * @throws UnsupportedEncodingException
      */
     private String getSerializedIntentForPersistence(String url, String callbackPayload, String payload,
-        String callbackClass) throws UnsupportedEncodingException {
-        String messageLine = String
-            .format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload, MessageSendingService.charsetName), url,
-                callbackClass);
+            String callbackClass) throws UnsupportedEncodingException {
+        String messageLine = String.format("%s;%s;%s;%s", callbackPayload,
+                URLEncoder.encode(payload, MessageSendingService.charsetName), url, callbackClass);
         return messageLine;
     }
 
@@ -81,7 +81,7 @@ public class MessagePersistenceManager {
     }
 
     private void removeMessage(String url, String callbackPayload, String payload, String callbackClass)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         if (!persistedMessages.isEmpty()) {
             ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
             String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
@@ -131,7 +131,7 @@ public class MessagePersistenceManager {
                 try {
                     @SuppressWarnings("unchecked")
                     Class<? extends ServerReplyCallback> tmp = (Class<? extends ServerReplyCallback>) Class
-                        .forName(callbackClassString);
+                            .forName(callbackClassString);
                     callbackClass = tmp;
                 } catch (ClassNotFoundException e) {
                     ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
@@ -140,8 +140,8 @@ public class MessagePersistenceManager {
 
             // We are passing no message id, because we know it used to suppress message sending and
             // we want this message to be sent.
-            Intent messageIntent = MessageSendingService
-                .createMessageIntent(context, url, callbackPayload, null, payload, callbackClass);
+            Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload, null,
+                    payload, callbackClass);
 
             if (messageRestorer != null) {
                 messageRestorer.restoreMessage(context, messageIntent);
@@ -169,7 +169,7 @@ public class MessagePersistenceManager {
             inputStream.close();
         } catch (IOException e) {
             ExLog.w(context, TAG, "In Method getFileContent(): " + e.getClass().getName() + " / " + e.getMessage()
-                + " fileContent is empty");
+                    + " fileContent is empty");
         }
         return fileContent;
     }
@@ -217,8 +217,8 @@ public class MessagePersistenceManager {
             outputStream.write(content.getBytes());
             outputStream.close();
         } catch (IOException e) {
-            ExLog.e(context, TAG,
-                "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
+            ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content
+                    + " and mode " + mode);
         }
     }
 

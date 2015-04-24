@@ -26,7 +26,7 @@ public class FileBasedHttpGetRequest extends HttpGetRequest {
 
     @Override
     protected InputStream readAndCopyResponse(HttpURLConnection connection, BufferedInputStream inputStream)
-        throws IOException {
+            throws IOException {
         FileOutputStream outputStream = new FileOutputStream(outputFile);
         try {
             if (!readResponse(connection, inputStream, outputStream)) {

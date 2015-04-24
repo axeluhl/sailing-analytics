@@ -13,9 +13,15 @@ import com.sap.sailing.android.shared.logging.LoggingExceptionHandler;
 import com.sap.sailing.android.shared.util.PrefUtils;
 
 /**
- * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
- * <p>Offers a static {@link StringContext} to handle i18n in ugly cases.</p>
- * <p>Sets the default preference values (if not set)</p>
+ * <p>
+ * Registers an additional exception handler for uncaught exception to have some crash logging.
+ * </p>
+ * <p>
+ * Offers a static {@link StringContext} to handle i18n in ugly cases.
+ * </p>
+ * <p>
+ * Sets the default preference values (if not set)
+ * </p>
  */
 public class LoggableApplication extends Application {
 
@@ -32,12 +38,11 @@ public class LoggableApplication extends Application {
         super.onCreate();
         ExLog.i(this, TAG, "Application is starting.");
 
-        Thread.setDefaultUncaughtExceptionHandler(
-            new LoggingExceptionHandler(Thread.getDefaultUncaughtExceptionHandler(), this));
+        Thread.setDefaultUncaughtExceptionHandler(new LoggingExceptionHandler(Thread
+                .getDefaultUncaughtExceptionHandler(), this));
 
-        LifecycleLogger.enableLifecycleLogging(PrefUtils
-            .getBoolean(this, R.string.preference_enableLifecycleLogging_key,
-                R.bool.preference_enableLifecycleLogging_default));
+        LifecycleLogger.enableLifecycleLogging(PrefUtils.getBoolean(this,
+                R.string.preference_enableLifecycleLogging_key, R.bool.preference_enableLifecycleLogging_default));
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
     }
 

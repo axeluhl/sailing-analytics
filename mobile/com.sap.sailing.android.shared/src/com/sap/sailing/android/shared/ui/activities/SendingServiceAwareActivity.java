@@ -91,8 +91,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         if (errorCount > 0) {
             menuItemLive.setIcon(R.drawable.ic_menu_share_red);
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
-            sendingServiceStatus = String
-                .format("Currently %d events waiting to be sent.\nLast successful sent was at %s", errorCount,
+            sendingServiceStatus = String.format(
+                    "Currently %d events waiting to be sent.\nLast successful sent was at %s", errorCount,
                     lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
             menuItemLive.setIcon(R.drawable.ic_menu_share);
@@ -101,8 +101,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     /**
-     * @return the resource ID for the options menu, {@code 0} if none.
-     * The menu item displaying the connection status is added automatically.
+     * @return the resource ID for the options menu, {@code 0} if none. The menu item displaying the connection status
+     *         is added automatically.
      */
     protected abstract int getOptionsMenuResId();
 
@@ -136,7 +136,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
 
     private String getLiveIconText() {
         return String.format("Connected to: %s\n%s",
-            PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default),
-            sendingServiceStatus);
+                PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                sendingServiceStatus);
     }
 }

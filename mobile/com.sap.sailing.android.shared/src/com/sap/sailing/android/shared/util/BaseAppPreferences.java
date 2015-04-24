@@ -11,7 +11,7 @@ public class BaseAppPreferences {
 
     public BaseAppPreferences(Context context) {
         this.context = context;
-        //multi process mode so that services read consistent values
+        // multi process mode so that services read consistent values
         preferences = context.getSharedPreferences(BaseAppPreferences.class.getName(), Context.MODE_MULTI_PROCESS);
     }
 

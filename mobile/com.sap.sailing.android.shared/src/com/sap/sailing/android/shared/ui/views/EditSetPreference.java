@@ -58,7 +58,7 @@ public class EditSetPreference extends DialogPreference {
 
         // setup inputView
         ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(),
-            android.R.layout.simple_dropdown_item_1line, exampleValues);
+                android.R.layout.simple_dropdown_item_1line, exampleValues);
         inputView.setAdapter(autoCompleteAdapter);
         inputView.addTextChangedListener(new TextWatcher() {
             @Override

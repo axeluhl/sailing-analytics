@@ -35,7 +35,7 @@ public class NetworkHelper {
     }
 
     public void executeHttpJsonRequestAsnchronously(HttpRequest request, NetworkHelperSuccessListener successListener,
-        NetworkHelperFailureListener failureListener) {
+            NetworkHelperFailureListener failureListener) {
 
         NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
@@ -50,7 +50,7 @@ public class NetworkHelper {
         private NetworkHelperError error;
 
         public NetworkRequestTask(NetworkHelperSuccessListener successListener,
-            NetworkHelperFailureListener failureListener) {
+                NetworkHelperFailureListener failureListener) {
             this.successListener = successListener;
             this.failureListener = failureListener;
         }

@@ -123,8 +123,8 @@ public class SelectionBuilder {
 
     @Override
     public String toString() {
-        return "SelectionBuilder[table=" + mTable + ", selection=" + getSelection() + ", selectionArgs=" + Arrays
-            .toString(getSelectionArgs()) + " projectionMap = " + mProjectionMap + " ]";
+        return "SelectionBuilder[table=" + mTable + ", selection=" + getSelection() + ", selectionArgs="
+                + Arrays.toString(getSelectionArgs()) + " projectionMap = " + mProjectionMap + " ]";
     }
 
     public Cursor query(SQLiteDatabase db, String[] columns, String orderBy) {
@@ -136,8 +136,8 @@ public class SelectionBuilder {
         if (columns != null)
             mapColumns(columns);
         ExLog.i(mContext, TAG, "query(columns=" + Arrays.toString(columns) + ", distinct=" + distinct + ") " + this);
-        return db
-            .query(distinct, mTable, columns, getSelection(), getSelectionArgs(), mGroupBy, mHaving, orderBy, limit);
+        return db.query(distinct, mTable, columns, getSelection(), getSelectionArgs(), mGroupBy, mHaving, orderBy,
+                limit);
     }
 
     /**

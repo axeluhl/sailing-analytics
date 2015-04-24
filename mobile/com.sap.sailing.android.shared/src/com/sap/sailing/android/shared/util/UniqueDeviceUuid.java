@@ -14,21 +14,20 @@ public class UniqueDeviceUuid {
 
     public static String getUniqueId(Context context) {
         /*
-                 String existingDeviceIdentifier = prefs.getDeviceIdentifier();
-		 
-		 if (existingDeviceIdentifier != null && existingDeviceIdentifier.length() > 0)
-		 {
-			 return existingDeviceIdentifier;
-		 }
-		 */
+         * String existingDeviceIdentifier = prefs.getDeviceIdentifier();
+         * 
+         * if (existingDeviceIdentifier != null && existingDeviceIdentifier.length() > 0) { return
+         * existingDeviceIdentifier; }
+         */
 
         final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         final String tmDevice, tmSerial, androidId;
         tmDevice = "" + tm.getDeviceId();
         tmSerial = "" + tm.getSimSerialNumber();
-        androidId = "" + android.provider.Settings.Secure
-            .getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        androidId = ""
+                + android.provider.Settings.Secure.getString(context.getContentResolver(),
+                        android.provider.Settings.Secure.ANDROID_ID);
 
         UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
         String deviceId = deviceUuid.toString();

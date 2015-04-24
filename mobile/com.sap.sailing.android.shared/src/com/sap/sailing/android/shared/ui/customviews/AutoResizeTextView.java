@@ -28,9 +28,8 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 /**
- * Text view that auto adjusts text size to fit within the view. If the text
- * size equals the minimum text size and still does not fit, append with an
- * ellipsis.
+ * Text view that auto adjusts text size to fit within the view. If the text size equals the minimum text size and still
+ * does not fit, append with an ellipsis.
  *
  * @author Chase Colburn
  * @since Apr 4, 2011
@@ -91,8 +90,7 @@ public class AutoResizeTextView extends TextView {
     }
 
     /**
-     * When text changes, set the force resize flag to true and reset the text
-     * size.
+     * When text changes, set the force resize flag to true and reset the text size.
      */
     @Override
     protected void onTextChanged(final CharSequence text, final int start, final int before, final int after) {
@@ -198,8 +196,7 @@ public class AutoResizeTextView extends TextView {
     }
 
     /**
-     * Return flag to add ellipsis to text that overflows at the smallest text
-     * size
+     * Return flag to add ellipsis to text that overflows at the smallest text size
      *
      * @return
      */
@@ -285,7 +282,7 @@ public class AutoResizeTextView extends TextView {
             TextPaint paint = new TextPaint(textPaint);
             // Draw using a static layout
             StaticLayout layout = new StaticLayout(text, paint, width, Alignment.ALIGN_NORMAL, mSpacingMult,
-                mSpacingAdd, false);
+                    mSpacingAdd, false);
             // Check that we have a least one line of rendered text
             if (layout.getLineCount() > 0) {
                 // Since the line at the specific vertical position would be cut
@@ -339,7 +336,7 @@ public class AutoResizeTextView extends TextView {
         paintCopy.setTextSize(textSize);
         // Measure using a static layout
         StaticLayout layout = new StaticLayout(source, paintCopy, width, Alignment.ALIGN_NORMAL, mSpacingMult,
-            mSpacingAdd, true);
+                mSpacingAdd, true);
         return layout.getHeight();
     }
 }

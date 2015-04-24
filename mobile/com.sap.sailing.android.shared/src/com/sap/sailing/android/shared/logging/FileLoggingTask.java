@@ -57,8 +57,9 @@ public class FileLoggingTask implements Runnable {
                     logWriter = new BufferedWriter(new FileWriter(logFile, true));
                     return true;
                 } catch (IOException e) {
-                    Log.w(TAG, String
-                        .format("Unable to open writer on file %s: %s", logFile.getAbsolutePath(), e.getMessage()));
+                    Log.w(TAG,
+                            String.format("Unable to open writer on file %s: %s", logFile.getAbsolutePath(),
+                                    e.getMessage()));
                     return false;
                 }
             }

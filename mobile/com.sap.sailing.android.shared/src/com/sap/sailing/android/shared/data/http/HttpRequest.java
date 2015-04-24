@@ -67,8 +67,7 @@ public abstract class HttpRequest {
     }
 
     /**
-     * Returns a copied {@link InputStream} of the server's response.
-     * You must close this stream when done.
+     * Returns a copied {@link InputStream} of the server's response. You must close this stream when done.
      */
     public InputStream execute() throws IOException {
         ExLog.i(context, TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
@@ -85,8 +84,8 @@ public abstract class HttpRequest {
                 responseInputStream = doRequest(connection);
             } catch (FileNotFoundException fnfe) {
                 // 404 errors...
-                throw new FileNotFoundException(String
-                    .format("(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.", this.hashCode(),
+                throw new FileNotFoundException(String.format(
+                        "(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.", this.hashCode(),
                         fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
             }
 
@@ -113,7 +112,7 @@ public abstract class HttpRequest {
     }
 
     protected InputStream readAndCopyResponse(HttpURLConnection connection, BufferedInputStream inputStream)
-        throws IOException {
+            throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         if (!readResponse(connection, inputStream, outputStream)) {
             return null;
@@ -122,7 +121,7 @@ public abstract class HttpRequest {
     }
 
     protected boolean readResponse(HttpURLConnection connection, BufferedInputStream inputStream,
-        OutputStream outputStream) throws IOException {
+            OutputStream outputStream) throws IOException {
         int fileLength = connection.getContentLength();
         byte data[] = new byte[4096];
         long total = 0;

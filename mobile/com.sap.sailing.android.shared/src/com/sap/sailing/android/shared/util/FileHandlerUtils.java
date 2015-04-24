@@ -32,13 +32,13 @@ public class FileHandlerUtils {
             }
         } catch (IOException e) {
             ExLog.e(context, TAG,
-                "In Method convertStreamToString while converting stream to string: " + e.getMessage());
+                    "In Method convertStreamToString while converting stream to string: " + e.getMessage());
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
                 ExLog.e(context, TAG,
-                    "In Method convertStreamToString while closing the input stream: " + e.getMessage());
+                        "In Method convertStreamToString while closing the input stream: " + e.getMessage());
             }
         }
         return stringBuilder.toString();

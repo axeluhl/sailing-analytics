@@ -14,8 +14,8 @@ import android.view.accessibility.AccessibilityEvent;
 import com.sap.sailing.android.shared.R;
 
 /**
- * Draws one vertical indicator that can is filled green up to a point,
- * depending on the value passed for signal-quality;
+ * Draws one vertical indicator that can is filled green up to a point, depending on the value passed for
+ * signal-quality;
  *
  * @author Lukas Zielinski
  */
@@ -50,21 +50,17 @@ public class SignalQualityIndicatorView extends View {
 
     private void setAccessibilityString() {
         if (this.signalQuality == 2) {
-            this.setContentDescription(
-                getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext()
-                    .getString(R.string.poor));
+            this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description)
+                    + getContext().getString(R.string.poor));
         } else if (this.signalQuality == 3) {
-            this.setContentDescription(
-                getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext()
-                    .getString(R.string.good));
+            this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description)
+                    + getContext().getString(R.string.good));
         } else if (this.signalQuality == 4) {
-            this.setContentDescription(
-                getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext()
-                    .getString(R.string.great));
+            this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description)
+                    + getContext().getString(R.string.great));
         } else {
-            this.setContentDescription(
-                getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext()
-                    .getString(R.string.no_signal));
+            this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description)
+                    + getContext().getString(R.string.no_signal));
         }
     }
 

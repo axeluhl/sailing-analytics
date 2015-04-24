@@ -43,12 +43,12 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
 
     public void showErrorPopup(String title, String message) {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(title).setMessage(message)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.dismiss();
-                }
-            }).create();
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                    }
+                }).create();
 
         dialog.show();
     }

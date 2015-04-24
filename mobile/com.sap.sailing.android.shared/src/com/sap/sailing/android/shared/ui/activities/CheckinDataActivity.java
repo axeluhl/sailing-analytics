@@ -13,8 +13,7 @@ public abstract class CheckinDataActivity extends AbstractBaseActivity implement
     public abstract void onCheckinDataAvailable(AbstractCheckinData data);
 
     /**
-     * Shows a pop-up-dialog that informs the user than an DB-operation has
-     * failed.
+     * Shows a pop-up-dialog that informs the user than an DB-operation has failed.
      */
     public void displayDatabaseError() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

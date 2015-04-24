@@ -31,30 +31,34 @@ import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
- * Service that handles sending messages to a webservice. Deals with an offline setting
- * by buffering the messages in a file, so that they can be sent when the connection is
- * re-established.<br>
+ * Service that handles sending messages to a webservice. Deals with an offline setting by buffering the messages in a
+ * file, so that they can be sent when the connection is re-established.<br>
  * <p/>
- * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml},
- * and also specify your class implementing the {@link MessagePersistenceManager.MessageRestorer}
- * as a meta-data tag with the key {@code com.sap.sailing.android.shared.services.sending.messageRestorer}.
- * Also refer to {@link ConnectivityChangedReceiver}, which has to be registered as well.
- * For example:
- * <pre>{@code
+ * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml}, and also specify
+ * your class implementing the {@link MessagePersistenceManager.MessageRestorer} as a meta-data tag with the key
+ * {@code com.sap.sailing.android.shared.services.sending.messageRestorer}. Also refer to
+ * {@link ConnectivityChangedReceiver}, which has to be registered as well. For example:
+ * 
+ * <pre>
+ * {@code
  * <service
  *   android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
  *   android:exported="false" >
  *   <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
- * }</pre>
+ * }
+ * </pre>
  * <p/>
  * <p/>
  * Message sending example:
- * <pre>{@code
+ * 
+ * <pre>
+ * {@code
  * context.startService(MessageSendingService.createMessageIntent(
  *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
- * }</pre>
+ * }
+ * </pre>
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";
@@ -133,7 +137,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload,
-        Serializable messageId, String payload, Class<? extends ServerReplyCallback> callbackClass) {
+            Serializable messageId, String payload, Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
         messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
@@ -166,24 +170,24 @@ public class MessageSendingService extends Service implements MessageSendingList
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
             if (data == null) {
                 ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
-                    + "on how to register the restorer through the manifest.");
+                        + "on how to register the restorer through the manifest.");
             } else {
                 String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
                 Class<?> clazz = Class.forName(className);
                 if (!MessageRestorer.class.isAssignableFrom(clazz)) {
                     ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
-                        + "on how to register the restorer through the manifest. Class " + clazz
-                        + " does not conform to expected type " + MessageRestorer.class.getName());
+                            + "on how to register the restorer through the manifest. Class " + clazz
+                            + " does not conform to expected type " + MessageRestorer.class.getName());
                 } else {
                     @SuppressWarnings("unchecked")
                     // checked above
-                        Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
+                    Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
                     restorer = castedClass.getConstructor().newInstance();
                 }
             }
         } catch (Exception e) {
             ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
-                + "on how to register the restorer through the manifest. Error Message: " + e.getMessage());
+                    + "on how to register the restorer through the manifest. Error Message: " + e.getMessage());
         }
         return new MessagePersistenceManager(this, restorer);
     }
@@ -268,8 +272,8 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void sendMessage(Intent intent) {
-        boolean sendingActive = PrefUtils
-            .getBoolean(this, R.string.preference_isSendingActive_key, R.bool.preference_isSendingActive_default);
+        boolean sendingActive = PrefUtils.getBoolean(this, R.string.preference_isSendingActive_key,
+                R.bool.preference_isSendingActive_default);
         if (!sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
@@ -288,7 +292,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
         ExLog.i(this, "MS", "on message sent");
         int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key,
-            R.integer.preference_messageResendIntervalMillis_default);
+                R.integer.preference_messageResendIntervalMillis_default);
         if (!success) {
             ExLog.i(this, "MS", "success");
             reportApiConnectivity(APIConnectivity.transmissionError);
@@ -352,27 +356,27 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     /**
-     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
+     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests
+     * coming from the same client
      */
     public final static UUID uuid = UUID.randomUUID();
 
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
-        final String raceName, final String fleetName) throws UnsupportedEncodingException {
-        String url = String.format("%s/sailingserver/rc/racelog?" +
-                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=%s&" +
-                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=%s&" +
-                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=%s&" +
-                RaceLogServletConstants.PARAMS_CLIENT_UUID + "=%s",
-            PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
-            URLEncoder.encode(raceGroupName, charsetName), URLEncoder.encode(raceName, charsetName),
-            URLEncoder.encode(fleetName, charsetName), uuid);
+            final String raceName, final String fleetName) throws UnsupportedEncodingException {
+        String url = String.format("%s/sailingserver/rc/racelog?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME
+                + "=%s&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=%s&"
+                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=%s&" + RaceLogServletConstants.PARAMS_CLIENT_UUID
+                + "=%s", PrefUtils.getString(context, R.string.preference_server_url_key,
+                R.string.preference_server_url_default), URLEncoder.encode(raceGroupName, charsetName), URLEncoder
+                .encode(raceName, charsetName), URLEncoder.encode(fleetName, charsetName), uuid);
         return url;
     }
 
     /**
      * Register listener for API-connectivity
      *
-     * @param listener class that wants to be notified of api-connectivity changes
+     * @param listener
+     *            class that wants to be notified of api-connectivity changes
      */
     public void registerAPIConnectivityListener(APIConnectivityListener listener) {
         apiConnectivityListener = listener;
