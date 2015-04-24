@@ -74,6 +74,8 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure {
 
     @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+        // Remark: We are reusing here CLASS_UP, STARTMODE_UP and STARTMODE_DOWN from the RRS26 procedure
+        // The question is why there are no generic CLASS_UP, STARTMODE_UP and STARTMODE_DOWN events
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassUpInterval), RaceStateEvents.RRS26_CLASS_UP),
                 new RaceStateEventImpl(startTime.minus(startPhaseStartModeUpInterval), RaceStateEvents.RRS26_STARTMODE_UP),
