@@ -52,16 +52,25 @@ public interface RankingMetric extends Serializable {
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
-     * Calculates the time that the <code>trailing</code> competitor needs to "catch up" to reach the <code>leading</code> competitor,
-     * measured in the <code>trailing</code> competitor's "time system." For one-design ranking this will be the gap based on the
-     * <code>trailing</code> competitor's windward/along-course distance to the <code>leading</code> competitor divided by the
-     * <code>trailing</code> competitor's current VMG/VMC. For other ranking systems such as time-on-time, time-on-distance,
-     * combinations thereof or ORC performance curve scoring special rules will apply which take into account the distance traveled
-     * by the <code>trailing</code> competitor in her current leg and scaling any allowances according to that distance in order
-     * to compare to the leader. If the leader is already in another leg, the best corrected leg completion time is used as the
-     * reference for comparison. This may not be the overall leader of the race at that time, but anything else would require an
-     * uncertain prediction of the <code>trailing</code> competitor's performance in the next leg which is not considered to be
+     * Calculates the time that the <code>trailing</code> competitor needs to "catch up" to reach the
+     * <code>leading</code> competitor, measured in the <code>trailing</code> competitor's "time system." For one-design
+     * ranking this will be the gap based on the <code>trailing</code> competitor's windward/along-course distance to
+     * the <code>leading</code> competitor divided by the <code>trailing</code> competitor's current VMG/VMC. For other
+     * ranking systems such as time-on-time, time-on-distance, combinations thereof or ORC performance curve scoring
+     * special rules will apply which take into account the distance traveled by the <code>trailing</code> competitor in
+     * her current leg and scaling any allowances according to that distance in order to compare to the leader. If the
+     * leader is already in another leg, the best corrected leg completion time is used as the reference for comparison.
+     * This may not be the overall leader of the race at that time, but anything else would require an uncertain
+     * prediction of the <code>trailing</code> competitor's performance in the next leg which is not considered to be
      * useful here.
+     * <p>
+     * 
+     * Note that this way of calculating the time to improve takes into account the competitor's <em>average</em>
+     * performance of the <em>entire race so far</em> (as opposed to the <em>current</em> performance</em>) by looking
+     * at how much earlier the competitor would have had to reach the current ranking value (windward position for
+     * one-design, for example) in order to have caught up to the leg's leader. This makes the result robust against
+     * short-term speed changes but doesn't respond well to the different types of legs in which the competitors
+     * may sail.
      */
     default Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint) {
         return getTimeToImprove(trailing, leading, timePoint, new NoCachingWindLegTypeAndLegBearingCache());

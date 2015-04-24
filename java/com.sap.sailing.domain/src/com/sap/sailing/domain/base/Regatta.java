@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.base;
 
+import java.util.function.Function;
+
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -139,6 +142,14 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
      *         discards local to each series rather than spreading them across the entire leaderboard.
      */
     boolean definesSeriesDiscardThresholds();
+    
+    /**
+     * Defines how this regatta is to be ranked. By default, a regatta would be ranked by one-design rules (first boat across
+     * the line wins). Other ranking metrics could define handicaps such as time factors ("time-on-time") or time allowances
+     * per distance sailed ("time-on-distance). This method returns a function that can, given a tracked race, construct the
+     * ranking metric in the context of that race.
+     */
+    Function<TrackedRace, RankingMetric> getRankingMetricConstructor();
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
 

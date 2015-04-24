@@ -35,7 +35,6 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -137,10 +136,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            boolean useInternalMarkPassingAlgorithm, Function<TrackedRace, RankingMetric> rankingMetricConstructor) {
         this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new);
+                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor);
     }
 
     @Override

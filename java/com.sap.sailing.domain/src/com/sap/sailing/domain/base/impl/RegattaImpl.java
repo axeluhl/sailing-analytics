@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -37,6 +38,8 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
@@ -81,6 +84,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
     private final IsRegattaLike regattaLikeHelper;
+    private final Function<TrackedRace, RankingMetric> rankingMetricConstructor;
     
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -138,6 +142,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
         super(name);
+        this.rankingMetricConstructor = OneDesignRankingMetric::new;
         this.useStartTimeInference = useStartTimeInference;
         this.id = id;
         this.raceLogStore = raceLogStore;
@@ -160,6 +165,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.defaultCourseArea = courseArea;
         this.configuration = null;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore);
+    }
+
+    @Override
+    public Function<TrackedRace, RankingMetric> getRankingMetricConstructor() {
+        return rankingMetricConstructor;
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
