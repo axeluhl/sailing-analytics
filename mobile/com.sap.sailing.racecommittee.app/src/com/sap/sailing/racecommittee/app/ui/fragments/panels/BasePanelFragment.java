@@ -72,10 +72,12 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(View lockIcon, @IdRes int idRes, Class cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
-            Fragment fragment = getFragmentManager().findFragmentById(idRes);
-            if (fragment != null) {
-                if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            if (getFragmentManager() != null) {
+                Fragment fragment = getFragmentManager().findFragmentById(idRes);
+                if (fragment != null) {
+                    if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    }
                 }
             }
         }
