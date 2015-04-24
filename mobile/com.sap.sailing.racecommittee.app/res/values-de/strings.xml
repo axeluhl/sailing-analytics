@@ -393,4 +393,6 @@
     <string name="no_event_to_be_sent">Derzeit wartet kein Event auf die Übertragung.</string>
     <string name="never">nie</string>
     <string name="connected_to_wp"><![CDATA[Verbunden mit: %1$s\n%2$s]]></string>
+    <string name="theme_changed_title">Theme Änderung</string>
+    <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
 </resources>
