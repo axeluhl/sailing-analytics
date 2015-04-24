@@ -45,10 +45,10 @@ public class AnalyticsContract {
     public static class Leaderboard implements LeaderboardColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LEADERBOARD).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.leaderboard";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.leaderboard";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.leaderboard";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.leaderboard";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri buildLeaderboardUri(String leaderboardId) {
@@ -63,10 +63,10 @@ public class AnalyticsContract {
     public static class CheckinUri implements CheckinUriColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN_URI).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.uri";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.uri";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.uri";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.uri";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri builCheckInUri(String checkinUriId) {
@@ -81,10 +81,10 @@ public class AnalyticsContract {
     public static class Mark implements MarkColums, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MARK).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.mark";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.mark";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.mark";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.mark";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri builMarkUri(String markId) {
@@ -99,10 +99,10 @@ public class AnalyticsContract {
     public static class MarkPing implements MarkPingColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MARK_PING).build();
 
-        public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.mark.ping";
-        public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.sap_sailing_analytics_buoy.mark.ping";
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.mark.ping";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+                + "/vnd.sap_sailing_analytics_buoy.mark.ping";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri builMarkPingUri(String markId) {
@@ -116,12 +116,12 @@ public class AnalyticsContract {
 
     public static class LeaderboardsMarksJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("leaderboards_marks_joined")
-            .build();
+                .build();
     }
 
     public static class MarksLeaderBoardsJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("marks_leaderboards_joined")
-            .build();
+                .build();
     }
 
     private AnalyticsContract() {

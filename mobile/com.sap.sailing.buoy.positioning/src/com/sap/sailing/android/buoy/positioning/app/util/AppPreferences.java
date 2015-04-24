@@ -12,20 +12,20 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards")
-            .replace("{leaderboard_name}", leaderboardName);
+        return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards").replace(
+                "{leaderboard_name}", leaderboardName);
     }
 
     public String getServerMarkPath(String leaderboardName) {
         String cleanLeaderBoardName = leaderboardName.replaceAll(" ", "%20");
-        return context.getString(R.string.preference_server_marks_path, "/leaderboards")
-            .replace("{leaderboard_name}", cleanLeaderBoardName);
+        return context.getString(R.string.preference_server_marks_path, "/leaderboards").replace("{leaderboard_name}",
+                cleanLeaderBoardName);
     }
 
     public String getServerMarkPingPath(String leaderBoardName, String markID) {
         String cleanLeaderBoardName = leaderBoardName.replaceAll(" ", "%20");
         return context.getString(R.string.preference_server_gps_fixes_post_path, "/leaderboards")
-            .replace("{leaderboard_name}", cleanLeaderBoardName).replace("{mark-id}", markID);
+                .replace("{leaderboard_name}", cleanLeaderBoardName).replace("{mark-id}", markID);
     }
 
     public static boolean getPrintDatabaseOperationDebugMessages() {

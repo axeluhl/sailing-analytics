@@ -121,8 +121,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             savedPosition = new LatLng(savedLatitude, savedLongitude);
             latitudeText += " (" + latlngFormatter.format(savedLatitude) + ")";
             longitudeText += " (" + latlngFormatter.format(savedLongitude) + ")";
-            accuracyText +=
-                " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy())) + ")";
+            accuracyText += " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy()))
+                    + ")";
         }
         latitudeTextView.setText(latitudeText);
         longitudeTextView.setText(longitudeText);
@@ -248,7 +248,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                         pingListener.updatePing();
                         setUpTextUI(lastKnownLocation);
                         updateMap();
-                        Toast.makeText(getActivity(),getString(R.string.position_set),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }

@@ -21,8 +21,9 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
         if (name != null) {
             String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_NAME));
             name.setText(text);
-            //String digestString = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
-            //System.out.println("BENNET: " + digestString);
+            // String digestString =
+            // cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
+            // System.out.println("BENNET: " + digestString);
         }
     }
 }

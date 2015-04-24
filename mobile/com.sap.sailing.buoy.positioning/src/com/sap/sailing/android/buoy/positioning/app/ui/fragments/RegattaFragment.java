@@ -61,7 +61,7 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         switch (loaderId) {
         case MARKER_LOADER:
             return new CursorLoader(getActivity(), AnalyticsContract.MarksLeaderBoardsJoined.CONTENT_URI, null,
-                AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+                    AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
 
         default:
             return null;

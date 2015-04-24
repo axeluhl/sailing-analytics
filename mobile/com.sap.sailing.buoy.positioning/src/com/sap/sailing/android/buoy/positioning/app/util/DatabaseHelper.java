@@ -43,7 +43,7 @@ public class DatabaseHelper {
         leaderboard.checkinDigest = checkinDigest;
 
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
-            Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
         if (lc.moveToFirst()) {
             leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
             leaderboard.name = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
@@ -59,9 +59,8 @@ public class DatabaseHelper {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.checkinDigest = checkinDigest;
 
-        Cursor uc = context.getContentResolver()
-            .query(CheckinUri.CONTENT_URI, null, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"",
-                null, null);
+        Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
+                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
         if (uc.moveToFirst()) {
             checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
             checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
@@ -74,8 +73,8 @@ public class DatabaseHelper {
 
     public List<MarkInfo> getMarks(Context context, String checkinDigest) {
         List<MarkInfo> marks = new ArrayList<MarkInfo>();
-        Cursor mc = context.getContentResolver()
-            .query(Mark.CONTENT_URI, null, Mark.MARK_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+        Cursor mc = context.getContentResolver().query(Mark.CONTENT_URI, null,
+                Mark.MARK_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
         mc.moveToFirst();
         while (!mc.isAfterLast()) {
             MarkInfo markInfo = new MarkInfo();
@@ -93,9 +92,8 @@ public class DatabaseHelper {
 
     public List<MarkPingInfo> getMarkPings(Context context, String markID) {
         List<MarkPingInfo> marks = new ArrayList<MarkPingInfo>();
-        Cursor mpc = context.getContentResolver()
-            .query(MarkPing.CONTENT_URI, null, MarkPing.MARK_ID + " = \"" + markID + "\"", null,
-                MarkPing.MARK_PING_TIMESTAMP + " DESC");
+        Cursor mpc = context.getContentResolver().query(MarkPing.CONTENT_URI, null,
+                MarkPing.MARK_ID + " = \"" + markID + "\"", null, MarkPing.MARK_PING_TIMESTAMP + " DESC");
         mpc.moveToFirst();
         while (!mpc.isAfterLast()) {
             MarkPingInfo markPingInfo = new MarkPingInfo();
@@ -129,13 +127,11 @@ public class DatabaseHelper {
             deletePingsFromDataBase(context, mark.getId());
         }
 
-        int d2 = cr
-            .delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"",
-                null);
+        int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest
+                + "\"", null);
         int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
-        int d4 = cr
-            .delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"",
-                null);
+        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest
+                + "\"", null);
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d2);
@@ -155,7 +151,7 @@ public class DatabaseHelper {
      * @throws RemoteException
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
-        CheckinUrlInfo checkinURL, List<MarkPingInfo> pings) throws GeneralDatabaseHelperException {
+            CheckinUrlInfo checkinURL, List<MarkPingInfo> pings) throws GeneralDatabaseHelperException {
 
         // inserting leaderboard first
 
@@ -231,7 +227,7 @@ public class DatabaseHelper {
     public boolean markLeaderboardCombnationAvailable(Context context, String checkinDigest) {
 
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
-            Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
 
         int count = lc.getCount();
 

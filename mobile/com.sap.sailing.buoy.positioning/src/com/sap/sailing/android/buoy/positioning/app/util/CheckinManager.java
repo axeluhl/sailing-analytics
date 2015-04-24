@@ -71,7 +71,7 @@ public class CheckinManager {
 
         } catch (MalformedURLException e) {
             ExLog.e(activity, TAG,
-                "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
+                    "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
 
@@ -84,9 +84,8 @@ public class CheckinManager {
 
         String leaderboardNameFromQR = "";
         try {
-            leaderboardNameFromQR = URLEncoder
-                .encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
-                .replace("+", "%20");
+            leaderboardNameFromQR = URLEncoder.encode(
+                    uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             ExLog.e(activity, TAG, "Failed to encode leaderboard name: " + e.getMessage());
         } catch (NullPointerException e) {
@@ -97,8 +96,8 @@ public class CheckinManager {
         if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
 
-            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(
-                UUID.fromString(UniqueDeviceUuid.getUniqueId(activity)));
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
+                    .getUniqueId(activity)));
 
             urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
@@ -107,104 +106,101 @@ public class CheckinManager {
 
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
         NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getLeaderboardRequest,
-            new NetworkHelper.NetworkHelperSuccessListener() {
+                new NetworkHelper.NetworkHelperSuccessListener() {
 
-                @Override
-                public void performAction(JSONObject response) {
-                    // TODO Auto-generated method stub
+                    @Override
+                    public void performAction(JSONObject response) {
+                        // TODO Auto-generated method stub
 
-                    final String leaderboardName;
+                        final String leaderboardName;
 
-                    try {
-                        leaderboardName = response.getString("name");
-                        urlData.getMarkUrl = urlData.hostWithPort + prefs.getServerMarkPath(leaderboardName);
-                    } catch (JSONException e) {
-                        ExLog.e(activity, TAG,
-                            "Error getting data from call on URL: " + urlData.getLeaderboardUrl + ", Error: " + e
-                                .getMessage());
+                        try {
+                            leaderboardName = response.getString("name");
+                            urlData.getMarkUrl = urlData.hostWithPort + prefs.getServerMarkPath(leaderboardName);
+                        } catch (JSONException e) {
+                            ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.getLeaderboardUrl
+                                    + ", Error: " + e.getMessage());
+                            activity.dismissProgressDialog();
+                            displayAPIErrorRecommendRetry();
+                            return;
+                        }
+
+                        HttpGetRequest getMarksRequest;
+                        try {
+                            getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), activity);
+                            getMarksFromServer(leaderboardName, getMarksRequest, urlData);
+                        } catch (MalformedURLException e1) {
+                            ExLog.e(activity, TAG, "Error: Failed to perform checking due to a MalformedURLException: "
+                                    + e1.getMessage());
+                        }
+                    }
+
+                }, new NetworkHelper.NetworkHelperFailureListener() {
+
+                    @Override
+                    public void performAction(NetworkHelper.NetworkHelperError e) {
+                        ExLog.e(activity, TAG, "Failed to get event from API: " + e.getMessage());
                         activity.dismissProgressDialog();
                         displayAPIErrorRecommendRetry();
-                        return;
                     }
-
-                    HttpGetRequest getMarksRequest;
-                    try {
-                        getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), activity);
-                        getMarksFromServer(leaderboardName, getMarksRequest, urlData);
-                    } catch (MalformedURLException e1) {
-                        ExLog.e(activity, TAG,
-                            "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
-                    }
-                }
-
-            }, new NetworkHelper.NetworkHelperFailureListener() {
-
-                @Override
-                public void performAction(NetworkHelper.NetworkHelperError e) {
-                    ExLog.e(activity, TAG, "Failed to get event from API: " + e.getMessage());
-                    activity.dismissProgressDialog();
-                    displayAPIErrorRecommendRetry();
-                }
-            });
+                });
     }
 
-    private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest,
-        final URLData urlData) {
-        NetworkHelper.getInstance(activity)
-            .executeHttpJsonRequestAsnchronously(getMarksRequest, new NetworkHelperSuccessListener() {
+    private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest, final URLData urlData) {
+        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getMarksRequest,
+                new NetworkHelperSuccessListener() {
 
-                @Override
-                public void performAction(JSONObject response) {
-                    try {
-                        JSONArray markArray = response.getJSONArray("marks");
-                        String checkinDigest = generateCheckindigest(urlData.uriStr);
-                        List<MarkInfo> marks = new ArrayList<MarkInfo>();
-                        List<MarkPingInfo> pings = new ArrayList<MarkPingInfo>();
-                        for (int i = 0; i < markArray.length(); i++) {
-                            JSONObject jsonMark = (JSONObject) markArray.get(i);
-                            MarkInfo mark = new MarkInfo();
-                            mark.setCheckinDigest(checkinDigest);
-                            mark.setClassName(jsonMark.getString("@class"));
-                            mark.setName(jsonMark.getString("name"));
-                            mark.setId(jsonMark.getString("id"));
-                            if (jsonMark.has("position")) {
-                                if (!jsonMark.get("position").equals(null)) {
-                                    JSONObject positionJson = jsonMark.getJSONObject("position");
-                                    MarkPingInfo ping = new MarkPingInfo();
-                                    ping.setLatitude(positionJson.getString("latitude"));
-                                    ping.setLongitude(positionJson.getString("longitude"));
-                                    ping.setTimestamp(positionJson.getInt("timestamp"));
-                                    ping.setAccuracy(positionJson.getDouble("accuracy"));
-                                    ping.setMarkId(mark.getId());
-                                    pings.add(ping);
+                    @Override
+                    public void performAction(JSONObject response) {
+                        try {
+                            JSONArray markArray = response.getJSONArray("marks");
+                            String checkinDigest = generateCheckindigest(urlData.uriStr);
+                            List<MarkInfo> marks = new ArrayList<MarkInfo>();
+                            List<MarkPingInfo> pings = new ArrayList<MarkPingInfo>();
+                            for (int i = 0; i < markArray.length(); i++) {
+                                JSONObject jsonMark = (JSONObject) markArray.get(i);
+                                MarkInfo mark = new MarkInfo();
+                                mark.setCheckinDigest(checkinDigest);
+                                mark.setClassName(jsonMark.getString("@class"));
+                                mark.setName(jsonMark.getString("name"));
+                                mark.setId(jsonMark.getString("id"));
+                                if (jsonMark.has("position")) {
+                                    if (!jsonMark.get("position").equals(null)) {
+                                        JSONObject positionJson = jsonMark.getJSONObject("position");
+                                        MarkPingInfo ping = new MarkPingInfo();
+                                        ping.setLatitude(positionJson.getString("latitude"));
+                                        ping.setLongitude(positionJson.getString("longitude"));
+                                        ping.setTimestamp(positionJson.getInt("timestamp"));
+                                        ping.setAccuracy(positionJson.getDouble("accuracy"));
+                                        ping.setMarkId(mark.getId());
+                                        pings.add(ping);
+                                    }
                                 }
+                                mark.setType(jsonMark.getString("type"));
+                                marks.add(mark);
                             }
-                            mark.setType(jsonMark.getString("type"));
-                            marks.add(mark);
-                        }
-                        urlData.marks = marks;
-                        urlData.pings = pings;
-                        saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
+                            urlData.marks = marks;
+                            urlData.pings = pings;
+                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
 
-                    } catch (JSONException e) {
-                        ExLog.e(activity, TAG,
-                            "Error getting data from call on URL: " + urlData.getMarkUrl + ", Error: " + e
-                                .getMessage());
+                        } catch (JSONException e) {
+                            ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
+                                    + ", Error: " + e.getMessage());
+                            activity.dismissProgressDialog();
+                            displayAPIErrorRecommendRetry();
+                            return;
+                        }
+
+                    }
+                }, new NetworkHelper.NetworkHelperFailureListener() {
+
+                    @Override
+                    public void performAction(NetworkHelper.NetworkHelperError e) {
+                        ExLog.e(activity, TAG, "Failed to get marks from API: " + e.getMessage());
                         activity.dismissProgressDialog();
                         displayAPIErrorRecommendRetry();
-                        return;
                     }
-
-                }
-            }, new NetworkHelper.NetworkHelperFailureListener() {
-
-                @Override
-                public void performAction(NetworkHelper.NetworkHelperError e) {
-                    ExLog.e(activity, TAG, "Failed to get marks from API: " + e.getMessage());
-                    activity.dismissProgressDialog();
-                    displayAPIErrorRecommendRetry();
-                }
-            });
+                });
     }
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
@@ -221,12 +217,12 @@ public class CheckinManager {
             setCheckinData(data);
         } catch (UnsupportedEncodingException e) {
             ExLog.e(activity, TAG,
-                "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
+                    "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
             activity.dismissProgressDialog();
             displayAPIErrorRecommendRetry();
         } catch (NoSuchAlgorithmException e) {
             ExLog.e(activity, TAG,
-                "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
+                    "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
             activity.dismissProgressDialog();
             displayAPIErrorRecommendRetry();
         }

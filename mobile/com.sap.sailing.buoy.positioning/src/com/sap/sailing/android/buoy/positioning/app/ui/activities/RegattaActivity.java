@@ -139,8 +139,8 @@ public class RegattaActivity extends AbstractRegattaActivity {
         CheckinData data = (CheckinData) checkinData;
         try {
             DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, data.checkinDigest);
-            DatabaseHelper.getInstance()
-                .storeCheckinRow(this, data.marks, data.getLeaderboard(), data.getCheckinUrl(), data.pings);
+            DatabaseHelper.getInstance().storeCheckinRow(this, data.marks, data.getLeaderboard(), data.getCheckinUrl(),
+                    data.pings);
             getRegattaFragment().getAdapter().notifyDataSetChanged();
         } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
             ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());

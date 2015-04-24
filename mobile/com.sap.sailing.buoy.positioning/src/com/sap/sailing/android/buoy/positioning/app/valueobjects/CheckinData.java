@@ -18,8 +18,8 @@ public class CheckinData extends AbstractCheckinData {
     public List<MarkInfo> marks;
     public List<MarkPingInfo> pings;
 
-    public void setCheckinDigestFromString(String checkinString)
-        throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
+            NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(checkinString.getBytes("UTF-8"));
         byte[] digest = md.digest();

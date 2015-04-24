@@ -30,8 +30,8 @@ public class PingHelper {
 
             String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId());
 
-            context.startService(MessageSendingService
-                .createMessageIntent(context, postUrlStr, null, UUID.randomUUID(), fixJson.toString(), null));
+            context.startService(MessageSendingService.createMessageIntent(context, postUrlStr, null,
+                    UUID.randomUUID(), fixJson.toString(), null));
 
         } catch (JSONException ex) {
             ExLog.i(context, TAG, "Error while building ping json " + ex.getMessage());
@@ -41,7 +41,7 @@ public class PingHelper {
     }
 
     public void storePingInDatabase(Context context, Location location, MarkInfo mark)
-        throws GeneralDatabaseHelperException {
+            throws GeneralDatabaseHelperException {
         MarkPingInfo pingInfo = new MarkPingInfo();
         pingInfo.setMarkId(mark.getId());
         pingInfo.setLatitude("" + location.getLatitude());

@@ -74,12 +74,12 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
     private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
         try {
-            if (!DatabaseHelper.getInstance()
-                .markLeaderboardCombnationAvailable(getActivity(), checkinData.checkinDigest)) {
+            if (!DatabaseHelper.getInstance().markLeaderboardCombnationAvailable(getActivity(),
+                    checkinData.checkinDigest)) {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinData.checkinDigest);
             }
-            DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.marks, checkinData.getLeaderboard(),
-                checkinData.getCheckinUrl(), checkinData.pings);
+            DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.marks,
+                    checkinData.getLeaderboard(), checkinData.getCheckinUrl(), checkinData.pings);
             adapter.notifyDataSetChanged();
         } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
             ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
