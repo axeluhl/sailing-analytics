@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
@@ -69,6 +70,11 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         basic.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.BASIC));
         basic.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.BASIC));
         configuration.setBasicConfiguration(basic);
+
+        LeagueConfigurationImpl league = new LeagueConfigurationImpl();
+        league.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.LEAGUE));
+        league.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.LEAGUE));
+        configuration.setLeagueConfiguration(league);
 
         return configuration.clone();
     }
