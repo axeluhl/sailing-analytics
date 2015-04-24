@@ -27,20 +27,66 @@ public class PathImpl implements Path, Serializable {
     private static final long serialVersionUID = -6354445155884413937L;
     private List<TimedPositionWithSpeed> pathPoints;
     private WindField windField;
+    private int turnCount;
+    private long maxTurnTime;
+    private boolean algorithmTimedOut;
+    private boolean mixedLeg = false;
 
     private static final double TRESHOLD_DEGREES = 25.0;
     private static final double THRESHOLD_DISTANCE_METERS = 15.0;
 
-    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
-
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, boolean algorithmTimedOut) {
         this.pathPoints = pointsList;
         this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+    }
 
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, boolean algorithmTimedOut, boolean mixedLeg) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
+    }
+
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime, boolean algorithmTimedOut, boolean mixedLeg) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = maxTurnTime;
+        this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
+    }
+
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, int turnCount, boolean algorithmTimedOut) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = turnCount;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+    }
+
+    @Override
+    public boolean getAlgorithmTimedOut() {
+        return this.algorithmTimedOut;
+    }
+
+    @Override
+    public boolean getMixedLeg() {
+        return this.mixedLeg;
     }
 
     @Override
     public List<TimedPositionWithSpeed> getPathPoints() {
         return this.pathPoints;
+    }
+    
+    @Override
+    public int getTurnCount() {
+        return this.turnCount;
     }
 
     @Override
@@ -49,8 +95,18 @@ public class PathImpl implements Path, Serializable {
     }
 
     @Override
+    public long getMaxTurnTime() {
+        return this.maxTurnTime;
+    }
+    
+    @Override
+    public void setMaxTurnTime(long maxTurnTime) {
+        this.maxTurnTime = maxTurnTime;
+    }
+    
+    @Override
     public Path getEvenTimedPath(long timestep) {
-        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField);
+        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField, this.algorithmTimedOut, this.mixedLeg);
     }
 
     private List<TimedPositionWithSpeed> getEvenTimedPathAsList(long timeStep) {
@@ -372,5 +428,16 @@ public class PathImpl implements Path, Serializable {
         }
 
         return !((diff >= 0 && diff <= TRESHOLD_DEGREES) || (diff >= (180 - TRESHOLD_DEGREES) && diff <= (180 + TRESHOLD_DEGREES)) || (diff >= (360 - TRESHOLD_DEGREES) && diff <= 360));
+    }
+
+    @Override
+    public TimePoint getFinalTime() {
+        TimePoint finalTime = null;
+        if (this.pathPoints != null) {
+            if (this.pathPoints.size() > 0) {
+                finalTime = this.pathPoints.get(this.pathPoints.size()-1).getTimePoint();
+            }
+        }
+        return finalTime;
     }
 }

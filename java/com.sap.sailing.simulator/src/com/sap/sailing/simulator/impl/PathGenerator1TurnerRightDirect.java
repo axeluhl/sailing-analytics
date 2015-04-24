@@ -24,6 +24,7 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
 
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
 
         // retrieve simulation parameters
         Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
@@ -102,7 +103,7 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
                     // System.out.println("out of time");
                     break;
                 }
-                if (!boundary.inBounds(currentPosition)) {
+                if (!boundary.inBounds(currentPosition)||this.isTimedOut()) {
                     // outOfBounds = true;
                     // System.out.println("out of bounds");
                     break;
@@ -130,7 +131,7 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
             // lst.addLast(new TimedPositionWithSpeedImpl(new
             // MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end,
             // lst.getLast().getSpeed()));
-            return new PathImpl(lst, windField);
+            return new PathImpl(lst, windField, this.algorithmTimedOut);
         } else {
             return null;
         }

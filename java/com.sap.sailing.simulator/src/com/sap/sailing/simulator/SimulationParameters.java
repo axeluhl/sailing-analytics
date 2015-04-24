@@ -1,13 +1,13 @@
 package com.sap.sailing.simulator;
 
 import java.util.List;
-import java.util.Map;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Duration;
 
 public interface SimulationParameters {
-
     char getMode();
 
     void setCourse(List<Position> course);
@@ -18,14 +18,13 @@ public interface SimulationParameters {
 
     WindFieldGenerator getWindField();
 
+    Duration getSimuStep();
+
     Grid getGrid();
 
-    Map<String,Double> getSettings();
-
-    void setProperty(String name, Double value);
-
-    Double getProperty(String name);
-    
     boolean showOmniscient();
+
     boolean showOpportunist();
+    
+    LegType getLegType();
 }
