@@ -313,7 +313,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         }
     }
     
-    private class SizeProvidingScrollPanel extends CustomScrollPanel implements SizeProvider {
+    private class SizeProvidingScrollPanel extends CustomScrollPanel implements RetrieverLevelFilterSelectionProvider.SizeProvider {
         @Override
         public int getFreeWidthInPX() {
             return getOffsetWidth() - getVerticalScrollbar().asWidget().getOffsetWidth();

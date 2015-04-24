@@ -228,6 +228,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return "singleRetrieverLevelSelectionPanel";
     }
     
+    interface SizeProvider {
+        
+        public int getFreeWidthInPX();
+        public int getFreeHeightInPX();
+
+    }
+    
     private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
         @Override
         public void onResize() {
