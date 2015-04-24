@@ -80,8 +80,19 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint,
             WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
-        return null;
+        return (tloc1, tloc2) -> getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(tloc1, timePoint).compareTo(
+                getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(tloc2, timePoint));
+    }
+
+    private Double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(TrackedLegOfCompetitor tloc, TimePoint timePoint) {
+        final TimePoint at = tloc.getTimePointNotAfterFinishingOfLeg(timePoint);
+        final Double result;
+        if (at == null) {
+            result = null;
+        } else {
+            result = getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(tloc.getCompetitor(), at);
+        }
+        return result;
     }
 
     @Override
