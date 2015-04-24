@@ -172,7 +172,7 @@
     <string name="number">Nummer</string>
     <string name="snap">Fotos schießen</string>
     <string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
-    <string name="logout_dialog_message">Wenn Sie sich abmelden wird kein Rennen mehr verwaltet.</string>
+    <string name="logout_dialog_message">Wenn Sie sich abmelden, wird kein Rennen mehr verwaltet.</string>
     <string name="logout">Abmelden</string>
     <string name="loading_configuration">Lade Konfiguration&#8230;</string>
     <string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
@@ -297,9 +297,9 @@
     <string name="time_start">Start #TIME#</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Signal setzen</string>
-    <string name="flag_ap_desc">Zukünftige Rennen verschieben</string>
-    <string name="flag_ap_alpha_desc">Verschieben, heute keine Rennen mehr</string>
-    <string name="flag_ap_hotel_desc">Verschieben, weitere Informationen an Land</string>
+    <string name="flag_ap_desc">Rennen verschieben</string>
+    <string name="flag_ap_alpha_desc">Rennen verschieben, heute keine Rennen mehr</string>
+    <string name="flag_ap_hotel_desc">Rennen verschieben, weitere Informationen an Land</string>
     <string name="flag_ap_alpha"><![CDATA[AP & Alpha]]></string>
     <string name="flag_ap_hotel"><![CDATA[AP & Hotel]]></string>
     <string name="flag_xray">Xray</string>
@@ -308,11 +308,11 @@
     <string name="flag_first_subst_desc">Allgemeiner Rückruf</string>
     <string name="flag_blue">Blau</string>
     <string name="flag_blue_desc">Beginn der Ziel Phase</string>
-    <string name="flag_november_desc">Alle gestarteten Rennen abbrechen</string>
+    <string name="flag_november_desc">Rennen abbrechen</string>
     <string name="flag_november_alpha"><![CDATA[November & Alpha]]></string>
     <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
-    <string name="flag_november_alpha_desc">Abbrechen, heute keine Rennen mehr</string>
-    <string name="flag_november_hotel_desc">Abbrechen, weitere Informationen an Land</string>
+    <string name="flag_november_alpha_desc">Rennen abbrechen, heute keine Rennen mehr</string>
+    <string name="flag_november_hotel_desc">Rennen abbrechen, weitere Informationen an Land</string>
     <string name="race_reset_confirm">Rennen zurücksetzen</string>
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden.</string>
@@ -342,8 +342,8 @@
     <string name="race_summary_individual_recalls">Individuelle Rückrufe</string>
     <string name="race_summary_start">Renn Start</string>
     <string name="race_summary_title">Renn Zusammenfassung</string>
-    <string name="race_summary_wind_direction">Durschnittliche Windrichtung</string>
-    <string name="race_summary_wind_speed">Durschnittliche Windgeschwindigkeit</string>
+    <string name="race_summary_wind_direction">Durchschnittliche Windrichtung</string>
+    <string name="race_summary_wind_speed">Durchschnittliche Windgeschwindigkeit</string>
     <string name="record_voice">Stimme Aufzeichnen</string>
     <string name="finishing_started">Erstes Schiff im Ziel um #TIME#</string>
     <string name="finishing_done">Jetzt Runter</string>
