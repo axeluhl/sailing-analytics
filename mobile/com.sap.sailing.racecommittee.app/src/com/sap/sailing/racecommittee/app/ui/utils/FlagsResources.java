@@ -90,8 +90,8 @@ public class FlagsResources {
             break;
 
         case INDIA_ZULU:
-            flag = "flag_india_zulu_" + size + "dp";
-            outline = outline.replace("XX", "01");
+            flag = "flag_india_zulu_" + AppPreferences.on(context).getTheme();
+            outline = null; // because of custom xml
             break;
 
         case JURY:
@@ -131,7 +131,7 @@ public class FlagsResources {
 
         result.add(context.getResources().getIdentifier(flag, "drawable", context.getPackageName()));
 
-        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(context).getTheme())) {
+        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(context).getTheme()) && outline != null) {
             result.add(context.getResources().getIdentifier(outline, "drawable", context.getPackageName()));
         }
 
