@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -435,6 +436,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
+                    }
+
+                    @Override
+                    public Function<TrackedRace, RankingMetric> getRankingMetricConstructor() {
+                        return null;
                     }
                 };
             }
