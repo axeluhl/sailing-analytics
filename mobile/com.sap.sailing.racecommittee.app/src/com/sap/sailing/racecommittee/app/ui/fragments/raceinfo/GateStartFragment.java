@@ -1,13 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -24,6 +28,14 @@ public class GateStartFragment {
     private final static String START_MODE = "startMode";
     private final static String NAT = "nationality";
     private final static String NUM = "number";
+
+    public static void hideKeyboard(Activity activity) {
+        View view = activity.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager manager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 
     public static class Pathfinder extends BaseFragment {
 
@@ -56,8 +68,8 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            final View layout = inflater
-                .inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
+            final View layout = LayoutInflater.from(getActivity()).inflate(
+                R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
 
             mNat = ViewHolder.get(layout, R.id.pathfinder_nat);
             mNum = ViewHolder.get(layout, R.id.pathfinder_num);
@@ -67,6 +79,7 @@ public class GateStartFragment {
             if (getArguments() != null) {
                 if (mNat != null) {
                     mNat.setText(getArguments().getString(NAT));
+                    mNat.setFilters(new InputFilter[] { new InputFilter.AllCaps(), new InputFilter.LengthFilter(3) });
                     mNat.addTextChangedListener(new TextWatcher() {
                         @Override
                         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -88,6 +101,7 @@ public class GateStartFragment {
 
                 if (mNum != null) {
                     mNum.setText(getArguments().getString(NUM));
+                    mNum.setFilters(new InputFilter[] { new InputFilter.LengthFilter(4) });
                     mNum.addTextChangedListener(new TextWatcher() {
                         @Override
                         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -136,11 +150,20 @@ public class GateStartFragment {
                 }
             }
 
+            final GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+            if (mNat != null && TextUtils.isEmpty(mNat.getText())) {
+                mNat.setText(extractPosition(0, procedure.getPathfinder()));
+            }
+            if (mNum != null && TextUtils.isEmpty(mNum.getText())) {
+                mNum.setText(extractPosition(1, procedure.getPathfinder()));
+            }
+
             if (mButton != null) {
                 mButton.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard(getActivity());
                         String nation = "";
                         if (mNat != null) {
                             nation = mNat.getText().toString();
@@ -149,7 +172,6 @@ public class GateStartFragment {
                         if (mNum != null) {
                             number = mNum.getText().toString();
                         }
-                        GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                         procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
                         if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                             replaceFragment(Timing.newInstance(nation, number));
@@ -165,6 +187,15 @@ public class GateStartFragment {
             }
         }
 
+        private String extractPosition(int pos, String string) {
+            if (!TextUtils.isEmpty(string)) {
+                String[] split = string.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
+                if (split.length == 2) {
+                    return split[pos];
+                }
+            }
+            return null;
+        }
 
         private void enableSetButton(View view, View button) {
             if (view != null && view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
@@ -197,7 +228,8 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
+            View layout = LayoutInflater.from(getActivity())
+                .inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
 
             View caption = ViewHolder.get(layout, R.id.header_text);
             if (caption != null) {
@@ -269,6 +301,7 @@ public class GateStartFragment {
 
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard(getActivity());
                         long launch = 0;
                         long golf = 0;
 
