@@ -281,7 +281,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         char reachingSide = ' ';
         // check whether boat is in "tacking area"
         if ((upwindLeftTarget.getDegrees() >= -1) && (upwindLeftTarget.getDegrees() <= upwindLeftRight.getDegrees()+1)) {
-            logger.fine("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees() + ", diffLeftRight: "
+            logger.finest("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees() + ", diffLeftRight: "
                     + upwindLeftRight.getDegrees() + ", " + path.path + ")");
             pointOfSail = PointOfSail.TACKING;
         } else {
@@ -290,11 +290,10 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
             Bearing downwindLeftTarget = bearOptimalDownwind[0].getDifferenceTo(bearTarget);
             // check whether boat is in "non-sailable area"
             if ((downwindLeftTarget.getDegrees() >= -1) && (downwindLeftTarget.getDegrees() <= downwindLeftRight.getDegrees()+1)) {
-                logger.fine("point-of-sail: jibing (diffLeftTarget: " + downwindLeftTarget.getDegrees()
+                logger.finest("point-of-sail: jibing (diffLeftTarget: " + downwindLeftTarget.getDegrees()
                         + ", diffLeftRight: " + downwindLeftRight.getDegrees() + ", " + path.path + ")");
                 pointOfSail = PointOfSail.JIBING;
             } else {
-                //logger.info("path: "+path.path);
                 Bearing windBoat = path.wind.getBearing().getDifferenceTo(bearTarget);
                 if (windBoat.getDegrees() > 0) {
                     reachingSide = 'D'; // left-sided reaching
@@ -609,7 +608,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         double distStartEndMeters = distStartEnd.getMeters();
 
         Wind wndStart = wf.getWind(new TimedPositionWithSpeedImpl(startTime, startPos, null));
-        logger.fine("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
+        logger.finest("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
         polarDiagram.setWind(wndStart);
         Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
         // Bearing bearHrz = bearVrt.add(new DegreeBearingImpl(90.0));
@@ -843,7 +842,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
         // debug output
         for (PathCandidate curPath : trgPaths) {
-            logger.fine("\nPath: " + curPath.path + " (" + curPath.trn + ")\n      Time: "
+            logger.finest("\nPath: " + curPath.path + " (" + curPath.trn + ")\n      Time: "
                     + (curPath.pos.getTimePoint().asMillis() - startTime.asMillis()) + ", Height: " + curPath.vrt
                     + " of " + (Math.round(startPos.getDistance(endPos).getMeters() * 100.0) / 100.0) + ", Dist: "
                     + curPath.hrz + "m ~ "
@@ -911,7 +910,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         SimpleDateFormat racetimeFormat = new SimpleDateFormat("HH:mm:ss:SSS");
         racetimeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         String racetimeFormatted = racetimeFormat.format(cal.getTime());
-        logger.info("Start Condition: " + this.initPathStr + "\nPath: " + bestCand.path +"\n      Time: "
+        logger.fine("Start Condition: " + this.initPathStr + "\nPath: " + bestCand.path +"\n      Time: "
                 +  racetimeFormatted + ", Distance: "
                 + String.format("%.2f", Math.round(bestCand.pos.getPosition().getDistance(endPos).getMeters() * 100.0) / 100.0) + " meters"
                 + ", " + bestCand.trn + " Turn" + (bestCand.trn>1?"s":""));
