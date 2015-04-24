@@ -215,17 +215,17 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                dimension1.getReturnTypeName().equals(dimension2.getReturnTypeName());
     }
     
-    void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider selectionProvider) {
-//      updateFilterSelectionProviders(selectionProvider.getRetrieverLevel());
+    void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
+      updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
       mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
       notifyListeners();
   }
     
-    private void updateFilterSelectionProviders(int beginningWithLevel) {
+    private void updateFilterSelectionProviders(int beginningWithLevel, FunctionDTO exceptForDimension) {
         for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
             final LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
             if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
-                selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData();
+                selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData(exceptForDimension);
             }
         }
     }
