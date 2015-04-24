@@ -58,7 +58,7 @@ class GPSAccuracyView: UIView {
     }
     
     func newLocation(notification: NSNotification) {
-        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as Double
+        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
         drawBar(horizontalAccuracy)
     }
     

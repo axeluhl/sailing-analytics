@@ -19,7 +19,7 @@ class AboutViewController: UIViewController, UIWebViewDelegate, UIAlertViewDeleg
     }
     
     @IBAction func done(sender: AnyObject) {
-        presentingViewController!.dismissViewControllerAnimated(true, nil)
+        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func webViewDidFinishLoad(webView: UIWebView) {

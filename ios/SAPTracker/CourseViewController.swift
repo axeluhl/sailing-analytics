@@ -22,7 +22,7 @@ class CourseViewController: UIViewController {
     }
     
     func newLocation(notification: NSNotification) {
-        courseLabel.text = String(format: "%.0f °", notification.userInfo!["course"] as Double)
+        courseLabel.text = String(format: "%.0f °", notification.userInfo!["course"] as! Double)
     }
     
 }

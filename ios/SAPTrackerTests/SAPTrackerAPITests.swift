@@ -25,7 +25,7 @@ class SAPTrackerAPITests: XCTestCase {
     func testParseEvent() {
         // read JSON from resources
         let data = NSData(contentsOfURL: bundle.URLForResource("event1", withExtension: "json")!)
-        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as [String: AnyObject]
+        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as! [String: AnyObject]
         
         // check values
         checkEventDictionary(dictionary)
@@ -38,7 +38,7 @@ class SAPTrackerAPITests: XCTestCase {
         APIManager.sharedManager.getEvent("35dc9389-b59d-4ebd-8f6b-432065642f40",
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 // check values
-                self.checkEventDictionary(eventResponseObject as [String: AnyObject])
+                self.checkEventDictionary(eventResponseObject as! [String: AnyObject])
                 expectation.fulfill()
             },
             failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
@@ -108,7 +108,7 @@ class SAPTrackerAPITests: XCTestCase {
     func testParseLeaderBoard() {
         // read JSON from resources
         let data = NSData(contentsOfURL: bundle.URLForResource("leaderboard1", withExtension: "json")!)
-        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as [String: AnyObject]
+        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as! [String: AnyObject]
         
         // check values
         checkLeaderBoardDictionary(dictionary)
@@ -121,7 +121,7 @@ class SAPTrackerAPITests: XCTestCase {
         APIManager.sharedManager.getLeaderBoard("505%20Worlds%202013",
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 // check values
-                self.checkLeaderBoardDictionary(eventResponseObject as [String: AnyObject])
+                self.checkLeaderBoardDictionary(eventResponseObject as! [String: AnyObject])
                 expectation.fulfill()
             },
             failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
@@ -169,7 +169,7 @@ class SAPTrackerAPITests: XCTestCase {
     func testParseCompetitor() {
         // read JSON from resources
         let data = NSData(contentsOfURL: bundle.URLForResource("competitor1", withExtension: "json")!)
-        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as [String: AnyObject]
+        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as! [String: AnyObject]
         
         // check values
         checkCompetitorDictionary(dictionary)
@@ -182,7 +182,7 @@ class SAPTrackerAPITests: XCTestCase {
         APIManager.sharedManager.getCompetitor("1d028378-e12c-a6bd-afa3-b8b21bc5a9ea",
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 // check values
-                self.checkCompetitorDictionary(eventResponseObject as [String: AnyObject])
+                self.checkCompetitorDictionary(eventResponseObject as! [String: AnyObject])
                 expectation.fulfill()
             },
             failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in

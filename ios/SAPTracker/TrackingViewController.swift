@@ -62,7 +62,7 @@ class TrackingViewController : UIViewController {
     }
     
     func newLocation(notification: NSNotification) {
-        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as Double
+        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
         gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
         trackingStatusLabel.text = NSLocalizedString("Tracking", comment: "")
         trackingStatusLabel.textColor = Color.Green

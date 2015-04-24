@@ -55,7 +55,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             targetImageView.image = UIImage(named: "scan_green")
             session.stopRunning()
             activityIndicatorView.startAnimating()
-            let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
+            let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
             qrCodeManager!.parseUrl(metadataObject.stringValue)
         }
     }

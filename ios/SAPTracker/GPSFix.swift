@@ -20,11 +20,11 @@ public class GPSFix: NSManagedObject {
     @NSManaged var checkIn: CheckIn?
 
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
-        timestamp = round(dictionary["timestamp"] as Double * 1000)
-        latitude = dictionary["latitude"] as Double
-        longitude = dictionary["longitude"] as Double
-        speed = dictionary["speed"] as Double
-        course = dictionary["course"] as Double
+        timestamp = round(dictionary["timestamp"] as! Double * 1000)
+        latitude = dictionary["latitude"] as! Double
+        longitude = dictionary["longitude"] as! Double
+        speed = dictionary["speed"] as! Double
+        course = dictionary["course"] as! Double
     }
     
     func dictionary() -> [String: AnyObject] {

@@ -22,7 +22,7 @@ class AcceptTermsViewController: UIViewController {
         let urlpath = NSBundle.mainBundle().pathForResource("eula-ios", ofType: "html");
         let requesturl = NSURL(string: urlpath!)
         let request = NSURLRequest(URL: requesturl!)
-        (self.view as UIWebView).loadRequest(request)
+        (self.view as! UIWebView).loadRequest(request)
     }
     
     @IBAction func declineButtonTap(sender: AnyObject) {

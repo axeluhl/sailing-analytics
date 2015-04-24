@@ -16,7 +16,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
-    @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView?
+    @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
     var fetchedResultsController: NSFetchedResultsController?
     private var qrCodeManager: QRCodeManager?
     
@@ -51,7 +51,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
 
     func openUrl(notification: NSNotification) {
-        let url = notification.userInfo!["url"] as String
+        let url = notification.userInfo!["url"] as! String
         qrCodeManager!.parseUrl(url)
     }
     
@@ -63,7 +63,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         actionSheet.showInView(view)
     }
     
-    func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
+    func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
         switch buttonIndex{
          case 0:
             performSegueWithIdentifier("Settings", sender: actionSheet)
@@ -78,7 +78,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     // MARK: - UITableViewDataSource
     func resizeTable() {
-        let info = fetchedResultsController!.sections![0] as NSFetchedResultsSectionInfo
+        let info = fetchedResultsController!.sections![0] as! NSFetchedResultsSectionInfo
         let rows = info.numberOfObjects
         if rows < 3 {
             tableView.removeConstraint(tableViewHeight)
@@ -94,7 +94,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let info = fetchedResultsController!.sections![section] as NSFetchedResultsSectionInfo
+        let info = fetchedResultsController!.sections![section] as! NSFetchedResultsSectionInfo
         resizeTable()
         return info.numberOfObjects
     }
@@ -104,13 +104,13 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
+        var cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as! UITableViewCell!
         configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as CheckIn
+        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn
         cell.textLabel?.text = checkIn.leaderBoardName
     }
     
@@ -120,23 +120,23 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.beginUpdates()
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject,  atIndexPath indexPath: NSIndexPath,
+    func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject,  atIndexPath indexPath: NSIndexPath?,
         forChangeType type: NSFetchedResultsChangeType,
-        newIndexPath: NSIndexPath) {
+        newIndexPath: NSIndexPath?) {
             switch type {
             case .Insert:
-                tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             case .Update:
-                let cell = tableView.cellForRowAtIndexPath(indexPath)
+                let cell = tableView.cellForRowAtIndexPath(indexPath!)
                 if cell != nil {
-                    configureCell(cell!, atIndexPath: indexPath)
-                    tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                    configureCell(cell!, atIndexPath: indexPath!)
+                    tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
                 }
             case .Move:
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-                tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
             case .Delete:
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             default:
                 return
             }
@@ -150,7 +150,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UITableViewDelegate
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        DataManager.sharedManager.selectedCheckIn = (fetchedResultsController!.objectAtIndexPath(indexPath) as CheckIn)
+        DataManager.sharedManager.selectedCheckIn = (fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn)
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         performSegueWithIdentifier("Regatta", sender: tableView)
     }

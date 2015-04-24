@@ -36,7 +36,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         var session: AVCaptureSession!
         var output: AVCaptureMetadataOutput!
         (session, output) = QRCodeManager.setUpCaptureSession(nil)
-        let types = output.availableMetadataObjectTypes as [String]
+        let types = output.availableMetadataObjectTypes as! [String]
         var deviceCanReadQRCodes = false
         for type in types {
             if type == AVMetadataObjectTypeQRCode {
@@ -70,7 +70,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     func parseUrl(url: NSString) {
         
         qrcodeData = QRCodeData()
-        let parseSuccess = qrcodeData!.parseString(url)
+        let parseSuccess = qrcodeData!.parseString(url as String)
         if !parseSuccess {
             let alertView = UIAlertView(title: NSLocalizedString("Incorrect QR Code", comment: ""), message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.IncorrectQRCode.rawValue;
@@ -109,9 +109,9 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                     self.delegate.activityIndicatorView?.stopAnimating()
                                     
                                     self.competitorDictionary = competitorResponseObject as? [String: AnyObject]
-                                    let competitorName = (self.competitorDictionary!["name"]) as String
-                                    let leaderBoardName = (self.leaderBoardDictionary!["name"]) as String
-                                    let sailId = (self.competitorDictionary!["sailID"]) as String
+                                    let competitorName = (self.competitorDictionary!["name"]) as! String
+                                    let leaderBoardName = (self.leaderBoardDictionary!["name"]) as! String
+                                    let sailId = (self.competitorDictionary!["sailID"]) as! String
                                     var title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""), competitorName, leaderBoardName, sailId)
                                     let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
                                     alertView.tag = AlertView.AcceptMapping.rawValue;
@@ -163,8 +163,8 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     }
     
     private func checkIn() {
-        let leaderBoardName = leaderBoardDictionary!["name"] as String
-        let competitorId = competitorDictionary!["id"] as String
+        let leaderBoardName = leaderBoardDictionary!["name"] as! String
+        let competitorId = competitorDictionary!["id"] as! String
         let now = NSDate()
         let fromMillis = Int64(now.timeIntervalSince1970 * 1000)
         let checkIn = DataManager.sharedManager.newCheckIn()

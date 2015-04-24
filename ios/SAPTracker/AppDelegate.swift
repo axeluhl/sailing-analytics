@@ -43,11 +43,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String, annotation: AnyObject?) -> Bool {
-        var rootViewController = self.window!.rootViewController as UINavigationController
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+        var rootViewController = self.window!.rootViewController as! UINavigationController
         rootViewController.popToRootViewControllerAnimated(false)
         rootViewController.dismissViewControllerAnimated(false, completion: nil)
-        var homeViewController = rootViewController.viewControllers[0] as HomeViewController
+        var homeViewController = rootViewController.viewControllers[0] as! HomeViewController
         let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": url.absoluteString!])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         return true

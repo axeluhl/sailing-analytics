@@ -22,7 +22,7 @@ class SettingsViewController: UITableViewController, UITableViewDelegate {
     }
     
     @IBAction func done(sender: AnyObject) {
-        presentingViewController!.dismissViewControllerAnimated(true, nil)
+        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
 }

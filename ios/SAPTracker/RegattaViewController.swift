@@ -62,10 +62,10 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
         
         // set regatta image, either load it from server or load from core data
-        if DataManager.sharedManager.selectedCheckIn?.userImage? != nil {
+        if DataManager.sharedManager.selectedCheckIn?.userImage != nil {
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
             self.yourTeamPhotoButton.hidden = true
-        } else if DataManager.sharedManager.selectedCheckIn?.imageUrl? != nil {
+        } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
             let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
             imageView.setImageWithURLRequest(urlRequest,
@@ -81,7 +81,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         } else {
             self.editTeamPhotoButton.hidden = true
         }
-        if (DataManager.sharedManager.selectedCheckIn?.competitor? != nil) {
+        if (DataManager.sharedManager.selectedCheckIn?.competitor != nil) {
             let competitor = DataManager.sharedManager.selectedCheckIn!.competitor!
             nameLabel.text = competitor.name
             flagImageView.image = UIImage(named: competitor.countryCode)
@@ -138,7 +138,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         startTrackingButton.setTitle(NSLocalizedString("Start Tracking", comment: ""), forState: UIControlState.Normal)
         announcementsLabel.text = NSLocalizedString("Please listen for announcements", comment: "")
         
-        if DataManager.sharedManager.selectedCheckIn?.event? != nil {
+        if DataManager.sharedManager.selectedCheckIn?.event != nil {
             let event = DataManager.sharedManager.selectedCheckIn!.event!
             // finished
             if now.timeIntervalSinceDate(event.endDate) > 0 {
@@ -191,7 +191,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     // MARK: - UIActionSheetDelegate
     
-    func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
+    func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
         if actionSheet.tag == ActionSheet.Menu.rawValue {
             switch buttonIndex{
             case 0:
@@ -248,7 +248,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         presentViewController(imagePickerController, animated: true, completion: nil)
     }
     
-    func imagePickerController(picker: UIImagePickerController!, didFinishPickingImage image: UIImage!, editingInfo: NSDictionary!) {
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
         dismissViewControllerAnimated(true, completion: nil)
         imageView.image = image
         yourTeamPhotoButton.hidden = true
@@ -260,8 +260,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             success: { (AnyObject responseObject) -> Void in
                 // http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
                 // "Additional Notes: Competitor profile image left out for now."
-                let responseDictionary = responseObject as [String: AnyObject]
-                let imageUrl = (responseDictionary["teamImageUri"]) as String;
+                let responseDictionary = responseObject as![String: AnyObject]
+                let imageUrl = (responseDictionary["teamImageUri"]) as! String;
                 DataManager.sharedManager.selectedCheckIn!.imageUrl = imageUrl;
             },
             failure: { (NSError error) -> Void in

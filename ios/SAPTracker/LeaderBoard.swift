@@ -16,7 +16,7 @@ public class LeaderBoard: NSManagedObject {
     @NSManaged public var checkIn: CheckIn?
 
     public func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
-        name = dictionary["name"] as String
+        name = dictionary["name"] as! String
     }
 
 }

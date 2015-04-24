@@ -21,12 +21,12 @@ public class Competitor: NSManagedObject {
     @NSManaged public var checkIn: CheckIn?
    
     public func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
-        competitorId = dictionary["id"] as String
-        name = dictionary["name"] as String
-        sailId = dictionary["sailID"] as String
-        boatClassName = dictionary["boatClassName"] as String
-        countryCode = dictionary["countryCode"] as String
-        nationality = dictionary["nationality"] as String
+        competitorId = dictionary["id"] as! String
+        name = dictionary["name"] as! String
+        sailId = dictionary["sailID"] as! String
+        boatClassName = dictionary["boatClassName"] as! String
+        countryCode = dictionary["countryCode"] as! String
+        nationality = dictionary["nationality"] as! String
     }
 
 }
