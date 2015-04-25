@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,6 +104,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
@@ -354,7 +354,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, Function<TrackedRace, RankingMetric> rankingMetricConstructor) {
+            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         rankingMetric = rankingMetricConstructor.apply(this);
         raceStates = new WeakHashMap<>();

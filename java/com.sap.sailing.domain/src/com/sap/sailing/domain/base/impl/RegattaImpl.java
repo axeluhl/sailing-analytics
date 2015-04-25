@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -39,7 +38,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
-import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
@@ -84,7 +83,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
     private final IsRegattaLike regattaLikeHelper;
-    private final Function<TrackedRace, RankingMetric> rankingMetricConstructor;
+    private final RankingMetricConstructor rankingMetricConstructor;
     
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -168,7 +167,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public Function<TrackedRace, RankingMetric> getRankingMetricConstructor() {
+    public RankingMetricConstructor getRankingMetricConstructor() {
         return rankingMetricConstructor;
     }
 

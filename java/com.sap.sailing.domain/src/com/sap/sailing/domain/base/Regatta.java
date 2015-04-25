@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.base;
 
-import java.util.function.Function;
-
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -149,7 +147,7 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
      * per distance sailed ("time-on-distance). This method returns a function that can, given a tracked race, construct the
      * ranking metric in the context of that race.
      */
-    Function<TrackedRace, RankingMetric> getRankingMetricConstructor();
+    RankingMetricConstructor getRankingMetricConstructor();
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
 
