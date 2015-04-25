@@ -20,9 +20,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -87,9 +87,9 @@ class DimensionFilterSelectionProvider {
         mainPanel.add(busyIndicator);
         
         selectionTable = new FilterableSelectionTable<>();
-        selectionTable.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        selectionTable.addSelectionChangeHandler(new FilterSelectionChangedListener() {
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
+            public void selectionChanged() {
                 DimensionFilterSelectionProvider.this.retrieverLevelSelectionProvider.dimensionFilterSelectionChanged(DimensionFilterSelectionProvider.this);
             }
         });
@@ -104,7 +104,7 @@ class DimensionFilterSelectionProvider {
         public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
             final FunctionDTO dimension = event.getValue();
             if (dimension != null) {
-                updateAvailableData();
+                fetchAndDisplayAvailableData(false);
                 if (firstChange && retrieverLevelSelectionProvider.canAddDimensionSelectionProvider()) {
                     retrieverLevelSelectionProvider.createAndAddDimensionSelectionProvider();
                 }
@@ -124,47 +124,55 @@ class DimensionFilterSelectionProvider {
         }
     }
     
-    void updateAvailableData() {
+    void fetchAndDisplayAvailableData(final boolean isUpdate) {
         final FunctionDTO dimension = getSelectedDimension();
-        if (dimension != null) {
-            Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
-            dimensionDTOs.add(dimension);
-            @SuppressWarnings("unchecked")
-            Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO = 
-                    (Map<Integer, Map<FunctionDTO, Collection<?>>>)(Map<?, ?>) retrieverLevelSelectionProvider.getCompleteFilterSelection();
-            busyIndicator.setVisible(true);
-            dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
-                    retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
-                    LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
-                        @Override
-                        public void onSuccess(QueryResult<Set<Object>> result) {
-                            if (!result.getResults().isEmpty()) {
-                                GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
-                                List<?> content = new ArrayList<Object>(result.getResults().get(contentKey));
-                                Collections.sort(content, new Comparator<Object>() {
-                                    @Override
-                                    public int compare(Object o1, Object o2) {
-                                        return o1.toString().compareTo(o2.toString());
-                                    }
-                                });
-                                selectionTable.setContent(content == null ? new ArrayList<>() : content);
-                                if (selectionToBeApplied != null) {
-                                    selectionTable.setSelection(selectionToBeApplied);
-                                    selectionToBeApplied = null;
+        Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
+        dimensionDTOs.add(dimension);
+        @SuppressWarnings("unchecked")
+        Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO = 
+                (Map<Integer, Map<FunctionDTO, Collection<?>>>)(Map<?, ?>) retrieverLevelSelectionProvider.getCompleteFilterSelection();
+        int retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
+        if (filterSelectionDTO.containsKey(retrieverLevel)) {
+            filterSelectionDTO.get(retrieverLevel).remove(dimension);
+        }
+        busyIndicator.setVisible(true);
+        dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
+                retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
+                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
+                    @Override
+                    public void onSuccess(QueryResult<Set<Object>> result) {
+                        if (!result.getResults().isEmpty()) {
+                            GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
+                            List<?> content = new ArrayList<Object>(result.getResults().get(contentKey));
+                            Collections.sort(content, new Comparator<Object>() {
+                                @Override
+                                public int compare(Object o1, Object o2) {
+                                    return o1.toString().compareTo(o2.toString());
                                 }
-                                selectionTable.setVisible(true);
-                                toggleFilterButton.setVisible(true);
+                            });
+                            
+                            if (isUpdate) {
+                                selectionTable.updateContent(content);
+                            } else {
+                                selectionTable.setContent(content);
                             }
                             
-                            busyIndicator.setVisible(false);
+                            if (selectionToBeApplied != null) {
+                                selectionTable.setSelection(selectionToBeApplied);
+                                selectionToBeApplied = null;
+                            }
+                            selectionTable.setVisible(true);
+                            toggleFilterButton.setVisible(true);
                         }
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error fetching the dimension values of " + dimension + ": "
-                                    + caught.getMessage());
-                        }
-                    });
-        }
+                        
+                        busyIndicator.setVisible(false);
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error fetching the dimension values of " + dimension + ": "
+                                + caught.getMessage());
+                    }
+                });
     }
     
     void setAvailableDimensions(Collection<FunctionDTO> availableDimensions) {

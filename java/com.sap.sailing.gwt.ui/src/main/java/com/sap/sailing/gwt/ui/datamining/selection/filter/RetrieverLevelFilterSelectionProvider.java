@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -131,8 +130,9 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     
     void updateAvailableData(FunctionDTO exceptForDimension) {
         for (DimensionFilterSelectionProvider selectionProvider : dimensionSelectionProviders) {
-            if (!Objects.equals(selectionProvider.getSelectedDimension(), exceptForDimension)) {
-                selectionProvider.updateAvailableData();
+            FunctionDTO selectedDimension = selectionProvider.getSelectedDimension();
+            if (selectedDimension != null && !selectedDimension.equals(exceptForDimension)) {
+                selectionProvider.fetchAndDisplayAvailableData(true);
             }
         }
     }
