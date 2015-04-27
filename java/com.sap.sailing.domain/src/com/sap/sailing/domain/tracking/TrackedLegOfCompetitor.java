@@ -80,7 +80,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * the time point when the competitor completed the leg if that was before <code>timePoint</code>. Note that this does not
      * account for changing winds during the leg.
      */
-    Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException;
+    Speed getAverageVelocityMadeGood(TimePoint timePoint);
 
     /**
      * Computes the competitor's average speed over ground for this leg from the beginning of the leg up to time
@@ -232,13 +232,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
      */
-    Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
-     * Same as {@link #getEstimatedTimeToNextMarkInSeconds(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
+     * Same as {@link #getEstimatedTimeToNextMark(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
      */
-    Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
@@ -313,7 +312,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Like {@link #getAverageVelocityMadeGood(TimePoint)}, only with an additional cache argument that allows the method to
      * use already computed values for wind and leg type, potentially also updating the cache as it goes.
      */
-    Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * If the {@link #getCompetitor() competitor} hasn't started the {@link #getTrackedLeg() leg} yet at

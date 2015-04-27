@@ -4,13 +4,17 @@ import java.util.Comparator;
 import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Mile;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * The basic concept of this ranking metric is to compare corrected reciproke VMG/VMC (measured in seconds per nautical
@@ -110,14 +114,12 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             result = null;
         } else {
             final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint);
-            final Duration correctedTimeByTimeOnTime = timeActuallySpent.times(Double.valueOf(
-                    getTimeOnTimeFactor(competitor)).longValue());
+            final Duration correctedTimeByTimeOnTime = timeActuallySpent.times(getTimeOnTimeFactor(competitor));
             if (windwardDistanceSailed == null) {
                 result = correctedTimeByTimeOnTime;
             } else {
-                final Duration timeOnDistanceAllowance = Duration.ONE_SECOND.times(Double.valueOf(
-                        windwardDistanceSailed.getNauticalMiles()
-                                * getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor)).longValue());
+                final Duration timeOnDistanceAllowance = Duration.ONE_SECOND.times(windwardDistanceSailed.getNauticalMiles()
+                                * getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor));
                 result = correctedTimeByTimeOnTime.minus(timeOnDistanceAllowance);
             }
         }
@@ -130,6 +132,35 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
 
     private double getTimeOnDistanceFactorInSecondsPerNauticalMile(Competitor competitor) {
         return timeOnDistanceFactorInSecondsPerNauticalMile.apply(competitor);
+    }
+
+    /**
+     * Equal performance is defined here to mean equal reciproke VMG as determined by the formula
+     * <pre>vmgc_i := t_i * f_i / d_i - g_i</pre> that, when equating it for <code>who</code> and <code>to</code> yields:
+     * <pre>t_who * f_who / d_who - g_who = t_to * f_to / d_to - g_to</pre> Resolving to <code>t_who</code> gives:
+     * <pre>t_who = (t_to * f_to / d_to - g_to + g_who) * d_who / f_who</pre> Furthermore, we have <code>d_who==d_to</code>
+     * because we want to know how long <code>who</code> would take for that same distance under performance equal to
+     * that of <code>to</code>.
+     */
+    @Override
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
+            TimePoint whenWhoIsAtFromWaypoint, TimePoint timePointOfTosPosition) {
+        final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
+        if (whenToPassedFromWaypoint == null) {
+            throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
+        }
+        final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
+        final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition);
+        final double   f_to = getTimeOnTimeFactor(to);
+        final double   g_to = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
+        final Distance d_who = d_to;
+        final double   f_who = getTimeOnTimeFactor(who);
+        final double   g_who = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
+        
+        final Duration t_who = new MillisecondsDurationImpl(Double.valueOf(
+                (1./d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE - g_to + g_who)
+                              * d_who.getNauticalMiles() / f_who * 1000.).longValue());
+        return t_who;
     }
 
 }

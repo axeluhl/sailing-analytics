@@ -32,6 +32,7 @@ public interface Duration extends Serializable, Comparable<Duration> {
     
     Duration divide(long divisor);
     Duration times(long factor);
+    Duration times(double factor);
     
     Duration minus(Duration duration);
     Duration minus(long milliseconds);

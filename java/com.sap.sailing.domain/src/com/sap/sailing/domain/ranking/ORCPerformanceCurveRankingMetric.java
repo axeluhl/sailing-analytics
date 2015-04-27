@@ -3,6 +3,7 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -43,4 +44,10 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return null;
     }
 
+    @Override
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
+            TimePoint whenWhoIsAtFromWaypoint, TimePoint timePointOfTosPosition) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

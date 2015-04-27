@@ -318,12 +318,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException {
+    public Speed getAverageVelocityMadeGood(TimePoint timePoint) {
         return getAverageVelocityMadeGood(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    public Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Speed result = null;
         MarkPassing start = getMarkPassingForLegStart();
         if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
@@ -687,12 +687,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
-        return getEstimatedTimeToNextMarkInSeconds(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+        return getEstimatedTimeToNextMark(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
+    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) throws NoWindException {
         final Duration result;
         if (hasFinishedLeg(timePoint)) {

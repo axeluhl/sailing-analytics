@@ -1636,7 +1636,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             Distance distanceTraveledConsideringGateStart = trackedLeg.getDistanceTraveledConsideringGateStart(timePoint);
             result.distanceTraveledIncludingGateStartInMeters = distanceTraveledConsideringGateStart == null ? null : distanceTraveledConsideringGateStart.getMeters();
-            final Duration estimatedTimeToNextMarkInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT, cache);
+            final Duration estimatedTimeToNextMarkInSeconds = trackedLeg.getEstimatedTimeToNextMark(timePoint, WindPositionMode.EXACT, cache);
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
