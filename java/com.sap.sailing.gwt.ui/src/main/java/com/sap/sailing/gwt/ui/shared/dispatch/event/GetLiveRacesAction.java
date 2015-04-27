@@ -1,16 +1,19 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -18,6 +21,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
@@ -38,7 +42,7 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
     @Override
     @GwtIncompatible
     public ResultWithTTL<LiveRacesDTO> execute(DispatchContext context) {
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
         LiveRacesDTO result = new LiveRacesDTO();
 
         Event event = context.getRacingEventService().getEvent(getEventId());
@@ -63,6 +67,10 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                             // race isn't live
                             continue;
                         }
+                        TimePoint startTime = state.getStartTime();
+                        if(startTime == null) {
+                            continue;
+                        }
                         
                         LiveRaceDTO liveRaceDTO = new LiveRaceDTO();
                         liveRaceDTO.setRegattaName(regattaName);
@@ -70,7 +78,22 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                         liveRaceDTO.setFleetColor(fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
                         liveRaceDTO.setRaceName(raceColumn.getName());
                         
-//                        liveRaceDTO.setStart(state.getStartTime().asDate());
+                        liveRaceDTO.setStart(startTime.asDate());
+                        
+                        if (startTime != null) {
+                            FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, now);
+                            List<FlagPole> activeFlags = activeFlagState.getCurrentState();
+                            FlagPoleState previousFlagState = activeFlagState.getPreviousState(state.getRacingProcedure(), startTime);
+                            List<FlagPole> previousFlags = previousFlagState.getCurrentState();
+                            FlagPole mostInterestingFlagPole = FlagPoleState.getMostInterestingFlagPole(previousFlags, activeFlags);
+
+                            // TODO: adapt the LastFlagFinder#getMostRecent method!
+                            if (mostInterestingFlagPole != null) {
+                                liveRaceDTO.setLastUpperFlag(mostInterestingFlagPole.getUpperFlag());
+                                liveRaceDTO.setLastFlagsAreDisplayed(mostInterestingFlagPole.isDisplayed());
+                                liveRaceDTO.setLastFlagsDisplayedStateChanged(previousFlagState.hasPoleChanged(mostInterestingFlagPole));
+                            }
+                        }
                         
                         result.addRace(liveRaceDTO);
                     }
@@ -87,11 +110,10 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                 // }
             }
         }
-        
+//        
 //        Calendar dayToCheck = Calendar.getInstance();
 //        dayToCheck.setTime(new Date());
 //        
-//        Event event = context.getRacingEventService().getEvent(eventId);
 //        if (event != null) {
 //            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
 //                for (Leaderboard leaderboard : context.getRacingEventService().getLeaderboards().values()) {

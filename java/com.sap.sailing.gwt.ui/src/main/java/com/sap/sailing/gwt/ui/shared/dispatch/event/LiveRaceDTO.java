@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.racelog.Flags;
 
 public class LiveRaceDTO implements IsSerializable {
 
@@ -11,6 +12,11 @@ public class LiveRaceDTO implements IsSerializable {
     private String fleetName;
     private String fleetColor;
     private Date start;
+    
+    public Flags lastUpperFlag;
+    public Flags lastLowerFlag;
+    public boolean lastFlagsAreDisplayed;
+    public boolean lastFlagsDisplayedStateChanged;
 
     public LiveRaceDTO() {
     }
@@ -53,5 +59,37 @@ public class LiveRaceDTO implements IsSerializable {
 
     public void setStart(Date start) {
         this.start = start;
+    }
+
+    public Flags getLastUpperFlag() {
+        return lastUpperFlag;
+    }
+
+    public void setLastUpperFlag(Flags lastUpperFlag) {
+        this.lastUpperFlag = lastUpperFlag;
+    }
+
+    public Flags getLastLowerFlag() {
+        return lastLowerFlag;
+    }
+
+    public void setLastLowerFlag(Flags lastLowerFlag) {
+        this.lastLowerFlag = lastLowerFlag;
+    }
+
+    public boolean isLastFlagsAreDisplayed() {
+        return lastFlagsAreDisplayed;
+    }
+
+    public void setLastFlagsAreDisplayed(boolean lastFlagsAreDisplayed) {
+        this.lastFlagsAreDisplayed = lastFlagsAreDisplayed;
+    }
+
+    public boolean isLastFlagsDisplayedStateChanged() {
+        return lastFlagsDisplayedStateChanged;
+    }
+
+    public void setLastFlagsDisplayedStateChanged(boolean lastFlagsDisplayedStateChanged) {
+        this.lastFlagsDisplayedStateChanged = lastFlagsDisplayedStateChanged;
     }
 }
