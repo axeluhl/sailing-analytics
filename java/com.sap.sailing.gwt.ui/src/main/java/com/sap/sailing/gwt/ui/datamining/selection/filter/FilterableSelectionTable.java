@@ -90,19 +90,22 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     }
 
     /**
-     * Replaces the current content of the table with the new one and clears the current selection.
+     * Replaces the current content of the table with the new one and clears the current selection.<br>
+     * Returns <code>true</code> and notifies the listeners, if the selection changed.
      * @param newContent
      */
     @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-    public void setContent(Collection<?> newContent) {
+    public boolean setContent(Collection<?> newContent) {
         Collection<ContentType> specificNewContent = null;
         try {
             specificNewContent = (Collection<ContentType>) newContent;
         } catch (ClassCastException e) {
-            return;
+            return false;
         }
-        internalSetSelection(specificNewContent);
+        internalSetContent(specificNewContent);
+        Set<ContentType> previousSelection = selectionModel.getSelectedSet();
         selectionModel.clear();
+        return !previousSelection.isEmpty();
     }
     
     /**
@@ -119,11 +122,11 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         } catch (ClassCastException e) {
             return false;
         }
-        internalSetSelection(specificNewContent);
+        internalSetContent(specificNewContent);
         return cleanSelection();
     }
 
-    private void internalSetSelection(Collection<ContentType> specificNewContent) {
+    private void internalSetContent(Collection<ContentType> specificNewContent) {
         allData.clear();
         allData.addAll(specificNewContent);
         dataProvider.getList().clear();

@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -128,13 +130,30 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return selectedDimensions;
     }
     
-    void updateAvailableData(FunctionDTO exceptForDimension) {
+    /**
+     * Updates the dimension values except for the given dimension.<br>
+     * Aborts the update, if it caused a selection change.
+     * @return <code>true</code>, if the selection has been changed because of the update.
+     */
+    boolean updateAvailableData(FunctionDTO exceptForDimension) {
+        boolean selectionChanged = false;
         for (DimensionFilterSelectionProvider selectionProvider : dimensionSelectionProviders) {
             FunctionDTO selectedDimension = selectionProvider.getSelectedDimension();
             if (selectedDimension != null && !selectedDimension.equals(exceptForDimension)) {
-                selectionProvider.fetchAndDisplayAvailableData(true);
+                Future<Boolean> dimensionSelectionChangedFuture = selectionProvider.fetchAndDisplayAvailableData(true);
+                Boolean dimensionsSelectionChanged = null;
+                try {
+                    dimensionsSelectionChanged = dimensionSelectionChangedFuture.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    errorReporter.reportError("Error updating the available data: " + e);
+                } 
+                if (dimensionsSelectionChanged != null && dimensionsSelectionChanged) {
+                    selectionChanged = true;
+                    break;
+                }
             }
         }
+        return selectionChanged;
     }
 
     void dimensionFilterSelectionChanged(DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {

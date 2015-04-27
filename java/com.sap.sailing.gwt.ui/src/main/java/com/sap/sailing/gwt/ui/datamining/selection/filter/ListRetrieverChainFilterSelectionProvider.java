@@ -216,18 +216,27 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
-      updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
-      mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
-      notifyListeners();
-  }
+        boolean selectionChanged = updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
+        if (!selectionChanged) {
+            mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
+            notifyListeners();
+        }
+    }
     
-    private void updateFilterSelectionProviders(int beginningWithLevel, FunctionDTO exceptForDimension) {
+    private boolean updateFilterSelectionProviders(int beginningWithLevel, FunctionDTO exceptForDimension) {
+        boolean selectionChanged = false;
         for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
             final LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
             if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
-                selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData(exceptForDimension);
+                boolean retrieverLevelSelectionChanged = selectionProvidersMappedByRetrievedDataType.get(retrievedDataType)
+                        .updateAvailableData(exceptForDimension);
+                if (retrieverLevelSelectionChanged) {
+                    selectionChanged = true;
+                    break;
+                }
             }
         }
+        return selectionChanged;
     }
 
     @Override
