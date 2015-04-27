@@ -421,8 +421,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     private void setupActionBar(ManagedRace race) {
-        String title = race.getSeries().getName() + " / ";
-        if (race.getFleet() != null) {
+        String title = "";
+        if (race.getSeries() != null && !race.getSeries().getName().equals("Default")) {
+            title = race.getSeries().getName() + " / ";
+        }
+        if (race.getFleet() != null && !race.getFleet().getName().equals("Default")) {
             title += race.getFleet().getName() + " / " + race.getRaceName();
         } else {
             title += race.getRaceName();
