@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining.settings;
 
-public class RefreshingSelectionTablesSettings {
+import com.sap.sse.common.settings.AbstractSettings;
+
+public class RefreshingSelectionTablesSettings extends AbstractSettings {
     
     private boolean refreshAutomatically;
     private Integer refreshIntervalInMilliseconds;

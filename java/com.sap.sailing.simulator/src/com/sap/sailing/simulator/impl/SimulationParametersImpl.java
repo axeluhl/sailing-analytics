@@ -1,41 +1,48 @@
 package com.sap.sailing.simulator.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Duration;
 
 public class SimulationParametersImpl implements SimulationParameters {
 
     private List<Position> course;
     private PolarDiagram polarDiagram;
     private WindFieldGenerator windField;
-    private Map<String, Double> settings;
+    private Duration simuStep;
     private char mode;
     private boolean showOmniscient;
     private boolean showOpportunist;
+    private LegType legType;
 
-
-    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, char mode, boolean showOmniscient, boolean showOpportunist) {
+    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
+            char mode, boolean showOmniscient, boolean showOpportunist) {
         this.course = crs;
         this.polarDiagram = pd;
         this.windField = wf;
+        this.simuStep = simuStep;
         this.mode = mode;
-
-        this.settings = new HashMap<String, Double>();
-
-        this.settings.put("Heuristic.targetTolerance[double]", 0.05);
-        this.settings.put("Heuristic.timeResolution[long]", 30000.0);
-        this.settings.put("Djikstra.gridv[int]", 10.0);
-        this.settings.put("Djikstra.gridh[int]", 100.0);
-        
         this.showOmniscient = showOmniscient;
         this.showOpportunist = showOpportunist;
+        this.legType = null;
+    }
+
+    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
+            char mode, boolean showOmniscient, boolean showOpportunist, LegType legType) {
+        this.course = crs;
+        this.polarDiagram = pd;
+        this.windField = wf;
+        this.simuStep = simuStep;
+        this.mode = mode;
+        this.showOmniscient = showOmniscient;
+        this.showOpportunist = showOpportunist;
+        this.legType = legType;
     }
 
     @Override
@@ -64,33 +71,27 @@ public class SimulationParametersImpl implements SimulationParameters {
     }
 
     @Override
+    public Duration getSimuStep() {
+        return simuStep;
+    }
+
+    @Override
     public Grid getGrid() {
         return windField.getGrid();
     }
 
     @Override
-    public Map<String, Double> getSettings() {
-        return settings;
+    public boolean showOmniscient() {
+        return showOmniscient;
     }
 
     @Override
-    public void setProperty(String name, Double value) {
-        settings.put(name, value);
-    }
-
-    @Override
-    public Double getProperty(String name) {
-        return settings.get(name);
+    public boolean showOpportunist() {
+        return showOpportunist;
     }
     
     @Override
-	public boolean showOmniscient() {
-    	return showOmniscient;
+    public LegType getLegType() {
+        return legType;
     }
-
-    @Override
-	public boolean showOpportunist() {
-    	return showOpportunist;
-    }
-
 }

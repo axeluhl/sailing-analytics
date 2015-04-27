@@ -7,6 +7,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Util.Pair;
 
 public interface PolarDiagram extends Serializable {
 
@@ -25,8 +26,10 @@ public interface PolarDiagram extends Serializable {
     void setWind(SpeedWithBearing newWind);
 
     // current
+    void initializeSOGwithCurrent();
     void setCurrent(SpeedWithBearing newCurrent);
     SpeedWithBearing getCurrent();
+    boolean hasCurrent();
 
     // target direction
     //     default is target bearing = 0;
@@ -35,6 +38,7 @@ public interface PolarDiagram extends Serializable {
     void setTargetDirection(Bearing newTargetDirection);
     
     // boat
+    Pair<PointOfSail, BoatDirection> getPointOfSail(Bearing bearTarget);
     SpeedWithBearing getSpeedAtBearing(Bearing bearing);
     SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing);
     SpeedWithBearing[] optimalVMGUpwind();

@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.regression;
+package com.sap.sailing.domain.polars;
 
 
 public class NotEnoughDataHasBeenAddedException extends Exception {

@@ -9,6 +9,10 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
         return createEntryPointLink("/gwt/RaceBoard.html", parameters);
     }
 
+    public static String createSimulatorLink(Map<String, String> parameters) {
+        return createEntryPointLink("/gwt/Simulator.html", parameters);
+    }
+
     public static String createLeaderboardLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Leaderboard.html", parameters);
     }

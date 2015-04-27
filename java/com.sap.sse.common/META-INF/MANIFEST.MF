@@ -13,5 +13,6 @@ Export-Package: com.sap.sse.common,
  com.sap.sse.common.search,
  com.sap.sse.common.settings,
  com.sap.sse.common.util
-Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"
+Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ org.json.simple;bundle-version="1.1.0"
 Bundle-ActivationPolicy: lazy

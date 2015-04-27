@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
@@ -25,6 +25,12 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
+    
+    @Override
+    public boolean canProcessElements() {
+        // TODO Auto-generated method stub
+        return true;
+    }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
@@ -148,10 +154,21 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
+    
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
+    }
+    
+    @Override
+    public boolean isAborted() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override

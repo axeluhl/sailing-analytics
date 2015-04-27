@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client.shared.components;
 import java.util.ArrayList;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
@@ -43,7 +44,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends AbstractSettings> String getErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
         for (ComponentAndValidator<?> componentAndValidator : validators) {
             if (componentAndValidator.getA() == componentAndSettings.getA()) {
                 @SuppressWarnings("unchecked")

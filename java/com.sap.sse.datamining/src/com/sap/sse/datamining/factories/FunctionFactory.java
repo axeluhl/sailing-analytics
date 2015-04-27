@@ -20,10 +20,6 @@ public class FunctionFactory {
     public <ReturnType> MethodWrappingFunction<ReturnType> createMethodWrappingFunction(Method method) throws ClassCastException {
         return new MethodWrappingFunction<ReturnType>(method, (Class<ReturnType>) method.getReturnType());
     }
-    
-    public <ReturnType> Function<ReturnType> createCompoundFunction(List<Function<?>> functions) {
-        return createCompoundFunction(null, functions);
-    }
 
     /**
      * Creates a {@link ConcatenatingCompoundFunction} for the given functions.<br>
@@ -32,14 +28,14 @@ public class FunctionFactory {
      * @throws ClassCastException
      */
     @SuppressWarnings("unchecked")
-    public <ReturnType> Function<ReturnType> createCompoundFunction(String name, List<Function<?>> functions) throws ClassCastException {
-        return new ConcatenatingCompoundFunction<ReturnType>(name, functions, (Class<ReturnType>) functions.get(functions.size() - 1).getReturnType());
+    public <ReturnType> Function<ReturnType> createCompoundFunction(List<Function<?>> functions) throws ClassCastException {
+        return new ConcatenatingCompoundFunction<ReturnType>(functions, (Class<ReturnType>) functions.get(functions.size() - 1).getReturnType());
     }
 
-    public Function<?> createCompoundFunction(String name, List<Function<?>> previousFunctions, Function<?> lastFunction) {
+    public Function<?> createCompoundFunction(List<Function<?>> previousFunctions, Function<?> lastFunction) {
         List<Function<?>> functions = new ArrayList<>(previousFunctions);
         functions.add(lastFunction);
-        return createCompoundFunction(name, functions);
+        return createCompoundFunction(functions);
     }
 
     /**
