@@ -149,6 +149,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         if (whenToPassedFromWaypoint == null) {
             throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
         }
+        if (whenToPassedFromWaypoint.getTimePoint().after(timePointOfTosPosition)) {
+            throw new IllegalArgumentException("Competitor was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
+                    " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
+        }
         final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
         final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition);
         final double   f_to = getTimeOnTimeFactor(to);

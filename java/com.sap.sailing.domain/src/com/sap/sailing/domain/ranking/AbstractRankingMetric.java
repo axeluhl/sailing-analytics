@@ -78,11 +78,13 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * 
      * @return <code>null</code>, if either of the two competitors' current legs is null
      */
-    protected Duration getActualPredictedTimeToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint) {
+    protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint) {
         final TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
         final TrackedLegOfCompetitor currentLegTo = getTrackedRace().getCurrentLeg(to, timePoint);
         final Duration result;
-        if (currentLegWho == null || currentLegTo == null) {
+        if (who == to) { // the same competitor requires no time to reach its own position; it's already there...
+            result = Duration.NULL;
+        } else if (currentLegWho == null || currentLegTo == null) {
             result = null;
         } else {
             final Position windwardPositionToReachInWhosCurrentLeg =
