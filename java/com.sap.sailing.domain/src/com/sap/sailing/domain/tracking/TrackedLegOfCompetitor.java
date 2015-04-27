@@ -232,12 +232,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
      */
-    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Same as {@link #getEstimatedTimeToNextMarkInSeconds(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
      */
-    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
+    Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**

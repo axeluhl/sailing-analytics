@@ -46,20 +46,31 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     }
     
     protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        return getWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint);
+    }
+    
+    /**
+     * How far did <code>competitor</code> sail windwards/along-course since passing the <code>from</code> waypoint?
+     */
+    protected Distance getWindwardDistanceTraveled(Competitor competitor, Waypoint from, TimePoint timePoint) {
         TrackedLegOfCompetitor currentLeg = getTrackedRace().getCurrentLeg(competitor, timePoint);
         final Distance result;
-        if (currentLeg == null) {
+        if (currentLeg == null || from == null) {
             result = null;
         } else {
             Distance d = Distance.NULL;
+            boolean count = false; // start counting only once the "from" waypoint has been found
             for (TrackedLeg trackedLeg : getTrackedRace().getTrackedLegs()) {
-                if (trackedLeg.getLeg() == currentLeg.getLeg()) {
-                    // partial distance sailed:
-                    d = d.add(trackedLeg.getWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
-                            .getEstimatedPosition(timePoint, /* extrapolate */true)));
-                    break;
-                } else {
-                    d = d.add(trackedLeg.getWindwardDistance());
+                count = count || trackedLeg.getLeg().getFrom() == from;
+                if (count) {
+                    if (trackedLeg.getLeg() == currentLeg.getLeg()) {
+                        // partial distance sailed:
+                        d = d.add(trackedLeg.getWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
+                                .getEstimatedPosition(timePoint, /* extrapolate */true)));
+                        break;
+                    } else {
+                        d = d.add(trackedLeg.getWindwardDistance());
+                    }
                 }
             }
             result = d;

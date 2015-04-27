@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -325,8 +326,9 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }
                             try {
+                                final Duration estimatedTimeToNextMarkInSeconds = trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT);
                                 jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds",
-                                        trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT));
+                                        estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds);
                             } catch (NoWindException e) {
                                 // well, we don't know the wind direction... then no windward distance will be shown...
                             }

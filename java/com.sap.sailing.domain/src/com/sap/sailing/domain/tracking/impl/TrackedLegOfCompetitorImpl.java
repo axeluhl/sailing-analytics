@@ -687,21 +687,21 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+    public Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
         return getEstimatedTimeToNextMarkInSeconds(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
+    public Duration getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        Double result;
+        final Duration result;
         if (hasFinishedLeg(timePoint)) {
-            result = 0.0;
+            result = Duration.NULL;
         } else {
             if (hasStartedLeg(timePoint)) {
                 Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint, windPositionMode);
                 Speed vmg = getVelocityMadeGood(timePoint, windPositionMode, cache);
-                result = vmg == null ? null : windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
+                result = vmg == null ? null : vmg.getDuration(windwardDistanceToGo);
             } else {
                 result = null;
             }
