@@ -50,6 +50,7 @@
     <attr name="lock_outline" format="reference"/>
     <attr name="mic_48dp" format="reference"/>
     <attr name="photo_camera_48dp" format="reference"/>
+    <attr name="play_arrow_36dp" format="reference"/>
     <attr name="value_next" format="reference"/>
     <attr name="value_prev" format="reference"/>
     <attr name="wind_on" format="reference"/>

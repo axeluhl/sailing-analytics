@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="100dp">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/navigation_drawer_cell_height">
 
     <RelativeLayout
         android:id="@+id/panel_right"
@@ -25,8 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_40"
+                android:textAppearance="?textXLarge"
                 tools:text="13:36"/>
 
             <TextView
@@ -35,8 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_started"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_18"/>
+                android:textAppearance="?textXSmall"/>
 
             <TextView
                 android:id="@+id/race_finshed"
@@ -44,8 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_finished"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_18"/>
+                android:textAppearance="?textXSmall"/>
         </LinearLayout>
 
         <TextView
@@ -107,8 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:textColor="?white"
-                    android:textSize="@dimen/textSize_18"
+                    android:textAppearance="?textXSmall"
                     tools:text="01:12"/>
             </LinearLayout>
         </LinearLayout>
@@ -130,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textSize="@dimen/textSize_22"
+                android:textAppearance="?textSmall"
                 tools:text="470 - Women"/>
 
             <TextView
@@ -138,7 +135,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textSize="@dimen/textSize_22"
+                android:textAppearance="?textSmall"
                 tools:text="Fleet Yellow - Race 3"/>
         </LinearLayout>
     </RelativeLayout>

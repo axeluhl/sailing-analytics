@@ -35,9 +35,11 @@ import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.ManagedRaceStartTimeComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -396,23 +398,53 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
+    private void initializeRacesByGroup() {
+        mRacesByGroup.clear();
+        for (ManagedRace race : mManagedRacesById.values()) {
+            BoatClassSeriesFleet container = new BoatClassSeriesFleet(race);
+
+            if (!mRacesByGroup.containsKey(container)) {
+                mRacesByGroup.put(container, new LinkedList<ManagedRace>());
+            }
+            mRacesByGroup.get(container).add(race);
+        }
+    }
+
+    private void initializeViewElements() {
+        // 1. Group races by <boat class, series, fleet>
+        initializeRacesByGroup();
+
+        // 2. Remove previous view items
+        mViewItems.clear();
+
+        // 3. Create view elements from tree
+        for (BoatClassSeriesFleet key : mRacesByGroup.navigableKeySet()) {
+            // ... add the header view...
+            mViewItems.add(new RaceListDataTypeHeader(key));
+
+            List<ManagedRace> races = mRacesByGroup.get(key);
+            Collections.sort(races, new NaturalNamedComparator());
+            for (ManagedRace race : races) {
+                // ... and add the race view!
+                mViewItems.add(new RaceListDataTypeRace(race));
+            }
+        }
+    }
+
     public void setupOn(Collection<ManagedRace> races) {
         ExLog.i(getActivity(), TAG,
-                String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
+            String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
 
         unregisterOnAllRaces();
 
         mManagedRacesById.clear();
-        mViewItems.clear();
-        List<ManagedRace> raceList = new ArrayList<>(races);
-        Collections.sort(raceList, new ManagedRaceStartTimeComparator());
-        for (ManagedRace managedRace : raceList) {
-            mManagedRacesById.put(managedRace.getId(), managedRace);
-            mViewItems.add(new RaceListDataTypeRace(managedRace));
-        }
 
+        for (ManagedRace managedRace: races) {
+            mManagedRacesById.put(managedRace.getId(), managedRace);
+        }
         registerOnAllRaces();
 
+        initializeViewElements();
         // prepare views and do initial filtering
         filterChanged();
         mAdapter.sort(new RaceListDataTypeComparator());

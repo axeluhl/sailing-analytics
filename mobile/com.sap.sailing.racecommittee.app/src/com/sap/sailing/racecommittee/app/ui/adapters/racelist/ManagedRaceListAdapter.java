@@ -1,11 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -14,15 +8,12 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
+import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
@@ -33,30 +24,20 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
-    public interface JuryFlagClickedListener {
-        void onJuryFlagClicked(BoatClassSeriesFleet clickedItem);
-    }
-
-    private enum ViewType {
-        HEADER(0), RACE(1);
-
-        public final int index;
-
-        ViewType(int index) {
-            this.index = index;
-        }
-    }
-
+    private final Object mLockObject = new Object();
     private List<RaceListDataType> mAllViewItems;
     private RaceFilter mFilter;
-    private final Object mLockObject = new Object();
-
     private LayoutInflater mInflater;
     private Resources mResources;
     private List<RaceListDataType> mShownViewItems;
-
     private ImageView marker;
     private ImageView update_badge;
     private LinearLayout race_flag;
@@ -70,17 +51,18 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView race_name;
     private TextView flag_timer;
     private ImageView arrow_direction;
+    private TextView boat_class;
+    private ImageView protest_image;
     private SimpleDateFormat dateFormat;
-
     private RaceListDataType mSelectedRace;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems,
-            JuryFlagClickedListener juryListener) {
+        JuryFlagClickedListener juryListener) {
         super(context, 0);
 
         mAllViewItems = viewItems;
         mShownViewItems = viewItems;
-        mInflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+        mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
         dateFormat = new SimpleDateFormat("HH:mm", getContext().getResources().getConfiguration().locale);
     }
@@ -174,18 +156,26 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         if (convertView == null) {
             if (type == ViewType.HEADER.index) {
-                // TODO
+                convertView = mInflater.inflate(R.layout.race_list_area_header, parent, false);
             } else if (type == ViewType.RACE.index) {
                 convertView = mInflater.inflate(R.layout.race_list_area_item, parent, false);
             }
         }
         findViews(convertView);
+        resetValues(convertView);
 
         if (type == ViewType.HEADER.index) {
-            // TODO
+            final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
+            boat_class.setText(header.toString());
+            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), 48));
+            protest_image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "Not yet implemented", Toast.LENGTH_SHORT).show();
+                }
+            });
         } else if (type == ViewType.RACE.index) {
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
-            resetValues(convertView);
 
             if (convertView != null) {
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
@@ -209,8 +199,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
-                    race_started.setText(mResources.getString(R.string.race_started,
-                            dateFormat.format(state.getStartTime().asDate())));
+                    race_started.setText(
+                        mResources.getString(R.string.race_started, dateFormat.format(state.getStartTime().asDate())));
                     if (state.getFinishedTime() == null) {
                         String duration = getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime());
                         time.setText(duration);
@@ -224,8 +214,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 if (state.getFinishedTime() != null) {
                     time.setVisibility(View.GONE);
                     race_finished.setVisibility(View.VISIBLE);
-                    race_finished.setText(mResources.getString(R.string.race_finished,
-                            dateFormat.format(state.getFinishedTime().asDate())));
+                    race_finished.setText(mResources
+                        .getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
                 }
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     race_scheduled.setVisibility(View.GONE);
@@ -280,6 +270,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         race_scheduled = ViewHolder.get(convertView, R.id.race_scheduled);
         race_unscheduled = ViewHolder.get(convertView, R.id.race_unscheduled);
         flag_timer = ViewHolder.get(convertView, R.id.flag_timer);
+        protest_image = ViewHolder.get(convertView, R.id.protest_image);
+        boat_class = ViewHolder.get(convertView, R.id.boat_class);
     }
 
     private void resetValues(View convertView) {
@@ -320,14 +312,16 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (state == null || state.getStartTime() == null) {
             return;
         }
-        FlagPoleState flagPoleState = state.getTypedRacingProcedure().getActiveFlags(state.getStartTime(), MillisecondsTimePoint.now());
+        FlagPoleState flagPoleState = state.getTypedRacingProcedure()
+            .getActiveFlags(state.getStartTime(), MillisecondsTimePoint.now());
         List<FlagPole> flagChanges = flagPoleState.computeUpcomingChanges();
         if (!flagChanges.isEmpty()) {
             TimePoint changeAt = flagPoleState.getNextStateValidFrom();
             FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
             if (changeAt != null) {
-                current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
+                current_flag.setImageDrawable(
+                    FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
                 String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
                 flag_timer.setText(text.replace("-", ""));
                 Drawable arrow;
@@ -360,5 +354,19 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
         }
         return level;
+    }
+
+    private enum ViewType {
+        HEADER(0), RACE(1);
+
+        public final int index;
+
+        ViewType(int index) {
+            this.index = index;
+        }
+    }
+
+    public interface JuryFlagClickedListener {
+        void onJuryFlagClicked(BoatClassSeriesFleet clickedItem);
     }
 }

@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="@dimen/navigation_drawer_cell_height">
 
-    <Button
-        android:id="@+id/change_filter"
-        style="?android:attr/borderlessButtonStyle"
+    <ImageView
+        android:id="@+id/header_marker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/default_margin_half"
+        android:src="?play_arrow_36dp"/>
+
+    <ImageView
+        android:id="@+id/protest_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:drawableEnd="@drawable/ic_arrow_drop_down_grey600_24dp"
-        android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp"
-        android:text="@string/race_show_all" />
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/default_margin"
+        tools:src="@drawable/flag_bravo_48dp"/>
 
     <TextView
-        android:id="@+id/area_name"
-        android:layout_width="wrap_content"
+        android:id="@+id/boat_class"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/change_filter"
-        android:layout_alignBottom="@+id/change_filter"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginStart="4dp"
-        android:text="@string/available_races"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/header_marker"
+        android:layout_toStartOf="@id/protest_image"
+        android:singleLine="true"
+        android:textAppearance="?textNormal"
+        tools:text="Extreme 40 - Day 1"/>
 </RelativeLayout>
