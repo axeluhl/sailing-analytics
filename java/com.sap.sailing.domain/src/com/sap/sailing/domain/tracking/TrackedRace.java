@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -796,6 +797,8 @@ public interface TrackedRace extends Serializable {
 
     boolean isUsingMarkPassingCalculator();
 
+    void setPolarDataService(PolarDataService polarDataService);
+    
     /**
      * With a handicap system in place, computes the windward distance to the race's overall leader based on the correction factors
      * introduced by the handicap's ranking and scoring system. For one-design classes, this method returns the same result as

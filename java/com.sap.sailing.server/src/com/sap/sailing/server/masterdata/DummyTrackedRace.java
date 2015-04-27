@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -582,6 +583,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return 0;
     }
 
+    @Override
+    public void setPolarDataService(PolarDataService polarDataService) {
+    }
+    
     @Override
     public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
             WindPositionMode windPositionMode) {

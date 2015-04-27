@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -20,10 +21,11 @@ public class GetRaceMapDataAction implements AsyncAction<RaceMapDataDTO> {
     private final Map<CompetitorDTO, Date> to;
     private final boolean extrapolate;
     private final Date date;
-   
+    private final LegIdentifier simulationLegIdentifier;
+    
     public GetRaceMapDataAction(SailingServiceAsync sailingService, Iterable<CompetitorDTO> allCompetitors,
             RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, boolean extrapolate) {
+            Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier) {
         this.allCompetitors = allCompetitors;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -31,6 +33,7 @@ public class GetRaceMapDataAction implements AsyncAction<RaceMapDataDTO> {
         this.from = from;
         this.to = to;
         this.extrapolate = extrapolate;
+        this.simulationLegIdentifier = simulationLegIdentifier;
     }
     
     @Override
@@ -46,7 +49,7 @@ public class GetRaceMapDataAction implements AsyncAction<RaceMapDataDTO> {
         }
         
         sailingService.getRaceMapData(raceIdentifier, date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
-                extrapolate, new AsyncCallback<CompactRaceMapDataDTO>() {
+                extrapolate, simulationLegIdentifier, new AsyncCallback<CompactRaceMapDataDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);

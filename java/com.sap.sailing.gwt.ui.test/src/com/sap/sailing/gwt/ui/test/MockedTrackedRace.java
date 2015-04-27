@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -729,6 +730,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return 0;
     }
 
+    @Override
+    public void setPolarDataService(PolarDataService polarDataService) {
+    }
+    
     @Override
     public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
             WindPositionMode windPositionMode) {

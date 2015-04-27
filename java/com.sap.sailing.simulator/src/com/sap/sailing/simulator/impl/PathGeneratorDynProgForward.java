@@ -128,6 +128,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
     // @Override
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
 
         // retrieve simulation parameters
         Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
@@ -213,6 +214,10 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
                     // origin loop: idxh1
                     for (int idxh1 = -range1; idxh1 <= range1; idxh1++) {
 
+                        if (this.isTimedOut()) {
+                            break;
+                        }
+                        
                         // calculate the time to go from [idxv,idxh1] to [idxv+1,idxh2]
                         DPDuration durationh1h2 = calcDuration(new MillisecondsTimePoint(
                                 duras.get(idxh1 + range1).duration), duras.get(idxh1 + range1).side,
@@ -244,6 +249,10 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
                         int k = 0;
                         for (int j = 0; j < alldur.size(); j++) {
 
+                            if (this.isTimedOut()) {
+                                break;
+                            }
+                            
                             if ((alldur.get(j).duration <= mintol * mindur.duration) && (k < maxeqpaths)) {
                                 ArrayList<Vector<DPLocation>> npaths;
                                 if ((pathsnew.size() > 0)
@@ -278,6 +287,10 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
                         // keep all (see mintol, maxeqpaths) paths with minimum duration for reaching [idxv,idxh2]
                         int k = 0;
                         for (int j = 0; j < alldur.size(); j++) {
+
+                            if (this.isTimedOut()) {
+                                break;
+                            }
 
                             if ((alldur.get(j).duration <= mintol * mindur.duration) && (k < maxeqpaths)) {
                                 ArrayList<Vector<DPLocation>> npaths;
@@ -331,20 +344,23 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
 
         }
 
-        // generate timed position path
-        for (int i = 0; i < paths.size(); i++) {
-            // for(int j=0; j<paths.get(i).size(); j++) {
-            for (int j = 0; j < 1; j++) { // restrict to first path
-                for (int k = 0; k < paths.get(i).get(j).size(); k++) {
-                    Position p = sailGrid[k][paths.get(i).get(j).get(k).idx + optimizationGridsizeHorizontal];
-                    TimePoint t = new MillisecondsTimePoint(paths.get(i).get(j).get(k).dur);
-                    // System.out.println("deltaT: "+(t.asMillis()-startTime.asMillis())/1000.);
-                    optPath.add(new TimedPositionWithSpeedImpl(t, p, null));
+        
+        if (!this.isTimedOut()) {
+            // generate timed position path
+            for (int i = 0; i < paths.size(); i++) {
+                // for(int j=0; j<paths.get(i).size(); j++) {
+                for (int j = 0; j < 1; j++) { // restrict to first path
+                    for (int k = 0; k < paths.get(i).get(j).size(); k++) {
+                        Position p = sailGrid[k][paths.get(i).get(j).get(k).idx + optimizationGridsizeHorizontal];
+                        TimePoint t = new MillisecondsTimePoint(paths.get(i).get(j).get(k).dur);
+                        // System.out.println("deltaT: "+(t.asMillis()-startTime.asMillis())/1000.);
+                        optPath.add(new TimedPositionWithSpeedImpl(t, p, null));
+                    }
                 }
             }
         }
 
-        return new PathImpl(optPath, windField);
+        return new PathImpl(optPath, windField, this.algorithmTimedOut);
     }
 
 }
