@@ -435,14 +435,16 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private void onPositionSetClick() {
         bigMap = false;
 
-        windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
-        mCurrentLocation = new Location("manual");
-        mCurrentLocation.setLatitude(windMap.windMarker.getPosition().latitude);
-        mCurrentLocation.setLongitude(windMap.windMarker.getPosition().longitude);
-        preferences.setWindPosition(windMap.windMarker.getPosition());
-        windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
-        windMap.windMarker.setDraggable(false);
-        windMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        if (windMap.windMarker != null) {
+            windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+            mCurrentLocation = new Location("manual");
+            mCurrentLocation.setLatitude(windMap.windMarker.getPosition().latitude);
+            mCurrentLocation.setLongitude(windMap.windMarker.getPosition().longitude);
+            preferences.setWindPosition(windMap.windMarker.getPosition());
+            windMap.windMarker.setDraggable(false);
+            windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+            windMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        }
         showElements(true);
     }
 
