@@ -304,12 +304,26 @@ public class SimulationServiceImpl implements SimulationService {
         return result;
     }
 
+    private List<Position> getLinePositions(Waypoint wayPoint, TimePoint at, TrackedRace trackedRace) {
+        List<Position> line = new ArrayList<Position>();
+        if (wayPoint != null) {
+            for (Mark lineMark : wayPoint.getMarks()) {
+                Position estimatedMarkPosition = trackedRace.getOrCreateTrack(lineMark).getEstimatedPosition(at, /* extrapolate */ false);
+                if (estimatedMarkPosition != null) {
+                    line.add(estimatedMarkPosition);
+                }
+            }
+        }
+        return line;
+    }
+
     public SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
-            Leg leg = trackedRace.getRace().getCourse().getLegs().get(legIdentifier.getLegNumber());
+            int legNumber = legIdentifier.getLegNumber();
+            Leg leg = trackedRace.getRace().getCourse().getLegs().get(legNumber);
             // get previous mark or start line as start-position
             Waypoint fromWaypoint = leg.getFrom();
             // get next mark as end-position
@@ -341,9 +355,13 @@ public class SimulationServiceImpl implements SimulationService {
                 legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
             }
             Position startPosition = null;
+            List<Position> startLine = null;
             Position endPosition = null;
             if (startTimePoint != null) {
                 startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
+                if (legNumber == 0) {
+                    startLine = this.getLinePositions(fromWaypoint, startTimePoint, trackedRace);
+                }
             }
             if (endTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
@@ -380,7 +398,7 @@ public class SimulationServiceImpl implements SimulationService {
             double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
                     / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
             Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-            SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
+            SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, polarDiagram, windField,
                     simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
             Map<PathType, Path> paths = null;
             if (polarDiagram != null) {

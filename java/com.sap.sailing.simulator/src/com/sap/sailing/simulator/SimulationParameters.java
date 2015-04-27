@@ -13,6 +13,8 @@ public interface SimulationParameters {
     void setCourse(List<Position> course);
 
     List<Position> getCourse();
+    
+    List<Position> getStartLine();
 
     PolarDiagram getBoatPolarDiagram();
 

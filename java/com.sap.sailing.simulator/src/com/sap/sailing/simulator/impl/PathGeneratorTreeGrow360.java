@@ -47,7 +47,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
     public PathGeneratorTreeGrow360(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
-        this.parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
+        this.parameters = new SimulationParametersImpl(params.getCourse(), params.getStartLine(), polarDiagramClone, params.getWindField(),
                 params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
@@ -262,7 +262,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, getBaseDirection(nextDirection), posWind));
+        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, getBaseDirection(nextDirection), posWind, path.start));
     }
 
     // generate path candidates based on bearing to target
@@ -593,11 +593,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
         Position startPos = this.parameters.getCourse().get(0);
         Position endPos = this.parameters.getCourse().get(1);
-
-        // test downwind: exchange start and end
-        // Position startPos = this.parameters.getCourse().get(1);
-        // Position endPos = this.parameters.getCourse().get(0);
-
+        
         TimePoint startTime = wf.getStartTime();// new MillisecondsTimePoint(0);
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
 
@@ -655,31 +651,77 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         logger.fine("Time step :" + usedTimeStep);
 
         // calculate initial position according to initPathStr
-        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0,
-                0.0, 0, "0", '0', wndStart);
+        List<PathCandidate> initPaths = new ArrayList<PathCandidate>();
+        List<PathCandidate> allPaths = new ArrayList<PathCandidate>();
+        List<PathCandidate> trgPaths = new ArrayList<PathCandidate>();
+        List<Position> startLine = this.parameters.getStartLine();
+        
+        // check if start-line has two marks as expected; if not fall back to start-position
+        if ((startLine != null) && (startLine.size() > 2)) {
+            startLine = null;
+        }
+        if (startLine == null) {
+            // initialize with a single path from start position
+            PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0, 0.0, 0, "0", '0', wndStart, startPos);
+            initPaths.add(initPath);
+        } else {
+            Bearing bearLine = startLine.get(0).getBearingGreatCircle(startLine.get(1));
+            double diffLineVrt = bearVrt.getDifferenceTo(bearLine).getDegrees();
+            Position startPositionLeft;
+            Position startPositionRight;
+            if ((diffLineVrt > 0) && (diffLineVrt < 180)) {
+                startPositionLeft = startLine.get(0);
+                startPositionRight = startLine.get(1);
+            } else {
+                startPositionLeft = startLine.get(1);
+                startPositionRight = startLine.get(0);                
+            }
+            // initialize with a multiple paths along the start line
+            if (startLine.size() == 2) {
+                if ((this.maxTurns == 1) && (initPathStr.length() > 1)) {
+                    PathCandidate initPath;
+                    if (initPathStr.charAt(1) == 'L') {
+                        initPath = new PathCandidate(new TimedPositionImpl(currentTime, startPositionLeft), false, 0.0, 0.0, 0, "0", '0', wndStart, startPositionLeft);
+                    } else {
+                        initPath = new PathCandidate(new TimedPositionImpl(currentTime, startPositionRight), false, 0.0, 0.0, 0, "0", '0', wndStart, startPositionRight);
+                    }
+                    initPaths.add(initPath);
+                } else {
+                    Bearing bearStartLine = startPositionLeft.getBearingGreatCircle(startPositionRight);
+                    int nParts = 10;
+                    for(int idx=0; idx<=nParts; idx++) {
+                        Distance deltaStartLine = startPositionLeft.getDistance(startPositionRight).scale(((double)idx)/nParts);
+                        Position tmpPosition = startPositionLeft.translateGreatCircle(bearStartLine, deltaStartLine);
+                        Wind tmpWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, tmpPosition, null));
+                        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, tmpPosition), false, 0.0, 0.0, 0, "0", '0', tmpWind, tmpPosition);
+                        initPaths.add(initPath);
+                    }
+                }
+            }
+        }
+        // construct initialization steps, e.g. first left-going step for left-going 1-turner
         if (initPathStr.length() > 1) {
             String initPathStrCaps = initPathStr.toUpperCase();
             if (!this.upwindLeg) {
                 initPathStrCaps = initPathStrCaps.replace('L', 'r');
                 initPathStrCaps = initPathStrCaps.replace('R', 'l');
             }
-            char nextDirection = '0';
-            for (int idx = 1; idx < initPathStrCaps.length(); idx++) {
-                nextDirection = initPathStrCaps.charAt(idx);
-                PathCandidate newPathCand = getPathCandWind(initPath, nextDirection, usedTimeStep, turnLoss, startPos,
-                        endPos, distStartEndMeters);
-                initPath = newPathCand;
+            for (PathCandidate cand : initPaths) {
+                char nextDirection = '0';
+                PathCandidate tmpCand1 = cand;
+                for (int idx = 1; idx < initPathStrCaps.length(); idx++) {
+                    nextDirection = initPathStrCaps.charAt(idx);
+                    tmpCand1 = getPathCandWind(tmpCand1, nextDirection, usedTimeStep, turnLoss, startPos, endPos, distStartEndMeters);
+                }
+                allPaths.add(tmpCand1);
             }
+        } else {
+            allPaths = initPaths;
         }
-        List<PathCandidate> allPaths = new ArrayList<PathCandidate>();
-        List<PathCandidate> trgPaths = new ArrayList<PathCandidate>();
-        allPaths.add(initPath);
-
-        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, endPos, usedTimeStep,
-                turnLoss, true, (this.upwindLeg?'L':'l'));
+        
+        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, endPos, usedTimeStep, turnLoss, true, (this.upwindLeg?'L':'l'));
         double tstDist1 = startPos.getDistance(tstPosition.getPosition()).getMeters();
-        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, endPos, usedTimeStep, turnLoss, true,
-                (this.upwindLeg?'R':'r'));
+        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, endPos, usedTimeStep, turnLoss, true, (this.upwindLeg?'R':'r'));
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
         double hrzBinSize = (tstDist1 + tstDist2) / 6.0; // horizontal bin size in meters
@@ -863,7 +905,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
             if (nextDirection == '0') {
 
-                curPosition = new TimedPositionWithSpeedImpl(startTime, startPos, null);
+                curPosition = new TimedPositionWithSpeedImpl(startTime, bestCand.start, null);
                 path.add(curPosition);
 
             } else {

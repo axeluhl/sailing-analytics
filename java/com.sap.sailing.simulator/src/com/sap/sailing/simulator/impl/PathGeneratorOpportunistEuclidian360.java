@@ -193,9 +193,9 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                             prevDirection = BoatDirection.BEAT_LEFT;
                         } else {
                             path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionRight, currentWind));
-                            pathStr += "l";
+                            pathStr += "r";
                             currentPosition = nextBoatPositionRight;
-                            prevDirection = BoatDirection.JIBE_LEFT;                        
+                            prevDirection = BoatDirection.JIBE_RIGHT;                        
                         }
                     } else {
                         if (pointOfSail == PointOfSail.TACKING) {
@@ -205,9 +205,9 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                             prevDirection = BoatDirection.BEAT_RIGHT;
                         } else {
                             path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionLeft, currentWind));
-                            pathStr += "r";
+                            pathStr += "l";
                             currentPosition = nextBoatPositionLeft;
-                            prevDirection = BoatDirection.JIBE_RIGHT;                        
+                            prevDirection = BoatDirection.JIBE_LEFT;                        
                         }
                     }
 
