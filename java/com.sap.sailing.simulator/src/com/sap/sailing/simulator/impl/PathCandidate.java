@@ -26,11 +26,19 @@ public class PathCandidate implements Comparable<PathCandidate> {
     char sid;
 
     public int getIndexOfTurnLR() {
-    	return path.indexOf("LR");
+        String tmpPath = path;
+        tmpPath = tmpPath.toUpperCase();
+        tmpPath = tmpPath.replace('D', 'L');
+        tmpPath = tmpPath.replace('E', 'R');
+    	return tmpPath.indexOf("LR");
     }
 
     public int getIndexOfTurnRL() {
-    	return path.indexOf("RL");
+        String tmpPath = path;
+        tmpPath = tmpPath.toUpperCase();
+        tmpPath = tmpPath.replace('D', 'L');
+        tmpPath = tmpPath.replace('E', 'R');
+    	return tmpPath.indexOf("RL");
     }
 
     @Override

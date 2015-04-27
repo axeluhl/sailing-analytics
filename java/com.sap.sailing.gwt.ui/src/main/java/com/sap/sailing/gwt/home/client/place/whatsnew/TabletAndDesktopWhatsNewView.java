@@ -28,15 +28,15 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     @UiField HTML sailingAnalyticsNotes;
-//    @UiField HTML sailingSimulatorNotes;
+    @UiField HTML sailingSimulatorNotes;
     @UiField HTML raceCommitteeAppNotes;
     
     @UiField Anchor sailingAnalyticsNotesAnchor;
-//    @UiField Anchor sailingSimulatorNotesAnchor;
+    @UiField Anchor sailingSimulatorNotesAnchor;
     @UiField Anchor raceCommitteeAppNotesAnchor;
 
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticNotesNavigation; 
-//    private final PlaceNavigation<WhatsNewPlace> sailingSimulatorNoteNavigation; 
+    private final PlaceNavigation<WhatsNewPlace> sailingSimulatorNoteNavigation; 
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppNotesNavigation; 
     
     private final List<Anchor> links;
@@ -49,19 +49,19 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
         initWidget(uiBinder.createAndBindUi(this));
     
         sailingAnalyticsNotes.setHTML(WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText());
-//        sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
+        sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
         raceCommitteeAppNotes.setHTML(WhatsNewResources.INSTANCE.getRaceCommitteeAppNotesHtml().getText());
   
         sailingAnalyticNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics); 
-//        sailingSimulatorNoteNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator); 
+        sailingSimulatorNoteNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator); 
         raceCommitteeAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
         
         sailingAnalyticsNotesAnchor.setHref(sailingAnalyticNotesNavigation.getTargetUrl());
-//      sailingSimulatorNotesAnchor.setHref(sailingSimulatorNoteNavigation.getTargetUrl());
+        sailingSimulatorNotesAnchor.setHref(sailingSimulatorNoteNavigation.getTargetUrl());
         raceCommitteeAppNotesAnchor.setHref(raceCommitteeAppNotesNavigation.getTargetUrl());
         
-        links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, /*sailingSimulatorNotesAnchor,*/ raceCommitteeAppNotesAnchor });
-        contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, /*sailingSimulatorNotes,*/ raceCommitteeAppNotes });
+        links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor });
+        contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes });
 
         switch(navigationTab) {
             case PostRaceAnalytics:
@@ -73,7 +73,7 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
                 setActiveContent(sailingAnalyticsNotes, sailingAnalyticsNotesAnchor);
                 break;
             case SailingSimulator:
-//                setActiveContent(sailingSimulatorNotes, sailingSimulatorNotesAnchor);
+                setActiveContent(sailingSimulatorNotes, sailingSimulatorNotesAnchor);
                 break;
             case TrainingDiary:
                 break;
@@ -85,13 +85,13 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
         setActiveContent(sailingAnalyticsNotes, sailingAnalyticsNotesAnchor);
         handleClickEventWithLocalNavigation(event, sailingAnalyticNotesNavigation);
     }
-/*
+
     @UiHandler("sailingSimulatorNotesAnchor")
     void featuresClicked(ClickEvent event) {
         setActiveContent(sailingSimulatorNotes, sailingSimulatorNotesAnchor);
         handleClickEventWithLocalNavigation(event, sailingSimulatorNoteNavigation);
     }
-*/
+
     @UiHandler("raceCommitteeAppNotesAnchor")
     void releaseNotesClicked(ClickEvent event) {
         setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);

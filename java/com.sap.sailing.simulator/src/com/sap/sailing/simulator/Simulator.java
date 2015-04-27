@@ -1,30 +1,28 @@
 package com.sap.sailing.simulator;
 
 import java.util.List;
-import java.util.Map;
+
+import com.sap.sailing.simulator.impl.SparsePolarDataException;
 
 
-public interface SailingSimulator {
+public interface Simulator {
 
     void setSimulationParameters(SimulationParameters params, SimulatorUISelection selection);
 
     SimulationParameters getSimulationParameters();
 
-    Path getLegGPSTrack(SimulatorUISelection selection);
-
-    Map<String, Path> getAllPaths();
-
-    Map<String, Path> getAllPathsForLeg(SimulatorUISelection selection);
-
-    Map<String, Path> getAllPathsEvenTimed(long millisecondsStep, SimulatorUISelection selection);
-
+    Path getPath(PathType pathType) throws SparsePolarDataException;
+    
     Path getRaceCourse();
 
     List<String> getLegsNames(int selectedRaceIndex);
 
     List<String> getRacesNames();
 
+    List<String> getCompetitorsNames(int selectedRaceIndex);
+
     Path getLeg(int selectedCompetitorIndex, int selectedLegIndex);
 
-    List<String> getComeptitorsNames(int selectedRaceIndex);
+    Path getLegGPSTrack(SimulatorUISelection selection);
+
 }

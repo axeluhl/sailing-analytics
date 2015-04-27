@@ -12,7 +12,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -27,11 +26,11 @@ import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.confidence.impl.ScalableWind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.kmeans.Cluster;
@@ -117,7 +116,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
             CreateModelException {
         setUp("event_20110609_KielerWoch-505_Race_3");
-        ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(Executors.newFixedThreadPool(4)),
+        ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
         final Map<Maneuver, Competitor> maneuvers = windTrack.getAllManeuvers(/* waitForLatest */ true);
         final int numberOfClusters = 16;
@@ -153,7 +152,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
     }
     
     private Wind getManeuverBasedAverageWind() throws NotEnoughDataHasBeenAddedException {
-        ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(Executors.newFixedThreadPool(4)),
+        ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
         ScalableWind windSum = null;
         int count = 0;
