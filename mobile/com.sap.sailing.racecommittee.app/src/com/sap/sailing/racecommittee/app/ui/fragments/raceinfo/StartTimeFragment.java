@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -269,6 +270,14 @@ public class StartTimeFragment extends BaseFragment
         mDatePicker.setMinValue(0);
         mDatePicker.setMaxValue(dates.size() - 1);
         mDatePicker.setWrapSelectorWheel(false);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            TextView date = new TextView(getActivity());
+            date.setText(dateFormat.format(calendar.getTime()));
+            int padding = getResources().getDimensionPixelSize(R.dimen.default_padding_half);
+            date.setPadding(padding, padding, padding, padding);
+            date.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            mDatePicker.getLayoutParams().width = date.getMeasuredWidth();
+        }
     }
 
     private void changeFragment() {
