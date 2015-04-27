@@ -10,9 +10,12 @@
         <item name="colorPrimary">@color/light_colorPrimary</item>
         <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
         <item name="colorAccent">@color/light_colorAccent</item>
-
+        <item name="android:textColorSecondary">?white</item>
         <item name="drawerArrowStyle">@style/AppTheme.Light.Widget.DrawerArrowStyle</item>
         <item name="editText">@style/AppTheme.Light.EditText</item>
+        <item name="android:editTextColor">?white</item>
+        <item name="android:dialogTheme">@style/AppTheme.AlertDialog</item>
+        <item name="android:alertDialogTheme">@style/AppTheme.Light.SettingsAlertDialog</item>
 
         <!-- custom attributes because of custom themes -->
         <!-- colors -->
@@ -152,6 +155,13 @@
     <style name="AppTheme.Light.Text.PanelCaption">
         <item name="android:textSize">@dimen/textSize_22</item>
         <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="AppTheme.Light.SettingsAlertDialog" parent="AppTheme.AlertDialog">
+        <item name="colorPrimaryDark">@color/dialog_color_text</item>
+        <item name="android:textColorSecondary">@color/dialog_color_text</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@null</item>
     </style>
 
 </resources>
