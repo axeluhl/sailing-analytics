@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.ranking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
@@ -47,6 +48,18 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return result;
     }
     
+    public Duration getPredictedCorrectedTimeFromStartOfRaceToReachFastestBoat(Competitor who, Competitor to, TimePoint timePoint) {
+        final Duration predictedDurationToReachWindwardPositionOf = getPredictedDurationToReachWindwardPositionOf(who, to, timePoint);
+        final Duration totalDurationSinceRaceStart = getTrackedRace().getStartOfRace().until(timePoint).plus(predictedDurationToReachWindwardPositionOf);
+        final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(to, timePoint);
+        return getCorrectedTime(who, getTrackedRace().getTrackedLeg(to, timePoint).getLeg(),
+                getTrackedRace().getTrack(to).getEstimatedPosition(timePoint, /* extrapolate */ true),
+                totalDurationSinceRaceStart, totalWindwardDistanceTraveled);
+    }
+    
+    protected abstract Duration getCorrectedTime(Competitor who, Leg leg, Position estimatedPosition,
+            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled);
+
     /**
      * Predicts how long <code>who</code> will take to reach competitor <code>to</code>'s position at
      * <code>timePoint</code>, starting at <code>who</code>'s position at <code>timePoint</code>, assuming a continued
@@ -122,7 +135,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     /**
      * How far did <code>competitor</code> sail windwards/along-course since passing the <code>from</code> waypoint?
      * 
-     * @param timePoint needed to determine <code>competior</code>'s position at that time point; note that the
+     * @param timePoint needed to determine <code>competitor</code>'s position at that time point; note that the
      * time point for wind approximation is taken to be a reference time point selected based on the mark passings
      * for the respective leg's from/to waypoints.
      */

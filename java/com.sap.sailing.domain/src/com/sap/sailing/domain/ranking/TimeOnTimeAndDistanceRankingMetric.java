@@ -4,9 +4,11 @@ import java.util.Comparator;
 import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -165,6 +167,14 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 (1./d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE - g_to + g_who)
                               * d_who.getNauticalMiles() / f_who * 1000.).longValue());
         return t_who;
+    }
+
+    @Override
+    protected Duration getCorrectedTime(Competitor who, Leg leg, Position estimatedPosition,
+            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
+        return totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
+                new MillisecondsDurationImpl((long) (1000. *
+                        getTimeOnDistanceFactorInSecondsPerNauticalMile(who) * totalWindwardDistanceTraveled.getNauticalMiles())));
     }
 
 }

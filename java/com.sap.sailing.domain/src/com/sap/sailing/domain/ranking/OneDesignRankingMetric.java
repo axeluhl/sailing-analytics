@@ -3,7 +3,10 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -67,5 +70,11 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                     " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
         }
         return whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
+    }
+
+    @Override
+    protected Duration getCorrectedTime(Competitor who, Leg leg, Position estimatedPosition,
+            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
+        return totalDurationSinceRaceStart;
     }
 }
