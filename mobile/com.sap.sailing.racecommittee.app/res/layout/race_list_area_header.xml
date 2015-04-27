@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_margin="@dimen/default_margin_half"
-        android:src="?play_arrow_36dp"/>
+        android:src="?play_arrow_36dp"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/protest_image"
@@ -22,14 +23,29 @@
         android:layout_marginRight="@dimen/default_margin"
         tools:src="@drawable/flag_bravo_48dp"/>
 
-    <TextView
-        android:id="@+id/boat_class"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/default_margin_half"
         android:layout_toEndOf="@id/header_marker"
         android:layout_toStartOf="@id/protest_image"
-        android:singleLine="true"
-        android:textAppearance="?textNormal"
-        tools:text="Extreme 40 - Day 1"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/boat_class"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textAppearance="?textNormal"
+            tools:text="Extreme 40"/>
+
+        <TextView
+            android:id="@+id/series_fleet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textAppearance="?textSmall"
+            tools:text="Day 1 - Yellow"/>
+    </LinearLayout>
 </RelativeLayout>

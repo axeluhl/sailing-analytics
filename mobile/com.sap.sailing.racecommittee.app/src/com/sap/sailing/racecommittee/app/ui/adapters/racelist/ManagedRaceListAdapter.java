@@ -47,11 +47,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private LinearLayout race_scheduled;
     private TextView race_unscheduled;
     private ImageView current_flag;
-    private TextView group_name;
     private TextView race_name;
     private TextView flag_timer;
     private ImageView arrow_direction;
     private TextView boat_class;
+    private TextView series_fleet;
     private ImageView protest_image;
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
@@ -166,7 +166,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         if (type == ViewType.HEADER.index) {
             final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
-            boat_class.setText(header.toString());
+            boat_class.setText(header.getBoatClass().getName());
+            String seriesFleet = "";
+            if (header.getSeries() != null && !header.getSeries().getName().equals("Default")) {
+                seriesFleet += header.getSeries().getName();
+            }
+            if (header.getFleet() != null && !header.getFleet().getName().equals("Default")) {
+                seriesFleet += " - " + header.getFleet().getName();
+            }
+            series_fleet.setText(seriesFleet);
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), 48));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -186,15 +194,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 }
             }
 
-            group_name.setText(race.getRace().getSeries().getName());
             if (!TextUtils.isEmpty(race.getRaceName())) {
-                if (race.getRace().getFleet() != null) {
-                    race_name.setText(race.getRace().getFleet().getName() + " / " + race.getRaceName());
-                } else {
-                    race_name.setText(race.getRaceName());
-                }
-                SpannableString raceName = new SpannableString(race_name.getText());
-                race_name.setText(raceName);
+                race_name.setText(race.getRaceName());
             }
             RaceState state = race.getRace().getState();
             if (state != null) {
@@ -221,9 +222,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_scheduled.setVisibility(View.GONE);
                     race_unscheduled.setVisibility(View.VISIBLE);
                 } else {
-                    if (group_name != null) {
-                        group_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
-                    }
                     if (race_name != null) {
                         race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                     }
@@ -260,7 +258,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         marker = ViewHolder.get(convertView, R.id.race_marker);
         arrow_direction = ViewHolder.get(convertView, R.id.arrow_direction);
         current_flag = ViewHolder.get(convertView, R.id.current_flag);
-        group_name = ViewHolder.get(convertView, R.id.group_name);
         update_badge = ViewHolder.get(convertView, R.id.update_badge);
         race_flag = ViewHolder.get(convertView, R.id.race_flag);
         time = ViewHolder.get(convertView, R.id.time);
@@ -272,6 +269,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         flag_timer = ViewHolder.get(convertView, R.id.flag_timer);
         protest_image = ViewHolder.get(convertView, R.id.protest_image);
         boat_class = ViewHolder.get(convertView, R.id.boat_class);
+        series_fleet = ViewHolder.get(convertView, R.id.series_fleet);
     }
 
     private void resetValues(View convertView) {
@@ -299,9 +297,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             if (race_name != null) {
                 race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
-            }
-            if (group_name != null) {
-                group_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
             }
             setMarker(0);
         }
