@@ -255,7 +255,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         }
 
         public ProtestTimeAdapter(Context context, List<ManagedRace> objects) {
-            super(context, android.R.layout.simple_list_item_multiple_choice, wrap(objects));
+            super(context, R.layout.themeable_protest_list_item, wrap(objects));
         }
 
     }
