@@ -5,6 +5,12 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecentResources" />
+  <ui:style>
+  	.quickFix {
+		padding: 0px 10px 10px 10px;
+		
+	}
+  </ui:style>
   <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewrecent_year}">
       <g:HTMLPanel ui:field="headerDiv" addStyleNames="{local_res.css.eventsoverviewrecent_year_header} {local_res.css.accordion_trigger}">
         <div class="{res.mediaCss.grid}">
@@ -47,7 +53,7 @@
         </div>
       </g:HTMLPanel>
       <div ui:field="contentDiv" class="{local_res.css.eventsoverviewrecent_year_content} {local_res.css.accordion_content}">
-        <g:FlowPanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid}">
+        <g:FlowPanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid} {style.quickFix}">
           <!-- EACH event in year.events -->
         <!-- <s:eventsOverviewRecent.RecentEventTeaser ui:field='event'></s> -->
             <!-- EACHEND -->
