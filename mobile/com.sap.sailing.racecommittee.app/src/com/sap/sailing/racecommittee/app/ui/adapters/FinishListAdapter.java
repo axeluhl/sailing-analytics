@@ -22,6 +22,7 @@ import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,17 +35,19 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     private ArrayList<CompetitorsWithIdImpl> mCompetitor;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, ManagedRace managedRace, ArrayList<CompetitorsWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, ArrayList<CompetitorsWithIdImpl> competitor) {
         mContext = context;
-        mCompetitors = new ArrayList<>();
-        mCompetitors.addAll(managedRace.getCompetitors());
         mCompetitor = competitor;
-
         setHasStableIds(true);
     }
 
     public void setListener(FinishEvents listener) {
         mListener = listener;
+    }
+
+    public void setCompetitors(Collection<Competitor> competitors) {
+        mCompetitors = new ArrayList<>();
+        mCompetitors.addAll(competitors);
     }
 
     @Override
@@ -62,17 +65,17 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         } else {
             holder.position.setText(item.getReason().name());
         }
-        if (holder.vesselId != null) {
-            for (Competitor competitor: mCompetitors) {
-                if (competitor.getId() == item.getKey()) {
-                    if (competitor.getBoat() != null) {
-                        holder.vesselId.setText(competitor.getBoat().getSailID());
-                    }
-                    break;
+        String name = "";
+        for (Competitor competitor: mCompetitors) {
+            if (competitor.getId() == item.getKey()) {
+                if (competitor.getBoat() != null) {
+                    name = competitor.getBoat().getSailID() + " - ";
                 }
+                break;
             }
         }
-        holder.competitor.setText(item.getText());
+        name += item.getText();
+        holder.competitor.setText(name);
 
         int dragState = holder.getDragStateFlags();
 
