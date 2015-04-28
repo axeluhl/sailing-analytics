@@ -34,7 +34,6 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
     }
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    private SimulationParameters simulationParameters;
     private boolean leftSide;
     private result1Turn result;
     private Position evalStartPoint;
@@ -45,7 +44,7 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
     private double evalTolerance;
 
     public PathGenerator1Turner360(SimulationParameters params) {
-        simulationParameters = params;
+        parameters = params;
     }
 
     public void setEvaluationParameters(boolean leftSideVal, Position startPoint, Position endPoint,
@@ -67,18 +66,18 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
     public Path getPath() {
         this.algorithmStartTime = MillisecondsTimePoint.now();
 
-        WindFieldGenerator windField = simulationParameters.getWindField();
-        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
+        WindFieldGenerator windField = parameters.getWindField();
+        PolarDiagram polarDiagram = parameters.getBoatPolarDiagram();
 
         Position posStart;
         if (this.evalStartPoint == null) {
-            posStart = simulationParameters.getCourse().get(0);
+            posStart = parameters.getCourse().get(0);
         } else {
             posStart = this.evalStartPoint;
         }
         Position posEnd;
         if (this.evalEndPoint == null) {
-            posEnd = simulationParameters.getCourse().get(1);
+            posEnd = parameters.getCourse().get(1);
         } else {
             posEnd = this.evalEndPoint;
         }

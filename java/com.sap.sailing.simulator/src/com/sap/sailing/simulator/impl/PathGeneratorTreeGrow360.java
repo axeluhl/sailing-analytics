@@ -656,6 +656,14 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         List<PathCandidate> trgPaths = new ArrayList<PathCandidate>();
         List<Position> startLine = this.parameters.getStartLine();
         
+        // generate start-line for testing
+        /*Bearing bearRightToStart = startPos.getBearingGreatCircle(endPos).add(new DegreeBearingImpl(80));        
+        Position exampleLineRight = startPos.translateGreatCircle(bearRightToStart, new MeterDistance(70.0));
+        Position exampleLineLeft = startPos.translateGreatCircle(bearRightToStart.reverse(), new MeterDistance(70.0));
+        startLine = new ArrayList<Position>();
+        startLine.add(exampleLineLeft);
+        startLine.add(exampleLineRight);*/
+        
         // check if start-line has two marks as expected; if not fall back to start-position
         if ((startLine != null) && (startLine.size() > 2)) {
             startLine = null;

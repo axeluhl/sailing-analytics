@@ -28,14 +28,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-    SimulationParameters simulationParameters;
     int turns;
     boolean startLeft;
     boolean upwindLeg = false;
 
     public PathGeneratorOpportunistEuclidian360(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
-        simulationParameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
+        parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
                 params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
@@ -64,11 +63,11 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
     public Path getPath() {
         this.algorithmStartTime = MillisecondsTimePoint.now();
 
-        WindFieldGenerator wf = simulationParameters.getWindField();
-        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
+        WindFieldGenerator wf = parameters.getWindField();
+        PolarDiagram polarDiagram = parameters.getBoatPolarDiagram();
 
-        Position startPos = simulationParameters.getCourse().get(0);
-        Position endPos = simulationParameters.getCourse().get(1);
+        Position startPos = parameters.getCourse().get(0);
+        Position endPos = parameters.getCourse().get(1);
 
         TimePoint startTime = wf.getStartTime();
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
@@ -80,7 +79,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
         BoatDirection prevDirection = BoatDirection.NONE;
         long turnLoss = polarDiagram.getTurnLoss(); // time lost when doing a turn
-        double fracFinishPhase = 0.05;
+        double fracFinishPhase = 0.075;
 
         TimePoint travelTimeLeft;
         TimePoint travelTimeRight;
@@ -92,11 +91,22 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         path.add(new TimedPositionWithSpeedImpl(startTime, startPos, wndStart));
         pathStr = "0";
 
-        long timeStep = wf.getTimeStep().asMillis() / 2;
+        long timeStep;
+        if (this.parameters.getSimuStep() != null) {
+            // time-step larger than turn-loss is required (this may be removed by
+            // extended handling of turn-loss)
+            if (this.parameters.getSimuStep().asMillis() > 2*turnLoss) {
+            timeStep = this.parameters.getSimuStep().asMillis();
+            } else {
+                timeStep = 2*turnLoss;
+            }
+        } else {
+            timeStep = wf.getTimeStep().asMillis() / 2; 
+        }
         logger.fine("Time step :" + timeStep);
 
         String legType = "none";
-        if (this.simulationParameters.getLegType() == null) {
+        if (this.parameters.getLegType() == null) {
             Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearStart);
             legType = "downwind";
             this.upwindLeg = false;
@@ -105,7 +115,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 this.upwindLeg = true;
             }
         } else {
-            if (this.simulationParameters.getLegType() == LegType.UPWIND) {
+            if (this.parameters.getLegType() == LegType.UPWIND) {
                 legType = "upwind";
                 this.upwindLeg = true;
             } else {
@@ -127,8 +137,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         // StrategicPhase: start & intermediate course until close to target
         //
         turns = 0;
-        while ((currentHeight > 0)
-                && (currentPosition.getDistance(endPos).compareTo(startPos.getDistance(endPos).scale(fracFinishPhase)) > 0)
+        while ((currentHeight > startPos.getDistance(endPos).getMeters()*fracFinishPhase)
                 && (path.size() < 500) && (!this.isTimedOut())) {
 
             long nextTimeVal = currentTime.asMillis() + timeStep;
@@ -279,11 +288,16 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             currentHeight = startPos.getDistance(endPos).getMeters() - posHeight.getDistance(startPos).getMeters();
         }
         
+        // remove last position, if already too close to target for finish-phase
+        if (currentHeight < startPos.getDistance(endPos).getMeters()*fracFinishPhase/2) {
+            path.remove(path.size()-1);
+        }
+        
         if (!this.isTimedOut()) {
             //
             // FinishPhase: get 1-turners to finalize course
             //
-            PathGenerator1Turner360 generator1Turner = new PathGenerator1Turner360(simulationParameters);
+            PathGenerator1Turner360 generator1Turner = new PathGenerator1Turner360(parameters);
             TimePoint leftTurningTime;
             TimePoint rightTurningTime;
             if (isBaseDirectionLeft(prevDirection)) {
@@ -294,10 +308,13 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 rightTurningTime = currentTime;
             }
 
-            generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, timeStep / (5 * 3), 100, 0.05, this.upwindLeg);
+            long finishTimeStep = Math.max(500, timeStep / 10);
+            int finishStepsLeft = (int) Math.round(1.5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
+            generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, finishTimeStep, finishStepsLeft, 0.05, this.upwindLeg);
             Path leftPath = generator1Turner.getPath();
 
-            generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, timeStep / (5 * 3), 100, 0.05, this.upwindLeg);
+            int finishStepsRight = (int) Math.round(1.5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
+            generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, finishTimeStep, finishStepsRight, 0.05, this.upwindLeg);
             Path rightPath = generator1Turner.getPath();
 
             if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
