@@ -8,10 +8,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -108,7 +104,12 @@ class DimensionFilterSelectionProvider {
         public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
             final FunctionDTO dimension = event.getValue();
             if (dimension != null) {
-                fetchAndDisplayAvailableData(false);
+                fetchAndDisplayAvailableData(false, new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onFailure(Throwable caught) { }
+                    @Override
+                    public void onSuccess(Boolean result) { }
+                });
                 if (firstChange && retrieverLevelSelectionProvider.canAddDimensionSelectionProvider()) {
                     retrieverLevelSelectionProvider.createAndAddDimensionSelectionProvider();
                 }
@@ -134,12 +135,9 @@ class DimensionFilterSelectionProvider {
      * 
      * @param isUpdate <code>true</code>, if the call should update the data and preserve the selection and 
      *                 <code>false</code>, if it should override the data and clear the selection.
-     * @return A {@link Future}, that returns <code>true</code>, if the filter selection has been changed after 
-     *         the data has been set.
+     * @param selectionChangedCallback An {@link AsyncCallback} to react, if the selection has been changed or not.
      */
-    Future<Boolean> fetchAndDisplayAvailableData(final boolean isUpdate) {
-        final SelectionChangedFuture future = new SelectionChangedFuture();
-        
+    void fetchAndDisplayAvailableData(final boolean isUpdate, final AsyncCallback<Boolean> selectionChangedCallback) {
         final FunctionDTO dimension = getSelectedDimension();
         Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
         dimensionDTOs.add(dimension);
@@ -172,7 +170,6 @@ class DimensionFilterSelectionProvider {
                             } else {
                                 selectionChanged = selectionTable.setContent(content);
                             }
-                            future.set(selectionChanged);
                             
                             if (selectionToBeApplied != null) {
                                 selectionTable.setSelection(selectionToBeApplied);
@@ -180,19 +177,19 @@ class DimensionFilterSelectionProvider {
                             }
                             selectionTable.setVisible(true);
                             toggleFilterButton.setVisible(true);
+                            
+                            selectionChangedCallback.onSuccess(selectionChanged);
                         }
                         
                         busyIndicator.setVisible(false);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        future.cancel(false);
                         errorReporter.reportError("Error fetching the dimension values of " + dimension + ": "
                                 + caught.getMessage());
+                        selectionChangedCallback.onFailure(caught);
                     }
                 });
-        
-        return future;
     }
     
     void setAvailableDimensions(Collection<FunctionDTO> availableDimensions) {
@@ -227,62 +224,6 @@ class DimensionFilterSelectionProvider {
         
         int remainingHeightInPX = Math.max(0, heightInPX - controlsPanel.getOffsetHeight());
         selectionTable.resizeTo(widthInPX, remainingHeightInPX);
-    }
-    
-    public static class SelectionChangedFuture implements Future<Boolean> {
-
-        private static final int SLEEP_TIME = 100;
-        
-        private boolean cancel;
-        private Boolean value = null;
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            if (isDone()) {
-                return false;
-            }
-            
-            cancel = true;
-            return true;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return cancel;
-        }
-
-        @Override
-        public boolean isDone() {
-            return isCancelled() || value != null;
-        }
-        
-        private void set(Boolean value) {
-            this.value  = value;
-            
-        }
-
-        @Override
-        public Boolean get() throws InterruptedException, ExecutionException {
-            while (!isDone()) {
-                Thread.sleep(SLEEP_TIME);
-            }
-            return value;
-        }
-
-        @Override
-        public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
-                TimeoutException {
-            long timeLeft = unit.toMillis(timeout);
-            while (!isDone()) {
-                Thread.sleep(SLEEP_TIME);
-                timeLeft -= SLEEP_TIME;
-                if (timeLeft <= 0) {
-                    throw new TimeoutException();
-                }
-            }
-            return value;
-        }
-        
     }
     
 }

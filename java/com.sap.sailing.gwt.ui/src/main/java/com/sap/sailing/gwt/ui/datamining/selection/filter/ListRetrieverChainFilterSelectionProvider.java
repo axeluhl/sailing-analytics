@@ -216,27 +216,39 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
-        boolean selectionChanged = updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
-        if (!selectionChanged) {
+        updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
+    }
+    
+    private void updateFilterSelectionProviders(int beginningWithLevel, final FunctionDTO exceptForDimension) {
+        LocalizedTypeDTO retrievedDataType = null;
+        int nextRetrieverLevel = 0;
+        for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
+            retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
+            if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
+                nextRetrieverLevel = retrieverLevel + 1;
+                break;
+            }
+        }
+        final int finalNextRetrievalLevel = nextRetrieverLevel;
+        
+        if (retrievedDataType != null) {
+            selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData(exceptForDimension,
+                    new AsyncCallback<Boolean>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean selectionChanged) {
+                            if (selectionChanged != null && !selectionChanged) {
+                                updateFilterSelectionProviders(finalNextRetrievalLevel, exceptForDimension);
+                            }
+                        }
+                    });
+        } else {
             mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
             notifyListeners();
         }
-    }
-    
-    private boolean updateFilterSelectionProviders(int beginningWithLevel, FunctionDTO exceptForDimension) {
-        boolean selectionChanged = false;
-        for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
-            final LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
-            if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
-                boolean retrieverLevelSelectionChanged = selectionProvidersMappedByRetrievedDataType.get(retrievedDataType)
-                        .updateAvailableData(exceptForDimension);
-                if (retrieverLevelSelectionChanged) {
-                    selectionChanged = true;
-                    break;
-                }
-            }
-        }
-        return selectionChanged;
     }
 
     @Override

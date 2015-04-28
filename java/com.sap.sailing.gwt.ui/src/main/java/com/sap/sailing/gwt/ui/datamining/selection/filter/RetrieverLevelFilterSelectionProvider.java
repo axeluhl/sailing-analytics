@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -133,27 +133,35 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     /**
      * Updates the dimension values except for the given dimension.<br>
      * Aborts the update, if it caused a selection change.
-     * @return <code>true</code>, if the selection has been changed because of the update.
      */
-    boolean updateAvailableData(FunctionDTO exceptForDimension) {
-        boolean selectionChanged = false;
-        for (DimensionFilterSelectionProvider selectionProvider : dimensionSelectionProviders) {
+    void updateAvailableData(FunctionDTO exceptForDimension, AsyncCallback<Boolean> selectionChangedCallback) {
+        updateAvailableData(exceptForDimension, selectionChangedCallback, dimensionSelectionProviders.iterator());
+    }
+    
+    private void updateAvailableData(final FunctionDTO exceptForDimension, final AsyncCallback<Boolean> selectionChangedCallback, final Iterator<DimensionFilterSelectionProvider> selectionProviderIterator) {
+        if (selectionProviderIterator.hasNext()) {
+            DimensionFilterSelectionProvider selectionProvider = selectionProviderIterator.next();
             FunctionDTO selectedDimension = selectionProvider.getSelectedDimension();
             if (selectedDimension != null && !selectedDimension.equals(exceptForDimension)) {
-                Future<Boolean> dimensionSelectionChangedFuture = selectionProvider.fetchAndDisplayAvailableData(true);
-                Boolean dimensionsSelectionChanged = null;
-                try {
-                    dimensionsSelectionChanged = dimensionSelectionChangedFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    errorReporter.reportError("Error updating the available data: " + e);
-                } 
-                if (dimensionsSelectionChanged != null && dimensionsSelectionChanged) {
-                    selectionChanged = true;
-                    break;
-                }
+                selectionProvider.fetchAndDisplayAvailableData(true, new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onFailure(Throwable caught) { }
+                    @Override
+                    public void onSuccess(Boolean selectionChanged) {
+                        if (selectionChanged != null && !selectionChanged) {
+                            updateAvailableData(exceptForDimension, selectionChangedCallback, selectionProviderIterator);
+                        } else {
+                            selectionChangedCallback.onSuccess(true);
+                        }
+                    }
+                    
+                });
+            } else {
+                updateAvailableData(exceptForDimension, selectionChangedCallback, selectionProviderIterator);
             }
+        } else {
+            selectionChangedCallback.onSuccess(false);
         }
-        return selectionChanged;
     }
 
     void dimensionFilterSelectionChanged(DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
