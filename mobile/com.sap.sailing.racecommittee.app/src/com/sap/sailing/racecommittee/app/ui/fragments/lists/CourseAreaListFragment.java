@@ -15,6 +15,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CourseAreaArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
@@ -55,5 +56,10 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     @Override
     protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.createCourseAreasLoader(parentEventId, this);
+    }
+
+    @Override
+    public DialogResultListener getListener() {
+        return (DialogResultListener) getActivity();
     }
 }

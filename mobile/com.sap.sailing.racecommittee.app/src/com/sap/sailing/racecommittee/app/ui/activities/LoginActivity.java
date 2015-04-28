@@ -37,6 +37,8 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
@@ -53,7 +55,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
-        PositionSelectedListenerHost {
+        PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
@@ -356,6 +358,16 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     public String getPositionName() {
         return positionName;
+    }
+
+    @Override
+    public void onDialogNegativeButton(AttachedDialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onDialogPositiveButton(AttachedDialogFragment dialog) {
+
     }
 
     private class BackdropClick implements View.OnClickListener {

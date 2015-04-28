@@ -23,6 +23,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
@@ -30,7 +31,7 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Named;
 
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements
-        LoadClient<Collection<T>> {
+        LoadClient<Collection<T>>, DialogListenerHost {
 
     // private static String TAG = NamedListFragment.class.getName();
 
@@ -176,7 +177,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         FragmentManager manager = getFragmentManager();
         FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
         //FIXME this can't be the real solution for the autologin
-        dialog.setTargetFragment(null, -1);
+        dialog.setTargetFragment(this, 0);
         // We cannot use DialogFragment#show here because we need to commit the transaction
         // allowing a state loss, because we are effectively in Loader#onLoadFinished()
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();

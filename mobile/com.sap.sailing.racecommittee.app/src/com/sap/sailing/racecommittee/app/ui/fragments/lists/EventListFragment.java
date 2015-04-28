@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
@@ -34,5 +35,10 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     @Override
     protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.createEventsLoader(this);
+    }
+
+    @Override
+    public DialogResultListener getListener() {
+        return (DialogResultListener) getActivity();
     }
 }
