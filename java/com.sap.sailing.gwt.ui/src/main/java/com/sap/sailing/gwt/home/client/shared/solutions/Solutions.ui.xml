@@ -67,7 +67,9 @@
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSimulatorHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSimulatorText}'/></p>
-        <!-- <a href="#" class="{res.mainCss.button}">Learn More</a>  -->
+        <g:Anchor ui:field="simulatorAppDetailsAnchor" styleName="{res.mainCss.button}"><ui:text from='{i18n.whatsNew}'/></g:Anchor>
+        <span>&nbsp;&nbsp;</span>
+        <g:Anchor ui:field="simulatorStartAnchor" target="_blank" styleName="{res.mainCss.button}"><ui:text from='{i18n.startSimulator}'/></g:Anchor>
       </div>
     </div>
   </div>

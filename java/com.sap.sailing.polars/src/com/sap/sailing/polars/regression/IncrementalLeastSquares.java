@@ -2,6 +2,8 @@ package com.sap.sailing.polars.regression;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+
 /**
  * Support incremental regression linear in one variable but potentially of higher order.
  * 
@@ -27,5 +29,7 @@ public interface IncrementalLeastSquares {
      * @throws NotEnoughDataHasBeenAddedException Will be returned if no data has been added to the regression.
      */
     public abstract PolynomialFunction getOrCreatePolynomialFunction() throws NotEnoughDataHasBeenAddedException;
+
+    public abstract long getNumberOfAddedPoints();
 
 }
