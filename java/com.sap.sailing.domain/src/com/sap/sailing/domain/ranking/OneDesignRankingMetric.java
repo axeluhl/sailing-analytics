@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -59,8 +60,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
      * reach her current position since passing <code>fromWaypoint</code>.
      */
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint whenWhoIsAtFromWaypoint, TimePoint timePointOfTosPosition) {
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
         if (whenToPassedFromWaypoint == null) {
             throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
@@ -73,7 +73,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected Duration getCorrectedTime(Competitor who, Leg leg, Position estimatedPosition,
+    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
         return totalDurationSinceRaceStart;
     }

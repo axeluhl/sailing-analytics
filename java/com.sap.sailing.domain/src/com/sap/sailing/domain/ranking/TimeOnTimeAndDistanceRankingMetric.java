@@ -2,6 +2,7 @@ package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -49,7 +50,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     private final Function<Competitor, Double> timeOnTimeFactor;
 
     private final Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile;
-
+    
     public TimeOnTimeAndDistanceRankingMetric(TrackedRace trackedRace, Function<Competitor, Double> timeOnTimeFactor,
             Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
         super(trackedRace);
@@ -111,21 +112,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final Duration timeActuallySpent = getActualTimeSinceStartOfRace(competitor, timePoint);
-        final Duration result;
-        if (timeActuallySpent == null) {
-            result = null;
-        } else {
-            final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint);
-            final Duration correctedTimeByTimeOnTime = timeActuallySpent.times(getTimeOnTimeFactor(competitor));
-            if (windwardDistanceSailed == null) {
-                result = correctedTimeByTimeOnTime;
-            } else {
-                final Duration timeOnDistanceAllowance = Duration.ONE_SECOND.times(windwardDistanceSailed.getNauticalMiles()
-                                * getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor));
-                result = correctedTimeByTimeOnTime.minus(timeOnDistanceAllowance);
-            }
-        }
-        return result;
+        final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint);
+        return getCorrectedTime(competitor, ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
+                ()->getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */true),
+                timeActuallySpent, windwardDistanceSailed);
     }
 
     private double getTimeOnTimeFactor(Competitor competitor) {
@@ -139,14 +129,13 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     /**
      * Equal performance is defined here to mean equal reciproke VMG as determined by the formula
      * <pre>vmgc_i := t_i * f_i / d_i - g_i</pre> that, when equating it for <code>who</code> and <code>to</code> yields:
-     * <pre>t_who * f_who / d_who - g_who = t_to * f_to / d_to - g_to</pre> Resolving to <code>t_who</code> gives:
+     * <pre>t_who * f_who / d_who - g_who = t_to * f_to / d_to - g_to</pre> Resolving for <code>t_who</code> gives:
      * <pre>t_who = (t_to * f_to / d_to - g_to + g_who) * d_who / f_who</pre> Furthermore, we have <code>d_who==d_to</code>
      * because we want to know how long <code>who</code> would take for that same distance under performance equal to
      * that of <code>to</code>.
      */
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint whenWhoIsAtFromWaypoint, TimePoint timePointOfTosPosition) {
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
         if (whenToPassedFromWaypoint == null) {
             throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
@@ -170,11 +159,13 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected Duration getCorrectedTime(Competitor who, Leg leg, Position estimatedPosition,
+    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
-        return totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
-                new MillisecondsDurationImpl((long) (1000. *
-                        getTimeOnDistanceFactorInSecondsPerNauticalMile(who) * totalWindwardDistanceTraveled.getNauticalMiles())));
+        return totalDurationSinceRaceStart == null ? null :
+            totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
+                totalWindwardDistanceTraveled == null ? Duration.NULL :
+                    Duration.ONE_SECOND.times(totalWindwardDistanceTraveled.getNauticalMiles()
+                            * getTimeOnDistanceFactorInSecondsPerNauticalMile(who)));
     }
 
 }
