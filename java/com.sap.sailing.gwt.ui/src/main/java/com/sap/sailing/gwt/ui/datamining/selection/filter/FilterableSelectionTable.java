@@ -10,7 +10,6 @@ import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
@@ -19,7 +18,6 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 public class FilterableSelectionTable<ContentType extends Serializable> extends FlowPanel {
     
     private final Set<FilterSelectionChangedListener> listeners;
-    private boolean blockSelectionChangeNotification;
     
     private final Collection<ContentType> allData;
     private int width;
@@ -28,7 +26,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     private final AbstractFilterablePanel<ContentType> filterPanel;
     private String filterText;
     private final DataGrid<ContentType> table;
-    private final MultiSelectionModel<ContentType> selectionModel;
+    private final ControllableMultiSelectionModel<ContentType> selectionModel;
     private final ListDataProvider<ContentType> dataProvider;
     
     public FilterableSelectionTable() {
@@ -48,13 +46,11 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         };
         table.addColumn(contentColumn);
 
-        selectionModel = new MultiSelectionModel<ContentType>();
+        selectionModel = new ControllableMultiSelectionModel<ContentType>();
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                if (!blockSelectionChangeNotification) {
-                    notifyListeners();
-                }
+                notifyListeners();
             }
         });
         table.setSelectionModel(selectionModel);
@@ -107,9 +103,9 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         if (notifyListenersWhenSelectionChanged) {
             clearSelection();
         } else {
-            blockSelectionChangeNotification = true;
+            selectionModel.setBlockNotifications(true);
             clearSelection();
-            blockSelectionChangeNotification = false;
+            selectionModel.setBlockNotifications(false);
         }
         return !previousSelection.isEmpty();
     }
@@ -146,7 +142,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
      */
     private boolean cleanSelection(boolean notifyListenersWhenSelectionChanged) {
         boolean selectionChanged = false;
-        blockSelectionChangeNotification = true;
+        selectionModel.setBlockNotifications(true);
         
         for (ContentType selectedElement : getSelection()) {
             Object selectedElementKey = dataProvider.getKey(selectedElement);
@@ -162,8 +158,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
                 selectionChanged = true;
             }
         }
-        
-        blockSelectionChangeNotification = false;
+
+        selectionModel.setBlockNotifications(false);
         if (selectionChanged && notifyListenersWhenSelectionChanged) {
             notifyListeners();
         }
@@ -180,13 +176,17 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         return selectionModel.getSelectedSet();
     }
 
-    public void setSelection(Iterable<?> elements) {
+    public void setSelection(Iterable<?> elements, boolean notifyListenersWhenSelectionChanged) {
         try {
             @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
             Iterable<ContentType> specificContent = (Iterable<ContentType>) elements;
+            selectionModel.setBlockNotifications(!notifyListenersWhenSelectionChanged);
             clearSelection();
             for (ContentType element : specificContent) {
                 selectionModel.setSelected(element, true);
+            }
+            if (!notifyListenersWhenSelectionChanged) {
+                selectionModel.setBlockNotifications(false);
             }
         } catch (ClassCastException e) {/*Ignore the elements, because they don't match the ContentType*/}
     }
@@ -235,6 +235,5 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
         table.redraw();
     }
-
 
 }

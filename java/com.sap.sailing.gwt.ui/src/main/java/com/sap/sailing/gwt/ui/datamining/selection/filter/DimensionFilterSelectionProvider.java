@@ -177,7 +177,7 @@ class DimensionFilterSelectionProvider {
                             }
                             
                             if (selectionToBeApplied != null) {
-                                selectionTable.setSelection(selectionToBeApplied);
+                                selectionTable.setSelection(selectionToBeApplied, notifyListenersWhenSelectionChanged);
                                 selectionToBeApplied = null;
                             }
                             busyIndicator.setVisible(false);
@@ -187,9 +187,7 @@ class DimensionFilterSelectionProvider {
                             if (retrieverLevelSelectionProviderIterator != null) {
                                 if (selectionChanged) {
                                     //Update the complete retriever level, because the selection changed
-//                                    retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension());
-                                    //TODO This is currently done with a selection changed notification of the inner selection table
-                                    //FIXME Enable, after the notifications can be blocked.
+                                    retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension());
                                 } else {
                                     //Continue with the update of the retriever level selection provider
                                     retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension(), retrieverLevelSelectionProviderIterator);
