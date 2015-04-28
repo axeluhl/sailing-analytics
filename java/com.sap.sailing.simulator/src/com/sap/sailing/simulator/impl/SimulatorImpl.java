@@ -40,7 +40,7 @@ public class SimulatorImpl implements Simulator {
     }
 
     @Override
-    public Path getPath(PathType pathType) throws SparsePolarDataException {
+    public Path getPath(PathType pathType) throws SparseSimulationDataException {
         PathGeneratorTreeGrow360 genTreeGrow;
         PathGeneratorOpportunistEuclidian360 genOpportunistic;
         Path path = null;

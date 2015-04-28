@@ -109,7 +109,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     // default: L - left, R - right
     // extended: M - wide left, S - wide right
     TimedPosition getStep(TimedPosition pos, Wind posWind, Position posEnd, long timeStep, long turnLoss, boolean sameBaseDirection,
-            char nextDirection) throws SparsePolarDataException {
+            char nextDirection) throws SparseSimulationDataException {
 
         TimePoint curTime = pos.getTimePoint();
         Position curPosition = pos.getPosition();
@@ -152,9 +152,14 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
             if (travelSpeed == null) {
                 logger.severe("Travel Speed for NextDirection '" + nextDirection + "' is NULL. This must NOT happen.");
             }
-            throw new SparsePolarDataException();
+            throw new SparseSimulationDataException();
         }     
 
+        if ((travelSpeed.getKnots() == 0)&&(!polarDiagram.hasCurrent())) {
+            logger.severe("Travel Speed for NextDirection '" + nextDirection + "' is ZERO. This must NOT happen.");            
+            throw new SparseSimulationDataException();
+        }
+        
         TimePoint travelTime;
         TimePoint nextTime = new MillisecondsTimePoint(curTime.asMillis() + timeStep);
         if (sameBaseDirection) {
@@ -201,7 +206,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     
     // get path candidate measuring height towards (local, current-apparent) wind
     PathCandidate getPathCandWind(PathCandidate path, char nextDirection, long timeStep, long turnLoss,
-            Position posStart, Position posEnd, double tgtHeight) throws SparsePolarDataException {
+            Position posStart, Position posEnd, double tgtHeight) throws SparseSimulationDataException {
 
         char prevDirection = path.path.charAt(path.path.length() - 1);
         boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
@@ -267,7 +272,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
     // generate path candidates based on bearing to target
     List<PathCandidate> getPathCandsBeatWind(PathCandidate path, long timeStep, long turnLoss, Position posStart,
-            Position posEnd, double tgtHeight) throws SparsePolarDataException {
+            Position posEnd, double tgtHeight) throws SparseSimulationDataException {
         
         // determine bearing of target
         Bearing bearTarget = path.pos.getPosition().getBearingGreatCircle(posEnd);
@@ -399,7 +404,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     }
 
     Util.Pair<List<PathCandidate>, List<PathCandidate>> generateCandidate(List<PathCandidate> oldPaths, long timeStep,
-            long turnLoss, Position posStart, Position posMiddle, Position posEnd, double tgtHeight) throws SparsePolarDataException {
+            long turnLoss, Position posStart, Position posMiddle, Position posEnd, double tgtHeight) throws SparseSimulationDataException {
 
         List<PathCandidate> newPathCands;
         List<PathCandidate> leftPaths = new ArrayList<PathCandidate>();
@@ -585,7 +590,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath() throws SparsePolarDataException {
+    public Path getPath() throws SparseSimulationDataException {
         this.algorithmStartTime = MillisecondsTimePoint.now();
         
         WindFieldGenerator wf = this.parameters.getWindField();

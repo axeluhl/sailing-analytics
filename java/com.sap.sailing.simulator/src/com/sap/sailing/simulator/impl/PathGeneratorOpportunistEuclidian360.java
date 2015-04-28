@@ -60,7 +60,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
     
     @Override
-    public Path getPath() {
+    public Path getPath() throws SparseSimulationDataException {
         this.algorithmStartTime = MillisecondsTimePoint.now();
 
         WindFieldGenerator wf = parameters.getWindField();
@@ -79,7 +79,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
         BoatDirection prevDirection = BoatDirection.NONE;
         long turnLoss = polarDiagram.getTurnLoss(); // time lost when doing a turn
-        double fracFinishPhase = 0.075;
+        double fracFinishPhase = 0.05;
 
         TimePoint travelTimeLeft;
         TimePoint travelTimeRight;
@@ -167,7 +167,15 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 }
                 // get boat speed at current position
                 SpeedWithBearing boatSpeedLeft = polarDiagram.getSpeedAtBearing(bearLeft);
+                if (boatSpeedLeft.getKnots() == 0) {
+                    logger.severe("Travel Speed for NextDirection '" + "L" + "' is ZERO. This must NOT happen.");            
+                    throw new SparseSimulationDataException();
+                }
                 SpeedWithBearing boatSpeedRight = polarDiagram.getSpeedAtBearing(bearRight);
+                if (boatSpeedRight.getKnots() == 0) {
+                    logger.severe("Travel Speed for NextDirection '" + "R" + "' is ZERO. This must NOT happen.");            
+                    throw new SparseSimulationDataException();
+                }
                 logger.finest("left boat speed:" + boatSpeedLeft.getKnots() + " angle:" + boatSpeedLeft.getBearing().getDegrees()
                         + "  right boat speed:" + boatSpeedRight.getKnots() + " angle:" + boatSpeedRight.getBearing().getDegrees());
 
@@ -183,7 +191,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                     travelTimeRight = new MillisecondsTimePoint(nextTimeVal);
                 }
                 
-                // get next boat positions by travelling left and right
+                // get next boat positions by traveling left and right
                 Position nextBoatPositionLeft = boatSpeedLeft.travelTo(currentPosition, currentTime, travelTimeLeft);
                 Position nextBoatPositionRight = boatSpeedRight.travelTo(currentPosition, currentTime, travelTimeRight);
                 // calculate distance to target left and right
@@ -267,7 +275,11 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 } else {
                     boatSpeedTarget = polarDiagram.getSpeedAtBearing(bearTarget);                    
                 }
-                // get next boat positions by travelling left and right
+                if ((boatSpeedTarget.getKnots() == 0)&&(!polarDiagram.hasCurrent())) {
+                    logger.severe("Travel Speed for NextDirection '" + (reachingSide==BoatDirection.REACH_LEFT?"D":"E") + "' is ZERO. This must NOT happen.");            
+                    throw new SparseSimulationDataException();
+                }
+                // get next boat positions by traveling reach
                 Position nextBoatPositionReach = boatSpeedTarget.travelTo(currentPosition, currentTime, travelTimeReach);
                 path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionReach, currentWind));
                 currentPosition = nextBoatPositionReach;
@@ -288,11 +300,6 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             currentHeight = startPos.getDistance(endPos).getMeters() - posHeight.getDistance(startPos).getMeters();
         }
         
-        // remove last position, if already too close to target for finish-phase
-        if (currentHeight < startPos.getDistance(endPos).getMeters()*fracFinishPhase/2) {
-            path.remove(path.size()-1);
-        }
-        
         if (!this.isTimedOut()) {
             //
             // FinishPhase: get 1-turners to finalize course
@@ -310,11 +317,11 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
             long finishTimeStep = Math.max(500, timeStep / 10);
             int finishStepsLeft = (int) Math.round(1.5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
-            generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, finishTimeStep, finishStepsLeft, 0.05, this.upwindLeg);
+            generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, finishTimeStep, finishStepsLeft, 0.2, this.upwindLeg);
             Path leftPath = generator1Turner.getPath();
 
             int finishStepsRight = (int) Math.round(1.5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
-            generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, finishTimeStep, finishStepsRight, 0.05, this.upwindLeg);
+            generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, finishTimeStep, finishStepsRight, 0.2, this.upwindLeg);
             Path rightPath = generator1Turner.getPath();
 
             if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {

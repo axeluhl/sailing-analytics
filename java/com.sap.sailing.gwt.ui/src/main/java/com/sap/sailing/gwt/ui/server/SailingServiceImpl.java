@@ -403,7 +403,7 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
-import com.sap.sailing.simulator.impl.SparsePolarDataException;
+import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
@@ -1434,7 +1434,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             PolarDiagram polarDiagram;
             try {
                 polarDiagram = new PolarDiagramGPS(boatClass, polarData);
-            } catch (SparsePolarDataException e) {
+            } catch (SparseSimulationDataException e) {
                 polarDiagram = null;
                 // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
             }

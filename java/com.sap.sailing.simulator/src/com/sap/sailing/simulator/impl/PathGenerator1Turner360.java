@@ -92,7 +92,6 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
         long turnloss = polarDiagram.getTurnLoss(); // 4000;
 
         Distance courseLength = posStart.getDistance(posEnd);
-        Bearing bearStart2End = posStart.getBearingGreatCircle(posEnd);
         Position currentPosition = posStart;
         TimePoint currentTime = startTime;
         TimePoint nextTime;
@@ -109,7 +108,6 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
         } else {
             stepMax = this.evalStepMax;
         }
-        double[] reachTime = new double[stepMax];
         boolean targetFound;
         long timeStep;
         if (this.evalTimeStep == 0) {
@@ -118,11 +116,10 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
             timeStep = this.evalTimeStep;
         }
         Bearing direction;
+        Bearing layline;
 
         double newDistance;
         double minimumDistance = courseLength.getMeters();
-        //double overallMinimumDistance = courseLength.getMeters();
-        //int stepOfOverallMinimumDistance = stepMax;
         LinkedList<TimedPositionWithSpeed> path = null;
         LinkedList<TimedPositionWithSpeed> allminpath = null;
         TimePoint minimumTime = startTime.plus(24*60*60*1000);
@@ -130,7 +127,6 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
 
             currentPosition = posStart;
             currentTime = startTime;
-            reachTime[step] = courseLength.getMeters();
             targetFound = false;
             minimumDistance = courseLength.getMeters();
             path = new LinkedList<TimedPositionWithSpeed>();
@@ -159,19 +155,24 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     if (pointOfSail == PointOfSail.TACKING) {
                         if (leftSide) {
                             direction = polarDiagram.optimalDirectionsUpwind()[0];
+                            layline = polarDiagram.optimalDirectionsUpwind()[1].reverse();
                         } else {
                             direction = polarDiagram.optimalDirectionsUpwind()[1];
+                            layline = polarDiagram.optimalDirectionsUpwind()[0].reverse();
                         }
                         prevPointOfSail = pointOfSail;
                     } else if (pointOfSail == PointOfSail.JIBING) {
                         if (leftSide) {
                             direction = polarDiagram.optimalDirectionsDownwind()[1];
+                            layline = polarDiagram.optimalDirectionsDownwind()[0].reverse();
                         } else {
                             direction = polarDiagram.optimalDirectionsDownwind()[0];
+                            layline = polarDiagram.optimalDirectionsDownwind()[1].reverse();
                         }
                         prevPointOfSail = pointOfSail;
                     } else {
-                        direction = bearTarget;                                                
+                        direction = bearTarget;
+                        layline = null;
                     }
                     SpeedWithBearing currSpeed;
                     if ((pointOfSail != PointOfSail.REACHING) || !polarDiagram.hasCurrent()) {
@@ -181,6 +182,19 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     }
                     nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                     Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+                    // scale step at layline            
+                    if (layline != null) {
+                        Bearing nextBearTarget = nextPosition.getBearingGreatCircle(posEnd);
+                        Util.Pair<PointOfSail, BoatDirection> nextPointOfSailAndReachingSide = polarDiagram.getPointOfSail(nextBearTarget);
+                        PointOfSail nextPointOfSail = nextPointOfSailAndReachingSide.getA();
+                        if (nextPointOfSail != pointOfSail) {
+                            Position tmpPosition = nextPosition.projectToLineThrough(posEnd, layline);
+                            long scaledTimeStep = Math.round(timeStep*currentPosition.getDistance(tmpPosition).getMeters() / currentPosition.getDistance(nextPosition).getMeters());
+                            nextTime = new MillisecondsTimePoint(currentTime.asMillis() + scaledTimeStep);
+                            nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);                        
+                        }
+                    }
+                    
                     newDistance = nextPosition.getDistance(posEnd).getMeters();
                     if (newDistance < minimumDistance) {
                         minimumDistance = newDistance;
@@ -190,14 +204,12 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     currentTime = nextTime;
                 }                
                 if (currentPosition.getDistance(posEnd).getMeters() < reachingTolerance * courseLength.getMeters()) {
-                    reachTime[step] = minimumDistance;
-                    targetFound = true;
+                    if (posStart.getDistance(currentPosition).getMeters() > posStart.getDistance(posEnd).getMeters()) {
+                        targetFound = true;
+                    }
                 }
-                //if (minimumDistance < overallMinimumDistance) {
                 if (targetFound&&(currentTime.before(minimumTime))) {
-                    //overallMinimumDistance = minimumDistance;
                     minimumTime = currentTime;
-                    //stepOfOverallMinimumDistance = step;
                     allminpath = path;
                 }
                 stepLeft++;
@@ -251,18 +263,12 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     currentTime = nextTime;
                 }
                 if (currentPosition.getDistance(posEnd).getMeters() < reachingTolerance * courseLength.getMeters()) {
-                    Bearing bearPath2End = currentPosition.getBearingGreatCircle(posEnd);
-                    double bearDiff = bearPath2End.getDegrees() - bearStart2End.getDegrees();
-                    reachTime[step] = minimumDistance * Math.signum(bearDiff);
                     if (posStart.getDistance(currentPosition).getMeters() > posStart.getDistance(posEnd).getMeters()) {
                         targetFound = true;
                     }
                 }
-                //if (minimumDistance < overallMinimumDistance) {
                 if (targetFound&&(currentTime.before(minimumTime))) {
-                    //overallMinimumDistance = minimumDistance;
                     minimumTime = currentTime;
-                    //stepOfOverallMinimumDistance = step;
                     allminpath = new LinkedList<TimedPositionWithSpeed>(path);
                 }
                 stepRight++;

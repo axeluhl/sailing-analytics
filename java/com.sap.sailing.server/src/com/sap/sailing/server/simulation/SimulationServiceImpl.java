@@ -49,7 +49,7 @@ import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.SimulatorImpl;
-import com.sap.sailing.simulator.impl.SparsePolarDataException;
+import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
@@ -391,7 +391,7 @@ public class SimulationServiceImpl implements SimulationService {
             PolarDiagram polarDiagram;
             try {
                 polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
-            } catch (SparsePolarDataException e) {
+            } catch (SparseSimulationDataException e) {
                 polarDiagram = null;
                 // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
             }
@@ -441,19 +441,21 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         // collect 1-turner results
-        result.put(PathType.ONE_TURNER_LEFT, task1TurnerLeft.get());
-        result.put(PathType.ONE_TURNER_RIGHT, task1TurnerRight.get());
+        Path path1TurnerLeft = task1TurnerLeft.get();
+        result.put(PathType.ONE_TURNER_LEFT, path1TurnerLeft);
+        Path path1TurnerRight = task1TurnerRight.get();
+        result.put(PathType.ONE_TURNER_RIGHT, path1TurnerRight);
 
         if (simulationParameters.showOpportunist()) {
             // collect opportunist results
             Path pathOpportunistLeft = taskOpportunistLeft.get();
-            if (pathOpportunistLeft.getTurnCount() == 1) {
-                pathOpportunistLeft = result.get(PathType.ONE_TURNER_LEFT);
+            if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOpportunistLeft.getTurnCount() == 1)) {
+                pathOpportunistLeft = path1TurnerLeft;
             }
             result.put(PathType.OPPORTUNIST_LEFT, pathOpportunistLeft);
             Path pathOpportunistRight = taskOpportunistRight.get();
-            if (pathOpportunistRight.getTurnCount() == 1) {
-                pathOpportunistRight = result.get(PathType.ONE_TURNER_RIGHT);
+            if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOpportunistRight.getTurnCount() == 1)) {
+                pathOpportunistRight = path1TurnerRight;
             }
             result.put(PathType.OPPORTUNIST_RIGHT, pathOpportunistRight);
         }
@@ -461,11 +463,11 @@ public class SimulationServiceImpl implements SimulationService {
         if (simulationParameters.showOmniscient()) {
             // collect omniscient result (last, since usually slowest calculation)
             Path pathOmniscient = taskOmniscient.get();
-            if (pathOmniscient.getFinalTime().after(result.get(PathType.ONE_TURNER_LEFT).getFinalTime())) {
-                pathOmniscient = result.get(PathType.ONE_TURNER_LEFT);
+            if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerLeft.getFinalTime()))) {
+                pathOmniscient = path1TurnerLeft;
             }
-            if (pathOmniscient.getFinalTime().after(result.get(PathType.ONE_TURNER_RIGHT).getFinalTime())) {
-                pathOmniscient = result.get(PathType.ONE_TURNER_RIGHT);
+            if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerRight.getFinalTime()))) {
+                pathOmniscient = path1TurnerRight;
             }
             result.put(PathType.OMNISCIENT, pathOmniscient);
         }
