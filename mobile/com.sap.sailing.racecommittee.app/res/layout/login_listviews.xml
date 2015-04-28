@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?sap_gray">
@@ -16,7 +17,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_events"
-            android:textAppearance="?textNormal" />
+            android:textAppearance="?textNormal"/>
 
         <ImageView
             android:id="@+id/icon_event"
@@ -25,7 +26,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:paddingRight="@dimen/default_padding"
-            android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+            android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
 
         <TextView
             android:id="@+id/selected_event"
@@ -35,7 +36,7 @@
             android:layout_toLeftOf="@id/icon_event"
             android:paddingRight="@dimen/default_padding"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22" />
+            android:textSize="@dimen/textSize_22"/>
     </RelativeLayout>
 
     <View
@@ -43,14 +44,15 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/event_header"
-        android:background="?black" />
+        android:background="?black"/>
 
     <FrameLayout
         android:id="@+id/event_fragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_alignParentEnd="true"
         android:layout_below="@id/event_line"
-        android:background="@color/constant_black_light" />
+        android:background="?sap_gray_black_30"/>
 
     <RelativeLayout
         android:id="@+id/area_header"
@@ -65,7 +67,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_course_area"
-            android:textAppearance="?textNormal" />
+            android:textAppearance="?textNormal"/>
 
         <ImageView
             android:id="@+id/icon_area"
@@ -74,7 +76,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:paddingRight="@dimen/default_padding"
-            android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+            android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
 
         <TextView
             android:id="@+id/selected_area"
@@ -84,7 +86,7 @@
             android:layout_toLeftOf="@id/icon_area"
             android:paddingRight="@dimen/default_padding"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22" />
+            android:textSize="@dimen/textSize_22"/>
     </RelativeLayout>
 
     <View
@@ -92,14 +94,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/area_header"
-        android:background="?black" />
+        android:background="?black"/>
 
     <FrameLayout
         android:id="@+id/area_fragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/area_line"
-        android:background="@color/constant_black_light" />
+        android:background="?sap_gray_black_30"/>
 
     <RelativeLayout
         android:id="@+id/position_header"
@@ -114,7 +116,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_position"
-            android:textAppearance="?textNormal" />
+            android:textAppearance="?textNormal"/>
 
         <ImageView
             android:id="@+id/icon_position"
@@ -123,7 +125,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:paddingRight="@dimen/default_padding"
-            android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+            android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
 
         <TextView
             android:id="@+id/selected_position"
@@ -133,7 +135,7 @@
             android:layout_toLeftOf="@id/icon_position"
             android:paddingRight="@dimen/default_padding"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22" />
+            android:textSize="@dimen/textSize_22"/>
     </RelativeLayout>
 
     <View
@@ -141,14 +143,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/position_header"
-        android:background="?black" />
+        android:background="?black"/>
 
     <FrameLayout
         android:id="@+id/position_fragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/position_line"
-        android:background="@color/constant_black_light" />
+        android:background="?sap_gray_black_30"/>
 
     <Button
         android:id="@+id/login_submit"
@@ -164,5 +166,5 @@
         android:enabled="false"
         android:text="@string/sign_up"
         android:textSize="@dimen/textSize_26"
-        android:visibility="visible" />
+        android:visibility="visible"/>
 </RelativeLayout>

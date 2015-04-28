@@ -395,4 +395,7 @@
     <string name="connected_to_wp"><![CDATA[Verbunden mit: %1$s\n%2$s]]></string>
     <string name="theme_changed_title">Theme Änderung</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
+    <string name="url_refresh_title">Datenänderung</string>
+    <string name="url_refresh_message">Bitte vom aktuellen Event abmelden.</string>
+
 </resources>

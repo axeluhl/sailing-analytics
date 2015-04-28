@@ -417,4 +417,7 @@
     <string name="connected_to_wp"><![CDATA[Connected to: %1$s\n%2$s]]></string>
     <string name="theme_changed_title">Theme Change</string>
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
+    <string name="url_refresh_title">Data change</string>
+    <string name="url_refresh_message">Please logout from current event.</string>
+
 </resources>

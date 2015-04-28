@@ -7,9 +7,13 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -63,6 +67,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private String courseName = null;
     private String positionName = null;
     private View backdrop;
+    private IntentReceiver mReceiver;
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
@@ -162,11 +167,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         setContentView(R.layout.login_view);
         setSupportProgressBarIndeterminateVisibility(false);
 
+        mReceiver = new IntentReceiver();
+
         loginListViews = new LoginListViews();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
-
-        addEventListFragment();
 
         UUID courseUUID = preferences.getCourseUUID();
         if (courseUUID != new UUID(0, 0)) {
@@ -177,9 +182,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         if (eventId != null) {
             mSelectedEvent = eventId;
         }
-
-        // sets up the global configuration and adds it to the preferences
-        setupDataManager();
 
         new AutoUpdater(this).notifyAfterUpdate();
 
@@ -224,6 +226,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     public void onResume() {
         super.onResume();
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.INTENT_ACTION_RESET);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
+
+        Intent intent = new Intent();
+        intent.setAction(AppConstants.INTENT_ACTION_RESET);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
         if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
@@ -238,6 +248,13 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
             fadeActivity(message);
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -375,6 +392,21 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
                 animatorSet.start();
             }
+        }
+    }
+
+    private class IntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setupDataManager();
+
+            addEventListFragment();
+
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.area_fragment, new Fragment());
+            transaction.replace(R.id.position_fragment, new Fragment());
+            transaction.commit();
         }
     }
 }

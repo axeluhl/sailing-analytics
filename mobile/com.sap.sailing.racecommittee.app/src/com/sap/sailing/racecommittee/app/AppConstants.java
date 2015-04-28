@@ -18,11 +18,12 @@ public class AppConstants {
 
     public final static String DARK_THEME = "dark";
     public final static String LIGHT_THEME = "light";
-    
-    public final static String INTENT_ACTION_REGISTER_RACE = "com.sap.sailing.racecommittee.app.action.registerRace";
-    public final static String INTENT_ACTION_CLEAR_RACES = "com.sap.sailing.racecommittee.app.action.clearRaces";
-    public final static String INTENT_ACTION_ALARM_ACTION = "com.sap.sailing.racecommittee.app.action.alarmAction";
-    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = "com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction";
+
+    public final static String INTENT_ACTION_RESET = PACKAGE_NAME + ".action.reset";
+    public final static String INTENT_ACTION_REGISTER_RACE = PACKAGE_NAME + ".action.registerRace";
+    public final static String INTENT_ACTION_CLEAR_RACES = PACKAGE_NAME + ".action.clearRaces";
+    public final static String INTENT_ACTION_ALARM_ACTION = PACKAGE_NAME + ".action.alarmAction";
+    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = PACKAGE_NAME + ".action.startProcedureSpecificAction";
 
     // Login activity
     public final static String EventIdTag = "EventId";

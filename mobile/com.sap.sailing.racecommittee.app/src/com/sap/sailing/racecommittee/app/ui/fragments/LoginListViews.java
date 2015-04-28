@@ -2,14 +2,19 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.*;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
@@ -17,6 +22,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFrag
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
     private LoginActivity activity;
+    private RelativeLayout event_header;
     private FrameLayout event_listView;
     private FrameLayout area_listView;
     private FrameLayout position_listView;
@@ -36,7 +42,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         View view = inflater.inflate(R.layout.login_listviews, container, false);
 
         // all click areas
-        RelativeLayout event_header = (RelativeLayout) view.findViewById(R.id.event_header);
+        event_header = (RelativeLayout) view.findViewById(R.id.event_header);
         if (event_header != null) {
             event_header.setOnClickListener(this);
         }
@@ -66,6 +72,23 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         onClick(event_header);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (event_selected != null) {
+            event_selected.setText(null);
+        }
+
+        if (area_selected != null) {
+            area_selected.setText(null);
+        }
+
+        if (position_selected != null) {
+            position_selected.setText(null);
+        }
     }
 
     @Override
