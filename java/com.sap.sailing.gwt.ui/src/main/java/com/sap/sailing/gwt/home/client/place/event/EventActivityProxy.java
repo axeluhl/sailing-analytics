@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.Multiregatt
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaActivity;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
@@ -88,8 +89,13 @@ public class EventActivityProxy extends AbstractActivityProxy {
 
     private AbstractEventPlace getRealPlace() {
         EventViewDTO event = ctx.getEventDTO();
+
         if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
-            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+            if (event.isFinished()) {
+                return new RegattaLeaderboardPlace(new EventContext(ctx).withRegattaId(null));
+            } else {
+                return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+            }
         }
         return new MultiregattaOverviewPlace(place.getCtx());
     }
