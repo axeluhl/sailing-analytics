@@ -168,4 +168,54 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                             * getTimeOnDistanceFactorInSecondsPerNauticalMile(who)));
     }
 
+    /**
+     * Compares <code>competitor</code> to {@link #getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()}. Based on
+     * the definition of "leader" the corrected estimated time for <code>competitor</code> when reaching the fastest
+     * boat's position at {@link #timePoint} is expected to be greater than that of the leader. We're equating
+     * <code>competitor</code>'s and the leader's corrected time when reaching the fastest boat's position at
+     * {@link #timePoint}, assuming a summand in <code>competitor</code>'s actual time required to reach the fastest
+     * boat's position. This equation can then be resolved for this additional summand (which is a negative
+     * duration), telling in <code>competitor</code>'s own time how much time she would have to make good to rank
+     * equal to the leader.
+     * <p>
+     * 
+     * The math behind this works as follows. Let <code>i</code> represent the <code>competitor</code>,
+     * <code>k</code> the leader, <code>d</code> the total windward distance from the start to the fastest
+     * competitor's position at {@link #timePoint}. Then we have for the corrected reciproke average corrected VMGs:
+     * 
+     * <pre>
+     * t_i * f_i - d * g_i - diff_corr_t_i = t_k * f_k - d * g_k
+     * </pre>
+     * 
+     * where <code>t_i / t_k</code> is the actual duration from the race start until competitor <code>i / k</code>
+     * (or <code>competitor</code> and the leader, respectively) reaches the fastest competitor's position at
+     * {@link #timePoint}. The <code>diff_corr_t_i</code> is the sorting criterion for ranking because corrected
+     * time is (also for Performance Curve after mapping implied wind to corrected times through the use of a
+     * scratch boat) the basis for ranking. But we would additionally like to understand what this difference means
+     * in <code>i</code>'s own time, so we introduce <code>diff_t_i</code> as follows:
+     * 
+     * <pre>
+     * (t_i - diff_t_i) * f_i - d * g_i = t_k * f_k - d * g_k
+     * </pre>
+     * 
+     * which resolves to
+     * 
+     * <pre>
+     * <b>diff_t_i</b> = (t_k * f_k + d * (g_i - g_k)) / f_i - t_i
+     * </pre>
+     */
+    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
+        final Duration t_k = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()).
+                getEstimatedActualDurationFromRaceStartToBoatFarthestAhead();
+        final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead());
+        final double   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead());
+        final Duration t_i = rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromRaceStartToBoatFarthestAhead();
+        final double   f_i = getTimeOnTimeFactor(competitor);
+        final double   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
+        final Distance d   = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getBoatFarthestAhead()).getWindwardDistanceSailed();
+        
+        final Duration diff_t_i = t_k.times(f_k).plus(Duration.ONE_SECOND.times(d.getNauticalMiles() * (g_i - g_k))).divide(f_i).minus(t_i);
+        return diff_t_i;
+    }
+
 }

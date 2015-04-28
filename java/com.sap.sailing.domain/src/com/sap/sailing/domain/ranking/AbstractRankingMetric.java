@@ -104,8 +104,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             return correctedTime;
         }
 
-        public Duration getEstimatedActualDurationToBoatFarthestAhead() {
+        public Duration getEstimatedActualDurationFromTimePointToBoatFarthestAhead() {
             return estimatedActualDurationToBoatFarthestAhead;
+        }
+        
+        public Duration getEstimatedActualDurationFromRaceStartToBoatFarthestAhead() {
+            return getTrackedRace().getStartOfRace().until(getTimePoint()).plus(getEstimatedActualDurationFromTimePointToBoatFarthestAhead());
         }
 
         public Duration getCorrectedTimeAtEstimatedArrivalAtBoatFarthestAhead() {
