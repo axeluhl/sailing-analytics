@@ -508,13 +508,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode) {
         return getGapToLeader(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return getGapToLeader(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
@@ -687,13 +686,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) {
         return getEstimatedTimeToNextMark(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         final Duration result;
         if (hasFinishedLeg(timePoint)) {
             result = Duration.NULL;

@@ -152,7 +152,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
      */
-    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode);
     
     /**
      * Same as {@link #getGapToLeader(TimePoint, WindPositionMode)}, only that a cache for wind and leg type data is used.
@@ -232,7 +232,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
      */
-    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
      * Same as {@link #getEstimatedTimeToNextMark(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
