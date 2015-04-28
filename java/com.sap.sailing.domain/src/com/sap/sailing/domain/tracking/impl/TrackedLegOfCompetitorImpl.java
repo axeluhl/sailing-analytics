@@ -338,7 +338,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (endPos != null) {
                 Distance d = getTrackedLeg().getAbsoluteWindwardDistance(
                         getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false),
-                        endPos, to, WindPositionMode.EXACT);
+                        endPos, to, WindPositionMode.EXACT, cache);
                 result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
             }
         }

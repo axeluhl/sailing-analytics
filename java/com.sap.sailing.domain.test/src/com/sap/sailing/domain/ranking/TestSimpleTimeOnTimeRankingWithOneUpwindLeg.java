@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.ranking;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,6 +157,12 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(45))));
+        trackedRace.getTrack(c2).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(315))));
+        trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(1.0, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(45))));
         trackedRace.getTrack(c2).add(
@@ -163,6 +170,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
         final RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
+        assertSame(c1, rankingInfo.getCompetitorFarthestAhead());
         CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
         CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
@@ -182,6 +190,12 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 c2,
                 Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
                         .getFirstWaypoint(), c2)));
+        trackedRace.getTrack(c1).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(45))));
+        trackedRace.getTrack(c2).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(315))));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(45))));
@@ -208,6 +222,12 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(45))));
+        trackedRace.getTrack(c2).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(315))));
+        trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(1.0, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(45))));
         trackedRace.getTrack(c2).add(
@@ -219,7 +239,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
         CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
-                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
+                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
+                startOfRace.until(middleOfFirstLeg).asSeconds() / 1000. /* 0.1% accuracy expected */);
     }
-
 }

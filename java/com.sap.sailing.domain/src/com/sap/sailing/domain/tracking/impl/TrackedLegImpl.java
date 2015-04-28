@@ -341,9 +341,14 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getWindwardDistanceFromLegStart(Position pos) {
+        return getWindwardDistanceFromLegStart(pos, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
         final TimePoint referenceTimePoint = getReferenceTimePoint();
         return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), referenceTimePoint),
-                pos, referenceTimePoint, WindPositionMode.LEG_MIDDLE);
+                pos, referenceTimePoint, WindPositionMode.LEG_MIDDLE, cache);
     }
     
     @Override
@@ -353,8 +358,13 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getWindwardDistance() {
+        return getWindwardDistance(new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Distance getWindwardDistance(WindLegTypeAndLegBearingCache cache) {
         final TimePoint middle = getReferenceTimePoint();
-        return getWindwardDistance(middle);
+        return getWindwardDistance(middle, cache);
     }
 
     /**
@@ -395,10 +405,10 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Distance getWindwardDistance(final TimePoint middle) {
+    public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingCache cache) {
         final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
         final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
-        return getWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE);
+        return getWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
     Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {

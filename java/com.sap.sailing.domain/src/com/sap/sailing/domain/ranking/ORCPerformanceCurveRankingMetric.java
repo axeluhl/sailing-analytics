@@ -43,7 +43,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
 
     @Override
     protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint timePointOfTosPosition) {
+            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
         // TODO Auto-generated method stub
         return null;
     }
