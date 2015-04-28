@@ -95,7 +95,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
      * @param newContent
      */
     @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-    public boolean setContent(Collection<?> newContent) {
+    public boolean setContent(Collection<?> newContent, boolean notifyListenersWhenSelectionChanged) {
         Collection<ContentType> specificNewContent = null;
         try {
             specificNewContent = (Collection<ContentType>) newContent;
@@ -104,7 +104,13 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         }
         internalSetContent(specificNewContent);
         Set<ContentType> previousSelection = selectionModel.getSelectedSet();
-        selectionModel.clear();
+        if (notifyListenersWhenSelectionChanged) {
+            clearSelection();
+        } else {
+            blockSelectionChangeNotification = true;
+            clearSelection();
+            blockSelectionChangeNotification = false;
+        }
         return !previousSelection.isEmpty();
     }
     
@@ -115,7 +121,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
      * @return <code>true</code>, if previously selected elements have been removed.
      */
     @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-    public boolean updateContent(Collection<?> newContent) {
+    public boolean updateContent(Collection<?> newContent, boolean notifyListenersWhenSelectionChanged) {
         Collection<ContentType> specificNewContent = null;
         try {
             specificNewContent = (Collection<ContentType>) newContent;
@@ -123,7 +129,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
             return false;
         }
         internalSetContent(specificNewContent);
-        return cleanSelection();
+        return cleanSelection(notifyListenersWhenSelectionChanged);
     }
 
     private void internalSetContent(Collection<ContentType> specificNewContent) {
@@ -138,7 +144,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
      * Unselects the selected elements, that aren't in the data anymore.
      * @return <code>true</code>, if elements have been unselected;
      */
-    private boolean cleanSelection() {
+    private boolean cleanSelection(boolean notifyListenersWhenSelectionChanged) {
         boolean selectionChanged = false;
         blockSelectionChangeNotification = true;
         
@@ -158,7 +164,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         }
         
         blockSelectionChangeNotification = false;
-        if (selectionChanged) {
+        if (selectionChanged && notifyListenersWhenSelectionChanged) {
             notifyListeners();
         }
         return selectionChanged;

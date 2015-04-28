@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -134,33 +133,22 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
      * Updates the dimension values except for the given dimension.<br>
      * Aborts the update, if it caused a selection change.
      */
-    void updateAvailableData(FunctionDTO exceptForDimension, AsyncCallback<Boolean> selectionChangedCallback) {
-        updateAvailableData(exceptForDimension, selectionChangedCallback, dimensionSelectionProviders.iterator());
+    void updateAvailableData(FunctionDTO exceptForDimension) {
+        updateAvailableData(exceptForDimension, dimensionSelectionProviders.iterator());
     }
     
-    private void updateAvailableData(final FunctionDTO exceptForDimension, final AsyncCallback<Boolean> selectionChangedCallback, final Iterator<DimensionFilterSelectionProvider> selectionProviderIterator) {
+    void updateAvailableData(final FunctionDTO exceptForDimension, final Iterator<DimensionFilterSelectionProvider> selectionProviderIterator) {
         if (selectionProviderIterator.hasNext()) {
             DimensionFilterSelectionProvider selectionProvider = selectionProviderIterator.next();
             FunctionDTO selectedDimension = selectionProvider.getSelectedDimension();
             if (selectedDimension != null && !selectedDimension.equals(exceptForDimension)) {
-                selectionProvider.fetchAndDisplayAvailableData(true, new AsyncCallback<Boolean>() {
-                    @Override
-                    public void onFailure(Throwable caught) { }
-                    @Override
-                    public void onSuccess(Boolean selectionChanged) {
-                        if (selectionChanged != null && !selectionChanged) {
-                            updateAvailableData(exceptForDimension, selectionChangedCallback, selectionProviderIterator);
-                        } else {
-                            selectionChangedCallback.onSuccess(true);
-                        }
-                    }
-                    
-                });
+                selectionProvider.fetchAndUpdateAvailableData(selectionProviderIterator);
             } else {
-                updateAvailableData(exceptForDimension, selectionChangedCallback, selectionProviderIterator);
+                updateAvailableData(exceptForDimension, selectionProviderIterator);
             }
         } else {
-            selectionChangedCallback.onSuccess(false);
+            // Update for this level is completed. Continue with the next level.
+            retrieverChainSelectionProvider.updateFilterSelectionProviders(getRetrieverLevel() + 1, exceptForDimension);
         }
     }
 

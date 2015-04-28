@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,12 +105,7 @@ class DimensionFilterSelectionProvider {
         public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
             final FunctionDTO dimension = event.getValue();
             if (dimension != null) {
-                fetchAndDisplayAvailableData(false, new AsyncCallback<Boolean>() {
-                    @Override
-                    public void onFailure(Throwable caught) { }
-                    @Override
-                    public void onSuccess(Boolean result) { }
-                });
+                fetchAndSetAvailableData();
                 if (firstChange && retrieverLevelSelectionProvider.canAddDimensionSelectionProvider()) {
                     retrieverLevelSelectionProvider.createAndAddDimensionSelectionProvider();
                 }
@@ -119,7 +115,7 @@ class DimensionFilterSelectionProvider {
                 firstChange = false;
             } else {
                 selectionTable.clearSelection();
-                selectionTable.setContent(new ArrayList<>());
+                selectionTable.setContent(new ArrayList<>(), true);
                 
                 selectionTable.setVisible(false);
                 toggleFilterButton.setVisible(false);
@@ -127,6 +123,14 @@ class DimensionFilterSelectionProvider {
             }
             retrieverLevelSelectionProvider.updateAvailableDimensions();
         }
+    }
+    
+    private void fetchAndSetAvailableData() {
+        fetchAndDisplayAvailableData(false, true, null);
+    }
+    
+    void fetchAndUpdateAvailableData(final Iterator<DimensionFilterSelectionProvider> retrieverLevelSelectionProviderIterator) {
+        fetchAndDisplayAvailableData(true, false, retrieverLevelSelectionProviderIterator);
     }
     
     /**
@@ -137,7 +141,8 @@ class DimensionFilterSelectionProvider {
      *                 <code>false</code>, if it should override the data and clear the selection.
      * @param selectionChangedCallback An {@link AsyncCallback} to react, if the selection has been changed or not.
      */
-    void fetchAndDisplayAvailableData(final boolean isUpdate, final AsyncCallback<Boolean> selectionChangedCallback) {
+    private void fetchAndDisplayAvailableData(final boolean isUpdate, final boolean notifyListenersWhenSelectionChanged,
+            final Iterator<DimensionFilterSelectionProvider> retrieverLevelSelectionProviderIterator) {
         final FunctionDTO dimension = getSelectedDimension();
         Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
         dimensionDTOs.add(dimension);
@@ -166,28 +171,36 @@ class DimensionFilterSelectionProvider {
                             
                             boolean selectionChanged;
                             if (isUpdate) {
-                                selectionChanged = selectionTable.updateContent(content);
+                                selectionChanged = selectionTable.updateContent(content, notifyListenersWhenSelectionChanged);
                             } else {
-                                selectionChanged = selectionTable.setContent(content);
+                                selectionChanged = selectionTable.setContent(content, notifyListenersWhenSelectionChanged);
                             }
                             
                             if (selectionToBeApplied != null) {
                                 selectionTable.setSelection(selectionToBeApplied);
                                 selectionToBeApplied = null;
                             }
+                            busyIndicator.setVisible(false);
                             selectionTable.setVisible(true);
                             toggleFilterButton.setVisible(true);
                             
-                            selectionChangedCallback.onSuccess(selectionChanged);
+                            if (retrieverLevelSelectionProviderIterator != null) {
+                                if (selectionChanged) {
+                                    //Update the complete retriever level, because the selection changed
+//                                    retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension());
+                                    //TODO This is currently done with a selection changed notification of the inner selection table
+                                    //FIXME Enable, after the notifications can be blocked.
+                                } else {
+                                    //Continue with the update of the retriever level selection provider
+                                    retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension(), retrieverLevelSelectionProviderIterator);
+                                }
+                            }
                         }
-                        
-                        busyIndicator.setVisible(false);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the dimension values of " + dimension + ": "
                                 + caught.getMessage());
-                        selectionChangedCallback.onFailure(caught);
                     }
                 });
     }

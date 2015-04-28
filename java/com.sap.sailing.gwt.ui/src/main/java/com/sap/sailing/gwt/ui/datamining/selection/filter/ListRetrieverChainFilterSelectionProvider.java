@@ -219,33 +219,19 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
     }
     
-    private void updateFilterSelectionProviders(int beginningWithLevel, final FunctionDTO exceptForDimension) {
+    void updateFilterSelectionProviders(int beginningWithLevel, final FunctionDTO exceptForDimension) {
         LocalizedTypeDTO retrievedDataType = null;
-        int nextRetrieverLevel = 0;
         for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
             retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
             if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
-                nextRetrieverLevel = retrieverLevel + 1;
                 break;
             }
         }
-        final int finalNextRetrievalLevel = nextRetrieverLevel;
         
         if (retrievedDataType != null) {
-            selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData(exceptForDimension,
-                    new AsyncCallback<Boolean>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean selectionChanged) {
-                            if (selectionChanged != null && !selectionChanged) {
-                                updateFilterSelectionProviders(finalNextRetrievalLevel, exceptForDimension);
-                            }
-                        }
-                    });
+            selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData(exceptForDimension);
         } else {
+            //The update of the whole retriever chain is completed. Notify the listeners.
             mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
             notifyListeners();
         }
