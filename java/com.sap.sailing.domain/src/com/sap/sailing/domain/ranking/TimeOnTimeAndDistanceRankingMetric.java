@@ -1,20 +1,26 @@
 package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -72,32 +78,96 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      */
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        return (c1, c2) -> Double.valueOf(getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c1, timePoint)).compareTo(
-                Double.valueOf(getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c2, timePoint)));
-    }
-
-    protected double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
-        final double tSec = getActualTimeSinceStartOfRace(competitor, timePoint).asSeconds();
-        final double diNM = getWindwardDistanceTraveled(competitor, timePoint).getNauticalMiles();
-        final double gi = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
-        final double fi = getTimeOnTimeFactor(competitor);
-        return tSec * fi / diNM - gi;
+        final RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
+        return (c1, c2) -> rankingInfo.getCompetitorRankingInfo().get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().compareTo(
+                rankingInfo.getCompetitorRankingInfo().get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
     }
 
     @Override
-    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
-        return (tloc1, tloc2) -> getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(tloc1, timePoint).compareTo(
-                getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(tloc2, timePoint));
+    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        // competitors that have not yet started the leg will get a duration based on Long.MAX_VALUE
+        final Map<Competitor, Duration> correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace = new HashMap<>();
+        final Competitor fastestCompetitorInLeg = getCompetitorFarthestAheadInLeg(trackedLeg, timePoint);
+        final TrackedLegOfCompetitor trackedLegOfFastestCompetitorInLeg = trackedLeg.getTrackedLeg(fastestCompetitorInLeg);
+        final Distance totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd;
+        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        final Position positionOfFastestBoatInLegAtTimePointOrLegEnd;
+        if (trackedLegOfFastestCompetitorInLeg.hasFinishedLeg(timePoint)) {
+            positionOfFastestBoatInLegAtTimePointOrLegEnd = getTrackedRace().getApproximatePosition(trackedLeg.getLeg().getTo(), timePoint);
+            Distance totalWindwardDistanceIncludingCompleteLeg = Distance.NULL;
+            final Course course = getTrackedRace().getRace().getCourse();
+            course.lockForRead();
+            try {
+                for (TrackedLeg tl : getTrackedRace().getTrackedLegs()) {
+                    totalWindwardDistanceIncludingCompleteLeg = totalWindwardDistanceIncludingCompleteLeg.add(tl.getWindwardDistance());
+                    if (tl == trackedLeg) {
+                        break;
+                    }
+                }
+            } finally {
+                course.unlockAfterRead();
+            }
+            totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd = totalWindwardDistanceIncludingCompleteLeg;
+        } else {
+            positionOfFastestBoatInLegAtTimePointOrLegEnd = getTrackedRace().getTrack(fastestCompetitorInLeg).getEstimatedPosition(timePoint, /* extrapolate */ true);
+            totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd = getWindwardDistanceTraveled(fastestCompetitorInLeg, timePoint);
+        }
+        for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            final TrackedLegOfCompetitor currentLeg = getTrackedRace().getCurrentLeg(competitor, timePoint);
+            final Duration correctedTime;
+            if (currentLeg.hasStartedLeg(timePoint)) {
+                final Duration timeToReachFastest = getPredictedDurationToEndOfLegOrTo(competitor,
+                        fastestCompetitorInLeg, timePoint, currentLeg, trackedLegOfFastestCompetitorInLeg);
+                final Duration totalDurationSinceRaceStart = startOfRace.until(timePoint).plus(timeToReachFastest);
+                correctedTime = getCorrectedTime(competitor, () -> trackedLeg.getLeg(),
+                        () -> positionOfFastestBoatInLegAtTimePointOrLegEnd, totalDurationSinceRaceStart,
+                        totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd);
+            } else { // competitor hasn't started the leg yet; they all get MAX_VALUE as the corrected duration, hence comparing equal to each other
+                // and greater than all competitors who have already started the leg
+                correctedTime = new MillisecondsDurationImpl(Long.MAX_VALUE);
+            }
+            correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.put(competitor, correctedTime);
+        }
+        return (tloc1, tloc2) -> correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc1.getCompetitor()).
+                compareTo(correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc2.getCompetitor()));
     }
 
-    private Double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(TrackedLegOfCompetitor tloc, TimePoint timePoint) {
-        final TimePoint at = tloc.getTimePointNotAfterFinishingOfLeg(timePoint);
-        final Double result;
-        if (at == null) {
-            result = null;
+    /**
+     * @return <code>null</code> if no competitor has started the leg yet; the first competitor to finish the leg if any has already
+     * finished the leg; or the competitor with the greatest windward distance traveled in the leg at <code>timePoint</code> otherwise
+     */
+    private Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint) {
+        Iterable<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getTo());
+        Competitor firstAroundMark = null;
+        getTrackedRace().lockForRead(markPassingsForLegEnd);
+        try {
+            final Iterator<MarkPassing> i = markPassingsForLegEnd.iterator();
+            if (i.hasNext()) {
+                firstAroundMark = i.next().getCompetitor();
+            }
+        } finally {
+            getTrackedRace().unlockAfterRead(markPassingsForLegEnd);
+        }
+        final Competitor result;
+        if (firstAroundMark != null) {
+            result = firstAroundMark;
         } else {
-            result = getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(tloc.getCompetitor(), at);
+            Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
+            Distance minRemainingDistance = new MeterDistance(Double.MAX_VALUE);
+            Competitor competitorFarthestAlong = null;
+            getTrackedRace().lockForRead(markPassingsForLegStart);
+            try {
+                for (MarkPassing mp : markPassingsForLegStart) {
+                    final Distance remainingWindwardDistance = trackedLeg.getTrackedLeg(mp.getCompetitor()).getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);
+                    if (remainingWindwardDistance.compareTo(minRemainingDistance) < 0) {
+                        minRemainingDistance = remainingWindwardDistance;
+                        competitorFarthestAlong = mp.getCompetitor();
+                    }
+                }
+            } finally {
+                getTrackedRace().unlockAfterRead(markPassingsForLegStart);
+            }
+            result = competitorFarthestAlong;
         }
         return result;
     }
@@ -162,7 +232,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     /**
-     * Compares <code>competitor</code> to {@link RankingInfo#getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()}.
+     * Compares <code>competitor</code> to {@link RankingInfo#getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}.
      * Based on the definition of "leader" the corrected estimated time for <code>competitor</code> when reaching the
      * fastest boat's position at {@link #timePoint} is expected to be greater than that of the leader. We're equating
      * <code>competitor</code>'s and the leader's corrected time when reaching the fastest boat's position at
@@ -199,14 +269,14 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      */
     @Override
     public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
-        final Duration t_k = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()).
-                getEstimatedActualDurationFromRaceStartToBoatFarthestAhead();
-        final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead());
-        final double   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead());
-        final Duration t_i = rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromRaceStartToBoatFarthestAhead();
+        final Duration t_k = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()).
+                getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+        final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
+        final double   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
+        final Duration t_i = rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_i = getTimeOnTimeFactor(competitor);
         final double   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
-        final Distance d   = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getBoatFarthestAhead()).getWindwardDistanceSailed();
+        final Distance d   = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
         
         final Duration diff_t_i = t_k.times(f_k).plus(Duration.ONE_SECOND.times(d.getNauticalMiles() * (g_i - g_k))).divide(f_i).minus(t_i);
         return diff_t_i;

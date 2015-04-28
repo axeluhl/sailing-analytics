@@ -38,6 +38,8 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.ranking.AbstractRankingMetric.CompetitorRankingInfo;
+import com.sap.sailing.domain.ranking.AbstractRankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -48,17 +50,18 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
-    private TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG tot;
+    private TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo tot;
     private DynamicTrackedRace trackedRace;
     private Competitor c1, c2;
     
-    private class TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG extends TimeOnTimeAndDistanceRankingMetric {
-        public TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG(TrackedRace trackedRace,
+    private class TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo extends TimeOnTimeAndDistanceRankingMetric {
+        public TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo(TrackedRace trackedRace,
                 Function<Competitor, Double> timeOnTimeFactor,
                 Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
             super(trackedRace, timeOnTimeFactor, timeOnDistanceFactorInSecondsPerNauticalMile);
@@ -66,9 +69,8 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
 
         private static final long serialVersionUID = 2450762527282968347L;
 
-        @Override
-        public double getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(Competitor competitor, TimePoint timePoint) {
-            return super.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(competitor, timePoint);
+        protected RankingInfo getRankingInfo(TimePoint timePoint) {
+            return super.getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
         }
     }
     
@@ -76,7 +78,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         c1 = TrackBasedTest.createCompetitor("FastBoat");
         c2 = TrackBasedTest.createCompetitor("SlowBoat");
         trackedRace = createTrackedRace(Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
-        tot = (TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG) trackedRace.getRankingMetric();
+        tot = (TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo) trackedRace.getRankingMetric();
         assertEquals(60, trackedRace.getCourseLength().getNauticalMiles(), 0.01);
     }
     
@@ -101,7 +103,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
-                tr->new TimeOnTimeAndDistanceRankingMetricWithAccessibleReciprokeVMG(tr,
+                tr->new TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo(tr,
                         timeOnTimeFactors, // time-on-time
                         timeOnDistanceFactors));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
@@ -160,8 +162,11 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
-        assertEquals(tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
-                tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.00001);
+        final RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
+        CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
+        CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
+        assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
+                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
     }
 
     @Test
@@ -210,8 +215,11 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other,
         // in this case .05 seconds per nautical mile for the reciproke VMG measured in seconds per nautical mile
-        assertEquals(tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c1, middleOfFirstLeg),
-                tot.getAverageCorrectedReciprokeVMGAsSecondsPerNauticalMile(c2, middleOfFirstLeg), 0.05);
+        final RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
+        CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
+        CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
+        assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
+                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
     }
 
 }

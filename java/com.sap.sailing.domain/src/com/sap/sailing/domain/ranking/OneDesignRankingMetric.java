@@ -38,7 +38,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
-        return rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromTimePointToBoatFarthestAhead();
+        return rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
     }
 
     @Override

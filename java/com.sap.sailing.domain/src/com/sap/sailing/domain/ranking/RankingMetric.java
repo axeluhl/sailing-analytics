@@ -84,7 +84,7 @@ public interface RankingMetric extends Serializable {
      * 
      * @param rankingInfo
      *            the pre-calculated ranking info for all competitors for a certain time point, as returned by
-     *            {@link AbstractRankingMetric#getRankingInfo(TimePoint)}
+     *            {@link AbstractRankingMetric#getRankingInfo(TimePoint, WindLegTypeAndLegBearingCache)}
      * @param competitor
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
      */
