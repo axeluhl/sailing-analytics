@@ -13,7 +13,6 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.RaceRankComparator;
 import com.sap.sailing.domain.tracking.impl.WindwardToGoComparator;
 import com.sap.sse.common.Duration;
@@ -38,16 +37,8 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
-        final Duration result;
-        final TrackedLegOfCompetitor currentLeg = getTrackedRace().getCurrentLeg(trailing, timePoint);
-        if (currentLeg != null) {
-            result = currentLeg.getGapToLeader(timePoint, leading, WindPositionMode.LEG_MIDDLE, cache);
-        } else {
-            result = null;
-        }
-        return result;
+    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+        return rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromTimePointToBoatFarthestAhead();
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.ranking.AbstractRankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -52,37 +53,6 @@ public interface RankingMetric extends Serializable {
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
-     * Calculates the time that the <code>trailing</code> competitor needs to "catch up" to reach the
-     * <code>leading</code> competitor, measured in the <code>trailing</code> competitor's "time system." For one-design
-     * ranking this will be the gap based on the <code>trailing</code> competitor's windward/along-course distance to
-     * the <code>leading</code> competitor divided by the <code>trailing</code> competitor's current VMG/VMC. For other
-     * ranking systems such as time-on-time, time-on-distance, combinations thereof or ORC performance curve scoring
-     * special rules will apply which take into account the distance traveled by the <code>trailing</code> competitor in
-     * her current leg and scaling any allowances according to that distance in order to compare to the leader. If the
-     * leader is already in another leg, the best corrected leg completion time is used as the reference for comparison.
-     * This may not be the overall leader of the race at that time, but anything else would require an uncertain
-     * prediction of the <code>trailing</code> competitor's performance in the next leg which is not considered to be
-     * useful here.
-     * <p>
-     * 
-     * Note that this way of calculating the time to improve takes into account the competitor's <em>average</em>
-     * performance of the <em>entire race so far</em> (as opposed to the <em>current</em> performance</em>) by looking
-     * at how much earlier the competitor would have had to reach the current ranking value (windward position for
-     * one-design, for example) in order to have caught up to the leg's leader. This makes the result robust against
-     * short-term speed changes but doesn't respond well to the different types of legs in which the competitors
-     * may sail.
-     */
-    default Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint) {
-        return getTimeToImprove(trailing, leading, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
-    }
-
-    /**
-     * Same as {@link #getTimeToImprove(Competitor, Competitor, TimePoint)}, but allowing the caller to pass a cache
-     * that accelerates some calculations.
-     */
-    Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
-    
-    /**
      * How much time did the <code>competitor</code> spend in the {@link TrackedRace#getRace() race} described by
      * <code>trackedRace</code> at <code>timePoint</code>, corrected by the handicapping rules defined by this ranking
      * metric? If the competitor hasn't started the race yet at <code>timePoint</code>, <code>null</code> is returned.
@@ -107,4 +77,20 @@ public interface RankingMetric extends Serializable {
      * accelerates some calculations.
      */
     Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+    /**
+     * Determines in <code>competitor</code>'s own time how much time earlier she would have had to be where she is at
+     * {@link RankingInfo#getTimePoint() the ranking info's time point} in order to rank equal to the race leader.
+     * 
+     * @param rankingInfo
+     *            the pre-calculated ranking info for all competitors for a certain time point, as returned by
+     *            {@link AbstractRankingMetric#getRankingInfo(TimePoint)}
+     * @param competitor
+     *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
+     */
+    default Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
+        return getGapToLeaderInOwnTime(rankingInfo, competitor, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
 }

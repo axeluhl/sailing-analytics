@@ -103,13 +103,6 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Duration getTimeToImprove(Competitor trailing, Competitor leading, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final Duration timeActuallySpent = getActualTimeSinceStartOfRace(competitor, timePoint);
         final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint);
@@ -169,30 +162,30 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     /**
-     * Compares <code>competitor</code> to {@link #getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()}. Based on
-     * the definition of "leader" the corrected estimated time for <code>competitor</code> when reaching the fastest
-     * boat's position at {@link #timePoint} is expected to be greater than that of the leader. We're equating
+     * Compares <code>competitor</code> to {@link RankingInfo#getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()}.
+     * Based on the definition of "leader" the corrected estimated time for <code>competitor</code> when reaching the
+     * fastest boat's position at {@link #timePoint} is expected to be greater than that of the leader. We're equating
      * <code>competitor</code>'s and the leader's corrected time when reaching the fastest boat's position at
      * {@link #timePoint}, assuming a summand in <code>competitor</code>'s actual time required to reach the fastest
-     * boat's position. This equation can then be resolved for this additional summand (which is a negative
-     * duration), telling in <code>competitor</code>'s own time how much time she would have to make good to rank
-     * equal to the leader.
+     * boat's position. This equation can then be resolved for this additional summand (which is a negative duration),
+     * telling in <code>competitor</code>'s own time how much time she would have to make good to rank equal to the
+     * leader.
      * <p>
      * 
-     * The math behind this works as follows. Let <code>i</code> represent the <code>competitor</code>,
-     * <code>k</code> the leader, <code>d</code> the total windward distance from the start to the fastest
-     * competitor's position at {@link #timePoint}. Then we have for the corrected reciproke average corrected VMGs:
+     * The math behind this works as follows. Let <code>i</code> represent the <code>competitor</code>, <code>k</code>
+     * the leader, <code>d</code> the total windward distance from the start to the fastest competitor's position at
+     * {@link #timePoint}. Then we have for the corrected reciproke average corrected VMGs:
      * 
      * <pre>
      * t_i * f_i - d * g_i - diff_corr_t_i = t_k * f_k - d * g_k
      * </pre>
      * 
-     * where <code>t_i / t_k</code> is the actual duration from the race start until competitor <code>i / k</code>
-     * (or <code>competitor</code> and the leader, respectively) reaches the fastest competitor's position at
-     * {@link #timePoint}. The <code>diff_corr_t_i</code> is the sorting criterion for ranking because corrected
-     * time is (also for Performance Curve after mapping implied wind to corrected times through the use of a
-     * scratch boat) the basis for ranking. But we would additionally like to understand what this difference means
-     * in <code>i</code>'s own time, so we introduce <code>diff_t_i</code> as follows:
+     * where <code>t_i / t_k</code> is the actual duration from the race start until competitor <code>i / k</code> (or
+     * <code>competitor</code> and the leader, respectively) reaches the fastest competitor's position at
+     * {@link #timePoint}. The <code>diff_corr_t_i</code> is the sorting criterion for ranking because corrected time is
+     * (also for Performance Curve after mapping implied wind to corrected times through the use of a scratch boat) the
+     * basis for ranking. But we would additionally like to understand what this difference means in <code>i</code>'s
+     * own time, so we introduce <code>diff_t_i</code> as follows:
      * 
      * <pre>
      * (t_i - diff_t_i) * f_i - d * g_i = t_k * f_k - d * g_k
@@ -204,7 +197,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * <b>diff_t_i</b> = (t_k * f_k + d * (g_i - g_k)) / f_i - t_i
      * </pre>
      */
-    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
+    @Override
+    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
         final Duration t_k = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead()).
                 getEstimatedActualDurationFromRaceStartToBoatFarthestAhead();
         final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToBoatFarthestAhead());
