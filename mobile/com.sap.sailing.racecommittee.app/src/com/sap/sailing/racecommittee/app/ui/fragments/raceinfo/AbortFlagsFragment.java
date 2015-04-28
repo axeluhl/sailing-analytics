@@ -23,8 +23,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
     public static AbortFlagsFragment newInstance(Flags flag) {
         if (flag != Flags.AP && flag != Flags.NOVEMBER) {
-            throw new IllegalArgumentException(
-                    "The abort fragment can only be instantiated with AP or NOVEMBER, but was " + flag.name());
+            throw new IllegalArgumentException("The abort fragment can only be instantiated with AP or NOVEMBER, but was " + flag.name());
         }
 
         AbortFlagsFragment fragment = new AbortFlagsFragment();
@@ -53,21 +52,25 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         RaceState state = getRaceState();
         Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
         switch (mainFlag) {
-            case AP:
-                logFlag(flag);
-                state.setAborted(now, /* postponed */ true, flag);
+        case AP:
+            logFlag(flag);
+            state.setAborted(now, /* postponed */ true, flag);
+            if (flag != Flags.NONE) {
                 setProtestTime();
-                break;
+            }
+            break;
 
-            case NOVEMBER:
-                logFlag(flag);
-                state.setAborted(now, /* postponed */ false, flag);
+        case NOVEMBER:
+            logFlag(flag);
+            state.setAborted(now, /* postponed */ false, flag);
+            if (flag != Flags.NONE) {
                 setProtestTime();
-                break;
+            }
+            break;
 
-            default:
-                logFlag(flag);
-                break;
+        default:
+            logFlag(flag);
+            break;
         }
         state.setAdvancePass(now);
 
@@ -77,17 +80,17 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
     private void logFlag(Flags flag) {
         switch (flag) {
-            case ALPHA:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString());
-                break;
+        case ALPHA:
+            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString());
+            break;
 
-            case HOTEL:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString());
-                break;
+        case HOTEL:
+            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString());
+            break;
 
-            default:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString());
-                break;
+        default:
+            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString());
+            break;
         }
     }
 

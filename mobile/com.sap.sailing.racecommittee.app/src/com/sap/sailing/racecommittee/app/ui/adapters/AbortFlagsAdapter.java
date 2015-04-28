@@ -42,21 +42,20 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         mListener = listener;
 
         mFlags = new ArrayList<>();
-        addFlag(flags.name().toLowerCase(), null);
-        addFlag(flags.name().toLowerCase(), Flags.HOTEL.name().toLowerCase());
-        addFlag(flags.name().toLowerCase(), Flags.ALPHA.name().toLowerCase());
+        addFlag(flags.name().toLowerCase(), Flags.NONE);
+        addFlag(flags.name().toLowerCase(), Flags.HOTEL);
+        addFlag(flags.name().toLowerCase(), Flags.ALPHA);
     }
 
-    private void addFlag(String primaryFlag, String secondFlag) {
+    private void addFlag(String primaryFlag, Flags otherFlag) {
         int flagNameId;
         int flagDescId;
         String flagName = null;
         String flagDesc = null;
+        String secondFlag = "";
 
-        if (!TextUtils.isEmpty(secondFlag)) {
-            secondFlag = "_" + secondFlag;
-        } else {
-            secondFlag = "";
+        if (otherFlag != Flags.NONE) {
+            secondFlag = "_" + otherFlag.name().toLowerCase();
         }
 
         flagNameId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag, null, mContext.getPackageName());
@@ -68,7 +67,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             flagDesc = mContext.getString(flagDescId);
         }
         if (!TextUtils.isEmpty(flagName) && !TextUtils.isEmpty(flagDesc)) {
-            mFlags.add(new AbortFlag(flagName, flagDesc, "flag_" + primaryFlag + secondFlag + "_96dp", Flags.NONE));
+            mFlags.add(new AbortFlag(flagName, flagDesc, "flag_" + primaryFlag + secondFlag + "_96dp", otherFlag));
         }
     }
 
