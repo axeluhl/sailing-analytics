@@ -104,7 +104,7 @@ public class PositioningFragment extends BaseFragment
                 mSwipeManager = new RecyclerViewSwipeManager();
 
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                FinishListAdapter adapter = new FinishListAdapter(getActivity(), mFinishedData);
+                FinishListAdapter adapter = new FinishListAdapter(getActivity(), getRace(), mFinishedData);
                 adapter.setListener(this);
                 mFinishedAdapter = mDragDropManager.createWrappedAdapter(adapter);
                 mFinishedAdapter = mSwipeManager.createWrappedAdapter(mFinishedAdapter);
@@ -268,8 +268,8 @@ public class PositioningFragment extends BaseFragment
     }
 
     private void moveCompetitorToFinishList(Competitor competitor) {
-        mFinishedData
-            .add(new CompetitorsWithIdImpl(mId, competitor.getId(), competitor.getName(), MaxPointsReason.NONE));
+        mFinishedData.add(
+            new CompetitorsWithIdImpl(mId, competitor.getId(), competitor.getName(), MaxPointsReason.NONE));
         mId++;
         mFinishedAdapter.notifyDataSetChanged();
     }

@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +20,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolder;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import java.util.ArrayList;
@@ -181,9 +185,29 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
-    public void onSetSwipeBackground(ViewHolder holder, int type) {
-        // don't change background color
+    public void onSetSwipeBackground(ViewHolder viewHolder, int type) {
+        int bgRes = 0;
+        switch (type) {
+        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
+            bgRes = R.attr.swipe_idle;
+            break;
+        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
+            bgRes = R.attr.swipe_left;
+            break;
+        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
+            bgRes = R.attr.swipe_right;
+            break;
+        }
+
+        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+        Drawable background = BitmapHelper.getAttrDrawable(mContext, bgRes);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            viewHolder.itemView.setBackground(background);
+        } else {
+            viewHolder.itemView.setBackgroundDrawable(background);
+        }
     }
 
     @Override

@@ -64,6 +64,9 @@
         <item name="mic_48dp">@drawable/ic_mic_white_48dp</item>
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_white_48dp</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_white_36dp</item>
+        <item name="swipe_idle">@drawable/swipe_idle_dark</item>
+        <item name="swipe_left">@drawable/swipe_left_dark</item>
+        <item name="swipe_right">@drawable/swipe_right_dark</item>
         <item name="value_next">@drawable/value_next_dark</item>
         <item name="value_prev">@drawable/value_prev_dark</item>
         <item name="wind_off">@drawable/wind_off_dark</item>

@@ -36,6 +36,9 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         Competitor competitor = mData.get(position);
 
         if (competitor != null) {
+            if (holder.vesselId != null && competitor.getBoat() != null) {
+                holder.vesselId.setText(competitor.getBoat().getSailID());
+            }
             if (holder.competitor != null) {
                 holder.competitor.setText(competitor.getName());
             }
@@ -57,6 +60,7 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public View container;
+        public TextView vesselId;
         public TextView competitor;
 
         public ViewHolder(View itemView) {
@@ -64,6 +68,7 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
 
             itemView.setOnClickListener(this);
             container = itemView.findViewById(R.id.container);
+            vesselId = (TextView) itemView.findViewById(R.id.vessel_id);
             competitor = (TextView) itemView.findViewById(R.id.competitor);
         }
 

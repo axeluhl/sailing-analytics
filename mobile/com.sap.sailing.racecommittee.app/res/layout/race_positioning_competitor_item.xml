@@ -16,11 +16,21 @@
         android:paddingRight="@dimen/default_padding">
 
         <TextView
+            android:id="@+id/vessel_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="?textSmall"
+            tools:text="GDR001"/>
+
+        <TextView
             android:id="@+id/competitor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="5dp"
             android:textAppearance="?textSmall"
-            tools:text="Gazprom Team Russia"/>
+            tools:text="Cool Runnings"/>
     </LinearLayout>
 
 </FrameLayout>
