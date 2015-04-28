@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 public interface TrackedLeg extends Serializable {
     Leg getLeg();
@@ -142,4 +143,18 @@ public interface TrackedLeg extends Serializable {
      */
     Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
 
+    /**
+     * Determines an average true wind direction for this leg; it does so by querying the tracked race for
+     * wind data at the leg's middle around a reference time point which is defined by the mark passings
+     * of the competitors entering and finishing this leg.
+     */
+    WindWithConfidence<Pair<Position, TimePoint>> getAverageTrueWindDirection();
+
+    /**
+     * Computes a reference time point for this leg that is the same for all competitors and that is the middle between
+     * the time points of first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
+     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
+     * "now" is used.
+     */
+    TimePoint getReferenceTimePoint();
 }

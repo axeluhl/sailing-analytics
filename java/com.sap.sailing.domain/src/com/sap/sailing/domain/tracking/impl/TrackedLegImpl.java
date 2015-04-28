@@ -32,8 +32,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedLegImpl implements TrackedLeg {
@@ -367,13 +369,8 @@ public class TrackedLegImpl implements TrackedLeg {
         return getWindwardDistance(middle, cache);
     }
 
-    /**
-     * Computes a reference time point for this leg that is the same for all competitors and that is the middle between
-     * the time points of first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
-     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
-     * "now" is used.
-     */
-    private TimePoint getReferenceTimePoint() {
+    @Override
+    public TimePoint getReferenceTimePoint() {
         Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
         Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
         getTrackedRace().lockForRead(legStartMarkPassings);
@@ -438,4 +435,9 @@ public class TrackedLegImpl implements TrackedLeg {
         return result;
     }
 
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getAverageTrueWindDirection() {
+        final TimePoint timePoint = getReferenceTimePoint();
+        return getTrackedRace().getWindWithConfidence(getMiddleOfLeg(timePoint), timePoint);
+    }
 }
