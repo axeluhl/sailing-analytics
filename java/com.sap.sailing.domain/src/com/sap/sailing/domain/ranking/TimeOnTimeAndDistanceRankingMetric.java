@@ -181,12 +181,22 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 timeActuallySpent, windwardDistanceSailed);
     }
 
-    private double getTimeOnTimeFactor(Competitor competitor) {
+    double getTimeOnTimeFactor(Competitor competitor) {
         return timeOnTimeFactor.apply(competitor);
     }
 
-    private double getTimeOnDistanceFactorInSecondsPerNauticalMile(Competitor competitor) {
+    double getTimeOnDistanceFactorInSecondsPerNauticalMile(Competitor competitor) {
         return timeOnDistanceFactorInSecondsPerNauticalMile.apply(competitor);
+    }
+
+    @Override
+    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
+            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
+        return totalDurationSinceRaceStart == null ? null :
+            totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
+                totalWindwardDistanceTraveled == null ? Duration.NULL :
+                    Duration.ONE_SECOND.times(totalWindwardDistanceTraveled.getNauticalMiles()
+                            * getTimeOnDistanceFactorInSecondsPerNauticalMile(who)));
     }
 
     /**
@@ -200,13 +210,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
-        if (whenToPassedFromWaypoint == null) {
-            throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
-        }
-        if (whenToPassedFromWaypoint.getTimePoint().after(timePointOfTosPosition)) {
-            throw new IllegalArgumentException("Competitor was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
-                    " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
-        }
+        validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
         final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
         final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition);
         final double   f_to = getTimeOnTimeFactor(to);
@@ -219,16 +223,6 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 (1./d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE - g_to + g_who)
                               * d_who.getNauticalMiles() / f_who * 1000.).longValue());
         return t_who;
-    }
-
-    @Override
-    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
-            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
-        return totalDurationSinceRaceStart == null ? null :
-            totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
-                totalWindwardDistanceTraveled == null ? Duration.NULL :
-                    Duration.ONE_SECOND.times(totalWindwardDistanceTraveled.getNauticalMiles()
-                            * getTimeOnDistanceFactorInSecondsPerNauticalMile(who)));
     }
 
     /**

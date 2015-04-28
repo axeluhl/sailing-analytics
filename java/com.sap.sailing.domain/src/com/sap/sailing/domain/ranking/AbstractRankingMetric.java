@@ -286,6 +286,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint) {
         final TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
         final TrackedLegOfCompetitor currentLegTo = getTrackedRace().getCurrentLeg(to, timePoint);
+        assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegWho.getLeg().getFrom()) <=
+                getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegTo.getLeg().getFrom());
         final Duration result;
         if (who == to) { // the same competitor requires no time to reach its own position; it's already there...
             result = Duration.NULL;
@@ -293,8 +295,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             result = null;
         } else {
             final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(who, to, timePoint, currentLegWho, currentLegTo);
-            final Duration durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
-                    currentLegWho.getLeg().getTo(), timePoint);
+            final Duration durationForSubsequentLegsToReachAtEqualPerformance;
+            if (currentLegWho.getLeg() == currentLegTo.getLeg()) {
+                durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
+            } else {
+                durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to, currentLegWho.getLeg().getTo(), timePoint);
+            }
             result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
         }
         return result;
@@ -330,9 +336,28 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * Computes the duration that <code>who</code> would take to reach <code>to</code>'s windward / along-track position
      * at <code>timePoint</code>, starting at <code>fromWaypoint</code>, assuming the same corrected performance at
      * which <code>to</code> sailed starting at <code>fromWaypoint</code> up to her current position.
+     * <p>
+     * 
+     * Precondition: competitor <code>to</code> has already passed <code>fromWaypoint</code>. If not, an
+     * {@link IllegalArgumentException} will be thrown.
+     * <p>
+     * 
+     * Implementations can validate this precondition using
+     * {@link #validateGetDurationToReachAtEqualPerformanceParameters(Competitor, Waypoint, TimePoint, MarkPassing)}.
      */
     protected abstract Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
             TimePoint timePointOfTosPosition);
+    
+    protected void validateGetDurationToReachAtEqualPerformanceParameters(Competitor to, Waypoint fromWaypoint,
+            TimePoint timePointOfTosPosition, final MarkPassing whenToPassedFromWaypoint) {
+        if (whenToPassedFromWaypoint == null) {
+            throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
+        }
+        if (whenToPassedFromWaypoint.getTimePoint().after(timePointOfTosPosition)) {
+            throw new IllegalArgumentException("Competitor was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
+                    " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
+        }
+    }
 
     protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint) {
         return getWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint);

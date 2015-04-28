@@ -53,13 +53,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     @Override
     protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
-        if (whenToPassedFromWaypoint == null) {
-            throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
-        }
-        if (whenToPassedFromWaypoint.getTimePoint().after(timePointOfTosPosition)) {
-            throw new IllegalArgumentException("Competitor was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
-                    " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
-        }
+        validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
         return whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
     }
 
