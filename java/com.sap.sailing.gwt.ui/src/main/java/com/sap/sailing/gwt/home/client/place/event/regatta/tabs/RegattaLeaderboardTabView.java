@@ -99,11 +99,9 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
 
             leaderboardPanel.addLeaderboardUpdateListener(this);
 
-            if (currentPresenter.getCtx().getEventDTO().getState() != EventState.RUNNING) {
-
-                this.leaderboard.hideRefresh();
-            } else {
+            if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
                 // TODO: start autorefresh?
+
             }
 
             regattaAnalyticsManager.hideCompetitorChart();
