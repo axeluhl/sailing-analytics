@@ -18,14 +18,16 @@ public interface EventsOverviewRecentResources extends ClientBundle {
         String accordion_content();
         String eventsoverviewrecent();
         String eventsoverviewrecent_year();
-        String eventsoverviewrecent_year_header();
         String accordioncollapsed();
         String eventsoverviewrecent_year_header_info_arrow_image();
+        String eventsoverviewrecent_year_header();
         String eventsoverviewrecent_year_header_title();
         String eventsoverviewrecent_year_header_info();
         String eventsoverviewrecent_year_header_info_arrow();
         String eventsoverviewrecent_year_header_info_item();
         String eventsoverviewrecent_year_header_info_item_value();
         String eventsoverviewrecent_year_content();
+        String eventsoverviewrecent_year_content_floattoinlineblock();
+        String eventsoverviewrecent_year_content_floattoinlineblock_child();
     }
 }
