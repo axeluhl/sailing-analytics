@@ -1,8 +1,10 @@
-package com.sap.sailing.dashboards.gwt.client;
+package com.sap.sailing.dashboards.gwt.client.dataretriever;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -24,9 +26,13 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
     private List<WindBotDataRetrieverListener> windBotDataRetrieverListeners;
     private List<String> windBotIDsInLiveRace;
 
-    private static final int WIND_CHART_RESOLUTION_IN_MILLISECONDS = 5000;
-    public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
+    private final Set<String> windSourceTypeNames;
+    private final int WIND_CHART_RESOLUTION_IN_MILLISECONDS = 5000;
+    private final int ONE_HOUR_IN_MILLISECONDS = 1000*60*60;
+    private final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     private boolean didInitialLoading;
+    
+    
 
     public WindBotDataRetriever(SailingServiceAsync sailingService) {
         this.sailingService = sailingService;
@@ -36,15 +42,17 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
         numberOfWindBotsChangeListeners = new ArrayList<NumberOfWindBotsChangeListener>();
         windBotDataRetrieverListeners = new ArrayList<WindBotDataRetrieverListener>(); 
         windBotIDsInLiveRace = new ArrayList<String>();
+        windSourceTypeNames = new HashSet<>();
+        windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
     }
 
     private void loadWindBotData(Date from, Date to, RegattaAndRaceIdentifier selectedRaceIdentifier) {
         if(!didInitialLoading){
             didInitialLoading = true;
-            from = new Date(from.getTime()-1000*60*15);
+            from = new Date(from.getTime()-ONE_HOUR_IN_MILLISECONDS);
         }
         GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier, from, to,
-                WIND_CHART_RESOLUTION_IN_MILLISECONDS, null, /*
+                WIND_CHART_RESOLUTION_IN_MILLISECONDS, windSourceTypeNames, /*
                                                               * onlyUpToNewestEvent==true because we don't want to
                                                               * overshoot the evidence so far
                                                               */true);

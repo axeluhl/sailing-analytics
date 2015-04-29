@@ -13,6 +13,7 @@ import com.sap.sse.common.Duration;
 public class SimulationParametersImpl implements SimulationParameters {
 
     private List<Position> course;
+    private List<Position> startLine;
     private PolarDiagram polarDiagram;
     private WindFieldGenerator windField;
     private Duration simuStep;
@@ -21,9 +22,10 @@ public class SimulationParametersImpl implements SimulationParameters {
     private boolean showOpportunist;
     private LegType legType;
 
-    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
+    public SimulationParametersImpl(List<Position> course, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
             char mode, boolean showOmniscient, boolean showOpportunist) {
-        this.course = crs;
+        this.course = course;
+        this.startLine = null;
         this.polarDiagram = pd;
         this.windField = wf;
         this.simuStep = simuStep;
@@ -33,9 +35,23 @@ public class SimulationParametersImpl implements SimulationParameters {
         this.legType = null;
     }
 
-    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
+    public SimulationParametersImpl(List<Position> course, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
             char mode, boolean showOmniscient, boolean showOpportunist, LegType legType) {
-        this.course = crs;
+        this.course = course;
+        this.startLine = null;
+        this.polarDiagram = pd;
+        this.windField = wf;
+        this.simuStep = simuStep;
+        this.mode = mode;
+        this.showOmniscient = showOmniscient;
+        this.showOpportunist = showOpportunist;
+        this.legType = legType;
+    }
+
+    public SimulationParametersImpl(List<Position> course, List<Position> startLine, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
+            char mode, boolean showOmniscient, boolean showOpportunist, LegType legType) {
+        this.course = course;
+        this.startLine = startLine;
         this.polarDiagram = pd;
         this.windField = wf;
         this.simuStep = simuStep;
@@ -58,6 +74,11 @@ public class SimulationParametersImpl implements SimulationParameters {
     @Override
     public List<Position> getCourse() {
         return course;
+    }
+
+    @Override
+    public List<Position> getStartLine() {
+        return startLine;
     }
 
     @Override

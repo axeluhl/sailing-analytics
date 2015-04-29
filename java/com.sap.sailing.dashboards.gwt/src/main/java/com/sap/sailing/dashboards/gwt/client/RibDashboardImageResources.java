@@ -41,4 +41,7 @@ public interface RibDashboardImageResources extends ClientBundle {
     
     @Source("images/settings.png")
     ImageResource settings();
+    
+    @Source("images/rotatedevice.png")
+    ImageResource rotatedevice();
 }

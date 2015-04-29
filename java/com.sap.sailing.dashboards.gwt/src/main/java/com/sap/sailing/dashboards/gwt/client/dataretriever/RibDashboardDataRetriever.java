@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client;
+package com.sap.sailing.dashboards.gwt.client.dataretriever;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.actions.GetRibDashboardRaceInfoAction;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
