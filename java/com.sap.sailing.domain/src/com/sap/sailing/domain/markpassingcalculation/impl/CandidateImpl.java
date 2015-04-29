@@ -6,7 +6,7 @@ import com.sap.sse.common.TimePoint;
 
 public class CandidateImpl implements Candidate {
     private final Waypoint w;
-    protected TimePoint p;
+    private final TimePoint p;
     private final double probability;
     private final Integer oneBasedIndexOfWaypoint;
 
@@ -15,7 +15,6 @@ public class CandidateImpl implements Candidate {
         this.p = p;
         this.probability = probability;
         this.oneBasedIndexOfWaypoint = oneBasedIndexOfWaypoint;
-
     }
 
     @Override
@@ -30,7 +29,6 @@ public class CandidateImpl implements Candidate {
 
     @Override
     public Double getProbability() {
-
         return probability;
     }
 
@@ -40,7 +38,7 @@ public class CandidateImpl implements Candidate {
     }
 
     public String toString() {
-        return "Candidate for waypoint " + oneBasedIndexOfWaypoint + " with cost " + getProbability() + " and Timepoint " + p;
+        return "Candidate for waypoint " + getOneBasedIndexOfWaypoint() + " with cost " + getProbability() + " and Timepoint " + p;
     }
 
     @Override
@@ -50,6 +48,9 @@ public class CandidateImpl implements Candidate {
 
     @Override
     public int compareTo(Candidate arg0) {
-        return oneBasedIndexOfWaypoint != arg0.getOneBasedIndexOfWaypoint() ? oneBasedIndexOfWaypoint.compareTo(arg0.getOneBasedIndexOfWaypoint()) : p != arg0.getTimePoint() ? p.compareTo(arg0.getTimePoint()) : getProbability().compareTo(arg0.getProbability());
+        return getOneBasedIndexOfWaypoint() != arg0.getOneBasedIndexOfWaypoint() ? Integer.valueOf(
+                getOneBasedIndexOfWaypoint()).compareTo(arg0.getOneBasedIndexOfWaypoint())
+                : getTimePoint() != arg0.getTimePoint() ? getTimePoint().compareTo(arg0.getTimePoint()) : getProbability().compareTo(
+                        arg0.getProbability());
     }
 }

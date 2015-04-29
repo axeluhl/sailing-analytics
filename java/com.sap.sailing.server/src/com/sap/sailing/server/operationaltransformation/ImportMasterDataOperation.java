@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -43,7 +44,6 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
@@ -332,7 +332,13 @@ public class ImportMasterDataOperation extends
             windTrackToReadFrom.lockForRead();
             try {
                 for (Wind fix : windTrackToReadFrom.getRawFixes()) {
-                    windTrackToWriteTo.add(fix);
+                    Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
+                    if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
+                            && fix.getPosition().equals(existingFix.getPosition()))) {
+                        windTrackToWriteTo.add(fix);
+                    } else {
+                        logger.info("Didn't add wind fix in import, because equal fix was already there.");
+                    }
                 }
             } finally {
                 windTrackToReadFrom.unlockAfterRead();

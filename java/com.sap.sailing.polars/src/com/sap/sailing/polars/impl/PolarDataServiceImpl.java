@@ -17,15 +17,18 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.PolarDataMiner;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.SmartFutureCache;
 
@@ -41,7 +44,7 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarDataMiner polarDataMiner;
     
-    public PolarDataServiceImpl(Executor executor) {
+    public PolarDataServiceImpl() {
         this.polarDataMiner = new PolarDataMiner();
     }
 
@@ -146,9 +149,44 @@ public class PolarDataServiceImpl implements PolarDataService {
             throws NotEnoughDataHasBeenAddedException {
         return polarDataMiner.getAngleRegressionFunction(boatClass, legType, tack);
     }
+    
+    @Override
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarDataMiner.getSpeedRegressionFunction(boatClass, trueWindAngle);
+    }
 
     @Override
     public void raceFinishedLoading(TrackedRace race) {
         polarDataMiner.raceFinishedTracking(race);
     }
+
+    @Override
+    public BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, ManeuverType maneuverType, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
+        if (maneuverType != ManeuverType.TACK && maneuverType != ManeuverType.JIBE) {
+            throw new IllegalArgumentException("ManeuverType needs to be tack or jibe.");
+        }
+        LegType legType = maneuverType == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND;
+        if (boatClass == null || windSpeed == null) {
+            throw new IllegalArgumentException("Boatclass and windspeed cannot be null.");
+        }
+        SpeedWithBearingWithConfidence<Void> port = getAverageSpeedWithBearing(boatClass, windSpeed, legType, Tack.PORT);
+        SpeedWithBearingWithConfidence<Void> starboard = getAverageSpeedWithBearing(boatClass, windSpeed, legType,
+                Tack.STARBOARD);
+        double angleSumInDeg = Math.abs(port.getObject().getBearing().getDegrees())
+                + Math.abs(starboard.getObject().getBearing().getDegrees());
+        Bearing bearing = new DegreeBearingImpl(angleSumInDeg);
+        double confidence = (port.getConfidence() + starboard.getConfidence()) / 2;
+        BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing, confidence,
+                null);
+        return bearingWithConfidence;
+    }
+
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, true);
+    }
+
 }

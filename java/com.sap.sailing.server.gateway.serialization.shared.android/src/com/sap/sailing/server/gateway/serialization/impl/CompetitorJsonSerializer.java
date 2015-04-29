@@ -31,6 +31,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_BOAT = "boat";
     public static final String FIELD_DISPLAY_COLOR = "displayColor";
     public static final String FIELD_EMAIL = "email";
+    public static final String FIELD_FLAG_IMAGE_URI = "flagImageUri";
 
     private final JsonSerializer<Team> teamJsonSerializer;
     private final JsonSerializer<Boat> boatJsonSerializer;
@@ -74,6 +75,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         result.put(FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());
         result.put(FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
+        if (competitor.getFlagImage() != null) {
+            result.put(FIELD_FLAG_IMAGE_URI, competitor.getFlagImage().toString());
+        }
         if (teamJsonSerializer != null) {
             result.put(FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }

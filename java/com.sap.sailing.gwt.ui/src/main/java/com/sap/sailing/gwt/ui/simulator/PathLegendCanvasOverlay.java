@@ -11,6 +11,7 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
@@ -39,25 +40,22 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
 
     private String textColor = "Black";
     private String textFont = "10pt OpenSansRegular";
+    private String algorithmTimedOutText = "out-of-bounds";
+    private String mixedLegText = "ambiguous wind";
 
-    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode) {
-        super(map, zIndex);
-        
+    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
     	this.mode = mode;
-    	
     	if (this.mode == SailingSimulatorConstants.ModeEvent) {
     	    yOffset = 170;
     	}
-    	
         setPathOverlays(null);
     }
 
     @Override
     protected void draw() {
-
         if (mapProjection != null && pathOverlays != null && pathOverlays.size() > 0) {
             boolean containsPolyline = false;
-    
             for (PathCanvasOverlay overlay : this.pathOverlays) {
                 //TODO: Make course name a constant
                 if (overlay.getName().equals("What-If Course")) {
@@ -65,10 +63,8 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                     break;
                 }
             }
-    
             if (containsPolyline) {
                 List<PathCanvasOverlay> result = new ArrayList<PathCanvasOverlay>();
-    
                 int indexOfPolyline = 0;
                 for (int index = 0; index < this.pathOverlays.size(); index++) {
                     if (this.pathOverlays.get(index).getName().equals("What-If Course")) {
@@ -77,11 +73,9 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                         result.add(this.pathOverlays.get(index));
                     }
                 }
-    
                 result.add(0, this.pathOverlays.get(indexOfPolyline));
                 this.pathOverlays = result;
             }
-    
             setCanvasSettings();
             int index = 0;
             Context2d context2d = canvas.getContext2d();
@@ -90,23 +84,51 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
             txtmet = context2d.measureText("00:00:00");
             double timewidth = txtmet.getWidth();
             double txtmaxwidth = 0.0;
+            boolean containsTimeOut = false;
+            boolean containsMixedLeg = false;
             for (PathCanvasOverlay path : pathOverlays) {
+                if (path.getAlgorithmTimedOut()) {
+                    containsTimeOut = true;
+                }
+                if (path.getMixedLeg()) {
+                    containsMixedLeg = true;
+                }
                 txtmet = context2d.measureText(path.getName());
                 txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
             }
+            double newwidth = 0;
+            double deltaTime = 0;
+            double deltaMixedLeg = 0;
+            double deltaTimeOut = 0;
+            double mixedLegWidth = 0;
+            if (containsMixedLeg) {
+                txtmet = context2d.measureText(mixedLegText);
+                mixedLegWidth = txtmet.getWidth();
+                newwidth = Math.max(timewidth, mixedLegWidth);
+            }
+            double timeOutWidth = 0;
+            if (containsTimeOut) {
+                txtmet = context2d.measureText(algorithmTimedOutText);
+                timeOutWidth = txtmet.getWidth();
+                newwidth = Math.max(newwidth, timeOutWidth);
+            }
+            if (containsMixedLeg||containsTimeOut) {
+                deltaTime = newwidth - timewidth;
+                deltaMixedLeg = newwidth - mixedLegWidth;
+                deltaTimeOut = newwidth - timeOutWidth;
+                timewidth = newwidth;
+            }
             for (PathCanvasOverlay path : pathOverlays) {
+                String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
                 drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.getPathColor(),
-                        path.getName(), getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
+                        path.getName(), timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)));
                 index++;
             }
-            
             //
             // TODO: draw current arrow
             //
             AbstractBearing curBear = new DegreeBearingImpl(this.curBearing);
-    
             //Context2d context2d = canvas.getContext2d();
-    
             if (this.curSpeed >= 0.0) {
                 //drawScaledArrow(windDTO, dbi.getRadians(), index, true);
                 double cFactor = 12.0;
@@ -123,16 +145,13 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 }
                 context2d.fillRect(cX - bgWidth/2.0, cY - 25.0 - 15.0, bgWidth, bgHeight);
                 context2d.setGlobalAlpha(1.0);
-    
                 context2d.setFont(textFont);
                 context2d.setFillStyle(textColor);
-    
                 //TextMetrics txtmet;
                 String cText = "Current: " + SimulatorMainPanel.formatSliderValue(curSpeed) + "kn";
                 txtmet = context2d.measureText(cText);
                 double txtwidth = txtmet.getWidth();
                 context2d.fillText(cText, cX-(txtwidth/2.0), cY-25);
-    
                 if (this.curSpeed > 0.0) {
                     drawArrowPx(cX, cY, curBear.getRadians(), cLength, cWidth, true, "Green");
                 }
@@ -184,7 +203,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         context2d.fillRect(x, y, rectWidth, rectHeight);
     }
 
-    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta) {
 
         double offset = 3.0;
 
@@ -193,11 +212,11 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         drawRectangle(x, y, color);
         context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
-        context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
+        context2d.fillRect(x + rectWidth, y, 20.0 + textmaxwidth + timewidth, rectHeight);
         context2d.setGlobalAlpha(1.0);
         context2d.setFillStyle(textColor);
         context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);
-        context2d.fillText(time, x + rectWidth + textmaxwidth + 10.0, y + 12.0 + offset);
+        context2d.fillText(time, x + rectWidth + textmaxwidth + xdelta + 15.0, y + 12.0 + offset);
     }
 
     protected String getFormattedTime(long pathTime) {

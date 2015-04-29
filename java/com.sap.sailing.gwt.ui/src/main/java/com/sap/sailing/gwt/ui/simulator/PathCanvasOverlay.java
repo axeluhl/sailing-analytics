@@ -14,8 +14,8 @@ import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sse.common.Named;
@@ -43,6 +43,8 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     private long totalTimeMilliseconds = 0;
 
     private String name;
+    private boolean algorithmTimedOut;
+    private boolean mixedLeg;
 
     private String pathColor = "Green";
 
@@ -51,40 +53,42 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
      */
     public boolean displayWindAlongPath = true;
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name) {
-        super(map, zIndex);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.name = name;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams) {
-        super(map, zIndex, timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, boolean algorithmTimedOut, boolean mixedLeg, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, timer, windParams, coordinateSystem);
         this.name = name;
+        this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds) {
-        super(map, zIndex);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, String color) {
-        super(map, zIndex);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, String color, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
         this.pathColor = color;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds) {
-        super(map, zIndex, timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, timer, windParams, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color) {
-        super(map, zIndex, timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, timer, windParams, coordinateSystem);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
@@ -195,23 +199,15 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     }
 
     private void drawLine(SimulatorWindDTO p1, SimulatorWindDTO p2) {
-
         double weight = 3.0;
-
-        PositionDTO position = p1.position;
-
-        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        LatLng positionLatLng = coordinateSystem.toLatLng(p1.position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
-        position = p2.position;
-        positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        positionLatLng = coordinateSystem.toLatLng(p2.position);
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
         // Context2d context2d = canvas.getContext2d();
         // context2d.setShadowBlur(weight);
         drawLine(x1, y1, x2, y2, weight, pathColor);
@@ -220,17 +216,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     }
 
     private void drawPoint(SimulatorWindDTO p) {
-
         double weight = 3.0;
-
-        PositionDTO position = p.position;
-
-        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        LatLng positionLatLng = coordinateSystem.toLatLng(p.position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
         drawCircle(x1, y1, weight / 2., pathColor);
     }
 
@@ -243,20 +233,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         if (p1 == null || p2 == null) {
             return true;
         }
-        PositionDTO position = p1.position;
-
-        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        LatLng positionLatLng = coordinateSystem.toLatLng(p1.position);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-
         double x1 = canvasPositionInPx.getX();
         double y1 = canvasPositionInPx.getY();
-
-        position = p2.position;
-        positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        positionLatLng = coordinateSystem.toLatLng(p2.position);
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x2 = canvasPositionInPx.getX();
         double y2 = canvasPositionInPx.getY();
-
         double pxDistance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
         if (pxDistance >= MinimumPxDistanceBetweenArrows) {
             return true;
@@ -270,6 +254,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         return name;
     }
 
+    public boolean getAlgorithmTimedOut() {
+        return algorithmTimedOut;
+    }
+
+    public boolean getMixedLeg() {
+        return mixedLeg;
+    }
+    
     public long getPathTime() {
         if (totalTimeIsGiven) {
             return totalTimeMilliseconds;

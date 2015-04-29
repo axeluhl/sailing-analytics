@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -17,8 +18,9 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
@@ -32,7 +34,6 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     private final TrackedRace race;
     private final Competitor competitor;
     private final ClusterGroup<Speed> windSpeedClusterGroup;
-    private final Set<WindSource> windSourcesToExcludeForBearing;
     private final Set<WindSource> windSourcesToExcludeForSpeed;
     private final ClusterGroup<Bearing> angleClusterGroup;
     private final BearingWithConfidence<Integer> trueWindAngle;
@@ -46,7 +47,6 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
         this.competitor = competitor;
         this.windSpeedClusterGroup = windSpeedClusterGroup;
         this.angleClusterGroup = angleClusterGroup;
-        this.windSourcesToExcludeForBearing = collectWindSourcesToIgnoreForBearing();
         this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
         this.trueWindAngle = computeTrueWindAngle();
         this.wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForSpeed);
@@ -71,7 +71,7 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
 
     private BearingWithConfidence<Integer> computeTrueWindAngle() {
         SpeedWithBearing boatSpeed = race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
-        WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForBearing);
+        WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint());
         
         BearingWithConfidenceImpl<Integer> result = null;
         if (wind != null && boatSpeed != null) {
@@ -101,32 +101,6 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
         return track.getEstimatedSpeed(fix.getTimePoint(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 track.getMillisecondsOverWhichToAverageSpeed()/2, /* minimumConfidence */ 0.00000001));
-    }
-    
-    private Set<WindSource> collectWindSourcesToIgnoreForBearing() {
-        Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
-        Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
-        for (WindSource combinedSource : combinedSources) {
-            windSourcesToExclude.add(combinedSource);
-        }
-        Iterable<WindSource> courseSources = race.getWindSources(WindSourceType.COURSE_BASED);
-        for (WindSource courseSource : courseSources) {
-            windSourcesToExclude.add(courseSource);
-        }
-
-        Iterable<WindSource> expSources = race.getWindSources(WindSourceType.EXPEDITION);
-        for (WindSource expSource : expSources) {
-            windSourcesToExclude.add(expSource);
-        }
-        Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
-        for (WindSource rcSource : rcSources) {
-            windSourcesToExclude.add(rcSource);
-        }
-        Iterable<WindSource> webSources = race.getWindSources(WindSourceType.WEB);
-        for (WindSource webSource : webSources) {
-            windSourcesToExclude.add(webSource);
-        }
-        return windSourcesToExclude;
     }
     
     private Set<WindSource> collectWindSourcesToIgnoreForSpeed() {
@@ -170,18 +144,13 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
 
     @Override
     public LegType getLegType() {
-        return getLegTypeWithPolarConstraints(getAngleToTheWind().getObject());
-    }
-
-    public static LegType getLegTypeWithPolarConstraints(Bearing angleDifferenceWindToBoat) {
-        double absoluteDiffInDeg = Math.abs(angleDifferenceWindToBoat.getDegrees());
-        LegType result = null;
-        if (absoluteDiffInDeg > 20 && absoluteDiffInDeg < 75) {
-            result = LegType.UPWIND;
-        } else if (absoluteDiffInDeg > 105) {
-            result = LegType.DOWNWIND;
+        TimePoint timePoint = fix.getTimePoint();
+        try {
+            final TrackedLeg currentLeg = race.getCurrentLeg(timePoint);
+            return currentLeg==null?null:currentLeg.getLegType(timePoint);
+        } catch (NoWindException e) {
+            return null;
         }
-        return result;
     }
 
     @Override

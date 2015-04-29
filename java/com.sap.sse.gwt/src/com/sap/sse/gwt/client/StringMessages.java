@@ -10,6 +10,7 @@ import com.google.gwt.i18n.client.Messages;
 public interface StringMessages extends Messages {
     String save();
     String remove();
+    String ok();
     String cancel();
     String add();
     String edit();
@@ -18,4 +19,7 @@ public interface StringMessages extends Messages {
     String remoteProcedureCall();
     String serverReplies();
     String errorCommunicatingWithServer();
+    String configuration();
+    String settings();
+    String settingsForComponent(String localizedShortName);
 }

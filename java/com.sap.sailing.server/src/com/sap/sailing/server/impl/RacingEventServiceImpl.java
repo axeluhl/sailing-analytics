@@ -95,6 +95,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -102,6 +103,8 @@ import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -124,6 +127,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -133,8 +137,6 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -145,7 +147,6 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
@@ -153,8 +154,6 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.polars.factory.PolarDataServiceFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
@@ -200,6 +199,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -351,7 +352,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final AbstractLogEventAuthor raceLogEventAuthorForServer = new LogEventAuthorImpl(
             RacingEventService.class.getName(), 0);
 
-    private final PolarDataService polarDataService;
+    private PolarDataService polarDataService;
+
+    private final SimulationService simulationService;
 
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
@@ -478,7 +481,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
                         .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
-                        competitor.getTeam().getImage()));
+                        competitor.getTeam().getImage(), competitor.getFlagImage()));
             }
         });
         this.windStore = windStore;
@@ -504,13 +507,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-        // TODO find out how many executors we have on server side and how to manage them
-        Executor polarExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
-        /* maximumPoolSize */THREAD_POOL_SIZE,
+        final int SIMULATION_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/3, 1);
+        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */SIMULATION_THREAD_POOL_SIZE,
+        /* maximumPoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,
         /* workQueue */new LinkedBlockingQueue<Runnable>());
-        polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
+        // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
+        simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -559,6 +562,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return polarDataService;
     }
 
+    @Override
+    public SimulationService getSimulationService() {
+        return simulationService;
+    }
+    
     @Override
     public void clearState() throws Exception {
         for (String leaderboardGroupName : new ArrayList<>(this.leaderboardGroupsByName.keySet())) {
@@ -1526,6 +1534,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
+            
+            if (polarDataService != null) {
+                trackedRace.setPolarDataService(polarDataService);
+            }
         }
     }
 
@@ -1539,14 +1551,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
-            polarDataService.competitorPositionChanged(fix, item, race);
+            if (polarDataService != null) {
+                polarDataService.competitorPositionChanged(fix, item, race);
+            }
         }
         
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING
                     && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
-                polarDataService.raceFinishedLoading(race);
+                if (polarDataService != null) {
+                    polarDataService.raceFinishedLoading(race);
+                }
             }
         }
 
@@ -2452,7 +2468,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
@@ -3112,5 +3128,32 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public ClassLoader getCombinedMasterDataClassLoader() {
         JoinedClassLoader joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         return joinedClassLoader;
+    }
+
+    public void setPolarDataService(PolarDataService service) {
+        if (this.polarDataService == null) {
+            polarDataService = service;
+            setPolarDataServiceOnAllTrackedRaces(service);
+        }
+    }
+
+    private void setPolarDataServiceOnAllTrackedRaces(PolarDataService service) {
+        Iterable<Regatta> allRegattas = getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                for (TrackedRace trackedRace : trackedRaces) {
+                    trackedRace.setPolarDataService(service);
+                }
+            }
+        }
+    }
+    
+    public void unsetPolarDataService(PolarDataService service) {
+        if (polarDataService == service) {
+            polarDataService = null;
+            setPolarDataService(null);
+        }
     }
 }

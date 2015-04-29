@@ -70,15 +70,23 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 ImageResourceRenderer renderer = new ImageResourceRenderer();
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-                final ImageResource flagImageResource;
-                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
-                } else {
-                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-                }
-                if (flagImageResource != null) {
-                    sb.append(renderer.render(flagImageResource));
+
+                final String imageURL = competitor.getImageURL();
+
+                if (imageURL != null && !imageURL.isEmpty()) {
+                    sb.appendHtmlConstant("<img src=\"" + imageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                     sb.appendHtmlConstant("&nbsp;");
+                } else {
+                    final ImageResource flagImageResource;
+                    if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                        flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    } else {
+                        flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    }
+                    if (flagImageResource != null) {
+                        sb.append(renderer.render(flagImageResource));
+                        sb.appendHtmlConstant("&nbsp;");
+                    }
                 }
                 sb.appendEscaped(competitor.getSailID());
                 return sb.toSafeHtml();
@@ -99,7 +107,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 return t.getColor();
             }
         });
-
+        
         Column<CompetitorDTO, SafeHtml> imageColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(CompetitorDTO competitor) {
@@ -165,7 +173,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(competitorNameColumn, stringMessages.name());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(displayColorColumn, stringMessages.color());
-        table.addColumn(imageColumn, stringMessages.imageURL());
+        table.addColumn(imageColumn, stringMessages.image());
         table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorIdColumn, stringMessages.id());
     }

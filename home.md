@@ -39,6 +39,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Profiling|wiki/profiling]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+  * [[Data Mining Architecture|wiki/data-mining-architecture]]
+  * [[Typical Data Mining Scenarios|wiki/typical-data-mining-scenarios]]
   * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]

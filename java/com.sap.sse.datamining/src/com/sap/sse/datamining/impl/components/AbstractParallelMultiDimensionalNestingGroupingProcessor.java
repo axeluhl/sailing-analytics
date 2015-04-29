@@ -4,39 +4,40 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 
 public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>
-                      extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
+                      extends AbstractParallelProcessor<DataType, GroupedDataEntry<DataType>> {
 
-    private Iterable<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvider;
+    private Iterable<ParameterizedFunction<?>> parameterizedDimensions;
 
     @SuppressWarnings("unchecked")
     public AbstractParallelMultiDimensionalNestingGroupingProcessor(Class<DataType> dataType,
                                                              ExecutorService executor,
                                                              Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
-                                                             Iterable<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvider) {
+                                                             Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
         super(dataType, (Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers);
-        verifyThatDimensionsAreDimensions(dimensionsWithParameterProvider);
-        this.dimensionsWithParameterProvider = dimensionsWithParameterProvider;
+        verifyThatDimensionsAreDimensions(parameterizedDimensions);
+        this.parameterizedDimensions = parameterizedDimensions;
     }
 
-    private void verifyThatDimensionsAreDimensions(Iterable<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvider) {
-        if (dimensionsWithParameterProvider == null) {
+    private void verifyThatDimensionsAreDimensions(Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
+        if (parameterizedDimensions == null) {
             throw new IllegalArgumentException("The given dimensions mustn't be null.");
         }
         
         int size = 0;
-        for (Pair<Function<?>, ParameterProvider> possibleDimension : dimensionsWithParameterProvider) {
+        for (ParameterizedFunction<?> possibleParameterizedDimension : parameterizedDimensions) {
             size++;
-            if (!possibleDimension.getA().isDimension()) {
-                throw new IllegalArgumentException("The given function " + possibleDimension.getA().toString() + " is no dimension.");
+            if (!possibleParameterizedDimension.getFunction().isDimension()) {
+                throw new IllegalArgumentException("The given function " + possibleParameterizedDimension.getFunction().toString() + " is no dimension.");
             }
         }
         
@@ -46,19 +47,18 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
     }
 
     @Override
-    protected AbstractProcessorInstruction<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
+    protected ProcessorInstruction<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
         return new AbstractProcessorInstruction<GroupedDataEntry<DataType>>(this, ProcessorInstructionPriority.Grouping) {
             @Override
             public GroupedDataEntry<DataType> computeResult() {
-                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element,
-                        dimensionsWithParameterProvider.iterator()), element);
+                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element, parameterizedDimensions.iterator()), element);
             }
         };
     }
     
-    private GroupKey createCompoundKeyFor(DataType input, Iterator<Pair<Function<?>, ParameterProvider>> dimensionsIterator) {
-        Pair<Function<?>, ParameterProvider> mainDimension = dimensionsIterator.next();
-        GroupKey key = createGroupKeyFor(input, mainDimension.getA(), mainDimension.getB());
+    private GroupKey createCompoundKeyFor(DataType input, Iterator<ParameterizedFunction<?>> dimensionsIterator) {
+        ParameterizedFunction<?> mainDimension = dimensionsIterator.next();
+        GroupKey key = createGroupKeyFor(input, mainDimension.getFunction(), mainDimension.getParameterProvider());
         if (dimensionsIterator.hasNext()) {
             key = new NestingCompoundGroupKey(key, createCompoundKeyFor(input, dimensionsIterator));
         }

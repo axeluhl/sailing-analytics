@@ -2,19 +2,16 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 
-public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultType> extends
-        AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType> {
+public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
 
     private final int retrievalLevel;
-    
-    private final Lock retrievedDataAmountLock;
-    private int retrievedDataAmount;
+    private final AtomicInteger retrievedDataAmount;
 
     /**
      * 
@@ -28,42 +25,28 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
             ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers, int retrievalLevel) {
         super(inputType, resultType, executor, resultReceivers);
         this.retrievalLevel = retrievalLevel;
-        retrievedDataAmountLock = new ReentrantLock(); 
+        retrievedDataAmount = new AtomicInteger();
     }
 
     @Override
-    protected AbstractProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement) {
+    protected ProcessorInstruction<ResultType> createInstruction(final InputType element) {
         return new AbstractProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
             @Override
             public ResultType computeResult() {
-                incrementRetrievedDataAmount();
-                return convertWorkingToResultType(partialElement);
+                for (ResultType retrievedElement : retrieveData(element)) {
+                    retrievedDataAmount.incrementAndGet();
+                    forwardResultToReceivers(retrievedElement);
+                }
+                return createInvalidResult();
             }
         };
     }
 
-    protected abstract ResultType convertWorkingToResultType(WorkingType partialElement);
-
-    // Override, to provide a better method name to the sub classes
-    @Override
-    protected Iterable<WorkingType> partitionElement(InputType element) {
-        return retrieveData(element);
-    }
-
-    protected abstract Iterable<WorkingType> retrieveData(InputType element);
-
-    private void incrementRetrievedDataAmount() {
-        retrievedDataAmountLock.lock();
-        try {
-            retrievedDataAmount++;
-        } finally {
-            retrievedDataAmountLock.unlock();
-        }
-    }
+    protected abstract Iterable<ResultType> retrieveData(InputType element);
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount);
+        additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount.get());
     }
 
 }

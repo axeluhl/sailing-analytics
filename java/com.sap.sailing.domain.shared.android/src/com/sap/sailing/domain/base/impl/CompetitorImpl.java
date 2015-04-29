@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,14 +22,16 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Color color;
     private transient Set<CompetitorChangeListener> listeners;
     private String email;
+    private URI flagImage;
     
-    public CompetitorImpl(Serializable id, String name, Color color, String email, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
         this.name = name;
         this.team = team;
         this.boat = boat;
         this.color = color;
         this.email = email;
+        this.flagImage = flagImage;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
     
@@ -75,7 +78,7 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getTeam(), getBoat());
+        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(), getBoat());
         return result;
     }
 
@@ -133,5 +136,15 @@ public class CompetitorImpl implements DynamicCompetitor {
     
     public boolean hasEmail(){
         return email != null && !email.isEmpty();
+    }
+
+    @Override
+    public URI getFlagImage() {
+        return flagImage;
+    }
+
+    @Override
+    public void setFlagImage(URI flagImage) {
+        this.flagImage = flagImage;
     }
 }

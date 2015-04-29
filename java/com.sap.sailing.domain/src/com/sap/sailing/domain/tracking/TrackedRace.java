@@ -29,11 +29,15 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -148,6 +152,13 @@ public interface TrackedRace extends Serializable {
      */
     TrackedLeg getCurrentLeg(TimePoint timePoint);
 
+    /**
+     * Tells the number of the last started leg at <code>timePoint</code>
+     * The leg number is 0 before the start, the number of the current leg during the race
+     * and the number of the last leg at the end of the race even if the race has finished. 
+     */
+    int getLastLegStarted(TimePoint timePoint);
+    
     /**
      * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
      */
@@ -759,5 +770,7 @@ public interface TrackedRace extends Serializable {
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
     boolean isUsingMarkPassingCalculator();
+
+    void setPolarDataService(PolarDataService polarDataService);
 
 }

@@ -116,12 +116,14 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -158,9 +160,7 @@ import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSe
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -857,6 +857,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
             ensureIndicesOnWindTracks(windTracks);
             BasicDBObject queryById = new BasicDBObject();
+            // the default query is by the RACE_ID key:
             queryById.put(FieldNames.RACE_ID.name(), race.getId());
             if (constrainToWindSource != null) {
                 queryById.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
@@ -864,6 +865,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             for (DBObject dbWind : windTracks.find(queryById)) {
                 loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
             }
+            // Additionally check for legacy wind fixes stored with the old EVENT_NAME key; if any are found, migrate them
             BasicDBObject queryByName = new BasicDBObject();
             queryByName.put(FieldNames.EVENT_NAME.name(), regattaName);
             queryByName.put(FieldNames.RACE_NAME.name(), race.getName());
