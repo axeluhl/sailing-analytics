@@ -2752,36 +2752,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         result = usePolarsIfPossible(wind, defaultAngle, LegType.DOWNWIND, threshold);
         return result;
     }
+    
+    private Pair<Double, Double> getMinimumAngleBetweenDifferentTacksUpwind(Wind wind) {
+        Pair<Double, Double> result;
+        double defaultAngle = getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind();
+        double threshold = 10;
+        result = usePolarsIfPossible(wind, defaultAngle, LegType.UPWIND, threshold);
+        return result;
+    }
 
     private Pair<Double, Double> usePolarsIfPossible(Wind wind, double defaultAngle, LegType legType, double threshold) {
         Pair<Double, Double> result;
         if (polarDataService != null) {
             try {
-                BearingWithConfidence<Void> average = polarDataService
-                        .getManeuverAngle(getRace().getBoatClass(), legType, wind);
+                BearingWithConfidence<Void> average = polarDataService.getManeuverAngle(getRace().getBoatClass(),
+                        legType == LegType.DOWNWIND ? ManeuverType.JIBE : ManeuverType.TACK, wind);
                 double averageAngleInDegMinusThreshold = average.getObject().getDegrees() - threshold;
-                if (averageAngleInDegMinusThreshold < defaultAngle) {
-                    result = new Pair<Double, Double>(defaultAngle, 0.1);
-                } else {
-                    result = new Pair<Double, Double>(averageAngleInDegMinusThreshold, average.getConfidence());
-                }
-            } catch (NotEnoughDataHasBeenAddedException e) {
-                result = new Pair<Double, Double>(defaultAngle, 0.1);
-            }
-        } else {
-            result = new Pair<Double, Double>(defaultAngle, 0.1);
-        }
-        return result;
-    }
-
-    private Pair<Double, Double> getMinimumAngleBetweenDifferentTacksUpwind(Wind wind) {
-        Pair<Double, Double> result;
-        double defaultAngle = getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind();
-        if (polarDataService != null) {
-            try {
-                BearingWithConfidence<Void> average = polarDataService
-                        .getManeuverAngle(getRace().getBoatClass(), LegType.UPWIND, wind);
-                double averageAngleInDegMinusThreshold = average.getObject().getDegrees() - 10;
                 if (averageAngleInDegMinusThreshold < defaultAngle) {
                     result = new Pair<Double, Double>(defaultAngle, 0.1);
                 } else {

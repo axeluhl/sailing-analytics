@@ -209,12 +209,15 @@ public interface PolarDataService {
      * For Upwind and Downwind returns the typical angle needed for a maneuver.
      * 
      * @param boatClass
-     * @param legType needs to be Upwind or Downwind
-     * @param windSpeed Since the maneuver angle is windSpeed depended, supply it here
+     * @param maneuverType
+     *            needs to be Tack or Jibe
+     * @param windSpeed
+     *            Since the maneuver angle is windSpeed depended, supply it here
      * @return angle with confidence as supplied by polars. Angle is always >= 0
-     * @throws NotEnoughDataHasBeenAddedException 
+     * @throws NotEnoughDataHasBeenAddedException
      */
-    BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, LegType legType, Speed windSpeed) throws NotEnoughDataHasBeenAddedException;
+    BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, ManeuverType maneuverType, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException;
     
     void raceFinishedLoading(TrackedRace race);
 
