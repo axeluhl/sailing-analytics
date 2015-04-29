@@ -4477,8 +4477,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
                                     .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
-                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
-                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()))));
+                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
+                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()))));
         }
         return result;
     }
