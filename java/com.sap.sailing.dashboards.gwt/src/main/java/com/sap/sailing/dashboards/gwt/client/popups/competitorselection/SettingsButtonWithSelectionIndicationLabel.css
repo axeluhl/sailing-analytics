@@ -10,11 +10,8 @@
 }
 
 .settings_button_image {
-	position: absolute;
 	height: 23.5pt;
 	width: 23.5pt;
-	right: 10pt;
-	top: 17.5pt;
 }
 
 .settings_indication_label {

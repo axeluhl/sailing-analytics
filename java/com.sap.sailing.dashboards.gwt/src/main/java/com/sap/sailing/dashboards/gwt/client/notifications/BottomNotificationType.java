@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client.bottomnotification;
+package com.sap.sailing.dashboards.gwt.client.notifications;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 

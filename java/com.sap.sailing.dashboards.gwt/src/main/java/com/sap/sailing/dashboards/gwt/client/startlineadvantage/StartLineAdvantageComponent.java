@@ -1,8 +1,8 @@
 package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardDataRetriever;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardDataRetrieverListener;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetriever;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetrieverListener;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;

@@ -1229,7 +1229,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String valueDescending();
     String sortBy();
     
-    String dashboardWindBotLoading();
+    String dashboardWindBotLoadingText();
+    String dashboardWindBotLoadingMessage();
     String dashboardWindBotNotAvailable();
     String dashboardWindBot();
     String dashboardTrueWindSpeed();

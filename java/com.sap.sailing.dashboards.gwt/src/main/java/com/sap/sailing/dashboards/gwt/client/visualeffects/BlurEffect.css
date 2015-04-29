@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+
+.blurred {
+	-webkit-filter: blur(10pt) brightness(0.92);
+	filter: blur(10pt) brightness(0.92);
+}
+
+.not_blurred {
+	-webkit-filter: blur(0pt) brightness(1);
+	filter: blur(0pt) brightness(1);
+}
