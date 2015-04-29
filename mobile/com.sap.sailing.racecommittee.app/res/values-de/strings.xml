@@ -395,7 +395,7 @@
     <string name="connected_to_wp"><![CDATA[Verbunden mit: %1$s\n%2$s]]></string>
     <string name="theme_changed_title">Darstellungsmodus ändern</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
-    <string name="url_refresh_title">Datenänderung</string>
-    <string name="url_refresh_message">Bitte vom aktuellen Event abmelden.</string>
+    <string name="url_refresh_title">Die Server URL wurde geändert</string>
+    <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
 
 </resources>
