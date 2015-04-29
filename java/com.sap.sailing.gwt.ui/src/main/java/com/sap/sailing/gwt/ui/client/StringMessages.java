@@ -15,6 +15,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String wind();
     String windPanelLabel();
     String refresh();
+    @Override
     String remove();
     String windSource();
     String dampeningInterval();
@@ -49,6 +50,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String linkToColumn();
     String unlink();
     String leaderboardName();
+    @Override
     String cancel();
     String pleaseEnterAName();
     String pleaseEnterABoatClass();
@@ -61,6 +63,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String renameLeaderboard();
     String addColumnToLeaderboard();
     String pleaseEnterNameForNewRaceColumn();
+    @Override
     String ok();
     String medalRace();
     String renameRace();
@@ -77,6 +80,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String leaderboard();
     String leaderboards();
     String leaderboardSettings();
+    @Override
     String settings();
     String linkedRaces();
     String selectAtLeastOneLegDetail();
@@ -150,6 +154,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String penaltyCircles();
     String medalRaceIsNull();
     String maneuverTypes();
+    @Override
     String configuration();
     String chooseChart();
     String distanceTraveled();
@@ -162,12 +167,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String in();
     String secondsUnit();
     String metersUnit();
+    @Override
     String close();
     String compareCompetitors();
     String description();
     String sailNumber();
     String country();
     String no3LetterCodes();
+    @Override
     String add();
     String delete();
     String showCharts();
@@ -938,6 +945,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pathfinderHelpText();
     String essStart();
     String basicStart();
+    String leagueStart();
     String configured();
     String overwriteRacingProceduresConfiguration();
     String overwriteRacingProceduresConfigurationHelpText();
@@ -1122,9 +1130,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String enterRaceName();
     String enterCourseName();
     String scoringSchemeHighPointFirstGetsTenOrEightDescription();
+    @Override
     String serverError();
+    @Override
     String remoteProcedureCall();
+    @Override
     String serverReplies();
+    @Override
     String errorCommunicatingWithServer();
     String userManagement();
     String structureImportUrls();
@@ -1172,10 +1184,15 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sendingMailsSuccessful();
     String selectEventForInvitation();
     String imageURL();
+    @Override
     String upload();
     String removeResult(JSONValue status, JSONValue message);
+    @Override
     String uploadSuccessful();
-    String fileUploadResult(JSONValue status, JSONValue message);
+    @Override
+    String fileUploadResult(String status, String message);
+    @Override
+    String removeUploadedImage();
     String showCompetitorSailIdColumn();
     String showCompetitorFullNameColumn();
     String loadingDimensionValues();

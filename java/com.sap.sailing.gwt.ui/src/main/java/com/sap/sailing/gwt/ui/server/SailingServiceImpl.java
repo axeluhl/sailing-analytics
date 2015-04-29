@@ -117,6 +117,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcher
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
@@ -403,7 +404,7 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
-import com.sap.sailing.simulator.impl.SparsePolarDataException;
+import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
@@ -1434,7 +1435,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             PolarDiagram polarDiagram;
             try {
                 polarDiagram = new PolarDiagramGPS(boatClass, polarData);
-            } catch (SparsePolarDataException e) {
+            } catch (SparseSimulationDataException e) {
                 polarDiagram = null;
                 // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
             }
@@ -4477,8 +4478,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
                                     .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
-                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
-                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()))));
+                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
+                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()))));
         }
         return result;
     }
@@ -4593,6 +4594,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.basicConfiguration.classFlag = configuration.getBasicConfiguration().getClassFlag();
             dto.basicConfiguration.hasInidividualRecall = configuration.getBasicConfiguration().hasInidividualRecall();
         }
+        if (configuration.getLeagueConfiguration() != null) {
+            dto.leagueConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.LeagueConfigurationDTO();
+            dto.leagueConfiguration.classFlag = configuration.getLeagueConfiguration().getClassFlag();
+            dto.leagueConfiguration.hasInidividualRecall = configuration.getLeagueConfiguration().hasInidividualRecall();
+        }
         return dto;
     }
 
@@ -4637,6 +4643,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             config.setClassFlag(dto.basicConfiguration.classFlag);
             config.setHasInidividualRecall(dto.basicConfiguration.hasInidividualRecall);
             configuration.setBasicConfiguration(config);
+        }
+        if (dto.leagueConfiguration != null) {
+            LeagueConfigurationImpl config = new LeagueConfigurationImpl();
+            config.setClassFlag(dto.leagueConfiguration.classFlag);
+            config.setHasInidividualRecall(dto.leagueConfiguration.hasInidividualRecall);
+            configuration.setLeagueConfiguration(config);
         }
         return configuration;
     }
