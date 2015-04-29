@@ -241,6 +241,8 @@ public class AppPreferences {
             return key(R.string.preference_racing_procedure_ess_hasxray_key);
         case BASIC:
             return key(R.string.preference_racing_procedure_basic_hasxray_key);
+        case LEAGUE:
+            return key(R.string.preference_racing_procedure_basic_hasxray_key);
         default:
             throw new IllegalArgumentException("Unknown racing procedure type.");
         }
