@@ -14,12 +14,12 @@ public interface EventTeaserResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String eventteasercontainer();
         String eventteaser();
-        String eventteaser_name();
-        String eventteaser_image();
-        String eventteaser_series();
         String eventteaser_title();
         String eventteaser_title_name();
-        String eventteaser_title_label();
+        String eventteaser_image();
+        String eventteaser_series();
+        String eventteaser_name();
+        String eventteaser_title_name_label();
         String label();
         String eventteaser_location();
     }
