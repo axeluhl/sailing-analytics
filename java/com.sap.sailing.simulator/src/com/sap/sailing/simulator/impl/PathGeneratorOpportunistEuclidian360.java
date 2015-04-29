@@ -78,6 +78,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         double currentHeight = startPos.getDistance(endPos).getMeters();
 
         BoatDirection prevDirection = BoatDirection.NONE;
+        BoatDirection prevPrevDirection = BoatDirection.NONE;
         long turnLoss = polarDiagram.getTurnLoss(); // time lost when doing a turn
         double fracFinishPhase = 0.05;
 
@@ -199,9 +200,10 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 Distance targetDistanceRight = nextBoatPositionRight.getDistance(endPos);
                 double targetDistanceMetersLeft = Math.round(targetDistanceLeft.getMeters() * 1000.) / 1000.;
                 double targetDistanceMetersRight = Math.round(targetDistanceRight.getMeters() * 1000.) / 1000.;
-
+                prevPrevDirection = prevDirection;
+                
                 if (prevDirection == BoatDirection.NONE) {
-
+                    
                     if (startLeft) {
                         if (pointOfSail == PointOfSail.TACKING) {
                             path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionLeft, currentWind));
@@ -287,6 +289,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                     turns++;
                 }
                 
+                prevPrevDirection = prevDirection;
                 prevDirection = reachingSide;
                 if (reachingSide == BoatDirection.REACH_LEFT) {
                     pathStr += "D";
@@ -299,7 +302,27 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             Position posHeight = currentPosition.projectToLineThrough(startPos, bearStart);
             currentHeight = startPos.getDistance(endPos).getMeters() - posHeight.getDistance(startPos).getMeters();
         }
-        
+
+        // remove last position, if already too close to target for finish-phase
+        if (currentHeight < startPos.getDistance(endPos).getMeters()*fracFinishPhase/2) {
+            path.remove(path.size()-1);
+            currentTime = path.get(path.size()-1).getTimePoint();
+            currentPosition = path.get(path.size()-1).getPosition();
+            prevDirection = prevPrevDirection;
+        } else {
+            // get bearing to target            
+            Bearing nextBearTarget = currentPosition.getBearingGreatCircle(endPos);
+            // get point-of-sail and reaching-side
+            Pair<PointOfSail, BoatDirection> nextPointOfSailAndReachingSide = polarDiagram.getPointOfSail(nextBearTarget);
+            PointOfSail nextPointOfSail = nextPointOfSailAndReachingSide.getA();
+            if (nextPointOfSail == PointOfSail.REACHING) {
+                path.remove(path.size()-1);
+                currentTime = path.get(path.size()-1).getTimePoint();
+                currentPosition = path.get(path.size()-1).getPosition();
+                prevDirection = prevPrevDirection;                
+            }
+        }
+
         if (!this.isTimedOut()) {
             //
             // FinishPhase: get 1-turners to finalize course

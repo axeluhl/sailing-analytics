@@ -11,7 +11,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class PathGeneratorBase implements PathGenerator {
 
     protected SimulationParameters parameters;
-    protected final Duration algorithmMaxDuration = new MillisecondsDurationImpl(2*60*1000); // 2 minutes maximum duration of one path generation
+    protected final Duration algorithmMaxDuration = new MillisecondsDurationImpl(20000); // 20 seconds maximum duration of one path generation
     protected TimePoint algorithmStartTime;
     protected boolean algorithmTimedOut = false;
 

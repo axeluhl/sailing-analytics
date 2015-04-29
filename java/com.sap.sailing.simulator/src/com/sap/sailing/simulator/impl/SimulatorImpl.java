@@ -10,6 +10,7 @@ import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.SimulatorUISelection;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorImpl implements Simulator {
@@ -44,32 +45,39 @@ public class SimulatorImpl implements Simulator {
         PathGeneratorTreeGrow360 genTreeGrow;
         PathGeneratorOpportunistEuclidian360 genOpportunistic;
         Path path = null;
-        switch (pathType) {
-        case OMNISCIENT:
-            genTreeGrow = new PathGeneratorTreeGrow360(this.simulationParameters); // instantiate heuristic searcher
-            genTreeGrow.setEvaluationParameters(null, 0, null); // allow for arbitrary many turns
-            path = genTreeGrow.getPath();
-            break;
-        case ONE_TURNER_LEFT:
-            genTreeGrow = new PathGeneratorTreeGrow360(this.simulationParameters); // instantiate heuristic searcher
-            genTreeGrow.setEvaluationParameters("L", 1, null); // start left and limit to one turn
-            path = genTreeGrow.getPath();
-            break;
-        case ONE_TURNER_RIGHT:
-            genTreeGrow = new PathGeneratorTreeGrow360(this.simulationParameters); // instantiate heuristic searcher
-            genTreeGrow.setEvaluationParameters("R", 1, null); // start right and limit to one turn
-            path = genTreeGrow.getPath();
-            break;
-        case OPPORTUNIST_LEFT:
-            genOpportunistic = new PathGeneratorOpportunistEuclidian360(this.simulationParameters); // instantiate greedy searcher
-            genOpportunistic.setEvaluationParameters(true); // use maxTurnTimes of 1-turners to avoid passing of lay lines
-            path = genOpportunistic.getPath();
-            break;
-        case OPPORTUNIST_RIGHT:
-            genOpportunistic = new PathGeneratorOpportunistEuclidian360(this.simulationParameters); // instantiate greedy searcher
-            genOpportunistic.setEvaluationParameters(false); // use maxTurnTimes of 1-turners to avoid passing of lay lines
-            path = genOpportunistic.getPath();
-            break;
+        try {
+            switch (pathType) {
+            case OMNISCIENT:
+                genTreeGrow = new PathGeneratorTreeGrow360(this.simulationParameters); // instantiate heuristic searcher
+                genTreeGrow.setEvaluationParameters(null, 0, null); // allow for arbitrary many turns
+                path = genTreeGrow.getPath();
+                break;
+            case ONE_TURNER_LEFT:
+                genTreeGrow = new PathGeneratorTreeGrow360(this.simulationParameters); // instantiate heuristic searcher
+                genTreeGrow.setEvaluationParameters("L", 1, null); // start left and limit to one turn
+                path = genTreeGrow.getPath();
+                break;
+            case ONE_TURNER_RIGHT:
+                genTreeGrow = new PathGeneratorTreeGrow360(this.simulationParameters); // instantiate heuristic searcher
+                genTreeGrow.setEvaluationParameters("R", 1, null); // start right and limit to one turn
+                path = genTreeGrow.getPath();
+                break;
+            case OPPORTUNIST_LEFT:
+                genOpportunistic = new PathGeneratorOpportunistEuclidian360(this.simulationParameters); // instantiate greedy searcher
+                genOpportunistic.setEvaluationParameters(true); // use maxTurnTimes of 1-turners to avoid passing of lay lines
+                path = genOpportunistic.getPath();
+                break;
+            case OPPORTUNIST_RIGHT:
+                genOpportunistic = new PathGeneratorOpportunistEuclidian360(this.simulationParameters); // instantiate greedy searcher
+                genOpportunistic.setEvaluationParameters(false); // use maxTurnTimes of 1-turners to avoid passing of lay lines
+                path = genOpportunistic.getPath();
+                break;
+            }
+        } catch (SparseSimulationDataException e) {
+            LOGGER.warning(e.getMessage() + "(PathType: " + pathType.getTxtId() + ")");
+            List<TimedPositionWithSpeed> points = new ArrayList<TimedPositionWithSpeed>();
+            points.add(new TimedPositionWithSpeedImpl(this.simulationParameters.getWindField().getStartTime(), this.simulationParameters.getCourse().get(0), null));
+            path = new PathImpl(points, null, 0, true, false);
         }
         return path;
     }
