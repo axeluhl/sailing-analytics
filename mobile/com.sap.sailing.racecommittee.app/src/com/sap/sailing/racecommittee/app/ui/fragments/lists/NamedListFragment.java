@@ -1,10 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -15,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -30,18 +26,18 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Named;
 
-public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements
-        LoadClient<Collection<T>>, DialogListenerHost {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
-    // private static String TAG = NamedListFragment.class.getName();
-
-    private ItemSelectedListener<T> listener;
-    private NamedArrayAdapter<T> listAdapter;
-
-    private View lastSelected;
-    private int mSelectedIndex = -1;
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
+    implements LoadClient<Collection<T>>, DialogListenerHost {
 
     protected ArrayList<T> namedList;
+    private ItemSelectedListener<T> listener;
+    private NamedArrayAdapter<T> listAdapter;
+    private View lastSelected;
+    private int mSelectedIndex = -1;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
@@ -49,8 +45,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return new NamedArrayAdapter<>(context, items);
     }
 
-    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
-            ReadonlyDataManager manager);
+    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
     private void loadItems() {
         setListShown(false);
@@ -136,6 +131,14 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt("position", mSelectedIndex);
+
+        Fragment fragment = getTargetFragment();
+        if (fragment != null && !fragment.isAdded()) {
+            setTargetFragment(null, -1);
+            listener = null;
+            listAdapter = null;
+        }
+
         super.onSaveInstanceState(outState);
     }
 
