@@ -13,12 +13,17 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
@@ -131,10 +136,46 @@ public class ORCPerformanceCurveCertificate implements Serializable {
         return getAllowancesForLegPerTrueWindSpeed(trueWindToDirection, legBearing, greatCircleLegDistance);
     }
     
+    /**
+     * Calculates the times that the competitor is expected to have taken to reach her position at
+     * <code>timePoint</code> for the different true wind speeds. This can be used to calculate the implied wind, given
+     * the actual duration the competitor took, by constructing a spline from the knots defined by the resulting map,
+     * mapping durations to implied wind speeds.
+     * <p>
+     * 
+     * If the <code>competitor</code> hasn't started the race yet, <code>null</code> is returned.
+     */
+    private Map<Speed, Duration> getAllowances(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        final Map<Speed, Duration> result;
+        if (trackedRace.getMarkPassings(competitor).isEmpty()) {
+            result = null;
+        } else {
+            result = new HashMap<>();
+            Course course = trackedRace.getRace().getCourse();
+            course.lockForRead();
+            try {
+                for (Leg leg : course.getLegs()) {
+                    TrackedLegOfCompetitor tloc = trackedRace.getTrackedLeg(competitor, leg);
+                    if (!tloc.hasStartedLeg(timePoint)) {
+                        break; // consider only legs that the competitor has at least started to sail
+                    } else {
+                        if (tloc.hasFinishedLeg(timePoint)) {
+                            // entire leg sailed
+                            // TODO continue here...
+                        }
+                    }
+                }
+            } finally {
+                course.unlockAfterRead();
+            }
+        }
+        return result;
+    }
+    
     // TODO keep in mind when projecting a boat onto the leg direction that TrackedLeg et al. won't know about the beat/gybe angles here.
     // Therefore, it may be a bit tricky to determine the "leg" distance for a competitor sailing anywhere on the course. Projecting
     // onto the wind based on a guess what the beat angle may be can lead to incorrect results for angles that the guessed beat angle
-    // may already call an upwind beat where this polar still considers it a reach.
+    // may already call an upwind beat where this polar still considers it a reach...
 
     /**
      * Same as {@link #getAllowancesForLegPerTrueWindSpeed(TrackedLeg, Bearing)}, but here any leg direction and great circle
