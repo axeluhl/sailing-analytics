@@ -12,7 +12,7 @@
 		}
 	</ui:style>             
 		<g:HTMLPanel >
-			<div class="{res.mediaCss.grid} {style.marginFix}" >
+			<div class="{res.mediaCss.grid}" >
 			  <div class="{res.mediaCss.small7} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 			    <p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
 			    <p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
@@ -25,7 +25,9 @@
 				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
 				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
 			  </div>
+			</div>
 			  
+			<div class="{res.mediaCss.grid} {style.marginFix}" >
 			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 			        <table class="{local_res.css.regattaleaderboard_table}">
       				  <tr>
