@@ -17,8 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.RRS26ChangedListeners;
-import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -33,7 +32,7 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure {
     private final static Flags startmodeFlag = Flags.PAPA;
     
     public LeagueRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, RRS26Configuration configuration) {
+            RaceLogEventFactory factory, LeagueConfiguration configuration) {
         super(raceLog, author, factory, configuration);
         update();
     }
@@ -75,6 +74,8 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure {
 
     @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+        // Remark: We are reusing here CLASS_UP, STARTMODE_UP and STARTMODE_DOWN from the RRS26 procedure
+        // The question is why there are no generic CLASS_UP, STARTMODE_UP and STARTMODE_DOWN events
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassUpInterval), RaceStateEvents.RRS26_CLASS_UP),
                 new RaceStateEventImpl(startTime.minus(startPhaseStartModeUpInterval), RaceStateEvents.RRS26_STARTMODE_UP),
@@ -135,6 +136,6 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure {
     
     @Override
     protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
-        return new RRS26ChangedListeners();
+        return new LeagueRacingProcedureChangedListeners();
     }
 }

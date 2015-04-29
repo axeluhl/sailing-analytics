@@ -14,19 +14,6 @@ public abstract class RaceInfoFragmentChooser {
     
     public static RaceInfoFragmentChooser on(RacingProcedureType racingProcedureType) {
         return new BasicRaceInfoFragmentChooser();
-
-//        switch (racingProcedureType) {
-//            case RRS26:
-//                return new RRS26RaceInfoFragmentChooser();
-//            case GateStart:
-//                return new GateStartRaceInfoFragmentChooser();
-//            case ESS:
-//                return new ESSRaceInfoFragmentChooser();
-//            case BASIC:
-//                return new BasicRaceInfoFragmentChooser();
-//            default:
-//                throw new UnsupportedOperationException(racingProcedureType.toString());
-//        }
     }
     
     protected abstract Class<? extends RaceFragment> getStartphaseFragment();

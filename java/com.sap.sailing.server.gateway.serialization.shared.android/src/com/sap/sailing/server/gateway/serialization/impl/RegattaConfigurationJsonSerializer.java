@@ -11,7 +11,7 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
     public static RegattaConfigurationJsonSerializer create() {
         return new RegattaConfigurationJsonSerializer(RRS26ConfigurationJsonSerializer.create(),
                 GateStartConfigurationJsonSerializer.create(), ESSConfigurationJsonSerializer.create(),
-                RacingProcedureConfigurationJsonSerializer.create());
+                RacingProcedureConfigurationJsonSerializer.create(), LeagueConfigurationJsonSerializer.create());
     }
 
     public static final Object FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
@@ -19,20 +19,23 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
     public static final String FIELD_RRS26 = "rrs26";
     public static final String FIELD_GATE_START = "gateStart";
     public static final String FIELD_ESS = "ess";
+    public static final String FIELD_LEAGUE = "league";
     public static final String FIELD_BASIC = "basic";
 
     private final JsonSerializer<RacingProcedureConfiguration> rrs26Serializer;
     private final JsonSerializer<RacingProcedureConfiguration> gateStartSerializer;
     private final JsonSerializer<RacingProcedureConfiguration> essSerializer;
     private final JsonSerializer<RacingProcedureConfiguration> basicSerializer;
+    private final JsonSerializer<RacingProcedureConfiguration> leagueSerializer;
 
     public RegattaConfigurationJsonSerializer(JsonSerializer<RacingProcedureConfiguration> rrs26,
             JsonSerializer<RacingProcedureConfiguration> gateStart, JsonSerializer<RacingProcedureConfiguration> ess,
-            JsonSerializer<RacingProcedureConfiguration> basicSerializer) {
+            JsonSerializer<RacingProcedureConfiguration> basicSerializer, JsonSerializer<RacingProcedureConfiguration> leagueSerializer) {
         this.rrs26Serializer = rrs26;
         this.gateStartSerializer = gateStart;
         this.essSerializer = ess;
         this.basicSerializer = basicSerializer;
+        this.leagueSerializer = leagueSerializer;
     }
 
     @Override
@@ -59,6 +62,10 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
         if (object.getBasicConfiguration() != null) {
             result.put(FIELD_BASIC, basicSerializer.serialize(object.getBasicConfiguration()));
         }
+        if (object.getLeagueConfiguration() != null) {
+            result.put(FIELD_LEAGUE, leagueSerializer.serialize(object.getLeagueConfiguration()));
+        }
+
         return result;
     }
 

@@ -219,6 +219,8 @@ public class AppPreferences {
             return key(R.string.preference_racing_procedure_ess_classflag_key);
         case BASIC:
             return key(R.string.preference_racing_procedure_basic_classflag_key);
+        case LEAGUE:
+            return key(R.string.preference_racing_procedure_basic_classflag_key);
         default:
             throw new IllegalArgumentException("Unknown racing procedure type.");
         }
@@ -245,8 +247,7 @@ public class AppPreferences {
     }
 
     public Set<Flags> getRRS26StartmodeFlags() {
-        Set<String> flagNames = preferences.getStringSet(
-                key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
+        Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
         if (flagNames != null) {
             Set<Flags> flags = new HashSet<Flags>();
             for (String flagName : flagNames) {
@@ -308,8 +309,8 @@ public class AppPreferences {
     }
 
     public boolean isSendingActive() {
-        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key),
-                context.getResources().getBoolean(R.bool.preference_isSendingActive_default));
+        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), context
+            .getResources().getBoolean(R.bool.preference_isSendingActive_default));
     }
 
     protected String key(int keyId) {
@@ -331,8 +332,7 @@ public class AppPreferences {
     public void setByNameCourseDesignerCourseNames(List<String> courseNames) {
         preferences
                 .edit()
-                .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key),
-                        new HashSet<String>(courseNames)).commit();
+                .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>(courseNames)).commit();
     }
 
     public void setCourseLayout(CourseLayouts courseLayout) {
@@ -444,8 +444,7 @@ public class AppPreferences {
         	.putLong(HIDDEN_PREFERENCE_WIND_LNG, lng)
         .commit();
     }
-    
-    
+
     public void setCourseUUID(UUID uuid){
     	long least = uuid.getLeastSignificantBits(); 
     	long most  = uuid.getMostSignificantBits();
