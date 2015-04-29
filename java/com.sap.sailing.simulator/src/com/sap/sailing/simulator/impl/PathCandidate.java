@@ -1,11 +1,12 @@
 package com.sap.sailing.simulator.impl;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.simulator.TimedPosition;
 
 public class PathCandidate implements Comparable<PathCandidate> {
 
-    public PathCandidate(TimedPosition pos, boolean reached, double vrt, double hrz, int trn, String path, char sid, Wind wind) {
+    public PathCandidate(TimedPosition pos, boolean reached, double vrt, double hrz, int trn, String path, char sid, Wind wind, Position start) {
         this.pos = pos;   // time and position
         this.wind = wind;
         this.reached = reached;
@@ -14,6 +15,7 @@ public class PathCandidate implements Comparable<PathCandidate> {
         this.trn = trn;   // number of turns
         this.path = path; // path as sequence of steps from start to pos
         this.sid = sid;   // side of wind of step reaching pos
+        this.start = start;
     }
 
     TimedPosition pos;
@@ -24,6 +26,7 @@ public class PathCandidate implements Comparable<PathCandidate> {
     int trn;
     String path;
     char sid;
+    Position start;
 
     public int getIndexOfTurnLR() {
         String tmpPath = path;

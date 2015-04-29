@@ -1,6 +1,6 @@
 package com.sap.sailing.simulator;
 
-import com.sap.sailing.simulator.impl.SparsePolarDataException;
+import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 
 public interface PathGenerator {
 
@@ -8,9 +8,9 @@ public interface PathGenerator {
 
     SimulationParameters getSimulationParameters();
 
-    Path getPath() throws SparsePolarDataException;
+    Path getPath() throws SparseSimulationDataException;
 
-    Path getPathEvenTimed(long stepMilliseconds) throws SparsePolarDataException;
+    Path getPathEvenTimed(long stepMilliseconds) throws SparseSimulationDataException;
     
     public boolean isTimedOut();
 
