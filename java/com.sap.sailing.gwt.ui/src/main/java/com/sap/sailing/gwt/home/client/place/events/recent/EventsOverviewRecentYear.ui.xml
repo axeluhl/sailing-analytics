@@ -14,12 +14,12 @@
   <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewrecent_year}">
       <g:HTMLPanel ui:field="headerDiv" addStyleNames="{local_res.css.eventsoverviewrecent_year_header} {local_res.css.accordion_trigger}">
         <div class="{res.mediaCss.grid}">
-          <div class="{res.mediaCss.small12} {res.mediaCss.medium2} {res.mediaCss.columns}">
+          <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
             <h3 class="{local_res.css.eventsoverviewrecent_year_header_title}">
               <span ui:field="year" />
             </h3>
           </div>
-          <div class="{res.mediaCss.small12} {res.mediaCss.medium10} {res.mediaCss.columns}">
+          <div class="{res.mediaCss.small10} {res.mediaCss.columns}">
             <table class="{local_res.css.eventsoverviewrecent_year_header_info}">
               <tr>
                 <td>
