@@ -10,7 +10,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -78,31 +77,30 @@ public class WidgetCarousel extends Composite {
 
     }
 
-    @Override
-    public void onBrowserEvent(Event event) {
-        super.onBrowserEvent(event);
-        if ("afterChange".equals(event.getType())) {
-            onAfterChange();
-        } else if ("init".equals(event.getType())) {
-            onAfterChange();
-        }
-    }
-
     public void onAfterChange() {
-
         for (Iterator<Widget> iterator = items.iterator(); iterator.hasNext();) {
             Widget widget = (Widget) iterator.next();
             final Element parent = widget.getElement();
-            if (parent != null && parent.getClassName().contains("slick-active")) {
-                if (iterator.hasNext()) {
-                    Widget nextOne = iterator.next();
-                    if (nextOne instanceof LazyLoadable) {
-                        LazyLoadable lazyLoadable = (LazyLoadable) nextOne;
+
+            if (parent != null) {
+                if (parent.getClassName().contains("slick-active")) {
+                    if (iterator.hasNext()) {
+                        Widget nextOne = iterator.next();
+                        if (nextOne instanceof LazyLoadable) {
+                            LazyLoadable lazyLoadable = (LazyLoadable) nextOne;
+                            lazyLoadable.doInitializeLazyComponents();
+                        }
+                    }
+                    int previousIdx = items.indexOf(widget) - 1 < 0 ? items.size() - 1 : items.indexOf(widget) - 1;
+                    Widget previousOne = items.get(previousIdx);
+
+                    if (previousOne instanceof LazyLoadable) {
+                        LazyLoadable lazyLoadable = (LazyLoadable) previousOne;
                         lazyLoadable.doInitializeLazyComponents();
-                    } else {
                     }
                     return;
                 }
+
             }
         }
     }
