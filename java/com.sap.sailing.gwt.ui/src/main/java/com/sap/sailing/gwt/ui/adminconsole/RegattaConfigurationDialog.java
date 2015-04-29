@@ -60,6 +60,11 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     private ListBox basicClassFlagListBox;
     private CheckBox basicRecallBox;
 
+    private DisclosurePanel leagueDisclosurePanel;
+    private CheckBox leagueEnabledBox;
+    private ListBox leagueClassFlagListBox;
+    private CheckBox leagueRecallBox;
+
     public RegattaConfigurationDialog(DeviceConfigurationDTO.RegattaConfigurationDTO regattaConfiguration,
             StringMessages messages, DataEntryDialog.DialogCallback<RegattaConfigurationDTO> callback) {
         super(messages.racingProcedureConfiguration(), "", messages.save(), messages.cancel(), /* validator */ null, callback);
@@ -75,6 +80,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         setupGateStart();
         setupESS();
         setupBasic();
+        setupLeague();
         
         if (rrs26EnabledBox.getValue()) {
             rrs26DisclosurePanel.setOpen(true);
@@ -87,6 +93,9 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         }
         if (basicEnabledBox.getValue()) {
             basicDisclosurePanel.setOpen(true);
+        }
+        if (leagueEnabledBox.getValue()) {
+            leagueDisclosurePanel.setOpen(true);
         }
 
         return contentPanel;
@@ -109,7 +118,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         racingProcedureListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                markAsDrity(true);
             }
         });
         grid.setWidget(gridRow, 0, new Label(stringMessages.racingProcedure()));
@@ -126,7 +134,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         designerModeEntryListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                markAsDrity(true);
             }
         });
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
@@ -143,7 +150,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         box.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                markAsDrity(true);
             }
         });
         return box;
@@ -155,7 +161,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
             }
         });
         return box;
@@ -170,7 +175,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         rrs26EnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
                 boolean isActive = event.getValue();
                 rrs26ClassFlagListBox.setEnabled(isActive);
                 rrs26RecallBox.setEnabled(isActive);
@@ -215,7 +219,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         rrs26StartModeFlagsBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                markAsDrity(true);
             }
         });
     }
@@ -229,7 +232,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         gateStartEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
                 gateStartClassFlagListBox.setEnabled(event.getValue());
                 gateStartRecallBox.setEnabled(event.getValue());
                 gateStartPathfinderBox.setEnabled(event.getValue());
@@ -244,14 +246,12 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         gateStartPathfinderBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
             }
         });
         gateStartGolfDownBox = createCheckbox(stringMessages.hasAdditionalGolfDownTime());
         gateStartGolfDownBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
             }
         });
 
@@ -284,7 +284,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         essEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
                 essClassFlagListBox.setEnabled(event.getValue());
                 essRecallBox.setEnabled(event.getValue());
             }
@@ -318,7 +317,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         basicEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
                 basicClassFlagListBox.setEnabled(event.getValue());
                 basicRecallBox.setEnabled(event.getValue());
             }
@@ -343,8 +341,37 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         contentPanel.add(basicDisclosurePanel);
     }
 
-    private void markAsDrity(boolean b) {
-        // hmnn do we need to this?
+    private void setupLeague() {
+        leagueDisclosurePanel = new DisclosurePanel(stringMessages.leagueStart());
+        VerticalPanel panel = new VerticalPanel();
+
+        Grid grid = new Grid(2, 3);
+        leagueEnabledBox = new CheckBox(stringMessages.setConfiguration());
+        leagueEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                leagueClassFlagListBox.setEnabled(event.getValue());
+                leagueRecallBox.setEnabled(event.getValue());
+            }
+        });
+        leagueClassFlagListBox = setupClassFlagListBox(originalConfiguration == null ? null
+                : originalConfiguration.leagueConfiguration);
+        leagueClassFlagListBox.setWidth("100%");
+        leagueRecallBox = setupRecallBox();
+
+        grid.setWidget(0, 0, new Label(stringMessages.classFlag() + ":"));
+        grid.setWidget(0, 1, leagueClassFlagListBox);
+        grid.setWidget(0, 2, createHelpImage(stringMessages.classFlagHelpText("league start")));
+        grid.setWidget(1, 0, leagueRecallBox);
+        grid.setWidget(1, 2, createHelpImage(stringMessages.individualRecallHelpText()));
+
+        leagueEnabledBox.setValue(originalConfiguration != null && originalConfiguration.leagueConfiguration != null);
+        ValueChangeEvent.fire(leagueEnabledBox, leagueEnabledBox.getValue());
+
+        panel.add(leagueEnabledBox);
+        panel.add(grid);
+        leagueDisclosurePanel.add(panel);
+        contentPanel.add(leagueDisclosurePanel);
     }
 
     private Widget createHelpImage(String tooltip) {
@@ -398,6 +425,10 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         if (basicEnabledBox.getValue()) {
             result.basicConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO();
             getRacingProcedureConfigurationResults(result.basicConfiguration, basicClassFlagListBox, basicRecallBox);
+        }
+        if (leagueEnabledBox.getValue()) {
+            result.leagueConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.LeagueConfigurationDTO();
+            getRacingProcedureConfigurationResults(result.leagueConfiguration, leagueClassFlagListBox, leagueRecallBox);
         }
         return result;
     }
