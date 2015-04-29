@@ -387,14 +387,14 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         if (mCourse != null) {
-            SpannableString header = new SpannableString(event);
+            SpannableString text = new SpannableString(course);
             StyleSpan spanBold = new StyleSpan(Typeface.BOLD);
-            header.setSpan(spanBold, 0, header.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            mCourse.setText(header);
+            text.setSpan(spanBold, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mCourse.setText(text);
         }
 
         if (mData != null) {
-            mData.setText(String.format("%s / %s", course, author));
+            mData.setText(author);
         }
     }
 
