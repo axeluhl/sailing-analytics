@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
+import android.app.Fragment;
 import android.app.ListFragment;
 import android.os.Bundle;
 
@@ -49,4 +50,13 @@ private LifecycleLogger lifeLogger;
         lifeLogger.onDestroy(this);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Fragment fragment = getTargetFragment();
+        if (fragment != null && !fragment.isAdded()) {
+            setTargetFragment(null, -1);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
 }

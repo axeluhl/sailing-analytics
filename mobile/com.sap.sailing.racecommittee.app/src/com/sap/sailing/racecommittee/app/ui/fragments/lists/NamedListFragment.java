@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -131,13 +130,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt("position", mSelectedIndex);
-
-        Fragment fragment = getTargetFragment();
-        if (fragment != null && !fragment.isAdded()) {
-            setTargetFragment(null, -1);
-            listener = null;
-            listAdapter = null;
-        }
 
         super.onSaveInstanceState(outState);
     }

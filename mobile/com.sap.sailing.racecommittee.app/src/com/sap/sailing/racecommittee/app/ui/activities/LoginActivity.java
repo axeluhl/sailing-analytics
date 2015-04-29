@@ -32,6 +32,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
@@ -411,6 +412,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            InMemoryDataStore.INSTANCE.reset();
             setupDataManager();
 
             addEventListFragment();
