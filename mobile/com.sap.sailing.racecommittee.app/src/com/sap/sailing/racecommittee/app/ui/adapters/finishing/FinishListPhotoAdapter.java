@@ -50,14 +50,6 @@ public class FinishListPhotoAdapter extends RecyclerView.Adapter<FinishListPhoto
         holder.dateTime.setText(mDateFormat.format(file.lastModified()));
         Bitmap bitmap = BitmapHelper.decodeSampleBitmapFromFile(fileName, (int) mHeight, (int) mHeight);
         holder.imageView.setImageBitmap(bitmap);
-        holder.imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext,
-                    "width: " + v.getMeasuredWidth() + " height: " + v.getMeasuredHeight(),
-                    Toast.LENGTH_LONG).show();
-            }
-        });
         holder.deleteView.setOnClickListener(new DeleteListener(file));
 
         holder.itemView.setTag(fileName);
@@ -96,12 +88,7 @@ public class FinishListPhotoAdapter extends RecyclerView.Adapter<FinishListPhoto
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AppTheme_AlertDialog);
             builder.setTitle(mContext.getString(R.string.delete_file_title));
             builder.setMessage(mContext.getString(R.string.delete_file));
-            builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-                }
-            });
+            builder.setNegativeButton(android.R.string.no, null);
             builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

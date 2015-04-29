@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -26,6 +27,30 @@ public class CameraHelper {
 
     public static CameraHelper on(Context context) {
         return new CameraHelper(context);
+    }
+
+    public String getSubFolder(ManagedRace race) {
+        String path = "";
+
+        if (race.getRaceGroup() != null) {
+            path += race.getRaceGroup().getName() + File.separator;
+
+            if (race.getRaceGroup().getBoatClass() != null) {
+                path += race.getRaceGroup().getBoatClass().getName() + File.separator;
+            }
+        }
+
+        if (race.getFleet() != null && !race.getFleet().getName().equals("Default")) {
+            path += race.getFleet().getName() + File.separator;
+        }
+
+        if (race.getSeries() != null && !race.getSeries().getName().equals("Default")) {
+            path += race.getSeries().getName() + File.separator;
+        }
+
+        path += race.getName();
+
+        return path.replace(" ", "_");
     }
 
     /**

@@ -11,7 +11,6 @@ import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
@@ -63,7 +62,8 @@ public class FinishedSubmitFragment extends BasePanelFragment {
 
     public ArrayList<Uri> getPhotos() {
         ArrayList<Uri> retValue = new ArrayList<>();
-        File folder = CameraHelper.on(getActivity()).getOutputMediaFolder(getRace().getId().toString());
+        CameraHelper cameraHelper = CameraHelper.on(getActivity());
+        File folder = cameraHelper.getOutputMediaFolder(cameraHelper.getSubFolder(getRace()));
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.getName().endsWith(".jpg") || file.getName().endsWith(".mp4")) {

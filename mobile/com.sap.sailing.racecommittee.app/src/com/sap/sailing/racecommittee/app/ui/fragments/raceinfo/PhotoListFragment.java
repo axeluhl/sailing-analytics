@@ -35,7 +35,6 @@ public class PhotoListFragment extends BaseFragment {
     private ArrayList<Uri> mPhotos;
     private FinishListPhotoAdapter mAdapter;
     private RecyclerView mPhotoList;
-    private String mRaceId;
 
     public PhotoListFragment() {
         mPhotos = new ArrayList<>();
@@ -56,8 +55,9 @@ public class PhotoListFragment extends BaseFragment {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Uri photoUri = CameraHelper.on(getActivity())
-                        .getOutputMediaFileUri(CameraHelper.MEDIA_TYPE_IMAGE, mRaceId);
+                    CameraHelper cameraHelper = CameraHelper.on(getActivity());
+                    Uri photoUri = cameraHelper.getOutputMediaFileUri(CameraHelper.MEDIA_TYPE_IMAGE, cameraHelper
+                        .getSubFolder(getRace()));
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     PackageManager manager = getActivity().getPackageManager();
                     List<ResolveInfo> activities = manager.queryIntentActivities(intent, 0);
@@ -88,7 +88,6 @@ public class PhotoListFragment extends BaseFragment {
 
         mAdapter = new FinishListPhotoAdapter(mPhotos);
         mPhotoList.setAdapter(mAdapter);
-        mRaceId = null;
         refreshPhotoList();
     }
 
@@ -113,7 +112,8 @@ public class PhotoListFragment extends BaseFragment {
 
     private void refreshPhotoList() {
         mPhotos.clear();
-        File folder = CameraHelper.on(getActivity()).getOutputMediaFolder(mRaceId);
+        CameraHelper cameraHelper = CameraHelper.on(getActivity());
+        File folder = cameraHelper.getOutputMediaFolder(cameraHelper.getSubFolder(getRace()));
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.getName().endsWith(".jpg") || file.getName().endsWith(".mp4")) {
