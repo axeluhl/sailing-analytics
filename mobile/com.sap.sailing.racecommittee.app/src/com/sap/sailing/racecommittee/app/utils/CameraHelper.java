@@ -8,6 +8,8 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,7 +52,16 @@ public class CameraHelper {
 
         path += race.getName();
 
-        return path.replace(" ", "_");
+        String sha1 = "";
+        try {
+            sha1 = HashHelper.SHA1(path);
+        } catch (NoSuchAlgorithmException e) {
+            ExLog.ex(mContext, TAG, e);
+        } catch (UnsupportedEncodingException e) {
+            ExLog.ex(mContext, TAG, e);
+        }
+
+        return sha1;
     }
 
     /**
