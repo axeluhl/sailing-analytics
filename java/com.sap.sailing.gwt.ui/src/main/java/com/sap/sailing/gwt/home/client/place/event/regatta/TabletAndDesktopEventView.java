@@ -1,13 +1,21 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -15,6 +23,7 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.partials.header.EventHeader;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
@@ -51,6 +60,28 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
         initWidget(uiBinder.createAndBindUi(this));
 
         initBreadCrumbs();
+        
+        if(currentPresenter.getCtx().getEventDTO().getType() == EventType.SERIES_EVENT) {
+            final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
+            Anchor seriesAnchor = new Anchor(currentPresenter.getCtx().getEventDTO().getSeriesName());
+            seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());
+            seriesAnchor.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
+                        event.preventDefault();
+                        currentEventSeriesNavigation.goToPlace();
+                    }
+                }
+            });
+            seriesAnchor.setStyleName(SharedResources.INSTANCE.mainCss().button());
+            seriesAnchor.addStyleName(SharedResources.INSTANCE.mainCss().buttonprimary());
+            Style style = seriesAnchor.getElement().getStyle();
+            style.setFontSize(16, Unit.PX);
+            style.setPadding(0.75, Unit.EM);
+            tabPanelUi.addTabExtension(seriesAnchor);
+        }
     }
 
     @Override
