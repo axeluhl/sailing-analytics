@@ -418,6 +418,15 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 mProgressSpinner.setVisibility(View.GONE);
             }
         }
+
+        View progress = findViewById(R.id.progress);
+        if (progress != null) {
+            if (visible) {
+                progress.setVisibility(View.VISIBLE);
+            } else {
+                progress.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void setupActionBar(ManagedRace race) {
