@@ -6,13 +6,18 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboardResources" />
-		<g:HTMLPanel>
-			<div class="{res.mediaCss.grid}" style="margin-bottom:1rem;">
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
+	<ui:style>
+		.marginFix {
+			margin:2rem 5rem;
+		}
+	</ui:style>             
+		<g:HTMLPanel >
+			<div class="{res.mediaCss.grid} {style.marginFix}" >
+			  <div class="{res.mediaCss.small7} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 			    <p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
 			    <p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
 			  </div>
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
+			  <div class="{res.mediaCss.small5} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
 			    <div class="{local_res.css.regattaleaderboard_meta_update}">
 			      <p ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></p>
 			      <p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
