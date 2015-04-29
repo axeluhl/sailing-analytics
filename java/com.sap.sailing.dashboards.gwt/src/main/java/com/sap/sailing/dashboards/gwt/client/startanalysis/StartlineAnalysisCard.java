@@ -136,10 +136,10 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live, 1000l);
         timer.pause();
         ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
-        if(startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)){
-            timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds+startAnalysisDTO.tailLenghtInMilliseconds);
+        if (startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)) {
+            timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds + startAnalysisDTO.tailLenghtInMilliseconds);
             zoomTypes.add(ZoomTypes.BUOYS);
-        }else{
+        } else {
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
             zoomTypes.add(ZoomTypes.TAILS);
         }
