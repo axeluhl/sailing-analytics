@@ -72,10 +72,17 @@ public class StartTimeFragment extends BaseFragment
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onDetach();
 
         getRaceState().removeChangedListener(raceStateChangedListener);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getRaceState().addChangedListener(raceStateChangedListener);
     }
 
     @Override
@@ -89,7 +96,6 @@ public class StartTimeFragment extends BaseFragment
                 notifyTick();
             }
         };
-        getRaceState().addChangedListener(raceStateChangedListener);
         Calendar time = Calendar.getInstance();
         if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 2) {
             if (getRace() != null && getRaceState() != null) {
@@ -124,15 +130,13 @@ public class StartTimeFragment extends BaseFragment
 
             mDatePicker = ViewHolder.get(getView(), R.id.start_date_picker);
             if (mDatePicker != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), mDatePicker,
-                    ThemeHelper.getColor(getActivity(), R.attr.white));
+                ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mDatePicker.setOnValueChangedListener(this);
                 initDatePicker();
             }
             mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker,
-                    ThemeHelper.getColor(getActivity(), R.attr.white));
+                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mTimePicker.setOnTimeChangedListener(this);
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);
