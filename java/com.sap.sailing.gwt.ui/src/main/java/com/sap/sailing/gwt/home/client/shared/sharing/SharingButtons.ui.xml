@@ -7,8 +7,8 @@
   <ui:style>
   </ui:style>
   <g:HTMLPanel addStyleNames="{local_res.css.eventheader_sharing}">
-    <a ui:field="mail" title="undefined" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
-    <a ui:field="twitter" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
-    <a ui:field="facebook" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
+    <a ui:field="mail" title="{i18n.sharingMailTooltip}" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
+    <a ui:field="twitter" title="{i18n.sharingTwitterTooltip}" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
+    <a ui:field="facebook" title="{i18n.sharingFacebookTooltip}" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
   </g:HTMLPanel>
 </ui:UiBinder> 

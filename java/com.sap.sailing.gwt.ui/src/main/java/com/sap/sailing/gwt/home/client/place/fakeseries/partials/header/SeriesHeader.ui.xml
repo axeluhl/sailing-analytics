@@ -7,9 +7,7 @@
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeaderResources" />
   <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
-        <!-- TODO add large9 when sharing is activated -->
-        <!-- <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}"> -->
-        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
           <div class="{local_res.css.eventheader_intro}">
             <div class="{local_res.css.eventheader_intro_logo}">
               <div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
@@ -24,7 +22,7 @@
             <g:FlowPanel ui:field="venues" addStyleNames="{local_res.css.eventheader_intro_details}" />
           </div>
         </div>
-        <div class="{res.mediaCss.showonlarge} {res.mediaCss.large3} {res.mediaCss.columns}" style="display:none;">
+        <div class="{res.mediaCss.showonlarge} {res.mediaCss.large3} {res.mediaCss.columns}">
           <sharing:SharingButtons ui:field="sharing" />
         </div>
   </g:HTMLPanel>
