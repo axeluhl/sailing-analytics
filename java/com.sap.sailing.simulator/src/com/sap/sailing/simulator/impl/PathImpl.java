@@ -140,9 +140,6 @@ public class PathImpl implements Path, Serializable {
                 TimedPositionWithSpeed p1 = this.pathPoints.get(idx - 1);
                 TimedPositionWithSpeed p2 = this.pathPoints.get(idx);
                 Distance dist = p1.getPosition().getDistance(p2.getPosition());
-                // long nextTime = (double)nextTimePoint.asMillis();
-                // System.out.println(""+(nextTimePoint.asMillis() -
-                // p1.getTimePoint().asMillis())+" - "+(p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()));
                 double scale1 = nextTimePoint.asMillis() - p1.getTimePoint().asMillis();
                 double scale2 = p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis();
                 Position nextPosition = p1.getPosition().translateGreatCircle(
@@ -168,32 +165,42 @@ public class PathImpl implements Path, Serializable {
                 double scaleDist = 0.01 * nextPoint.getPosition().getDistance(prevPoint.getPosition())
                         .getMeters();
 
-                // evaluate collected points to potentially find turn/corner
-                double maxDist = 0;
-                TimedPositionWithSpeed maxPoint = null;
+                // evaluate collected points to potentially find turn/corner (up to two)
+                double prevSide = 0;
+                int maxCnt = 0;
+                ArrayList<TimedPositionWithSpeed> maxPoint = new ArrayList<TimedPositionWithSpeed>();
+                maxPoint.add(path.get(0));
+                ArrayList<Double> maxDist = new ArrayList<Double>();
+                maxDist.add(new Double(0));
                 Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
                 for (int jdx = 0; jdx < points.size(); jdx++) {
 
                     Position pcur = points.get(jdx).getPosition();
                     Position ptmp = pcur.projectToLineThrough(prevPoint.getPosition(), nextBear);
-                    double lineDist = ptmp.getDistance(pcur).getMeters();
-                    if (lineDist > maxDist) {
-                        maxPoint = points.get(jdx);
-                        maxDist = lineDist;
+                    double side = Math.signum(nextBear.getDifferenceTo(prevPoint.getPosition().getBearingGreatCircle(pcur)).getDegrees());
+                    boolean sideChange = (prevSide != 0)&&(side != prevSide);
+                    double lineDist = Math.round(ptmp.getDistance(pcur).getMeters()*1000.0)/1000.0;
+                    if (sideChange) {
+                        maxCnt++;
+                        maxDist.add(new Double(0));
+                        maxPoint.add(path.get(0));
                     }
-
+                    if (lineDist > maxDist.get(maxCnt)) {
+                        maxPoint.set(maxCnt, points.get(jdx));
+                        maxDist.set(maxCnt, lineDist);
+                    }
+                    prevSide = side;
                 }
-
-                if (maxDist > scaleDist) {
-                    // add intermediate corner point
-                    SpeedWithBearing maxWind = null;
-                    if (this.windField != null) {
-                        maxWind = this.windField.getWind(new TimedPositionImpl(maxPoint.getTimePoint(), maxPoint
-                                .getPosition()));
-                        maxPoint = new TimedPositionWithSpeedImpl(maxPoint.getTimePoint(), maxPoint.getPosition(),
-                                maxWind);
+                for(int cnt=0; cnt<=maxCnt; cnt++) {
+                    if (maxDist.get(cnt) > scaleDist) {
+                        // add intermediate corner point
+                        SpeedWithBearing maxWind = null;
+                        if (this.windField != null) {
+                            maxWind = this.windField.getWind(new TimedPositionImpl(maxPoint.get(cnt).getTimePoint(), maxPoint.get(cnt).getPosition()));
+                            maxPoint.set(cnt, new TimedPositionWithSpeedImpl(maxPoint.get(cnt).getTimePoint(), maxPoint.get(cnt).getPosition(), maxWind));
+                        }
+                        path.add(maxPoint.get(cnt));
                     }
-                    path.add(maxPoint);
                 }
 
                 // add next even timed point

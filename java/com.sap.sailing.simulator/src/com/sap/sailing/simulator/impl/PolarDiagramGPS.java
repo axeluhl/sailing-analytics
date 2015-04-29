@@ -25,7 +25,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
     private final PolarDataService polarData;
     private double avgSpeed;
 
-    public PolarDiagramGPS(BoatClass boatClass, PolarDataService polarData) throws SparsePolarDataException {
+    public PolarDiagramGPS(BoatClass boatClass, PolarDataService polarData) throws SparseSimulationDataException {
         this.boatClass = boatClass;
         this.polarData = polarData;
 
@@ -102,7 +102,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         }
 
         if ((beatAngles.size() <= 1)||(beatSpeed.size() <= 1)||(jibeAngles.size() <= 1)||(jibeSpeed.size() <= 1)) {
-            throw new SparsePolarDataException();
+            throw new SparseSimulationDataException();
         }
         
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> mapSpeedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();

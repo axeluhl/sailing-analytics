@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client.bottomnotification;
+package com.sap.sailing.dashboards.gwt.client.notifications;
 
 import java.util.ArrayList;
 import java.util.List;

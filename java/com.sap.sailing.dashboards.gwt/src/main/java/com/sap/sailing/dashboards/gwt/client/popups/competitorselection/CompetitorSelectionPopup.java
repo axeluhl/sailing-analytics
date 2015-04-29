@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.visualeffects.BlurEffect;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorSelectionPopup extends Composite implements HasWidgets, CompetitorTableRowSelectionListener {
@@ -27,10 +28,6 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         String popuphide();
 
         String buttonshow();
-        
-        String blurred();
-
-        String not_blurred();
     }
 
     @UiField
@@ -68,16 +65,14 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         this.button.setText("OK");
         this.getElement().addClassName(style.popupshow());
         this.getElement().removeClassName(style.popuphide());
-        RootLayoutPanel.get().addStyleName(style.blurred());
-        RootLayoutPanel.get().removeStyleName(style.not_blurred());
+        BlurEffect.getInstance().addToView(RootLayoutPanel.get());
         isVisible = true;
     }
 
     public void hide() {
         this.getElement().addClassName(style.popuphide());
         this.getElement().removeClassName(style.popupshow());
-        RootLayoutPanel.get().addStyleName(style.not_blurred());
-        RootLayoutPanel.get().removeStyleName(style.blurred());
+        BlurEffect.getInstance().removeFromView(RootLayoutPanel.get());
         RootPanel.get().remove(this);
         isVisible = false;
     }
