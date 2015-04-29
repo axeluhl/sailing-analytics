@@ -124,7 +124,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
     	logger.info("Added wind line with " + path.size()  + "points");
 
-    	return new PathImpl(path, this);
+    	return new PathImpl(path, this, false /* algorithmTimedOut */);
     }
 
 

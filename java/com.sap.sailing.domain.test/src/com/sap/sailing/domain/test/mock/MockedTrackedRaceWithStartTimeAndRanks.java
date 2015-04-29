@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -607,6 +608,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public int getLastLegStarted(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public void setPolarDataService(PolarDataService polarDataService) {
     }
 
 }
