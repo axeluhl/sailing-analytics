@@ -9,6 +9,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -16,9 +17,7 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -37,7 +36,7 @@ public class URLFieldWithFileUpload extends Composite {
     
     private String uri;
 
-    private final PushButton removeButton;
+    private final Button removeButton;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
@@ -55,7 +54,7 @@ public class URLFieldWithFileUpload extends Composite {
             }
         });
         removePanel.setMethod(FormPanel.METHOD_POST);
-        removeButton = new PushButton(new Image(com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon()));
+        removeButton = new Button(stringMessages.removeUploadedImage());
         removeButton.setEnabled(false); // the button shall only be enabled as long as we know the URI for removal
         removeButton.ensureDebugId("RemoveButton");
         removeButton.setTitle(stringMessages.remove());
