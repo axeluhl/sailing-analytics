@@ -16,8 +16,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 
 public class PolarDiagramGPS extends PolarDiagramBase {
 

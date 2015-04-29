@@ -1,4 +1,4 @@
-package com.sap.sailing.polars;
+package com.sap.sailing.domain.polars;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;

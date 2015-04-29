@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.domain.polars.PolarDataService;
 
 public class LeaderboardGroupWithContext implements HasLeaderboardGroupContext {
 

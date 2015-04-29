@@ -12,8 +12,8 @@ import org.apache.commons.math.linear.RealMatrixPreservingVisitor;
 import org.apache.commons.math.linear.RealVector;
 import org.apache.commons.math.linear.SingularMatrixException;
 
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -295,6 +295,11 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             return result;
         }
 
+    }
+
+    @Override
+    public long getNumberOfAddedPoints() {
+        return numberOfPointsAdded.get();
     }
 
 }
