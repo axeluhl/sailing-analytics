@@ -133,7 +133,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         outState.putInt("position", mSelectedIndex);
 
         Fragment fragment = getTargetFragment();
-        if (!fragment.isAdded()) {
+        if (fragment != null && !fragment.isAdded()) {
             setTargetFragment(null, -1);
             listener = null;
             listAdapter = null;
