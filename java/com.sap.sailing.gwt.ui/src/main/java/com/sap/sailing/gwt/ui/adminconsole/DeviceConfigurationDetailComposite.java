@@ -246,10 +246,14 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
     
     private void markAsDirty(boolean dirty) {
-        if (dirty && !(captionPanel.getTitle() == stringMessages.configuration())) {
-            captionPanel.setCaptionText(stringMessages.configuration() + "* (CHANGED)");
+        if (dirty) {
+            if (captionPanel.getCaptionText().equals(stringMessages.configuration())) {
+                captionPanel.setCaptionText(stringMessages.configuration() + "* (CHANGED)");
+            }
         } else {
-            captionPanel.setCaptionText(stringMessages.configuration());
+            if (!captionPanel.getCaptionText().equals(stringMessages.configuration())) {
+                captionPanel.setCaptionText(stringMessages.configuration());
+            }
         }
     }
     
