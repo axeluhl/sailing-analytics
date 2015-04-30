@@ -10,7 +10,7 @@
 <!-- Page displays all solutions-->
 <div class="{local_res.css.solutions}">
   <div class="{local_res.css.solutions_nav}">
-    <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
+    <div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <g:Anchor ui:field="sailingAnalyticsAnchor" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsSAPHeadline}'/></g:Anchor>
           <g:Anchor ui:field="raceAnchor" styleName="{local_res.css.solutions_nav_link}"><ui:text from='{i18n.solutionsRaceHeadline}'/></g:Anchor>
@@ -21,7 +21,7 @@
     </div>
   </div>
   <div ui:field="sailingAnalyticsDiv" class="{local_res.css.solutions_content} {local_res.css.solutions_contentsap}">
-    <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
+    <div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSAPHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSAPText1}'/></p>
@@ -34,7 +34,7 @@
     <div class="{local_res.css.parallax}">
       <div class="{local_res.css.background}"></div>
     </div>
-    <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
+    <div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small8} {res.mediaCss.large5} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsRaceHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsRaceText}'/></p>
@@ -43,7 +43,7 @@
     </div>
   </div>
   <div ui:field="postRaceDiv" class="{local_res.css.solutions_content} {local_res.css.solutions_contentpost}">
-    <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
+    <div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsPostHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsPostText}'/></p>
@@ -54,7 +54,7 @@
     <div class="{local_res.css.parallax}">
       <div class="{local_res.css.background}"></div>
     </div>
-    <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
+    <div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small5} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsTrainingHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsTrainingText}'/></p>
@@ -63,11 +63,13 @@
     </div>
   </div>
   <div ui:field="simulatorDiv" class="{local_res.css.solutions_content} {local_res.css.solutions_contentsimulator}">
-    <div class="{res.mainCss.grid} {local_res.css.gridalternator}">
+    <div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSimulatorHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSimulatorText}'/></p>
-        <!-- <a href="#" class="{res.mainCss.button}">Learn More</a>  -->
+        <g:Anchor ui:field="simulatorAppDetailsAnchor" styleName="{res.mainCss.button}"><ui:text from='{i18n.whatsNew}'/></g:Anchor>
+        <span>&nbsp;&nbsp;</span>
+        <g:Anchor ui:field="simulatorStartAnchor" target="_blank" styleName="{res.mainCss.button}"><ui:text from='{i18n.startSimulator}'/></g:Anchor>
       </div>
     </div>
   </div>

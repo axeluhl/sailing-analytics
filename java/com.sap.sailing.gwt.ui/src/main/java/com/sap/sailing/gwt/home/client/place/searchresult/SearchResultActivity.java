@@ -44,10 +44,14 @@ public class SearchResultActivity extends AbstractActivity {
         panel.setWidget(view.asWidget());
         Window.setTitle(searchResultPlace.getTitle());
 
+
         doSearch(searchResultPlace.getSearchText());
     }
 
     protected void doSearch(final String searchText) {
+        if (searchText == null || searchText.isEmpty())
+            return;
+
         final KeywordQuery searchQuery = new KeywordQuery(searchText.split("[ \t]+"));
         clientFactory.getSailingService().getSearchServerNames(new AsyncCallback<Iterable<String>>() {
             @Override

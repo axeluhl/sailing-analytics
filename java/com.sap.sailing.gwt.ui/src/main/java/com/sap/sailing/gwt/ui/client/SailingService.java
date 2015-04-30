@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
+import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -143,10 +145,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier);
 
-    SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime);
+    SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier);
 
     CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
-            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate) throws NoWindException;
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, LegIdentifier simulationLegIdentifier) throws NoWindException;
     
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
     
@@ -599,7 +601,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
-    
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
@@ -607,4 +608,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
+    
+    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 }

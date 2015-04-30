@@ -5,6 +5,8 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.HomeService;
+import com.sap.sailing.gwt.home.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -13,6 +15,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
 public abstract class AbstractApplicationClientFactory extends SecureClientFactoryImpl implements AutoPlayAppClientFactory {
     private final SailingServiceAsync sailingService;
+    private final HomeServiceAsync homeService;
     private final MediaServiceAsync mediaService;
     private final PlaceNavigator navigator;
 
@@ -20,6 +23,7 @@ public abstract class AbstractApplicationClientFactory extends SecureClientFacto
         super(root, eventBus, placeController);
         navigator = new PlaceNavigatorImpl(placeController);
         sailingService = GWT.create(SailingService.class);
+        homeService = GWT.create(HomeService.class);
         mediaService = GWT.create(MediaService.class);
     }
     
@@ -31,6 +35,11 @@ public abstract class AbstractApplicationClientFactory extends SecureClientFacto
     @Override
     public SailingServiceAsync getSailingService() {
         return sailingService;
+    }
+
+    @Override
+    public HomeServiceAsync getHomeService() {
+        return homeService;
     }
 
     @Override
