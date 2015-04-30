@@ -18,7 +18,7 @@ public class HttpJsonPostRequest extends HttpRequest {
     public HttpJsonPostRequest(URL requestUrl, Context context) {
         this(requestUrl, null, context);
     }
-
+    
     public HttpJsonPostRequest(URL requestUrl, String body, Context context) {
         super(requestUrl, context);
         this.requestBody = body;

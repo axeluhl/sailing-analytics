@@ -23,6 +23,7 @@ import com.sap.sse.common.Util.Pair;
  */
 public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
         JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> {
+
     @Override
     public Pair<UUID, List<GPSFixMoving>> deserialize(JSONObject object) throws JsonDeserializationException {
         UUID device = UUID.fromString(object.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID).toString());

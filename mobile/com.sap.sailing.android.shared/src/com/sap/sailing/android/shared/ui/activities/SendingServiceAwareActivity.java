@@ -20,7 +20,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.util.PrefUtils;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
-
+    
     private class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -55,9 +55,9 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     protected boolean boundSendingService = false;
     protected MessageSendingService sendingService;
     private MessageSendingServiceConnection sendingServiceConnection;
-
+    
     private String sendingServiceStatus = "";
-
+    
     public SendingServiceAwareActivity() {
         this.sendingServiceConnection = new MessageSendingServiceConnection();
     }
@@ -65,15 +65,15 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     @Override
     public void onStart() {
         super.onStart();
-
+        
         Intent intent = new Intent(this, MessageSendingService.class);
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
-
+    
     @Override
     public void onStop() {
         super.onStop();
-
+        
         if (boundSendingService) {
             unbindService(sendingServiceConnection);
             boundSendingService = false;
@@ -83,29 +83,28 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     protected void updateSendingServiceInformation() {
         if (menuItemLive == null)
             return;
-
+        
         if (!boundSendingService)
             return;
-
+        
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
             menuItemLive.setIcon(R.drawable.ic_menu_share_red);
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
-            sendingServiceStatus = String.format(
-                    "Currently %d events waiting to be sent.\nLast successful sent was at %s", errorCount,
-                    lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
+            sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
+                    errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
             menuItemLive.setIcon(R.drawable.ic_menu_share);
             sendingServiceStatus = String.format("Currently no event waiting to be sent.", errorCount);
         }
     }
-
+    
     /**
-     * @return the resource ID for the options menu, {@code 0} if none. The menu item displaying the connection status
-     *         is added automatically.
+     * @return the resource ID for the options menu, {@code 0} if none.
+     *          The menu item displaying the connection status is added automatically.
      */
     protected abstract int getOptionsMenuResId();
-
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -116,7 +115,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         }
         return true;
     }
-
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.options_menu_live == item.getItemId()) {
@@ -127,7 +126,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-
+    
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         updateSendingServiceInformation();
@@ -135,8 +134,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s",
-                PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default),
-                sendingServiceStatus);
+        return String.format("Connected to: %s\n%s", PrefUtils.getString(this, R.string.preference_server_url_key,
+                R.string.preference_server_url_default), sendingServiceStatus);
     }
 }

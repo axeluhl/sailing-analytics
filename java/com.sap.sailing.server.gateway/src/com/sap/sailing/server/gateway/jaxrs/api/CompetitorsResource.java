@@ -129,6 +129,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity("Could not find competitor with id " + competitorId).type(MediaType.TEXT_PLAIN).build());
         }
+
         String fileExtension = "";
         if (fileType.equals("image/jpeg")) {
             fileExtension = ".jpg";

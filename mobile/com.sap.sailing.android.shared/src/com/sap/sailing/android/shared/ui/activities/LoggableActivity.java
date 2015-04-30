@@ -49,7 +49,7 @@ public abstract class LoggableActivity extends BaseActivity {
         super.onDestroy();
         lifeLogger.onDestroy(this);
     }
-
+    
     @Override
     public void onBackPressed() {
         super.onBackPressed();

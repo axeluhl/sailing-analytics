@@ -18,6 +18,8 @@ public class HttpGetRequest extends HttpRequest {
         super(url, listener, context);
     }
 
+
+
     @Override
     protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {
         InputStream stream = connection.getInputStream();

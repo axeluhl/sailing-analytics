@@ -57,5 +57,7 @@
 			<id>uni-luebeck</id>
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
 		</repository>
+
 	</repositories>
+
 </project>

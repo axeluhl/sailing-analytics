@@ -5,10 +5,10 @@
     <color name="welter_selection_bottom">#ff0062a9</color>
     <color name="welter_extralight_gray">#ffe6e6e6</color>
     <color name="welter_extralight_gray_transparent">#eee6e6e6</color>
-
+    
     <color name="welter_light_gray">#ffcccccc</color>
     <color name="welter_light_gray_transparent">#eecccccc</color>
-
+    
     <color name="welter_medium_gray">#ff999999</color>
     <color name="welter_medium_darkgray">#ff808080</color>
     <color name="welter_dark_gray">#ff666666</color>
@@ -18,10 +18,10 @@
     <color name="welter_medium_blue">#ff226ca9</color>
     <color name="welter_black">#ff000000</color>
     <color name="welter_title_bar_background">#323232</color>
-
+    
     <color name="sapstore_background_gray">#FFD5D5D6</color>
     <color name="sapstore_background_light_gray">#FFF3F3F3</color>
-
+    
     <!-- 
     <color name="tabMedium">#D6D6D7</color>
 	<color name="tabDark">#CBCBCC</color>

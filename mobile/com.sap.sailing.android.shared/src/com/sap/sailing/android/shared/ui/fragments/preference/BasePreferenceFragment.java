@@ -21,12 +21,12 @@ import com.sap.sailing.android.shared.ui.views.EditSetPreference;
  * Created by I074137 on 18.09.13.
  */
 public class BasePreferenceFragment extends PreferenceFragment {
-
+    
     @SuppressWarnings("unchecked")
     protected <T extends Preference> T findPreference(int resourceId) {
         return (T) findPreference(getString(resourceId));
     }
-
+    
     protected static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -35,7 +35,10 @@ public class BasePreferenceFragment extends PreferenceFragment {
             if (preference instanceof ListPreference) {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
-                preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
+                preference.setSummary(
+                        index >= 0
+                                ? listPreference.getEntries()[index]
+                                : null);
 
             } else if (preference instanceof MultiSelectListPreference || preference instanceof EditSetPreference) {
                 @SuppressWarnings("unchecked")
@@ -53,24 +56,28 @@ public class BasePreferenceFragment extends PreferenceFragment {
     protected static void bindPreferenceSummaryToValue(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager
-                .getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getString(preference.getKey(), ""));
     }
-
+    
     protected static void bindPreferenceSummaryToInteger(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager
-                .getDefaultSharedPreferences(preference.getContext()).getInt(preference.getKey(), 0));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getInt(preference.getKey(), 0));
     }
-
+    
     protected static void bindPreferenceSummaryToSet(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                preference,
-                PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getStringSet(
-                        preference.getKey(), new HashSet<String>()));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getStringSet(preference.getKey(), new HashSet<String>()));
     }
 
     protected static void bindPreferenceToCheckbox(CheckBoxPreference checkboxPreference, final Preference target) {
@@ -83,7 +90,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
             }
         });
     }
-
+    
     protected static void addOnPreferenceChangeListener(Preference preference, OnPreferenceChangeListener newListener) {
         OnPreferenceChangeListener oldListener = preference.getOnPreferenceChangeListener();
         if (oldListener == null) {

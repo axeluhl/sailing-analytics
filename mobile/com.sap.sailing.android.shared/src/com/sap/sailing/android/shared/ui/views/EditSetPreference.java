@@ -27,12 +27,12 @@ import com.sap.sailing.android.shared.ui.adapters.ArrayRemoveAdapter;
 public class EditSetPreference extends DialogPreference {
 
     private static final String TAG = EditSetPreference.class.getName();
-
+    
     private static final List<String> defaultFallbackValue = new ArrayList<String>();
     private List<String> currentValue;
-
+    
     private List<String> exampleValues;
-
+    
     public EditSetPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.exampleValues = new ArrayList<String>();
@@ -46,19 +46,18 @@ public class EditSetPreference extends DialogPreference {
     @Override
     protected View onCreateDialogView() {
         View view = super.onCreateDialogView();
-
+        
         final AutoCompleteTextView inputView = (AutoCompleteTextView) view.findViewById(R.id.edit_set_preference_input);
         final Button addButton = (Button) view.findViewById(R.id.edit_set_preference_add);
         final ListView listView = (ListView) view.findViewById(R.id.edit_set_preference_list);
-
+        
         // setup list view
         final ArrayRemoveAdapter<String> adapter = new ArrayRemoveAdapter<String>(view.getContext(), currentValue);
         listView.setEmptyView(view.findViewById(R.id.edit_set_preference_list_empty));
         listView.setAdapter(adapter);
-
+        
         // setup inputView
-        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(),
-                android.R.layout.simple_dropdown_item_1line, exampleValues);
+        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_dropdown_item_1line, exampleValues);
         inputView.setAdapter(autoCompleteAdapter);
         inputView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -66,19 +65,17 @@ public class EditSetPreference extends DialogPreference {
                 boolean invalid = s.length() == 0 || currentValue.contains(s.toString());
                 addButton.setEnabled(!invalid);
             }
-
+            
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
         });
-
+        
         // setup add button
         addButton.setOnClickListener(new OnClickListener() {
-
+            
             @Override
             public void onClick(View arg0) {
                 Editable text = inputView.getText();
@@ -86,10 +83,10 @@ public class EditSetPreference extends DialogPreference {
                 text.clear();
             }
         });
-
+        
         return view;
     }
-
+    
     @SuppressWarnings("unchecked")
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
@@ -102,7 +99,7 @@ public class EditSetPreference extends DialogPreference {
             persistStringSet(currentValue);
         }
     }
-
+    
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
         Set<String> defaultValue = new HashSet<String>();
@@ -111,7 +108,7 @@ public class EditSetPreference extends DialogPreference {
         }
         return defaultValue;
     }
-
+    
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
@@ -129,27 +126,28 @@ public class EditSetPreference extends DialogPreference {
                 // It's already there, so the same as persisting
                 return true;
             }
-
+            
             SharedPreferences.Editor editor = getEditor();
             editor.putStringSet(getKey(), new HashSet<String>(value));
             if (shouldCommit()) {
                 editor.commit();
             }
-
+            
             return true;
         }
         return false;
     }
-
+    
     protected List<String> getPersistedStringSet(List<String> defaultReturnValue) {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-
+        
         Set<String> fallbackDefault = defaultReturnValue == null ? null : new HashSet<String>(defaultReturnValue);
         Set<String> value = getSharedPreferences().getStringSet(getKey(), fallbackDefault);
-
+        
         return value == null ? null : new ArrayList<String>(value);
     }
+
 
 }

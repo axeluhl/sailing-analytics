@@ -7,9 +7,9 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 
 public class MultiplePreferenceChangeListener implements OnPreferenceChangeListener {
-
+    
     private final Set<OnPreferenceChangeListener> listeners;
-
+    
     public MultiplePreferenceChangeListener() {
         this.listeners = new HashSet<Preference.OnPreferenceChangeListener>();
     }
@@ -17,10 +17,11 @@ public class MultiplePreferenceChangeListener implements OnPreferenceChangeListe
     public void addOnPreferenceChangeListener(OnPreferenceChangeListener listener) {
         listeners.add(listener);
     }
-
+    
     public void removeOnPreferenceChangeListener(OnPreferenceChangeListener listener) {
         listeners.remove(listener);
     }
+
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {

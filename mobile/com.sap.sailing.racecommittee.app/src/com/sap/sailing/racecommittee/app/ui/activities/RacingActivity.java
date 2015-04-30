@@ -52,7 +52,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         private ActionBar actionBar;
         private List<FilterMode> items;
 
-		public FilterModeSelectionBinder(ManagedRaceListFragment list, ActionBar actionBar,
+        public FilterModeSelectionBinder(ManagedRaceListFragment list, ActionBar actionBar,
                 ArrayAdapter<FilterMode> adapter, FilterMode... rawItems) {
             this.targetList = list;
             this.actionBar = actionBar;
@@ -62,7 +62,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
             trackSelection(list);
         }
 
-		private void trackSelection(ManagedRaceListFragment list) {
+        private void trackSelection(ManagedRaceListFragment list) {
             int selectedIndex = this.items.indexOf(list.getFilterMode());
             if (selectedIndex >= 0) {
                 this.actionBar.setSelectedNavigationItem(selectedIndex);
@@ -205,7 +205,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         return courseId;
     }
 
-	private void setupActionBar(CourseArea courseArea) {
+    private void setupActionBar(CourseArea courseArea) {
         ActionBar actionBar = getActionBar();
         AbstractLogEventAuthor author = preferences.getAuthor();
         String title = String.format(getString(R.string.racingview_header), courseArea.getName());

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.sap.sailing</groupId>
-        <artifactId>mobile</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
-    <artifactId>com.sap.sailing.android.shared</artifactId>
-    <packaging>apklib</packaging>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.sap.sailing</groupId>
+		<artifactId>mobile</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>com.sap.sailing.android.shared</artifactId>
+	<packaging>apklib</packaging>
 
-    <dependencies>
+	<dependencies>
         <dependency>
             <groupId>com.sap.sailing</groupId>
             <artifactId>org.json.simple</artifactId>
@@ -39,7 +39,7 @@
             <version>1.0.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>com.sap.sailing</groupId>
             <artifactId>com.sap.sse.common</artifactId>
@@ -86,12 +86,12 @@
             <groupId>android</groupId>
             <artifactId>android</artifactId>
         </dependency>
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <sourceDirectory>src</sourceDirectory>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
             <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>android-maven-plugin</artifactId>
@@ -101,6 +101,6 @@
                     </sdk>
                 </configuration>
             </plugin>
-        </plugins>
-    </build>
+		</plugins>
+	</build>
 </project>

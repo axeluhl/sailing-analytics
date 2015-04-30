@@ -18,14 +18,14 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 
 public class MessagePersistenceManager {
-
+    
     private final static String TAG = MessagePersistenceManager.class.getName();
 
     private final static String delayedMessagesFileName = "delayedMessages.txt";
 
     protected Context context;
     protected List<String> persistedMessages;
-
+    
     private final MessageRestorer messageRestorer;
 
     public MessagePersistenceManager(Context context, MessageRestorer messageRestorer) {
@@ -48,8 +48,7 @@ public class MessagePersistenceManager {
         persistMessage(url, callbackPayload, payload, callbackClass);
     }
 
-    private void persistMessage(String url, String callbackPayload, String payload, String callbackClass)
-            throws UnsupportedEncodingException {
+    private void persistMessage(String url, String callbackPayload, String payload, String callbackClass) throws UnsupportedEncodingException {
         String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
         ExLog.i(context, TAG, String.format("Persisting message \"%s\".", messageLine));
         if (persistedMessages.contains(messageLine)) {
@@ -60,14 +59,14 @@ public class MessagePersistenceManager {
     }
 
     /**
-     * @param payload
-     *            will be URL-encoded to ensure that the resulting string does not contain newlines
-     * @throws UnsupportedEncodingException
+     * @param payload will be URL-encoded to ensure that the resulting string does not contain newlines
+     * @throws UnsupportedEncodingException 
      */
-    private String getSerializedIntentForPersistence(String url, String callbackPayload, String payload,
-            String callbackClass) throws UnsupportedEncodingException {
-        String messageLine = String.format("%s;%s;%s;%s", callbackPayload,
-                URLEncoder.encode(payload, MessageSendingService.charsetName), url, callbackClass);
+    private String getSerializedIntentForPersistence(String url, String callbackPayload, 
+            String payload, String callbackClass) throws UnsupportedEncodingException {
+        String messageLine = String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload,
+                MessageSendingService.charsetName), 
+                url, callbackClass);
         return messageLine;
     }
 
@@ -80,15 +79,14 @@ public class MessagePersistenceManager {
         removeMessage(url, callbackPayload, payload, callbackClass);
     }
 
-    private void removeMessage(String url, String callbackPayload, String payload, String callbackClass)
-            throws UnsupportedEncodingException {
+    private void removeMessage(String url, String callbackPayload, String payload, String callbackClass) throws UnsupportedEncodingException {
         if (!persistedMessages.isEmpty()) {
             ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
             String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
             removePersistedMessage(messageLine);
         }
     }
-
+    
     /**
      * Removes all pending messages and clears the persistence file.
      */
@@ -108,11 +106,11 @@ public class MessagePersistenceManager {
     public int getMessageCount() {
         return persistedMessages.size();
     }
-
+    
     public List<String> getContent() {
         return persistedMessages;
     }
-
+    
     public static interface MessageRestorer {
         void restoreMessage(Context context, Intent messageIntent);
     }
@@ -127,26 +125,26 @@ public class MessagePersistenceManager {
             String callbackClassString = lineParts[3];
 
             Class<? extends ServerReplyCallback> callbackClass = null;
-            if (!"null".equals(callbackClassString)) {
+            if (! "null".equals(callbackClassString)) {
                 try {
                     @SuppressWarnings("unchecked")
-                    Class<? extends ServerReplyCallback> tmp = (Class<? extends ServerReplyCallback>) Class
-                            .forName(callbackClassString);
+                    Class<? extends ServerReplyCallback> tmp =
+                    (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
                     callbackClass = tmp;
                 } catch (ClassNotFoundException e) {
                     ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
                 }
             }
-
+            
             // We are passing no message id, because we know it used to suppress message sending and
             // we want this message to be sent.
-            Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload, null,
-                    payload, callbackClass);
-
+            Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
+                    null, payload, callbackClass);
+            
             if (messageRestorer != null) {
                 messageRestorer.restoreMessage(context, messageIntent);
             }
-
+            
             if (messageIntent != null) {
                 delayedIntents.add(messageIntent);
             }
@@ -168,8 +166,7 @@ public class MessagePersistenceManager {
             fileContent = FileHandlerUtils.convertStreamToString(inputStream, context);
             inputStream.close();
         } catch (IOException e) {
-            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getClass().getName() + " / " + e.getMessage()
-                    + " fileContent is empty");
+            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getClass().getName()+" / "+e.getMessage() + " fileContent is empty");
         }
         return fileContent;
     }
@@ -217,8 +214,7 @@ public class MessagePersistenceManager {
             outputStream.write(content.getBytes());
             outputStream.close();
         } catch (IOException e) {
-            ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content
-                    + " and mode " + mode);
+            ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
         }
     }
 

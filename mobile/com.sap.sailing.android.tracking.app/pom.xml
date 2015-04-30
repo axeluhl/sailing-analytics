@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
     <parent>
         <groupId>com.sap.sailing</groupId>
         <artifactId>mobile</artifactId>
@@ -15,8 +15,7 @@
 
     <properties>
         <!-- If you change this name, change in app too! -->
-        <additional-deployment-version-file>com.sap.sailing.android.tracking.app.version
-        </additional-deployment-version-file>
+        <additional-deployment-version-file>com.sap.sailing.android.tracking.app.version</additional-deployment-version-file>
         <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
         <app-version>${tracking-app-version}</app-version>
     </properties>
@@ -58,10 +57,10 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sap.sailing</groupId>
-            <artifactId>com.sap.sailing.android.shared</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <type>apklib</type>
+          <groupId>com.sap.sailing</groupId>
+          <artifactId>com.sap.sailing.android.shared</artifactId>
+          <version>1.0.0-SNAPSHOT</version>
+          <type>apklib</type>
         </dependency>
     </dependencies>
 
@@ -80,7 +79,7 @@
                     </sdk>
                     <release>true</release>
                     <proguard>
-                        <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
+                     <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
                         <skip>true</skip>
                         <config>proguard-project.txt</config>
                         <configs>

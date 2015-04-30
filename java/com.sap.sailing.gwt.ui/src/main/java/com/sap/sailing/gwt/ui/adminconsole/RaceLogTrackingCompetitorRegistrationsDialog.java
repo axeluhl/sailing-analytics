@@ -33,6 +33,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
 
     static interface CompetitorRegistrationHandler {
         void getRegisteredCompetitors(Callback<Collection<CompetitorDTO>, Throwable> callback);
+
         void setRegisteredCompetitors(Set<CompetitorDTO> competitors);
     }
 
@@ -41,6 +42,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
             CompetitorRegistrationHandler competitorRegistrationHandler) {
         super(sailingService, stringMessages, errorReporter, editable);
         this.competitorRegistrationsHandler = competitorRegistrationHandler;
+
         setupUi();
         refreshCompetitors();
     }
@@ -55,6 +57,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
             }
         });
         buttonPanel.add(addCompetitorButton);
+
         super.addButtons(buttonPanel);
     }
 
@@ -79,6 +82,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
     @Override
     protected void addMainContent(Panel mainPanel) {
         super.addMainContent(mainPanel);
+
         HorizontalPanel panel = new HorizontalPanel();
         mainPanel.add(panel);
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
@@ -138,6 +142,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
 
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
+
         allCompetitorsTable.refreshCompetitorList(null, true, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {

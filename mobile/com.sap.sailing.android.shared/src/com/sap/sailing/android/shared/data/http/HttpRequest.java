@@ -67,7 +67,8 @@ public abstract class HttpRequest {
     }
 
     /**
-     * Returns a copied {@link InputStream} of the server's response. You must close this stream when done.
+     * Returns a copied {@link InputStream} of the server's response.
+     * You must close this stream when done.
      */
     public InputStream execute() throws IOException {
         ExLog.i(context, TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
@@ -92,13 +93,13 @@ public abstract class HttpRequest {
             validateHttpResponseCode(connection);
 
             InputStream copiedResponseInputStream = readAndCopyResponse(connection, responseInputStream);
-
+            
             if (copiedResponseInputStream != null) {
                 ExLog.i(context, TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
             } else {
                 ExLog.i(context, TAG, String.format("(Request %d) HTTP request aborted.", this.hashCode()));
             }
-
+            
             connection.disconnect();
             return copiedResponseInputStream;
         } catch (IOException e) {

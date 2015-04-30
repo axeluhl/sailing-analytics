@@ -28,7 +28,7 @@ public class FileLoggingTask implements Runnable {
     private String logFileName;
     private File logFile;
     private BufferedWriter logWriter;
-
+    
     private final Context context;
 
     public FileLoggingTask(BlockingQueue<String> queue, Context context) {

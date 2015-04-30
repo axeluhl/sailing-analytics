@@ -16,7 +16,7 @@ public class BaseActivity extends AbstractBaseActivity {
 
     private static final String TAG = BaseActivity.class.getName();
     protected AppPreferences prefs;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +29,7 @@ public class BaseActivity extends AbstractBaseActivity {
         inflater.inflate(R.menu.options_menu, menu);
         return true;
     }
-
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
