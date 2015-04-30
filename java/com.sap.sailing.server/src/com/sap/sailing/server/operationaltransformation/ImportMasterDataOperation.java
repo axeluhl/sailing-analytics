@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -28,6 +29,8 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -38,6 +41,8 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
@@ -50,6 +55,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 
@@ -110,6 +116,7 @@ public class ImportMasterDataOperation extends
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
+            importRaceLogTrackingGPSFixes(toState);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -346,6 +353,26 @@ public class ImportMasterDataOperation extends
             i++;
             progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
             progress.setOverAllProgressPct(0.5 + (0.5) * ((double) i / numOfWindTracks));
+        }
+    }
+    
+
+    
+    private void importRaceLogTrackingGPSFixes(RacingEventService toState) {
+        Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
+        if (raceLogTrackingFixes != null) {
+            GPSFixStore store = toState.getGPSFixStore();
+            for (Entry<DeviceIdentifier, Set<GPSFix>> entry : raceLogTrackingFixes.entrySet()) {
+                DeviceIdentifier device = entry.getKey();
+                for (GPSFix fixToAdd : entry.getValue()) {
+                    try {
+                        store.storeFix(device, fixToAdd);
+                    } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                        logger.severe("Failed to store race log tracking fix while importing.");
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     }
 

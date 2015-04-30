@@ -3,12 +3,15 @@ package com.sap.sailing.domain.racelog.tracking;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.WithID;
 
 public enum EmptyGPSFixStore implements GPSFixStore {
     INSTANCE;
@@ -56,5 +59,11 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     @Override
     public long getNumberOfFixes(DeviceIdentifier device) {
         return 0;
+    }
+
+    @Override
+    public void loadTrack(DynamicGPSFixTrack<WithID, GPSFix> track, DeviceMapping<WithID> mapping)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+        
     }
 }
