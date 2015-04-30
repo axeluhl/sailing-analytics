@@ -50,6 +50,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final Set<FilterSelectionChangedListener> listeners;
 
     private boolean isAwaitingReload;
+    private boolean blockDataUpdates;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<LocalizedTypeDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrievedDataType;
     
@@ -72,6 +73,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
         
         isAwaitingReload = false;
+        blockDataUpdates = false;
         retrieverChain = null;
         selectionProvidersMappedByRetrievedDataType = new HashMap<>();
         
@@ -156,11 +158,14 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     private void clearContent() {
+        blockDataUpdates = true;
         retrieverLevelDataProvider.getList().clear();
         retrieverLevelSelectionModel.clear();
         selectionPanel.clear();
         clearSelection();
         selectionProvidersMappedByRetrievedDataType.clear();
+        blockDataUpdates = false;
+        forwardSelectionChanged();
     }
 
     private Map<String, Collection<FunctionDTO>> mapBySourceType(Iterable<FunctionDTO> dimensions) {
@@ -216,7 +221,10 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
-        updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(), dimensionFilterSelectionProvider.getSelectedDimension());
+        if (!blockDataUpdates) {
+            updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(),
+                                           dimensionFilterSelectionProvider.getSelectedDimension());
+        }
     }
     
     void updateFilterSelectionProviders(int beginningWithLevel, final FunctionDTO exceptForDimension) {
@@ -233,9 +241,13 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             selectionProvidersMappedByRetrievedDataType.get(retrievedDataType).updateAvailableData(exceptForDimension);
         } else {
             //The update of the whole retriever chain is completed. Notify the listeners.
-            mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
-            notifyListeners();
+            forwardSelectionChanged();
         }
+    }
+
+    private void forwardSelectionChanged() {
+        mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
+        notifyListeners();
     }
 
     @Override
