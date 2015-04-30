@@ -34,7 +34,8 @@ public class SharingButtons extends Composite {
         mail.setHref(mailtoLink.buildString().replace("+", "%20"));
         UrlBuilder twitterLink = new UrlBuilder().setProtocol("https").setHost("twitter.com").setPath("intent/tweet").setParameter("text", shortText).setParameter("url", Window.Location.getHref()).setParameter("short_url_length", "8");
         twitter.setHref(twitterLink.buildString());
-        UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com").setPath("dialog/feed").setParameter("display", "page").setParameter("caption", shortText).setParameter("link", Window.Location.getHref()).setParameter("redirect_uri", Window.Location.getHref());
+        UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com")
+                .setPath("sharer/sharer.php").setParameter("u", Window.Location.getHref());
         facebook.setHref(facebookLink.buildString());
     }
 }
