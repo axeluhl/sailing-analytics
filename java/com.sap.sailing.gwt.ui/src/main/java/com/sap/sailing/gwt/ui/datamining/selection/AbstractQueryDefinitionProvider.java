@@ -8,12 +8,13 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
@@ -89,7 +90,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setSpacing(5);
-        contentPanel.add(new Label(getStringMessages().dataMiningComponentsNeedReloadDialogMessage()));
+        contentPanel.add(new HTML(new SafeHtmlBuilder().appendEscapedLines(getStringMessages().dataMiningComponentsNeedReloadDialogMessage()).toSafeHtml()));
         
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
