@@ -33,7 +33,7 @@
 	<!-- Specify the paths for translatable code                    -->
         	<extend-property name="locale" values="en,de,cn,ru" />
         <extend-property name="locale" values="en,de,cn,ru" />
-        <set-property name="locale" values="en,de,cn,ru" />
+        <set-property name="locale" value="en,de,cn,ru" />
         <set-property-fallback name="locale" value="en"/>
   	
 	<source path='common'/>
