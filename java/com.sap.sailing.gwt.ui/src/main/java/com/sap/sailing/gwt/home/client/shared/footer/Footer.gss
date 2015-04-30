@@ -1,15 +1,23 @@
+/**
+ * Website footer styling
+ */
 .sitefooter {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+  font-size: 1rem;
   background: #333;
   border-top: 5px solid #fff;
   color: #fff;
-  line-height: 3em;
+  line-height: 5em;
   width: 100%;
+  padding: 0 1.333333333333333em;
 }
 .sitefooter_copyright {
   font-weight: 600;
   margin-right: 2em;
+}
+@media (min-width: 45em) {
+  .sitefooter_copyright {
+    float: left;
+  }
 }
 .sitefooter_links {
   text-align: left;
@@ -26,26 +34,22 @@
 .sitefooter_links_link:last-child {
   margin-right: 0;
 }
+@media (min-width: 45em) {
+  .sitefooter_links_link {
+    display: inline-block;
+  }
+}
 .sitefooter_language {
   text-align: left;
+}
+@media (min-width: 45em) {
+  .sitefooter_language {
+    text-align: right;
+  }
 }
 .sitefooter_language_link {
   color: #f0ab00;
   display: inline-block;
   cursor: pointer;
   margin-left: 0.666666666666667em;
-}
-@media (min-width: 25em) {
-  .sitefooter {
-    line-height: 4.666666666666667em;
-  }
-  .sitefooter_copyright {
-    float: left;
-  }
-  .sitefooter_links_link {
-    display: inline-block;
-  }
-  .sitefooter_language {
-    text-align: right;
-  }
 }

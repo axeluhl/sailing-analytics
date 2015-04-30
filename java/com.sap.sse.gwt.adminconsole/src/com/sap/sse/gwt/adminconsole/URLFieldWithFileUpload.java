@@ -54,7 +54,7 @@ public class URLFieldWithFileUpload extends Composite {
             }
         });
         removePanel.setMethod(FormPanel.METHOD_POST);
-        removeButton = new Button(stringMessages.removeUploadedImage());
+        removeButton = new Button(stringMessages.removeUploadedFile());
         removeButton.setEnabled(false); // the button shall only be enabled as long as we know the URI for removal
         removeButton.ensureDebugId("RemoveButton");
         removeButton.setTitle(stringMessages.remove());

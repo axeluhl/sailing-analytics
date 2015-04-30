@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
+import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
+import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
+@DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
@@ -480,6 +484,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String overallLeaderboardSelection();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
+    String upcoming();
+    String inProgress();
     String passedTo(String name);
     String gapChangeSinceLegStartInSeconds();
     String sideToWhichMarkAtLegStartWasRounded();
@@ -1057,6 +1063,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
+    String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
+    String sharingMailTooltip();
+    String sharingTwitterTooltip();
+    String sharingFacebookTooltip();
+    String eventSharingShortText(String eventName, String venue, String dateString);
+    String eventSharingLongText(String eventName, String venue, String dateString, String url);
+    String seriesSharingShortText(String seriesName);
+    String seriesSharingLongText(String seriesName, String url);
+    String competitorsAnalytics();
+    String mediaNoContent();
+    String media();
+    String photos();
+    String videos();
     String image();
     String video();
     String flagImageURL();
@@ -1192,7 +1211,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     @Override
     String fileUploadResult(String status, String message);
     @Override
-    String removeUploadedImage();
+    String removeUploadedFile();
     String showCompetitorSailIdColumn();
     String showCompetitorFullNameColumn();
     String loadingDimensionValues();
@@ -1210,7 +1229,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String valueDescending();
     String sortBy();
     
-    String dashboardWindBotLoading();
+    String dashboardWindBotLoadingText();
+    String dashboardWindBotLoadingMessage();
     String dashboardWindBotNotAvailable();
     String dashboardWindBot();
     String dashboardTrueWindSpeed();
@@ -1238,4 +1258,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String serverUrl();
     String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
     String startLineToFirstMarkTriangle(String distanceInMeters);
+    
+    String noDataForEvent();
+    String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String racesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
 }

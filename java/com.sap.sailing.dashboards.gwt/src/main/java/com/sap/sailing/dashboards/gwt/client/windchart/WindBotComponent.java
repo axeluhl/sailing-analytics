@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardDataRetrieverListener;
-import com.sap.sailing.dashboards.gwt.client.WindBotDataRetrieverListener;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetrieverListener;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverListener;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.LiveAverageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.compass.LocationPointerCompass;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
@@ -85,14 +85,14 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * One of two {@link VerticalWindChart}s that shows the wind fixes speed measured by the wind bot in a chart
      * vertically.
      * */
-    @UiField
+    @UiField(provided = true)
     public VerticalWindChart trueWindSpeedVerticalWindChart;
 
     /**
      * One of two {@link VerticalWindChart}s that shows the wind fixes direction measured by the wind bot in a chart
      * vertically.
      * */
-    @UiField
+    @UiField(provided = true)
     public VerticalWindChart trueWindDirectionVerticalWindChart;
 
     /**
@@ -104,6 +104,7 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
 
     private String windBotId;
     private StringMessages stringConstants;
+    private final static String UNIT_WIND_DIRECTION = "°";
 
     public WindBotComponent(String windBotId) {
         this.windBotId = windBotId;
@@ -119,7 +120,9 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
         movingAverageSpeed = new MovingAverage(500);
         movingAverageDirection = new MovingAverage(500);
         trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeed(), stringConstants.dashboardTrueWindSpeedUnit());
-        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), stringConstants.dashboardTrueWindDirectionUnit());
+        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), UNIT_WIND_DIRECTION);
+        trueWindSpeedVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
+        trueWindDirectionVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         initWidget(uiBinder.createAndBindUi(this));
         windBotNamePanel.getElement().setInnerText(stringConstants.dashboardWindBot()+" "+ windBotId);
         trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
@@ -197,16 +200,16 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
             Point[] points = new Point[windFixes.size()];
             int counter = 0;
             if (windtype.equals(WindType.DIRECTION)) {
-                Point previouspoint = new Point(windFixes.get(0).requestTimepoint, windFixes.get(0).trueWindBearingDeg);
+                Point previouspoint = new Point(windFixes.get(0).requestTimepoint, windFixes.get(0).trueWindFromDeg);
                 for (WindDTO windDTO : windFixes) {
                     double nextSinusValue = 0;
                     if (inSimulationMode == true) {
                         nextSinusValue = directionSinWave.getNexNumber();
                     }
-                    points[counter] = new Point(windDTO.requestTimepoint, windDTO.trueWindBearingDeg + nextSinusValue);
+                    points[counter] = new Point(windDTO.requestTimepoint, windDTO.trueWindFromDeg + nextSinusValue);
                     points[counter] = adaptWindDirectionPointToStayCloseToLastPoint(previouspoint, points[counter]);
                     previouspoint = points[counter];
-                        movingAverageDirection.add(windDTO.trueWindBearingDeg + nextSinusValue);
+                        movingAverageDirection.add(windDTO.trueWindFromDeg + nextSinusValue);
                     counter++;
                 }
             } else if (windtype.equals(WindType.SPEED)) {
