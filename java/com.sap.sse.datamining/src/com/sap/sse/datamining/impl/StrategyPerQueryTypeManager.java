@@ -17,7 +17,7 @@ public class StrategyPerQueryTypeManager implements DataMiningQueryManager {
         managersMappedByQueryType = new HashMap<>();
         managersMappedByQueryType.put(QueryType.STATISTIC, new SingleQueryPerSessionManager());
         managersMappedByQueryType.put(QueryType.DIMENSION_VALUES, new ManyQueriesPerRetrieverChainManager());
-        managersMappedByQueryType.put(QueryType.OTHER, new SingleQueryPerSessionManager());
+        managersMappedByQueryType.put(QueryType.OTHER, NULL);
     }
 
     @Override
