@@ -41,7 +41,7 @@
             tools:text="Extreme 40"/>
 
         <TextView
-            android:id="@+id/series_fleet"
+            android:id="@+id/fleet_series"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"

@@ -1,9 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.text.SpannableString;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
@@ -51,7 +53,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView flag_timer;
     private ImageView arrow_direction;
     private TextView boat_class;
-    private TextView series_fleet;
+    private TextView fleet_series;
     private ImageView protest_image;
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
@@ -167,19 +169,24 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (type == ViewType.HEADER.index) {
             final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
             boat_class.setText(header.getBoatClass().getName());
-            String seriesFleet = "";
-            if (header.getSeries() != null && !header.getSeries().getName().equals("Default")) {
-                seriesFleet += header.getSeries().getName();
-            }
+            String fleetSeries = "";
             if (header.getFleet() != null && !header.getFleet().getName().equals("Default")) {
-                seriesFleet += " - " + header.getFleet().getName();
+                fleetSeries += header.getFleet().getName();
             }
-            series_fleet.setText(seriesFleet);
+            if (header.getSeries() != null && !header.getSeries().getName().equals("Default")) {
+                if (!TextUtils.isEmpty(fleetSeries)) {
+                    fleetSeries += " - ";
+                }
+                fleetSeries += header.getSeries().getName();
+            }
+            fleet_series.setText(fleetSeries);
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), 48));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), "Not yet implemented", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, header.toString());
+                    LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
                 }
             });
         } else if (type == ViewType.RACE.index) {
@@ -269,7 +276,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         flag_timer = ViewHolder.get(convertView, R.id.flag_timer);
         protest_image = ViewHolder.get(convertView, R.id.protest_image);
         boat_class = ViewHolder.get(convertView, R.id.boat_class);
-        series_fleet = ViewHolder.get(convertView, R.id.series_fleet);
+        fleet_series = ViewHolder.get(convertView, R.id.fleet_series);
     }
 
     private void resetValues(View convertView) {

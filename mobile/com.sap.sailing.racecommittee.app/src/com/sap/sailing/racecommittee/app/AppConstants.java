@@ -7,6 +7,8 @@ public class AppConstants {
     //TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
     private final static String PACKAGE_NAME = "com.sap.sailing.racecommittee.app";
 
+    public final static String DEFAULT = "Default";
+
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
     public final static String RACE_ID_KEY = "raceUuid";
@@ -59,4 +61,6 @@ public class AppConstants {
 
     public final static String INTENT_ACTION_SHOW_MAIN_CONTENT = PACKAGE_NAME + ".action.show.main";
     public final static String INTENT_ACTION_SHOW_SUMMARY_CONTENT = PACKAGE_NAME + ".action.show.summary";
+
+    public final static String INTENT_ACTION_SHOW_PROTEST = PACKAGE_NAME + ".action.show.protest";
 }

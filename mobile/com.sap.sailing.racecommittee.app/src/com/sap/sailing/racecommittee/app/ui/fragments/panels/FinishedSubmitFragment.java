@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -30,7 +34,7 @@ public class FinishedSubmitFragment extends BasePanelFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finished_right, container, false);
 
         Button protest = ViewHolder.get(layout, R.id.protest_button);
@@ -38,8 +42,16 @@ public class FinishedSubmitFragment extends BasePanelFragment {
             protest.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(getRace());
-                    fragment.show(getFragmentManager(), null);
+                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                    String extra = getRace().getRaceGroup().getBoatClass().getDisplayName();
+                    if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
+                        extra += " - " + getRace().getSeries().getName();
+                    }
+                    if (!getRace().getFleet().getName().equals(AppConstants.DEFAULT)) {
+                        extra += " - " + getRace().getFleet().getName();
+                    }
+                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
+                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 }
             });
         }

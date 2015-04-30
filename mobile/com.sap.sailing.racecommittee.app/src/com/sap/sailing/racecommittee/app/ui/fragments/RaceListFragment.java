@@ -2,10 +2,15 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -38,7 +43,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.ManagedRaceStartTimeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
@@ -67,6 +71,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private HashMap<Serializable, ManagedRace> mManagedRacesById;
     private TreeMap<BoatClassSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
+    private IntentReceiver mReceiver;
     private boolean mUpdateList;
     private ArrayList<RaceListDataType> mViewItems;
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
@@ -219,6 +224,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
         View view = inflater.inflate(layout, container, false);
 
+        mReceiver = new IntentReceiver();
         mListView = (ListView) view.findViewById(R.id.listView);
         mListView.setOnScrollListener(this);
 
@@ -306,6 +312,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         super.onPause();
 
         TickSingleton.INSTANCE.unregisterListener(this);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -313,6 +320,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         super.onResume();
 
         TickSingleton.INSTANCE.registerListener(this);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -480,5 +491,24 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     public interface RaceListCallbacks {
         void onRaceListItemSelected(RaceListDataType selectedItem);
+    }
+
+    private class IntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
+                String extra = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (extra != null) {
+                    for (BoatClassSeriesFleet boatClassSeriesFleet : mRacesByGroup.keySet()) {
+                        if (extra.equals(boatClassSeriesFleet.getDisplayName())) {
+                            List<ManagedRace> races = mRacesByGroup.get(boatClassSeriesFleet);
+                            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
+                            fragment.show(getFragmentManager(), null);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
