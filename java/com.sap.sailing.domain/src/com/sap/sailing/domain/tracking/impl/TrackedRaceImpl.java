@@ -2773,7 +2773,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 } else {
                     result = new Pair<Double, Double>(averageAngleInDegMinusThreshold, average.getConfidence());
                 }
-            } catch (NotEnoughDataHasBeenAddedException e) {
+            } catch (NotEnoughDataHasBeenAddedException | IllegalArgumentException e) {
                 result = new Pair<Double, Double>(defaultAngle, 0.1);
             }
         } else {
