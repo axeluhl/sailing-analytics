@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.start;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -11,9 +9,7 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.client.shared.stage.Stage;
-import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 public class TabletAndDesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -34,16 +30,11 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
         
         initWidget(uiBinder.createAndBindUi(this));
     }
-
+    
     @Override
-    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
-        stage.setFeaturedEvents(featuredEvents);
-        mainMedia.setFeaturedEvents(featuredEvents);
-    }
-
-    @Override
-    public void setRecentEvents(List<EventBaseDTO> recentEvents) {
-        mainEvents.setRecentEvents(recentEvents);
-        mainMedia.setRecentEvents(recentEvents);
+    public void setData(StartViewDTO data) {
+        stage.setFeaturedEvents(data.getStageEvents());
+        mainEvents.setRecentEvents(data.getRecentEvents());
+        mainMedia.setData(data.getVideos(), data.getPhotos());
     }
 }

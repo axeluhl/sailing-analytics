@@ -8,7 +8,7 @@
     <g:HTMLPanel>
 <!-- The search/social media page footer-->
 <div class="{res.mainCss.mainsection} {local_res.css.socialfooter}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
         <h3 class="{local_res.css.mainsection_header_title}">Follow SAP Sports</h3>

@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.CssResource.Shared;
 
 public interface SharedResources extends ClientBundle {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
@@ -14,20 +13,24 @@ public interface SharedResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/media.gss")
     MediaCss mediaCss();
 
-    @Shared 
-    public interface MainCss extends CssResource {
-        String grid();
-        String stackenblochen();
+    public interface MainCss extends CssResource{
         String wrapper();
         String navbar();
         String navbar_button();
+        String navbar_buttonhidden();
         String navbar_buttonactive();
         String button();
+        String buttonsmall();
+        String buttonstrong();
         String buttoninactive();
+        String buttonprimary();
+        String buttonred();
         String buttonrefresh();
-        String buttonsearch();
         String buttonarrowdown();
+        String buttonsearch();
+        String buttonarrowrightwhite();
         String label();
+        String labellarge();
         String morelink();
         String dummy();
         String mainsection();
@@ -36,22 +39,19 @@ public interface SharedResources extends ClientBundle {
         String mainsection_navigation();
         String lightbox();
         String lightbox_overlay();
-        String lightbox_overlayhidden();
         String lightbox_content();
-        String lightbox_contenthidden();
-        String lightbox_content_enlargeditem();
-        String lightbox_content_enlargeditem_caption();
-        String lightbox_content_enlargeditem_close();
-        String media_slideshow_controls();
-        String lightbox_data();
-        String lightbox_item();
+        String lightbox_close();
+        String stickyheader();
+        String slideto();
+        String slidetonav();
+        String slidetoactive();
     }
-    
-    @Shared 
-    public interface MediaCss extends CssResource {
+
+    public interface MediaCss extends CssResource{
+        String grid();
+        String stackenblochen();
         String column();
         String columns();
-
         String small1();
         String small2();
         String small3();
@@ -76,11 +76,14 @@ public interface SharedResources extends ClientBundle {
         String smalloffset9();
         String smalloffset10();
         String smalloffset11();
-        String smallcentered();
-        String smalluncentered();
         String showonsmall();
         String hideonsmall();
-
+        String showonmedium();
+        String hideonmedium();
+        String showonlarge();
+        String hideonlarge();
+        String smallcentered();
+        String smalluncentered();
         String medium1();
         String medium2();
         String medium3();
@@ -107,9 +110,6 @@ public interface SharedResources extends ClientBundle {
         String mediumoffset11();
         String mediumcentered();
         String mediumuncentered();
-        String showonmedium();
-        String hideonmedium();
-
         String large1();
         String large2();
         String large3();
@@ -136,9 +136,5 @@ public interface SharedResources extends ClientBundle {
         String largeoffset11();
         String largecentered();
         String largeuncentered();
-        String showonlarge();
-        String hideonlarge();
-
-        
     }
 }
