@@ -139,8 +139,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         Query<Set<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
-//        QueryResult<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
-        QueryResult<Set<Object>> result = dimensionValuesQuery.run();
+        QueryResult<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
         return result;
     }
 
