@@ -83,6 +83,15 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     public AdditionalQueryData getAdditionalData() {
         return additionalData;
     }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends AdditionalQueryData> T getSpecificAdditionalData(Class<T> additionalDataType) {
+        if (additionalDataType.isAssignableFrom(getAdditionalData().getClass())) {
+            return (T) getAdditionalData();
+        }
+        return null;
+    }
 
     @Override
     public QueryResult<AggregatedType> run() {

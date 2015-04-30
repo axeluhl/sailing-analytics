@@ -5,12 +5,12 @@ import java.util.UUID;
 import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.Query.QueryType;
 
-public class SimpleAdditionalQueryData implements AdditionalQueryData {
+public class AdditionalStandardQueryData implements AdditionalQueryData {
     
     private final QueryType type;
     private final UUID dataRetrieverChainID;
     
-    public SimpleAdditionalQueryData(QueryType type, UUID dataRetrieverChainID) {
+    public AdditionalStandardQueryData(QueryType type, UUID dataRetrieverChainID) {
         this.type = type;
         this.dataRetrieverChainID = dataRetrieverChainID;
     }

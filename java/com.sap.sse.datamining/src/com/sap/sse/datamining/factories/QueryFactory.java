@@ -20,8 +20,9 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.functions.ParameterizedFunction;
+import com.sap.sse.datamining.impl.AdditionalDimensionValuesQueryData;
+import com.sap.sse.datamining.impl.AdditionalStandardQueryData;
 import com.sap.sse.datamining.impl.ProcessorQuery;
-import com.sap.sse.datamining.impl.SimpleAdditionalQueryData;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
@@ -35,7 +36,7 @@ public class QueryFactory {
 
     public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), new SimpleAdditionalQueryData(QueryType.STATISTIC, queryDefinition.getDataRetrieverChainDefinition().getID())) {
+        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), new AdditionalStandardQueryData(QueryType.STATISTIC, queryDefinition.getDataRetrieverChainDefinition().getID())) {
             @Override
             protected Processor<DataSourceType, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
@@ -121,7 +122,7 @@ public class QueryFactory {
             final DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, final int retrieverLevel,
             final Iterable<Function<?>> dimensions, final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
-        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, new SimpleAdditionalQueryData(QueryType.DIMENSION_VALUES, dataRetrieverChainDefinition.getID())) {
+        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, new AdditionalDimensionValuesQueryData(QueryType.DIMENSION_VALUES, dataRetrieverChainDefinition.getID(), dimensions)) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);

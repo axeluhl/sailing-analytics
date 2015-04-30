@@ -13,6 +13,8 @@ public interface Query<AggregatedType> {
     
     public AdditionalQueryData getAdditionalData();
     
+    public <T extends AdditionalQueryData> T getSpecificAdditionalData(Class<T> additionalDataType);
+    
     public QueryResult<AggregatedType> run();
 
     public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException;
