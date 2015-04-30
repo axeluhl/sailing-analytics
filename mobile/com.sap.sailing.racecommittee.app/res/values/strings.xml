@@ -419,5 +419,6 @@
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
     <string name="url_refresh_message">Please logout from the current event to load the data from the new server.</string>
+    <string name="until_xray_removed">XRAY will be removed in #TIME#</string>
 
 </resources>

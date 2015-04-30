@@ -8,10 +8,12 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -22,6 +24,11 @@ import java.util.List;
 public class RaceFlagViewerFragment extends BaseFragment {
 
     private LinearLayout mLayout;
+    private View mRecall;
+
+    private ImageView mXrayFlag;
+    private TextView mXrayCountdown;
+    private Button mXrayButton;
 
     public RaceFlagViewerFragment() {
 
@@ -39,6 +46,23 @@ public class RaceFlagViewerFragment extends BaseFragment {
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.race_flag_screen, container, false);
 
         mLayout = ViewHolder.get(layout, R.id.flags);
+        mRecall = ViewHolder.get(layout, R.id.individual_recall);
+
+        mXrayButton = ViewHolder.get(layout, R.id.flag_down);
+        if (mXrayButton != null) {
+            mXrayButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+                    procedure.removeIndividualRecall(MillisecondsTimePoint.now());
+                }
+            });
+        }
+        mXrayFlag = ViewHolder.get(layout, R.id.flag);
+        if (mXrayFlag != null) {
+            mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), 96));
+        }
+        mXrayCountdown = ViewHolder.get(layout, R.id.xray_down);
 
         return layout;
     }
@@ -55,15 +79,44 @@ public class RaceFlagViewerFragment extends BaseFragment {
             return;
         }
 
-        FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(),
-                MillisecondsTimePoint.now());
-        List<FlagPole> currentState = poleState.getCurrentState();
-        List<FlagPole> upcoming = poleState.computeUpcomingChanges();
-        mLayout.removeAllViews();
-        int size = 0;
-        for (FlagPole flagPole : currentState) {
-            size++;
-            mLayout.addView(renderFlag(poleState, flagPole, FlagPoleState.getMostInterestingFlagPole(upcoming), currentState.size() == size));
+        if (mLayout != null) {
+            mLayout.setVisibility(View.GONE);
+        }
+        if (mRecall != null) {
+            mRecall.setVisibility(View.GONE);
+        }
+        RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+        if (!procedure.isIndividualRecallDisplayed()) {
+            if (mLayout != null) {
+                mLayout.setVisibility(View.VISIBLE);
+            }
+            FlagPoleState poleState = getRaceState().getRacingProcedure()
+                .getActiveFlags(getRaceState().getStartTime(), MillisecondsTimePoint.now());
+            List<FlagPole> currentState = poleState.getCurrentState();
+            List<FlagPole> upcoming = poleState.computeUpcomingChanges();
+            mLayout.removeAllViews();
+            int size = 0;
+            for (FlagPole flagPole : currentState) {
+                size++;
+                mLayout.addView(renderFlag(poleState, flagPole, FlagPoleState.getMostInterestingFlagPole(upcoming),
+                    currentState.size() == size));
+            }
+        } else {
+            if (mRecall != null) {
+                mRecall.setVisibility(View.VISIBLE);
+            }
+            String time = getString(R.string.until_xray_removed);
+            if (mXrayCountdown != null) {
+                TimePoint now = MillisecondsTimePoint.now();
+                TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
+                if (now.before(flagDown)) {
+                    time = time.replace("#TIME#", getDuration(flagDown.asDate(), MillisecondsTimePoint.now().asDate())
+                        .replace("-", ""));
+                    mXrayCountdown.setText(time);
+                } else {
+                    procedure.removeIndividualRecall(now);
+                }
+            }
         }
     }
 
@@ -102,7 +155,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         textView.setText("");
         if (changeAt != null && next) {
             textView.setVisibility(View.VISIBLE);
-            textView.setText(getDuration(changeAt.asDate(), Calendar.getInstance().getTime()).replace("-", ""));
+            textView.setText(getDuration(changeAt.asDate(), MillisecondsTimePoint.now().asDate()).replace("-", ""));
             if (flag.isDisplayed()) {
                 downView.setVisibility(View.VISIBLE);
                 upView.setVisibility(View.GONE);

@@ -5,13 +5,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.RecallFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.RecallFlagsAdapter.RecallFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.RecallFlagsAdapter.RecallFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemClick{
 
@@ -28,21 +31,37 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.flag_list, container, false);
+        return inflater.inflate(R.layout.flag_list, container, false);
+    }
 
-        ListView listView = (ListView) layout.findViewById(R.id.listView);
-        if (listView != null) {
-            mAdapter = new RecallFlagsAdapter(getActivity(), this);
-            listView.setAdapter(mAdapter);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (getView() != null) {
+            ListView listView = (ListView) getView().findViewById(R.id.listView);
+            if (listView != null) {
+                mAdapter = new RecallFlagsAdapter(getActivity(), getRaceState().getTypedRacingProcedure(), this);
+                listView.setAdapter(mAdapter);
+            }
         }
-
-        return layout;
     }
 
     @Override
     public void onClick(RecallFlag flag) {
         mAdapter.notifyDataSetChanged();
-        Toast.makeText(getActivity(), flag.file_name, Toast.LENGTH_SHORT).show();
+        if (flag.flag.equals(Flags.XRAY)) {
+            RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+            procedure.displayIndividualRecall(MillisecondsTimePoint.now());
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        }
+        if (flag.flag.equals(Flags.FIRSTSUBSTITUTE)) {
+            TimePoint now = MillisecondsTimePoint.now();
+            getRaceState().setGeneralRecall(now);
+            // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
+            getRaceState().setAdvancePass(now);
+        }
     }
 
     @Override
