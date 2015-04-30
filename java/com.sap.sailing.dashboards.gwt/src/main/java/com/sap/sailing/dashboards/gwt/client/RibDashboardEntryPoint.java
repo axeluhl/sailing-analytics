@@ -63,6 +63,6 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
 
     @Override
     protected StringMessages createStringMessages() {
-        return GWT.create(StringMessages.class);
+        return StringMessages.INSTANCE;
     }
 }

@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+		     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event"
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+    
+    	.outerBox {
+		padding-top: 10px;
+
+	}
+    
+    </ui:style>
+    <g:HTMLPanel styleName="{style.outerBox}">
+		<s:oldleaderboard.OldLeaderboard ui:field='leaderboard'/>
+    </g:HTMLPanel>
+</ui:UiBinder>

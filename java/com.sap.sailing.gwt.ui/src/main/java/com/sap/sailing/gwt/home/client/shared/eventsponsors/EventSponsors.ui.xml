@@ -9,7 +9,7 @@
 
 <!-- Sponsors of an event-->
 <div class="{local_res.css.eventsponsors}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <h3 class="{local_res.css.eventsponsors_title}">Event Sponsors</h3>
     </div>

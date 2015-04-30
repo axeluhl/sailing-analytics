@@ -157,6 +157,22 @@ load_from_release_file ()
     fi
 }
 
+load_from_local_release_file ()
+{
+    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+        cd $SERVER_HOME
+        rm -f $SERVER_HOME/$INSTALL_FROM_RELEASE.tar.gz*
+        rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
+        echo "Loading from release file $INSTALL_FROM_RELEASE.tar.gz"
+        mv env.sh env.sh.preserved
+        tar xvzf $INSTALL_FROM_RELEASE.tar.gz
+        mv env.sh.preserved env.sh
+        echo "Configuration for this server is unchanged - just binaries have been changed."
+    else
+        echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
+    fi
+}
+
 checkout_code ()
 {
     cd $PROJECT_HOME
@@ -274,6 +290,21 @@ elif [[ $OPERATION == "install-release" ]]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         load_from_release_file
+        echo "ATTENTION: This new release code is not active yet. Make sure to restart the server if it is running!"
+    fi
+
+elif [[ $OPERATION == "install-local-release" ]]; then
+    INSTALL_FROM_RELEASE=$PARAM
+    if [[ $INSTALL_FROM_RELEASE == "" ]]; then
+        echo "You need to provide the file of a release without tar.gz"
+        exit 1
+    fi
+
+    # Honor the no-overrite setting if there is one
+    if [ -f $SERVER_HOME/no-overwrite ]; then
+        echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
+    else
+        load_from_local_release_file
         echo "ATTENTION: This new release code is not active yet. Make sure to restart the server if it is running!"
     fi
 
