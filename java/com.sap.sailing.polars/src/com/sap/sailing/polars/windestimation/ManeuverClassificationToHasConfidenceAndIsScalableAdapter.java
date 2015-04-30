@@ -5,7 +5,7 @@ import java.util.function.Function;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
-import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 

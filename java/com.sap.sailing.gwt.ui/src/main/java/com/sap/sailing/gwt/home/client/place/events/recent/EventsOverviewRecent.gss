@@ -54,6 +54,7 @@
 }
 .eventsoverviewrecent_year_header_title {
   margin-bottom: 0;
+  line-height: 1.944444444444444em;
 }
 .eventsoverviewrecent_year_header_info {
   float: right;

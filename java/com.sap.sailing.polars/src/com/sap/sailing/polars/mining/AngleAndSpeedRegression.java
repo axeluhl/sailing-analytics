@@ -14,10 +14,10 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -48,7 +48,7 @@ public class AngleAndSpeedRegression {
         double estimatedAngle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedInKnots);
         Bearing bearing = new DegreeBearingImpl(estimatedAngle);
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed, bearing);
-        return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, /*FIXME*/ 0.5, null);
+        return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, Math.min(1, speedRegression.getNumberOfAddedPoints() / 100.0), null);
     }
 
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround) throws NotEnoughDataHasBeenAddedException {
