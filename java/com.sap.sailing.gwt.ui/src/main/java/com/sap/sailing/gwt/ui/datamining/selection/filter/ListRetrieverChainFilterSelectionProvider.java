@@ -222,8 +222,9 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     void updateFilterSelectionProviders(int beginningWithLevel, final FunctionDTO exceptForDimension) {
         LocalizedTypeDTO retrievedDataType = null;
         for (int retrieverLevel = beginningWithLevel; retrieverLevel < retrieverChain.size(); retrieverLevel++) {
-            retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
-            if (selectionProvidersMappedByRetrievedDataType.containsKey(retrievedDataType)) {
+            LocalizedTypeDTO levelRetrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
+            if (selectionProvidersMappedByRetrievedDataType.containsKey(levelRetrievedDataType)) {
+                retrievedDataType = levelRetrievedDataType;
                 break;
             }
         }
