@@ -64,6 +64,8 @@
         <item name="dns_48dp">@drawable/ic_dns_black_48dp</item>
         <item name="hearing_48dp">@drawable/ic_hearing_black_48dp</item>
         <item name="lock_outline">@drawable/lock_outline_light</item>
+        <item name="marker">@drawable/marker_light</item>
+        <item name="marker_race">@drawable/marker_race_light</item>
         <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_black_36dp</item>

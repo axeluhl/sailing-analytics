@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="@drawable/marker"/>
+                android:src="?marker"/>
 
             <LinearLayout
                 android:id="@+id/start_procedure_header"
@@ -78,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="@drawable/marker"/>
+                android:src="?marker"/>
 
             <LinearLayout
                 android:id="@+id/start_mode_header"
@@ -130,7 +130,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="@drawable/marker"/>
+                android:src="?marker"/>
 
             <LinearLayout
                 android:id="@+id/course_header"
@@ -184,7 +184,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="@drawable/marker"/>
+                android:src="?marker"/>
 
             <LinearLayout
                 android:id="@+id/wind_header"

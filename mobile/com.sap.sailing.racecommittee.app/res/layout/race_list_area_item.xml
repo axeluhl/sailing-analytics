@@ -68,7 +68,7 @@
             android:id="@+id/race_marker"
             android:layout_width="@dimen/thick_line"
             android:layout_height="match_parent"
-            android:src="@drawable/marker_race"/>
+            android:src="?marker_race"/>
 
         <LinearLayout
             android:id="@+id/race_flag"

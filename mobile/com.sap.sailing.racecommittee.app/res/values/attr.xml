@@ -48,6 +48,8 @@
     <attr name="dns_48dp" format="reference"/>
     <attr name="hearing_48dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
+    <attr name="marker" format="reference"/>
+    <attr name="marker_race" format="reference"/>
     <attr name="mic_48dp" format="reference"/>
     <attr name="photo_camera_48dp" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
