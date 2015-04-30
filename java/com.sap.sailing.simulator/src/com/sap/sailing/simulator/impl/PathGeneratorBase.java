@@ -11,7 +11,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class PathGeneratorBase implements PathGenerator {
 
     protected SimulationParameters parameters;
-    protected final Duration algorithmMaxDuration = new MillisecondsDurationImpl(2*60*1000); // 2 minutes maximum duration of one path generation
+    protected final Duration algorithmMaxDuration = new MillisecondsDurationImpl(20000); // 20 seconds maximum duration of one path generation
     protected TimePoint algorithmStartTime;
     protected boolean algorithmTimedOut = false;
 
@@ -34,7 +34,7 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPath() throws SparsePolarDataException {
+    public Path getPath() throws SparseSimulationDataException {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPathEvenTimed(long stepMilliseconds) throws SparsePolarDataException {
+    public Path getPathEvenTimed(long stepMilliseconds) throws SparseSimulationDataException {
 
         Path path = this.getPath();
 

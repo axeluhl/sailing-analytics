@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client;
+package com.sap.sailing.dashboards.gwt.client.dataretriever;
 
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
