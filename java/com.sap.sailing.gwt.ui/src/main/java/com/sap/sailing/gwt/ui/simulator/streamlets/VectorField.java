@@ -6,6 +6,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 
 /**
  * A field of vectors to display in a streamlet {@link Swarm}. The {@link Vector}s returned by {@link #getVector(Position, Date)}

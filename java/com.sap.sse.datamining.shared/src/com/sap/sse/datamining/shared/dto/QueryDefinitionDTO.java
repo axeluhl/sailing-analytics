@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.shared;
+package com.sap.sse.datamining.shared.dto;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface QueryDefinitionDTO extends Serializable {
     

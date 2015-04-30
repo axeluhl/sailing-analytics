@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-public interface SelectionChangedListener {
+public interface FilterSelectionChangedListener {
     
     public void selectionChanged();
 

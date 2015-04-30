@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.shared;
+package com.sap.sse.datamining.shared.data;
 
 public enum QueryResultState {
     
