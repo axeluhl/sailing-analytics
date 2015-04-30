@@ -159,39 +159,42 @@ class DimensionFilterSelectionProvider {
                 LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
                     @Override
                     public void onSuccess(QueryResult<Set<Object>> result) {
-                        if (!result.getResults().isEmpty()) {
+                        Map<GroupKey, Set<Object>> results = result.getResults();
+                        List<Object> content = new ArrayList<Object>();
+                        
+                        if (!results.isEmpty()) {
                             GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
-                            List<?> content = new ArrayList<Object>(result.getResults().get(contentKey));
+                            content.addAll(results.get(contentKey));
                             Collections.sort(content, new Comparator<Object>() {
                                 @Override
                                 public int compare(Object o1, Object o2) {
                                     return o1.toString().compareTo(o2.toString());
                                 }
                             });
+                        }
                             
-                            boolean selectionChanged;
-                            if (isUpdate) {
-                                selectionChanged = selectionTable.updateContent(content, notifyListenersWhenSelectionChanged);
+                        boolean selectionChanged;
+                        if (!isUpdate || content.isEmpty()) {
+                            selectionChanged = selectionTable.setContent(content, notifyListenersWhenSelectionChanged);
+                        } else {
+                            selectionChanged = selectionTable.updateContent(content, notifyListenersWhenSelectionChanged);
+                        }
+                        
+                        if (selectionToBeApplied != null) {
+                            selectionTable.setSelection(selectionToBeApplied, notifyListenersWhenSelectionChanged);
+                            selectionToBeApplied = null;
+                        }
+                        busyIndicator.setVisible(false);
+                        selectionTable.setVisible(true);
+                        toggleFilterButton.setVisible(true);
+                        
+                        if (retrieverLevelSelectionProviderIterator != null) {
+                            if (selectionChanged) {
+                                //Update the complete retriever level, because the selection changed
+                                retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension());
                             } else {
-                                selectionChanged = selectionTable.setContent(content, notifyListenersWhenSelectionChanged);
-                            }
-                            
-                            if (selectionToBeApplied != null) {
-                                selectionTable.setSelection(selectionToBeApplied, notifyListenersWhenSelectionChanged);
-                                selectionToBeApplied = null;
-                            }
-                            busyIndicator.setVisible(false);
-                            selectionTable.setVisible(true);
-                            toggleFilterButton.setVisible(true);
-                            
-                            if (retrieverLevelSelectionProviderIterator != null) {
-                                if (selectionChanged) {
-                                    //Update the complete retriever level, because the selection changed
-                                    retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension());
-                                } else {
-                                    //Continue with the update of the retriever level selection provider
-                                    retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension(), retrieverLevelSelectionProviderIterator);
-                                }
+                                //Continue with the update of the retriever level selection provider
+                                retrieverLevelSelectionProvider.updateAvailableData(getSelectedDimension(), retrieverLevelSelectionProviderIterator);
                             }
                         }
                     }
