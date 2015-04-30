@@ -56,6 +56,7 @@
 
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
+	<extend-property name="locale" values="cn" />
 
 	<!-- Uncomment this to get clear-text CSS style/class names in generated output -->
 	<!-- 
