@@ -8,17 +8,17 @@
     <g:HTMLPanel>
 <!-- The events main content-->
 <div class="{local_res.css.mainevents} {res.mainCss.mainsection}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
         <h3 class="{res.mainCss.mainsection_header_title}"><ui:text from='{i18n.mainEventTitle}'/></h3>
       </header>
     </div>
   </div>
-  <div ui:field="recentEventsDiv" class="{res.mainCss.grid}">
-	<!-- the recent events will be inserted here -->
-  </div>
-  <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
+  <g:FlowPanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid}">
+    <!-- the recent events will be inserted here -->
+  </g:FlowPanel>
+  <div class="{res.mediaCss.grid} {res.mainCss.mainsection_navigation}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <g:Anchor ui:field="showAllEventsAnchor" styleName="{res.mainCss.button}"><ui:text from='{i18n.mainEventShowAll}'/></g:Anchor>
     </div>

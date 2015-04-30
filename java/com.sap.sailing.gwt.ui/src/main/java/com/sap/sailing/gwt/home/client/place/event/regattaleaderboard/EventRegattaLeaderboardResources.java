@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface EventRegattaLeaderboardResources extends ClientBundle {
     public static final EventRegattaLeaderboardResources INSTANCE = GWT.create(EventRegattaLeaderboardResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/event/regattaleaderboard/EventRegattaLeaderboard.css")
+    @Source("EventRegattaLeaderboard.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
@@ -58,5 +58,6 @@ public interface EventRegattaLeaderboardResources extends ClientBundle {
         String leaderboardcompetitor_item_table();
         String leaderboardcompetitor_itemcenter_table();
         String leaderboardcompetitorshort();
+        String marginFix();
     }
 }
