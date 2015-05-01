@@ -17,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.LeagueRacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -24,7 +25,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 
 // TODO consider subclassing RRS26RacingProcedureImpl instead of this copy&paste orgy...
-public class LeagueRacingProcedureImpl extends BaseRacingProcedure {
+public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements LeagueRacingProcedure {
     private final static long startPhaseClassUpInterval = 3 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeUpInterval = 2 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
@@ -70,6 +71,18 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure {
             return timeTillStart < startPhaseClassUpInterval;
         }
         return false;
+    }
+
+    public boolean processStateEvent(RaceStateEvent event) {
+        switch (event.getEventName()) {
+        case RRS26_STARTMODE_UP:
+        case RRS26_CLASS_UP:
+        case RRS26_STARTMODE_DOWN:
+            getChangedListeners().onActiveFlagsChanged(this);
+            return true;
+        default:
+            return super.processStateEvent(event);
+        }
     }
 
     @Override
