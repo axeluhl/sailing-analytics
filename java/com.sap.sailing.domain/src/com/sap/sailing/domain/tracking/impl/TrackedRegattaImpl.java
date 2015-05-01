@@ -42,7 +42,7 @@ import difflib.PatchFailedException;
 
 public class TrackedRegattaImpl implements TrackedRegatta {
     
-    private RaceExecutionOrderCache raceExecutionOrderCache;
+    private transient RaceExecutionOrderCache raceExecutionOrderCache;
     
     private transient NamedReentrantReadWriteLock lock = createLock();
     
@@ -67,6 +67,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         this.raceListeners = new HashSet<RaceListener>();
+        this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
