@@ -38,6 +38,8 @@ import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
+import difflib.PatchFailedException;
+
 public class TrackedRegattaImpl implements TrackedRegatta {
     
     private RaceExecutionOrderCache raceExecutionOrderCache;
@@ -220,7 +222,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     
     private class RaceExecutionOrderCache extends AbstractRaceColumnListener {
 
-        SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
+        private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
         private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
         private static final long serialVersionUID = -1016823551825618490L;
 
@@ -297,6 +299,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                             }
                         }
                     }, "RacesOrderCache");
+        }
+        
+        private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
+            racesOrderCache = createRacesOrderCache();
         }
     }
 }
