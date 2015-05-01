@@ -26,20 +26,20 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-    private final Timer autoRefreshTimer = new Timer(PlayModes.Live, PlayStates.Paused,
-            delayBetweenAutoAdvancesInMilliseconds);
+    private final Timer autoRefreshTimer;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
             HomePlacesNavigator homePlacesNavigator) {
         super(place, clientFactory, homePlacesNavigator);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
-            ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager( //
-                    clientFactory.getSailingService(), //
-                    asyncActionsExecutor, //
-                    autoRefreshTimer, //
-                    clientFactory.getErrorReporter(), //
+            ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
+                    clientFactory.getSailingService(),
+                    asyncActionsExecutor,
+                    new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
+                    clientFactory.getErrorReporter(),
                     userAgent));
         }
+        this.autoRefreshTimer = ctx.getRegattaAnalyticsManager().getTimer();
     }
 
     @Override

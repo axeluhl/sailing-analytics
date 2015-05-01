@@ -134,4 +134,8 @@ public class RegattaAnalyticsDataManager {
         dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
         dialog.show();
     }
+    
+    public Timer getTimer() {
+        return timer;
+    }
 }
