@@ -16,8 +16,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.datamining.shared,
  com.sap.sse,
  com.sap.sse.common,
- org.eclipse.osgi,
- com.sap.sailing.polars
+ org.eclipse.osgi
 Bundle-ClassPath: .
 Bundle-Activator: com.sap.sailing.datamining.Activator
 Bundle-ActivationPolicy: lazy

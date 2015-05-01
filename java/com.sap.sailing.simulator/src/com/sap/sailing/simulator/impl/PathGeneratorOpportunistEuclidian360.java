@@ -97,7 +97,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             // time-step larger than turn-loss is required (this may be removed by
             // extended handling of turn-loss)
             if (this.parameters.getSimuStep().asMillis() > 2*turnLoss) {
-            timeStep = this.parameters.getSimuStep().asMillis();
+                timeStep = this.parameters.getSimuStep().asMillis();
             } else {
                 timeStep = 2*turnLoss;
             }

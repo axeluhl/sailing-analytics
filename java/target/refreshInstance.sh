@@ -161,11 +161,10 @@ load_from_local_release_file ()
 {
     if [[ $INSTALL_FROM_RELEASE != "" ]]; then
         cd $SERVER_HOME
-        rm -f $SERVER_HOME/$INSTALL_FROM_RELEASE.tar.gz*
-        rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
-        echo "Loading from release file $INSTALL_FROM_RELEASE.tar.gz"
+        rm -rf plugins start stop status native-libraries org.eclipse.osgi
+        echo "Loading from release file $INSTALL_FROM_RELEASE"
         mv env.sh env.sh.preserved
-        tar xvzf $INSTALL_FROM_RELEASE.tar.gz
+        tar xvzf $INSTALL_FROM_RELEASE
         mv env.sh.preserved env.sh
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
@@ -349,6 +348,7 @@ else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
+    echo "install-local-release <release-file>: Installs the release file specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
     exit 0
 fi
