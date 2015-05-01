@@ -73,4 +73,9 @@ public interface TrackedRegatta extends Serializable {
 
     void removeTrackedRace(RaceDefinition raceDefinition);
     
+    /**
+     * Parameter <code>race</code> is a {@link TrackedRace} from which the method returns the previous {@link TrackedRace} in the execution order of a {@link Regatta}.
+     * */
+    TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race);
+    
 }
