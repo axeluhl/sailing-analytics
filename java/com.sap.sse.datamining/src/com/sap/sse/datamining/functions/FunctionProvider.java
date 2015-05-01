@@ -3,7 +3,7 @@ package com.sap.sse.datamining.functions;
 import java.util.Collection;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface FunctionProvider {
     

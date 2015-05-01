@@ -19,6 +19,7 @@
 	<inherits name="com.google.gwt.logging.Logging" />
 
 	<!-- Other module inherits -->
+	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
@@ -55,9 +56,10 @@
 	<!-- Specify the app entry point class. -->
 
 	<!-- Specify the paths for translatable code -->
-	<extend-property name="locale" values="de" />
-	<extend-property name="locale" values="cn" />
-
+	<extend-property name="locale" values="en,de,cn,ru" />
+    <set-property name="locale" value="en,de,cn,ru" />
+	<set-property-fallback name="locale" value="en"/>
+	
 	<!-- Uncomment this to get clear-text CSS style/class names in generated output -->
 	<!-- 
 	<set-configuration-property name="CssResource.style" value="pretty" />

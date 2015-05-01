@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -12,7 +14,6 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -34,9 +35,9 @@ public class SearchResult extends Composite {
     
     @UiField TextBox searchText1;
     @UiField Button searchButton1;
-    @UiField TextBox searchText2;
-    @UiField Button searchButton2;
     @UiField HTMLPanel searchResultItemPanel;
+
+    @UiField DivElement searchAmountUi;
 
     private final List<SearchResultItem> searchResultItemComposites;
     private final HomePlacesNavigator navigator;
@@ -49,7 +50,8 @@ public class SearchResult extends Composite {
         
         SearchResultResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
+        searchAmountUi.getStyle().setVisibility(Visibility.HIDDEN);
+
         searchText1.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
@@ -58,14 +60,7 @@ public class SearchResult extends Composite {
                 }
             }
         });
-        searchText2.addKeyPressHandler(new KeyPressHandler() {
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                    searchButton2.click();
-                }
-            }
-        });
+
     }
 
     @UiHandler("searchButton1")
@@ -74,22 +69,15 @@ public class SearchResult extends Composite {
         doSearch(searchText);
     }
 
-    @UiHandler("searchButton2")
-    void searchButton2Click(ClickEvent event) {
-        String searchText = searchText2.getText();
-        doSearch(searchText);
-    }
 
     private void doSearch(String searchText) {
-        if(searchText.isEmpty()) {
-            Window.alert("Please enter a search term.");
-        } else {
-            PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText);
-            navigator.goToPlace(searchResultNavigation);
-        }
+        PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText);
+        navigator.goToPlace(searchResultNavigation);
     }
 
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
+
+
         for (LeaderboardSearchResultDTO singleSearchResult : searchResultItems) {
             // for now filter all results where we no event is defined
             if (singleSearchResult.getEvent() != null) {
@@ -99,16 +87,22 @@ public class SearchResult extends Composite {
                 resultCounter++;
             }
         }
+
         searchResultCount.setInnerText(String.valueOf(resultCounter));
     }
 
     public void init(String searchText) {
+        if (searchText == null || searchText.isEmpty()) {
+            searchAmountUi.getStyle().setVisibility(Visibility.HIDDEN);
+            return;
+        }
+        searchAmountUi.getStyle().setVisibility(Visibility.VISIBLE);
+
         searchResultItemPanel.clear();
         searchResultItemComposites.clear();
         
         searchResultFor.setInnerText(searchText);
         searchText1.setText(searchText);
-        searchText2.setText(searchText);
         
         resultCounter = 0;
     }

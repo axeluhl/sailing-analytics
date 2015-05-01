@@ -12,8 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
@@ -47,7 +46,7 @@ public class TestFunctionDTOConstruction {
         assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.GERMAN), is(expectedDimensionDTO));
     }
 
-    public FunctionDTOImpl createExpectedDimensionDTO() {
+    public FunctionDTO createExpectedDimensionDTO() {
         String functionName = dimensionMethod.getName();
         String sourceTypeName = dimensionMethod.getDeclaringClass().getSimpleName();
         String returnTypeName = dimensionMethod.getReturnType().getSimpleName();
@@ -57,7 +56,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = true;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
+        return new FunctionDTO(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test
@@ -79,7 +78,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = false;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
+        return new FunctionDTO(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test
@@ -101,7 +100,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = false;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
+        return new FunctionDTO(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test
@@ -124,7 +123,7 @@ public class TestFunctionDTOConstruction {
         boolean isDimension = false;
         int ordinal = 0;
         
-        return new FunctionDTOImpl(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
+        return new FunctionDTO(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, ordinal);
     }
     
     @Test

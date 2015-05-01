@@ -13,5 +13,5 @@ public interface StringMessages extends Messages {
 
     String fileUploadResult(String status, String message);
 
-    String removeUploadedImage();
+    String removeUploadedFile();
 }

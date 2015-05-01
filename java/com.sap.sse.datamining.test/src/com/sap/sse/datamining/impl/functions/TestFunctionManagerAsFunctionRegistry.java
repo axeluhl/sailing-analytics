@@ -46,8 +46,8 @@ public class TestFunctionManagerAsFunctionRegistry {
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
         OpenFunctionManager registry = new OpenFunctionManager();
-        registry.registerAllClasses(internalClassesToScan);
-        registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
+        assertThat(registry.registerAllClasses(internalClassesToScan), is(true));
+        assertThat(registry.registerAllWithExternalFunctionPolicy(externalClassesToScan), is(true));
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
         expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
@@ -62,6 +62,16 @@ public class TestFunctionManagerAsFunctionRegistry {
     }
     
     @Test
+    public void testMultipleRegistrationAndUnregistrationOfTheSameClasses() {
+        OpenFunctionManager registry = new OpenFunctionManager();
+        assertThat(registry.registerAllClasses(internalClassesToScan), is(true));
+        assertThat(registry.registerAllClasses(internalClassesToScan), is(false));
+
+        assertThat(registry.unregisterAllFunctionsOf(internalClassesToScan), is(true));
+        assertThat(registry.unregisterAllFunctionsOf(internalClassesToScan), is(false));
+    }
+    
+    @Test
     public void testUnregistration() {
         OpenFunctionManager registry = new OpenFunctionManager();
         registry.registerAllClasses(internalClassesToScan);
@@ -73,7 +83,7 @@ public class TestFunctionManagerAsFunctionRegistry {
         
         Set<Class<?>> classesToUnregister = new HashSet<>();
         classesToUnregister.add(Test_HasLegOfCompetitorContext.class);
-        registry.unregisterAllFunctionsOf(classesToUnregister);
+        assertThat(registry.unregisterAllFunctionsOf(classesToUnregister), is(true));
         
         expectedDimensions = expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
         assertThat(registry.getDimensions(), is(expectedDimensions));
@@ -81,7 +91,7 @@ public class TestFunctionManagerAsFunctionRegistry {
         registry.registerAllClasses(internalClassesToScan);
         classesToUnregister = new HashSet<>();
         classesToUnregister.add(Test_HasRaceContext.class);
-        registry.unregisterAllFunctionsOf(classesToUnregister);
+        assertThat(registry.unregisterAllFunctionsOf(classesToUnregister), is(true));
         
         expectedDimensions = expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class);
         assertThat(registry.getDimensions(), is(expectedDimensions));

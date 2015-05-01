@@ -8,7 +8,7 @@
     <g:HTMLPanel>
 <div class="{local_res.css.searchresult}">
   <div class="{local_res.css.searchresult_header}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
         <div class="{local_res.css.searchresult_form}">
           <label for="searchfor" class="{local_res.css.searchresult_form_label} {local_res.css.searchresult_header_formlabel}">
@@ -20,8 +20,9 @@
       </div>
     </div>
   </div>
-  <div class="{local_res.css.searchresult_content}">
-    <div class="{res.mainCss.grid} {local_res.css.searchresult_content_amount}">
+  
+  <div class="{local_res.css.searchresult_content}" ui:field="searchAmountUi">
+    <div class="{res.mediaCss.grid} {local_res.css.searchresult_content_amount}">
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
         <h5><span ui:field="searchResultCount" />&nbsp;<ui:text from='{i18n.searchResultsFound}'/> '<span ui:field="searchResultFor" />'.
         </h5>
@@ -40,12 +41,12 @@
            -->
       </div>
     </div>
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
 	    <g:HTMLPanel ui:field="searchResultItemPanel">
 		</g:HTMLPanel>
 		<!-- paging seems to be old fashioned -> Ubilabs will provide a better approach
-        <div class="{res.mainCss.grid} {local_res.css.paging}">
+        <div class="{res.mediaCss.grid} {local_res.css.paging}">
           <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
               <a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linkprevious}">previous</a>
               <a href="http://" class="{local_res.css.paging_link}">1</a>
@@ -69,16 +70,7 @@
       </div>
     </div>
   </div>
-  <div class="{local_res.css.searchresult_footer}">
-    <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
-        <form action="search-results.html" method="get" name="search" class="{local_res.css.searchresult_form}">
-          <label for="searchforfooter" class="{local_res.css.searchresult_form_label}"><ui:text from='{i18n.searchResultSearchAgain}'/></label>
-          <g:TextBox ui:field="searchText2" styleName="{local_res.css.searchresult_form_input} {local_res.css.searchresult_header_input}" />
-          <g:Button ui:field="searchButton2" text="{i18n.searchResultHeaderButton}" styleName="{res.mainCss.button} {local_res.css.searchresult_form_button}" />
-        </form>
-      </div>
-    </div>
+  <div class="{local_res.css.searchresult_footer}" >
   </div>
 </div>
     </g:HTMLPanel>

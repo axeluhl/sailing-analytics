@@ -23,10 +23,15 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void register(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    public boolean register(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        if (chainDefinitionsMappedByID.containsKey(dataRetrieverChainDefinition.getID())) {
+            return false;
+        }
+        
         registerToBySourceTypeMap(dataRetrieverChainDefinition);
         registerToByDataTypeMap(dataRetrieverChainDefinition);
         chainDefinitionsMappedByID.put(dataRetrieverChainDefinition.getID(), dataRetrieverChainDefinition);
+        return true;
     }
     
     private void registerToBySourceTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
@@ -45,10 +50,10 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void unregister(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    public boolean unregister(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         unregisterFromBySourceTypeMap(dataRetrieverChainDefinition);
         unregisterFromByDataTypeMap(dataRetrieverChainDefinition);
-        chainDefinitionsMappedByID.remove(dataRetrieverChainDefinition.getID());
+        return chainDefinitionsMappedByID.remove(dataRetrieverChainDefinition.getID()) != null;
     }
     
     private void unregisterFromBySourceTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {

@@ -8,8 +8,10 @@
 }
 .error_message_detail {
 	font-size: 15px;
+	margin-top: 20px;
 }
 .reload_page_message {
 	font-size: 20px;
 	margin-right: 20px;
+	margin-bottom: 20px;
 }
