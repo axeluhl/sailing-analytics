@@ -40,7 +40,7 @@ import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
 public class TrackedRegattaImpl implements TrackedRegatta {
     
-    private RaceOrderCache raceOrderCache;
+    private RaceExecutionOrderCache raceExecutionOrderCache;
     
     private transient NamedReentrantReadWriteLock lock = createLock();
     
@@ -59,7 +59,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         raceListeners = new HashSet<RaceListener>();
-        this.raceOrderCache = new RaceOrderCache();
+        this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -208,7 +208,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     
     @Override
     public TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race) {
-        List<TrackedRace> racesInOrder = raceOrderCache.getRacesOrder();
+        List<TrackedRace> racesInOrder = raceExecutionOrderCache.getRacesInExecutionOrder();
         if (racesInOrder != null) {
             int indexOfRace = racesInOrder.indexOf(race);
             if (indexOfRace != -1 && indexOfRace != 0) {
@@ -218,18 +218,18 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         return null;
     }
     
-    private class RaceOrderCache extends AbstractRaceColumnListener {
+    private class RaceExecutionOrderCache extends AbstractRaceColumnListener {
 
         SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
         private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
         private static final long serialVersionUID = -1016823551825618490L;
 
-        public RaceOrderCache() {
+        public RaceExecutionOrderCache() {
             racesOrderCache = createRacesOrderCache();
             getRegatta().addRaceColumnListener(this);
         }
 
-        public List<TrackedRace> getRacesOrder() {
+        public List<TrackedRace> getRacesInExecutionOrder() {
             List<TrackedRace> result;
             LockUtil.lockForRead(lock);
             result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY, true);

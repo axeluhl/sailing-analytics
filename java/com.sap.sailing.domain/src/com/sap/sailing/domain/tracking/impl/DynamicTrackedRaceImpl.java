@@ -45,6 +45,7 @@ import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -657,8 +658,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
+        TrackedRace previosRaceInExecutionOrder = getTrackedRegatta().getPreviousRaceInExecutionOrder(this);
+        long conditional_time_before_start_to_track_wind;
+        if(previosRaceInExecutionOrder == null || previosRaceInExecutionOrder.getEndOfTracking() != null || !previosRaceInExecutionOrder.hasWindData()){
+            conditional_time_before_start_to_track_wind = EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
+        }else{
+            conditional_time_before_start_to_track_wind = TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
+        }
+        if ((startOfTracking == null || !startOfTracking.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint())))
             &&
         (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
