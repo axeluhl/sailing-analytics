@@ -26,7 +26,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-    private final Timer autoRefreshTimer;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
             HomePlacesNavigator homePlacesNavigator) {
@@ -39,7 +38,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
                     clientFactory.getErrorReporter(),
                     userAgent));
         }
-        this.autoRefreshTimer = ctx.getRegattaAnalyticsManager().getTimer();
     }
 
     @Override
@@ -83,7 +81,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
 
     @Override
     public Timer getAutoRefreshTimer() {
-        return autoRefreshTimer;
+        return ctx.getRegattaAnalyticsManager().getTimer();
     }
 
     @Override
