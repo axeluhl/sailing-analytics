@@ -5,6 +5,20 @@
 	version="2.5">
 
 	<servlet>
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
+		</servlet-class>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+	   		<param-name>useFileMappedBuffer</param-name>
+	   		<param-value>false</param-value>
+	 	</init-param>
+	</servlet>
+
+	<servlet>
 		<display-name>Rib Dashboard Service</display-name>
 		<servlet-name>RibDashboardService</servlet-name>
 		<servlet-class>com.sap.sailing.dashboards.gwt.server.RibDashboardServiceImpl
