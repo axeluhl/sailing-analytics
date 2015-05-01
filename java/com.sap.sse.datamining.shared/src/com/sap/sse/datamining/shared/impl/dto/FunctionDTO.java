@@ -1,11 +1,10 @@
 package com.sap.sse.datamining.shared.impl.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
-
-public class FunctionDTOImpl implements FunctionDTO {
+public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
     private static final long serialVersionUID = 4587389541910498505L;
 
     private boolean isDimension;
@@ -21,10 +20,10 @@ public class FunctionDTOImpl implements FunctionDTO {
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    FunctionDTOImpl() {
+    FunctionDTO() {
     }
     
-    public FunctionDTOImpl(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
+    public FunctionDTO(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
                            List<String> parameterTypeNames, String displayName, int ordinal) {
         this.isDimension = isDimension;
         this.functionName = functionName;
@@ -36,37 +35,30 @@ public class FunctionDTOImpl implements FunctionDTO {
         this.ordinal = ordinal;
     }
 
-    @Override
     public String getSourceTypeName() {
         return sourceTypeName;
     }
 
-    @Override
     public String getReturnTypeName() {
         return returnTypeName;
     }
 
-    @Override
     public List<String> getParameterTypeNames() {
         return parameterTypeNames;
     }
     
-    @Override
     public String getFunctionName() {
         return functionName;
     }
 
-    @Override
     public String getDisplayName() {
         return displayName;
     }
     
-    @Override
     public boolean isDimension() {
         return isDimension;
     }
     
-    @Override
     public int getOrdinal() {
         return ordinal;
     }
@@ -76,7 +68,6 @@ public class FunctionDTOImpl implements FunctionDTO {
         return Integer.compare(this.getOrdinal(), f.getOrdinal());
     }
     
-    @Override
     public String toString() {
         return (isDimension() ? "Dimension " : "Function ") + sourceTypeName + "." + functionName + "(" + parametersAsString() + ") : " + returnTypeName;
     }
@@ -114,7 +105,7 @@ public class FunctionDTOImpl implements FunctionDTO {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        FunctionDTOImpl other = (FunctionDTOImpl) obj;
+        FunctionDTO other = (FunctionDTO) obj;
         if (functionName == null) {
             if (other.functionName != null)
                 return false;

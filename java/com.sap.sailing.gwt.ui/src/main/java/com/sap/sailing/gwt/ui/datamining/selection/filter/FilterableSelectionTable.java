@@ -1,19 +1,23 @@
-package com.sap.sailing.gwt.ui.datamining.selection;
+package com.sap.sailing.gwt.ui.datamining.selection.filter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 public class FilterableSelectionTable<ContentType extends Serializable> extends FlowPanel {
+    
+    private final Set<FilterSelectionChangedListener> listeners;
     
     private final Collection<ContentType> allData;
     private int width;
@@ -22,10 +26,12 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     private final AbstractFilterablePanel<ContentType> filterPanel;
     private String filterText;
     private final DataGrid<ContentType> table;
-    private final MultiSelectionModel<ContentType> selectionModel;
+    private final ControllableMultiSelectionModel<ContentType> selectionModel;
     private final ListDataProvider<ContentType> dataProvider;
     
     public FilterableSelectionTable() {
+        listeners = new HashSet<>();
+        
         allData = new ArrayList<ContentType>();
         
         table = new DataGrid<ContentType>();
@@ -40,7 +46,13 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         };
         table.addColumn(contentColumn);
 
-        selectionModel = new MultiSelectionModel<ContentType>();
+        selectionModel = new ControllableMultiSelectionModel<ContentType>();
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                notifyListeners();
+            }
+        });
         table.setSelectionModel(selectionModel);
         
         dataProvider = new ListDataProvider<ContentType>(new ProvidesKey<ContentType>() {
@@ -72,35 +84,109 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     private String getElementAsString(ContentType element) {
         return element.toString();
     }
-    
+
+    /**
+     * Replaces the current content of the table with the new one and clears the current selection.<br>
+     * Returns <code>true</code> and notifies the listeners, if the selection changed.
+     * @param newContent
+     */
     @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-    public void setContent(Collection<?> newContent) {
+    public boolean setContent(Collection<?> newContent, boolean notifyListenersWhenSelectionChanged) {
         Collection<ContentType> specificNewContent = null;
         try {
             specificNewContent = (Collection<ContentType>) newContent;
         } catch (ClassCastException e) {
-            return;
+            return false;
         }
-        
+        internalSetContent(specificNewContent);
+        Set<ContentType> previousSelection = selectionModel.getSelectedSet();
+        if (notifyListenersWhenSelectionChanged) {
+            clearSelection();
+        } else {
+            selectionModel.setBlockNotifications(true);
+            clearSelection();
+            selectionModel.setBlockNotifications(false);
+        }
+        return !previousSelection.isEmpty();
+    }
+    
+    /**
+     * Replaces the current content of the table with the new one, while preserving the current selection.<br>
+     * Returns <code>true</code> and notifies the listeners, if previously selected elements have been removed.
+     * @param newContent
+     * @return <code>true</code>, if previously selected elements have been removed.
+     */
+    @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
+    public boolean updateContent(Collection<?> newContent, boolean notifyListenersWhenSelectionChanged) {
+        Collection<ContentType> specificNewContent = null;
+        try {
+            specificNewContent = (Collection<ContentType>) newContent;
+        } catch (ClassCastException e) {
+            return false;
+        }
+        internalSetContent(specificNewContent);
+        return cleanSelection(notifyListenersWhenSelectionChanged);
+    }
+
+    private void internalSetContent(Collection<ContentType> specificNewContent) {
         allData.clear();
         allData.addAll(specificNewContent);
         dataProvider.getList().clear();
         dataProvider.getList().addAll(allData);
-        clearSelection();
         filterPanel.updateAll(allData);
+    }
+
+    /**
+     * Unselects the selected elements, that aren't in the data anymore.
+     * @return <code>true</code>, if elements have been unselected;
+     */
+    private boolean cleanSelection(boolean notifyListenersWhenSelectionChanged) {
+        boolean selectionChanged = false;
+        selectionModel.setBlockNotifications(true);
+        
+        for (ContentType selectedElement : getSelection()) {
+            Object selectedElementKey = dataProvider.getKey(selectedElement);
+            boolean contentContainsSelectedElement = false;
+            for (ContentType contentElement : allData) {
+                if (selectedElementKey.equals(dataProvider.getKey(contentElement))) {
+                    contentContainsSelectedElement = true;
+                    break;
+                }
+            }
+            if (!contentContainsSelectedElement) {
+                selectionModel.setSelected(selectedElement, false);
+                selectionChanged = true;
+            }
+        }
+
+        selectionModel.setBlockNotifications(false);
+        if (selectionChanged && notifyListenersWhenSelectionChanged) {
+            notifyListeners();
+        }
+        return selectionChanged;
+    }
+
+    private void notifyListeners() {
+        for (FilterSelectionChangedListener listener : listeners) {
+            listener.selectionChanged();
+        }
     }
 
     public Collection<ContentType> getSelection() {
         return selectionModel.getSelectedSet();
     }
 
-    public void setSelection(Iterable<?> elements) {
+    public void setSelection(Iterable<?> elements, boolean notifyListenersWhenSelectionChanged) {
         try {
             @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
             Iterable<ContentType> specificContent = (Iterable<ContentType>) elements;
+            selectionModel.setBlockNotifications(!notifyListenersWhenSelectionChanged);
             clearSelection();
             for (ContentType element : specificContent) {
                 selectionModel.setSelected(element, true);
+            }
+            if (!notifyListenersWhenSelectionChanged) {
+                selectionModel.setBlockNotifications(false);
             }
         } catch (ClassCastException e) {/*Ignore the elements, because they don't match the ContentType*/}
     }
@@ -109,8 +195,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         selectionModel.clear();
     }
     
-    public void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
-        selectionModel.addSelectionChangeHandler(handler);
+    public void addSelectionChangeHandler(FilterSelectionChangedListener handler) {
+        listeners.add(handler);
     }
     
     public boolean isFilteringEnabled() {
@@ -149,6 +235,5 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
         table.redraw();
     }
-
 
 }

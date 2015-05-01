@@ -1258,6 +1258,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String serverUrl();
     String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
     String startLineToFirstMarkTriangle(String distanceInMeters);
+    String dataMiningComponentsHaveBeenUpdated();
+    String dataMiningComponentsNeedReloadDialogMessage();
     
     String noDataForEvent();
     String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
