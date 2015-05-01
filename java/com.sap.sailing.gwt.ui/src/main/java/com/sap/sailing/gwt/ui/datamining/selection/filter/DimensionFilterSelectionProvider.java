@@ -24,6 +24,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
+import com.sap.sailing.gwt.ui.datamining.execution.ManagedDataMiningQueryCallback;
+import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -38,6 +41,7 @@ class DimensionFilterSelectionProvider {
     private final ErrorReporter errorReporter;
     private final DataMiningSession session;
     private final RetrieverLevelFilterSelectionProvider retrieverLevelSelectionProvider;
+    private final ManagedDataMiningQueriesCounter counter;
 
     private final FlowPanel mainPanel;
     
@@ -56,6 +60,7 @@ class DimensionFilterSelectionProvider {
         this.errorReporter = errorReporter;
         this.session = session;
         this.retrieverLevelSelectionProvider = retrieverLevelSelectionProvider;
+        counter = new SimpleManagedDataMiningQueriesCounter();
         
         mainPanel = new FlowPanel();
         
@@ -154,11 +159,12 @@ class DimensionFilterSelectionProvider {
             filterSelectionDTO.get(retrieverLevel).remove(dimension);
         }
         busyIndicator.setVisible(true);
+        counter.increase();
         dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
                 retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
-                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
+                LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<Set<Object>>(counter) {
                     @Override
-                    public void onSuccess(QueryResult<Set<Object>> result) {
+                    protected void handleSuccess(QueryResult<Set<Object>> result) {
                         Map<GroupKey, Set<Object>> results = result.getResults();
                         List<Object> content = new ArrayList<Object>();
                         
@@ -199,7 +205,7 @@ class DimensionFilterSelectionProvider {
                         }
                     }
                     @Override
-                    public void onFailure(Throwable caught) {
+                    protected void handleFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the dimension values of " + dimension + ": "
                                 + caught.getMessage());
                     }

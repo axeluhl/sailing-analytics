@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.ui.datamining.execution;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.QueryRunner;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
@@ -24,14 +24,12 @@ public class SimpleQueryRunner implements QueryRunner {
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    
-    private final Button runButton;
+    private final ManagedDataMiningQueriesCounter counter;
 
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider queryDefinitionProvider;
     private final ResultsPresenter<Number> resultsPresenter;
-    
-    private int sentQueriesNumber;
+    private final Button runButton;
 
     public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
@@ -40,6 +38,7 @@ public class SimpleQueryRunner implements QueryRunner {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        counter = new SimpleManagedDataMiningQueriesCounter();
         
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
@@ -56,30 +55,23 @@ public class SimpleQueryRunner implements QueryRunner {
         if (this.settings.isRunAutomatically()) {
             queryDefinitionProvider.addQueryDefinitionChangedListener(this);
         }
-        
-        sentQueriesNumber = 0;
     }
 
     @Override
     public void run(QueryDefinitionDTO queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
-            sentQueriesNumber++;
+            counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new AsyncCallback<QueryResult<Number>>() {
+            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Number>(counter) {
                 @Override
-                public void onFailure(Throwable caught) {
+                protected void handleFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
-            
                 @Override
-                public void onSuccess(QueryResult<Number> result) {
-                    sentQueriesNumber--;
-                    //Don't show the empty result, if more Queries have been sent
-                    if (!result.isEmpty() || sentQueriesNumber == 0) {
-                        resultsPresenter.showResult(result);
-                    }
+                protected void handleSuccess(QueryResult<Number> result) {
+                    resultsPresenter.showResult(result);
                 }
             });
         } else {
