@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -394,6 +396,29 @@ public class TestProcessorQuery {
         };
         query.run();
         assertThat(query.getState(), is(QueryState.FAILURE));
+    }
+    
+    @Test
+    public void testQueryAdditionalData() {
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(UUID.randomUUID());
+        Query<?> query = new ProcessorQuery<Double, Double>(0.0, additionalData) {
+            @Override
+            protected Processor<Double, ?> createFirstProcessor() {
+                return null;
+            }
+        };
+        assertThat(query.getAdditionalData(), is(additionalData));
+        assertThat(query.getAdditionalData(AdditionalStatisticQueryData.class), is(additionalData));
+        assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), nullValue());
+        
+        additionalData = new AdditionalDimensionValuesQueryData(UUID.randomUUID(), new ArrayList<Function<?>>());
+        query = new ProcessorQuery<Double, Double>(0.0, additionalData) {
+            @Override
+            protected Processor<Double, ?> createFirstProcessor() {
+                return null;
+            }
+        };
+        assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), is(additionalData));
     }
 
 }

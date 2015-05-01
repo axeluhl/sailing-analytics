@@ -13,7 +13,7 @@ public interface Query<AggregatedType> {
     
     public AdditionalQueryData getAdditionalData();
     
-    public <T extends AdditionalQueryData> T getSpecificAdditionalData(Class<T> additionalDataType);
+    public <T extends AdditionalQueryData> T getAdditionalData(Class<T> additionalDataType);
     
     public QueryResult<AggregatedType> run();
 

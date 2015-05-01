@@ -14,7 +14,7 @@ public class SingleQueryPerDimensionManager extends SingleQueryPerKeyManager<Key
 
     @Override
     protected <ResultType> Iterable<Key> getKeysFor(DataMiningSession session, Query<ResultType> query) {
-        AdditionalDimensionValuesQueryData additionalData = query.getSpecificAdditionalData(AdditionalDimensionValuesQueryData.class);
+        AdditionalDimensionValuesQueryData additionalData = query.getAdditionalData(AdditionalDimensionValuesQueryData.class);
         if (additionalData == null) {
             throw new IllegalArgumentException("This " + DataMiningQueryManager.class.getSimpleName()
                                                + " can only manage queries of the " + QueryType.class.getSimpleName()

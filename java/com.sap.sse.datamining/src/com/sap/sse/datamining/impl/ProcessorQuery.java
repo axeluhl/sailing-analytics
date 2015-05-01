@@ -51,11 +51,18 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
      *   <li> with no {@link AdditionalQueryData} (more exactly with {@link NullAdditionalQueryData} as additional data).</li>
      *   <li> that returns a result without {@link AdditionalResultData} (more exactly with {@link NullAdditionalResultData} as additional data).</li>
      * </ul>
-     * 
-     * This is useful for non user specific queries, like retrieving the dimension values.
      */
     public ProcessorQuery(DataSourceType dataSource) {
-        this(dataSource, null, null, AdditionalQueryData.NULL_INSTANCE);
+        this(dataSource, AdditionalQueryData.NULL_INSTANCE);
+    }
+
+    
+    /**
+     * Creates a query that returns a result without {@link AdditionalResultData}
+     * (more exactly with {@link NullAdditionalResultData} as additional data).
+     */
+    public ProcessorQuery(DataSourceType dataSource, AdditionalQueryData additionalData) {
+        this(dataSource, null, null, additionalData);
     }
 
     /**
@@ -86,7 +93,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends AdditionalQueryData> T getSpecificAdditionalData(Class<T> additionalDataType) {
+    public <T extends AdditionalQueryData> T getAdditionalData(Class<T> additionalDataType) {
         if (additionalDataType.isAssignableFrom(getAdditionalData().getClass())) {
             return (T) getAdditionalData();
         }
