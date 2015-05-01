@@ -22,10 +22,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
-
     private EventRegattaView currentView = new TabletAndDesktopEventView();
-
-
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
@@ -35,16 +32,13 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
             HomePlacesNavigator homePlacesNavigator) {
         super(place, clientFactory, homePlacesNavigator);
-
         if (this.ctx.getRegattaAnalyticsManager() == null) {
-
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager( //
                     clientFactory.getSailingService(), //
                     asyncActionsExecutor, //
                     autoRefreshTimer, //
                     clientFactory.getErrorReporter(), //
                     userAgent));
-
         }
     }
 
@@ -52,7 +46,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
-
         currentView.navigateTabsTo(currentPlace);
     }
     
@@ -88,7 +81,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         return homePlacesNavigator.getEventNavigation(new RegattaOverviewPlace(ctx), null, false);
     }
 
-
     @Override
     public Timer getAutoRefreshTimer() {
         return autoRefreshTimer;
@@ -98,5 +90,4 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     protected EventView<AbstractEventRegattaPlace, ?> getView() {
         return currentView;
     }
-
 }
