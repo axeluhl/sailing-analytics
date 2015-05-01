@@ -56,7 +56,7 @@ public class RegattaAnalyticsDataManager {
     public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
-        if(leaderboardPanel == null) {
+        if (leaderboardPanel == null) {
             leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */
