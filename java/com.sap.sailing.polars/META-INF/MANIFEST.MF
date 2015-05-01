@@ -24,3 +24,4 @@ Import-Package:
  com.sap.sailing.util,
  com.sap.sse.common
 Bundle-Activator: com.sap.sailing.polars.impl.Activator
+Bundle-ActivationPolicy: lazy
