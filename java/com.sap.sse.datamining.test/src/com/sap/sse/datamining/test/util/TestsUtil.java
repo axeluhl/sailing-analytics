@@ -1,5 +1,10 @@
 package com.sap.sse.datamining.test.util;
 
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.impl.DataMiningServerImpl;
+import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
@@ -28,6 +33,12 @@ public class TestsUtil {
         }
         
         return EXTENDED_STRING_MESSAGES;
+    }
+    
+    public static ModifiableDataMiningServer createNewServer() {
+        FunctionManager functionManager = new FunctionManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
+        return new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager, functionManager, dataRetrieverChainDefinitionRegistry);
     }
     
     protected TestsUtil() { }

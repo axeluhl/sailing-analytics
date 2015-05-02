@@ -176,6 +176,11 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
+    public DataRetrieverChainDefinitionRegistry getDataRetrieverChainDefinitionRegistry() {
+        return dataRetrieverChainDefinitionRegistry;
+    }
+    
+    @Override
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         boolean componentsChanged = dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
         if (componentsChanged) {
@@ -262,7 +267,9 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @SuppressWarnings("unchecked")
     private <DataSourceType> DataSourceProvider<DataSourceType> getDataSourceProviderFor(Class<DataSourceType> dataSourceType) {
-        assert dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType) : "No DataSourceProvider found for '" + dataSourceType + "'";
+        if (!dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType)) {
+            throw new NullPointerException("No DataSourceProvider found for '" + dataSourceType + "'");
+        }
         return (DataSourceProvider<DataSourceType>) dataSourceProviderMappedByDataSourceType.get(dataSourceType);
     }
     

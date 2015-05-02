@@ -21,8 +21,8 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  *      <li>Call {@link #endWith(Class, Class, Class, String)} to add the last Processor of the chain</li>
  * </ol>
  * 
- * The Processors in the chain should extend {@link AbstractSimpleRetrievalProcessor} or {@link AbstractRetrievalProcessor}.
- * If not, the processor has to have a constructor with the exact parameter list {@link ExecutorService}, {@link Collection}.
+ * The Processors in the chain should extend {@link AbstractRetrievalProcessor}.
+ * If not, the processor has to have a constructor with the exact parameter list {@link ExecutorService}, {@link Collection}, <code>int</code>.
  * Otherwise an exception will be thrown, when you call one of the methods above.<br/>
  * To create a data retriever chain defined by a <code>DataRetrieverChainDefinition</code>, call {@link #startBuilding(ExecutorService)}
  * which returns an instance of {@link DataRetrieverChainBuilder}.
@@ -44,9 +44,9 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
 
     /**
      * Sets the first {@link Processor} in the chain.<br />
-     * The given processor should extend {@link AbstractSimpleRetrievalProcessor} or
-     * {@link AbstractRetrievalProcessor}. If not, the processor has to have a constructor with the exact parameter list
-     * {@link ExecutorService}, {@link Collection}.
+     * The given processor should extend {@link AbstractRetrievalProcessor}.
+     * If not, the processor has to have a constructor with the exact parameter list
+     * {@link ExecutorService}, {@link Collection}, <code>int</code>.
      * 
      * @param retrieverType The type of the first processor in the chain
      * @param retrievedDataType The <code>ResultType</code> of the <code>retrieverType</code>
@@ -61,9 +61,9 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
     /**
      * Sets the next {@link Processor} in the chain. {@link #startWith(Class, Class, String)} has to be called once before you
      * can use this method. Otherwise an exception will be thrown.<br />
-     * The given processor should extend {@link AbstractSimpleRetrievalProcessor} or
-     * {@link AbstractRetrievalProcessor}. If not, the processor has to have a constructor with the exact parameter list
-     * {@link ExecutorService}, {@link Collection}.
+     * The given processor should extend {@link AbstractRetrievalProcessor}.
+     * If not, the processor has to have a constructor with the exact parameter list
+     * {@link ExecutorService}, {@link Collection}, <code>int</code>.
      * 
      * @param lastAddedRetrieverType The processor that has been added before the <code>nextRetrieverType</code>
      * @param nextRetrieverType The next processor in the chain
@@ -84,9 +84,9 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
      * Sets the last {@link Processor} in the chain. {@link #startWith(Class, Class, String)} has to be called once before you
      * can use this method. Otherwise an exception will be thrown.<br />
      * <b>Calling this method completes the chain and no other modifications will be possible!</b><br />
-     * The given processor should extend {@link AbstractSimpleRetrievalProcessor} or
-     * {@link AbstractRetrievalProcessor}. If not, the processor has to have a constructor with the exact parameter list
-     * {@link ExecutorService}, {@link Collection}.
+     * The given processor should extend {@link AbstractRetrievalProcessor}.
+     * If not, the processor has to have a constructor with the exact parameter list
+     * {@link ExecutorService}, {@link Collection}., <code>int</code>
      * 
      * @param lastAddedRetrieverType The processor that has been added before the <code>lastRetrieverType</code>
      * @param lastRetrieverType The last processor in the chain

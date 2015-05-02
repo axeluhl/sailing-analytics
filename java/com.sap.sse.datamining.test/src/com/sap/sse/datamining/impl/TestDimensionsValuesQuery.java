@@ -14,15 +14,11 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.functions.ParameterizedFunction;
-import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -61,91 +57,6 @@ public class TestDimensionsValuesQuery {
     private Function<Integer> dimensionLegNumber;
     private Function<String> dimensionCompetitorName;
     private Function<String> dimensionCompetitorSailID;
-
-    @Test
-    public void testDimensionsValuesQuery() throws InterruptedException, ExecutionException {
-        Query<Set<Object>> dimensionsValueQuery = createDimensionsValuesQuery();
-        Map<GroupKey, Set<Object>> expectedResultData = buildExpectedResultData();
-        QueryResult<Set<Object>> result = dimensionsValueQuery.run();
-        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedResultData);
-    }
-
-    private Query<Set<Object>> createDimensionsValuesQuery() {
-        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(dataSource) {
-            @Override
-            protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
-                Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = ComponentTestsUtil.getProcessorFactory().createGroupedDataCollectingAsSetProcessor(this); 
-                
-                Collection<ParameterizedFunction<?>> legDimensions = new ArrayList<>();
-                legDimensions.add(new SimpleParameterizedFunction<>(dimensionLegNumber, ParameterProvider.NULL));
-                legDimensions.add(new SimpleParameterizedFunction<>(dimensionCompetitorName, ParameterProvider.NULL));
-                legDimensions.add(new SimpleParameterizedFunction<>(dimensionCompetitorSailID, ParameterProvider.NULL));
-                
-                Collection<ParameterizedFunction<?>> raceDimensions = new ArrayList<>();
-                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionRegattaName, ParameterProvider.NULL));
-                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionRaceName, ParameterProvider.NULL));
-                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionBoatClassName, ParameterProvider.NULL));
-                raceDimensions.add(new SimpleParameterizedFunction<>(dimensionYear, ParameterProvider.NULL));
-                
-                DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
-                chainBuilder.stepFurther(); //Initialization
-                
-                chainBuilder.stepFurther();
-                for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasRaceContext.class, resultCollector, raceDimensions, stringMessages, locale)) {
-                    chainBuilder.addResultReceiver(resultReceiver);
-                }
-                
-                chainBuilder.stepFurther();
-                for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, resultCollector, legDimensions, stringMessages, locale)) {
-                    chainBuilder.addResultReceiver(resultReceiver);
-                }
-                
-                return chainBuilder.build();
-            }
-        };
-    }
-    
-    private Map<GroupKey, Set<Object>> buildExpectedResultData() {
-        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
-
-        //Add empty sets for Test_HasRaceContext dimensions
-        GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
-        expectedResultData.put(dimensionRegattaNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionRaceNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRaceName, stringMessages, locale));
-        expectedResultData.put(dimensionRaceNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionBoatClassNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionBoatClassName, stringMessages, locale));
-        expectedResultData.put(dimensionBoatClassNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionYearGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionYear, stringMessages, locale));
-        expectedResultData.put(dimensionYearGroupKey, new HashSet<Object>());
-
-        //Add empty sets for Test_HasLegContext dimensions
-        GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));
-        expectedResultData.put(dimensionLegNumberGroupKey, new HashSet<Object>());
-        GroupKey dimensionCompetitorNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorName, stringMessages, locale));
-        expectedResultData.put(dimensionCompetitorNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionCompetitorSailIDGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorSailID, stringMessages, locale));
-        expectedResultData.put(dimensionCompetitorSailIDGroupKey, new HashSet<Object>());
-        
-        for (Test_Regatta regatta : dataSource) {
-            expectedResultData.get(dimensionRegattaNameGroupKey).add(regatta.getName());
-            expectedResultData.get(dimensionYearGroupKey).add(regatta.getYear());
-            expectedResultData.get(dimensionBoatClassNameGroupKey).add(regatta.getBoatClass().getName());
-            
-            for (Test_Race race : regatta.getRaces()) {
-                expectedResultData.get(dimensionRaceNameGroupKey).add(race.getName());
-                
-                for (int legNumber = 1; legNumber <= race.getLegs().size(); legNumber++) {
-                    expectedResultData.get(dimensionLegNumberGroupKey).add(legNumber);
-                }
-                
-                for (Test_Competitor competitor : race.getCompetitors()) {
-                    expectedResultData.get(dimensionCompetitorNameGroupKey).add(competitor.getTeam().getName());
-                    expectedResultData.get(dimensionCompetitorSailIDGroupKey).add(competitor.getBoat().getSailID());
-                }
-            }
-        }
-        return expectedResultData;
-    }
     
     @SuppressWarnings("unchecked")
     @Before
@@ -165,6 +76,92 @@ public class TestDimensionsValuesQuery {
         dataRetrieverChainDefinition.endWith(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void testDimensionsValuesQuery() throws InterruptedException, ExecutionException {
+        ModifiableDataMiningServer server = TestsUtil.createNewServer();
+        server.addStringMessages(stringMessages);
+        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+            @Override
+            public Collection<?> getDataSource() {
+                return dataSource;
+            }
+        });
+        
+        Collection<Function<?>> raceDimensions = new ArrayList<>();
+        raceDimensions.add(dimensionRegattaName);
+        raceDimensions.add(dimensionRaceName);
+        raceDimensions.add(dimensionBoatClassName);
+        raceDimensions.add(dimensionYear);
+        Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
+        Query<Set<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 1 /*race*/, raceDimensions, filterSelection, locale);
+        
+        Map<GroupKey, Set<Object>> expectedRaceResultData = buildExpectedRaceResultData();
+        QueryResult<Set<Object>> result = dimensionsValueQuery.run();
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedRaceResultData);
+        
+        Collection<Function<?>> legDimensions = new ArrayList<>();
+        legDimensions.add(dimensionLegNumber);
+        legDimensions.add(dimensionCompetitorName);
+        legDimensions.add(dimensionCompetitorSailID);
+        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 2 /*leg*/, legDimensions, filterSelection, locale);
+
+        Map<GroupKey, Set<Object>> expectedLegResultData = buildExpectedLegResultData();
+        result = dimensionsValueQuery.run();
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedLegResultData);
+    }
+    
+    private Map<GroupKey, Set<Object>> buildExpectedRaceResultData() {
+        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
+
+        //Add empty sets for Test_HasRaceContext dimensions
+        GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
+        expectedResultData.put(dimensionRegattaNameGroupKey, new HashSet<Object>());
+        GroupKey dimensionRaceNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRaceName, stringMessages, locale));
+        expectedResultData.put(dimensionRaceNameGroupKey, new HashSet<Object>());
+        GroupKey dimensionBoatClassNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionBoatClassName, stringMessages, locale));
+        expectedResultData.put(dimensionBoatClassNameGroupKey, new HashSet<Object>());
+        GroupKey dimensionYearGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionYear, stringMessages, locale));
+        expectedResultData.put(dimensionYearGroupKey, new HashSet<Object>());
+        
+        for (Test_Regatta regatta : dataSource) {
+            expectedResultData.get(dimensionRegattaNameGroupKey).add(regatta.getName());
+            expectedResultData.get(dimensionYearGroupKey).add(regatta.getYear());
+            expectedResultData.get(dimensionBoatClassNameGroupKey).add(regatta.getBoatClass().getName());
+            
+            for (Test_Race race : regatta.getRaces()) {
+                expectedResultData.get(dimensionRaceNameGroupKey).add(race.getName());
+            }
+        }
+        return expectedResultData;
+    }
+    
+    private Map<GroupKey, Set<Object>> buildExpectedLegResultData() {
+        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
+
+        //Add empty sets for Test_HasLegContext dimensions
+        GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));
+        expectedResultData.put(dimensionLegNumberGroupKey, new HashSet<Object>());
+        GroupKey dimensionCompetitorNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorName, stringMessages, locale));
+        expectedResultData.put(dimensionCompetitorNameGroupKey, new HashSet<Object>());
+        GroupKey dimensionCompetitorSailIDGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorSailID, stringMessages, locale));
+        expectedResultData.put(dimensionCompetitorSailIDGroupKey, new HashSet<Object>());
+        
+        for (Test_Regatta regatta : dataSource) {
+            for (Test_Race race : regatta.getRaces()) {
+                for (int legNumber = 1; legNumber <= race.getLegs().size(); legNumber++) {
+                    expectedResultData.get(dimensionLegNumberGroupKey).add(legNumber);
+                }
+                
+                for (Test_Competitor competitor : race.getCompetitors()) {
+                    expectedResultData.get(dimensionCompetitorNameGroupKey).add(competitor.getTeam().getName());
+                    expectedResultData.get(dimensionCompetitorSailIDGroupKey).add(competitor.getBoat().getSailID());
+                }
+            }
+        }
+        return expectedResultData;
     }
 
     @Before

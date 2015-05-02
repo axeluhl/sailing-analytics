@@ -22,7 +22,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     private final Class<DataType> retrievedDataType;
     private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
     
-    private boolean isComplete;
+    protected boolean isComplete;
 
     public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType, String nameMessageKey) {
         id = UUID.randomUUID();

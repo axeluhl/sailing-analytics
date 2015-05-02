@@ -20,23 +20,16 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 public interface DataMiningServer {
     
     public ExecutorService getExecutorService();
-
     public ResourceBundleStringMessages getStringMessages();
-    
     public FunctionProvider getFunctionProvider();
 
     public Date getComponentsChangedTimepoint();
 
     public Iterable<Function<?>> getAllStatistics();
-    
     public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
-    
     public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
-
     public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
-    
     public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
-
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
      */

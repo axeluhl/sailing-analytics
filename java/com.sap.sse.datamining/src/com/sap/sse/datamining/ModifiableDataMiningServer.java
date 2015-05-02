@@ -17,6 +17,8 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
     
     public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
     public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
+    
+    public DataRetrieverChainDefinitionRegistry getDataRetrieverChainDefinitionRegistry();
 
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);

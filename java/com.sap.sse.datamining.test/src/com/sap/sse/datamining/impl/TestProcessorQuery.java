@@ -7,9 +7,9 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -25,22 +25,18 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.QueryState;
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
-import com.sap.sse.datamining.factories.ProcessorFactory;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
-import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.components.AggregatorType;
@@ -55,26 +51,75 @@ import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.BlockingProcessor;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.Number;
+import com.sap.sse.datamining.test.util.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestProcessorQuery {
     
     private static final Logger LOGGER = Logger.getLogger(TestProcessorQuery.class.getSimpleName());
     private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
-    private static final ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
     
     private QueryResult<?> resultAfterAbortion;
     
+    @SuppressWarnings("rawtypes")
     @Test
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
-        Collection<Number> dataSource = createDataSource();
-        Query<Double> queryWithStandardWorkflow = createQueryWithStandardWorkflow(dataSource);
+        final Collection<Number> dataSource = createDataSource();
+        
+        ModifiableDataMiningServer server = TestsUtil.createNewServer();
+        server.addStringMessages(stringMessages);
+        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+            @Override
+            public Collection<?> getDataSource() {
+                return dataSource;
+            }
+        });
+
+        Query<Double> queryWithStandardWorkflow = server.createQuery(createQueryDefinition());
         assertThat(queryWithStandardWorkflow.getState(), is(QueryState.NOT_STARTED));
         QueryResult<Double> expectedResult = buildExpectedResult(dataSource);
         verifyResult(queryWithStandardWorkflow.run(), expectedResult);
+    }
+
+    /**
+     * Creates a query definition, that filters all numbers < 10, groups them by
+     * their length, extracts the cross sum and aggregates their sum.
+     */
+    private QueryDefinition<Collection<Number>, Number, Double> createQueryDefinition() {
+        FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
+        
+        @SuppressWarnings("unchecked")
+        DataRetrieverChainDefinition<Collection<Number>, Number> retrieverChain = new SingleDataRetrieverChainDefinition<>((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, "Number");
+        retrieverChain.startWith(NumberRetrievalProcessor.class, Number.class, "Number");
+        
+        Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
+        ModifiableQueryDefinition<Collection<Number>, Number, Double> definition =
+                new ModifiableQueryDefinition<>(Locale.ENGLISH, retrieverChain, functionFactory.createMethodWrappingFunction(getCrossSumMethod), AggregatorType.Sum);
+        
+        Method getLengthMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getLength");
+        definition.addDimensionToGroupBy(functionFactory.createMethodWrappingFunction(getLengthMethod));
+        
+        Method getValueMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getValue");
+        definition.setFilterSelection(0, functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
+        
+        return definition;
+    }
+    
+    private static class NumberRetrievalProcessor extends AbstractRetrievalProcessor<Collection<Number>, Number> {
+
+        @SuppressWarnings("unchecked")
+        public NumberRetrievalProcessor(ExecutorService executor, Collection<Processor<Number, ?>> resultReceivers, int retrievalLevel) {
+            super((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, executor, resultReceivers, retrievalLevel);
+        }
+
+        @Override
+        protected Iterable<Number> retrieveData(Collection<Number> element) {
+            return element;
+        }
+        
     }
     
     private Collection<Number> createDataSource() {
@@ -109,53 +154,6 @@ public class TestProcessorQuery {
         dataSource.add(new Number(1000));
         
         return dataSource;
-    }
-
-    /**
-     * Creates a query, that takes a Collection of Numbers, filters all numbers < 10, groups them by
-     * their length, extracts the cross sum and aggregates these as sum.
-     */
-    private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
-        final ExecutorService executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
-            @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
-                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = processorFactory.createAggregationProcessor(this, AggregatorType.Sum, Double.class);
-                
-                Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-                Function<Double> getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
-                Processor<GroupedDataEntry<Number>, GroupedDataEntry<Double>> crossSumExtractor = processorFactory.createExtractionProcessor(sumAggregator, getCrossSumFunction, ParameterProvider.NULL);
-
-                List<ParameterizedFunction<?>> dimensions = new ArrayList<>();
-                Function<Integer> getLengthFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
-                dimensions.add(new SimpleParameterizedFunction<>(getLengthFunction, ParameterProvider.NULL));
-                Processor<Number, GroupedDataEntry<Number>> lengthGrouper = processorFactory.createGroupingProcessor(Number.class, crossSumExtractor, dimensions);
-                Collection<Processor<Number, ?>> filtrationResultReceivers = new ArrayList<>();
-                filtrationResultReceivers.add(lengthGrouper);
-                
-                FilterCriterion<Number> filterCriterion = new AbstractFilterCriterion<Number>(Number.class) {
-                    @Override
-                    public boolean matches(Number element) {
-                        return element.getValue() >= 10;
-                    }
-                };
-                Processor<Number, Number> filtrationProcessor =  new ParallelFilteringProcessor<>(Number.class, executor, filtrationResultReceivers, filterCriterion);
-                Collection<Processor<Number, ?>> retrievalResultReceivers = new ArrayList<>();
-                retrievalResultReceivers.add(filtrationProcessor);
-                
-                @SuppressWarnings("unchecked")
-                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
-                                                                                                                                         ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 0) {
-                    @Override
-                    protected Iterable<Number> retrieveData(Iterable<Number> element) {
-                        return element;
-                    }
-                };
-                
-                return retrievalProcessor;
-            }
-        };
-        return query;
     }
 
     private QueryResult<Double> buildExpectedResult(Collection<Number> dataSource) {

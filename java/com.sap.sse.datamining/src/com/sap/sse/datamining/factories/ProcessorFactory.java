@@ -47,7 +47,8 @@ public class ProcessorFactory {
 
     @SuppressWarnings("unchecked")
     public <ResultType> Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>> createAggregationProcessor(Collection<Processor<Map<GroupKey, ResultType>, ?>> resultReceivers, AggregatorType aggregatorType, Class<ResultType> resultType) {
-        if (Double.class.equals(resultType) || double.class.equals(resultType)) {
+        if (Double.class.equals(resultType) || double.class.equals(resultType) ||
+            Integer.class.equals(resultType) || int.class.equals(resultType)) {
             Collection<Processor<Map<GroupKey, Double>, ?>> specificResultReceivers = (Collection<Processor<Map<GroupKey, Double>, ?>>)(Collection<?>) resultReceivers;
 
             switch (aggregatorType) {
