@@ -9,7 +9,7 @@ import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public interface QueryDefinitionDTO extends Serializable {
+public interface StatisticQueryDefinitionDTO extends Serializable {
     
     public String getLocaleInfoName();
     

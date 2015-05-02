@@ -31,10 +31,10 @@ import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilt
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.QueryDefinitionDTOImpl;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -148,8 +148,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
     
     @Override
-    public QueryDefinitionDTO getQueryDefinition() {
-        QueryDefinitionDTOImpl queryDTO = new QueryDefinitionDTOImpl(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
+    public StatisticQueryDefinitionDTO getQueryDefinition() {
+        ModifiableStatisticQueryDefinitionDTO queryDTO = new ModifiableStatisticQueryDefinitionDTO(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
                                                                statisticProvider.getAggregatorType(), retrieverChainProvider.getDataRetrieverChainDefinition());
         
         for (FunctionDTO dimension : groupingProvider.getDimensionsToGroupBy()) {
@@ -164,7 +164,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition) {
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         setBlockChangeNotification(true);
         statisticProvider.applyQueryDefinition(queryDefinition);
         retrieverChainProvider.applyQueryDefinition(queryDefinition);

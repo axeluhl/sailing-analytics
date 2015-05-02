@@ -18,14 +18,14 @@ import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.QueryDefinition;
+import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
@@ -220,8 +220,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public <DataSourceType, DataType, ResultType> QueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO) {
-        ModifiableQueryDefinition<DataSourceType, DataType, ResultType> queryDefinition = null;
+    public <DataSourceType, DataType, ResultType> StatisticQueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(StatisticQueryDefinitionDTO queryDefinitionDTO) {
+        ModifiableStatisticQueryDefinition<DataSourceType, DataType, ResultType> queryDefinition = null;
         
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
         DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
@@ -229,7 +229,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         Function<ResultType> statisticToCalculate = (Function<ResultType>) getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());
         
         if (locale != null && retrieverChain != null && statisticToCalculate != null) {
-             queryDefinition = new ModifiableQueryDefinition<>(locale, retrieverChain, statisticToCalculate, queryDefinitionDTO.getAggregatorType());
+             queryDefinition = new ModifiableStatisticQueryDefinition<>(locale, retrieverChain, statisticToCalculate, queryDefinitionDTO.getAggregatorType());
              
              for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {
                 Integer retrieverLevel = levelSpecificFilterSelection.getKey();
@@ -253,7 +253,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType, ResultType> Query<ResultType> createQuery(QueryDefinition<DataSourceType, ?, ResultType> queryDefinition) {
+    public <DataSourceType, ResultType> Query<ResultType> createQuery(StatisticQueryDefinition<DataSourceType, ?, ResultType> queryDefinition) {
         DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(queryDefinition.getDataRetrieverChainDefinition().getDataSourceType());
         return queryFactory.createQuery(dataSourceProvider.getDataSource(), queryDefinition, getStringMessages(), getExecutorService());
     }

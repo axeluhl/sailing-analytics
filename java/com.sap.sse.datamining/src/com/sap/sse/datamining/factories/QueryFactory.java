@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.QueryDefinition;
+import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
@@ -33,7 +33,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class QueryFactory {
 
-    public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
+    public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, StatisticQueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), new AdditionalStatisticQueryData(queryDefinition.getDataRetrieverChainDefinition().getID())) {
             @Override

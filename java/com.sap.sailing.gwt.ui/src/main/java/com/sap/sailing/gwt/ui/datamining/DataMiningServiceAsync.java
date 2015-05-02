@@ -10,7 +10,7 @@ import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -32,7 +32,7 @@ public interface DataMiningServiceAsync {
             Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
 
-    <ResultType extends Number> void runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
+    <ResultType extends Number> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining

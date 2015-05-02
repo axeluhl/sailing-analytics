@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
-public class QueryDefinitionDTOImpl implements QueryDefinitionDTO {
+public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefinitionDTO {
     private static final long serialVersionUID = -6438771277564908352L;
     
     private String localeInfoName;
@@ -24,9 +24,9 @@ public class QueryDefinitionDTOImpl implements QueryDefinitionDTO {
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
      */
     @Deprecated
-    QueryDefinitionDTOImpl() { }
+    ModifiableStatisticQueryDefinitionDTO() { }
 
-    public QueryDefinitionDTOImpl(String localeInfoName, FunctionDTO statisticToCalculate, AggregatorType aggregatorType, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
+    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregatorType aggregatorType, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
         this.localeInfoName = localeInfoName;
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorType = aggregatorType;

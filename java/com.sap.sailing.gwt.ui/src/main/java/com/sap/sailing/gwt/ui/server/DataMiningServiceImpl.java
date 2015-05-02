@@ -19,14 +19,14 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.QueryDefinition;
+import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
@@ -176,8 +176,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinitionDTO) {
-        QueryDefinition<RacingEventService, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
+        StatisticQueryDefinition<RacingEventService, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
         Query<ResultType> query = getDataMiningServer().createQuery(queryDefinition);
         QueryResult<ResultType> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, query);
         return result;

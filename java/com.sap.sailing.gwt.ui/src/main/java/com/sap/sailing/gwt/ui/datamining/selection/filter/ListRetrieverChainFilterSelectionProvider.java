@@ -34,7 +34,7 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
@@ -264,7 +264,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public void applySelection(QueryDefinitionDTO queryDefinition) {
+    public void applySelection(StatisticQueryDefinitionDTO queryDefinition) {
         for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
             Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
             int retrieverLevel = selectionProvider.getRetrieverLevel();

@@ -8,11 +8,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.QueryDefinition;
+import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 
-public class ModifiableQueryDefinition<DataSourceType, DataType, ResultType> implements QueryDefinition<DataSourceType, DataType, ResultType> {
+public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, ResultType> implements StatisticQueryDefinition<DataSourceType, DataType, ResultType> {
 
     private final Locale locale;
     
@@ -24,7 +24,7 @@ public class ModifiableQueryDefinition<DataSourceType, DataType, ResultType> imp
     private final Function<ResultType> statisticToCalculate;
     private final AggregatorType aggregatorType;
 
-    public ModifiableQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ResultType> statisticToCalculate, AggregatorType aggregatorType) {
+    public ModifiableStatisticQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ResultType> statisticToCalculate, AggregatorType aggregatorType) {
         this.locale = locale;
         
         this.retrieverChain = retrieverChain;

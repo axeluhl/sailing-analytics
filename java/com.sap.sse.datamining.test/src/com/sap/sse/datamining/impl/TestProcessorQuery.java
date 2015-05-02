@@ -28,7 +28,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.QueryDefinition;
+import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
@@ -88,7 +88,7 @@ public class TestProcessorQuery {
      * Creates a query definition, that filters all numbers < 10, groups them by
      * their length, extracts the cross sum and aggregates their sum.
      */
-    private QueryDefinition<Collection<Number>, Number, Double> createQueryDefinition() {
+    private StatisticQueryDefinition<Collection<Number>, Number, Double> createQueryDefinition() {
         FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
         
         @SuppressWarnings("unchecked")
@@ -96,8 +96,8 @@ public class TestProcessorQuery {
         retrieverChain.startWith(NumberRetrievalProcessor.class, Number.class, "Number");
         
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        ModifiableQueryDefinition<Collection<Number>, Number, Double> definition =
-                new ModifiableQueryDefinition<>(Locale.ENGLISH, retrieverChain, functionFactory.createMethodWrappingFunction(getCrossSumMethod), AggregatorType.Sum);
+        ModifiableStatisticQueryDefinition<Collection<Number>, Number, Double> definition =
+                new ModifiableStatisticQueryDefinition<>(Locale.ENGLISH, retrieverChain, functionFactory.createMethodWrappingFunction(getCrossSumMethod), AggregatorType.Sum);
         
         Method getLengthMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getLength");
         definition.addDimensionToGroupBy(functionFactory.createMethodWrappingFunction(getLengthMethod));

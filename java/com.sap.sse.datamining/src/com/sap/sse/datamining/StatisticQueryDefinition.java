@@ -8,7 +8,7 @@ import java.util.Map;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 
-public interface QueryDefinition<DataSourceType, DataType, ResultType> {
+public interface StatisticQueryDefinition<DataSourceType, DataType, ResultType> {
 
     public Class<DataSourceType> getDataSourceType();
     public Class<DataType> getDataType();

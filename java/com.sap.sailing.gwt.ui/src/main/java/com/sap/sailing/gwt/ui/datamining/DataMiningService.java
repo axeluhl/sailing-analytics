@@ -10,7 +10,7 @@ import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
@@ -28,7 +28,7 @@ public interface DataMiningService extends RemoteService {
     QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
             Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO, String localeInfoName);
     
-    <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinition);
+    <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
 
     SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy();
 

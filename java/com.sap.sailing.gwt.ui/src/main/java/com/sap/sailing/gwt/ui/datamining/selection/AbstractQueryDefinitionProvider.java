@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
@@ -121,7 +121,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
 
     @Override
-    public Iterable<String> validateQueryDefinition(QueryDefinitionDTO queryDefinition) {
+    public Iterable<String> validateQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
         if (queryDefinition != null) {
@@ -142,7 +142,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return errorMessages;
     }
 
-    private String validateGrouper(QueryDefinitionDTO queryDefinition) {
+    private String validateGrouper(StatisticQueryDefinitionDTO queryDefinition) {
         for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
             if (dimension != null) {
                 return null;
@@ -151,11 +151,11 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return stringMessages.noDimensionToGroupBySelectedError();
     }
 
-    private String validateStatisticAndAggregator(QueryDefinitionDTO queryDefinition) {
+    private String validateStatisticAndAggregator(StatisticQueryDefinitionDTO queryDefinition) {
         return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
-    private String validateDataRetrieverChain(QueryDefinitionDTO queryDefinition) {
+    private String validateDataRetrieverChain(StatisticQueryDefinitionDTO queryDefinition) {
         return queryDefinition.getDataRetrieverChainDefinition() == null ? stringMessages.noDataRetrieverChainDefinitonSelectedError() : null;
     }
 
@@ -175,7 +175,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
-            QueryDefinitionDTO queryDefinition = getQueryDefinition();
+            StatisticQueryDefinitionDTO queryDefinition = getQueryDefinition();
             if (isQueryDefinitionConsistent(queryDefinition)) {
                 for (QueryDefinitionChangedListener listener : listeners) {
                     listener.queryDefinitionChanged(queryDefinition);
@@ -184,7 +184,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         }
     }
 
-    private boolean isQueryDefinitionConsistent(QueryDefinitionDTO queryDefinition) {
+    private boolean isQueryDefinitionConsistent(StatisticQueryDefinitionDTO queryDefinition) {
         if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is selected
             String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
             

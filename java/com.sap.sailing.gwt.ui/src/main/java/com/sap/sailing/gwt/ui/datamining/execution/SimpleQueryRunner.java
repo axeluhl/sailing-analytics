@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -58,7 +58,7 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void run(QueryDefinitionDTO queryDefinition) {
+    public void run(StatisticQueryDefinitionDTO queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
@@ -92,7 +92,7 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void queryDefinitionChanged(QueryDefinitionDTO newQueryDefinition) {
+    public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
         run(newQueryDefinition);
     }
 
