@@ -27,7 +27,6 @@
         android:hint="?sap_light_gray"
         tools:text="300°"
         android:gravity="center_horizontal">
-        <requestFocus/>
     </com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText>
 
     <ImageView

@@ -12,7 +12,8 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import com.sap.sailing.racecommittee.app.R;
 
 public class CompassView extends RelativeLayout {
@@ -58,10 +59,12 @@ public class CompassView extends RelativeLayout {
 
         needleView = (ImageView) findViewById(R.id.compass_view_needle);
         degreeView = (BackAwareEditText) findViewById(R.id.compass_view_degree);
+        degreeView.setSelectAllOnFocus(true);
         degreeView.setInputDownPressedListener(new BackAwareEditText.InputDownPressedListener() {
             @Override
             public void onImeBack(BackAwareEditText editText) {
                 float degree = currentDegrees > 0 ? currentDegrees : currentDegrees + 360;
+                degreeView.clearFocus();
                 degreeView.setText(String.format("%.0f°", degree));
             }
         });
@@ -163,6 +166,7 @@ public class CompassView extends RelativeLayout {
             if (Math.abs(degree) == 360) {
                 degree = 0;
             }
+            degreeView.clearFocus();
             changeListener.onDirectionChanged(degree);
         }
     }
