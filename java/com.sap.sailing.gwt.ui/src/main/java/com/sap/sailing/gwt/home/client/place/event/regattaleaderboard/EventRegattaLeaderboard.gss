@@ -121,7 +121,7 @@
   background-size: 40%;
 }
 .regattaleaderboard_table {
-  margin-top: 0.666666666666667em;
+  	margin-bottom: 20px;
 }
 .regattaleaderboard_header {
   background: #f2f2f2;
@@ -218,4 +218,8 @@
 }
 .marginFix {
   margin-top:2rem;
+}
+.letItScroll {
+  overflow-x: auto;
+  margin: 10px 0px;
 }

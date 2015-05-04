@@ -338,8 +338,10 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-TabBar {
-  background: #ccc;
-  padding-top: 6px;
+  margin-top: 20px;
+  border-bottom: 1px solid #dedede;
+  margin-bottom: 10px;
+  
 }
 
 .gwt-TabBar .gwt-TabBarFirst {
@@ -351,22 +353,27 @@ body ::-webkit-scrollbar-track {
 
 .gwt-TabBar .gwt-TabBarItem {
   margin-left: 4px;
-  padding: 4px 8px 4px 8px;
+  padding: 10px 12px;
   cursor: pointer;
   cursor: hand;
-  color: white;
+  color: black;
   font-weight: normal;
   text-align: center;
-  background: #8E8E8E;
-  -moz-border-radius: 3px 3px 0px 0px;
-  border-radius: 3px 3px 0px 0px;
+  background: #ebebeb;
+  border-radius: 4px 4px 0px 0px;
+  border-left: 1px solid #dedede;
+  border-top: 1px solid #dedede;
+  border-right: 1px solid #dedede;
+  
 }
 
+.gwt-TabBarItem:FOCUS {
+	outline: none;
+}
 .gwt-TabBar .gwt-TabBarItem-selected {
   cursor: default;
   background: white;
-  color: #333;
-  font-weight: bold;
+  color: black;
 }
 
 .gwt-TabBar .gwt-TabBarItem-disabled {

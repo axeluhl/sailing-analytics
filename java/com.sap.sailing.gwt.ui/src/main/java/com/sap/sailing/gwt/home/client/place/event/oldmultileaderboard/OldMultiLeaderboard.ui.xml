@@ -23,7 +23,7 @@
 		</div>
 		
 		<div class="{res.mediaCss.grid}" >
-		  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+		  <div class="{res.mediaCss.small12} {res.mediaCss.columns}  {local_res.css.letItScroll}">
 		        <table class="{local_res.css.regattaleaderboard_table}">
      				  <tr>
      					<td>
