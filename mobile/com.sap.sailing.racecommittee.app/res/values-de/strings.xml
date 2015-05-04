@@ -399,5 +399,7 @@
     <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
     <string name="until_xray_removed">XRAY wird eingeholt in #TIME#</string>
     <string name="send_photos">Fotos senden</string>
+    <string name="error_wrong_degree_value_title">Fehler</string>
+    <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
 
 </resources>

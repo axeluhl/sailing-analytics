@@ -14,16 +14,21 @@
         android:contentDescription="@string/compass_view_compass"
         android:src="?compass_back"/>
 
-    <TextView
+    <com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText
         android:id="@+id/compass_view_degree"
-        android:layout_width="200dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="false"
+        android:inputType="numberDecimal"
         android:layout_centerInParent="true"
         android:layout_gravity="center"
-        android:textAppearance="?textLarge"
+        android:textColor="?white"
+        android:hint="?sap_light_gray"
         tools:text="300°"
-        android:gravity="center_horizontal"/>
+        android:gravity="center_horizontal">
+        <requestFocus/>
+    </com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText>
 
     <ImageView
         android:id="@+id/compass_view_needle"

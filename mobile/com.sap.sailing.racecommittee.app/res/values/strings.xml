@@ -421,5 +421,7 @@
     <string name="url_refresh_message">Please logout from the current event to load the data from the new server.</string>
     <string name="until_xray_removed">XRAY will be removed in #TIME#</string>
     <string name="send_photos">Send Photos</string>
+    <string name="error_wrong_degree_value_title">Error</string>
+    <string name="error_wrong_degree_value_message">Please provide a value between 0 and 360</string>
 
 </resources>

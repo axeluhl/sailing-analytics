@@ -1,16 +1,18 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.*;
 import com.sap.sailing.racecommittee.app.R;
 
 public class CompassView extends RelativeLayout {
@@ -18,7 +20,7 @@ public class CompassView extends RelativeLayout {
     private CompassDirectionListener changeListener = null;
     private RotateAnimation rotation = null;
     private ImageView needleView = null;
-    private TextView degreeView = null;
+    private BackAwareEditText degreeView = null;
     private float currentDegrees = 0.0f;
     private Float deferredToDegrees = null;
 
@@ -55,7 +57,50 @@ public class CompassView extends RelativeLayout {
         super.onFinishInflate();
 
         needleView = (ImageView) findViewById(R.id.compass_view_needle);
-        degreeView = (TextView) findViewById(R.id.compass_view_degree);
+        degreeView = (BackAwareEditText) findViewById(R.id.compass_view_degree);
+        degreeView.setInputDownPressedListener(new BackAwareEditText.InputDownPressedListener() {
+            @Override
+            public void onImeBack(BackAwareEditText editText) {
+                float degree = currentDegrees > 0 ? currentDegrees : currentDegrees + 360;
+                degreeView.setText(String.format("%.0f°", degree));
+            }
+        });
+        degreeView.setOnKeyListener(new OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    String value = degreeView.getText().toString();
+                    value = value.replace("°", "");
+                    value = value.replace(" ", "");
+                    float degree = Float.valueOf(value);
+                    if (degree > 0.0 && degree < 360.0) {
+                        setDirection(degree);
+                    } else {
+                        generateAndShowAlert();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void generateAndShowAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(getContext().getString(R.string.error_wrong_degree_value_title));
+        builder.setMessage(getContext().getString(R.string.error_wrong_degree_value_message));
+        builder.setPositiveButton(android.R.string.ok, null);
+        AlertDialog dialog = builder.create();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                degreeView.requestFocus();
+                degreeView.selectAll();
+                InputMethodManager imm = (InputMethodManager) getContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(degreeView, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+        dialog.show();
     }
 
     @Override
