@@ -10,7 +10,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 
 public class SailingFlagsBuilder {
     

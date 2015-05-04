@@ -7,7 +7,7 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
@@ -15,17 +15,29 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
     private static final String LOCALIZED_NAME_CHAIN_CONNECTOR = " ";
     
-    private final String name;
     private final List<Function<?>> functions;
+    
+    private final String simpleName;
     private final int ordinal;
 
-    public ConcatenatingCompoundFunction(String name, List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
+    public ConcatenatingCompoundFunction(List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isLastFunctionADimension(functions));
         checkThatReturnTypesMatch(functions, returnType);
         
-        this.name = name;
         this.functions = new ArrayList<>(functions);
-        this.ordinal = calculateOrdinal();
+        
+        simpleName = buildSimpleName();
+        ordinal = calculateOrdinal();
+    }
+
+    private String buildSimpleName() {
+        Iterator<Function<?>> functionsIterator = functions.iterator();
+        StringBuilder builder = new StringBuilder(functionsIterator.next().getSimpleName());
+        while (functionsIterator.hasNext()) {
+            Function<?> function = functionsIterator.next();
+            builder.append(SIMPLE_NAME_CHAIN_CONNECTOR + function.getSimpleName());
+        }
+        return builder.toString();
     }
 
     private int calculateOrdinal() {
@@ -69,28 +81,11 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     
     @Override
     public String getSimpleName() {
-        if (name != null && !name.isEmpty()) {
-            return name;
-        }
-        
-        return buildSimpleNameChain();
-    }
-
-    private String buildSimpleNameChain() {
-        Iterator<Function<?>> functionsIterator = functions.iterator();
-        StringBuilder builder = new StringBuilder(functionsIterator.next().getSimpleName());
-        while (functionsIterator.hasNext()) {
-            Function<?> function = functionsIterator.next();
-            builder.append(SIMPLE_NAME_CHAIN_CONNECTOR + function.getSimpleName());
-        }
-        return builder.toString();
+        return simpleName;
     }
 
     @Override
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
-        if (name != null && !name.isEmpty()) {
-            return name;
-        }
         if (!isLocalizable()) {
             return getSimpleName();
         }
@@ -180,7 +175,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         final int prime = 31;
         int result = 1;
         result = prime * result + ((functions == null) ? 0 : functions.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
 
@@ -197,11 +191,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
             if (other.functions != null)
                 return false;
         } else if (!functions.equals(other.functions))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
             return false;
         return true;
     }

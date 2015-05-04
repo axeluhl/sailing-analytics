@@ -38,19 +38,20 @@ import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
+import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 
 public class PolarDataMiner {
 
@@ -125,38 +126,38 @@ public class PolarDataMiner {
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> movingAverageGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         movingAverageGrouperResultReceivers.add(movingAverageProcessor);
 
-        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProviders = new ArrayList<>();
+        Collection<ParameterizedFunction<?>> parameterizedDimensions = new ArrayList<>();
         for (Function<?> function : PolarDataDimensionCollectionFactory.getMovingAverageClusterKeyDimensions()) {
-            dimensionsWithParameterProviders.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+            parameterizedDimensions.add(new SimpleParameterizedFunction<>(function, ParameterProvider.NULL));
         }
 
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> movingAverageGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, dimensionsWithParameterProviders);
+                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, parameterizedDimensions);
         
 
         cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerCourseGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerCourseGrouperResultReceivers.add(cubicRegressionPerCourseProcessor);
 
-        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvidersForCubicRegression = new ArrayList<>();
+        Collection<ParameterizedFunction<?>> parameterizedDimensionsForCubicRegression = new ArrayList<>();
         for (Function<?> function : PolarDataDimensionCollectionFactory.getCubicRegressionPerCourseClusterKeyDimensions()) {
-            dimensionsWithParameterProvidersForCubicRegression.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+            parameterizedDimensionsForCubicRegression.add(new SimpleParameterizedFunction<>(function, ParameterProvider.NULL));
         }
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> cubicRegressionPerCourseGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, dimensionsWithParameterProvidersForCubicRegression);
+                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, parameterizedDimensionsForCubicRegression);
         
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
         speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerAngleClusterGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerAngleClusterGrouperResultReceivers.add(speedRegressionPerAngleClusterProcessor);
 
-        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvidersForRegressionPerAngleCluster = new ArrayList<>();
+        Collection<ParameterizedFunction<?>> parameterizedDimensionsForRegressionPerAngleCluster = new ArrayList<>();
         for (Function<?> function : PolarDataDimensionCollectionFactory.getSpeedRegressionPerAngleClusterClusterKeyDimensions()) {
-            dimensionsWithParameterProvidersForRegressionPerAngleCluster.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+            parameterizedDimensionsForRegressionPerAngleCluster.add(new SimpleParameterizedFunction<>(function, ParameterProvider.NULL));
         }
         
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> regressionPerAngleClusterGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, dimensionsWithParameterProvidersForRegressionPerAngleCluster);
+                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, parameterizedDimensionsForRegressionPerAngleCluster);
 
           
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = new ArrayList<>();

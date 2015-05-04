@@ -7,8 +7,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -26,7 +26,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @Override
     public TabView.State getState() {
-        return TabView.State.NOT_AVAILABLE;
+        return TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
     }
 
     @Override

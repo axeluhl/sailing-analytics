@@ -29,7 +29,7 @@
                 <div class="{local_res.css.regatta_intro_header_details_item}"><ui:text from='{i18n.regattaRaces}'/>&nbsp;<span class="{local_res.css.regatta_intro_header_details_item_value}"><span ui:field="racesCount" /></span></div>
                 <div class="{local_res.css.regatta_intro_header_details_item}"><ui:text from='{i18n.regattaTracked}'/>&nbsp;<span class="{local_res.css.regatta_intro_header_details_item_value}"><span ui:field="trackedRacesCount" /></span></div>
                 <div ui:field="leaderboardGroupNameDiv" class="{local_res.css.regatta_intro_header_details_item}">
-                  <div ui:field="leaderboardGroupName" data-labeltype="" class="{local_res.css.regatta_intro_header_details_label} {res.mainCss.label}"></div>
+                  <div ui:field="leaderboardGroupName" data-labeltype="" class="{local_res.css.regatta_intro_header_details_label} {local_res.css.regatta_intro_header_details_item}"></div>
                 </div>
               </div>
             </div>

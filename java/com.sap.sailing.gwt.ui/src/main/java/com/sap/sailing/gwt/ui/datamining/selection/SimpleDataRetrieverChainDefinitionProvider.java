@@ -17,20 +17,19 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SimpleDataRetrieverChainDefinitionProvider implements DataRetrieverChainDefinitionProvider,
-                                                                   StatisticChangedListener {
+public class SimpleDataRetrieverChainDefinitionProvider implements DataRetrieverChainDefinitionProvider {
     
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
@@ -38,6 +37,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     private final Set<DataRetrieverChainDefinitionChangedListener> listeners;
     
     private FunctionDTO currentStatisticToCalculate;
+    private boolean isAwaitingReload;
     
     private final HorizontalPanel mainPanel;
     private final ValueListBox<DataRetrieverChainDefinitionDTO> retrieverChainsListBox;
@@ -49,6 +49,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
         currentStatisticToCalculate = null;
+        isAwaitingReload = false;
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
@@ -78,17 +79,27 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
     
     @Override
+    public void awaitReloadComponents() {
+        isAwaitingReload = true;
+    }
+    
+    @Override
+    public void reloadComponents() {
+        updateRetrieverChains();
+    }
+    
+    @Override
     public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
         if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
             String currentSourceType = currentStatisticToCalculate == null ? null : currentStatisticToCalculate.getSourceTypeName();
             currentStatisticToCalculate = newStatisticToCalculate;
-            if (!Objects.equals(currentSourceType, newStatisticToCalculate.getSourceTypeName())) {
-                updateAvailableRetrieverChains();
+            if (!isAwaitingReload && !Objects.equals(currentSourceType, newStatisticToCalculate.getSourceTypeName())) {
+                updateRetrieverChains();
             }
         }
     }
     
-    private void updateAvailableRetrieverChains() {
+    private void updateRetrieverChains() {
         dataMiningService.getDataRetrieverChainDefinitionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>>() {
                     @Override
@@ -108,9 +119,10 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                             retrieverChainsListBox.setValue(retrieverChainToBeSelected);
                             retrieverChainsListBox.setAcceptableValues(sortedRetrieverChains);
                             
-                            if (!retrieverChainToBeSelected.equals(currentRetrieverChain)) {
+                            if (isAwaitingReload || !retrieverChainToBeSelected.equals(currentRetrieverChain)) {
                                 notifyListeners();
                             }
+                            isAwaitingReload = false;
                         } else {
                             retrieverChainsListBox.setValue(null);
                             retrieverChainsListBox.setAcceptableValues(new ArrayList<DataRetrieverChainDefinitionDTO>());
@@ -120,6 +132,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error retrieving the available DataRetrieverChainDefinitions: " + caught.getMessage());
+                        isAwaitingReload = false;
                     }
                 });
     }
@@ -176,11 +189,11 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) { }
+    public void updateSettings(AbstractSettings newSettings) { }
 
 }

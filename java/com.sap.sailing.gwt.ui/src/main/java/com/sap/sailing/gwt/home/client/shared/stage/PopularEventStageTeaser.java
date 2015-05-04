@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class PopularEventStageTeaser extends StageTeaser {
 
+    private final PopularEventStageTeaserBand teaserBand;
     public PopularEventStageTeaser(EventStageDTO event, HomePlacesNavigator placeNavigator) {
         super(event);
 
@@ -15,8 +16,13 @@ public class PopularEventStageTeaser extends StageTeaser {
         countdown.getStyle().setDisplay(Display.NONE);
 
         bandCount.setAttribute("data-bandcount", "1");
-
-        stageTeaserBandsPanel.getElement().appendChild(
-                new PopularEventStageTeaserBand(event, placeNavigator).getElement());
+        teaserBand = new PopularEventStageTeaserBand(event, placeNavigator);
+        stageTeaserBandsPanel.getElement().appendChild(teaserBand.getElement());
     }
+
+    @Override
+    protected void handleUserAction() {
+        teaserBand.actionLinkClicked(null);
+    }
+
 }

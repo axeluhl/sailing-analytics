@@ -44,6 +44,7 @@ public interface TextMessages extends Messages {
     String overview();
     String sapSailing();
     String search();
+    String startSimulator();
     
     String countdownDays();
     String countdownHours();
@@ -121,6 +122,7 @@ public interface TextMessages extends Messages {
     String eventRegattaRacesLegendVideo();
     String eventRegattaRacesLegendAudio();
     String eventSponsorsTitle();
+    String footerJobs();
     String footerCopyright();
     String footerLanguage();
     String footerLegal();

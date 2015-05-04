@@ -29,6 +29,8 @@ public class LiveStageTeaserBand extends StageTeaserBand {
     @Override
     public void actionLinkClicked(ClickEvent e) {
         getPlaceNavigator().goToPlace(getEventNavigation());
-        e.preventDefault();
+        if (e != null) {
+            e.preventDefault();
+        }
     }
 }

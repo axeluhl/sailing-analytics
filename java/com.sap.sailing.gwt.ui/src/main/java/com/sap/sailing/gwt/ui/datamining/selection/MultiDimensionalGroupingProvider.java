@@ -16,20 +16,20 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiDimensionalGroupingProvider implements GroupingProvider, StatisticChangedListener {
+public class MultiDimensionalGroupingProvider implements GroupingProvider {
     
     private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
     
@@ -41,6 +41,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     private final HorizontalFlowPanel mainPanel;
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
+    private boolean isAwaitingReload;
     private FunctionDTO currentStatisticToCalculate;
     private final List<FunctionDTO> availableDimensions;
 
@@ -52,6 +53,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
         listeners = new HashSet<GroupingChangedListener>();
         currentStatisticToCalculate = null;
         availableDimensions = new ArrayList<>();
+        isAwaitingReload = false;
         dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
         
         mainPanel = new HorizontalFlowPanel();
@@ -65,14 +67,27 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     }
     
     @Override
+    public void awaitReloadComponents() {
+        isAwaitingReload = true;
+    }
+    
+    @Override
+    public void reloadComponents() {
+        isAwaitingReload = false;
+        updateAvailableDimensions();
+    }
+    
+    @Override
     public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
         if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
             currentStatisticToCalculate = newStatisticToCalculate;
-            updateAvailableDimensionsFor();
+            if (!isAwaitingReload) {
+                updateAvailableDimensions();
+            }
         }
     }
 
-    private void updateAvailableDimensionsFor() {
+    private void updateAvailableDimensions() {
         if (currentStatisticToCalculate != null) {
             dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale()
                     .getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
@@ -82,11 +97,13 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
                     for (FunctionDTO dimension : dimensions) {
                         availableDimensions.add(dimension);
                     }
-                    Collections.sort(availableDimensions);
                     ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
                     addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
                     if (!availableDimensions.isEmpty()) {
+                        Collections.sort(availableDimensions);
                         firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                    } else {
+                        notifyListeners();
                     }
                 }
 
@@ -225,12 +242,12 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider, Stati
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) { }
+    public void updateSettings(AbstractSettings newSettings) { }
     
     @Override
     public String getDependentCssClassName() {

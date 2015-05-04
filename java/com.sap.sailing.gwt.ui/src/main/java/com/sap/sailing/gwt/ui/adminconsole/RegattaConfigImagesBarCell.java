@@ -5,7 +5,7 @@ import java.util.Arrays;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.gwt.client.IconResources;
 
 public class RegattaConfigImagesBarCell extends ImagesBarCell {

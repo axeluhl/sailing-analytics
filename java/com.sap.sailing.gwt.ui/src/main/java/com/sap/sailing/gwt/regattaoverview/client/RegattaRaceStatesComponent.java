@@ -53,8 +53,6 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -67,6 +65,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * This component shows a table displaying the current state of races for a given event. 
@@ -110,6 +110,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
     
+    
+    
+    
+    
+   
     private EntryHandler entryClickedHandler;
     
     public void setEntryClickedHandler(EntryHandler handler) {

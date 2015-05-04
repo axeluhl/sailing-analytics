@@ -2,19 +2,19 @@ package com.sap.sailing.gwt.home.client.shared.media;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
+import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
@@ -27,7 +27,6 @@ public class MediaPage extends Composite {
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
     }
     
-    @UiField HeadingElement noContent;
     // TODO use this when ImageGallery and VideoGallery is implemented correctly
 //    @UiField ImageGallery photos;
 //    @UiField VideoGallery videos;
@@ -36,6 +35,9 @@ public class MediaPage extends Composite {
     @UiField DivElement photoWrapper;
     @UiField DivElement videoWrapper;
     @UiField DivElement videosPanel;
+    private final SimplePanel contentPanel;
+    
+    @UiField StringMessages i18n;
 
     public MediaPage() {
         MediaPageResources.INSTANCE.css().ensureInjected();
@@ -44,7 +46,7 @@ public class MediaPage extends Composite {
     }
     
     public void setMedia(MediaDTO media) {
-        contentPanel.setWidget(uiBinder.createAndBindUi(this));
+        Widget mediaUi = uiBinder.createAndBindUi(this);
         
         boolean hasPhotos = !media.getPhotos().isEmpty();
      // TODO use this when ImageGallery is implemented correctly
@@ -84,46 +86,20 @@ public class MediaPage extends Composite {
             if(hasPhotos) {
                 videoWrapper.addClassName(MediaPageResources.INSTANCE.css().dark());
             }
-            final int numberOfCandidatesAvailable = media.getVideos().size();
-            if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - addedVideoIds.size())) {
-                // add all we have, no randomize
-                for (VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
-                    addVideoToVideoPanel(videoCandidateInfo.getRef(), videoCandidateInfo.getTitle());
-                }
-            } else {
-                // fill up the list randomly from videoCandidates
-                final Random videosRandomizer = new Random(numberOfCandidatesAvailable);
-                randomlyPick: for (int i = 0; i < numberOfCandidatesAvailable; i++) {
-                    int nextVideoindex = videosRandomizer.nextInt(numberOfCandidatesAvailable);
-                    final VideoMetadataDTO videoCandidateInfo = media.getVideos().get(nextVideoindex);
-                    addVideoToVideoPanel(videoCandidateInfo.getRef(), videoCandidateInfo.getTitle());
-                    if (addedVideoIds.size() == MAX_VIDEO_COUNT) {
-                        break randomlyPick;
-                    }
-                }
+            for (VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
+                MainMediaVideo video = new MainMediaVideo(videoCandidateInfo.getTitle(), videoCandidateInfo.getRef(), true);
+                videosPanel.appendChild(video.getElement());
             }
         }
         
         
         if(!hasPhotos && !hasVideos) {
-            noContent.getStyle().clearDisplay();
+            contentPanel.setWidget(new InfoPlaceholder(i18n.mediaNoContent()));
+        } else {
+            contentPanel.setWidget(mediaUi);
         }
     }
     
- // TODO remove -> temporary solution to get contents on the page
-    private static final int MAX_VIDEO_COUNT = 3;
-    private final HashSet<String> addedVideoIds = new HashSet<String>(MAX_VIDEO_COUNT);
-    private SimplePanel contentPanel;
-    private void addVideoToVideoPanel(String youtubeId, String title) {
-        if (addedVideoIds.contains(youtubeId)) {
-            return;
-        }
-        if (youtubeId != null && !youtubeId.trim().isEmpty()) {
-            MainMediaVideo video = new MainMediaVideo(title, youtubeId);
-            videosPanel.appendChild(video.getElement());
-            addedVideoIds.add(youtubeId);
-        }
-    }
 
     // private ImageGalleryData mapPhotoData(ArrayList<MediaEntryDTO> photos) {
     // List<ImageDescriptor> images = new ArrayList<>();

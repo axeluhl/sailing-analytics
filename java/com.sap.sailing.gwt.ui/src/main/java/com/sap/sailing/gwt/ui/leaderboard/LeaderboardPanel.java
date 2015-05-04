@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -85,10 +85,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
@@ -112,6 +108,11 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -142,6 +143,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
         SafeHtml cellFrameWithTextColor(String textColor);
+
+        @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
+        SafeHtml cellWithImageResourceAndText(ImageResource image, String text);
     }
 
     private static RaceColumnTemplates raceColumnTemplate = GWT.create(RaceColumnTemplates.class);
@@ -284,8 +288,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     private boolean isEmbedded;
 
-    private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
-    private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
+    private static final LeaderboardResources resources = GWT.create(LeaderboardResources.class);
+    private static final ComponentResources componentResources = GWT.create(ComponentResources.class);
+    private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
 
     private ImageResource pauseIcon;
     private ImageResource playIcon;
@@ -385,7 +390,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     protected ImageResource getSettingsIcon() {
-        return resources.settingsIcon();
+        return componentResources.settingsIcon();
     }
 
     public void updateSettings(final LeaderboardSettings newSettings) {
@@ -659,18 +664,26 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).getTwoLetterIsoCountryCode();
-            final ImageResource flagImageResource;
-            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
-            } else {
-                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-            }
-            if (flagImageResource != null) {
-                sb.append(renderer.render(flagImageResource));
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+            final String flagImageURL = competitor.getFlagImageURL();
+
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
+            } else {
+                final ImageResource flagImageResource;
+                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                } else {
+                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                }
+                if (flagImageResource != null) {
+                    sb.append(renderer.render(flagImageResource));
+                    sb.appendHtmlConstant("&nbsp;");
+                }
             }
-            sb.appendEscaped(competitorFetcher.getCompetitor(object).getSailID());
+            sb.appendEscaped(competitor.getSailID());
         }
 
         @Override

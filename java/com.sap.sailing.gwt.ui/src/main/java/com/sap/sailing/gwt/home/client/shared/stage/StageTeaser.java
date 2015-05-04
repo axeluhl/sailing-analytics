@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -58,15 +61,9 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
         String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
 
-        teaserImage.getStyle().setOpacity(0);
-        new Animation() {
+    }
 
-            @Override
-            protected void onUpdate(double progress) {
-                teaserImage.getStyle().setOpacity(progress);
-
-            }
-        }.run(1000);
+    protected void handleUserAction() {
 
     }
 
@@ -85,6 +82,23 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
 
         };
         new Countdown(eventStart, countdownListener);
+
+        addDomHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+                if (!Element.is(eventTarget)) {
+                    return;
+                }
+                Element element = eventTarget.cast();
+                if (stageTeaserBandsPanel.getElement().isOrHasChild(element)) {
+                    return;
+                }
+                handleUserAction();
+
+            }
+        }, ClickEvent.getType());
     }
 
     private void updateCountdown(RemainingTime major, RemainingTime minor) {

@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -12,6 +11,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
@@ -22,11 +22,7 @@ import com.sap.sailing.gwt.ui.shared.general.LabelType;
 public class EventTeaser extends Composite {
 
     @UiField
-    DivElement eventTeaserWithState;
-    @UiField
-    DivElement eventNameWithState;
-    @UiField
-    DivElement eventName;
+    SpanElement eventName;
     @UiField
     SpanElement venue;
     @UiField
@@ -40,10 +36,10 @@ public class EventTeaser extends Composite {
 
     private final EventMetadataDTO event;
 
-    interface RecentEventUiBinder extends UiBinder<Widget, EventTeaser> {
+    interface EventTeaserUiBinder extends UiBinder<Widget, EventTeaser> {
     }
 
-    private static RecentEventUiBinder uiBinder = GWT.create(RecentEventUiBinder.class);
+    private static EventTeaserUiBinder uiBinder = GWT.create(EventTeaserUiBinder.class);
     private final LabelType labelType;
 
     public EventTeaser(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event, LabelType labelType) {
@@ -58,7 +54,7 @@ public class EventTeaser extends Composite {
         Event.setEventListener(eventLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                if(event.getTypeInt() == Event.ONCLICK) {
+                if(LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
                     placeNavigation.goToPlace();
                 }
@@ -69,14 +65,11 @@ public class EventTeaser extends Composite {
     }
 
     private void updateUI() {
-        SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getDisplayName());
+        eventName.setInnerSafeHtml(LongNamesUtil.breakLongName(event.getDisplayName()));
         if(labelType.isRendered()) {
-            eventNameWithState.setInnerSafeHtml(safeHtmlEventName);
             LabelTypeUtil.renderLabelType(eventState, labelType);
-            eventName.removeFromParent();
         } else {
-            eventName.setInnerSafeHtml(safeHtmlEventName);
-            eventTeaserWithState.removeFromParent();
+            eventState.removeFromParent();
         }
         
         venue.setInnerText(event.getLocationOrVenue());

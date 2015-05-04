@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -26,6 +25,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
 public class OldLeaderboard extends Composite {
     private static OldLeaderboardUiBinder uiBinder = GWT.create(OldLeaderboardUiBinder.class);
@@ -47,19 +47,16 @@ public class OldLeaderboard extends Composite {
     
     public OldLeaderboard() {
         this.leaderboardPanel = null;
-        
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         OldLeaderboardResources.INSTANCE.css().ensureInjected();
-        
         initWidget(uiBinder.createAndBindUi(this));
-        
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
     }
     
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
-        if(autoRefreshTimer != null) {
+        if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
                 autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
@@ -87,12 +84,11 @@ public class OldLeaderboard extends Composite {
     public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
-
         oldLeaderboardPanel.add(leaderboardPanel);
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard, boolean hasLiveRace) {
-        if(leaderboard != null) {
+        if (leaderboard != null) {
             lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
             scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
@@ -105,7 +101,6 @@ public class OldLeaderboard extends Composite {
                 lastScoringUpdateTimeDiv.setInnerText("");
                 lastScoringUpdateTextDiv.setInnerText("");
             }
-
             lastScoringUpdateTextDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
             lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
         }

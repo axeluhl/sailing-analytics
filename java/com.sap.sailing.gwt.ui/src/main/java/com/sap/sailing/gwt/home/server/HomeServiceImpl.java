@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.VideoReferenceDTO.VideoType;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
@@ -185,7 +186,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             Collection<URL> videosOfEvent = (Collection<URL>) holder.event.getVideoURLs();
             if (videosOfEvent.size() > 0 && result.getVideos().size() < MAX_VIDEO_COUNT) {
                 URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
-                result.addVideo(new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName()));
+                VideoMetadataDTO candidate = new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName());
+                if (candidate.getType() == VideoType.YOUTUBE) {
+                    result.addVideo(candidate);
+                }
             }
         }
         Collections.sort(recentEventsOfLast12Month, new Comparator<EventHolder>() {
@@ -216,7 +220,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 }
             }
             for (URL videoUrl : event.getVideoURLs()) {
-                videoCandidates.add(new VideoMetadataDTO(videoUrl, holder.event.getName()));
+                
+                
+                VideoMetadataDTO candidate = new VideoMetadataDTO(videoUrl, holder.event.getName());
+                if (candidate.getType() == VideoType.YOUTUBE) {
+                    videoCandidates.add(candidate);
+                }
             }
         }
         
@@ -263,7 +272,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         dto.setLogoImageURL(event.getLogoImageURL() == null ? null : event.getLogoImageURL().toString());
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
-        
+
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(calculateEventState(event));
         dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
@@ -452,7 +461,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             media.addPhoto(entry);
         }
         for(URL url : event.getVideoURLs()) {
-            media.addVideo(new VideoMetadataDTO(url, eventName));
+            VideoMetadataDTO candidate = new VideoMetadataDTO(url, null /* eventName */);
+            if (candidate.getType() == VideoType.YOUTUBE) {
+                media.addVideo(candidate);
+            }
         }
         return media;
     }

@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.shared.impl;
 
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 
 public class AdditionalResultDataImpl implements AdditionalResultData {
     private static final long serialVersionUID = -9054872418326676943L;

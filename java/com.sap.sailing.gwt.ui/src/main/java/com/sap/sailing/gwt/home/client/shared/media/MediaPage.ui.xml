@@ -11,7 +11,6 @@
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <h3 ui:field="noContent" style="display: none; padding-top: 2em;"><ui:text from="{i18n.mediaNoContent}" /></h3>
 <!--           <c:imagegallery.ImageGallery ui:field="photos" visible="false" /> -->
 <!--           <c:videogallery.VideoGallery ui:field="videos" visible="false" /> -->
       </div>

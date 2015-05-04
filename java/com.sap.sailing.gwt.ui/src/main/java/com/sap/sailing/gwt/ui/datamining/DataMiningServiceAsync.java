@@ -1,18 +1,23 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface DataMiningServiceAsync {
+
+    public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
     void getAllStatistics(String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
 
@@ -23,7 +28,9 @@ public interface DataMiningServiceAsync {
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
             AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>> callback);
 
-    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
+    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
+            Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO,
+            String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
 
     <ResultType extends Number> void runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     

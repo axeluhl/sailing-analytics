@@ -16,7 +16,7 @@
             <span>
               <h3 class="{local_res.css.eventsoverviewupcoming_header_title}">
                 <ui:text from="{i18n_ubi.seriesHeaderUpcoming}" /><span ui:field="colon" style="display: none;">:</span></h3>
-              <span ui:field="ticker" class="{local_res.css.eventsoverviewupcoming_header_ticker}" />
+              <span ui:field="ticker" class="{local_res.css.eventsoverviewupcoming_header_ticker}" style="display: none;" />
             </span>
             <!-- IFEND upcomingEvents.events.length < 2 -->
           </div>
@@ -26,10 +26,7 @@
               <tr>
                 <td>
                   <div class="{local_res.css.eventsoverviewupcoming_header_info_item}">
-                    <span class="{local_res.css.eventsoverviewupcoming_header_info_item_value}">
-                      <span ui:field="eventsCount" />
-                      <ui:text from='{i18n.events}' />
-                    </span>
+                    <span ui:field="eventsCount" class="{local_res.css.eventsoverviewupcoming_header_info_item_value}" />
                   </div>
                 </td>
                 <td>

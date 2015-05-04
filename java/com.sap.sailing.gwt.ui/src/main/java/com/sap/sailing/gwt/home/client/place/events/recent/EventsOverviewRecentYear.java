@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
@@ -39,6 +40,7 @@ public class EventsOverviewRecentYear extends Composite {
     @UiField FlowPanel recentEventsTeaserPanel;
     @UiField DivElement contentDiv;
     @UiField HTMLPanel headerDiv;
+    @UiField StringMessages i18n;
     
     private boolean isContentVisible;
     
@@ -51,25 +53,22 @@ public class EventsOverviewRecentYear extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         this.year.setInnerText(String.valueOf(yearDTO.getYear()));
-        this.eventsCount.setInnerText(String.valueOf(events.size()));
+        this.eventsCount.setInnerText(i18n.eventsCount(events.size()));
         if(yearDTO.getSailorCount() > 0) {
-            sailorsCount.setInnerText("" + yearDTO.getSailorCount());
+            sailorsCount.setInnerText(i18n.competitorsCount(yearDTO.getSailorCount()));
         } else {
             sailorsContainer.removeFromParent();
         }
         if(yearDTO.getCountryCount() > 0) {
-            countriesCount.setInnerText("" + yearDTO.getCountryCount());
+            countriesCount.setInnerText(i18n.countriesCount(yearDTO.getCountryCount()));
         } else {
             countriesContainer.removeFromParent();
         }
         if(yearDTO.getTrackedRacesCount() > 0) {
-            trackedRacesCount.setInnerText("" + yearDTO.getTrackedRacesCount());
+            trackedRacesCount.setInnerText(i18n.trackedRacesCount(yearDTO.getTrackedRacesCount()));
         } else {
             trackedRacesContainer.removeFromParent();
         }
-//        this.countriesCount.setInnerText("tbd.");
-//        this.sailorsCount.setInnerText("tbd.");
-//        this.trackedRacesCount.setInnerText("tbd.");
         for (EventListEventDTO eventDTO : events) {
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());

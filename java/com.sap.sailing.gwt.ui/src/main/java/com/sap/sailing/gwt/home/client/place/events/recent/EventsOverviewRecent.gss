@@ -21,17 +21,15 @@
   padding-top: 2em;
 }
 .eventsoverviewrecent_year {
-  border-bottom: 1px solid #ebebeb;
+/*  border-bottom: 1px solid #ebebeb; */
   -webkit-transition: opacity 0.1s;
      -moz-transition: opacity 0.1s;
           transition: opacity 0.1s;
-}
-.eventsoverviewrecent_year:nth-child(2n) {
-  background: #f2f2f2;
-}
-.eventsoverviewrecent_year:nth-child(2n) .eventsoverviewrecent_year_header:hover,
-.eventsoverviewrecent_year:nth-child(2n) .eventsoverviewrecent_year_header:focus {
-  background-color: #fafafa;
+  border: 1px solid  #dedede;
+  border-radius: .333333333333333em;
+  margin-bottom:10px;
+  margin-top: 20px;
+  
 }
 .eventsoverviewrecent_year.accordioncollapsed .eventsoverviewrecent_year_header_info_arrow_image {
   -webkit-transform: rotate(0deg);
@@ -42,17 +40,21 @@
 .eventsoverviewrecent_year_header {
   padding: 0.666666666666667em;
   cursor: pointer;
+  background-color: #f2f2f2;
+  border-bottom: 1px solid  #dedede;
+  
 }
 .eventsoverviewrecent_year_header:hover,
 .eventsoverviewrecent_year_header:focus {
-  background-color: #fefefe;
+/*  background-color: #ebebeb; */
 }
 .eventsoverviewrecent_year_header:hover .eventsoverviewrecent_year_header_title,
 .eventsoverviewrecent_year_header:focus .eventsoverviewrecent_year_header_title {
-  text-decoration: underline;
+/*  text-decoration: underline; */
 }
 .eventsoverviewrecent_year_header_title {
   margin-bottom: 0;
+  line-height: 1.944444444444444em;
 }
 .eventsoverviewrecent_year_header_info {
   float: right;
@@ -83,4 +85,12 @@
 .eventsoverviewrecent_year_content {
   margin-top: 0.666666666666667em;
   padding-bottom: 1.333333333333333em;
+}
+.eventsoverviewrecent_year_content_floattoinlineblock {
+  font-size: 0;
+}
+.eventsoverviewrecent_year_content_floattoinlineblock_child {
+  float: none;
+  vertical-align: top;
+  display: inline-block;
 }

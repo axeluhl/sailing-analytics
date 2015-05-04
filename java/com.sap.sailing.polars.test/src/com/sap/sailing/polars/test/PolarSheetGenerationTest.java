@@ -91,7 +91,7 @@ public class PolarSheetGenerationTest {
                 settings, executor);
 
         BoatClass forelle = new BoatClassImpl("Forelle", true);
-        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, null,
+        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, null, null, 
                 new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
 
         PolarFixAggregationWorker task = new PolarFixAggregationWorker(race,

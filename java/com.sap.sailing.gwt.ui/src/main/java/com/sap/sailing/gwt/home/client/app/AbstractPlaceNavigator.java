@@ -12,6 +12,7 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     private final ApplicationHistoryMapper mapper = GWT.create(ApplicationHistoryMapper.class);
 
     public final static String DEFAULT_SAPSAILING_SERVER = "www.sapsailing.com";
+    public final static String DEFAULT_SAPSAILING_DEV_SERVER = "dev.sapsailing.com";
     public final static String DEFAULT_SAPSAILING_SERVER_URL = "http://" + DEFAULT_SAPSAILING_SERVER;
 
     protected AbstractPlaceNavigator(PlaceController placeController) {

@@ -11,18 +11,24 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sailing.simulator.BoatDirection;
+import com.sap.sailing.simulator.PointOfSail;
 import com.sap.sailing.simulator.PolarDiagram;
+import com.sap.sse.common.Util.Pair;
 
 public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     private static final long serialVersionUID = 7465253094290674423L;
 
+    protected BoatClass boatClass;
     // the current speed and direction of the wind
     protected SpeedWithBearing windprev = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
     protected SpeedWithBearing wind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
@@ -88,7 +94,17 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagramBase() {
-        // do nothing
+    }
+
+    public PolarDiagramBase(PolarDiagramBase pd) {
+        boatClass = pd.boatClass;
+        speedTable = pd.speedTable;
+        beatAngles = pd.beatAngles;
+        beatSOG = pd.beatSOG;
+        jibeAngles = pd.jibeAngles;
+        jibeSOG = pd.jibeSOG;
+        current = pd.current;
+        extTable = pd.extTable;
     }
 
     // a constructor that allows a generic set of parameters
@@ -98,6 +114,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
         wind = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
+        boatClass = null;
         speedTable = speeds;
         beatAngles = beats;
         jibeAngles = jibes;
@@ -238,7 +255,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         double crValue = values[level];
 
         Double hiDouble = map.ceilingKey(crValue);
-        if (level==3) {
+        if ((level==2)||(level==3)) {
             if (hiDouble == null) {
                 hiDouble = map.ceilingKey(crValue-360);
             }
@@ -274,6 +291,11 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     }
 
     @Override
+    public void initializeSOGwithCurrent() {
+        this.setCurrent(null);
+    }
+    
+    @Override
     public void setCurrent(SpeedWithBearing newCurrent) {
 
         if ((newCurrent == null)&&(extTable == null)) {
@@ -289,7 +311,19 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         return current;
     }
 
-
+    @Override
+    public boolean hasCurrent() {
+        if (current == null) {
+            return false;
+        }
+        if (current.getKnots() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    
     public SpeedWithBearing addVectorSpeeds(SpeedWithBearing a, SpeedWithBearing b) {
 
         if (a.getKnots() == 0.0) {
@@ -504,13 +538,13 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         if (targetDirection.equals(new DegreeBearingImpl(0))) {
             Bearing floorBeatAngle;
             if (beatAngles.floorEntry(wind) == null) {
-                floorBeatAngle = beatAngles.ceilingEntry(wind).getValue();
+                floorBeatAngle = beatAngles.ceilingEntry(wind)==null?null:beatAngles.ceilingEntry(wind).getValue();
             } else {
                 floorBeatAngle = beatAngles.floorEntry(wind).getValue();
             }
             Bearing ceilingBeatAngle;
             if (beatAngles.ceilingEntry(wind) == null) {
-                ceilingBeatAngle = beatAngles.floorEntry(wind).getValue();
+                ceilingBeatAngle = beatAngles.floorEntry(wind)==null?null:beatAngles.floorEntry(wind).getValue();
             } else {
                 ceilingBeatAngle = beatAngles.ceilingEntry(wind).getValue();
             }
@@ -797,8 +831,16 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     @Override
     public long getTurnLoss() {
-        // TODO Auto-generated method stub
-        return 4000;
+        // TODO: retrieve values from polar data mining
+        int turnLoss;
+        if (this.boatClass.getDisplayName().equals(BoatClassMasterdata.EXTREME_40.getDisplayName())) {
+            turnLoss = 2000;
+        } else if (this.boatClass.getDisplayName().equals(BoatClassMasterdata._5O5.getDisplayName())) {
+            turnLoss = 5000;
+        } else {
+            turnLoss = 4000; // default value
+        }
+        return turnLoss;
     }
 
     @Override
@@ -879,6 +921,42 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     @Override
     public void setTargetDirection(Bearing newTargetDirection) {
         targetDirection = newTargetDirection;
+    }
+
+    @Override
+    public Pair<PointOfSail, BoatDirection> getPointOfSail(Bearing bearTarget) {
+        double offSet = 1;
+        Bearing[] bearOptimalUpwind = this.optimalDirectionsUpwind();
+        Bearing[] bearOptimalDownwind = this.optimalDirectionsDownwind();
+        // compare target bearing to upwind bearings
+        Bearing upwindLeftRight = bearOptimalUpwind[0].getDifferenceTo(bearOptimalUpwind[1]);
+        Bearing upwindLeftTarget = bearOptimalUpwind[0].getDifferenceTo(bearTarget);
+        PointOfSail pointOfSail = PointOfSail.REACHING;
+        BoatDirection reachingSide = BoatDirection.NONE;
+        // check whether boat is in "tacking area"
+        if ((upwindLeftTarget.getDegrees() >= -offSet) && (upwindLeftTarget.getDegrees() <= upwindLeftRight.getDegrees() + offSet)) {
+            //logger.fine("point-of-sail: tacking (diffLeftTarget: " + upwindLeftTarget.getDegrees()
+            //        + ", diffLeftRight: " + upwindLeftRight.getDegrees() + ", " + currentPosition + ")");
+            pointOfSail = PointOfSail.TACKING;
+        } else {
+            Bearing downwindLeftRight = bearOptimalDownwind[0].getDifferenceTo(bearOptimalDownwind[1]);
+            Bearing downwindLeftTarget = bearOptimalDownwind[0].getDifferenceTo(bearTarget);
+            // check whether boat is in "non-sailable area"
+            if ((downwindLeftTarget.getDegrees() >= -offSet) && (downwindLeftTarget.getDegrees() <= downwindLeftRight.getDegrees() + offSet)) {
+                //logger.fine("point-of-sail: jibing (diffLeftTarget: " + downwindLeftTarget.getDegrees()
+                //        + ", diffLeftRight: " + downwindLeftRight.getDegrees() + ", " + currentPosition + ")");
+                pointOfSail = PointOfSail.JIBING;
+            } else {
+                // logger.info("path: "+path.path);
+                Bearing windBoat = wind.getBearing().getDifferenceTo(bearTarget);
+                if (windBoat.getDegrees() > 0) {
+                    reachingSide = BoatDirection.REACH_LEFT; // left-sided reaching
+                } else {
+                    reachingSide = BoatDirection.REACH_RIGHT; // right-sided reaching
+                }
+            }
+        }
+        return new Pair<PointOfSail, BoatDirection>(pointOfSail, reachingSide);
     }
 
 }

@@ -58,11 +58,8 @@ public class EventHeader extends Composite {
     @UiField DivElement eventVenueContainer;
     @UiField AnchorElement eventLink;
     @UiField DivElement competitors;
-    @UiField SpanElement competitorsCount;
     @UiField DivElement races;
-    @UiField SpanElement racesCount;
     @UiField DivElement trackedRaces;
-    @UiField SpanElement trackedRacesCount;
     @UiField DivElement eventCategory;
     
     @UiField FlowPanel dropdownContent;
@@ -116,17 +113,17 @@ public class EventHeader extends Composite {
             nameToShow = regattaMetadata.getDisplayName();
             
             if(regattaMetadata.getCompetitorsCount() > 0) {
-                competitorsCount.setInnerText(""+regattaMetadata.getCompetitorsCount());
+                competitors.setInnerText((i18n.competitorsCount(regattaMetadata.getCompetitorsCount())));
             } else {
                 hide(competitors);
             }
             if(regattaMetadata.getRaceCount() > 0) {
-                racesCount.setInnerText(""+regattaMetadata.getRaceCount());
+                races.setInnerText((i18n.racesCount(regattaMetadata.getRaceCount())));
             } else {
                 hide(races);
             }
             if(regattaMetadata.getTrackedRacesCount() > 0) {
-                trackedRacesCount.setInnerText(""+regattaMetadata.getTrackedRacesCount());
+                trackedRaces.setInnerText(i18n.trackedRacesCount(regattaMetadata.getTrackedRacesCount()));
             } else {
                 hide(trackedRaces);
             }

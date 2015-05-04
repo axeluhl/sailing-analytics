@@ -39,6 +39,7 @@ public class TabPanel<PRESENTER> extends Composite {
     @UiField
     TabBar tabBar;
     @UiField BreadcrumbPane breadcrumbs;
+    @UiField FlowPanel tabExtension;
     private TabView<Place, PRESENTER> currentTab;
     
 
@@ -115,14 +116,20 @@ public class TabPanel<PRESENTER> extends Composite {
         if (knownTabs.containsKey(placeToGo.getClass())) {
             final TabView<Place, PRESENTER> newTab = knownTabs.get(placeToGo.getClass());
             
-            if(newTab.getState() == State.NOT_AVAILABLE) {
+            if (newTab.getState() == State.NOT_AVAILABLE_REDIRECT
+                    || newTab.getState() == State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE) {
                 for(TabView<Place, PRESENTER> tab : knownTabs.values()) {
                     if(tab.getState() == State.VISIBLE) {
                         // TODO is this redirect wanted? Just silently select another tab?
                         if (currentTab != null) {
                             currentTab.stop();
                         }
-                        fireEvent(new TabPanelPlaceSelectionEvent(tab));
+
+                        if (newTab.getState() == State.NOT_AVAILABLE_REDIRECT) {
+                            fireEvent(new TabPanelPlaceSelectionEvent(tab));
+                        } else {
+                            activatePlace(tab.placeToFire());
+                        }
                         return;
                     }
                 }
@@ -167,4 +174,8 @@ public class TabPanel<PRESENTER> extends Composite {
         return knownTabTitles.get(currentTab.getPlaceClassForActivation());
     }
 
+    @UiChild
+    public void addTabExtension(IsWidget widget) {
+        tabExtension.add(widget);
+    }
 }

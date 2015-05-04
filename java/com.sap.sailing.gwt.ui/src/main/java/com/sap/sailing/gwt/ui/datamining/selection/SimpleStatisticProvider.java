@@ -17,16 +17,17 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SimpleObjectRenderer;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
+import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class SimpleStatisticProvider implements StatisticProvider {
     
@@ -67,6 +68,16 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
         updateExtractionFunctions();
     }
+    
+    @Override
+    public void awaitReloadComponents() {
+        // Nothing to do here.
+    }
+    
+    @Override
+    public void reloadComponents() {
+        updateExtractionFunctions();
+    }
 
     private void updateExtractionFunctions() {
         dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
@@ -77,24 +88,14 @@ public class SimpleStatisticProvider implements StatisticProvider {
                 
                 if (extractionFunctions.iterator().hasNext()) {
                     extractionFunctionSet.addAll(extractionFunctions);
-
-                    StrippedFunctionDTO previousExtractionFunction = extractionFunctionListBox.getValue();
                     updateExtractionFunctionListBox();
-                    StrippedFunctionDTO newExtractionFunction = extractionFunctionListBox.getValue();
-
-                    String previousBaseDataType = baseDataTypeListBox.getValue();
                     updateBaseDataTypeListBox();
-                    String newBaseDataType = baseDataTypeListBox.getValue();
-
-                    if (!newExtractionFunction.equals(previousExtractionFunction) ||
-                        !newBaseDataType.equals(previousBaseDataType)) {
-                        notifyListeners();
-                    }
                 } else {
                     clearListBox(extractionFunctionListBox);
                     clearListBox(baseDataTypeListBox);
-                    notifyListeners();
                 }
+
+                notifyListeners();
             }
             
             @Override
@@ -237,12 +238,12 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(Object newSettings) { }
+    public void updateSettings(AbstractSettings newSettings) { }
     
     @Override
     public String getDependentCssClassName() {
