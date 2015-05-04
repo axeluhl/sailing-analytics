@@ -9,18 +9,12 @@
     <div class="{local_res.css.eventteasercontainer}">
       <a ui:field="eventLink" class="{local_res.css.eventteaser}">
         <div ui:field="eventImage" class="{local_res.css.eventteaser_image}"></div>
-        <!-- IF event.state === 'live' -->
-        <div ui:field="eventTeaserWithState" class="{local_res.css.eventteaser_title}">
-          <div class="{local_res.css.eventteaser_title_label}">
-            <div ui:field="eventState" data-labeltype="live" class="{local_res.css.label} {res.mainCss.label} {res.mainCss.labellarge}" />
+        <div class="{local_res.css.eventteaser_title}">
+          <div class="{local_res.css.eventteaser_title_name}">
+            <div ui:field="eventState" data-labeltype="live" class="{res.mainCss.label} {res.mainCss.labellarge} {local_res.css.eventteaser_title_name_label}" style="margin-top: 0px;" />
+            <span ui:field="eventName" />
           </div>
-          <div ui:field="eventNameWithState" class="{local_res.css.eventteaser_title_name}" />
         </div>
-        <!-- IF/ELSE event.state !== 'live' -->
-        <div ui:field="eventName" class="{local_res.css.eventteaser_name}">
-          <!-- event.name -->
-        </div>
-        <!-- END -->
         <div class="{local_res.css.eventteaser_location}">
           <span ui:field="venue" />,&nbsp;<span ui:field="eventDate" />
         </div>

@@ -39,6 +39,7 @@ public class TabPanel<PRESENTER> extends Composite {
     @UiField
     TabBar tabBar;
     @UiField BreadcrumbPane breadcrumbs;
+    @UiField FlowPanel tabExtension;
     private TabView<Place, PRESENTER> currentTab;
     
 
@@ -173,4 +174,8 @@ public class TabPanel<PRESENTER> extends Composite {
         return knownTabTitles.get(currentTab.getPlaceClassForActivation());
     }
 
+    @UiChild
+    public void addTabExtension(IsWidget widget) {
+        tabExtension.add(widget);
+    }
 }

@@ -60,29 +60,18 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
 
     @Override
     public void start(final RegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
-
         contentArea.setWidget(new Placeholder());
-
         String regattaId = myPlace.getRegattaId();
-
         if (regattaId != null && !regattaId.isEmpty()) {
-
             String leaderboardName = regattaId;
-          
-            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
-                    .getRegattaAnalyticsManager();
-
-
+            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
             boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-
             final LeaderboardSettings leaderboardSettings = EventParamUtils
                     .createLeaderboardSettingsFromURLParameters(Window.Location
                     .getParameterMap());
-
             final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
                     .getPreselectedRace(Window.Location.getParameterMap());
-
             LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
                     leaderboardSettings, //
                     preselectedRace, //
@@ -90,24 +79,13 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
                     leaderboardName, //
                     true,
                     autoExpandLastRaceColumn);
-
             initWidget(ourUiBinder.createAndBindUi(this));
-
-            leaderboard.setLeaderboard(leaderboardPanel,
-                    currentPresenter.getAutoRefreshTimer());
-
-
+            leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             leaderboardPanel.addLeaderboardUpdateListener(this);
-
-            if (currentPresenter.getCtx().getEventDTO().getState() != EventState.RUNNING) {
-
-                this.leaderboard.hideRefresh();
-            } else {
+            if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
                 // TODO: start autorefresh?
             }
-
             regattaAnalyticsManager.hideCompetitorChart();
-
             contentArea.setWidget(this);
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
@@ -117,9 +95,7 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
                     currentPresenter.getHomeNavigation().goToPlace();
                 }
             }.schedule(3000);
-
         }
-
     }
 
     @Override

@@ -149,7 +149,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
         // The course layout makes a wind estimation around 7deg. The confidence of the cluster based wind estimation is a lot
         // higher that that of the course layout wind (currently at approximately 10E-13), we will end up quite near 180 deg.
-        assertEquals(180.0, combinedWindDirection.getBearing().getDegrees(), 0.2);
+        // Update 04/24/15: Since polar data service is not available here, the confidence will not be as good as it once was.
+        // So we have quite a big delta in the assert
+        assertEquals(180.0, combinedWindDirection.getBearing().getDegrees(), 0.9);
     }
 
     /**

@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.client.app;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
@@ -19,6 +22,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -42,6 +46,11 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createLocalPlaceNavigation(new WhatsNewPlace(navigationTab));
     }
 
+    public String getSimulatorURL() {
+        Map<String, String> parameters = new HashMap<String, String>();
+        return EntryPointLinkFactory.createSimulatorLink(parameters);
+    }
+    
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
         return createGlobalPlaceNavigation(new SponsoringPlace());
     }

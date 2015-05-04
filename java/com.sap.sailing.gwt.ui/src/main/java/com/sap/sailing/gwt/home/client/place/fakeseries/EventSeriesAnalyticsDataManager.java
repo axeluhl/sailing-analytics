@@ -64,8 +64,8 @@ public class EventSeriesAnalyticsDataManager {
         if(overallLeaderboardPanel == null) {
             overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */
-                    true, false, false);
+                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
+                    /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, false, false);
         }
         return overallLeaderboardPanel;
     }
@@ -157,5 +157,9 @@ public class EventSeriesAnalyticsDataManager {
         SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component, StringMessages.INSTANCE);
         dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
         dialog.show();
+    }
+
+    public Timer getTimer() {
+        return timer;
     }
 }

@@ -4,5 +4,6 @@
   xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared.event">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <s:EventTeaser ui:field='eventTeaser' addStyleNames="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecentResources" />
+  <s:EventTeaser ui:field='eventTeaser' addStyleNames="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns} {local_res.css.eventsoverviewrecent_year_content_floattoinlineblock_child}" />
 </ui:UiBinder>

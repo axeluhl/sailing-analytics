@@ -7,7 +7,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
@@ -32,24 +33,22 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
             afterLoad();
         } else {
             final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            
             clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
                 @Override
                 public void onSuccess(final EventSeriesViewDTO event) {
                     ctx.updateContext(event);
                     afterLoad();
                 }
-
                 @Override
                 public void onFailure(Throwable caught) {
-                 // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the series with service getEventSeriesViewById()");
+                    // TODO @FM: extract text?
+                    ErrorPlace errorPlace = new ErrorPlace(
+                            "Error while loading the series with service getEventSeriesViewById()");
                     // TODO @FM: reload sinnvoll hier?
                     errorPlace.setComingFrom(place);
                     clientFactory.getPlaceController().goTo(errorPlace);
                 }
             });
-
         }
     }
 
@@ -58,18 +57,22 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
             @Override
             public void onSuccess() {
                 final AbstractSeriesPlace placeToStart;
-                if(place instanceof SeriesDefaultPlace) {
+                if (place instanceof SeriesDefaultPlace) {
                     placeToStart = getRealPlace();
                 } else {
                     placeToStart = place;
                 }
-                
-                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) placeToStart, clientFactory, homePlacesNavigator));
+                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) placeToStart, clientFactory,
+                        homePlacesNavigator));
             }
         });
     }
-    
+
     private AbstractSeriesPlace getRealPlace() {
-        return new SeriesOverviewPlace(ctx);
+        if (ctx.getSeriesDTO().isHasAnalytics()) {
+            return new EventSeriesOverallLeaderboardPlace(ctx);
+        } else {
+            return new SeriesEventsPlace(ctx);
+        }
     }
 }

@@ -41,32 +41,35 @@ public class OldLeaderboard extends Composite {
     @UiField ParagraphElement lastScoringUpdateTextDiv;
     @UiField ParagraphElement lastScoringCommentDiv;
     @UiField ParagraphElement scoringSchemeDiv;
+    @UiField
+    EventRegattaLeaderboardResources local_res;
 
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     
     public OldLeaderboard() {
         this.leaderboardPanel = null;
-        
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         OldLeaderboardResources.INSTANCE.css().ensureInjected();
-        
         initWidget(uiBinder.createAndBindUi(this));
-        
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
     }
     
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
-        if(autoRefreshTimer != null) {
+        autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+        if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
+                // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
             }
         }
     }
@@ -87,12 +90,11 @@ public class OldLeaderboard extends Composite {
     public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
-
         oldLeaderboardPanel.add(leaderboardPanel);
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard, boolean hasLiveRace) {
-        if(leaderboard != null) {
+        if (leaderboard != null) {
             lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
             scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
@@ -105,7 +107,6 @@ public class OldLeaderboard extends Composite {
                 lastScoringUpdateTimeDiv.setInnerText("");
                 lastScoringUpdateTextDiv.setInnerText("");
             }
-
             lastScoringUpdateTextDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
             lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
         }

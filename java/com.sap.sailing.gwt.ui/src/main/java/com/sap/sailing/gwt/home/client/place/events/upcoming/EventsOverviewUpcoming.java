@@ -96,6 +96,7 @@ public class EventsOverviewUpcoming extends Composite {
             colon.getStyle().setDisplay(Display.NONE);
             getElement().removeClassName(EventsOverviewUpcomingResources.INSTANCE.css().accordioncollapsed());
             ticker.setInnerText("");
+            ticker.getStyle().setDisplay(Display.NONE);
             tickerTimer.cancel();
             tickerAnimation.cancel();
         } else {
@@ -103,6 +104,7 @@ public class EventsOverviewUpcoming extends Composite {
             getElement().addClassName(EventsOverviewUpcomingResources.INSTANCE.css().accordioncollapsed());
             if(tickerStrings.isEmpty()) {
                 ticker.setInnerText("");
+                ticker.getStyle().setDisplay(Display.NONE);
             } else {
                 nextTicker(true);
             }
@@ -113,6 +115,7 @@ public class EventsOverviewUpcoming extends Composite {
     protected void nextTicker(boolean restart) {
         currentTickerOffset = restart ? 0 : (currentTickerOffset + 1) % tickerStrings.size();
         ticker.setInnerText(tickerStrings.get(currentTickerOffset));
+        ticker.getStyle().clearDisplay();
         tickerAnimation.animate(true);
         if(tickerStrings.size() > 1) {
             tickerTimer.schedule(3000);
