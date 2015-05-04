@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,13 +12,19 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.DataMiningServerImpl;
+import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 import com.sap.sse.datamining.test.util.OpenFunctionManager;
+import com.sap.sse.datamining.test.util.TestsUtil;
 
 
 public class TestFunctionManagerAsFunctionRegistry {
@@ -45,30 +52,53 @@ public class TestFunctionManagerAsFunctionRegistry {
     
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
-        OpenFunctionManager registry = new OpenFunctionManager();
-        assertThat(registry.registerAllClasses(internalClassesToScan), is(true));
-        assertThat(registry.registerAllWithExternalFunctionPolicy(externalClassesToScan), is(true));
+        OpenFunctionManager functionRegistry = new OpenFunctionManager();
+        DataRetrieverChainDefinitionRegistry retrieverChainRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
+        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionRegistry, functionRegistry, retrieverChainRegistry);
+
+        Date beforeRegistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.registerAllClasses(internalClassesToScan);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
+        
+        beforeRegistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.registerAllWithExternalFunctionPolicy(externalClassesToScan);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
         expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
         expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
-        assertThat(registry.getDimensions(), is(expectedDimensions));
+        assertThat(functionRegistry.getDimensions(), is(expectedDimensions));
         
         Collection<Function<?>> expectedStatistics = expectedFunctionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
-        assertThat(registry.getAllStatistics(), is(expectedStatistics));
+        assertThat(server.getAllStatistics(), is(expectedStatistics));
         
         Collection<Function<?>> expectedExternalFunctions = expectedFunctionRegistryUtil.getExpectedExternalFunctionsFor(Test_ExternalLibraryClass.class);
-        assertThat(registry.getExternalFunctions(), is(expectedExternalFunctions));
+        assertThat(functionRegistry.getExternalFunctions(), is(expectedExternalFunctions));
     }
     
     @Test
     public void testMultipleRegistrationAndUnregistrationOfTheSameClasses() {
-        OpenFunctionManager registry = new OpenFunctionManager();
-        assertThat(registry.registerAllClasses(internalClassesToScan), is(true));
-        assertThat(registry.registerAllClasses(internalClassesToScan), is(false));
+        ModifiableDataMiningServer server = TestsUtil.createNewServer();
 
-        assertThat(registry.unregisterAllFunctionsOf(internalClassesToScan), is(true));
-        assertThat(registry.unregisterAllFunctionsOf(internalClassesToScan), is(false));
+        Date beforeRegistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.registerAllClasses(internalClassesToScan);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
+        beforeRegistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.registerAllClasses(internalClassesToScan);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
+
+        Date beforeUnregistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.unregisterAllFunctionsOf(internalClassesToScan);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeUnregistration), is(true));
+        beforeUnregistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.unregisterAllFunctionsOf(internalClassesToScan);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeUnregistration), is(false));
     }
     
     @Test

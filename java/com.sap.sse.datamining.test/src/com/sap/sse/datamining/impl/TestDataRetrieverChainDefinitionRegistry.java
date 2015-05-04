@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -16,6 +17,7 @@ import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContextImpl;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
@@ -58,13 +60,26 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void testGetDataRetrieverChainDefinitions() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
         
-        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasRaceContext>> expectedRaceRetrieverChainDefinitions = new HashSet<>();
-        expectedRaceRetrieverChainDefinitions.add(raceRetrieverChainDefinition);
-        assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasRaceContext.class), is(expectedRaceRetrieverChainDefinitions));
+        Collection<DataRetrieverChainDefinition<?, ?>> expectedRetrieverChainDefinitions = new HashSet<>();
+        expectedRetrieverChainDefinitions.add(raceRetrieverChainDefinition);
+        assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasRaceContext.class), is(expectedRetrieverChainDefinitions));
         
-        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedLegRetrieverChainDefinitions = new HashSet<>();
-        expectedLegRetrieverChainDefinitions.add(legRetrieverChainDefinition);
-        assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedLegRetrieverChainDefinitions));
+        expectedRetrieverChainDefinitions = new HashSet<>();
+        expectedRetrieverChainDefinitions.add(legRetrieverChainDefinition);
+        assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedRetrieverChainDefinitions));
+        
+        expectedRetrieverChainDefinitions = new HashSet<>();
+        expectedRetrieverChainDefinitions.add(raceRetrieverChainDefinition);
+        expectedRetrieverChainDefinitions.add(legRetrieverChainDefinition);
+        assertThat(server.getDataRetrieverChainDefinitionsBySourceType(dataSourceType), is(expectedRetrieverChainDefinitions));
+        
+        expectedRetrieverChainDefinitions = new HashSet<>();
+        expectedRetrieverChainDefinitions.add(legRetrieverChainDefinition);
+        assertThat(server.getDataRetrieverChainDefinitionsByDataType(Test_HasLegOfCompetitorContext.class), is(expectedRetrieverChainDefinitions));
+        
+        expectedRetrieverChainDefinitions = new HashSet<>();
+        expectedRetrieverChainDefinitions.add(raceRetrieverChainDefinition);
+        assertThat(server.getDataRetrieverChainDefinitionsByDataType(Test_HasRaceContext.class), is(expectedRetrieverChainDefinitions));
     }
     
     @Test
@@ -81,8 +96,16 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void testRemoveDataRetrieverChainDefinition() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
 
-        assertThat(server.getDataRetrieverChainDefinitionRegistry().unregister(legRetrieverChainDefinition), is(true));
-        assertThat(server.getDataRetrieverChainDefinitionRegistry().unregister(legRetrieverChainDefinition), is(false));
+        Date beforeUnregistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.unregisterDataRetrieverChainDefinition(legRetrieverChainDefinition);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeUnregistration), is(true));
+        
+        beforeUnregistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.unregisterDataRetrieverChainDefinition(legRetrieverChainDefinition);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeUnregistration), is(false));
+        
         Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
         assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedEmptyDataRetrieverChainDefinitions));
     }
@@ -92,7 +115,11 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void testAddingDataRetrieverChainDefinitionTwice() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
 
-        assertThat(server.getDataRetrieverChainDefinitionRegistry().register(legRetrieverChainDefinition), is(false));
+        Date beforeRegistration = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.registerDataRetrieverChainDefinition(legRetrieverChainDefinition);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
+        
         Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedDataRetrieverChainDefinitions = new HashSet<>();
         expectedDataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
         assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedDataRetrieverChainDefinitions));
