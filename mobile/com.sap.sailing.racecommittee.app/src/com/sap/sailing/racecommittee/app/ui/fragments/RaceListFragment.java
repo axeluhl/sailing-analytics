@@ -35,16 +35,15 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.RegattaSeriesFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -53,7 +52,7 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import java.io.Serializable;
 import java.util.*;
 
-public class RaceListFragment extends LoggableFragment implements OnItemClickListener, JuryFlagClickedListener,
+public class RaceListFragment extends LoggableFragment implements OnItemClickListener,
         OnItemSelectedListener, TickListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();
@@ -69,7 +68,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private FilterMode mFilterMode;
     private ListView mListView;
     private HashMap<Serializable, ManagedRace> mManagedRacesById;
-    private TreeMap<BoatClassSeriesFleet, List<ManagedRace>> mRacesByGroup;
+    private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
     private boolean mUpdateList;
@@ -94,7 +93,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
         mManagedRacesById = new HashMap<>();
-        mRacesByGroup = new TreeMap<>(new BoatClassSeriesDataFleetComparator());
+        mRacesByGroup = new TreeMap<>(new RegattaSeriesFleetComparator());
         mViewItems = new ArrayList<>();
     }
 
@@ -198,7 +197,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         RaceListDataTypeRace.initializeTemplates(this);
 
         if (mListView != null) {
-            mAdapter = new ManagedRaceListAdapter(getActivity(), mViewItems, this);
+            mAdapter = new ManagedRaceListAdapter(getActivity(), mViewItems);
             mListView.setAdapter(mAdapter);
             mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             mListView.setOnItemClickListener(this);
@@ -291,15 +290,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         setFilterMode(Arrays.asList(FilterMode.values()).get(position));
-    }
-
-    @Override
-    public void onJuryFlagClicked(BoatClassSeriesFleet group) {
-        if (mRacesByGroup.containsKey(group)) {
-            List<ManagedRace> races = mRacesByGroup.get(group);
-            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
-            fragment.show(getFragmentManager(), null);
-        }
     }
 
     @Override
@@ -412,7 +402,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private void initializeRacesByGroup() {
         mRacesByGroup.clear();
         for (ManagedRace race : mManagedRacesById.values()) {
-            BoatClassSeriesFleet container = new BoatClassSeriesFleet(race);
+            RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
 
             if (!mRacesByGroup.containsKey(container)) {
                 mRacesByGroup.put(container, new LinkedList<ManagedRace>());
@@ -429,7 +419,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mViewItems.clear();
 
         // 3. Create view elements from tree
-        for (BoatClassSeriesFleet key : mRacesByGroup.navigableKeySet()) {
+        for (RaceGroupSeriesFleet key : mRacesByGroup.navigableKeySet()) {
             // ... add the header view...
             mViewItems.add(new RaceListDataTypeHeader(key));
 
@@ -500,9 +490,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
                 String extra = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                 if (extra != null) {
-                    for (BoatClassSeriesFleet boatClassSeriesFleet : mRacesByGroup.keySet()) {
-                        if (extra.equals(boatClassSeriesFleet.getDisplayName())) {
-                            List<ManagedRace> races = mRacesByGroup.get(boatClassSeriesFleet);
+                    for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
+                        if (extra.equals(raceGroupSeriesFleet.getDisplayName())) {
+                            List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                             ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
                             fragment.show(getFragmentManager(), null);
                         }

@@ -1,24 +1,24 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
-import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 
 public class RaceListDataTypeHeader implements RaceListDataType {
 
-    private BoatClassSeriesFleet data;
+    private RaceGroupSeriesFleet data;
 
-    public RaceListDataTypeHeader(BoatClassSeriesFleet data) {
+    public RaceListDataTypeHeader(RaceGroupSeriesFleet data) {
         this.data = data;
     }
 
-    public BoatClassSeriesFleet getBoatClassSeriesDataFleet() {
+    public RaceGroupSeriesFleet getRegattaSeriesFleet() {
         return data;
     }
 
-    public BoatClass getBoatClass() {
-        return data.getBoatClass();
+    public RaceGroup getRaceGroup() {
+        return data.getRaceGroup();
     }
 
     public SeriesBase getSeries() {

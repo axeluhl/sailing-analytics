@@ -9,7 +9,10 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -18,7 +21,6 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -58,8 +60,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
 
-    public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems,
-        JuryFlagClickedListener juryListener) {
+    public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems) {
         super(context, 0);
 
         mAllViewItems = viewItems;
@@ -168,12 +169,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         if (type == ViewType.HEADER.index) {
             final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
-            boat_class.setText(header.getBoatClass().getName());
+            String regatta = header.getRaceGroup().getName();
+            boat_class.setText(regatta);
             String fleetSeries = "";
-            if (header.getFleet() != null && !header.getFleet().getName().equals("Default")) {
+            if (header.getFleet() != null && !header.getFleet().getName().equals(AppConstants.DEFAULT)) {
                 fleetSeries += header.getFleet().getName();
             }
-            if (header.getSeries() != null && !header.getSeries().getName().equals("Default")) {
+            if (header.getSeries() != null && !header.getSeries().getName().equals(AppConstants.DEFAULT)) {
                 if (!TextUtils.isEmpty(fleetSeries)) {
                     fleetSeries += " - ";
                 }
@@ -366,9 +368,5 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         ViewType(int index) {
             this.index = index;
         }
-    }
-
-    public interface JuryFlagClickedListener {
-        void onJuryFlagClicked(BoatClassSeriesFleet clickedItem);
     }
 }

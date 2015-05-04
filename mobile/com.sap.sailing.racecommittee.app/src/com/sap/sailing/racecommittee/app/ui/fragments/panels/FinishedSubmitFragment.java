@@ -29,7 +29,7 @@ public class FinishedSubmitFragment extends BasePanelFragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    String extra = getRace().getRaceGroup().getBoatClass().getDisplayName();
+                    String extra = getRace().getRaceGroup().getName();
                     if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
                         extra += " - " + getRace().getSeries().getName();
                     }
