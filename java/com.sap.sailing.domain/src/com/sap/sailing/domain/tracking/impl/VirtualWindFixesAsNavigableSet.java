@@ -141,7 +141,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     protected TimePoint getFrom() {
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         return from == null ? startOfRace == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
-                : floorToResolution(startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS)) : from;
+                : floorToResolution(startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS)) : from;
     }
 
     /**

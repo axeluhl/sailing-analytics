@@ -63,7 +63,7 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();
         if (startOfRace != null) {
-            TimePoint fourMinutesBeforeRaceStartTimePoint = startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS); // let wind tracks start four minutes before start
+            TimePoint fourMinutesBeforeRaceStartTimePoint = startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS); // let wind tracks start four minutes before start
             if (timePointOfNewestEvent != null) {
                 if (at.compareTo(fourMinutesBeforeRaceStartTimePoint) < 0) {
                     adjustedAt = fourMinutesBeforeRaceStartTimePoint;

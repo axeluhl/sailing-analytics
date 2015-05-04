@@ -32,8 +32,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
@@ -42,9 +40,7 @@ import difflib.PatchFailedException;
 
 public class TrackedRegattaImpl implements TrackedRegatta {
     
-    private transient RaceExecutionOrderCache raceExecutionOrderCache;
-    
-    private transient NamedReentrantReadWriteLock lock = createLock();
+    private RaceExecutionOrderCache raceExecutionOrderCache;
     
     private static final long serialVersionUID = 6480508193567014285L;
 
@@ -84,10 +80,6 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         result.trackedRaces.putAll(this.trackedRaces);
         result.trackedRacesByBoatClass.putAll(this.trackedRacesByBoatClass);
         return result;
-    }
-    
-    private NamedReentrantReadWriteLock createLock() {
-        return new NamedReentrantReadWriteLock(getClass().getName(), true);
     }
 
     @Override
@@ -225,6 +217,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
         private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
         private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
+        private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
         private static final long serialVersionUID = -1016823551825618490L;
 
         public RaceExecutionOrderCache() {
@@ -234,9 +227,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
         public List<TrackedRace> getRacesInExecutionOrder() {
             List<TrackedRace> result;
-            LockUtil.lockForRead(lock);
             result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY, true);
-            LockUtil.unlockAfterRead(lock);
             return result;
         }
         
@@ -299,10 +290,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                                 return null;
                             }
                         }
-                    }, "RacesOrderCache");
+                    }, RACES_ORDER_LIST_LOCKS_NAME);
         }
         
         private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
+            ois.defaultReadObject();
             racesOrderCache = createRacesOrderCache();
         }
     }

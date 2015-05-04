@@ -661,9 +661,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TrackedRace previosRaceInExecutionOrder = getTrackedRegatta().getPreviousRaceInExecutionOrder(this);
         long conditional_time_before_start_to_track_wind;
         if(previosRaceInExecutionOrder == null || previosRaceInExecutionOrder.getEndOfTracking() != null || !previosRaceInExecutionOrder.hasWindData()){
-            conditional_time_before_start_to_track_wind = EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
+            conditional_time_before_start_to_track_wind = EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS;
         }else{
-            conditional_time_before_start_to_track_wind = TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
+            conditional_time_before_start_to_track_wind = TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS;
         }
         if ((startOfTracking == null || !startOfTracking.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint()) ||
                 (startOfRace != null && !startOfRace.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint())))
