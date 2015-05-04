@@ -28,11 +28,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO>, DeviceConfigurationCloneListener {
 
-    public static String renderIdentifiers(List<String> clientIdentifiers) {
+    public static String renderIdentifiers(List<String> clientIdentifiers, StringMessages stringMessages) {
         if (clientIdentifiers.size() == 1) {
             return clientIdentifiers.get(0);
         } else if (clientIdentifiers.size() == 0) {
-            return "[ANY]";
+            return "["+stringMessages.any()+"]";
         } else {
             return clientIdentifiers.toString();
         }
