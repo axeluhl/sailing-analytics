@@ -224,8 +224,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 if (state.getFinishedTime() != null) {
                     time.setVisibility(View.GONE);
                     race_finished.setVisibility(View.VISIBLE);
-                    race_finished.setText(mResources
-                        .getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
+                    race_finished.setText(mResources.getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
                 }
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     race_scheduled.setVisibility(View.GONE);
@@ -236,6 +235,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
                 }
             }
+
+            if (race.isUpdateIndicatorVisible()) {
+                update_badge.setVisibility(View.VISIBLE);
+            }
+
             updateFlag(race.getRace());
         }
         return convertView;
