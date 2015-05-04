@@ -17,12 +17,10 @@ import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
  *
  */
 public class EventContext {
-
     private String eventId;
     private String regattaId;
     private List<RaceGroupDTO> raceGroups;
     private List<LeaderboardGroupDTO> leaderboardGroups;
-
     private RegattaAnalyticsDataManager regattaAnalyticsManager;
 
     /**
@@ -30,7 +28,6 @@ public class EventContext {
      */
     private EventViewDTO eventDTO;
     private MediaDTO media;
-
 
     public EventContext() {
     }
@@ -54,12 +51,8 @@ public class EventContext {
         return this;
     }
 
-
     /**
      * Used to update context with dto instance
-     * 
-     * @param dto
-     * @return
      */
     public EventContext updateContext(EventViewDTO dto) {
         this.eventDTO = dto;

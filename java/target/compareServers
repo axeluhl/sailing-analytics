@@ -30,6 +30,8 @@ OLDSERVER=$1
 NEWSERVER=$2
 OLDGROUPS=leaderboardgroups.old.sed
 NEWGROUPS=leaderboardgroups.new.sed
+OLDGROUPS_FOR_CONTINUE=${OLDGROUPS}.continue
+NEWGROUPS_FOR_CONTINUE=${NEWGROUPS}.continue
 
 # If we continue, don't download again
 if [ "$continue" != "1" ]; then
@@ -43,6 +45,8 @@ download_and_fix_boatclasses () {
 
 diff leaderboardgroups.old.sed leaderboardgroups.new.sed
 if [ "$?" = "0" ]; then
+  cp "$OLDGROUPS" "$OLDGROUPS_FOR_CONTINUE"
+  cp "$NEWGROUPS" "$NEWGROUPS_FOR_CONTINUE"
   exec 3<> $OLDGROUPS
   exec 4<> $NEWGROUPS
   read OLD_LB <&3
@@ -58,17 +62,21 @@ if [ "$?" = "0" ]; then
     if [ "$DIFFRESULT" != "0" ]; then
       echo "Difference detected in leaderboard group $OLD_LB vs. $NEW_LB"
       if [ "$exitOnError" = "1" ]; then
+	cp "$OLDGROUPS_FOR_CONTINUE" "$OLDGROUPS"
+	cp "$NEWGROUPS_FOR_CONTINUE" "$NEWGROUPS"
         echo "Exiting..."
         exit $DIFFRESULT
       fi
     else
       # no diff; remove the leaderboards successfully compared from both leaderboardgroups lists in case a later -c invocation occurs
-      sed -i -e '1d' $OLDGROUPS
-      sed -i -e '1d' $NEWGROUPS
+      sed -i -e '1d' $OLDGROUPS_FOR_CONTINUE
+      sed -i -e '1d' $NEWGROUPS_FOR_CONTINUE
     fi
     read OLD_LB <&3
     read NEW_LB <&4
   done
+  cp "$OLDGROUPS_FOR_CONTINUE" "$OLDGROUPS"
+  cp "$NEWGROUPS_FOR_CONTINUE" "$NEWGROUPS"
 else
   # pass on diff result to caller
   exit $?
