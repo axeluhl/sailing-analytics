@@ -228,5 +228,7 @@ public interface PolarDataService {
     SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
+    void insertExistingFixes(TrackedRace trackedRace);
+
 
 }
