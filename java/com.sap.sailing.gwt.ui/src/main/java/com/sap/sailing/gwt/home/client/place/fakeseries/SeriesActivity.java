@@ -41,8 +41,6 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-    private final Timer autoRefreshTimer = new Timer(PlayModes.Live, PlayStates.Paused,
-            delayBetweenAutoAdvancesInMilliseconds);
 
     public SeriesActivity(AbstractSeriesTabPlace place, SeriesClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
@@ -54,7 +52,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
             ctx.withAnalyticsManager(new EventSeriesAnalyticsDataManager( //
                     clientFactory.getSailingService(), //
                     asyncActionsExecutor, //
-                    autoRefreshTimer, //
+                    new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds), //
                     clientFactory.getErrorReporter(), //
                     userAgent));
 
@@ -136,6 +134,6 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
 
     @Override
     public Timer getAutoRefreshTimer() {
-        return autoRefreshTimer;
+        return ctx.getAnalyticsManager().getTimer();
     }
 }
