@@ -222,38 +222,39 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
         public RaceExecutionOrderCache() {
             racesOrderCache = createRacesOrderCache();
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
             getRegatta().addRaceColumnListener(this);
         }
 
         public List<TrackedRace> getRacesInExecutionOrder() {
             List<TrackedRace> result;
-            result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY, true);
+            result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY,/*waitForLatest*/ true);
             return result;
         }
         
         @Override
         public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, null);
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
         }
 
         @Override
         public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, null);
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
         }
 
         @Override
         public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, null);
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
         }
 
         @Override
         public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, null);
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
         }
 
         @Override
         public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, null);
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
         }
 
         private List<TrackedRace> reloadRacesInExecutionOrder() {
@@ -268,8 +269,8 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                     while (fleetsInRaceColumn.hasNext()) {
                         TrackedRace trackedRaceInColumnForFleet = currentRaceColumn.getTrackedRace(fleetsInRaceColumn
                                 .next());
-                        if(trackedRaceInColumnForFleet != null){
-                        raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
+                        if (trackedRaceInColumnForFleet != null) {
+                            raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
                         }
                     }
                 }
