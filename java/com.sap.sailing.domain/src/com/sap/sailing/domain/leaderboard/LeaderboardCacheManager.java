@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -121,7 +122,11 @@ public class LeaderboardCacheManager {
         public void emailChanged(String oldEmail, String newEmail) {
             //ignore (email not shown in leaderboard)
         }
-        
+
+        @Override
+        public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
+            removeFromCache(leaderboard);
+        }
     }
     
     private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {

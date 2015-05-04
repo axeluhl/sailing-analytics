@@ -332,7 +332,13 @@ public class ImportMasterDataOperation extends
             windTrackToReadFrom.lockForRead();
             try {
                 for (Wind fix : windTrackToReadFrom.getRawFixes()) {
-                    windTrackToWriteTo.add(fix);
+                    Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
+                    if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
+                            && fix.getPosition().equals(existingFix.getPosition()))) {
+                        windTrackToWriteTo.add(fix);
+                    } else {
+                        logger.info("Didn't add wind fix in import, because equal fix was already there.");
+                    }
                 }
             } finally {
                 windTrackToReadFrom.unlockAfterRead();

@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.shared.impl;
 
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 
 /**
  * Null Object pattern for {@link AdditionalResultData} with the values:

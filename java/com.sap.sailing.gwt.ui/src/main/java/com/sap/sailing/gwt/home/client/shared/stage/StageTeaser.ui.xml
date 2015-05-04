@@ -30,7 +30,7 @@
 			</header>
 		</div>
 		<div ui:field="bandCount" data-bandcount="" class="{local_res.css.stageteaser_content_band}">
-			<div class="{res.mainCss.grid}">
+			<div class="{res.mediaCss.grid}">
 				<g:HTMLPanel ui:field="stageTeaserBandsPanel" />
 			</div>
 		</div>

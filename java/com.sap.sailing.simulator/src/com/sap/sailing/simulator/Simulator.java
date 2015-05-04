@@ -2,7 +2,7 @@ package com.sap.sailing.simulator;
 
 import java.util.List;
 
-import com.sap.sailing.simulator.impl.SparsePolarDataException;
+import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 
 
 public interface Simulator {
@@ -11,7 +11,7 @@ public interface Simulator {
 
     SimulationParameters getSimulationParameters();
 
-    Path getPath(PathType pathType) throws SparsePolarDataException;
+    Path getPath(PathType pathType) throws SparseSimulationDataException;
     
     Path getRaceCourse();
 

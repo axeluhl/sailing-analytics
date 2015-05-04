@@ -231,7 +231,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, posWind));
+        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, posWind, null));
     }
 
     // generate path candidates based on beat angles
@@ -526,8 +526,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         logger.fine("Time step :" + usedTimeStep);
 
         // calculate initial position according to initPathStr
-        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0,
-                0.0, 0, "0", '0', wndStart);
+        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0, 0.0, 0, "0", '0', wndStart, null);
         if (initPathStr.length() > 1) {
             char nextDirection = '0';
             for (int idx = 1; idx < initPathStr.length(); idx++) {

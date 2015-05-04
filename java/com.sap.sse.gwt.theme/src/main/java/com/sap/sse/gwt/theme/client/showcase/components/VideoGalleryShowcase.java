@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.theme.client.component.videogallery.VideoGallery;
+import com.sap.sse.gwt.theme.client.component.videogallery.VideoGalleryData;
 
 public class VideoGalleryShowcase extends Composite {
 
@@ -14,10 +15,12 @@ public class VideoGalleryShowcase extends Composite {
     interface VideoGalleryShowcaseUiBinder extends UiBinder<Widget, VideoGalleryShowcase> {
     }
 
-    @UiField
+    @UiField(provided=true)
     VideoGallery videoGallery;
 
     public VideoGalleryShowcase() {
+        videoGallery = new VideoGallery(new VideoGalleryData("My video gallery"));
+        
         initWidget(uiBinder.createAndBindUi(this));
     }
 }

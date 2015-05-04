@@ -691,6 +691,19 @@ public class MasterDataImportTest {
         } finally {
             windTrackOnDest.unlockAfterRead();
         }
+        
+        //Reimport again to see if db throws exceptions (see console for error for now, since exception is caught deep inside)
+        try {
+            streamingOutput.write(os);
+            os.flush();
+
+            inputStream = new ByteArrayInputStream(os.toByteArray());
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
+        } finally {
+            os.close();
+            inputStream.close();
+        }
 
     }
 

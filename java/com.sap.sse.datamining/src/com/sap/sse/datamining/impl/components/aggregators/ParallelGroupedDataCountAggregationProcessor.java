@@ -9,7 +9,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 
 public class ParallelGroupedDataCountAggregationProcessor extends
         AbstractParallelStoringAggregationProcessor<GroupedDataEntry<?>, Map<GroupKey, Double>> {

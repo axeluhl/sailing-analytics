@@ -666,10 +666,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             ImageResourceRenderer renderer = new ImageResourceRenderer();
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-            final String imageURL = competitor.getImageURL();
+            final String flagImageURL = competitor.getFlagImageURL();
 
-            if (imageURL != null && !imageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + imageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
             } else {
                 final ImageResource flagImageResource;
