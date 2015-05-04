@@ -24,6 +24,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -1798,7 +1799,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
 
         contentPanel = new VerticalPanel();
-        contentPanel.setSpacing(5);
+        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
