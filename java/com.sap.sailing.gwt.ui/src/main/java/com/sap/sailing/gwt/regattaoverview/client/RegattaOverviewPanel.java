@@ -5,21 +5,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -65,8 +59,6 @@ public class RegattaOverviewPanel extends SimplePanel {
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
     private final TabPanel leaderboardsTabPanel;
-    private final Label eventNameLabel;
-    private final Label venueNameLabel;
     private final Label timeLabel;
     private final Button settingsButton;
     private final Button refreshNowButton;
@@ -74,16 +66,20 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final CheckBox leaderboardCheckBox;
     private final UserAgentDetails userAgent;
     
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
-    
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
     
     public void setEntryClickedHandler(EntryHandler handler) {
         regattaRaceStatesComponent.setEntryClickedHandler(handler);
     }
     
-    public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UUID eventId, RegattaRaceStatesSettings settings, UserAgentDetails userAgent) {
+    public RegattaOverviewPanel(
+            SailingServiceAsync sailingService, 
+            final ErrorReporter errorReporter, 
+            final StringMessages stringMessages, 
+            UUID eventId, 
+            RegattaRaceStatesSettings settings, 
+            UserAgentDetails userAgent) {
+        
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -108,6 +104,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         regattaRaceStatesComponent.setWidth("100%");
         
         refreshNowButton = new Button(stringMessages.refreshNow());
+        refreshNowButton.addStyleName(style.viewerToolbar_innerElement());
+
         refreshNowButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -116,6 +114,8 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         settingsButton = new Button(stringMessages.settings());
+        settingsButton.addStyleName(style.viewerToolbar_innerElement());
+
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -124,6 +124,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         });
         
         startStopUpdatingButton = new Button(stringMessages.stopUpdating());
+        startStopUpdatingButton.addStyleName(style.viewerToolbar_innerElement());
+
         startStopUpdatingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -137,8 +139,6 @@ public class RegattaOverviewPanel extends SimplePanel {
             }
             
         });
-        this.refreshNowButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
-        this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
@@ -149,48 +149,40 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
-                onUpdateUI(newTime);
+                fireEvent(new EventTimeUpdateEvent(newTime));
             }
         });
         this.uiUpdateTimer.play();
         
-        eventNameLabel = new Label();
-        eventNameLabel.addStyleName(style.eventLabel());
-        eventNameLabel.addStyleName(style.titleLabel());
-        
-        venueNameLabel = new Label();
-        venueNameLabel.addStyleName(style.titleLabel());
-        venueNameLabel.addStyleName(style.venueLabel());
+
         
         timeLabel = new Label();
         timeLabel.addStyleName(style.titleLabel());
         timeLabel.addStyleName(style.clockLabel());
         
-        FlexTable flexTable = new FlexTable();
-        flexTable.setWidth("100%");
-        flexTable.addStyleName(style.functionBar());
         
-        Grid eventVenueGrid = new Grid(1, 2);
-        eventVenueGrid.setCellPadding(5);
-        eventVenueGrid.setWidget(0, 0, eventNameLabel);
-        eventVenueGrid.setWidget(0, 1, venueNameLabel);
         
-        flexTable.setWidget(0, 0, eventVenueGrid);
-        flexTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
         
         final boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
                 && Window.Location.getParameter("enableLeaderboard").equalsIgnoreCase("true");
         if (showLeaderboardButton) {
             leaderboardCheckBox = addLeaderboardEnablerButton();
-            leaderboardCheckBox.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         } else {
             leaderboardCheckBox = null;
         }
+        FlowPanel flexTable = new FlowPanel();
+        flexTable.addStyleName(style.functionBar());
 
-        HorizontalPanel refreshStartStopClockPanel = getRefreshStartStopClockPanel();
-        flexTable.setWidget(0, 1, refreshStartStopClockPanel);
-        
-        mainPanel.add(flexTable);
+        if (leaderboardCheckBox != null) {
+            flexTable.add(leaderboardCheckBox);
+        }
+        flexTable.add(settingsButton);
+        flexTable.add(refreshNowButton);
+        flexTable.add(startStopUpdatingButton);
+        flexTable.add(timeLabel);
+
+        mainPanel.add(new SimplePanel(flexTable));
+
         mainPanel.add(regattaRaceStatesComponent);
         
         if (showLeaderboardButton) {
@@ -202,17 +194,15 @@ public class RegattaOverviewPanel extends SimplePanel {
             leaderboardsTabPanel = null;
         }
         
-        onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
     }
-    
+
     private CheckBox addLeaderboardEnablerButton() {
         final CheckBox checkBox = new CheckBox(stringMessages.leaderboard());
-        
-        checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-        
+
         checkBox.setEnabled(true);
         checkBox.setValue(false);
         checkBox.setTitle(stringMessages.showHideComponent("Leaderboard"));
+        // checkBox.getElement().getStyle().setMarginRight(10, Unit.PX);
         checkBox.addStyleName(style.viewerToolbar_innerElement());
 
         checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -268,25 +258,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         }
     }
 
-    private HorizontalPanel getRefreshStartStopClockPanel() {
-        HorizontalPanel refreshStartStopClockPanel = new HorizontalPanel();
-        refreshStartStopClockPanel.setSpacing(5);
-        refreshStartStopClockPanel.setStyleName(style.refreshStopTime());
-        refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        
-        if (leaderboardCheckBox != null) {
-            refreshStartStopClockPanel.add(leaderboardCheckBox);
-        }
-        refreshStartStopClockPanel.add(settingsButton);
-        refreshStartStopClockPanel.add(refreshNowButton);
-        refreshStartStopClockPanel.add(startStopUpdatingButton);
-        refreshStartStopClockPanel.add(timeLabel);
-        return refreshStartStopClockPanel;
-    }
-    
-    public void onUpdateUI(Date time) {
-        timeLabel.setText(timeFormatter.format(time));
-    }
+
     
     private void retrieveEvent() {
         sailingService.getEventById(eventId, false, new MarkedAsyncCallback<EventDTO>(
@@ -307,10 +279,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                 }));
     }
     
-    private void fillEventAndVenueName() {
-        eventNameLabel.setText(eventDTO.getName());
-        venueNameLabel.setText(eventDTO.venue.getName());
-    }
+
 
     protected void setEvent(EventDTO event) {
         eventDTO = event;
@@ -318,7 +287,8 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
 
     private void onEventUpdated() {
-        fillEventAndVenueName();
+        fireEvent(new EventDTOLoadedEvent(eventDTO));
+
         for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
             listener.onEventUpdated(eventDTO);
         }

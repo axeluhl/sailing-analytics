@@ -1,160 +1,162 @@
 @import url("SettingsDialog.css");
 
 body ::-webkit-scrollbar {
-    width: 16px;
-    height: 10px;
+	width: 16px;
+	height: 10px;
 }
 
 body ::-webkit-scrollbar-thumb {
-    min-height: 28px;
-    padding-top: 100px;
-    border-left: 6px solid transparent;
-    border-right: 1px solid transparent;
-    border-top: 0 solid transparent;
-    border-bottom: 0 solid transparent;
-    background-clip: padding-box;
-    background-color: rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+	min-height: 28px;
+	padding-top: 100px;
+	border-left: 6px solid transparent;
+	border-right: 1px solid transparent;
+	border-top: 0 solid transparent;
+	border-bottom: 0 solid transparent;
+	background-clip: padding-box;
+	background-color: rgba(0, 0, 0, 0.2);
+	-webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1), inset 0 -1px 0
+		rgba(0, 0, 0, 0.07);
 }
 
 body ::-webkit-scrollbar-button {
-    height: 0;
-    width: 0;
+	height: 0;
+	width: 0;
 }
 
 body ::-webkit-scrollbar-track {
-    border-left: 6px solid transparent;
-    border-right: 1px solid transparent;
+	border-left: 6px solid transparent;
+	border-right: 1px solid transparent;
 }
 
 .collapsablePanel {
-  background: #b6b6b6;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -o-border-radius: 5px;
-  -ms-border-radius: 5px;
-  border-radius: 5px;
-  overflow: hidden;
-  border: 1px solid #aaaaaa;
-  margin: 0 0 15px 0;
+	background: #b6b6b6;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-o-border-radius: 5px;
+	-ms-border-radius: 5px;
+	border-radius: 5px;
+	overflow: hidden;
+	border: 1px solid #aaaaaa;
+	margin: 0 0 15px 0;
 }
 
 .collapsablePanel-content {
-  background: #fff;
-  margin: 12px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -o-border-radius: 5px;
-  -ms-border-radius: 5px;
-  border-radius: 5px;
-  width: auto !important;
-  border: 1px solid #aaaaaa;
+	background: #fff;
+	margin: 12px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-o-border-radius: 5px;
+	-ms-border-radius: 5px;
+	border-radius: 5px;
+	width: auto !important;
+	border: 1px solid #aaaaaa;
 }
 
 .collapsablePanel-header {
-  background: url(images/titlebar-background.png) 0 0 repeat-x;
-  padding: 0;
-  margin: 0;
-  height: 42px;
-  position: relative;
-  -webkit-border-top-left-radius: 4px;
-  -moz-border-top-left-radius: 4px;
-  -o-border-top-left-radius: 4px;
-  -ms-border-top-left-radius: 4px;
-  border-top-left-radius: 4px;
-  -webkit-border-top-right-radius: 4px;
-  -moz-border-top-right-radius: 4px;
-  -o-border-top-right-radius: 4px;
-  -ms-border-top-right-radius: 4px;
-  border-top-right-radius: 4px;
+	background: url(images/titlebar-background.png) 0 0 repeat-x;
+	padding: 0;
+	margin: 0;
+	height: 42px;
+	position: relative;
+	-webkit-border-top-left-radius: 4px;
+	-moz-border-top-left-radius: 4px;
+	-o-border-top-left-radius: 4px;
+	-ms-border-top-left-radius: 4px;
+	border-top-left-radius: 4px;
+	-webkit-border-top-right-radius: 4px;
+	-moz-border-top-right-radius: 4px;
+	-o-border-top-right-radius: 4px;
+	-ms-border-top-right-radius: 4px;
+	border-top-right-radius: 4px;
 }
 
 .collapsablePanel:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 .collapsablePanel-open {
+	
 }
 
 .collapsablePanel-closed {
+	
 }
 
-.collapsablePanel-header-text{
-  font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
-  text-transform: uppercase;
-  margin: 15px 0 0 13px;
-  float: left;
+.collapsablePanel-header-text {
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	text-transform: uppercase;
+	margin: 15px 0 0 13px;
+	float: left;
 }
 
-.collapsablePanel-header-image{
-  float:left;
-  margin: 13px 0 0 0;
+.collapsablePanel-header-image {
+	float: left;
+	margin: 13px 0 0 0;
 }
 
-.collapsablePanel-header-collapse{
-  height:100%;
-  display: block;
-  padding: 0 0 0 10px;
-  color: #3b3b3b;
+.collapsablePanel-header-collapse {
+	height: 100%;
+	display: block;
+	padding: 0 0 0 10px;
+	color: #3b3b3b;
 }
 
 .collapsablePanel-header-collapse:hover {
-  color: #3b3b3b;
+	color: #3b3b3b;
 }
 
 .collapsablePanel-toolbar {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 43px;
-  width: 43px;
-  overflow: hidden;
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 43px;
+	width: 43px;
+	overflow: hidden;
 }
 
 .collapsablePanel-toolbar table {
-  border-collapse: collapse;
+	border-collapse: collapse;
 }
 
 .collapsablePanel-toolbar a {
-  display: block;
-  padding: 9px;
-
+	display: block;
+	padding: 9px;
 }
 
 .breadcrumbPanel-NextArrow {
-  display: none;
+	display: none;
 }
 
-
-
 .breadcrumbPanel-ActiveBreadcrumb {
-  font-size: 18px;
-  font-family: 'OpenSansLight',Arial,Verdana,sans-serif;
-  margin: 5px 10px 0 0;
+	font-size: 18px;
+	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
+	margin: 5px 10px 0 0;
 }
 
 .breadcrumbPanel-InactiveBreadcrumb {
-  font-size: 24px;
+	font-size: 24px;
 }
 
-.breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
-  color:#A1A1A1;
-  }
+.breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a,
+	.breadcrumbPanel-NextArrow a {
+	color: #A1A1A1;
+}
 
-  .breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
-  color:#A1A1A1;
-  }
+.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb,
+	.breadcrumbPanel-NextArrow {
+	color: #A1A1A1;
+}
 
 .gwt-ToggleButton {
-  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
-  padding: 8px;
-  margin: 0 11px 0 0;
-  border: 0;
+	background: url(images/btn-cta-orangeleft.png) center top repeat-x;
+	padding: 8px;
+	margin: 0 11px 0 0;
+	border: 0;
 }
 
 .gwt-ToggleButton-down {
-  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
-  color: #fff;
+	background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+	color: #fff;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
@@ -171,12 +173,12 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-EastToggleButton {
 	height: 40px;
-    background-color: white;
-    border: none;
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
+	background-color: white;
+	border: none;
+	-webkit-transform: rotate(-90deg);
+	-moz-transform: rotate(-90deg);
+	-o-transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg);
 	padding-right: 25px;
 	padding-left: 30px;
 	margin-left: -15px;
@@ -184,15 +186,17 @@ body ::-webkit-scrollbar-track {
 	border-right: 1px solid #cecece;
 	border-left: 1px solid #cecece;
 	border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
+	border-bottom-left-radius: 10px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Open {
-	background: white url(images/arrows_top_black_small.png) 96% 50% no-repeat;
+	background: white url(images/arrows_top_black_small.png) 96% 50%
+		no-repeat;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Closed {
-	background: white url(images/arrows_bottom_black_small.png) 96% 50% no-repeat;
+	background: white url(images/arrows_bottom_black_small.png) 96% 50%
+		no-repeat;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton:hover {
@@ -200,32 +204,34 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton:focus {
-	outline:0 !important;
+	outline: 0 !important;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton {
-    height: 33px;
-    background-color: #fff;
-    border: 1px solid #cecece;
-    margin-left: 5px;
+	height: 33px;
+	background-color: #fff;
+	border: 1px solid #cecece;
+	margin-left: 5px;
 	padding: 2px 40px;
 	border-radius: 7px;
 	margin-top: 0px;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed {
-	background: white url(images/arrows_top_black_small.png) 95% 50% no-repeat;
+	background: white url(images/arrows_top_black_small.png) 95% 50%
+		no-repeat;
 	font-weight: normal;
 }
-	
+
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Open {
-	background: white url(images/arrows_bottom_black_small.png) 95% 50% no-repeat;
+	background: white url(images/arrows_bottom_black_small.png) 95% 50%
+		no-repeat;
 	font-weight: bold;
 	border-width: 3px;
 }
-	
+
 .gwt-SplitLayoutPanel-NorthSouthToggleButton:focus {
-	outline:0 !important;
+	outline: 0 !important;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton:hover {
@@ -293,7 +299,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-CloseButton:focus {
-	outline:0 !important;
+	outline: 0 !important;
 }
 
 .gwt-SplitLayoutPanel-CloseButton:hover {
@@ -333,450 +339,439 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
-  background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
-  color: #fff;
+	background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
+	color: #fff;
 }
 
 .gwt-TabBar {
-  margin-top: 20px;
-  border-bottom: 1px solid #dedede;
-  margin-bottom: 10px;
-  
+	margin-top: 20px;
+	border-bottom: 1px solid #dedede;
+	margin-bottom: 10px;
 }
 
 .gwt-TabBar .gwt-TabBarFirst {
-  width: 5px;  /* first tab distance from the left */
+	width: 5px; /* first tab distance from the left */
 }
 
 .gwt-TabBar .gwt-TabBarRest {
+	
 }
 
 .gwt-TabBar .gwt-TabBarItem {
-  margin-left: 4px;
-  padding: 10px 12px;
-  cursor: pointer;
-  cursor: hand;
-  color: black;
-  font-weight: normal;
-  text-align: center;
-  background: #ebebeb;
-  border-radius: 4px 4px 0px 0px;
-  border-left: 1px solid #dedede;
-  border-top: 1px solid #dedede;
-  border-right: 1px solid #dedede;
-  
+	margin-left: 4px;
+	padding: 10px 12px;
+	cursor: pointer;
+	cursor: hand;
+	color: black;
+	font-weight: normal;
+	text-align: center;
+	background: #ebebeb;
+	border-radius: 4px 4px 0px 0px;
+	border-left: 1px solid #dedede;
+	border-top: 1px solid #dedede;
+	border-right: 1px solid #dedede;
 }
 
 .gwt-TabBarItem:FOCUS {
 	outline: none;
 }
+
 .gwt-TabBar .gwt-TabBarItem-selected {
-  cursor: default;
-  background: white;
-  color: black;
+	cursor: default;
+	background: white;
+	color: black;
 }
 
 .gwt-TabBar .gwt-TabBarItem-disabled {
-  cursor: default;
-  color: #999999;
+	cursor: default;
+	color: #999999;
 }
 
 .gwt-TabPanel {
+	
 }
 
-
 .titleLabelWrapper {
-  position: absolute;
-  width: 100%;
+	position: absolute;
+	width: 100%;
 }
 
 .titleLabel {
-    text-align: center;
-    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
-    font-size: 18px;
-    color: #fff;
-    margin-top: 13px;
+	text-align: center;
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	font-size: 18px;
+	color: #fff;
+	margin-top: 13px;
 }
 
 .titleLabelRight {
-    text-align: right;
-    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
-    font-size: 18px;
-    color: #fff;
-    margin-top: 13px;
-    margin-right: 12px;
+	text-align: right;
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	font-size: 18px;
+	color: #fff;
+	margin-top: 13px;
+	margin-right: 12px;
 }
 
-
 .subTitleLabelWrapper {
-  position: absolute;
-    min-width: 200px;
-    text-align: right;
-    height: 68px;
-    right: 0;
-    top: 0;
-    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
-    font-size: 16px;
-    color: #fff;
-    //background: url(images/titleLabelWrapper.png) right center no-repeat;
+	position: absolute;
+	min-width: 200px;
+	text-align: right;
+	height: 68px;
+	right: 0;
+	top: 0;
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	font-size: 16px;
+	color: #fff; //
+	background: url(images/titleLabelWrapper.png) right center no-repeat;
 }
 
 .subTitleLabel {
-    background: url(images/titleLabelInner.png) left center no-repeat;
-    height: 26px;
-    padding: 42px 7px 0 130px;
+	background: url(images/titleLabelInner.png) left center no-repeat;
+	height: 26px;
+	padding: 42px 7px 0 130px;
 }
-
 
 .gwt-MenuBarPopup .menuPopupTopLeft {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupTopCenter {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupTopCenter {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupTopRight {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupMiddleLeft {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupMiddleRight {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupMiddleRight {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupBottomCenter {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupBottomRight {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBarPopup .menuPopupBottomLeft {
-    background: none !important;
+	background: none !important;
 }
 
 .gwt-MenuBar-vertical .gwt-MenuItem {
-    padding: 10px;
-    padding-bottom: 5px;
-    padding-top: 5px;
+	padding: 10px;
+	padding-bottom: 5px;
+	padding-top: 5px;
 }
 
 .gwt-MenuBar .gwt-MenuItem-selected {
-    background: none repeat scroll 0 0 #efaa00;
+	background: none repeat scroll 0 0 #efaa00;
 }
 
 .dateBoxPopup {
-  z-Index: 2000;
+	z-Index: 2000;
 }
 
 .timeLinePanel {
-  color: black;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  z-index: 9;
-  background: #f6f6f6;
-  border-top: 2px solid #cecece;
+	color: black;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	z-index: 9;
+	background: #f6f6f6;
+	border-top: 2px solid #cecece;
 }
 
 .timeLineInnerBgPanel {
-
+	
 }
 
 .footerShadowPanel {
-  position: fixed;
-  height: 15px;
-  bottom: 0;
-  background: url(images/footer_shadow.png) left bottom repeat-x;
-  width: 100%;
-  z-index: 10;
+	position: fixed;
+	height: 15px;
+	bottom: 0;
+	background: url(images/footer_shadow.png) left bottom repeat-x;
+	width: 100%;
+	z-index: 10;
 }
 
 .timePanel-controls {
-    margin: 0;
-    padding: 7px 12px 0 12px;
-    height: 29px;
+	margin: 0;
+	padding: 7px 12px 0 12px;
+	height: 29px;
 }
 
 .timePanel-controls-play {
-    float:left;
-    padding: 0 10px 0 0;
-    border-right: 1px solid #fcbb22;
-    height: 24px;
-    margin: 0 14px 0 0;
+	float: left;
+	padding: 0 10px 0 0;
+	border-right: 1px solid #fcbb22;
+	height: 24px;
+	margin: 0 14px 0 0;
 }
 
 .timePanel-timeslider-play {
-    float:left;
-    padding: 10px 4px;
-    height: 24px;
-    margin: 5px 14px 5px 0;
+	float: left;
+	padding: 10px 4px;
+	height: 24px;
+	margin: 5px 14px 5px 0;
 }
 
 .timePanel-controls-playSpeed {
-  vertical-align: middle;
-  line-height: 25px;
-  float:left;
-  padding: 0 14px 0 0;
-  margin: 0 14px 0 0;
-    border-right: 1px solid #fcbb22;
-    height: 24px;
+	vertical-align: middle;
+	line-height: 25px;
+	float: left;
+	padding: 0 14px 0 0;
+	margin: 0 14px 0 0;
+	border-right: 1px solid #fcbb22;
+	height: 24px;
 }
 
 .timePanel-label {
-        float:left;
+	float: left;
 }
 
 .timePanel-controls-time {
-    float:left;
-    padding: 0 0 0 0;
+	float: left;
+	padding: 0 0 0 0;
 }
 
-.timePanel-controls-time .dateLabel,
-.timePanel-controls-time .timeLabel {
-    padding: 4px 20px 0 0;
-    float:left;
+.timePanel-controls-time .dateLabel, .timePanel-controls-time .timeLabel
+	{
+	padding: 4px 20px 0 0;
+	float: left;
 }
 
 .timePanel-controls-timeToStart {
-    float:left;
-    padding: 0 0 0 0;
-    border-left: 1px solid #fcbb22;
+	float: left;
+	padding: 0 0 0 0;
+	border-left: 1px solid #fcbb22;
 }
 
 .timePanel-controls-timeToStart .timeToStartLabel {
-    float:left;
+	float: left;
 	padding: 4px 20px 0 20px;
 }
 
 .timePanel-controls-timeDelay {
-  float: right;
-  margin: 0 50px 0 0;
+	float: right;
+	margin: 0 50px 0 0;
 }
 
-.timePanel-controls-playmode{
-    float:left;
-    padding: 0 14px 0 0;
-    margin: 0 14px 0 0;
-    height: 24px;
-    border-right: 1px solid #fcbb22;
+.timePanel-controls-playmode {
+	float: left;
+	padding: 0 14px 0 0;
+	margin: 0 14px 0 0;
+	height: 24px;
+	border-right: 1px solid #fcbb22;
 }
 
-.timePanel-controls-playmode .playModeLabel{
-    padding: 4px 0 0 5px;
+.timePanel-controls-playmode .playModeLabel {
+	padding: 4px 0 0 5px;
 }
 
-.timePanelSettings{
-  float: right;
+.timePanelSettings {
+	float: right;
 }
 
 .timePanelSlider {
-  margin: 0 12px;
-  height: 49px;
-  padding-top: 5px;
+	margin: 0 12px;
+	height: 49px;
+	padding-top: 5px;
 }
 
 .timePanelInnerWrapper {
+	
 }
-
 
 .LogoAndTitlePanel {
-    height: 68px;
-    font-family: Arial, Verdana, sans-serif;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-    background-position: center top, 0 0;
-    background-repeat: no-repeat, repeat-x;
-    box-shadow: 0 0 20px #858585;
-    -moz-box-shadow: 0 0 20px #858585;
-    -webkit-box-shadow: 0 0 20px #858585;
-    -o-box-shadow: 0 0 20px #858585;
-    -ms-box-shadow: 0 0 20px #858585;
-    z-index: 1;
+	height: 68px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png),
+		url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+	box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+	-o-box-shadow: 0 0 20px #858585;
+	-ms-box-shadow: 0 0 20px #858585;
+	z-index: 1;
 }
 
-
 .LogoAndTitlePanel:after {
-  content: " ";
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
 }
 
 .globalNavigation {
-    position:absolute;
-    top:0;
-    right:0;
+	position: absolute;
+	top: 0;
+	right: 0;
 }
 
 .globalNavigation-Link, .globalNavigation-Link:visited {
-  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
-    border: none;
-    display: inline-block;
-    padding: 2px 10px 4px;
-    color: #fff;
-    text-decoration: none;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    height: 24px;
-    white-space: nowrap;
+	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+	border: none;
+	display: inline-block;
+	padding: 2px 10px 4px;
+	color: #fff;
+	text-decoration: none;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+	cursor: pointer;
+	height: 24px;
+	white-space: nowrap;
 }
 
 .globalNavigation-Link:active {
-    top: 1px;
-    position: relative;
-    border: none;
+	top: 1px;
+	position: relative;
+	border: none;
 }
 
 .globalNavigation-Link:hover {
-  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
-    cursor: pointer;
+	background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+	cursor: pointer;
 }
 
 .globalNavigation-leaderBoardGroup a, .globalNavigation-home a {
-    background: url(images/globalNavigation-home_bg.png) 11px 8px no-repeat;
+	background: url(images/globalNavigation-home_bg.png) 11px 8px no-repeat;
 }
 
 .globalNavigation-leaderBoard a {
-  background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
+	background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px
+		no-repeat;
 }
 
-.globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
-    margin: -4px 10px 0 0;
-    padding: 0px 0px 4px;
-    float: left;
-    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
+.globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard,
+	.globalNavigation-home {
+	margin: -4px 10px 0 0;
+	padding: 0px 0px 4px;
+	float: left;
+	background: #7c7b7c url(images/alert-overlay.png) repeat-x;
 }
 
 .globalNavigation-leaderBoard {
-  margin-right: 5px;
+	margin-right: 5px;
 }
 
-.globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a, .globalNavigation-home a {
-  color: #fff;
-  text-decoration: none;
-    display: block;
-    padding: 8px 13px 6px 36px;
+.globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a,
+	.globalNavigation-home a {
+	color: #fff;
+	text-decoration: none;
+	display: block;
+	padding: 8px 13px 6px 36px;
 }
 
 .sapLogo {
-  float: left;
-  margin-top: 13px;
-  margin-left: 12px;
+	float: left;
+	margin-top: 13px;
+	margin-left: 12px;
 }
 
 .sailingAnalyticsLabelPanel {
-  margin: 10px 0 0 0;
+	margin: 10px 0 0 0;
 }
 
 .sailingAnalyticsLabel {
-  float: left;
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-  margin: 15px 0 0 0;
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
 }
 
 .gwt-DialogBox {
-  line-height: 1.4;
-  background-color: #cecece;
-  border: 1px solid #3e3e3e;
-  border-radius: 4px;
-  box-shadow: 0px 0px 10px 0px #3e3e3e;
+	line-height: 1.4;
+	background-color: #cecece;
+	border: 1px solid #3e3e3e;
+	border-radius: 4px;
+	box-shadow: 0px 0px 10px 0px #3e3e3e;
 }
 
 .gwt-PopupPanelGlass {
-	background-color: rgba(140,140,140,0.5);
+	background-color: rgba(140, 140, 140, 0.5);
 }
 
 .gwt-DialogBox .Caption {
-    font-size: 14px;
-    padding: 8px 10px;
-    background-color: #ededed;
-    border-bottom: 1px solid #3e3e3e;
-  	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+	font-size: 14px;
+	padding: 8px 10px;
+	background-color: #ededed;
+	border-bottom: 1px solid #3e3e3e;
+	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
 }
 
 .gwt-DialogBox .dialogContent {
-    background: #ffffff;
-    padding: 10px;
-   
- 
+	background: #ffffff;
+	padding: 10px;
 }
 
 .gwt-Button, .gwt-Button:visited {
-  font-size: 0,9rem;
-  display: inline-block;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  background-color: #efaa00;
-  -webkit-transition: background-color 0.2s;
-     -moz-transition: background-color 0.2s;
-          transition: background-color 0.2s;
-  text-decoration: none;
-  cursor: pointer;
+	font-size: 0, 9rem;
+	display: inline-block;
+	color: #fff;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	background-color: #efaa00;
+	-webkit-transition: background-color 0.2s;
+	-moz-transition: background-color 0.2s;
+	transition: background-color 0.2s;
+	text-decoration: none;
+	cursor: pointer;
 }
 
 .gwt-Button:active {
-    border: none;
+	border: none;
 }
 
 .gwt-Button:hover {
-      background-color: #d79900;
-  outline: none;
-  text-decoration: none;
+	background-color: #d79900;
+	outline: none;
+	text-decoration: none;
 }
 
 .gwt-Button[disabled] {
-  cursor: default;
-  color: #888;
-  background: #F1F1F1;
-  border: 1px solid #919090;
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
-  -o-box-shadow: none;
-  -ms-box-shadow: none;
-  box-shadow: none;
-  border: none;
-  text-shadow: none;
+	cursor: not-allowed;
+	background: #cfcfcf;
 }
 
 .gwt-Button[disabled]:hover {
-  cursor: default;
-  color: #888;
-  background: #F1F1F1;
+	cursor: default;
+	background: #cfcfcf;
+	cursor: not-allowed;
 }
 
 .gwt-Button[disabled]:active {
-  cursor: default;
-  color: #888;
-  background: #F1F1F1;
-  top: 0;
+	cursor: default;
+	background: #cfcfcf;
+	cursor: not-allowed;
 }
 
 .gwt-ButtonLarge
@@ -784,95 +779,92 @@ body ::-webkit-scrollbar-track {
 .gwt-ButtonSmall
 
 .gwt-DialogBox .boxPanel {
-  padding: 0 0 10px 0;
+	padding: 0 0 10px 0;
 }
 
 .gwt-DialogBox .boxPanel:after {
-  display: inline-block;
-    content: " ";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
+	display: inline-block;
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
 }
 
 .gwt-DialogBox .settingsDialogLabel {
-    float: left;
-    padding: 3px 6px 0 0;
+	float: left;
+	padding: 3px 6px 0 0;
 }
 
 .gwt-DialogBox .settingsDialogValue {
-  float: right;
+	float: right;
 }
 
 .gwt-DialogBox .additionalWidgets {
-  padding: 5px 0 0 0;
-  text-align: right;
+	padding: 5px 0 0 0;
+	text-align: right;
 }
 
 .gwt-DialogBox .gwt-Label {
-  line-height: 1.4;
+	line-height: 1.4;
 }
 
 .timingSettings .dialogInnerContent {
-    padding: 0 9px 0 9px;
+	padding: 0 9px 0 9px;
 }
 
 .timingSettings .gwt-Label {
-  float: left;
-  padding: 0 10px 0 0;
+	float: left;
+	padding: 0 10px 0 0;
 }
 
 .helpPanel {
-  margin-top: 15px;
+	margin-top: 15px;
 }
 
 .minMaxBackgroundBar {
-  left: 0px;
-  background-image: url(images/yellowBar.png);
-  background-position: left;
-  background-repeat: no-repeat;
+	left: 0px;
+	background-image: url(images/yellowBar.png);
+	background-position: left;
+	background-repeat: no-repeat;
 }
 
 .minMaxBackgroundBarBad {
-  left: 0px;
-  background-image: url(images/redBar.png);
-  background-position: left;
-  background-repeat: no-repeat;
+	left: 0px;
+	background-image: url(images/redBar.png);
+	background-position: left;
+	background-repeat: no-repeat;
 }
 
 .minMaxBackgroundBarGood {
-  left: 0px;
-  background-image: url(images/greenBar.png);
-  background-position: left;
-  background-repeat: no-repeat;
+	left: 0px;
+	background-image: url(images/greenBar.png);
+	background-position: left;
+	background-repeat: no-repeat;
 }
 
 .inlineButton {
-  height: 20px;
-    padding: 0px 10px 3px;
-    float: left;
-    background: #de8a2e url(images/alert-overlay.png) repeat-x;
-    font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+	height: 20px;
+	padding: 0px 10px 3px;
+	float: left;
+	background: #de8a2e url(images/alert-overlay.png) repeat-x;
+	font-family: OpenSansRegular, Arial, Verdana, sans-serif;
 }
 
-
 .chartCloseButton {
-  cursor: pointer;
-  background: url(images/closeButton.png) right center no-repeat;
-  height: 18px;
-  width: 60px;
-  text-align: left;
+	cursor: pointer;
+	background: url(images/closeButton.png) right center no-repeat;
+	height: 18px;
+	width: 60px;
+	text-align: left;
 }
 
 video {
-    max-width: 100%;
-    height: auto;
+	max-width: 100%;
+	height: auto;
 }
 
 .pointeredLink {
-  cursor: pointer;
-  cursor: hand;
 }
 
 .betterCheckboxCellSelected {
@@ -885,7 +877,8 @@ video {
 }
 
 .betterCheckboxCellDeselected {
-	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
+	margin-left: 2px;
+	/* account for the selection border that pushes a selected checkbox to the side */
 	margin-top: 0px;
 	margin-bottom: 0px;
 	margin-right: 0px;
@@ -898,17 +891,17 @@ video {
 .LeaderboardPanel-FilterControl-Panel {
 	width: 380px;
 	border-top: 1px solid #ececec;
-    margin-top: 3px;
+	margin-top: 3px;
 }
 
 .LeaderboardPanel-FilterClear-Button {
-    margin-top: 2px;
-    font-size: 10px;
-    outline: 0;
-    height: 23px;
+	margin-top: 2px;
+	font-size: 10px;
+	outline: 0;
+	height: 23px;
 	background-color: #fff;
-    border: 1px solid #cecece;
-    border-radius: 7px;
+	border: 1px solid #cecece;
+	border-radius: 7px;
 }
 
 .LeaderboardPanel-FilterClear-Button:hover {
@@ -920,8 +913,6 @@ video {
 	font-size: 10px;
 }
 
-
 label {
 	padding-left: 4px;
 }
-

@@ -10,16 +10,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
-import com.sap.sse.gwt.theme.client.component.sapheader.SAPHeader;
+import com.sap.sse.gwt.theme.client.component.sapheader2.SAPHeader2;
 import com.sap.sse.gwt.theme.client.resources.ThemeResources;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
@@ -30,10 +29,15 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private final static String PARAM_REGATTA = "regatta";
     private final static String PARAM_COURSE_AREA = "coursearea";
     
-    private HeaderPanel headerPanel;
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
+    private SAPHeader2 logoAndTitlePanel;
+    private final Label eventNameLabel = new Label();
+    private final Label venueNameLabel = new Label();
+    private final Label clockLabel = new Label();
+
+    private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
 
     @Override
     public void doOnModuleLoad() {
@@ -44,24 +48,22 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         RegattaOverviewResources.INSTANCE.css().ensureInjected();
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        
-        headerPanel = new HeaderPanel();
-        rootPanel.add(headerPanel);
-        
         containerPanel = new DockLayoutPanel(Unit.PX);
+        rootPanel.add(containerPanel);
         containerPanel.addStyleName(RegattaOverviewResources.INSTANCE.css().container());
-        headerPanel.setContentWidget(containerPanel);
         
-        boolean embedded = Window.Location.getParameter("embedded") != null
-                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
-        if (!embedded) {
+        FlowPanel descriptionUi = new FlowPanel();
+        descriptionUi.setStyleName(style.eventDescription());
+        eventNameLabel.addStyleName(style.eventLabel());
+        venueNameLabel.addStyleName(style.venueLabel());
+        clockLabel.addStyleName(style.clockLabel());
+        descriptionUi.add(eventNameLabel);
+        descriptionUi.add(venueNameLabel);
 
-            SAPHeader logoAndTitlePanel = new SAPHeader(getStringMessages().sapSailingAnalytics(), getStringMessages().eventOverview(), false);
-            headerPanel.setHeaderWidget(logoAndTitlePanel);
-        } else {
-            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
-            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
-        }
+        SAPHeader2 logoAndTitlePanel = new SAPHeader2(getStringMessages().sapSailingAnalytics(), descriptionUi, false);
+
+        logoAndTitlePanel.addWidgetToRightSide(clockLabel);
+        containerPanel.addNorth(logoAndTitlePanel, 75);
 
         String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
         if (eventIdAsString == null) {
@@ -88,12 +90,31 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     }
     
     private void toggleDetailPanel(boolean visibile) {
-        containerPanel.setWidgetHidden(detailPanel, !visibile);
+        containerPanel.setWidgetSize(detailPanel, visibile ? 110 : 0);
+        containerPanel.animate(500);
+        // containerPanel.setWidgetHidden(detailPanel, !visibile);
     }
 
     private void createAndAddRegattaPanel(UUID eventId) {
         RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
         regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent);
+
+        regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
+            @Override
+            public void onEventDTOLoaded(EventDTOLoadedEvent e) {
+                eventNameLabel.setText(e.getCurrentEvent().getName());
+                venueNameLabel.setText(e.getCurrentEvent().venue.getName());
+
+            }
+        }, EventDTOLoadedEvent.TYPE);
+
+        regattaPanel.addHandler(new EventTimeUpdateEvent.Handler() {
+            @Override
+            public void onEventDTOLoaded(EventTimeUpdateEvent e) {
+                clockLabel.setText(e.getFormattedUpdatedTime());
+            }
+        }, EventTimeUpdateEvent.TYPE);
+
         Panel centerPanel = new FlowPanel();
         centerPanel.add(regattaPanel);
         ScrollPanel scrollPanel = new ScrollPanel(centerPanel);

@@ -29,5 +29,9 @@ public interface RegattaOverviewResources extends ClientBundle {
         String raceDetailPanel_content();
         String leaderboards();
         String viewerToolbar_innerElement();
+
+        String eventLogo();
+
+        String eventDescription();
     }
 }

@@ -1,6 +1,5 @@
 .cellTableWidget {
-	border-left: 1px solid #c9caca;
-	border-top: 1px solid #c9caca;
+	border-spacing: 0px;
 }
 
 /** v-align images in the table header
@@ -9,35 +8,19 @@
 .cellTableHeader {
 	position: relative;
     vertical-align: middle;
-	background-color: #e5e5e5;
-	border-right: 1px solid #ffffff !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-	text-align: center;
+	background-color: #f2f2f2;
+	background-color: #fff;
+	padding: 5px 12px;
+	text-align: left;
+	border-bottom: 1px solid black;
+	text-shadow: none;
 }
 
 .cellTableFirstColumnHeader {
-	position: relative;
-    vertical-align: middle;
-	background-color: #e5e5e5;
-	border-left: none !important;
-	border-right: 1px solid #ffffff !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-	text-align: center;
 }
 
 .cellTableLastColumnHeader {
-	position: relative;
-    vertical-align: middle;
-	background-color: #e5e5e5;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-	text-align: center;
+	
 }
 
 .cellTableHeader > span > img:first-child {
@@ -46,30 +29,25 @@
 }
 
 .cellTableEvenRow {
-	border-bottom: 1px solid #e5e5e5;
 	background-color: rgba(255,255,255,0.5);
 }
 
 .cellTableEvenRowCell {
-	border-right: 1px solid #c9caca !important;
-	border-left: none;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 17px 5px !important;
+	border: none;
+	border-bottom: 1px solid #dedede;
+	padding: 15px 20px 5px;
 	white-space: nowrap;
 }
 
 .cellTableOddRow {
-	border-bottom: 1px solid #e5e5e5;
 	background-color: rgba(242,242,242,0.5);
 }
 
 .cellTableOddRowCell {
-	border-left: none !important;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 17px 5px !important;
+		border: none;
+	
+	border-bottom: 1px solid #dedede;
+	padding: 15px 20px 5px ;
 	white-space: nowrap;
 }
 
@@ -81,29 +59,16 @@
 .cellTableSelectedRow {
 	color: #000000;
 	background-color: rgba(229,242,249,0.5);
-	border-right: 2px solid #21a0e4 !important;
-	border-left: 2px solid #21a0e4 !important;
-	border: 2px solid #21a0e4;
-}
-
-.cellTableSelectedRow > td:FIRST-CHILD {
-	border-left: 2px solid rgba(33,160,228,0.5) !important;
-}
-
-.cellTableSelectedRow > td:LAST-CHILD {
-	border-right: 2px solid rgba(33,160,228,0.5) !important;
 }
 
 .cellTableSelectedRowCell {
-	border-left: none;
-	border-right: 1px solid #e5e5e5;
 	border-top: 2px solid #21a0e4 !important;
 	border-bottom: 2px solid #21a0e4 !important;
 }
 
 .cellTableRaceNameColumnHeader {
 	background-color: #e0e0e0;
-	padding: 3px 12px;
+	padding: 5px 20px;
 }
 
 .cellTableRaceNameColumn {

@@ -13,6 +13,7 @@ import java.util.UUID;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -145,7 +146,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         loadAndSetSettings(settings);
 
         mainPanel = new VerticalPanel();
-        setWidth("100%");
+        mainPanel.getElement().getStyle().setWidth(100, Unit.PCT);
+        getElement().getStyle().setWidth(100, Unit.PCT);
 
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
@@ -316,7 +318,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return entryDTO.raceInfo.seriesName.equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME) ? "-" : entryDTO.raceInfo.seriesName;
             }
         };
-        seriesNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // seriesNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -324,7 +326,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return entryDTO.raceInfo.fleetName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME) ? "-" : entryDTO.raceInfo.fleetName;
             }
         };
-        fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         AnchorCell raceCell = new AnchorCell();
         Column<RegattaOverviewEntryDTO, Anchor> raceNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(raceCell) {
@@ -360,7 +362,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return formatTime(entryDTO.raceInfo.startTime);
             }
         };
-        raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         raceStartTimeColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(raceStartTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
 
@@ -410,7 +412,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
 
         });
-        raceStatusColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // raceStatusColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Column<RegattaOverviewEntryDTO, SafeHtml> raceCourseColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(new ClickableSafeHtmlCell()) {
             @Override
@@ -440,7 +442,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 }
             }
         });
-        raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         SafeHtmlCell flagsCell = new SafeHtmlCell();
         Column<RegattaOverviewEntryDTO, SafeHtml> flagColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(flagsCell) {
@@ -467,7 +469,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
             
         };
-        flagColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // flagColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         
         TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -493,7 +495,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return leftLastUpdateTime.compareTo(rightLastUpdateTime);
             }
         });
-        lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        // lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<RegattaOverviewEntryDTO> raceAdditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
