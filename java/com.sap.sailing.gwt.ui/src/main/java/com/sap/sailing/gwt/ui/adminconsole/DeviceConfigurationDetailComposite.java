@@ -40,8 +40,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void onCloneRequested(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO configuration);
     }
     
-    private static List<String> suggestedCourseNames = Arrays.asList("Upwind", "Downwind");
-    
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
     protected final SailingServiceAsync sailingService;
@@ -82,7 +80,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
-        cloneButton = new Button(stringMessages.save() + " + " +  "Clone");
+        cloneButton = new Button(stringMessages.save() + " + " +  stringMessages.clone());
         cloneButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -196,7 +194,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     protected void setupIdentifier(Grid grid, int gridRow) {
         identifierBox = new TextBox();
         identifierBox.setWidth("80%");
-        identifierBox.setText(DeviceConfigurationPanel.renderIdentifiers(matcher.clients));
+        identifierBox.setText(DeviceConfigurationPanel.renderIdentifiers(matcher.clients, stringMessages));
         identifierBox.setReadOnly(true);
         
         grid.setWidget(gridRow, 0, new Label("Identifier"));
@@ -220,6 +218,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
         
+        List<String> suggestedCourseNames = Arrays.asList(stringMessages.upWind(), stringMessages.downWind());
         courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), IconResources.INSTANCE.removeIcon(), suggestedCourseNames,
                 stringMessages.enterCourseName());
         courseNamesList.setWidth("80%");
@@ -248,7 +247,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private void markAsDirty(boolean dirty) {
         if (dirty) {
             if (captionPanel.getCaptionText().equals(stringMessages.configuration())) {
-                captionPanel.setCaptionText(stringMessages.configuration() + "* (CHANGED)");
+                captionPanel.setCaptionText(stringMessages.configuration() + "* ("+stringMessages.changed()+")");
             }
         } else {
             if (!captionPanel.getCaptionText().equals(stringMessages.configuration())) {
