@@ -59,27 +59,17 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
 
     @Override
     public void start(final EventSeriesOverallLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
-
         contentArea.setWidget(new Placeholder());
-
         String leaderboardName = myPlace.getCtx().getSeriesDTO().getLeaderboardId();
-
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-          
-            EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
-                    .getAnalyticsManager();
-
-
+            EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
             boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-
             final LeaderboardSettings leaderboardSettings = EventParamUtils
                     .createLeaderboardSettingsFromURLParameters(Window.Location
                     .getParameterMap());
-
             final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
                     .getPreselectedRace(Window.Location.getParameterMap());
-
             LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createOverallLeaderboardPanel(
                     leaderboardSettings,
                     preselectedRace,
@@ -87,23 +77,15 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
                     leaderboardName,
                     true, // this information came from place, now hard coded. check with frank
                     autoExpandLastRaceColumn);
-
             initWidget(ourUiBinder.createAndBindUi(this));
-
-            leaderboard.setLeaderboard(leaderboardPanel,
-                    currentPresenter.getAutoRefreshTimer());
-
+            leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             leaderboardPanel.addLeaderboardUpdateListener(this);
-
             if (currentPresenter.getCtx().getSeriesDTO().getState() != EventSeriesState.RUNNING) {
                 this.leaderboard.hideRefresh();
             } else {
                 // TODO: start autorefresh?
             }
-
-
             regattaAnalyticsManager.hideCompetitorChart();
-
             contentArea.setWidget(this);
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
@@ -113,7 +95,6 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
                     currentPresenter.getHomeNavigation().goToPlace();
                 }
             }.schedule(3000);
-
         }
 
     }
