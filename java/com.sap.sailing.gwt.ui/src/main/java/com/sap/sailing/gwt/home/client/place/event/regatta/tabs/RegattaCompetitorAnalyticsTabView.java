@@ -8,25 +8,31 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class RegattaCompetitorAnalyticsTabView extends Composite implements
-        RegattaTabView<RegattaCompetitorAnalyticsPlace> {
+public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaTabView<RegattaCompetitorAnalyticsPlace> {
+
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaCompetitorAnalyticsTabView> {
+    }
+
+    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+    private Presenter currentPresenter;
 
     public RegattaCompetitorAnalyticsTabView() {
-
+        super();
     }
 
     @UiField
@@ -44,17 +50,15 @@ public class RegattaCompetitorAnalyticsTabView extends Composite implements
 
     @Override
     public void start(RegattaCompetitorAnalyticsPlace myPlace, AcceptsOneWidget contentArea) {
-
         contentArea.setWidget(new Placeholder());
-
         String regattaId = myPlace.getRegattaId();
 
         if (regattaId != null && !regattaId.isEmpty()) {
-
             String leaderboardName = regattaId;
-
-            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
-                    .getRegattaAnalyticsManager();
+            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
+            if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
+                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
+            }
 
             initWidget(ourUiBinder.createAndBindUi(this));
 
@@ -79,14 +83,7 @@ public class RegattaCompetitorAnalyticsTabView extends Composite implements
 
     @Override
     public void stop() {
-
     }
-
-    interface MyBinder extends UiBinder<HTMLPanel, RegattaCompetitorAnalyticsTabView> {
-    }
-
-    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
-    private Presenter currentPresenter;
 
     @Override
     public RegattaCompetitorAnalyticsPlace placeToFire() {
@@ -102,6 +99,14 @@ public class RegattaCompetitorAnalyticsTabView extends Composite implements
     public boolean isSmallWidth() {
         int width = Window.getClientWidth();
         return width <= 720;
+    }
+
+    @Override
+    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+    }
+
+    @Override
+    public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
     }
 
 }
