@@ -33,6 +33,10 @@ public interface EventRegattaLeaderboardResources extends ClientBundle {
         String regattaleaderboard_meta_scoring_text();
         String regattaleaderboard_meta_update_text();
         String regattaleaderboard_meta_reload();
+
+        String regattaleaderboard_meta_reload_playing();
+        String regattaleaderboard_meta_reload_live();
+
         String regattaleaderboard_meta_settings_button();
         String regattaleaderboard_meta_settings();
         String regattaleaderboard_table();
@@ -59,5 +63,6 @@ public interface EventRegattaLeaderboardResources extends ClientBundle {
         String leaderboardcompetitor_itemcenter_table();
         String leaderboardcompetitorshort();
         String marginFix();
+        String letItScroll();
     }
 }
