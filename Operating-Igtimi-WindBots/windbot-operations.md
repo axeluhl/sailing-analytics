@@ -16,7 +16,7 @@ More information on running the WindBots can be found [here](https://igtimi.desk
 
 # Update Firmware
 
-https://igtimi.desk.com/customer/portal/articles/1122866-how-to-update-the-firmware-in-the-yachtbot-trackers?b_id=1690
+[How to update the firmware](https://igtimi.desk.com/customer/portal/articles/1122866-how-to-update-the-firmware-in-the-yachtbot-trackers?b_id=1690)
 
 # WindBot User Guide (v. 1.0 R3)
 
