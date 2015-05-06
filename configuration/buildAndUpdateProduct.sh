@@ -162,7 +162,7 @@ do
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
-        a) android=1;;
+        a) android=0;;
         r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
