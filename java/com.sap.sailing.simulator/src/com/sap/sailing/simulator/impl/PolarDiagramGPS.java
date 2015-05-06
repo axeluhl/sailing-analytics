@@ -44,7 +44,10 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         windSpeeds.add(new KnotSpeedImpl(12.0));
         windSpeeds.add(new KnotSpeedImpl(14.0));
         windSpeeds.add(new KnotSpeedImpl(16.0));
+        windSpeeds.add(new KnotSpeedImpl(18.0));
         windSpeeds.add(new KnotSpeedImpl(20.0));
+        windSpeeds.add(new KnotSpeedImpl(22.0));
+        windSpeeds.add(new KnotSpeedImpl(24.0));
 
         // initialize beat-angles and -speeds
         SpeedWithBearing beatPort;
@@ -100,10 +103,6 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 jibeSpeed.add(null);
             }
         }
-
-        if ((beatAngles.size() <= 1)||(beatSpeed.size() <= 1)||(jibeAngles.size() <= 1)||(jibeSpeed.size() <= 1)) {
-            throw new SparseSimulationDataException();
-        }
         
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> mapSpeedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Speed, Bearing> mapBeatAngles = new TreeMap<Speed, Bearing>();
@@ -149,6 +148,10 @@ public class PolarDiagramGPS extends PolarDiagramBase {
             }
         }
 
+        if ((mapBeatAngles.size() <= 1)||(mapBeatSOG.size() <= 1)||(mapJibeAngles.size() <= 1)||(mapJibeSOG.size() <= 1)) {
+            throw new SparseSimulationDataException();
+        }
+        
         super.speedTable = mapSpeedTable;
         super.beatAngles = mapBeatAngles;
         super.jibeAngles = mapJibeAngles;

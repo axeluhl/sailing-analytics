@@ -395,13 +395,13 @@ public class SimulationServiceImpl implements SimulationService {
                 polarDiagram = null;
                 // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
             }
-            double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                    / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
-            Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-            SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, polarDiagram, windField,
-                    simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
             Map<PathType, Path> paths = null;
             if (polarDiagram != null) {
+                double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
+                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
+                Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
+                SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, polarDiagram,
+                        windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
             }
             // prepare simulator-results

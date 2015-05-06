@@ -10,7 +10,6 @@ Export-Package:
  com.sap.sailing.polars.data,
  com.sap.sailing.polars.regression,
  com.sap.sailing.polars.windestimation
-Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain,
@@ -25,3 +24,4 @@ Import-Package:
  com.sap.sailing.util,
  com.sap.sse.common
 Bundle-Activator: com.sap.sailing.polars.impl.Activator
+Bundle-ActivationPolicy: lazy

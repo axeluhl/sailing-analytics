@@ -22,29 +22,21 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
-
     private EventRegattaView currentView = new TabletAndDesktopEventView();
-
-
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-    private final Timer autoRefreshTimer = new Timer(PlayModes.Live, PlayStates.Paused,
-            delayBetweenAutoAdvancesInMilliseconds);
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
             HomePlacesNavigator homePlacesNavigator) {
         super(place, clientFactory, homePlacesNavigator);
-
         if (this.ctx.getRegattaAnalyticsManager() == null) {
-
-            ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager( //
-                    clientFactory.getSailingService(), //
-                    asyncActionsExecutor, //
-                    autoRefreshTimer, //
-                    clientFactory.getErrorReporter(), //
+            ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
+                    clientFactory.getSailingService(),
+                    asyncActionsExecutor,
+                    new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
+                    clientFactory.getErrorReporter(),
                     userAgent));
-
         }
     }
 
@@ -52,7 +44,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
-
         currentView.navigateTabsTo(currentPlace);
     }
     
@@ -88,15 +79,13 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         return homePlacesNavigator.getEventNavigation(new RegattaOverviewPlace(ctx), null, false);
     }
 
-
     @Override
     public Timer getAutoRefreshTimer() {
-        return autoRefreshTimer;
+        return ctx.getRegattaAnalyticsManager().getTimer();
     }
 
     @Override
     protected EventView<AbstractEventRegattaPlace, ?> getView() {
         return currentView;
     }
-
 }
