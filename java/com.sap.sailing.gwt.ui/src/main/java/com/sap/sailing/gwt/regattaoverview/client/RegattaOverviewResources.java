@@ -30,8 +30,15 @@ public interface RegattaOverviewResources extends ClientBundle {
         String leaderboards();
         String viewerToolbar_innerElement();
 
-        String eventLogo();
+        String settingsButton();
 
+        String refreshButton();
+
+        String refreshButton_live();
+
+        String refreshButton_playing();
         String eventDescription();
+
+        String button();
     }
 }

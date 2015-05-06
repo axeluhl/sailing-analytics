@@ -11,7 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.theme.client.resources.ThemeResources;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -60,13 +61,14 @@ public class RegattaOverviewPanel extends SimplePanel {
     
     private final TabPanel leaderboardsTabPanel;
     private final Label timeLabel;
-    private final Button settingsButton;
-    private final Button refreshNowButton;
-    private final Button startStopUpdatingButton;
+    private final Anchor settingsButton;
+    private final Anchor refreshNowButton;
+    private final Anchor startStopUpdatingButton;
     private final CheckBox leaderboardCheckBox;
     private final UserAgentDetails userAgent;
     
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
+    private final ThemeResources RES = ThemeResources.INSTANCE;
     
     public void setEntryClickedHandler(EntryHandler handler) {
         regattaRaceStatesComponent.setEntryClickedHandler(handler);
@@ -103,8 +105,9 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
         regattaRaceStatesComponent.setWidth("100%");
         
-        refreshNowButton = new Button(stringMessages.refreshNow());
-        refreshNowButton.addStyleName(style.viewerToolbar_innerElement());
+        refreshNowButton = new Anchor(stringMessages.refreshNow());
+        refreshNowButton.setStyleName(RES.mainCss().button());
+        refreshNowButton.addStyleName(style.button());
 
         refreshNowButton.addClickHandler(new ClickHandler() {
             @Override
@@ -113,8 +116,10 @@ public class RegattaOverviewPanel extends SimplePanel {
             }
             
         });
-        settingsButton = new Button(stringMessages.settings());
-        settingsButton.addStyleName(style.viewerToolbar_innerElement());
+        settingsButton = new Anchor("&nbsp;", true);
+        settingsButton.setStyleName(style.settingsButton());
+        settingsButton.addStyleName(RES.mainCss().button());
+        settingsButton.addStyleName(style.button());
 
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -123,18 +128,19 @@ public class RegattaOverviewPanel extends SimplePanel {
             }            
         });
         
-        startStopUpdatingButton = new Button(stringMessages.stopUpdating());
-        startStopUpdatingButton.addStyleName(style.viewerToolbar_innerElement());
-
+        startStopUpdatingButton = new Anchor("&nbsp;", true);
+        startStopUpdatingButton.setStyleName(RES.mainCss().button());
+        startStopUpdatingButton.addStyleName(style.refreshButton());
+        startStopUpdatingButton.addStyleName(style.button());
         startStopUpdatingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (serverUpdateTimer.getPlayState().equals(PlayStates.Playing)) {
                     serverUpdateTimer.pause();
-                    startStopUpdatingButton.setText(stringMessages.startUpdating());
+                    startStopUpdatingButton.removeStyleName(style.refreshButton_live());
                 } else if (serverUpdateTimer.getPlayState().equals(PlayStates.Paused)) {
                     serverUpdateTimer.play();
-                    startStopUpdatingButton.setText(stringMessages.stopUpdating());
+                    startStopUpdatingButton.addStyleName(style.refreshButton_live());
                 }
             }
             
@@ -176,10 +182,9 @@ public class RegattaOverviewPanel extends SimplePanel {
         if (leaderboardCheckBox != null) {
             flexTable.add(leaderboardCheckBox);
         }
-        flexTable.add(settingsButton);
         flexTable.add(refreshNowButton);
         flexTable.add(startStopUpdatingButton);
-        flexTable.add(timeLabel);
+        flexTable.add(settingsButton);
 
         mainPanel.add(new SimplePanel(flexTable));
 
@@ -203,8 +208,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         checkBox.setValue(false);
         checkBox.setTitle(stringMessages.showHideComponent("Leaderboard"));
         // checkBox.getElement().getStyle().setMarginRight(10, Unit.PX);
-        checkBox.addStyleName(style.viewerToolbar_innerElement());
-
+        checkBox.setStyleName(RES.mainCss().button());
+        checkBox.addStyleName(style.button());
         checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> newValue) {

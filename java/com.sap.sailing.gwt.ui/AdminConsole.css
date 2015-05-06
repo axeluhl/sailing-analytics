@@ -1,17 +1,8 @@
 /** Add css rules here for your application. */
 
 * {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 12px;
-}
-
-html,
-body {
-  height: 100%;
-  font-family: 'Open Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -ms-content-zooming: none;
+	font-family: Arial;
+	font-size: 12px;
 }
 
 /** Example rules used by the template application (remove for your app) */

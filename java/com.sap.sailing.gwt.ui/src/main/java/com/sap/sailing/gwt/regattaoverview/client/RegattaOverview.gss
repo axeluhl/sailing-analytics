@@ -31,18 +31,6 @@ body {
   vertical-align: top;
 }
 
-.eventLogo {
-  float: left;
-  margin-right: 20px;
-  vertical-align: top;
-  display: inline-block;
-  width: 75px;
-  height: 75px;
-  padding: 0px;
-  border-radius: 4px;
-  border: 3px solid #f6f9fc;
-}
-
 
 .clockLabel {
   margin-left:30px;
@@ -59,7 +47,7 @@ body {
 }
 
 .functionBar {
-  height: 55px;
+  height: 80px;
   background-color: #fff;  
   padding: 2px 2px 5px 0px;
   text-align: right;
@@ -139,4 +127,36 @@ body {
 
 .viewerToolbar_innerElement label {
 	cursor: pointer;
+}
+
+.button {
+	margin: 10px;
+}
+
+ 
+.refreshButton, .refreshButton:ACTIVE {
+	width: 2.666666666666667em;
+	height: 2.666666666666667em;
+ 	background-color: #9f9f9f;
+  	background-image: url("images/home/reload.png");
+	background-size: 40%;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.refreshButton_live {
+  background-color: #f0ab00;
+}
+.refreshButton_playing {
+  background-color: #f0ab00;
+}
+
+.settingsButton {
+  width: 2.666666666666667em;
+  height: 2.666666666666667em;
+ 
+  background-color: #9f9f9f;
+  background-image: url("images/home/settings.png");
+  background-size: 40%;
+  background-repeat: no-repeat;
+  background-position: center center;
 }
