@@ -7,7 +7,7 @@ The provider for our servers is PIRONET. They are responsible in any case of eme
 - sapcoe-app01 (main server running all services)
 - sapcoe-template01 (backup server for data and servers)
 
-You can find additional information here: [[Welcome Guide|wiki/uploads/WGuidePironet.pdf]]
+You can find additional information here: [Welcome Guide](wiki/uploads/WGuidePironet.pdf)
 
 ### 24x7 Bereitschaft (Emergency)
 
