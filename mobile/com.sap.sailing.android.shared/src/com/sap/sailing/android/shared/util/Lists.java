@@ -19,7 +19,9 @@ public class Lists {
         return list;
     }
 
-    /** Clones a SparseArray. */
+    /**
+     * Clones a SparseArray.
+     */
     public static <E> SparseArray<E> cloneSparseArray(SparseArray<E> orig) {
         SparseArray<E> result = new SparseArray<E>();
         for (int i = 0; i < orig.size(); i++) {

@@ -13,12 +13,12 @@ public class EventData {
         public EventDays[] eventDays;
         public String eventEndDate;
     }
-    
+
     public class EventDays {
         public String eventDayEnd;
         public String eventDayStart;
     }
-    
+
     public class Competitor {
         public String competitorName;
         public String competitorProfileImageUrl;

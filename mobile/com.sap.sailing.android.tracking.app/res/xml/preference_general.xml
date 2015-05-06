@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
     <!--  Energy Saving -->
-    <PreferenceCategory android:title="@string/settings_category_energy_saving" >
+    <PreferenceCategory android:title="@string/settings_category_energy_saving">
         <SwitchPreference
             android:defaultValue="false"
             android:key="@string/preference_energy_saving_enabled_key"
@@ -10,26 +10,27 @@
             android:switchTextOff="@string/preference_energy_saving_is_disabled"
             android:summaryOn="@string/prefrence_energy_saving_summary_is_enabled"
             android:summaryOff="@string/prefrence_energy_saving_summary_is_disabled"
-            android:title="@string/energy_saving_enabled" />
+            android:title="@string/energy_saving_enabled"/>
     </PreferenceCategory>
-    
+
     <!--  Connection -->
-    <PreferenceCategory android:title="@string/settings_category_other" >
+    <PreferenceCategory android:title="@string/settings_category_other">
         <EditTextPreference
             android:defaultValue="@string/preference_device_identifier_default"
             android:key="@string/preference_device_identifier_key"
             android:summary="@string/empty"
-            android:title="@string/device_identifier" android:selectable="false"/>
-        
-         <SwitchPreference
+            android:title="@string/device_identifier"
+            android:selectable="false"/>
+
+        <SwitchPreference
             android:defaultValue="true"
             android:key="@string/preference_heading_with_declination_subtracted_key"
             android:switchTextOn="@string/preference_heading_with_declination_subtracted_is_enabled"
             android:switchTextOff="@string/preference_heading_with_declination_subtracted_is_disabled"
             android:summaryOn="@string/preference_heading_with_declination_subtracted_summary_is_enabled"
             android:summaryOff="@string/preference_heading_with_declination_subtracted_summary_is_disabled"
-            android:title="@string/preference_heading_with_declination_subtracted_enabled" />
+            android:title="@string/preference_heading_with_declination_subtracted_enabled"/>
     </PreferenceCategory>
-    
+
 
 </PreferenceScreen>

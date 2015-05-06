@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <string-array name="empty_array" tools:ignore="UnusedResources" />
+    <string name="empty"></string>
 
     <string name="intent_update_ui" translatable="false">com.sap.sailing.racecommittee.intent.update-ui</string>
     <string name="intent_update_ui_data" translatable="false">com.sap.sailing.racecommittee.intent.update-ui.data</string>
@@ -285,7 +286,6 @@
 
     <string name="login_text">Welcome to SAP Sailing\nRace Committee App</string>
     <string name="login_sub_text">Where are you?</string>
-    <string name="empty"></string>
     <string name="sign_up">Sign Me Up</string>
     <string name="wind_display">dd</string>
     <string name="flags_abandon">Abandon</string>

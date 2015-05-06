@@ -15,9 +15,6 @@ android {
         versionCode verCode
         versionName "$verCode - Altitude"
         useJack false // not working on Windows yet
-
-        /* UI testing with espresso */
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
@@ -67,28 +64,18 @@ android {
 }
 
 dependencies {
-    compile "net.hockeyapp.android:HockeySDK:3.5.0"
 
     /* support libraries */
-    compile "com.android.support:appcompat-v7:22.1.0"
+    compile "com.android.support:appcompat-v7:22.1.1"
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-gcm:7.0.0"
-    compile "com.google.android.gms:play-services-location:7.0.0"
+    compile "com.google.android.gms:play-services-location:6.5.87"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
 
     /* all local jar-libs */
 //    compile fileTree(dir: "libs", include: ["*.jar"])
-
-    /* UI testing with espresso */
-    androidTestCompile "com.android.support.test.espresso:espresso-core:2.0"
-    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.0') {
-        exclude group: 'com.android.support', module: 'appcompat'
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude module: 'recyclerview-v7'
-    }
 }
 
 // Custom tasks
@@ -108,7 +95,7 @@ clean.doLast {
 build.doLast {
     // Copy APK file
     copy {
-        from ("build/outputs/apk") {
+        from("build/outputs/apk") {
             include "**/*debug.apk"
         }
         into "../../java/com.sap.sailing.www/apps"

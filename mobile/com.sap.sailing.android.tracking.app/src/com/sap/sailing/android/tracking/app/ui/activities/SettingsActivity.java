@@ -9,8 +9,8 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment;
 
 public class SettingsActivity extends ActionBarActivity {
-	
-	@Override
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pref_with_actionbar);
@@ -26,7 +26,7 @@ public class SettingsActivity extends ActionBarActivity {
                 }
             });
         }
-        
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -37,10 +37,9 @@ public class SettingsActivity extends ActionBarActivity {
 
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();
     }
-	
-    
-    /* (non-javadoc)
-     * Seems to be new for this target API level, fixing a security hole.
+
+    /*
+     * (non-javadoc) Seems to be new for this target API level, fixing a security hole.
      */
     protected boolean isValidFragment(String fragmentName) {
         return GeneralPreferenceFragment.class.getName().equals(fragmentName);

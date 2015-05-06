@@ -1,11 +1,5 @@
 package com.sap.sailing.android.tracking.app.services;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.receiver.GcmBroadcastReceiver;
-import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
-
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,6 +8,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.receiver.GcmBroadcastReceiver;
+import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 
 public class GcmIntentService extends IntentService {
 

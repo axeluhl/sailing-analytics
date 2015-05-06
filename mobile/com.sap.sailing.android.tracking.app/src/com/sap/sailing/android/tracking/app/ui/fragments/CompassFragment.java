@@ -10,40 +10,38 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
 public class CompassFragment extends BaseFragment {
-	
-	//private String TAG = CompassFragment.class.getName(); 
 
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		super.onCreateView(inflater, container, savedInstanceState);
-		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_compass, container, false);		
-		return view;
-	}
+    // private String TAG = CompassFragment.class.getName();
 
-	public void setBearing(float heading)
-	{
-		if (isAdded())
-		{
-			TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
-			headingText.setText(String.valueOf(Math.round(heading)) + "°");
-			
-			TrackingActivity activity = (TrackingActivity) getActivity();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_compass, container, false);
+        return view;
+    }
 
-			if (activity != null) {
-				activity.lastCompassIndicatorText = headingText.getText().toString();
-			}
-		}
-	}
-	
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_text_view);
-		
-		TrackingActivity activity = (TrackingActivity) getActivity();
-		if (activity != null) {
-			headingText.setText(activity.lastCompassIndicatorText);
-		} else {
-			headingText.setText("");
-		}
-	}	
+    public void setBearing(float heading) {
+        if (isAdded()) {
+            TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
+            headingText.setText(String.valueOf(Math.round(heading)) + (char) 0x00B0);
+
+            TrackingActivity activity = (TrackingActivity) getActivity();
+
+            if (activity != null) {
+                activity.lastCompassIndicatorText = headingText.getText().toString();
+            }
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
+
+        TrackingActivity activity = (TrackingActivity) getActivity();
+        if (activity != null) {
+            headingText.setText(activity.lastCompassIndicatorText);
+        } else {
+            headingText.setText("");
+        }
+    }
 }

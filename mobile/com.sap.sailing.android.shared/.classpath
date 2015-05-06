@@ -6,9 +6,12 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sailing.server.gateway.serialization.shared.android"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sse.shared.android"/>
+	<classpathentry kind="lib" path="/google-play-services_lib/libs/google-play-services.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.json.simple"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

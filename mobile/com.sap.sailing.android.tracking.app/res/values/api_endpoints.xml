@@ -6,4 +6,5 @@
     <string name="preference_server_event_path" translatable="false">/sailingserver/api/v1/events/{event_id}</string>
     <string name="preference_server_leaderboard_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboard_name}</string>
     <string name="preference_server_competitor_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}</string>
+    <string name="preference_server_team_image_upload_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}/team/image</string>
 </resources>

@@ -74,9 +74,9 @@ public class MessageSendingService extends Service implements MessageSendingList
     private boolean isHandlerSet;
     
     private Set<Serializable> suppressedMessageIds = new HashSet<Serializable>();
-    
+
     private APIConnectivityListener apiConnectivityListener;
-    
+
     public void registerMessageForSuppression(Serializable messageId) {
         suppressedMessageIds.add(messageId);
     }
@@ -287,12 +287,12 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     @Override
     public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
-    	ExLog.i(this, "MS", "on message sent");
+        ExLog.i(this, "MS", "on message sent");
         int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key,
                 R.integer.preference_messageResendIntervalMillis_default);
         if (!success) {
-        	ExLog.i(this, "MS", "success");
-        	reportApiConnectivity(APIConnectivity.transmissionError);
+            ExLog.i(this, "MS", "success");
+            reportApiConnectivity(APIConnectivity.transmissionError);
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             try {
                 persistenceManager.persistIntent(intent);
@@ -307,8 +307,8 @@ public class MessageSendingService extends Service implements MessageSendingList
             reportUnsentGPSFixesCount();
             serviceLogger.onMessageSentFailed();
         } else {
-        	ExLog.i(this, "MS", "!success");
-        	reportApiConnectivity(APIConnectivity.transmissionSuccess);
+            ExLog.i(this, "MS", "!success");
+            reportApiConnectivity(APIConnectivity.transmissionSuccess);
             ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 try {
@@ -335,7 +335,7 @@ public class MessageSendingService extends Service implements MessageSendingList
                 callback.processResponse(this, inputStream, raceId);
             }
             ExLog.i(this, "MS", "report");
-            reportUnsentGPSFixesCount()	;
+            reportUnsentGPSFixesCount();
         }
     }
 
@@ -370,10 +370,10 @@ public class MessageSendingService extends Service implements MessageSendingList
 				URLEncoder.encode(fleetName, charsetName), uuid);
         return url;
     }
-    
+
     /**
      * Register listener for API-connectivity
-     * 
+     *
      * @param listener
      *            class that wants to be notified of api-connectivity changes
      */
@@ -416,7 +416,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     /**
      * Report API connectivity to listening activity
-     * 
+     *
      * @param apiConnectivity
      */
     private void reportApiConnectivity(APIConnectivity apiConnectivity) {
@@ -427,6 +427,8 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     /**
      * Report the number of currently unsent GPS-fixes
+     *
+     * @param unsentGPSFixesCount
      */
     private void reportUnsentGPSFixesCount() {
         if (apiConnectivityListener != null) {

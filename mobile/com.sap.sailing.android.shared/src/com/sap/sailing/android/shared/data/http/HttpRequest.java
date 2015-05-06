@@ -53,7 +53,11 @@ public abstract class HttpRequest {
         this.isCancelled = false;
         this.context = context;
     }
-    
+
+    public String getUrlAsString() {
+        return url == null ? null : url.toString();
+    }
+
     public boolean isCancelled() {
         return isCancelled;
     }
