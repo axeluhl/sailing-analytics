@@ -78,6 +78,7 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
@@ -431,7 +432,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void addResultImportUrl(String resultProviderName, String url, AsyncCallback<Void> callback);
 
-    void getUrlResultProviderNames(AsyncCallback<List<String>> callback);
+    void getUrlResultProviderNamesAndOptionalSampleURL(AsyncCallback<List<Pair<String, String>>> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Util.Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
