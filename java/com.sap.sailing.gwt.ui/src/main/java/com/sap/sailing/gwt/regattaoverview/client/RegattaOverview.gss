@@ -98,6 +98,8 @@ body {
 .leaderboards {
   padding-top: 20px;	
   font-size: 16px;
+  margin: 10px;
+  width: calc(100% - 20px);
 }
 
 .viewerToolbar_innerElement {
@@ -133,6 +135,10 @@ body {
 	margin: 10px;
 }
 
+.buttonLeaderboard {
+	height: 2.666666666666667em;
+ 	background-color: #9f9f9f;
+}
  
 .refreshButton, .refreshButton:ACTIVE {
 	width: 2.666666666666667em;

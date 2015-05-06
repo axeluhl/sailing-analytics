@@ -212,6 +212,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         // checkBox.getElement().getStyle().setMarginRight(10, Unit.PX);
         checkBox.setStyleName(RES.mainCss().button());
         checkBox.addStyleName(style.button());
+        checkBox.addStyleName(style.buttonLeaderboard());
         checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> newValue) {

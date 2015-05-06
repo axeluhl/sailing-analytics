@@ -40,5 +40,7 @@ public interface RegattaOverviewResources extends ClientBundle {
         String eventDescription();
 
         String button();
+
+        String buttonLeaderboard();
     }
 }
