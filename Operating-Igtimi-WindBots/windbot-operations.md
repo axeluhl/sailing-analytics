@@ -20,3 +20,4 @@ https://igtimi.desk.com/customer/portal/articles/1122866-how-to-update-the-firmw
 
 # WindBot User Guide (v. 1.0 R3)
 
+[User Guide v. 1.0 R3](wiki/uploads/WindBot%20User%20Guide%201.0%20R3.pdf)
