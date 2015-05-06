@@ -1,65 +1,73 @@
 .cellTableWidget {
 	border-spacing: 0px;
 }
+.cellTableWidget a {
+	color: black;
+}
+
 
 /** v-align images in the table header
  * grey background for table header
  */
 .cellTableHeader {
 	position: relative;
-    vertical-align: middle;
+	vertical-align: middle;
 	background-color: #f2f2f2;
 	background-color: #fff;
-	padding: 5px 12px;
+	padding: 20px 5px;
 	text-align: left;
 	border-bottom: 1px solid black;
 	text-shadow: none;
 	font-size: 16px;
 }
 
+.cellTableHeader:FOCUS {
+	outline: none;
+}
+
 .cellTableFirstColumnHeader {
+	
 }
 
 .cellTableLastColumnHeader {
 	
 }
 
-.cellTableHeader > span > img:first-child {
+.cellTableHeader>span>img:first-child {
 	position: relative;
-    vertical-align: middle;
+	vertical-align: middle;
 }
 
 .cellTableEvenRow {
-	background-color: rgba(255,255,255,0.5);
+	background-color: #fafafa;
 }
 
 .cellTableEvenRowCell {
 	border: none;
 	border-bottom: 1px solid #dedede;
-	padding: 15px 20px 5px;
-	white-space: nowrap;
+	padding: 20px 5px;
+	
 }
 
 .cellTableOddRow {
-	background-color: rgba(242,242,242,0.5);
+	background-color: #fdfdfd;
 }
 
 .cellTableOddRowCell {
-		border: none;
-	
+	border: none;
 	border-bottom: 1px solid #dedede;
-	padding: 15px 20px 5px ;
-	white-space: nowrap;
+	padding: 20px 5px;
+
 }
 
 .cellTableHoveredRow {
-	background-color: rgba(229,242,249,0.5);
+	background-color: rgba(229, 242, 249, 0.5);
 	border-bottom: 1px solid #e5e5e5;
 }
 
 .cellTableSelectedRow {
 	color: #000000;
-	background-color: rgba(229,242,249,0.5);
+	background-color: rgba(229, 242, 249, 0.5);
 }
 
 .cellTableSelectedRowCell {

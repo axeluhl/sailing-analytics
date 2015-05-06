@@ -152,6 +152,8 @@ public class RegattaOverviewPanel extends SimplePanel {
             }
         });
         this.serverUpdateTimer.play();
+        startStopUpdatingButton.addStyleName(style.refreshButton_live());
+
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
@@ -182,7 +184,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         if (leaderboardCheckBox != null) {
             flexTable.add(leaderboardCheckBox);
         }
-        flexTable.add(refreshNowButton);
+        // flexTable.add(refreshNowButton);
         flexTable.add(startStopUpdatingButton);
         flexTable.add(settingsButton);
 

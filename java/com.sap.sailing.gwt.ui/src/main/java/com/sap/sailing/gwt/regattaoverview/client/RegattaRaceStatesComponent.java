@@ -538,7 +538,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
 
+
         table.addColumn(circleColumn, "");
+
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
         table.addColumn(regattaNameColumn, stringMessages.regatta());
         table.addColumn(seriesNameColumn, stringMessages.series());
