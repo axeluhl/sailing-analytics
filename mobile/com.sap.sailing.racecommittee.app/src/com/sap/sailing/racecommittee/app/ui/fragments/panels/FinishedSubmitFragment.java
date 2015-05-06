@@ -30,10 +30,7 @@ public class FinishedSubmitFragment extends BasePanelFragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    String extra = getRace().getRaceGroup().getDisplayName();
-                    if (TextUtils.isEmpty(extra)) {
-                        extra = getRace().getRaceGroup().getName();
-                    }
+                    String extra = getRace().getRaceGroup().getName();
                     if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
                         extra += " - " + getRace().getSeries().getName();
                     }
