@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,10 @@ public class FinishedSubmitFragment extends BasePanelFragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    String extra = getRace().getRaceGroup().getName();
+                    String extra = getRace().getRaceGroup().getDisplayName();
+                    if (TextUtils.isEmpty(extra)) {
+                        extra = getRace().getRaceGroup().getName();
+                    }
                     if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
                         extra += " - " + getRace().getSeries().getName();
                     }

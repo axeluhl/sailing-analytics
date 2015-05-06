@@ -169,7 +169,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         if (type == ViewType.HEADER.index) {
             final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
-            String regatta = header.getRaceGroup().getName();
+            String regatta = header.getRaceGroup().getDisplayName();
+            if (TextUtils.isEmpty(regatta)) {
+                regatta = header.getRaceGroup().getName();
+            }
             boat_class.setText(regatta);
             String fleetSeries = "";
             if (header.getFleet() != null && !header.getFleet().getName().equals(AppConstants.DEFAULT)) {
