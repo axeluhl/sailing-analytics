@@ -537,7 +537,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return additionalInformation.toString();
             }
         };
-
+        table.setColumnWidth(flagColumn, 95, Unit.PX);
 
         table.addColumn(circleColumn, "");
 

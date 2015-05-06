@@ -24,7 +24,7 @@ public class SailingFlagsBuilder {
          *            how to render the image; this needs to be an &lt;img&gt; tag, not enclosed by any other element,
          *            as returned by {@link ImagesBarCell#makeImagePrototype(ImageResource)}
          */
-        @SafeHtmlTemplates.Template("<div title=\"{0}\"><div style=\"{1}\"><div>{2}</div><div>{3}</div></div><div>{4}</div></div>")
+        @SafeHtmlTemplates.Template("<div title=\"{0}\" ><div style=\"{1}\"><div>{2}</div><div>{3}</div></div><div>{4}</div></div>")
         SafeHtml cell(String title, SafeStyles styles, SafeHtml upperFlag, SafeHtml lowerFlag, SafeHtml directionArrow);
     }
     
