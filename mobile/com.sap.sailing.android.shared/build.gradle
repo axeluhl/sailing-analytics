@@ -45,7 +45,7 @@ dependencies {
     compile project(':java:org.json.simple')
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:6.5.87"
+    compile "com.google.android.gms:play-services-location:7.3.0"
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
 }

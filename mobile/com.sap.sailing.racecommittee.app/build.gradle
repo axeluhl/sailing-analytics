@@ -75,7 +75,7 @@ dependencies {
     compile "com.android.support:recyclerview-v7:22.1.1"
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:7.0.0"
+    compile "com.google.android.gms:play-services-location:7.3.0"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
