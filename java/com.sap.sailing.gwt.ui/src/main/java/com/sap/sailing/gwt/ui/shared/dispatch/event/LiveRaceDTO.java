@@ -1,64 +1,28 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.Date;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
-public class LiveRaceDTO implements IsSerializable {
+public class LiveRaceDTO extends RaceMetadataDTO {
 
-    private String regattaName;
-    private String raceName;
-    private String fleetName;
-    private String fleetColor;
-    private Date start;
+    private Flags lastUpperFlag;
+    private Flags lastLowerFlag;
+    private boolean lastFlagsAreDisplayed;
+    private boolean lastFlagsDisplayedStateChanged;
     
-    public Flags lastUpperFlag;
-    public Flags lastLowerFlag;
-    public boolean lastFlagsAreDisplayed;
-    public boolean lastFlagsDisplayedStateChanged;
+    private Double trueWindFromDeg;
+    private Double trueWindSpeedInKnots;
+    
+    private int course;
+    // TODO status
 
-    public LiveRaceDTO() {
+    @SuppressWarnings("unused")
+    private LiveRaceDTO() {
     }
-
-    public String getRegattaName() {
-        return regattaName;
-    }
-
-    public void setRegattaName(String regattaName) {
-        this.regattaName = regattaName;
-    }
-
-    public String getRaceName() {
-        return raceName;
-    }
-
-    public void setRaceName(String raceName) {
-        this.raceName = raceName;
-    }
-
-    public String getFleetName() {
-        return fleetName;
-    }
-
-    public void setFleetName(String fleetName) {
-        this.fleetName = fleetName;
-    }
-
-    public String getFleetColor() {
-        return fleetColor;
-    }
-
-    public void setFleetColor(String fleetColor) {
-        this.fleetColor = fleetColor;
-    }
-
-    public Date getStart() {
-        return start;
-    }
-
-    public void setStart(Date start) {
-        this.start = start;
+    
+    public LiveRaceDTO(RegattaAndRaceIdentifier id) {
+        super(id);
     }
 
     public Flags getLastUpperFlag() {
@@ -91,5 +55,29 @@ public class LiveRaceDTO implements IsSerializable {
 
     public void setLastFlagsDisplayedStateChanged(boolean lastFlagsDisplayedStateChanged) {
         this.lastFlagsDisplayedStateChanged = lastFlagsDisplayedStateChanged;
+    }
+
+    public Double getTrueWindFromDeg() {
+        return trueWindFromDeg;
+    }
+
+    public void setTrueWindFromDeg(Double trueWindFromDeg) {
+        this.trueWindFromDeg = trueWindFromDeg;
+    }
+
+    public Double getTrueWindSpeedInKnots() {
+        return trueWindSpeedInKnots;
+    }
+
+    public void setTrueWindSpeedInKnots(Double trueWindSpeedInKnots) {
+        this.trueWindSpeedInKnots = trueWindSpeedInKnots;
+    }
+
+    public int getCourse() {
+        return course;
+    }
+
+    public void setCourse(int course) {
+        this.course = course;
     }
 }
