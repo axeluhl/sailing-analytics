@@ -7,7 +7,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+import android.widget.TimePicker;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -32,13 +35,22 @@ public class StartTimeFragment extends BaseFragment
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
     private TextView mCountdown;
+    private Button mMinuteInc;
+    private Button mMinuteDec;
     private TimePoint mStartTime;
+    private Calendar mTimeLeft;
+    private Calendar mTimeRight;
+    private Calendar mCalendar;
     private boolean mListenerIgnore = true;
 
     /**
      * Listens for start time changes
      */
     private RaceStateChangedListener raceStateChangedListener;
+
+    public StartTimeFragment() {
+        mCalendar = Calendar.getInstance();
+    }
 
     public static StartTimeFragment newInstance(int startMode) {
         StartTimeFragment fragment = new StartTimeFragment();
@@ -53,14 +65,14 @@ public class StartTimeFragment extends BaseFragment
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
         mCountdown = ViewHolder.get(layout, R.id.start_countdown);
-        ImageButton min_inc = ViewHolder.get(layout, R.id.minute_inc);
-        if (min_inc != null) {
-            min_inc.setOnClickListener(this);
+        mMinuteInc = ViewHolder.get(layout, R.id.minute_inc);
+        if (mMinuteInc != null) {
+            mMinuteInc.setOnClickListener(this);
         }
 
-        ImageButton min_dec = ViewHolder.get(layout, R.id.minute_dec);
-        if (min_dec != null) {
-            min_dec.setOnClickListener(this);
+        mMinuteDec = ViewHolder.get(layout, R.id.minute_dec);
+        if (mMinuteDec != null) {
+            mMinuteDec.setOnClickListener(this);
         }
 
         Button setStart = ViewHolder.get(layout, R.id.set_start_time);
@@ -163,23 +175,56 @@ public class StartTimeFragment extends BaseFragment
         super.notifyTick();
 
         int resId;
+        TimePoint timePoint;
         String time;
+        String timeLeft;
+        String timeRight;
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         if (mStartTime == null) {
             mStartTime = getPickerTime(true);
         }
-        resId = R.string.race_start_time_ago;
         if (mStartTime.after(now)) {
-            //            resId = R.string.race_start_time_in;
-            time = TimeUtils.formatDurationUntil(mStartTime.minus(now.asMillis()).asMillis());
+            resId = R.string.race_start_time_in;
+            timePoint = mStartTime.minus(now.asMillis());
+            setButtonTime(timePoint, false);
+            time = TimeUtils.formatDurationUntil(timePoint.asMillis());
+            timeLeft = TimeUtils.formatDurationUntil(mTimeLeft.getTimeInMillis());
+            timeRight = TimeUtils.formatDurationUntil(mTimeRight.getTimeInMillis());
         } else {
-            //            resId = R.string.race_start_time_ago;
-            time = TimeUtils.formatDurationSince(now.minus(mStartTime.asMillis()).asMillis());
+            resId = R.string.race_start_time_ago;
+            timePoint = now.minus(mStartTime.asMillis());
+            setButtonTime(timePoint, true);
+            time = TimeUtils.formatDurationSince(timePoint.asMillis());
+            timeLeft = TimeUtils.formatDurationSince(mTimeLeft.getTimeInMillis());
+            timeRight = TimeUtils.formatDurationSince(mTimeRight.getTimeInMillis());
         }
         if (mCountdown != null) {
             String countdown = getString(resId).replace("#TIME#", time);
             mCountdown.setText(countdown);
+            mCountdown.setTag(resId);
         }
+        if (mMinuteDec != null) {
+            String countdown = getString(resId).replace("#TIME#", timeLeft);
+            mMinuteDec.setText(countdown);
+        }
+        if (mMinuteInc != null) {
+            String countdown = getString(resId).replace("#TIME#", timeRight);
+            mMinuteInc.setText(countdown);
+        }
+    }
+
+    private void setButtonTime(TimePoint timePoint, boolean reverse) {
+        mCalendar.setTime(timePoint.asDate());
+        mTimeLeft = getNewTime(mCalendar, (reverse) ? 0 : 1);
+        mTimeRight = getNewTime(mCalendar, (reverse) ? 1 : 0);
+    }
+
+    private Calendar getNewTime(Calendar calendar, int upDown) {
+        Calendar newCalendar = (Calendar) calendar.clone();
+        newCalendar.add(Calendar.MINUTE, upDown);
+        newCalendar.set(Calendar.SECOND, 0);
+        newCalendar.set(Calendar.MILLISECOND, 0);
+        return newCalendar;
     }
 
     @Override
@@ -194,10 +239,19 @@ public class StartTimeFragment extends BaseFragment
                 String secondsCountdown = mCountdown.getText().toString();
                 secondsCountdown = secondsCountdown.substring(secondsCountdown.length() - 2);
                 int seconds = Integer.parseInt(secondsCountdown);
-                if (operator.equals("-")) {
-                    seconds = -1 * seconds;
+                int id = (int) mCountdown.getTag();
+                if (id == R.string.race_start_time_in) {
+                    if (operator.equals("-")) {
+                        seconds = -1 * seconds;
+                    } else {
+                        seconds = 60 - seconds;
+                    }
                 } else {
-                    seconds = 60 - seconds;
+                    if (operator.equals("-")) {
+                        seconds = 60 - seconds;
+                    } else {
+                        seconds = -1 * seconds;
+                    }
                 }
                 newStart.add(Calendar.SECOND, seconds);
                 mStartTime = new MillisecondsTimePoint(newStart.getTimeInMillis());

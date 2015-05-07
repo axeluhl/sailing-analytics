@@ -37,8 +37,11 @@
     <attr name="arrow_up" format="reference"/>
     <attr name="arrow_up_large" format="reference"/>
     <attr name="arrow_up_normal" format="reference"/>
+    <attr name="button_filled_bordered" format="reference"/>
     <attr name="check_18dp" format="reference"/>
     <attr name="chevron_left_24dp" format="reference"/>
+    <attr name="chevron_left_36dp" format="reference"/>
+    <attr name="chevron_right_36dp" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>
     <attr name="course_triangle_48dp" format="reference"/>

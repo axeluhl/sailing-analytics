@@ -50,8 +50,11 @@
         <item name="arrow_up">@drawable/arrow_up_dark</item>
         <item name="arrow_up_large">@drawable/arrow_up_large_dark</item>
         <item name="arrow_up_normal">@drawable/arrow_up_normal_dark</item>
+        <item name="button_filled_bordered">@drawable/button_filled_bordered_dark</item>
         <item name="check_18dp">@drawable/ic_check_white_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
+        <item name="chevron_left_36dp">@drawable/ic_chevron_left_white_36dp</item>
+        <item name="chevron_right_36dp">@drawable/ic_chevron_right_white_36dp</item>
         <item name="compass_back">@drawable/compass_back_dark</item>
         <item name="compass_needle">@drawable/compass_needle_dark</item>
         <item name="course_triangle_48dp">@drawable/course_triangle_48dp_dark</item>

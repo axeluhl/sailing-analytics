@@ -53,8 +53,11 @@
         <item name="arrow_up">@drawable/arrow_up_light</item>
         <item name="arrow_up_large">@drawable/arrow_up_large_light</item>
         <item name="arrow_up_normal">@drawable/arrow_up_normal_light</item>
+        <item name="button_filled_bordered">@drawable/button_filled_bordered_light</item>
         <item name="check_18dp">@drawable/ic_check_black_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_black_24dp</item>
+        <item name="chevron_left_36dp">@drawable/ic_chevron_left_black_36dp</item>
+        <item name="chevron_right_36dp">@drawable/ic_chevron_right_black_36dp</item>
         <item name="compass_back">@drawable/compass_back_light</item>
         <item name="compass_needle">@drawable/compass_needle_light</item>
         <item name="course_triangle_48dp">@drawable/course_triangle_48dp_light</item>

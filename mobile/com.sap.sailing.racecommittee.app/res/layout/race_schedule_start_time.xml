@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -47,35 +48,42 @@
             android:layout_marginTop="@dimen/default_margin_half"
             android:orientation="horizontal">
 
-            <ImageButton
+            <Button
                 android:id="@+id/minute_dec"
-                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/default_padding"
-                android:src="?value_next"
-                android:tag="+"/>
+                android:layout_gravity="center_vertical"
+                android:background="?button_filled_bordered"
+                android:drawableLeft="?chevron_left_36dp"
+                android:paddingRight="@dimen/default_padding_half"
+                android:tag="+"
+                android:textAppearance="?textLarge"
+                android:textColor="?white"
+                tools:text="@string/race_start_time_in"/>
 
             <TextView
                 android:id="@+id/start_countdown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/default_margin_half"
-                android:layout_marginRight="@dimen/default_margin_half"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_40"
+                android:layout_marginLeft="@dimen/default_margin"
+                android:layout_marginRight="@dimen/default_margin"
+                android:textAppearance="?textXLarge"
                 android:visibility="visible"
                 tools:text="@string/race_start_time_in"/>
 
-            <ImageButton
+            <Button
                 android:id="@+id/minute_inc"
-                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/default_padding"
-                android:src="?value_prev"
-                android:tag="-"/>
+                android:layout_gravity="center_vertical"
+                android:background="?button_filled_bordered"
+                android:drawableRight="?chevron_right_36dp"
+                android:paddingLeft="@dimen/default_padding_half"
+                android:tag="-"
+                android:textAppearance="?textLarge"
+                android:textColor="?white"
+                tools:text="@string/race_start_time_in"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -119,13 +127,13 @@
             android:id="@+id/set_start_time"
             style="?attr/buttonSolidSmall"
             android:layout_width="wrap_content"
-            android:maxWidth="200dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
-            android:inputType="textMultiLine"
             android:layout_margin="@dimen/default_margin_twice"
+            android:inputType="textMultiLine"
+            android:maxWidth="200dp"
             android:text="@string/race_set_start"/>
     </RelativeLayout>
 </RelativeLayout>

@@ -15,11 +15,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@drawable/border_gray"
+            android:background="?button_filled_bordered"
             android:padding="@dimen/default_padding_half"
             android:text="@string/protest_time"
             android:textAllCaps="true"
-            android:textAppearance="?textNormal" />
+            android:textAppearance="?textNormal"
+            android:textColor="?white"/>
 
         <View
             android:layout_width="match_parent"
