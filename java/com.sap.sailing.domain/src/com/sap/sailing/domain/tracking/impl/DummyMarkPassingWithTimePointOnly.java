@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 
@@ -87,6 +88,16 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
 
             @Override
             public URI getFlagImage() {
+                return null;
+            }
+
+            @Override
+            public Double getTimeOnTimeFactor() {
+                return null;
+            }
+
+            @Override
+            public Duration getTimeOnDistanceAllowancePerNauticalMile() {
                 return null;
             }
         };

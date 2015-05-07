@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -125,6 +126,17 @@ public class LeaderboardCacheManager {
 
         @Override
         public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void timeOnTimeFactorChanged(Double oldTimeOnTimeFactor, Double newTimeOnTimeFactor) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void timeOnDistanceAllowancePerNauticalMileChanged(Duration oldTimeOnDistanceAllowancePerNauticalMile,
+                Duration newTimeOnDistanceAllowancePerNauticalMile) {
             removeFromCache(leaderboard);
         }
     }

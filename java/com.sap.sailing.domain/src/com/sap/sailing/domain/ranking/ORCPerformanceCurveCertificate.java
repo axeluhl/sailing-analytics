@@ -127,7 +127,7 @@ public class ORCPerformanceCurveCertificate implements Serializable {
      *         {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed} which duration is expected for the competitor
      *         described by this certificate to sail the complete <code>leg</code>.
      */
-    private Map<Speed, Duration> getAllowancesForLegPerTrueWindSpeed(TrackedLeg leg, Bearing trueWindToDirection) throws FunctionEvaluationException {
+    protected Map<Speed, Duration> getAllowancesForLegPerTrueWindSpeed(TrackedLeg leg, Bearing trueWindToDirection) throws FunctionEvaluationException {
         Bearing legBearing = leg.getLegBearing(leg.getReferenceTimePoint());
         Distance greatCircleLegDistance = leg.getGreatCircleDistance(leg.getReferenceTimePoint());
         if (trueWindToDirection == null) {
@@ -145,7 +145,7 @@ public class ORCPerformanceCurveCertificate implements Serializable {
      * 
      * If the <code>competitor</code> hasn't started the race yet, <code>null</code> is returned.
      */
-    private Map<Speed, Duration> getAllowances(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+    protected Map<Speed, Duration> getAllowances(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
         final Map<Speed, Duration> result;
         if (trackedRace.getMarkPassings(competitor).isEmpty()) {
             result = null;
