@@ -31,6 +31,10 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -366,6 +370,12 @@ public class ImportMasterDataOperation extends
                 DeviceIdentifier device = entry.getKey();
                 for (GPSFix fixToAdd : entry.getValue()) {
                     try {
+                        if (fixToAdd instanceof CompactGPSFixMovingImpl) {
+                            fixToAdd = new GPSFixMovingImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint(),
+                                    ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                        } else if (fixToAdd instanceof CompactGPSFixImpl) {
+                            fixToAdd = new GPSFixImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint());
+                        } 
                         store.storeFix(device, fixToAdd);
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.severe("Failed to store race log tracking fix while importing.");

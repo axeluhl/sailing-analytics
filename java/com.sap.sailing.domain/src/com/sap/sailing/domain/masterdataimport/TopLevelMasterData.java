@@ -13,8 +13,10 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -34,6 +36,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.WithID;
@@ -124,7 +127,12 @@ public class TopLevelMasterData implements Serializable {
 
     private void addAllFixesForMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
             DeviceMappingEvent<?, ?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        DynamicGPSFixTrack<WithID, GPSFix> track = new DynamicGPSFixTrackImpl<WithID>(mappingEvent.getMappedTo(), 10000);
+        DynamicGPSFixTrack<WithID, ?> track;
+        if (isMarkMappingEvent(mappingEvent)) {
+            track = new DynamicGPSFixTrackImpl<WithID>(mappingEvent.getMappedTo(), 10000);
+        } else {
+            track = new DynamicGPSFixMovingTrackImpl<WithID>(mappingEvent.getMappedTo(), 1000);
+        }
         DeviceIdentifier device = mappingEvent.getDevice();
         gpsFixStore.loadTrack(track, new DeviceMappingImpl<WithID>(mappingEvent.getMappedTo(), device,
                 new TimeRangeImpl(mappingEvent.getFrom(), mappingEvent.getTo())));
@@ -140,6 +148,14 @@ public class TopLevelMasterData implements Serializable {
         } finally {
             track.unlockAfterRead();
         }
+    }
+
+    private boolean isMarkMappingEvent(DeviceMappingEvent<?, ?> mappingEvent) {
+        boolean isMarkMappingEvent = false;
+        if (mappingEvent instanceof RaceLogDeviceMarkMappingEvent || mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
+            isMarkMappingEvent = true;
+        }
+        return isMarkMappingEvent;
     }
 
     /**

@@ -199,7 +199,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
     
     @Override
-    public void loadTrack(DynamicGPSFixTrack<WithID, GPSFix> track, DeviceMapping<WithID> mapping)
+    public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
     }

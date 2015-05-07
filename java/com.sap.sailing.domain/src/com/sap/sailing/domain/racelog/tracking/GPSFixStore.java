@@ -44,7 +44,7 @@ public interface GPSFixStore {
     /**
      * Load all fixes for both marks and competitors according to the {@code mapping}.
      */
-    void loadTrack(DynamicGPSFixTrack<WithID, GPSFix> track, DeviceMapping<WithID> mapping)
+    void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
             throws NoCorrespondingServiceRegisteredException, TransformationException;
 
     void storeFix(DeviceIdentifier device, GPSFix fix) throws TransformationException, NoCorrespondingServiceRegisteredException;
