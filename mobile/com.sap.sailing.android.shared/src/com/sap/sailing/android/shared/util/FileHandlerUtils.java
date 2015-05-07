@@ -48,4 +48,13 @@ public class FileHandlerUtils {
         dir.mkdirs();
         return dir;
     }
+
+    public static File getExternalFileFolder(Context context) {
+        return new File(context.getExternalFilesDir(null).getPath() + "/");
+    }
+
+    public static File getExternalCacheFolder(Context context) {
+        return new File(context.getExternalCacheDir().getPath() + "/");
+    }
+
 }

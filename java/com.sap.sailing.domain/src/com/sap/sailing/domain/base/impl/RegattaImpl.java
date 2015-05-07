@@ -582,7 +582,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         for (Event event : eventFetcher.getAllEvents()) {
             event.removeRegatta(this);
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseArea != null && courseArea.getId().equals(defaultCourseArea)) {
+                if (defaultCourseArea != null && courseArea.getId().equals(defaultCourseArea.getId())) {
                     event.addRegatta(this);
                 }
             }

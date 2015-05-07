@@ -109,7 +109,6 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log, Competitor competitor)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
         List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
-
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
