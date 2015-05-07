@@ -263,6 +263,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient Timer cacheInvalidationTimer;
     private transient Object cacheInvalidationTimerLock;
 
+    /**
+     * Keys are the {@link RaceLog#getId() IDs} of the race logs that are stored as values.
+     */
     protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
     
     /**
@@ -272,6 +275,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     protected transient WeakHashMap<RaceLog, ReadonlyRaceState> raceStates;
 
+    /**
+     * Keys are the {@link RegattaLog#getId() IDs} of the regatta logs that are stored as values.
+     */
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
 
     /**
@@ -2964,6 +2970,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
     
+    /**
+     * Loads the GPS fixes as per the device registrations in the <code>log</code> into this race. The <code>log</code> is added to the
+     * <code>addLogToMap</code> data structure while holding this object's monitor, and all waiters on this object are notified when done
+     * with adding the <code>log</code> to <code>addLogToMap</code>.
+     */
     private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
             final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap) {
         if (log != null) {
