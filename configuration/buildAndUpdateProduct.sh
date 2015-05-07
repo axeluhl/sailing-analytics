@@ -632,11 +632,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
+        NOW=$(date +"%s")
         BUILD_TOOLS=22.0.0
         TARGET_API=22
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
-        AVD_NAME=androidTest
+        AVD_NAME="androidTest-${NOW}"
         echo "Updating Android SDK (tools)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter tools --no-ui --force --all > /dev/null
         echo "Updating Android SDK (platform-tools)..." | tee -a $START_DIR/build.log
@@ -654,11 +655,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             exit 100
         fi
         # testing deactivated due to errors in hudson
-        if [ $testing -eq 2 ]; then
+        if [ $testing -eq 1 ]; then
             adb emu kill
             echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
             echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
-            echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force
+            echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force -p ${START_DIR}/emulator
             echo "Starting emulator..." | tee -a $START_DIR/build.log
             emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
             echo "Waiting for startup..." | tee -a $START_DIR/build.log
