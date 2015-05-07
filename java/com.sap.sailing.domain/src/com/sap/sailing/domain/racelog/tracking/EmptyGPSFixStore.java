@@ -62,7 +62,7 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     }
 
     @Override
-    public void loadTrack(DynamicGPSFixTrack<WithID, GPSFix> track, DeviceMapping<WithID> mapping)
+    public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         
     }
