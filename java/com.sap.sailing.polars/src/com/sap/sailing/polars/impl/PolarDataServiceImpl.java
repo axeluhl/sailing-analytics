@@ -189,4 +189,13 @@ public class PolarDataServiceImpl implements PolarDataService {
         return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, true);
     }
 
+    @Override
+    public void insertExistingFixes(TrackedRace trackedRace) {
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            for (GPSFixMoving fix : trackedRace.getTrack(competitor).getFixes()) {
+                competitorPositionChanged(fix, competitor, trackedRace);
+            }
+        }
+    }
+
 }

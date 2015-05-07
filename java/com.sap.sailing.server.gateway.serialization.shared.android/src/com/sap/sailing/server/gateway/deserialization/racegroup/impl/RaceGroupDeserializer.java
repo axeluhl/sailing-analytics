@@ -48,30 +48,29 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
     public RaceGroup deserialize(JSONObject object) throws JsonDeserializationException {
         String name = object.get(RaceGroupJsonSerializer.FIELD_NAME).toString();
         BoatClass boatClass = null;
+        String displayName = null;
         CourseArea courseArea = null;
         RegattaConfiguration configuration = null;
-
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
             // TODO: deserialize CourseArea ...
             // WHY should I?
         }
-
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_BOAT_CLASS)) {
             boatClass = boatClassDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                     RaceGroupJsonSerializer.FIELD_BOAT_CLASS));
         }
-
         Collection<SeriesWithRows> series = new ArrayList<SeriesWithRows>();
         for (Object seriesObject : Helpers.getNestedArraySafe(object, SeriesWithRowsOfRaceGroupSerializer.FIELD_SERIES)) {
             JSONObject seriesJson = Helpers.toJSONObjectSafe(seriesObject);
             series.add(seriesDeserializer.deserialize(seriesJson));
         }
-        
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
             JSONObject value = Helpers.getNestedObjectSafe(object, RaceGroupJsonSerializer.FIELD_REGATTA_CONFIGURATION);
             configuration = configurationDeserializer.deserialize(value);
         }
-        
-        return new RaceGroupImpl(name, boatClass, courseArea, series, configuration);
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_DISPLAY_NAME)) {
+            displayName = object.get(RaceGroupJsonSerializer.FIELD_DISPLAY_NAME).toString();
+        }
+        return new RaceGroupImpl(name, displayName, boatClass, courseArea, series, configuration);
     }
 }

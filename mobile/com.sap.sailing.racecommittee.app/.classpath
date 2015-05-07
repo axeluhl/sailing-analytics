@@ -6,5 +6,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry exported="true" kind="lib" path="libs/drag-sort-listview-0.6.1-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json.simple"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

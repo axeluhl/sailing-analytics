@@ -192,6 +192,10 @@ fi
 
 
 if [[ "$@" == "clean" ]]; then
+    ./gradlew clean
+    if [[ $? != 0 ]]; then
+        exit 100
+    fi
     cd $PROJECT_HOME/java
     rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
     rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
@@ -533,8 +537,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             echo "INFO: Activating proxy profile"
             extra="$extra -P no-debug.with-proxy"
             MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
+	    ANDROID_OPTIONS="--proxy-host proxy --proxy-port 8080"
         else
             extra="$extra -P no-debug.without-proxy"
+	    ANDROID_OPTIONS=""
         fi
 
 	cd $PROJECT_HOME/java
@@ -612,6 +618,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
+	ANDROID="$ANDROID_HOME/tools/android"
+	if [ \! -x "$ANDROID" ]; then
+	  ANDROID="$ANDROID_HOME/tools/android.bat"
+	fi
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
@@ -620,6 +630,55 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
+
+        BUILD_TOOLS=22.0.0
+        TARGET_API=22
+        TEST_API=18
+        ANDROID_ABI=armeabi-v7a
+        AVD_NAME=androidTest
+        echo "Updating Android SDK (tools)..."
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (platform-tools)..."
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter platform-tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..."
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (android-${TARGET_API})..."
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (extra-android-m2repository)..."
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (extra-google-m2repository)..."
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
+        ./gradlew clean build
+        if [[ $? != 0 ]]; then
+            exit 100
+        fi
+        # testing deactivated due to errors in hudson
+        if [ $testing -eq 2 ]; then
+            adb emu kill
+            echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..."
+            echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
+            echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force
+            echo "Starting emulator..."
+            emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
+            echo "Waiting for startup..."
+            adb wait-for-device
+            sleep 60
+            $PROJECT_HOME/configuration/androidWaitForEmulator.sh
+            if [[ $? != 0 ]]; then
+                adb emu kill
+                "$ANDROID" delete avd --name ${AVD_NAME}
+                exit 102
+            fi
+            adb shell input keyevent 82 &
+            ./gradlew deviceCheck connectedCheck
+            if [[ $? != 0 ]]; then
+              adb emu kill
+              "$ANDROID" delete avd --name ${AVD_NAME}
+              exit 101
+            fi
+            adb emu kill
+            "$ANDROID" delete avd --name ${AVD_NAME}
+        fi
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"

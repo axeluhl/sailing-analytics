@@ -59,7 +59,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.homePlacesNavigator = homePlacesNavigator;
         this.ctx = new EventContext(place.getCtx());
         this.timerForClientServerOffset = new Timer(PlayModes.Replay);
-
         this.clientFactory = clientFactory;
     }
 

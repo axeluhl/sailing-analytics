@@ -442,8 +442,12 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     private Position getCenter(final Position a, final Position b, final Position c, final Position d) {
-        final Position center = new DegreePosition((a.getLatDeg() + b.getLatDeg() + c.getLatDeg() + d.getLatDeg()) / 4.0,
-                                                   (a.getLngDeg() + b.getLngDeg() + c.getLngDeg() + d.getLngDeg()) / 4.0);
+        // center longitudes on position a, to ensure consistency on date line
+        double aLng = (a.getLngDeg() + 180) % 360.0 - 180;
+        double bLng = (b.getLngDeg() - aLng + 180) % 360.0 - 180;
+        double cLng = (c.getLngDeg() - aLng + 180) % 360.0 - 180;
+        double dLng = (d.getLngDeg() - aLng + 180) % 360.0 - 180;
+        final Position center = new DegreePosition((a.getLatDeg() + b.getLatDeg() + c.getLatDeg() + d.getLatDeg()) / 4.0, aLng + (bLng + cLng + dLng) / 4.0);
         return center;
     }
 
