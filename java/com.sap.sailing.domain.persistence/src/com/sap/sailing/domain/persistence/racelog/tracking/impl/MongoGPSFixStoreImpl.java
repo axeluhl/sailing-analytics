@@ -40,6 +40,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
@@ -196,6 +197,12 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
         loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
     }
     
+    @Override
+    public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
+    }
+    
     private DBObject getDeviceQuery(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException  {
         Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
@@ -228,4 +235,5 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
         }
         return ((Number) result.get(FieldNames.NUM_FIXES.name())).longValue();
     }
+
 }
