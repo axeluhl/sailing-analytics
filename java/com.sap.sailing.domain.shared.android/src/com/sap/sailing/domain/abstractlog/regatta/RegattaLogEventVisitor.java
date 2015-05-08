@@ -5,8 +5,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMile;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 
 public interface RegattaLogEventVisitor {
     void visit(RegattaLogRevokeEvent event);
@@ -19,7 +19,7 @@ public interface RegattaLogEventVisitor {
 
     void visit(RegattaLogRegisterCompetitorEvent event);
     
-    void visit(RegattaLogSetCompetitorTimeOnTimeFactor event);
+    void visit(RegattaLogSetCompetitorTimeOnTimeFactorEvent event);
     
-    void visit(RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMile event);
+    void visit(RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event);
 }
