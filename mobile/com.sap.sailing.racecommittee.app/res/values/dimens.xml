@@ -45,4 +45,7 @@
 
     <dimen name="biggerActionBarSize">75dp</dimen>
 
+    <dimen name="bigger_over_flow_width">64dp</dimen>
+    <dimen name="bigger_over_flow_height">32dp</dimen>
+
 </resources>
