@@ -672,7 +672,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
                 exit 102
             fi
             adb shell input keyevent 82 &
-            ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
+            ./gradlew deviceCheck connectedCheck --debug --stacktrace | tee -a $START_DIR/build.log
             if [[ $? != 0 ]]; then
               adb emu kill
               "$ANDROID" delete avd --name ${AVD_NAME}
