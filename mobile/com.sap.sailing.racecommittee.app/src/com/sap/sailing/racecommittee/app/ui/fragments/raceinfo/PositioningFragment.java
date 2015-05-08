@@ -114,11 +114,6 @@ public class PositioningFragment extends BaseFragment
                 mFinishView.setAdapter(mFinishedAdapter);
                 mFinishView.setItemAnimator(new SwipeDismissItemAnimator());
 
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    mFinishView.addItemDecoration(new ItemShadowDecorator(
-                        (NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z1)));
-                }
-
                 mGuardManager.attachRecyclerView(mFinishView);
                 mDragDropManager.attachRecyclerView(mFinishView);
                 mSwipeManager.attachRecyclerView(mFinishView);
