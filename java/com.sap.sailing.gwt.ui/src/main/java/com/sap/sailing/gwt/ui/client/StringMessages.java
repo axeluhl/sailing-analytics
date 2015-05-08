@@ -1271,4 +1271,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String changed();
     String matcher();
     String any();
+    String urlProviders();
+    String pleaseSelectAURLProvider();
+    String sampleURL(String sampleURL);
 }
