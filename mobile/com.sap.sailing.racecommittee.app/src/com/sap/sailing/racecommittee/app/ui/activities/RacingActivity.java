@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.*;
@@ -515,6 +516,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         });
     }
 
+    // Requires higher api to avoid deprecation
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
