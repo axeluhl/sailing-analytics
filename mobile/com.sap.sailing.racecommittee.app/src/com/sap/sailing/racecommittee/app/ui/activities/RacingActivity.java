@@ -4,17 +4,20 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.*;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,11 +44,13 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.*;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, OnClickListener {
@@ -199,7 +204,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
+            setOverflowIcon();
+            toolbar.setMinimumHeight((int) getResources().getDimension(R.dimen.biggerActionBarSize));
             setSupportActionBar(toolbar);
+            int actionBarTitleId = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
+            TextView title = (TextView) findViewById(actionBarTitleId);
+            if (title != null) {
+                title.setTextSize(getResources().getDimension(R.dimen.textSize_40));
+            }
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
 
@@ -475,6 +487,39 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void openDrawer() {
         if (mRaceList != null) {
             mRaceList.openDrawer();
+        }
+    }
+
+    private void setOverflowIcon() {
+        // Required to set overflow icon
+        final String overflowDescription = getString(R.string.abc_action_menu_overflow_description);
+        final ViewGroup decorView = (ViewGroup) getWindow().getDecorView();
+        final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                // Find the overflow button
+                final ArrayList<View> outViews = new ArrayList<View>();
+                decorView.findViewsWithText(outViews, overflowDescription, View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+                if (outViews.isEmpty()) {
+                    return;
+                }
+                // Actual replacement of the icon
+                TintImageView overflow = (TintImageView) outViews.get(0);
+                Bitmap bitmap = BitmapHelper
+                    .decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon_32dp, 6, 8);
+                overflow.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
+                // Remove listener on layout
+                removeOnGlobalLayoutListener(decorView, this);
+            }
+        });
+    }
+
+    private void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+        } else {
+            v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
         }
     }
 

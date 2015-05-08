@@ -6,6 +6,7 @@
 
     <style name="AppTheme.Light.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
 
         <item name="colorPrimary">@color/light_colorPrimary</item>
         <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
