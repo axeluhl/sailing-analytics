@@ -208,11 +208,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             setOverflowIcon();
             toolbar.setMinimumHeight((int) getResources().getDimension(R.dimen.biggerActionBarSize));
             setSupportActionBar(toolbar);
-            int actionBarTitleId = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
-            TextView title = (TextView) findViewById(actionBarTitleId);
-            if (title != null) {
-                title.setTextSize(getResources().getDimension(R.dimen.textSize_40));
-            }
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
 

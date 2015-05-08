@@ -16,7 +16,12 @@
 
     <style name="ToolBarStyle" parent="AppTheme.Light.Base">
         <item name="android:textColorSecondary">@color/constant_white</item>
+    </style>
+    
+    <style name="ToolBarRacingStyle" parent="ToolBarStyle">
         <item name="drawerArrowStyle">@style/DrawerButton</item>
+        <item name="titleTextStyle">@style/RacingToolBarTitle</item>
+        <item name="android:titleTextStyle">@style/RacingToolBarTitle</item>
     </style>
 
     <style name="DrawerButton" parent="Widget.AppCompat.DrawerArrowToggle">
@@ -31,6 +36,10 @@
         <item name="android:minWidth">32dp</item>
         <item name="android:minHeight">32dp</item>
         <item name="android:contentDescription">@android:string/unknownName</item>
+    </style>
+
+    <style name="RacingToolBarTitle" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">40sp</item>
     </style>
 
 </resources>
