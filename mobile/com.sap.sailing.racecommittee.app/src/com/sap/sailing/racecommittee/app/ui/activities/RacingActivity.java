@@ -507,6 +507,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 }
                 // Actual replacement of the icon
                 TintImageView overflow = (TintImageView) outViews.get(0);
+                overflow.setMinimumWidth(64);
+                overflow.setMinimumHeight(32);
                 Bitmap bitmap = BitmapHelper
                     .decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon_32dp, 6, 8);
                 overflow.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
