@@ -8,6 +8,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMile;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactor;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 
@@ -46,6 +48,16 @@ public class MongoRegattaLogStoreVisitor implements RegattaLogEventVisitor {
 
     @Override
     public void visit(RegattaLogRegisterCompetitorEvent event) {
+        mongoObjectFactory.storeRegattaLogEvent(regattaLikeIdentifier, event);
+    }
+
+    @Override
+    public void visit(RegattaLogSetCompetitorTimeOnTimeFactor event) {
+        mongoObjectFactory.storeRegattaLogEvent(regattaLikeIdentifier, event);
+    }
+
+    @Override
+    public void visit(RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMile event) {
         mongoObjectFactory.storeRegattaLogEvent(regattaLikeIdentifier, event);
     }
 }

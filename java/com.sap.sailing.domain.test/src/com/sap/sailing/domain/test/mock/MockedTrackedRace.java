@@ -69,6 +69,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -441,6 +442,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public RankingMetricConstructor getRankingMetricConstructor() {
+                        return null;
+                    }
+
+                    @Override
+                    public Double getTimeOnTimeFactor(Competitor competitor) {
+                        return null;
+                    }
+
+                    @Override
+                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
                         return null;
                     }
                 };

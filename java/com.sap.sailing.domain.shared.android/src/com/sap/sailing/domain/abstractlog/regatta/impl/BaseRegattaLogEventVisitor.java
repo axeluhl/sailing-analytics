@@ -6,6 +6,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMile;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactor;
 
 public class BaseRegattaLogEventVisitor implements RegattaLogEventVisitor {
 
@@ -27,6 +29,14 @@ public class BaseRegattaLogEventVisitor implements RegattaLogEventVisitor {
 
     @Override
     public void visit(RegattaLogRegisterCompetitorEvent event) {
+    }
+
+    @Override
+    public void visit(RegattaLogSetCompetitorTimeOnTimeFactor event) {
+    }
+
+    @Override
+    public void visit(RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMile event) {
     }
 
 }

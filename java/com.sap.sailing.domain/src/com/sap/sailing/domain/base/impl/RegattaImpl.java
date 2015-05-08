@@ -50,6 +50,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
@@ -577,6 +578,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         regattaLikeHelper.removeListener(listener);
     }
     
+    @Override
+    public Double getTimeOnTimeFactor(Competitor competitor) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor);
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
+    }
+
     public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
         CourseArea defaultCourseArea = getDefaultCourseArea();
         for (Event event : eventFetcher.getAllEvents()) {
