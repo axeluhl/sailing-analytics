@@ -1,13 +1,11 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sse.common.settings.Settings;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public interface StatisticProvider extends Component<Settings> {
-    
+public interface StatisticProvider extends DataMiningComponentProvider {
+
     public FunctionDTO getStatisticToCalculate();
 
     public AggregatorType getAggregatorType();

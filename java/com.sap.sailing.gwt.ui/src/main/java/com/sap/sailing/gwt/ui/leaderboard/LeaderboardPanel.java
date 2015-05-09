@@ -143,6 +143,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
         SafeHtml cellFrameWithTextColor(String textColor);
+
+        @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
+        SafeHtml cellWithImageResourceAndText(ImageResource image, String text);
     }
 
     private static RaceColumnTemplates raceColumnTemplate = GWT.create(RaceColumnTemplates.class);
@@ -661,18 +664,26 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).getTwoLetterIsoCountryCode();
-            final ImageResource flagImageResource;
-            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
-            } else {
-                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-            }
-            if (flagImageResource != null) {
-                sb.append(renderer.render(flagImageResource));
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+            final String flagImageURL = competitor.getFlagImageURL();
+
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
+            } else {
+                final ImageResource flagImageResource;
+                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                } else {
+                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                }
+                if (flagImageResource != null) {
+                    sb.append(renderer.render(flagImageResource));
+                    sb.appendHtmlConstant("&nbsp;");
+                }
             }
-            sb.appendEscaped(competitorFetcher.getCompetitor(object).getSailID());
+            sb.appendEscaped(competitor.getSailID());
         }
 
         @Override

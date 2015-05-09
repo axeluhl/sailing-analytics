@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
@@ -66,10 +67,10 @@ public class TestAbstractParallelProcessorFinishing {
         };
     }
 
-    private AbstractSimpleParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer, ?>> receivers) {
-        return new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
+    private AbstractParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer, ?>> receivers) {
+        return new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected AbstractProcessorInstruction<Integer> createInstruction(Integer partialElement) {
+            protected ProcessorInstruction<Integer> createInstruction(Integer partialElement) {
                 return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
                     public Integer computeResult() {

@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.common.client.i18n;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.i18n.client.Messages;
 
+
+@DefaultLocale("en")
 public interface TextMessages extends Messages {
     public static final TextMessages INSTANCE = GWT.create(TextMessages.class);
 
@@ -41,6 +44,7 @@ public interface TextMessages extends Messages {
     String overview();
     String sapSailing();
     String search();
+    String startSimulator();
     
     String countdownDays();
     String countdownHours();
@@ -118,6 +122,7 @@ public interface TextMessages extends Messages {
     String eventRegattaRacesLegendVideo();
     String eventRegattaRacesLegendAudio();
     String eventSponsorsTitle();
+    String footerJobs();
     String footerCopyright();
     String footerLanguage();
     String footerLegal();

@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.impl.functions;
 
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 
 public class AdditionalMethodWrappingFunctionData {
     

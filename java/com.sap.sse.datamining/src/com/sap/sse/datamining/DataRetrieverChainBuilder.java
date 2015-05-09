@@ -20,6 +20,8 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     
     /**
      * Steps to the next data retriever in the chain.
+     * 
+     * @throws IllegalStateException if {@link #canStepFurther()} would return <code>false</code>.
      */
     public DataRetrieverChainBuilder<DataSourceType> stepFurther();
 
@@ -30,8 +32,7 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public Class<?> getCurrentRetrievedDataType();
     
     /**
-     * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
-     * @return The current retriever level.
+     * @return The current retriever level or <code>-1</code> if {@link #stepFurther()} has not yet been called.
      */
     public int getCurrentRetrieverLevel();
 

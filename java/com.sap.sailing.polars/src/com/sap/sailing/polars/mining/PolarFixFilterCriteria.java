@@ -127,18 +127,20 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
 
     private static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, double pctOfLeadingCompetitorsToInclude) {
         boolean result = false;
-        Iterator<MarkPassing> finishPassings = trackedRace
-                .getMarkPassingsInOrder(trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
-        for (int i = 0; i < ((int) Math.max(Math.round(pctOfLeadingCompetitorsToInclude
-                * getNumberOfCompetitors(trackedRace)), 1)); i++) {
-            if (finishPassings.hasNext()) {
-                if (finishPassings.next().getCompetitor().equals(competitor)) {
-                    result = true;
+        Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();
+        if (lastWaypoint != null) {
+            Iterator<MarkPassing> finishPassings = trackedRace.getMarkPassingsInOrder(lastWaypoint).iterator();
+            for (int i = 0; i < ((int) Math.max(
+                    Math.round(pctOfLeadingCompetitorsToInclude * getNumberOfCompetitors(trackedRace)), 1)); i++) {
+                if (finishPassings.hasNext()) {
+                    if (finishPassings.next().getCompetitor().equals(competitor)) {
+                        result = true;
+                        break;
+                    }
+                } else {
+                    result = false;
                     break;
                 }
-            } else {
-                result = false;
-                break;
             }
         }
         return result;

@@ -3,7 +3,7 @@ package com.sap.sse.datamining.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface Function<ReturnType> {
@@ -22,6 +22,9 @@ public interface Function<ReturnType> {
      */
     public boolean isLocalizable();
     
+    /**
+     * @return the localized name of this function, if it can be {@link #isLocalizable() localized} and the {@link #getSimpleName() simple name} if not.
+     */
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages);
     
     /**

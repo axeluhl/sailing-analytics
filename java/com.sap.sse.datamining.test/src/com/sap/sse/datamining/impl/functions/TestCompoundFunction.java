@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElementImpl;
 import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
@@ -34,14 +34,14 @@ public class TestCompoundFunction {
         getNameFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(ContainerElement.class.getMethod("getName", new Class<?>[0]));
         functions.add(getNameFunction);
         
-        compoundFunction = FunctionTestsUtil.getFunctionFactory().createCompoundFunction("TestCompoundFunction", functions);
+        compoundFunction = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(functions);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testConstruction() {
         List<Function<?>> functions = new ArrayList<>();
         functions.add(getContainerElementFunction);
-        new ConcatenatingCompoundFunction<String>("IllegalCompoundFunction", functions, String.class);
+        new ConcatenatingCompoundFunction<String>(functions, String.class);
     }
     
     @Test
@@ -50,8 +50,8 @@ public class TestCompoundFunction {
         //This is a workaround, because the assertion, that to types are equal checks for an instance of the given class instead.
         assertThat("The actual declaring class did'nt match the expected one.",
                 compoundFunction.getDeclaringType().equals(MarkedContainer.class), is(true));
-        assertThat(compoundFunction.getSimpleName(), is("TestCompoundFunction"));
-        assertThat(compoundFunction.getLocalizedName(Locale.ENGLISH, TestsUtil.getTestStringMessages()), is("TestCompoundFunction"));
+        assertThat(compoundFunction.getSimpleName(), is("getContainerElement -> getName"));
+        assertThat(compoundFunction.getLocalizedName(Locale.ENGLISH, TestsUtil.getTestStringMessages()), is("Name"));
         assertThat(compoundFunction.getResultUnit(), is(Unit.None));
         assertThat(compoundFunction.getResultDecimals(), is(0));
     }

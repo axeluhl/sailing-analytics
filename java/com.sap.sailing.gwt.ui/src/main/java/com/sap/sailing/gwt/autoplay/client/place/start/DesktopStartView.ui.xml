@@ -19,7 +19,7 @@
     <g:HTMLPanel>
         <s:header.SAPHeader ui:field="sapHeader" />
         <div style="height:1em;" />
-        <div class="{res.mainCss.grid} {style.row}">
+        <div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span>Display language:</span>
 	        </div>
@@ -27,7 +27,7 @@
 				<g:ListBox ui:field="localeSelectionBox" />
 	        </div>
         </div>
-		<div class="{res.mainCss.grid} {style.row}">
+		<div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span>Start browser in full screen mode:</span>
 	        </div>
@@ -35,7 +35,7 @@
 				<g:CheckBox ui:field="startInFullscreenModeBox" />
 	        </div>
 		</div>
-		<div class="{res.mainCss.grid} {style.row}">
+		<div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span>Event:</span>
 	        </div>
@@ -43,7 +43,7 @@
 				<g:ListBox ui:field="eventSelectionBox" />
 	        </div>
 		</div>
-		<div ui:field="leaderboardSelectionUi" class="{res.mainCss.grid}  {style.row}">
+		<div ui:field="leaderboardSelectionUi" class="{res.mediaCss.grid}  {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span>Leaderboard:</span>
 	        </div>
@@ -52,12 +52,12 @@
 	        </div>
 		</div>
 		
-		<div class="{res.mainCss.grid} {style.row}">
+		<div class="{res.mediaCss.grid} {style.row}">
 			<div ui:field="screenConfiguraionUi" class="{res.mediaCss.columns}">
 				Screen configuration
 			</div>
 			
-			<div ui:field="leaderboardAutoZoomDiv" class="{res.mainCss.grid} {style.row}">
+			<div ui:field="leaderboardAutoZoomDiv" class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.columns} {style.row}">
 					Screen settings
 				</div>
@@ -68,7 +68,7 @@
 					<g:CheckBox ui:field="leaderboardAutoZoomBox" />
 		        </div>
 			</div>
-			<div ui:field="leaderboardZoomDiv" class="{res.mainCss.grid} {style.row}">
+			<div ui:field="leaderboardZoomDiv" class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    <span>Zoom-Factor:</span>
 		        </div>
@@ -77,7 +77,7 @@
 		        </div>
 			</div>
 
-			<div class="{res.mainCss.grid} {style.row}">
+			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    <span>Auto switch when race active:</span>
 		        </div>
@@ -85,7 +85,7 @@
 					<g:CheckBox ui:field="autoSwitchToRaceboard" />
 		        </div>
 			</div>
-			<div class="{res.mainCss.grid} {style.row}">
+			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.columns} {style.row}">
 					Trigger to switch to raceboard
 				</div>
@@ -96,7 +96,7 @@
 					<g:TextBox ui:field="timeToRaceStartInSeconds" />
 		        </div>
 			</div>
-			<div class="{res.mainCss.grid} {style.row}">
+			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    <span>Auto-Play video:</span>
 		        </div>
@@ -107,14 +107,14 @@
 			
 			
 			<div class="{res.mediaCss.columns}">
-				<div ui:field="components" class="{res.mainCss.grid} {style.row}">
+				<div ui:field="components" class="{res.mediaCss.grid} {style.row}">
 					<g:TabPanel ui:field="componentConfigurationTabPanel" styleName="{style.configTabPanel}">
 					
 					
 					<!-- 
 					    <g:Tab text="Raceboard">
 					    	<g:HTMLPanel ui:field="raceboardConfigPanel" styleName="{style.configTabContent}">
-								<div class="{res.mainCss.grid} {style.row}">
+								<div class="{res.mediaCss.grid} {style.row}">
 									<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 									    <span>Leaderboard Settings:</span>
 							        </div>
@@ -122,7 +122,7 @@
 							    		<g:Button ui:field="leaderboardInRaceboardSettingsButton" text="Configure" styleName="{res.mainCss.button}" />
 							        </div>
 								</div>
-								<div class="{res.mainCss.grid} {style.row}">
+								<div class="{res.mediaCss.grid} {style.row}">
 									<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 									    <span>Map Settings:</span>
 							        </div>
@@ -138,7 +138,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="{res.mainCss.grid}">
+		<div class="{res.mediaCss.grid}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    &nbsp;
 	        </div>
