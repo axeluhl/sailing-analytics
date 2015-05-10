@@ -69,11 +69,6 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
         return result;
     }
 
-    private Double getTimeOnTimeFactorFromRegattaLog(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
         final Duration timeOnDistanceAllowancePerNauticalMileFromRegattaLog = getTimeOnDistanceAllowancePerNauticalMileFromRegattaLog(competitor);
@@ -84,6 +79,11 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
             result = timeOnDistanceAllowancePerNauticalMileFromRegattaLog;
         }
         return result;
+    }
+
+    private Double getTimeOnTimeFactorFromRegattaLog(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private Duration getTimeOnDistanceAllowancePerNauticalMileFromRegattaLog(Competitor competitor) {
