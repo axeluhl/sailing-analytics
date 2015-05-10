@@ -7,6 +7,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnDistanceAllowancePerNauticalMileFinder;
+import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnTimeFactorFinder;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogEventListener;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -82,12 +84,10 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
     }
 
     private Double getTimeOnTimeFactorFromRegattaLog(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return null;
+        return new CompetitorTimeOnTimeFactorFinder(getRegattaLog(), competitor).analyze();
     }
 
     private Duration getTimeOnDistanceAllowancePerNauticalMileFromRegattaLog(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return null;
+        return new CompetitorTimeOnDistanceAllowancePerNauticalMileFinder(getRegattaLog(), competitor).analyze();
     }
 }
