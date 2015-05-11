@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
-import com.sap.sse.common.TimePoint;
 
 public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRacesDTO>> {
     private UUID eventId;
@@ -29,28 +28,12 @@ public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRa
         RacesActionUtil.forRacesOfRegatta(context, eventId, regattaName, new RaceCallback() {
             @Override
             public void doForRace(RaceContext rc) {
-                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive()) {
+                // TODO better condition after Frank implemented race state stuff
+                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive() || !rc.isStartTimeAvailable()) {
                     return;
                 }
                 
-                TimePoint startTime = rc.getStartTime();
-                if(startTime == null) {
-                    return;
-                }
-                
-                LiveRaceDTO liveRaceDTO = new LiveRaceDTO(rc.getIdentifier());
-                liveRaceDTO.setRegattaName(rc.getRegattaDisplayName());
-                liveRaceDTO.setFleet(rc.getFleetMetadataOrNull());
-                liveRaceDTO.setRaceName(rc.raceColumn.getName());
-                liveRaceDTO.setStart(startTime.asDate());
-                liveRaceDTO.setBoatClass(rc.getBoatClassName());
-                liveRaceDTO.setCourseArea(rc.getCourseArea());
-                liveRaceDTO.setCourse(rc.getCourseName());
-                liveRaceDTO.setFlagState(rc.getFlagStateOrNull());
-                liveRaceDTO.setProgress(rc.getProgressOrNull());
-                liveRaceDTO.setWind(rc.getWindOrNull());
-                
-                result.addRace(liveRaceDTO);
+                result.addRace(rc.getLiveRaceDTO());
             }
         });
         return new ResultWithTTL<LiveRacesDTO>(5000, result);

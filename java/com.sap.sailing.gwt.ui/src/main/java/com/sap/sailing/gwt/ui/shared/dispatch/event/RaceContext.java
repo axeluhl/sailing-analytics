@@ -194,7 +194,7 @@ public class RaceContext {
     }
     
     public boolean isStartTimeAvailable() {
-        return raceLog != null;
+        return getStartTime() != null;
     }
 
     public boolean isLive() {
@@ -204,6 +204,24 @@ public class RaceContext {
     }
 
     public TimePoint getStartTime() {
+        if(state == null) {
+            return null;
+        }
         return state.getStartTime();
+    }
+
+    public LiveRaceDTO getLiveRaceDTO() {
+        LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
+        liveRaceDTO.setRegattaName(getRegattaDisplayName());
+        liveRaceDTO.setFleet(getFleetMetadataOrNull());
+        liveRaceDTO.setRaceName(raceColumn.getName());
+        liveRaceDTO.setStart(getStartTime().asDate());
+        liveRaceDTO.setBoatClass(getBoatClassName());
+        liveRaceDTO.setCourseArea(getCourseArea());
+        liveRaceDTO.setCourse(getCourseName());
+        liveRaceDTO.setFlagState(getFlagStateOrNull());
+        liveRaceDTO.setProgress(getProgressOrNull());
+        liveRaceDTO.setWind(getWindOrNull());
+        return liveRaceDTO;
     }
 }
