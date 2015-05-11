@@ -70,6 +70,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
@@ -1697,7 +1698,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO), coordinateSystem);
+        final BoatOverlay boatCanvas;
+//        if(competitorDTO.getBoatClass().getName().equals(BoatClassMasterdata.EXTREME_40.name())){
+            boatCanvas = new RowingBoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO), coordinateSystem);
+//        }else{
+//            boatCanvas = new SailingBoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO), coordinateSystem);
+//        }
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
