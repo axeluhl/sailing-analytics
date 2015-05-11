@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -36,5 +38,24 @@ public abstract class AbstractGetRacesAction<R extends Result> implements Action
                 }
             }
         }
+    }
+
+    @GwtIncompatible
+    protected boolean isSingleFleet(RaceColumn raceColumn) {
+        Iterable<? extends Fleet> fleets = raceColumn.getFleets();
+        
+        if(fleets instanceof Collection) {
+            return ((Collection<?>) fleets).size() <= 1;
+        }
+        
+        if(fleets == null) {
+            return false;
+        }
+        Iterator<? extends Fleet> fleetsIterator = fleets.iterator();
+        if(!fleetsIterator.hasNext()) {
+            return false;
+        }
+        fleetsIterator.next();
+        return !fleetsIterator.hasNext();
     }
 }

@@ -78,8 +78,12 @@ public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<Liv
                 
                 LiveRaceDTO liveRaceDTO = new LiveRaceDTO(new RegattaNameAndRaceName(regattaName, raceDefinition.getName()));
                 liveRaceDTO.setRegattaName(regattaName);
-                liveRaceDTO.setFleetName(fleet.getName());
-                liveRaceDTO.setFleetColor(fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
+                
+                if(!isSingleFleet(raceColumn)) {
+                    liveRaceDTO.setFleetName(fleet.getName());
+                    liveRaceDTO.setFleetColor(fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
+                }
+                
                 liveRaceDTO.setRaceName(raceColumn.getName());
                 
                 liveRaceDTO.setStart(startTime.asDate());
