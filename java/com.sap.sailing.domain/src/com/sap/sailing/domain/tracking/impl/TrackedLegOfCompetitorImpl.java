@@ -518,7 +518,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         // finished the leg, return the difference between this competitor's leg completion time point and the leader's completion
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
-        Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint, windPositionMode, cache);
+        // See also bug1080: using the average VMG instead of the current VMG may produce better results
+        Speed windwardSpeed = getAverageVelocityMadeGood(timePoint, cache);
         // Has our competitor started the leg already? If not, we won't be able to compute a gap
         if (hasStartedLeg(timePoint)) {
             Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
