@@ -4,13 +4,10 @@
 .grid,
 .stackenblochen {
   display: block;
-/*  width: 100%;  */
-/*  max-width: 80rem; */
-  min-width: 720px;
+  width: 100%;
+  max-width: 80rem;
   list-style: none;
   margin: 0 auto;
-  margin-left: 5rem;
-  margin-right: 5rem;
   zoom: 1;
 }
 .grid:before,
