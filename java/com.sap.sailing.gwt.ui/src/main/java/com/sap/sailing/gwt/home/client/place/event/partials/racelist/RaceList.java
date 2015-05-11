@@ -1,22 +1,25 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Composite;
+import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
+import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
@@ -27,7 +30,8 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
     private static final MediaCss MEDIA_CSS = SharedResources.INSTANCE.mediaCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
 
-    private final CellTable<LiveRaceDTO> cellTable = new CellTable<LiveRaceDTO>(0, CleanCellTableResources.INSTANCE);
+    private final SortedCellTable<LiveRaceDTO> cellTable = new SortedCellTable<LiveRaceDTO>(0,
+            CleanCellTableResources.INSTANCE);
     private final DateTimeFormat startTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
 
     public RaceList() {
@@ -46,116 +50,341 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
     }
 
     private void initColumns() {
-        TextColumn<LiveRaceDTO> fleetCornerColumn = new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader("");
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return CSS.race_fleetcorner();
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
-                return "";
+                return object.getFleet() != null ? object.getFleet().getFleetColor() : "";
             }
-        };
-        fleetCornerColumn.setCellStyleNames(CSS.race_fleetcorner());
-        this.cellTable.addColumn(fleetCornerColumn, getStyledHeader(""));
+        });
+        
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
 
-        this.cellTable.addColumn(getStyledColumn(new TextColumn<LiveRaceDTO>() {
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.regatta());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), CSS.race_itemname());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return object.getRegattaName();
             }
-        }, CSS.race_itemname()), getStyledHeader(I18N.regatta()));
+        });
 
-        this.cellTable.addColumn(getStyledColumn(new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.race());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), CSS.race_itemname());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return object.getRaceName();
             }
-        }, CSS.race_itemname()), getStyledHeader(I18N.race()));
+        });
 
-        add(I18N.fleet(), new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.fleet());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return Util.join(" ", CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), MEDIA_CSS.showonlarge());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return object.getFleet() != null ? object.getFleet().getFleetName() : "";
             }
-        }, MEDIA_CSS.showonlarge());
+        });
 
-        add(I18N.start(), new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.start());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return CSS.race_item();
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return object.getStart() == null ? "-" : startTimeFormat.format(object.getStart());
             }
         });
 
-        add("TODO FLAG", new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader("TODO FLAG");
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return CSS.race_item();
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO FLAG";
             }
         });
 
-        add(I18N.wind(), new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader("TODO WIND");
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return CSS.race_item();
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO WIND";
             }
         });
 
-        add(I18N.from(), new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader("TODO FROM");
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return Util.join(" ", CSS.raceslist_head_item(), MEDIA_CSS.hideonsmall());
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), MEDIA_CSS.hideonsmall());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO FROM";
             }
-        }, MEDIA_CSS.hideonsmall());
+        });
 
-        add("TODO AREA", new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader("TODO AREA");
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return Util.join(" ", CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), MEDIA_CSS.showonlarge());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO AREA";
             }
-        }, MEDIA_CSS.showonlarge());
+        });
 
-        add(I18N.course(), new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.course());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return Util.join(" ", CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), MEDIA_CSS.showonlarge());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO COURSE";
             }
-        }, MEDIA_CSS.showonlarge());
+        });
 
-        add(I18N.status(), new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.status());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return CSS.race_item();
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO STATUS";
             }
         });
 
-        this.cellTable.addColumn(getStyledColumn(new TextColumn<LiveRaceDTO>() {
+        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+            @Override
+            public InvertibleComparator<LiveRaceDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader(I18N.fleet());
+            }
+
+            @Override
+            public String getHeaderStyle() {
+                return Util.join(" ", CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return Util.join(" ", CSS.race_item(), CSS.race_itemright());
+            }
+
             @Override
             public String getValue(LiveRaceDTO object) {
                 return "TODO WATCH NOW";
             }
-        }, CSS.race_itemright()), getStyledHeader("", CSS.raceslist_head_itembutton()));
-
+        });
     }
 
-    private Header<?> getStyledHeader(String headerText, String... additionalStyles) {
-        Header<String> header = new TextHeader(headerText);
-        header.setHeaderStyleNames(createStyleNameString(CSS.raceslist_head_item(), additionalStyles));
-        return header;
-    }
-
-    private <C> Column<LiveRaceDTO, C> getStyledColumn(Column<LiveRaceDTO, C> column, String... additionalStyles) {
-        column.setCellStyleNames(createStyleNameString(CSS.race_item(), additionalStyles));
-        return column;
-    }
-
-    private void add(String headerText, Column<LiveRaceDTO, ?> column, String... mediaStyle) {
-        this.cellTable.addColumn(getStyledColumn(column, mediaStyle), getStyledHeader(headerText, mediaStyle));
-    }
-
-    private String createStyleNameString(String primaryStyle, String... additionalStyles) {
-        assert primaryStyle != null : "primaryStyle parameter cannot be null";
-        StringBuilder styleName = new StringBuilder(primaryStyle);
-        for (int i = 0; i < additionalStyles.length; i++) {
-            styleName.append(" ").append(additionalStyles[i]);
+    private void add(SortableColumn<LiveRaceDTO, ?> column) {
+        if (column.getColumnStyle() != null) {
+            column.setCellStyleNames(column.getColumnStyle());
         }
-        return styleName.toString();
+        Header<?> header = column.getHeader();
+        if (header != null && column.getHeaderStyle() != null) {
+            header.setHeaderStyleNames(column.getHeaderStyle());
+        }
+        boolean ascending = column.getPreferredSortingOrder().isAscending();
+        this.cellTable.addColumn(column, header, column.getComparator(), ascending);
     }
 
     @Override

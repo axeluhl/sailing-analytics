@@ -47,7 +47,7 @@ public class SortedCellTable<T> extends CellTable<T> {
      */
     private ListHandler<T> columnSortHandler;
 
-    public SortedCellTable(int pageSize, LeaderboardTableResources resources) {
+    public SortedCellTable(int pageSize, CellTable.Resources resources) {
         super(pageSize, resources);
         dataProvider = new ListDataProvider<T>();
         dataProvider.addDataDisplay(this);
