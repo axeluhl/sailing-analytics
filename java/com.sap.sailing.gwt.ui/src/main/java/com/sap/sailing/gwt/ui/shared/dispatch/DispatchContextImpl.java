@@ -14,7 +14,7 @@ public class DispatchContextImpl implements DispatchContext {
 
     public  DispatchContextImpl() {
         final BundleContext context = Activator.getDefault();
-        final Activator activator = Activator.getInstance();
+//        final Activator activator = Activator.getInstance();
 
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
     }

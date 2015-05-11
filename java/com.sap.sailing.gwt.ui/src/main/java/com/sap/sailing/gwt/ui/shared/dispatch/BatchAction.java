@@ -27,8 +27,6 @@ public class BatchAction implements Action<BatchResult> {
         final ArrayList<Result> results = new ArrayList<Result>(nrOfActions);
         final ArrayList<DispatchException> exceptions = new ArrayList<DispatchException>(nrOfActions);
         for (Action<?> a : getActions()) {
-            final String actionName = a.getClass().getSimpleName();
-            // TODO LOG.trace("Found action {} in batch", actionName);
             Result result = null;
             try {
                 result = a.execute(ctx);
