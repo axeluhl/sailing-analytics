@@ -2,7 +2,7 @@ package com.sap.sailing.domain.ranking;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Map;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
@@ -55,7 +55,8 @@ public interface RankingMetric extends Serializable {
         Distance getWindwardDistanceSailed();
     
         /**
-         * Usually the difference between {@link #timePoint} and the start of the race
+         * Usually the difference between {@link #timePoint} and the start of the race; <code>null</code> if the
+         * race start time is not known.
          */
         Duration getActualTime();
     
@@ -72,7 +73,10 @@ public interface RankingMetric extends Serializable {
          */
         Duration getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
         
-        Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+        default Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
+            return getActualTime() == null ? null : getActualTime().plus(
+                    getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead());
+        }
     
         /**
          * The corrections applied to the time and distance sailed when the {@link #competitor} would have reached the
@@ -93,7 +97,7 @@ public interface RankingMetric extends Serializable {
          * about actual and corrected times needed to reach the position of the competitor farthest ahead at
          * {@link #timePoint}.
          */
-        Map<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo();
+        Function<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo();
     
         Competitor getCompetitorFarthestAhead();
     

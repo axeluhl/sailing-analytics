@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -38,7 +39,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
-        return rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+        return rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
     }
 
     @Override
@@ -62,4 +63,87 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
         return totalDurationSinceRaceStart;
     }
+
+    @Override
+    protected RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+        return new RankingInfo() {
+            private static final long serialVersionUID = 25689357311324825L;
+
+            @Override
+            public TimePoint getTimePoint() {
+                return timePoint;
+            }
+
+            @Override
+            public Function<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo() {
+                return competitor -> getCompetitorRankingInfo(competitor);
+            }
+
+            private CompetitorRankingInfo getCompetitorRankingInfo(final Competitor competitor) {
+                return new CompetitorRankingInfo() {
+                    private static final long serialVersionUID = 1164789004900690406L;
+
+                    @Override
+                    public TimePoint getTimePoint() {
+                        return timePoint;
+                    }
+
+                    @Override
+                    public Competitor getCompetitor() {
+                        return competitor;
+                    }
+
+                    @Override
+                    public Distance getWindwardDistanceSailed() {
+                        return getWindwardDistanceTraveled(competitor, timePoint, cache);
+                    }
+
+                    @Override
+                    public Duration getActualTime() {
+                        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+                        final Duration result;
+                        if (startOfRace == null) {
+                            result = null;
+                        } else {
+                            result = startOfRace.until(timePoint);
+                        }
+                        return result;
+                    }
+
+                    /**
+                     * Corrected time is the same as actual time for one-design ranking
+                     */
+                    @Override
+                    public Duration getCorrectedTime() {
+                        return getActualTime();
+                    }
+
+                    @Override
+                    public Duration getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead() {
+                        return getPredictedDurationToReachWindwardPositionOf(competitor, getCompetitorFarthestAhead(), timePoint, cache);
+                    }
+
+                    /**
+                     * Corrected time is the same as actual time for one-design ranking
+                     */
+                    @Override
+                    public Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead() {
+                        return getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+                    }
+                    
+                };
+            }
+
+            @Override
+            public Competitor getCompetitorFarthestAhead() {
+                return getTrackedRace().getOverallLeader(timePoint, cache);
+            }
+
+            @Override
+            public Competitor getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead() {
+                return getCompetitorFarthestAhead();
+            }
+        };
+    }
+    
 }

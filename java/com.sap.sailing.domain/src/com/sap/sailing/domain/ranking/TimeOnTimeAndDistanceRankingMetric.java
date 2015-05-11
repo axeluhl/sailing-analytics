@@ -79,8 +79,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final RankingMetric.RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
-        return (c1, c2) -> rankingInfo.getCompetitorRankingInfo().get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().compareTo(
-                rankingInfo.getCompetitorRankingInfo().get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
+        return (c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().compareTo(
+                rankingInfo.getCompetitorRankingInfo().apply(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
     }
 
     @Override
@@ -264,14 +264,14 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      */
     @Override
     public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
-        final Duration t_k = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()).
+        final Duration t_k = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()).
                 getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
         final double   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
-        final Duration t_i = rankingInfo.getCompetitorRankingInfo().get(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+        final Duration t_i = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_i = getTimeOnTimeFactor(competitor);
         final double   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
-        final Distance d   = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
+        final Distance d   = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
         
         final Duration diff_t_i = t_i.minus(t_k.times(f_k).plus(Duration.ONE_SECOND.times(d.getNauticalMiles() * (g_i - g_k))).divide(f_i));
         return diff_t_i;

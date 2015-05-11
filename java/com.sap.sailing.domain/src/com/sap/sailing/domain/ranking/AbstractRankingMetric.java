@@ -3,6 +3,7 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 
@@ -116,11 +117,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
         
         @Override
-        public Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
-            return getTrackedRace().getStartOfRace().until(getTimePoint()).plus(getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead());
-        }
-
-        @Override
         public Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead() {
             return correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
         }
@@ -139,7 +135,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
          * about actual and corrected times needed to reach the position of the competitor farthest ahead at
          * {@link #timePoint}.
          */
-        private final Map<Competitor, RankingMetric.CompetitorRankingInfo> competitorRankingInfo;
+        private final Function<Competitor, RankingMetric.CompetitorRankingInfo> competitorRankingInfo;
         
         private final Competitor competitorFarthestAhead;
         
@@ -151,7 +147,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         
         public RankingInfoImpl(TimePoint timePoint, Map<Competitor, RankingMetric.CompetitorRankingInfo> competitorRankingInfo, Competitor competitorFarthestAhead) {
             this.timePoint = timePoint;
-            this.competitorRankingInfo = competitorRankingInfo; 
+            this.competitorRankingInfo = c->competitorRankingInfo.get(c); 
             this.competitorFarthestAhead = competitorFarthestAhead;
             leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead = competitorRankingInfo.keySet().stream().sorted(
                     (c1, c2) -> competitorRankingInfo.get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().
@@ -164,7 +160,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
 
         @Override
-        public Map<Competitor, RankingMetric.CompetitorRankingInfo> getCompetitorRankingInfo() {
+        public Function<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo() {
             return competitorRankingInfo;
         }
 
@@ -217,7 +213,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 .stream(getTrackedRace().getRace().getCompetitors().spliterator(), /* parallel */true).
                 sorted(oneDesignComparator).findFirst().get();
         final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
-        final Duration actualRaceDuration = getTrackedRace().getStartOfRace().until(timePoint);
+        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        final Duration actualRaceDuration;
+        if (startOfRace == null) {
+            actualRaceDuration = null;
+        } else {
+            actualRaceDuration = startOfRace.until(timePoint);
         for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead =
                     getPredictedDurationToReachWindwardPositionOf(competitor, competitorFarthestAhead, timePoint, cache);
@@ -233,9 +234,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                     actualRaceDuration, totalWindwardDistanceTraveled);
             RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
                     getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, correctedTime,
-                    totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead,
+                    predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
                     correctedEstimatedTimeWhenReachingCompetitorFarthestAhead);
             result.put(competitor, rankingInfo);
+        }
         }
         return new RankingInfoImpl(timePoint, result, competitorFarthestAhead);
     }
@@ -245,9 +247,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache()).getCompetitorRankingInfo());
     }
 
-    protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(final Map<Competitor, RankingMetric.CompetitorRankingInfo> rankingInfos) {
-        return (c1, c2) -> rankingInfos.get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead()
-                .compareTo(rankingInfos.get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
+    protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(
+            final Function<Competitor, RankingMetric.CompetitorRankingInfo> rankingInfos) {
+        return (c1, c2) -> rankingInfos.apply(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead()
+                .compareTo(rankingInfos.apply(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
     }
     
     /**
