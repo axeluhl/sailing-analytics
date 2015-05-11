@@ -226,19 +226,20 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     /**
-     * Compares <code>competitor</code> to {@link RankingInfo#getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}.
-     * Based on the definition of "leader" the corrected estimated time for <code>competitor</code> when reaching the
-     * fastest boat's position at {@link #timePoint} is expected to be greater than that of the leader. We're equating
-     * <code>competitor</code>'s and the leader's corrected time when reaching the fastest boat's position at
-     * {@link #timePoint}, assuming a summand in <code>competitor</code>'s actual time required to reach the fastest
-     * boat's position. This equation can then be resolved for this additional summand (which is a negative duration),
-     * telling in <code>competitor</code>'s own time how much time she would have to make good to rank equal to the
-     * leader.
+     * For the {@link RankingInfo#getTimePoint() ranking info's time point} compares <code>competitor</code> to
+     * {@link RankingInfo#getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}. Based on the definition of
+     * "leader" the corrected estimated time for <code>competitor</code> when reaching the fastest boat's position at
+     * {@link #timePoint} is expected to be greater than that of the leader. We're equating <code>competitor</code>'s
+     * and the leader's corrected time when reaching the fastest boat's position at {@link #timePoint}, assuming a
+     * summand in <code>competitor</code>'s actual time required to reach the fastest boat's position. This equation can
+     * then be resolved for this additional summand (which is a negative duration), telling in <code>competitor</code>'s
+     * own time how much time she would have to make good to rank equal to the leader.
      * <p>
      * 
      * The math behind this works as follows. Let <code>i</code> represent the <code>competitor</code>, <code>k</code>
      * the leader, <code>d</code> the total windward distance from the start to the fastest competitor's position at
-     * {@link #timePoint}. Then we have for the corrected reciproke average corrected VMGs:
+     * {@link RankingInfo#getTimePoint() time point provided by the ranking info}. Then we have for the corrected
+     * reciproke average corrected VMGs:
      * 
      * <pre>
      * t_i * f_i - d * g_i - diff_corr_t_i = t_k * f_k - d * g_k
@@ -258,7 +259,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * which resolves to
      * 
      * <pre>
-     * <b>diff_t_i</b> = (t_k * f_k + d * (g_i - g_k)) / f_i - t_i
+     * <b>diff_t_i</b> = t_i - (t_k * f_k + d * (g_i - g_k)) / f_i
      * </pre>
      */
     @Override
@@ -272,7 +273,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final double   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
         final Distance d   = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
         
-        final Duration diff_t_i = t_k.times(f_k).plus(Duration.ONE_SECOND.times(d.getNauticalMiles() * (g_i - g_k))).divide(f_i).minus(t_i);
+        final Duration diff_t_i = t_i.minus(t_k.times(f_k).plus(Duration.ONE_SECOND.times(d.getNauticalMiles() * (g_i - g_k))).divide(f_i));
         return diff_t_i;
     }
 
