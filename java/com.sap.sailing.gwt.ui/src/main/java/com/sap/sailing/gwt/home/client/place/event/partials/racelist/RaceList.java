@@ -1,8 +1,16 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesUtils;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -10,6 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
@@ -19,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
+import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
@@ -27,12 +37,22 @@ import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuil
 public class RaceList extends Composite implements RefreshableWidget<LiveRacesDTO> {
 
     private static final LocalCss CSS = RacesListLiveResources.INSTANCE.css();
+    private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
     private static final MediaCss MEDIA_CSS = SharedResources.INSTANCE.mediaCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
+    private static final CustomTemplate TEMPLATE = GWT.create(CustomTemplate.class);
 
     private final SortedCellTable<LiveRaceDTO> cellTable = new SortedCellTable<LiveRaceDTO>(0,
             CleanCellTableResources.INSTANCE);
     private final DateTimeFormat startTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
+
+    interface CustomTemplate extends SafeHtmlTemplates {
+        @Template("<div style=\"{1}\" class=\"{0}\"></div>")
+        SafeHtml fleetCorner(String styleNames, SafeStyles color);
+
+        @Template("<a class=\"{0}\">{1}</a>")
+        SafeHtml watchNowButton(String styleNames, String text);
+    }
 
     public RaceList() {
         CSS.ensureInjected();
@@ -50,7 +70,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
     }
 
     private void initColumns() {
-        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+        add(new SortableColumn<LiveRaceDTO, SafeHtml>(new SafeHtmlCell(), SortingOrder.ASCENDING) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return null;
@@ -62,18 +82,18 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
             }
 
             @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
             public String getColumnStyle() {
                 return CSS.race_fleetcorner();
             }
 
             @Override
-            public String getValue(LiveRaceDTO object) {
-                return object.getFleet() != null ? object.getFleet().getFleetColor() : "";
+            public SafeHtml getValue(LiveRaceDTO object) {
+                String color = "";
+                if (object.getFleet() != null) {
+                    color = object.getFleet().getFleetColor();
+                }
+                return TEMPLATE.fleetCorner(CSS.race_fleetcorner_icon(),
+                        SafeStylesUtils.fromTrustedNameAndValue("border-top-color", color));
             }
         });
         
@@ -154,7 +174,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return object.getFleet() != null ? object.getFleet().getFleetName() : "";
+                return object.getFleet() != null ? object.getFleet().getFleetName() : "-";
             }
         });
 
@@ -208,7 +228,11 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return "TODO FLAG";
+                FlagStateDTO flagState = object.getFlagState();
+                if (flagState != null) {
+                    return flagState.getLastLowerFlag().name() + " " + flagState.getLastUpperFlag().name();
+                }
+                return "-";
             }
         });
 
@@ -235,7 +259,10 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return "TODO WIND";
+                if (object.getWind() != null) {
+                    return String.valueOf(object.getWind().getTrueWindSpeedInKnots());
+                }
+                return "-";
             }
         });
 
@@ -262,7 +289,10 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return "TODO FROM";
+                if (object.getWind() != null) {
+                    return String.valueOf(object.getWind().getTrueWindFromDeg());
+                }
+                return "-";
             }
         });
 
@@ -289,7 +319,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return "TODO AREA";
+                return object.getCourseArea();
             }
         });
 
@@ -316,7 +346,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return "TODO COURSE";
+                return String.valueOf(object.getCourse());
             }
         });
 
@@ -347,7 +377,14 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
             }
         });
 
-        add(new SortableColumn<LiveRaceDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+        add(new SortableColumn<LiveRaceDTO, String>(new ButtonCell() {
+            @Override
+            public void render(Context context, String data, SafeHtmlBuilder sb) {
+                sb.append(TEMPLATE.watchNowButton(
+                        Util.join(" ", MAIN_CSS.button(), MAIN_CSS.buttonstrong(), MAIN_CSS.buttonred(),
+                                MAIN_CSS.buttonarrowrightwhite()), data));
+            }
+        }, SortingOrder.ASCENDING) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return null;
@@ -355,7 +392,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader(I18N.fleet());
+                return new TextHeader("");
             }
 
             @Override
