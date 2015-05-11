@@ -48,10 +48,10 @@ public class RacesListLiveRow extends Composite {
     }
 
     void setData(LiveRaceDTO raceData) {
-        fleetCorner.getStyle().setBorderColor(raceData.getFleetColor()); // TODO border-top-color!?
+        fleetCorner.getStyle().setBorderColor(raceData.getFleet() != null ? raceData.getFleet().getFleetColor() : "transparent"); // TODO border-top-color!?
         regatta.setInnerText(raceData.getRegattaName());
         race.setInnerText(raceData.getRaceName());
-        fleetName.setInnerText(raceData.getFleetName());
+        fleetName.setInnerText(raceData.getFleet() != null ? raceData.getFleet().getFleetName() : "");
         start.setInnerText(raceData.getStart() == null ? "-" : startTimeFormat.format(raceData.getStart()));
         // flag.setSrc(""); TODO
         wind.setInnerText("TODO Wind");

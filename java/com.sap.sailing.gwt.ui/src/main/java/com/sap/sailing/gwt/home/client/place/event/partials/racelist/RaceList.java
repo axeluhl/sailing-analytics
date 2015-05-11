@@ -72,7 +72,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
         add(I18N.fleet(), new TextColumn<LiveRaceDTO>() {
             @Override
             public String getValue(LiveRaceDTO object) {
-                return object.getFleetName();
+                return object.getFleet() != null ? object.getFleet().getFleetName() : "";
             }
         }, MEDIA_CSS.showonlarge());
 
