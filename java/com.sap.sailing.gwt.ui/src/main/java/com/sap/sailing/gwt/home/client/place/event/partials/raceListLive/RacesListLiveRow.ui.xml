@@ -1,0 +1,38 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
+		xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive">
+		<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+		<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+		<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+		<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources" />
+   <g:HTMLPanel tag="tbody">
+   	<tr class="{local_res.css.race}">
+      <td class="{local_res.css.race_fleetcorner}">
+        <div style="border-top-color: blue" class="{local_res.css.race_fleetcorner_icon}" ui:field="fleetCorner"></div>
+      </td>
+      <td class="{local_res.css.race_item} {local_res.css.race_itemname}" ui:field="regatta"></td>
+      <td class="{local_res.css.race_item} {local_res.css.race_itemname}" ui:field="race"></td>
+      <td class="{local_res.css.race_item} {res.mediaCss.showonlarge}" ui:field="fleetName"></td>
+      <td class="{local_res.css.race_item}" ui:field="start"></td>
+      <td class="{local_res.css.race_item} {res.mediaCss.showonlarge}">
+        <img src="" class="{local_res.css.race_item_flag}" ui:field="flag"/>
+      </td>
+      <td class="{local_res.css.race_item}" ui:field="wind"></td>
+      <td class="{local_res.css.race_item} {res.mediaCss.hideonsmall}" ui:field="from"></td>
+      <td class="{local_res.css.race_item} {res.mediaCss.showonlarge}" ui:field="area"></td>
+      <td class="{local_res.css.race_item} {res.mediaCss.showonlarge}" ui:field="course"></td>
+      <td class="{local_res.css.race_item} {local_res.css.race_itemstatus}">
+      	<div ui:field="statusText"></div>
+        <div class="{local_res.css.race_itemstatus_progressbar}">
+          <div class="{local_res.css.race_itemstatus_progressbar_progress}" ui:field="statusProgress"></div>
+        </div>
+      </td>
+      <td class="{local_res.css.race_item} {local_res.css.race_itemright}">
+        <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonred} {res.mainCss.buttonarrowrightwhite}" ui:field="watchNowAnchor">
+		  TODO <!-- <ui:text from='{i18n_ubi.i18nRegattaButtonsWatchNow}' /> -->
+        </a>
+      </td>
+     </tr>
+    </g:HTMLPanel>
+</ui:UiBinder>
