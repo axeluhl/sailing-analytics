@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -60,12 +62,12 @@ public class RegattaOverviewPanel extends SimplePanel {
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
     private final TabPanel leaderboardsTabPanel;
-    private final Label timeLabel;
     private final Anchor settingsButton;
     private final Anchor refreshNowButton;
     private final Anchor startStopUpdatingButton;
     private final CheckBox leaderboardCheckBox;
     private final UserAgentDetails userAgent;
+    private final Label repeatedInfoLabel = new Label();
     
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
     private final ThemeResources RES = ThemeResources.INSTANCE;
@@ -163,14 +165,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer.play();
         
 
-        
-        timeLabel = new Label();
-        timeLabel.addStyleName(style.titleLabel());
-        timeLabel.addStyleName(style.clockLabel());
-        
-        
-        
-        
+
         final boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
                 && Window.Location.getParameter("enableLeaderboard").equalsIgnoreCase("true");
         if (showLeaderboardButton) {
@@ -178,18 +173,28 @@ public class RegattaOverviewPanel extends SimplePanel {
         } else {
             leaderboardCheckBox = null;
         }
-        FlowPanel flexTable = new FlowPanel();
-        flexTable.addStyleName(style.functionBar());
+        FlowPanel flowPanelLeft = new FlowPanel();
+        flowPanelLeft.addStyleName(style.functionBarLeft());
+        flowPanelLeft.add(repeatedInfoLabel);
+        repeatedInfoLabel.setStyleName(style.repeatedInfoLabel());
+        regattaRaceStatesComponent.setRepeatedInfoLabel(repeatedInfoLabel);
+
+        FlowPanel flowPanelRight = new FlowPanel();
+        flowPanelRight.addStyleName(style.functionBar());
 
         if (leaderboardCheckBox != null) {
-            flexTable.add(leaderboardCheckBox);
+            flowPanelRight.add(leaderboardCheckBox);
         }
         // flexTable.add(refreshNowButton);
-        flexTable.add(startStopUpdatingButton);
-        flexTable.add(settingsButton);
+        flowPanelRight.add(startStopUpdatingButton);
+        flowPanelRight.add(settingsButton);
 
-        mainPanel.add(new SimplePanel(flexTable));
+        FlexTable leftRightToolbar = new FlexTable();
+        leftRightToolbar.setWidget(0, 1, flowPanelRight);
+        leftRightToolbar.setWidget(0, 0, flowPanelLeft);
 
+        leftRightToolbar.getElement().getStyle().setWidth(100, Unit.PCT);
+        mainPanel.add(leftRightToolbar);
         mainPanel.add(regattaRaceStatesComponent);
         
         if (showLeaderboardButton) {
@@ -323,6 +328,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
 
     protected void setRaceGroups(List<RaceGroupDTO> result) {
+
         raceGroupDTOs.clear();
         raceGroupDTOs.addAll(result);
         onRaceGroupsUpdated();

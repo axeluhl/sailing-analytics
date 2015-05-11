@@ -755,6 +755,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dropReplicaConnection();
     String timePanelName();
     String competitorFilterExplanation();
+    String protestTime();
     String protestTimeFinishesAt();
     String protestTimeFinishedAt();
     String flags();
