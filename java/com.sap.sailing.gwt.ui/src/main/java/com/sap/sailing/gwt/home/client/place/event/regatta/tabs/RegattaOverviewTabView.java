@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.shared.dispatch.AutomaticBatchingDispatch;
 import com.sap.sailing.gwt.home.client.shared.dispatch.SimpleDispatch;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -42,7 +42,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         // TODO CF
         RefreshManager refreshManager = new RefreshManager(this, new AutomaticBatchingDispatch(new SimpleDispatch(null)));
         
-        refreshManager.add(raceList, new GetLiveRacesAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(raceList, new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO().getId(), currentPresenter.getCtx().getRegattaId()));
 
         contentArea.setWidget(this);
     }

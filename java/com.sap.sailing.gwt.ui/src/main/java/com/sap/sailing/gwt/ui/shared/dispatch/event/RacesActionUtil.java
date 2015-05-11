@@ -31,4 +31,14 @@ public final class RacesActionUtil {
             }
         }
     }
+    
+    public static void forRacesOfRegatta(DispatchContext context, UUID eventId, String regattaName, RaceCallback callback) {
+        Leaderboard lb = context.getRacingEventService().getLeaderboardByName(regattaName);
+        // TODO find leaderboard group by event id?
+        for(RaceColumn raceColumn : lb.getRaceColumns()) {
+            for(Fleet fleet : raceColumn.getFleets()) {
+                callback.doForRace(new RaceContext(null, lb, raceColumn, fleet));
+            }
+        }
+    }
 }

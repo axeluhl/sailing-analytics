@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -44,6 +45,8 @@ public class RaceContext {
     public final Fleet fleet;
     public final RaceDefinition raceDefinition;
     public final TrackedRace trackedRace;
+    private final RaceLog raceLog;
+    private final ReadonlyRaceState state;
 
     public RaceContext(LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, Fleet fleet) {
         this.lg = lg;
@@ -52,6 +55,8 @@ public class RaceContext {
         this.raceDefinition = raceColumn.getRaceDefinition(fleet);
         this.fleet = fleet;
         trackedRace = raceColumn.getTrackedRace(fleet);
+        raceLog = raceColumn.getRaceLog(fleet);
+        state = ReadonlyRaceStateImpl.create(raceLog);
     }
 
     public boolean isShowFleetData() {
@@ -104,18 +109,8 @@ public class RaceContext {
         }
         return null;
     }
-    
-    public ReadonlyRaceState getRaceState() {
-        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        if(raceLog == null) {
-            // No racelog -> we can't decide if the race is live
-            return null;
-        }
-        return ReadonlyRaceStateImpl.create(raceLog);
-    }
 
     public FlagStateDTO getFlagStateOrNull() {
-        ReadonlyRaceState state = getRaceState();
         TimePoint startTime = state.getStartTime();
         if(startTime == null) {
             return null;
@@ -175,7 +170,6 @@ public class RaceContext {
     }
 
     public RaceProgressDTO getProgressOrNull() {
-        ReadonlyRaceState state = getRaceState();
         List<Leg> legs = state.getCourseDesign() != null ? state.getCourseDesign().getLegs() : (raceDefinition.getCourse() != null ? raceDefinition.getCourse().getLegs() : null);
         if(legs != null && trackedRace != null) {
             return new RaceProgressDTO(trackedRace.getLastLegStarted(MillisecondsTimePoint.now()), legs.size());
@@ -189,5 +183,27 @@ public class RaceContext {
             return course.getName();
         }
         return null;
+    }
+    
+    public boolean isRaceDefinitionAvailable() {
+        return raceDefinition != null;
+    }
+    
+    public boolean isRaceLogAvailable() {
+        return raceLog != null;
+    }
+    
+    public boolean isStartTimeAvailable() {
+        return raceLog != null;
+    }
+
+    public boolean isLive() {
+        // TODO
+//        return RaceLogRaceStatus.isActive(state.getStatus());
+        return true;
+    }
+
+    public TimePoint getStartTime() {
+        return state.getStartTime();
     }
 }
