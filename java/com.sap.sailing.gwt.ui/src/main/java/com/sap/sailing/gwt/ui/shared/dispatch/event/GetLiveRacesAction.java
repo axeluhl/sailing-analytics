@@ -9,9 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -20,17 +18,17 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<LiveRacesDTO>> {
+public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
     private UUID eventId;
     
     public GetLiveRacesAction() {
@@ -50,15 +48,14 @@ public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<Liv
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
         final LiveRacesDTO result = new LiveRacesDTO();
         
-        forRacesOfEvent(context, getEventId(), new RaceCallback() {
+        RacesActionUtil.forRacesOfEvent(context, getEventId(), new RaceCallback() {
             @Override
-            public void doForRace(LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, String regattaName,
-                    Fleet fleet) {
-                RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
+            public void doForRace(RaceContext rc) {
+                RaceDefinition raceDefinition = rc.raceColumn.getRaceDefinition(rc.fleet);
                 if(raceDefinition == null) {
                     return;
                 }
-                final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                final RaceLog raceLog = rc.raceColumn.getRaceLog(rc.fleet);
                 if(raceLog == null) {
                     // No racelog -> we can't decide if the race is live
                     return;
@@ -69,22 +66,22 @@ public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<Liv
                     // race isn't live
                     return;
                 }
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                TrackedRace trackedRace = rc.raceColumn.getTrackedRace(rc.fleet);
                 
                 TimePoint startTime = state.getStartTime();
                 if(startTime == null) {
                     return;
                 }
                 
-                LiveRaceDTO liveRaceDTO = new LiveRaceDTO(new RegattaNameAndRaceName(regattaName, raceDefinition.getName()));
-                liveRaceDTO.setRegattaName(regattaName);
+                LiveRaceDTO liveRaceDTO = new LiveRaceDTO(new RegattaNameAndRaceName(rc.regattaName, raceDefinition.getName()));
+                liveRaceDTO.setRegattaName(rc.regattaName);
                 
-                if(!isSingleFleet(raceColumn)) {
-                    liveRaceDTO.setFleetName(fleet.getName());
-                    liveRaceDTO.setFleetColor(fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
+                if(!rc.isSingleFleet()) {
+                    liveRaceDTO.setFleetName(rc.fleet.getName());
+                    liveRaceDTO.setFleetColor(rc.fleet.getColor() == null ? null : rc.fleet.getColor().getAsHtml());
                 }
                 
-                liveRaceDTO.setRaceName(raceColumn.getName());
+                liveRaceDTO.setRaceName(rc.raceColumn.getName());
                 
                 liveRaceDTO.setStart(startTime.asDate());
                 
