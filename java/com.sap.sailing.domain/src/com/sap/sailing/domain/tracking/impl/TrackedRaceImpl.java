@@ -1155,7 +1155,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Competitor result = null;
-        List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
+        List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint, cache);
         if (ranks != null && !ranks.isEmpty()) {
             result = ranks.iterator().next();
         }
