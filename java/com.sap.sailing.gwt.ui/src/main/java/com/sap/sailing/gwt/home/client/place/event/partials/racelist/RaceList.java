@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.CellTable.Style;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
@@ -19,6 +17,8 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.Refreshab
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
+import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
+import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
 
 public class RaceList extends Composite implements RefreshableWidget<LiveRacesDTO> {
@@ -27,19 +27,14 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
     private static final MediaCss MEDIA_CSS = SharedResources.INSTANCE.mediaCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
 
-    private static final CustomResources RESOURCES = GWT.create(CustomResources.class);
-    private final CellTable<LiveRaceDTO> cellTable = new CellTable<LiveRaceDTO>(0, RESOURCES);
+    private final CellTable<LiveRaceDTO> cellTable = new CellTable<LiveRaceDTO>(0, CleanCellTableResources.INSTANCE);
     private final DateTimeFormat startTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
-
-    interface CustomResources extends CellTable.Resources {
-        @Override
-        @Source("RaceList.css")
-        public Style cellTableStyle();
-    }
 
     public RaceList() {
         CSS.ensureInjected();
         cellTable.addStyleName(CSS.raceslist());
+        cellTable
+                .setHeaderBuilder(new StyledHeaderOrFooterBuilder<LiveRaceDTO>(cellTable, false, CSS.raceslist_head()));
         cellTable.setRowStyles(new RowStyles<LiveRaceDTO>() {
             @Override
             public String getStyleNames(LiveRaceDTO row, int rowIndex) {
