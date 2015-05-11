@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 
 public abstract class AbstractGetRacesAction<R extends Result> implements Action<R> {
     
+    @GwtIncompatible
     protected interface RaceCallback {
         void doForRace(LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, String regattaName, Fleet fleet);
     }
