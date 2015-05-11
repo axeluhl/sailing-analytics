@@ -15,7 +15,9 @@ public class LiveRaceDTO extends RaceMetadataDTO {
     private Double trueWindSpeedInKnots;
     
     private int course;
-    // TODO status
+    
+    private int totalLegs;
+    private int currentLeg;
 
     @SuppressWarnings("unused")
     private LiveRaceDTO() {
@@ -79,5 +81,21 @@ public class LiveRaceDTO extends RaceMetadataDTO {
 
     public void setCourse(int course) {
         this.course = course;
+    }
+
+    public int getTotalLegs() {
+        return totalLegs;
+    }
+
+    public void setTotalLegs(int totalLegs) {
+        this.totalLegs = totalLegs;
+    }
+
+    public int getCurrentLeg() {
+        return currentLeg;
+    }
+
+    public void setCurrentLeg(int currentLeg) {
+        this.currentLeg = currentLeg;
     }
 }
