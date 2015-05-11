@@ -16,8 +16,8 @@ public class LiveRaceDTO extends RaceMetadataDTO {
     
     private int course;
     
-    private int totalLegs;
-    private int currentLeg;
+    private Integer totalLegs;
+    private Integer currentLeg;
 
     @SuppressWarnings("unused")
     private LiveRaceDTO() {
@@ -83,19 +83,19 @@ public class LiveRaceDTO extends RaceMetadataDTO {
         this.course = course;
     }
 
-    public int getTotalLegs() {
+    public Integer getTotalLegs() {
         return totalLegs;
     }
 
-    public void setTotalLegs(int totalLegs) {
+    public void setTotalLegs(Integer totalLegs) {
         this.totalLegs = totalLegs;
     }
 
-    public int getCurrentLeg() {
+    public Integer getCurrentLeg() {
         return currentLeg;
     }
 
-    public void setCurrentLeg(int currentLeg) {
+    public void setCurrentLeg(Integer currentLeg) {
         this.currentLeg = currentLeg;
     }
 }

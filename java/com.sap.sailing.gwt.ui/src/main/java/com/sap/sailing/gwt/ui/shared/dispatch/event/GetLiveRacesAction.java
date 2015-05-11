@@ -54,6 +54,10 @@ public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<Liv
             @Override
             public void doForRace(LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, String regattaName,
                     Fleet fleet) {
+                RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
+                if(raceDefinition == null) {
+                    return;
+                }
                 final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 if(raceLog == null) {
                     // No racelog -> we can't decide if the race is live
@@ -65,7 +69,6 @@ public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<Liv
                     // race isn't live
                     return;
                 }
-                RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 
                 TimePoint startTime = state.getStartTime();
@@ -100,11 +103,11 @@ public class GetLiveRacesAction extends AbstractGetRacesAction<ResultWithTTL<Liv
                     liveRaceDTO.setLastFlagsDisplayedStateChanged(previousFlagState.hasPoleChanged(mostInterestingFlagPole));
                 }
                 
-                // TODO check which one is to be used
-//                raceDefinition.getCourse().getLegs()
-                List<Leg> legs = state.getCourseDesign().getLegs();
-                liveRaceDTO.setTotalLegs(legs.size());
-                liveRaceDTO.setCurrentLeg(trackedRace.getLastLegStarted(MillisecondsTimePoint.now()));
+                List<Leg> legs = state.getCourseDesign() != null ? state.getCourseDesign().getLegs() : (raceDefinition.getCourse() != null ? raceDefinition.getCourse().getLegs() : null);
+                if(legs != null && trackedRace != null) {
+                    liveRaceDTO.setTotalLegs(legs.size());
+                    liveRaceDTO.setCurrentLeg(trackedRace.getLastLegStarted(MillisecondsTimePoint.now()));
+                }
                 
                 TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
                 TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
