@@ -2,9 +2,10 @@ package com.sap.sailing.domain.ranking;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.ranking.AbstractRankingMetric.RankingInfo;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -35,6 +36,74 @@ import com.sap.sse.common.TimePoint;
  * @param <T>
  */
 public interface RankingMetric extends Serializable {
+    public interface CompetitorRankingInfo extends Serializable {
+        /**
+         * For which time point in the race was this ranking information computed?
+         */
+        TimePoint getTimePoint();
+    
+        /**
+         * Whose ranking does this object describe?
+         */
+        Competitor getCompetitor();
+    
+        /**
+         * How far did {@link #competitor} actually sail windward / along track from the start of the race until
+         * {@link #timePoint}? <code>null</code> before the race start; {@link Distance#NULL} after the race start
+         * until {@link #competitor} has actually started.
+         */
+        Distance getWindwardDistanceSailed();
+    
+        /**
+         * Usually the difference between {@link #timePoint} and the start of the race
+         */
+        Duration getActualTime();
+    
+        /**
+         * The corrected time for the {@link #competitor}, assuming the race ended at {@link #timePoint}. This
+         * is applying the handicaps proportionately to the time and distance the competitor sailed so far.
+         */
+        Duration getCorrectedTime();
+    
+        /**
+         * Based on the {@link #competitor}'s average VMG in the current leg and the windward position
+         * of the competitor that is farthest ahead in the race, how long would it take {@link #competitor}
+         * to reach the competitor farthest ahead if that competitor stopped at {@link #timePoint}?
+         */
+        Duration getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+        
+        Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+    
+        /**
+         * The corrections applied to the time and distance sailed when the {@link #competitor} would have reached the
+         * competitor farthest ahead (which would be the case {@link #estimatedActualDurationToCompetitorFarthestAhead} after
+         * {@link #timePoint}).
+         */
+        Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
+    }
+
+    public interface RankingInfo extends Serializable {
+        /**
+         * The time point for which this ranking information is valid
+         */
+        TimePoint getTimePoint();
+    
+        /**
+         * The basic information for each competitor, telling about actual and corrected times as well as information
+         * about actual and corrected times needed to reach the position of the competitor farthest ahead at
+         * {@link #timePoint}.
+         */
+        Map<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo();
+    
+        Competitor getCompetitorFarthestAhead();
+    
+        /**
+         * The competitor with the least corrected time for her arrival at {@link #competitorFarthestAhead}'s windward
+         * position at {@link #timePoint}.
+         */
+        Competitor getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
+    }
+
     /**
      * @return the tracked race to which this ranking metric is specific
      */
@@ -88,9 +157,9 @@ public interface RankingMetric extends Serializable {
      * @param competitor
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
      */
-    default Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
+    default Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor) {
         return getGapToLeaderInOwnTime(rankingInfo, competitor, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
-    Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
+    Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
 }

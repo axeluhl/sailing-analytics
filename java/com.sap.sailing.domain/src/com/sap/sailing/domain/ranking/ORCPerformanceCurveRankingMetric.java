@@ -56,7 +56,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor,
+    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor,
             WindLegTypeAndLegBearingCache cache) {
         // TODO Auto-generated method stub
         return null;

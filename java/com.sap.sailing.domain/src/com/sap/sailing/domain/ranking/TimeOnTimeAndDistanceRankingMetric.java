@@ -78,7 +78,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      */
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        final RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
+        final RankingMetric.RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
         return (c1, c2) -> rankingInfo.getCompetitorRankingInfo().get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().compareTo(
                 rankingInfo.getCompetitorRankingInfo().get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
     }
@@ -263,7 +263,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * </pre>
      */
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
         final Duration t_k = rankingInfo.getCompetitorRankingInfo().get(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()).
                 getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());

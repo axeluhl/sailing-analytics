@@ -39,8 +39,8 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
-import com.sap.sailing.domain.ranking.AbstractRankingMetric.CompetitorRankingInfo;
-import com.sap.sailing.domain.ranking.AbstractRankingMetric.RankingInfo;
+import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -70,7 +70,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
 
         private static final long serialVersionUID = 2450762527282968347L;
 
-        protected RankingInfo getRankingInfo(TimePoint timePoint) {
+        protected RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint) {
             return super.getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
         }
     }
@@ -169,10 +169,10 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
-        final RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
+        final RankingMetric.RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
         assertSame(c1, rankingInfo.getCompetitorFarthestAhead());
-        CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
-        CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
+        RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
+        RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
                 c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
     }
@@ -235,9 +235,9 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         new DegreeBearingImpl(315))));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other,
         // in this case .05 seconds per nautical mile for the reciproke VMG measured in seconds per nautical mile
-        final RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
-        CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
-        CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
+        final RankingMetric.RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
+        RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
+        RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
                 c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
                 startOfRace.until(middleOfFirstLeg).asSeconds() / 1000. /* 0.1% accuracy expected */);
