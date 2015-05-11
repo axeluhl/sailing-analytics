@@ -1,18 +1,15 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 
 public class LiveRaceDTO extends RaceMetadataDTO {
-
-    private Flags lastUpperFlag;
-    private Flags lastLowerFlag;
-    private boolean lastFlagsAreDisplayed;
-    private boolean lastFlagsDisplayedStateChanged;
     
-    private Double trueWindFromDeg;
-    private Double trueWindSpeedInKnots;
+    private FlagStateDTO flagState;
+    
+    private SimpleWindDTO wind;
     
     private int course;
     
@@ -27,52 +24,12 @@ public class LiveRaceDTO extends RaceMetadataDTO {
         super(id);
     }
 
-    public Flags getLastUpperFlag() {
-        return lastUpperFlag;
+    public SimpleWindDTO getWind() {
+        return wind;
     }
 
-    public void setLastUpperFlag(Flags lastUpperFlag) {
-        this.lastUpperFlag = lastUpperFlag;
-    }
-
-    public Flags getLastLowerFlag() {
-        return lastLowerFlag;
-    }
-
-    public void setLastLowerFlag(Flags lastLowerFlag) {
-        this.lastLowerFlag = lastLowerFlag;
-    }
-
-    public boolean isLastFlagsAreDisplayed() {
-        return lastFlagsAreDisplayed;
-    }
-
-    public void setLastFlagsAreDisplayed(boolean lastFlagsAreDisplayed) {
-        this.lastFlagsAreDisplayed = lastFlagsAreDisplayed;
-    }
-
-    public boolean isLastFlagsDisplayedStateChanged() {
-        return lastFlagsDisplayedStateChanged;
-    }
-
-    public void setLastFlagsDisplayedStateChanged(boolean lastFlagsDisplayedStateChanged) {
-        this.lastFlagsDisplayedStateChanged = lastFlagsDisplayedStateChanged;
-    }
-
-    public Double getTrueWindFromDeg() {
-        return trueWindFromDeg;
-    }
-
-    public void setTrueWindFromDeg(Double trueWindFromDeg) {
-        this.trueWindFromDeg = trueWindFromDeg;
-    }
-
-    public Double getTrueWindSpeedInKnots() {
-        return trueWindSpeedInKnots;
-    }
-
-    public void setTrueWindSpeedInKnots(Double trueWindSpeedInKnots) {
-        this.trueWindSpeedInKnots = trueWindSpeedInKnots;
+    public void setWind(SimpleWindDTO wind) {
+        this.wind = wind;
     }
 
     public int getCourse() {
@@ -97,5 +54,13 @@ public class LiveRaceDTO extends RaceMetadataDTO {
 
     public void setCurrentLeg(Integer currentLeg) {
         this.currentLeg = currentLeg;
+    }
+
+    public FlagStateDTO getFlagState() {
+        return flagState;
+    }
+
+    public void setFlagState(FlagStateDTO flagState) {
+        this.flagState = flagState;
     }
 }

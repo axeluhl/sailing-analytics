@@ -11,8 +11,7 @@ public class RaceMetadataDTO implements IsSerializable {
 
     private String regattaName;
     private String raceName;
-    private String fleetName;
-    private String fleetColor;
+    private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
 
@@ -43,20 +42,12 @@ public class RaceMetadataDTO implements IsSerializable {
         this.raceName = raceName;
     }
 
-    public String getFleetName() {
-        return fleetName;
+    public FleetMetadataDTO getFleet() {
+        return fleet;
     }
 
-    public void setFleetName(String fleetName) {
-        this.fleetName = fleetName;
-    }
-
-    public String getFleetColor() {
-        return fleetColor;
-    }
-
-    public void setFleetColor(String fleetColor) {
-        this.fleetColor = fleetColor;
+    public void setFleet(FleetMetadataDTO fleet) {
+        this.fleet = fleet;
     }
 
     public Date getStart() {
