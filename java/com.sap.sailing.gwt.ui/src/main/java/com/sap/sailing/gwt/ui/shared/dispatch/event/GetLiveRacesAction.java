@@ -110,10 +110,9 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                             liveRaceDTO.setLastFlagsDisplayedStateChanged(previousFlagState.hasPoleChanged(mostInterestingFlagPole));
                         }
                         
-                        // TODO nicer calculation
                         TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
                         TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-                        if(trackedRace.getEndOfRace() == null && newestEvent != null && newestEvent.before(toTimePoint)) {
+                        if(newestEvent != null && newestEvent.before(toTimePoint)) {
                             toTimePoint = newestEvent;
                         }
                         
