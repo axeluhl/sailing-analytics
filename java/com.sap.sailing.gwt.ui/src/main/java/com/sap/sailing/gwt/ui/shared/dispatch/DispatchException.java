@@ -6,7 +6,7 @@ public class DispatchException extends RuntimeException implements IsSerializabl
     
     private static final long serialVersionUID = 8192187255698006941L;
     
-    private DispatchException() {
+    protected DispatchException() {
     }
 
     public DispatchException(String message) {
