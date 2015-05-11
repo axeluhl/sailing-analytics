@@ -493,14 +493,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        return getGapToLeader(timePoint, new LeaderGetter() {
-            @Override
-            public Competitor getLeader() {
-                return leaderInLegAtTimePoint;
-            }
-        }, windPositionMode, cache);
+        return getGapToLeader(timePoint, ()->leaderInLegAtTimePoint, windPositionMode, cache);
     }
 
+    @FunctionalInterface
     private static interface LeaderGetter {
         Competitor getLeader();
     }
@@ -512,12 +508,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        return getGapToLeader(timePoint, new LeaderGetter() {
-            @Override
-            public Competitor getLeader() {
-                return getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint);
-            }
-        }, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeader(timePoint, ()->getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint),
+                windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
     private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
