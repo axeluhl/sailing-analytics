@@ -171,8 +171,8 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
         final RankingMetric.RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
         assertSame(c1, rankingInfo.getCompetitorFarthestAhead());
-        RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
-        RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
+        RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().apply(c1);
+        RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().apply(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
                 c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
     }
@@ -236,8 +236,8 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other,
         // in this case .05 seconds per nautical mile for the reciproke VMG measured in seconds per nautical mile
         final RankingMetric.RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
-        RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().get(c1);
-        RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().get(c2);
+        RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().apply(c1);
+        RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().apply(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
                 c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
                 startOfRace.until(middleOfFirstLeg).asSeconds() / 1000. /* 0.1% accuracy expected */);

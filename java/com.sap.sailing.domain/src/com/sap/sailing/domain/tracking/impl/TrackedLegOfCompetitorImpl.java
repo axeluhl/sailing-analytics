@@ -513,9 +513,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        // If the leader already completed this leg, compute the estimated arrival time at the
-        // end of this leg; if this leg's competitor also already finished the leg, return the
-        // difference between this competitor's leg completion time point and the leader's completion
+        // If a competitor already completed this leg, compute the estimated arrival time at the
+        // end of this leg and compare to the first mark passing for the end of this leg; if this leg's competitor also already
+        // finished the leg, return the difference between this competitor's leg completion time point and the leader's completion
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
         Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint, windPositionMode, cache);
