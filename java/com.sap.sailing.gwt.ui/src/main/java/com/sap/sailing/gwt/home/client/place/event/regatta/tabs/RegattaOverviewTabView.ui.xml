@@ -1,6 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview"
   xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.racelist">
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <g:HTMLPanel>
@@ -8,10 +7,6 @@
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <h2>Live Races</h2>
         <r:RaceList ui:field="raceList"/>
-        <h2>Content 1</h2>
-        <o:LiveRacesContent ui:field="liveRaces" />
-        <h2>Content 2</h2>
-        <o:OtherContent ui:field="content2" />
       </div>
     </div>
   </g:HTMLPanel>

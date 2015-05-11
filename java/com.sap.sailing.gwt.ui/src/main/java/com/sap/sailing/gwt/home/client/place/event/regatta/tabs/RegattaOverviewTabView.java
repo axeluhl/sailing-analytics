@@ -11,13 +11,10 @@ import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceList;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview.LiveRacesContent;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview.OtherContent;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.shared.dispatch.AutomaticBatchingDispatch;
 import com.sap.sailing.gwt.home.client.shared.dispatch.SimpleDispatch;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.OtherAction;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -46,8 +43,6 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         RefreshManager refreshManager = new RefreshManager(this, new AutomaticBatchingDispatch(new SimpleDispatch(null)));
         
         refreshManager.add(raceList, new GetLiveRacesAction(currentPresenter.getCtx().getEventDTO().getId()));
-        refreshManager.add(liveRaces, new GetLiveRacesAction(currentPresenter.getCtx().getEventDTO().getId()));
-        refreshManager.add(content2, new OtherAction());
 
         contentArea.setWidget(this);
     }
@@ -64,8 +59,6 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     private Presenter currentPresenter;
     
     @UiField RaceList raceList;
-    @UiField LiveRacesContent liveRaces;
-    @UiField OtherContent content2;
 
     @Override
     public RegattaOverviewPlace placeToFire() {
