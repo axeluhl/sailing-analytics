@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 
 public class LiveRaceDTO extends RaceMetadataDTO {
@@ -11,12 +12,9 @@ public class LiveRaceDTO extends RaceMetadataDTO {
     
     private SimpleWindDTO wind;
     
-    private int course;
-    
-    private Integer totalLegs;
-    private Integer currentLeg;
-    
     private String boatClass;
+    
+    private RaceProgressDTO progress;
 
     @SuppressWarnings("unused")
     private LiveRaceDTO() {
@@ -34,30 +32,6 @@ public class LiveRaceDTO extends RaceMetadataDTO {
         this.wind = wind;
     }
 
-    public int getCourse() {
-        return course;
-    }
-
-    public void setCourse(int course) {
-        this.course = course;
-    }
-
-    public Integer getTotalLegs() {
-        return totalLegs;
-    }
-
-    public void setTotalLegs(Integer totalLegs) {
-        this.totalLegs = totalLegs;
-    }
-
-    public Integer getCurrentLeg() {
-        return currentLeg;
-    }
-
-    public void setCurrentLeg(Integer currentLeg) {
-        this.currentLeg = currentLeg;
-    }
-
     public FlagStateDTO getFlagState() {
         return flagState;
     }
@@ -72,5 +46,13 @@ public class LiveRaceDTO extends RaceMetadataDTO {
 
     public void setBoatClass(String boatClass) {
         this.boatClass = boatClass;
+    }
+
+    public RaceProgressDTO getProgress() {
+        return progress;
+    }
+
+    public void setProgress(RaceProgressDTO progress) {
+        this.progress = progress;
     }
 }

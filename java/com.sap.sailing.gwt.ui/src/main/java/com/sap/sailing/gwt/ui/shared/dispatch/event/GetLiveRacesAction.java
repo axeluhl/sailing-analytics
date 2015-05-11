@@ -1,22 +1,18 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
     private UUID eventId;
@@ -55,7 +51,6 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
 //                    // race isn't live
 //                    return;
 //                }
-                TrackedRace trackedRace = rc.trackedRace;
                 
                 TimePoint startTime = state.getStartTime();
                 if(startTime == null) {
@@ -68,20 +63,10 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                 liveRaceDTO.setRaceName(rc.raceColumn.getName());
                 liveRaceDTO.setStart(startTime.asDate());
                 liveRaceDTO.setBoatClass(rc.getBoatClassName());
-                
-                Course course = raceDefinition.getCourse();
-                if(course != null) {
-                    liveRaceDTO.setCourseArea(course.getName());
-                }
-                
+                liveRaceDTO.setCourseArea(rc.getCourseArea());
+                liveRaceDTO.setCourse(rc.getCourseName());
                 liveRaceDTO.setFlagState(rc.getFlagStateOrNull());
-                
-                List<Leg> legs = state.getCourseDesign() != null ? state.getCourseDesign().getLegs() : (raceDefinition.getCourse() != null ? raceDefinition.getCourse().getLegs() : null);
-                if(legs != null && trackedRace != null) {
-                    liveRaceDTO.setTotalLegs(legs.size());
-                    liveRaceDTO.setCurrentLeg(trackedRace.getLastLegStarted(MillisecondsTimePoint.now()));
-                }
-                
+                liveRaceDTO.setProgress(rc.getProgressOrNull());
                 liveRaceDTO.setWind(rc.getWindOrNull());
                 
                 result.addRace(liveRaceDTO);

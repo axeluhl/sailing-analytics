@@ -14,6 +14,7 @@ public class RaceMetadataDTO implements IsSerializable {
     private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
+    private String course;
 
     protected RaceMetadataDTO() {
     }
@@ -64,5 +65,13 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setCourseArea(String courseArea) {
         this.courseArea = courseArea;
+    }
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
     }
 }

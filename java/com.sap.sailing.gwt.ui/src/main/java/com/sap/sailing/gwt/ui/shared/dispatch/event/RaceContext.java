@@ -8,7 +8,9 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -159,6 +162,31 @@ public class RaceContext {
     private BoatClass getBoatClassFromTrackedRaces() {
         for (TrackedRace trackedRace : lb.getTrackedRaces()) {
             return trackedRace.getRace().getBoatClass();
+        }
+        return null;
+    }
+
+    public String getCourseArea() {
+        Regatta regatta = getRegatta();
+        if(regatta != null && regatta.getDefaultCourseArea() != null) {
+            return regatta.getDefaultCourseArea().getName();
+        }
+        return null;
+    }
+
+    public RaceProgressDTO getProgressOrNull() {
+        ReadonlyRaceState state = getRaceState();
+        List<Leg> legs = state.getCourseDesign() != null ? state.getCourseDesign().getLegs() : (raceDefinition.getCourse() != null ? raceDefinition.getCourse().getLegs() : null);
+        if(legs != null && trackedRace != null) {
+            return new RaceProgressDTO(trackedRace.getLastLegStarted(MillisecondsTimePoint.now()), legs.size());
+        }
+        return null;
+    }
+
+    public String getCourseName() {
+        Course course = raceDefinition.getCourse();
+        if(course != null) {
+            return course.getName();
         }
         return null;
     }
