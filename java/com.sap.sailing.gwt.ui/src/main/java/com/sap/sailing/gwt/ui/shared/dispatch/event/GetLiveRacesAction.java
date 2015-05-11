@@ -67,6 +67,7 @@ public class GetLiveRacesAction implements Action<ResultWithTTL<LiveRacesDTO>> {
                 liveRaceDTO.setFleet(rc.getFleetMetadataOrNull());
                 liveRaceDTO.setRaceName(rc.raceColumn.getName());
                 liveRaceDTO.setStart(startTime.asDate());
+                liveRaceDTO.setBoatClass(rc.getBoatClassName());
                 
                 Course course = raceDefinition.getCourse();
                 if(course != null) {

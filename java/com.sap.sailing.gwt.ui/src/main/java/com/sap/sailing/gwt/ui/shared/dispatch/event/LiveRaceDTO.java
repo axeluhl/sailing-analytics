@@ -15,6 +15,8 @@ public class LiveRaceDTO extends RaceMetadataDTO {
     
     private Integer totalLegs;
     private Integer currentLeg;
+    
+    private String boatClass;
 
     @SuppressWarnings("unused")
     private LiveRaceDTO() {
@@ -62,5 +64,13 @@ public class LiveRaceDTO extends RaceMetadataDTO {
 
     public void setFlagState(FlagStateDTO flagState) {
         this.flagState = flagState;
+    }
+
+    public String getBoatClass() {
+        return boatClass;
+    }
+
+    public void setBoatClass(String boatClass) {
+        this.boatClass = boatClass;
     }
 }

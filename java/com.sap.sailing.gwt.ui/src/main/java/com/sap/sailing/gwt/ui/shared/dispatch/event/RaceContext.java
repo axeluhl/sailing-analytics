@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -141,6 +142,38 @@ public class RaceContext {
         // TODO: adapt the LastFlagFinder#getMostRecent method!
         if (mostInterestingFlagPole != null) {
             return new FlagStateDTO(mostInterestingFlagPole, previousFlagState);
+        }
+        return null;
+    }
+    
+    public Regatta getRegatta() {
+        final Regatta regatta;
+        if (lb instanceof RegattaLeaderboard) {
+            regatta = ((RegattaLeaderboard) lb).getRegatta();
+        } else {
+            regatta = null;
+        }
+        return regatta;
+    }
+    
+    public String getBoatClassName() {
+        BoatClass boatClass = getBoatClass();
+        return boatClass == null ? null : boatClass.getName();
+    }
+
+    public BoatClass getBoatClass() {
+        final BoatClass boatClass;
+        if (getRegatta() != null) {
+            boatClass = getRegatta().getBoatClass();
+        } else {
+            boatClass = getBoatClassFromTrackedRaces();
+        }
+        return boatClass;
+    }
+
+    private BoatClass getBoatClassFromTrackedRaces() {
+        for (TrackedRace trackedRace : lb.getTrackedRaces()) {
+            return trackedRace.getRace().getBoatClass();
         }
         return null;
     }
