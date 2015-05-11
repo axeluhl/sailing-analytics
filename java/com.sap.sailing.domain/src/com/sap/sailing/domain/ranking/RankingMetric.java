@@ -165,5 +165,15 @@ public interface RankingMetric extends Serializable {
         return getGapToLeaderInOwnTime(rankingInfo, competitor, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
+    default Duration getGapToLeaderInOwnTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getGapToLeaderInOwnTime(getRankingInfo(timePoint, cache), competitor, cache);
+    }
+    
+    default Duration getGapToLeaderInOwnTime(Competitor competitor, TimePoint timePoint) {
+        return getGapToLeaderInOwnTime(competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
     Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
 }

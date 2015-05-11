@@ -65,7 +65,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+    public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
         return new RankingInfo() {
             private static final long serialVersionUID = 25689357311324825L;
 
