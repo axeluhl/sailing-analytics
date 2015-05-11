@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -14,6 +12,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -52,22 +51,8 @@ public class RaceContext {
         trackedRace = raceColumn.getTrackedRace(fleet);
     }
 
-    public boolean isSingleFleet() {
-        Iterable<? extends Fleet> fleets = raceColumn.getFleets();
-
-        if (fleets instanceof Collection) {
-            return ((Collection<?>) fleets).size() <= 1;
-        }
-
-        if (fleets == null) {
-            return false;
-        }
-        Iterator<? extends Fleet> fleetsIterator = fleets.iterator();
-        if (!fleetsIterator.hasNext()) {
-            return false;
-        }
-        fleetsIterator.next();
-        return !fleetsIterator.hasNext();
+    public boolean isShowFleetData() {
+        return !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName());
     }
 
     public String getRegattaName() {
@@ -91,7 +76,7 @@ public class RaceContext {
     }
 
     public FleetMetadataDTO getFleetMetadataOrNull() {
-        if (isSingleFleet()) {
+        if (!isShowFleetData()) {
             return null;
         }
         return new FleetMetadataDTO(fleet.getName(), fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
