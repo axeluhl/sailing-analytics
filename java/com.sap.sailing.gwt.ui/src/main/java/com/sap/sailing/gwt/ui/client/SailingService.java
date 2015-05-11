@@ -333,7 +333,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
-    List<String> getUrlResultProviderNames();
+    List<Pair<String, String>> getUrlResultProviderNamesAndOptionalSampleURL();
     
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints);
 

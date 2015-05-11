@@ -21,3 +21,7 @@ More information on running the WindBots can be found [here](https://igtimi.desk
 # WindBot User Guide (v. 1.0 R3)
 
 [User Guide v. 1.0 R3](wiki/uploads/WindBot%20User%20Guide%201.0%20R3.pdf)
+
+# Is the WindBot waterproof and does it sink if dropped it in the water?
+
+Yes and yes.

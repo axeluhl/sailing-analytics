@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -37,17 +38,15 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
     private final Button refreshButton;
 
     public ResultImportUrlsManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages) {
+            final StringMessages stringMessages) {
+        final Label sampleURLLabel = new Label();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-
         urlListBox = new ListBox();
         urlListBox.setMultipleSelect(true);
-
         urlProviderSelectionListBox = new ListBox();
         urlListBox.setMultipleSelect(false);
-
         urlProviderSelectionListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -56,10 +55,13 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                 addButton.setEnabled(buttonsEnabled);
                 removeButton.setEnabled(buttonsEnabled);
                 refreshButton.setEnabled(buttonsEnabled);
+                final String value = urlProviderSelectionListBox.getValue(selectedIndex);
+                // believe it or not: adding an item with (someString, null) results in an item
+                // whose getValue() returns "null" and not null...
+                sampleURLLabel.setText(value == null || value.equals("null") ? "" : stringMessages.sampleURL(value));
                 refreshUrlList();
             }
         });
-
         addButton = new Button(stringMessages.add());
         removeButton = new Button(stringMessages.remove());
         refreshButton = new Button(stringMessages.refresh());
@@ -85,18 +87,15 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
         HorizontalPanel providerSelectionPanel = new HorizontalPanel();
         providerSelectionPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         vp.add(providerSelectionPanel);
-        
-        providerSelectionPanel.add(new Label("URL Providers:"));
+        providerSelectionPanel.add(new Label(stringMessages.urlProviders()));
         providerSelectionPanel.add(urlProviderSelectionListBox);
-        
-        sailingService.getUrlResultProviderNames(new AsyncCallback<List<String>>() {
-            
+        sailingService.getUrlResultProviderNamesAndOptionalSampleURL(new AsyncCallback<List<Pair<String, String>>>() {
             @Override
-            public void onSuccess(List<String> urlProviderNames) {
+            public void onSuccess(List<Pair<String, String>> urlProviderNamesAndOptionalSampleURL) {
                 urlProviderSelectionListBox.clear();
-                urlProviderSelectionListBox.addItem("Please select a URL provider...");
-                for(String urlProviderName: urlProviderNames) {
-                    urlProviderSelectionListBox.addItem(urlProviderName);
+                urlProviderSelectionListBox.addItem(stringMessages.pleaseSelectAURLProvider());
+                for (Pair<String, String> urlProviderNameAndSampleURL : urlProviderNamesAndOptionalSampleURL) {
+                    urlProviderSelectionListBox.addItem(urlProviderNameAndSampleURL.getA(), urlProviderNameAndSampleURL.getB());
                 }
             }
             
@@ -104,8 +103,8 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
             public void onFailure(Throwable caught) {
             }
         });
-                
         vp.add(urlListBox);
+        vp.add(sampleURLLabel);
         HorizontalPanel buttonPanel = new HorizontalPanel();
         vp.add(buttonPanel);
         buttonPanel.add(addButton);
