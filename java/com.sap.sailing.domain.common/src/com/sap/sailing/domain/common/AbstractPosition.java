@@ -209,7 +209,7 @@ public class AbstractPosition implements Position {
         Position intersectionPosition2 = cartesianVectorToPosition(intersection2);
         Distance sumOfDistances1 = getDistance(intersectionPosition1).add(intersectionPosition1.getDistance(to));
         Distance sumOfDistances2 = getDistance(intersectionPosition2).add(intersectionPosition2.getDistance(to));
-        return sumOfDistances1.compareTo(sumOfDistances2) > 0 ? intersectionPosition1 : intersectionPosition2;
+        return sumOfDistances1.compareTo(sumOfDistances2) < 0 ? intersectionPosition1 : intersectionPosition2;
     }
 
     private Position cartesianVectorToPosition(double[] vector) {
