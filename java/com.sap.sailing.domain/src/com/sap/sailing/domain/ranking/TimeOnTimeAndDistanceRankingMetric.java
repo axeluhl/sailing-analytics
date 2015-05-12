@@ -76,8 +76,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace, Function<Competitor, Double> timeOnTimeFactor,
             Function<Competitor, Duration> timeOnDistanceFactorInSecondsPerNauticalMile) {
         super(trackedRace);
-        this.timeOnTimeFactor = c->trackedRace.getTrackedRegatta().getRegatta().getTimeOnTimeFactor(c);
-        this.timeOnDistanceFactorNauticalMile = c->trackedRace.getTrackedRegatta().getRegatta().getTimeOnDistanceAllowancePerNauticalMile(c);
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
     }
 
     /**
