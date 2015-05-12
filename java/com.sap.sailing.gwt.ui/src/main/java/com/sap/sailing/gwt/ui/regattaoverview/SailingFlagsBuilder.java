@@ -1,61 +1,82 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safecss.shared.SafeStyles;
-import com.google.gwt.safecss.shared.SafeStylesUtils;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 
 public class SailingFlagsBuilder {
     
     private final static SailingFlagsTemplates imageTemplate = GWT.create(SailingFlagsTemplates.class);
+    private final static FlagImageResolver flagImageResolver = new FlagImageResolver();
     
     interface SailingFlagsTemplates extends SafeHtmlTemplates {
-        /**
-         * @param title
-         *            the tool-tip to display for the image on mouse-over
-         * @param upperFlag
-         *            how to render the image; this needs to be an &lt;img&gt; tag, not enclosed by any other element,
-         *            as returned by {@link ImagesBarCell#makeImagePrototype(ImageResource)}
-         */
-        @SafeHtmlTemplates.Template("<div title=\"{0}\"><div style=\"{1}\"><div>{2}</div><div>{3}</div></div><div>{4}</div></div>")
-        SafeHtml cell(String title, SafeStyles styles, SafeHtml upperFlag, SafeHtml lowerFlag, SafeHtml directionArrow);
-    }
-    
-    protected static SailingFlagsTemplates getImageTemplate() {
-        return imageTemplate;
-    }
-    
-    protected static AbstractImagePrototype makeImagePrototype(ImageResource resource) {
-        return AbstractImagePrototype.create(resource);
-    }
-    
-    protected static SafeStyles getImageStyle() {
-        return SafeStylesUtils.fromTrustedString("float:left;padding-right:10px;");
+        @SafeHtmlTemplates.Template("<div title=\"{0}\">{1}</div>")
+        SafeHtml cell(String title, SafeHtml content);
+
+        @SafeHtmlTemplates.Template("<div style=\"{0}\">{1}</div>")
+        SafeHtml cell(SafeStyles styles, SafeHtml content);
     }
     
     public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, boolean displayStateChanged, String tooltip) {
-        FlagImageResolver flagImageResolver = new FlagImageResolver();
-        ImageResource upperFlagImage = flagImageResolver.resolveFlagToImage(upperFlag, isDisplayed, displayStateChanged);
-        ImageResource lowerFlagImage = flagImageResolver.resolveFlagToImage(lowerFlag, isDisplayed, displayStateChanged);
-        ImageResource directionImage = flagImageResolver.resolveFlagDirectionToImage(isDisplayed, displayStateChanged);
-        
-        SafeHtml upperFlagHtml = (upperFlagImage != null) ? makeImagePrototype(upperFlagImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
-        SafeHtml lowerFlagHtml = (lowerFlagImage != null) ? makeImagePrototype(lowerFlagImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
-        SafeHtml directionHtml = (directionImage != null) ? makeImagePrototype(directionImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
-        
-        SafeHtmlBuilder builder = new SafeHtmlBuilder();
-        SafeStyles imgStyle = getImageStyle();
-        SafeHtml rendered = getImageTemplate().cell(tooltip, imgStyle,
-                upperFlagHtml, lowerFlagHtml, directionHtml);
-        builder.append(rendered);
-        return builder.toSafeHtml();
+        return render(upperFlag, lowerFlag, isDisplayed, displayStateChanged, 1, tooltip);
+    }
+
+    public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, boolean isDisplayedChanged,
+            double scale, String tooltip) {
+        SafeHtmlBuilder contentBuilder = new SafeHtmlBuilder();
+        SafeHtmlBuilder flagsBuilder = new SafeHtmlBuilder();
+        flagsBuilder.append(getFlagBackgroundImage(upperFlag, isDisplayed, isDisplayedChanged, scale));
+        flagsBuilder.append(getFlagBackgroundImage(lowerFlag, isDisplayed, isDisplayedChanged, scale));
+
+        SafeStylesBuilder flagStyleBuilder = new SafeStylesBuilder();
+        flagStyleBuilder.display(Display.INLINE_BLOCK);
+        flagStyleBuilder.verticalAlign(VerticalAlign.TOP);
+        flagStyleBuilder.paddingRight(10 * scale, Unit.PX);
+        contentBuilder.append(imageTemplate.cell(flagStyleBuilder.toSafeStyles(), flagsBuilder.toSafeHtml()));
+
+        contentBuilder.append(getArrowBackgroundImage(isDisplayed, isDisplayedChanged, scale));
+        return imageTemplate.cell(tooltip, contentBuilder.toSafeHtml());
+    }
+
+    public static SafeHtml render(FlagStateDTO flagState, double scale, String tooltip) {
+        return render(flagState.getLastUpperFlag(), flagState.getLastLowerFlag(), flagState.isLastFlagsAreDisplayed(),
+                flagState.isLastFlagsDisplayedStateChanged(), scale, tooltip);
+    }
+
+    private static SafeHtml getFlagBackgroundImage(Flags flag, boolean displayed, boolean displayedChanged, double scale) {
+        ImageResource flagImage = flagImageResolver.resolveFlagToImage(flag, displayed, displayedChanged);
+        return getBackgroundImage(flagImage, scale, new SafeStylesBuilder());
+    }
+
+    private static SafeHtml getArrowBackgroundImage(boolean displayed, boolean displayedChanged, double scale) {
+        ImageResource flagImage = flagImageResolver.resolveFlagDirectionToImage(displayed, displayedChanged);
+        SafeStylesBuilder arrowStyleBuilder = new SafeStylesBuilder();
+        arrowStyleBuilder.display(Display.INLINE_BLOCK);
+        arrowStyleBuilder.verticalAlign(VerticalAlign.TOP);
+        return getBackgroundImage(flagImage, scale, arrowStyleBuilder);
+    }
+
+    private static SafeHtml getBackgroundImage(ImageResource imageResource, double scale,
+            SafeStylesBuilder stylesBuilder) {
+        if (imageResource != null) {
+            stylesBuilder.backgroundImage(imageResource.getSafeUri());
+            stylesBuilder.appendTrustedString("background-size: contain;");
+            stylesBuilder.appendTrustedString("background-repeat: no-repeat;");
+            stylesBuilder.width(imageResource.getWidth() * scale, Unit.PX);
+            stylesBuilder.height(imageResource.getHeight() * scale, Unit.PX);
+            return imageTemplate.cell(stylesBuilder.toSafeStyles(), SafeHtmlUtils.EMPTY_SAFE_HTML);
+        }
+        return SafeHtmlUtils.EMPTY_SAFE_HTML;
     }
 
 }
