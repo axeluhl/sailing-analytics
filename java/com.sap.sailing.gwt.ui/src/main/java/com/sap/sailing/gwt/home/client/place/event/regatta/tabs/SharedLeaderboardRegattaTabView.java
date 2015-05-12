@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
- * A regatta tab view which some shared functions between leaderboard tab and competitor 
+ * An abstract regatta tabView with some shared functions between the leaderboard tab and competitors chart tab 
  */
 public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventRegattaPlace> extends Composite implements RegattaTabView<T>,
         LeaderboardUpdateListener {
