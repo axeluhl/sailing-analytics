@@ -43,42 +43,26 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
-import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
-    private TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo tot;
+    private RankingMetric tot;
     private DynamicTrackedRace trackedRace;
     private Competitor c1, c2;
-    
-    private class TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo extends TimeOnTimeAndDistanceRankingMetric {
-        public TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo(TrackedRace trackedRace,
-                final Function<Competitor, Double> timeOnTimeFactor,
-                final Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
-            super(trackedRace, timeOnTimeFactor, c->new MillisecondsDurationImpl(timeOnDistanceFactorInSecondsPerNauticalMile.apply(c).longValue()));
-        }
-
-        private static final long serialVersionUID = 2450762527282968347L;
-
-        protected RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint) {
-            return super.getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
-        }
-    }
     
     private void setUp(Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         c1 = TrackBasedTest.createCompetitor("FastBoat");
         c2 = TrackBasedTest.createCompetitor("SlowBoat");
         trackedRace = createTrackedRace(Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
-        tot = (TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo) trackedRace.getRankingMetric();
+        tot = trackedRace.getRankingMetric();
         assertEquals(60, trackedRace.getCourseLength().getNauticalMiles(), 0.01);
         assertSame(RankingMetrics.TIME_ON_TIME_AND_DISTANCE, trackedRace.getTrackedRegatta().getRegatta().getRankingMetricType());
     }
@@ -104,9 +88,9 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
-                tr->new TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo(tr,
+                tr->new TimeOnTimeAndDistanceRankingMetric(tr,
                         timeOnTimeFactors, // time-on-time
-                        timeOnDistanceFactors));
+                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(1, 0);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(0, -0.000001), timePointForFixes));

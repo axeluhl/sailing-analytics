@@ -173,6 +173,10 @@ public interface RankingMetric extends Serializable {
         return getGapToLeaderInOwnTime(competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
+    default RankingInfo getRankingInfo(TimePoint timePoint) {
+        return getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
     RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
