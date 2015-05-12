@@ -134,11 +134,29 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate,
             TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id,
             CourseArea courseArea) {
-        this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, Collections.singletonList(
-                new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+        this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, trackedRegattaRegistry, scoringScheme,
+                id, courseArea, OneDesignRankingMetric::new);
+    }
+
+    /**
+     * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
+     * is not {@link #isPersistent() marked for persistence}.
+     * 
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
+     */
+    public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass,
+            TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
+        this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, Collections
+                .singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
-                scoringScheme, id, courseArea, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
+                scoringScheme, id, courseArea, /* useStartTimeInference */ true, rankingMetricConstructor);
     }
 
     /**

@@ -80,6 +80,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         trackedRace = createTrackedRace(Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
         tot = (TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo) trackedRace.getRankingMetric();
         assertEquals(60, trackedRace.getCourseLength().getNauticalMiles(), 0.01);
+        assertSame(RankingMetrics.TIME_ON_TIME_AND_DISTANCE, trackedRace.getTrackedRegatta().getRegatta().getRankingMetricType());
     }
     
     private DynamicTrackedRace createTrackedRace(Iterable<Competitor> competitors, Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
@@ -87,7 +88,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         BoatClassImpl boatClass = new BoatClassImpl("Some Handicap Boat Class", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null, TimeOnTimeAndDistanceRankingMetric::new);
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
@@ -209,7 +210,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
 
     @Test
     public void testTimeOnDistanceWithFactorTwoC1TwiceAsFarAsC2() {
-        setUp(c -> 1.0, c -> c==c1 ? 180. : 360.); // c1 is twice as fast (350s instead of 700s to the mile) as c2
+        setUp(c -> 1.0, c -> c==c1 ? 180. : 360.); // c1 is twice as fast (180s instead of 360s to the mile) as c2
         final TimePoint startOfRace = MillisecondsTimePoint.now();
         final TimePoint middleOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
         trackedRace.updateMarkPassings(
