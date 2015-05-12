@@ -380,7 +380,7 @@ public class TrackedLegImpl implements TrackedLeg {
     public Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint)
             throws NotEnoughDataHasBeenAddedException, NoWindException {
         Position centralPosition = trackedRace.getCenterOfCourse(timepoint);
-        Wind wind = trackedRace.getWind(centralPosition, timepoint);
+        Wind wind = trackedRace.getWind(centralPosition, timepoint, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         Position from = trackedRace.getApproximatePosition(leg.getFrom(), timepoint);
         Position to = trackedRace.getApproximatePosition(leg.getTo(), timepoint);
         LegType legType = getLegType(timepoint);
