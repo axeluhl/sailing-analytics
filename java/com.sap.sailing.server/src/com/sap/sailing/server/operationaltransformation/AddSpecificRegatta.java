@@ -11,12 +11,13 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.ranking.RankingMetrics;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -33,7 +34,8 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     
     public AddSpecificRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetrics rankingMetricType) {
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference,
+            RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
@@ -46,7 +48,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getStartDate(), getEndDate(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference, rankingMetricType.getRankingMetricConstructor());
+                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }
 

@@ -116,6 +116,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -163,7 +164,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
-import com.sap.sailing.domain.ranking.RankingMetrics;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -1162,7 +1163,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = OneDesignRankingMetric::new;
         } else {
             final String rankingMetricTypeName = (String) rankingMetricJson.get(FieldNames.REGATTA_RANKING_METRIC_TYPE.name());
-            result = RankingMetrics.valueOf(rankingMetricTypeName).getRankingMetricConstructor();
+            result = RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.valueOf(rankingMetricTypeName));
         }
         return result;
     }

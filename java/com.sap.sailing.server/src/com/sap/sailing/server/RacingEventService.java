@@ -306,7 +306,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * @param series the series must not have any {@link RaceColumn}s yet
-     * @param rankingMetricConstructor TODO
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,

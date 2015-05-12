@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
-import com.sap.sailing.domain.ranking.RankingMetrics;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -188,6 +189,6 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
     void adjustEventToRegattaAssociation(EventFetcher eventFetcher);
 
     default RankingMetrics getRankingMetricType() {
-        return RankingMetrics.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());
+        return RankingMetricsFactory.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());
     }
 }

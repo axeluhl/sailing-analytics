@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
+    
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
         private StringMessages stringMessages;
         private ArrayList<RegattaDTO> existingRegattas;
