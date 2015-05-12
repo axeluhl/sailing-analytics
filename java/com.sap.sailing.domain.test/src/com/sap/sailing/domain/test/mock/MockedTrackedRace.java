@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -925,13 +926,20 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
     }
-    
+
+    @Override
+    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+            NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     @Override
     public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
             WindPositionMode windPositionMode) throws NoWindException {
         return null;
     }
-
+    
     @Override
     public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {

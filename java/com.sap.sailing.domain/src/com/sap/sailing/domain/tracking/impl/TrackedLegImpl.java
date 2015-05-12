@@ -14,18 +14,25 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -33,6 +40,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -433,6 +441,46 @@ public class TrackedLegImpl implements TrackedLeg {
             result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
         }
         return result;
+    }
+
+    @Override
+    public Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint)
+            throws NotEnoughDataHasBeenAddedException, NoWindException {
+        Position centralPosition = trackedRace.getCenterOfCourse(timepoint);
+        Wind wind = trackedRace.getWind(centralPosition, timepoint, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+        Position from = trackedRace.getApproximatePosition(leg.getFrom(), timepoint);
+        Position to = trackedRace.getApproximatePosition(leg.getTo(), timepoint);
+        LegType legType = getLegType(timepoint);
+        BoatClass boatClass = trackedRace.getRace().getBoatClass();
+        Duration result;
+        if (legType == LegType.REACHING) {
+            Bearing trueWindAngle = wind.getBearing().getDifferenceTo(from.getBearingGreatCircle(to));
+            SpeedWithConfidence<Void> reachSpeed = polarDataService.getSpeed(boatClass, wind, trueWindAngle);
+            Distance distance = from.getDistance(to);
+            result = reachSpeed.getObject().getDuration(distance);
+        } else {
+            SpeedWithBearingWithConfidence<Void> portSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
+                    boatClass, wind, legType, Tack.PORT);
+            SpeedWithBearingWithConfidence<Void> starboardSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
+                    boatClass, wind, legType, Tack.STARBOARD);
+            result = estimateTargetTimeTacking(from, to, portSpeedAndBearing, starboardSpeedAndBearing, wind);
+        }
+        return result;
+    }
+
+    private Duration estimateTargetTimeTacking(Position from, Position to,
+            SpeedWithBearingWithConfidence<Void> portSpeedAndBearing,
+            SpeedWithBearingWithConfidence<Void> starboardSpeedAndBearing, Wind wind) {
+        Bearing portBearing = portSpeedAndBearing.getObject().getBearing();
+        Bearing starboardBearing = starboardSpeedAndBearing.getObject().getBearing();
+        Position intersection = from.getIntersection(portBearing, to, starboardBearing);
+        Distance fromToIntersection = from.getDistance(intersection);
+        Speed portSpeed = portSpeedAndBearing.getObject();
+        Duration duration1 = portSpeed.getDuration(fromToIntersection);
+        Distance fromToTo = intersection.getDistance(to);
+        Speed starboardSpeed = starboardSpeedAndBearing.getObject();
+        Duration duration2 = starboardSpeed.getDuration(fromToTo);
+        return duration1.plus(duration2);
     }
 
     @Override

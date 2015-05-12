@@ -37,6 +37,8 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -54,6 +56,7 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -78,6 +81,19 @@ public class RegattasResource extends AbstractSailingServerResource {
     private Response getBadRaceErrorResponse(String regattaName, String raceName) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find a race with name '" + raceName + "' in regatta '" + regattaName + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+    
+
+    private Response getNoTrackedRaceErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No tracked race for race with name '" + raceName + "' in regatta '" + regattaName + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getNotEnoughDataAvailabeErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No wind or polar data for race with name '" + raceName + "' in regatta '" + regattaName + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -400,6 +416,54 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonCourse = serializer.serialize(course);
                 String json = jsonCourse.toJSONString();
                 response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
+    
+    /**
+     * Gets the target time of the race
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @return -1 if not enough polar data or no wind information is available
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/targettime")
+    public Response getTargetTime(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("timeasmillis") Long timeasmillis) {
+        if (timeasmillis == null) {
+            timeasmillis = System.currentTimeMillis();
+        }
+        TimePoint timePoint = new MillisecondsTimePoint(timeasmillis);
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
+                if (trackedRace != null) {
+                    Duration targetTime;
+                    try {
+                        targetTime = trackedRace.getEstimatedTimeToComplete(timePoint);
+
+                        DurationJsonSerializer serializer = new DurationJsonSerializer();
+
+                        JSONObject jsonCourse = serializer.serialize(targetTime);
+                        String json = jsonCourse.toJSONString();
+                        response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+                        response = getNotEnoughDataAvailabeErrorResponse(regattaName, raceName);
+                    }
+                } else {
+                    response = getNoTrackedRaceErrorResponse(regattaName, raceName);
+                }
+                
             }
         }
         return response;
