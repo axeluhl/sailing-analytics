@@ -109,7 +109,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        // uadjust the competitor selection for the chart in case the leaderboard changed
+        // adjust the competitor selection for the chart in case the leaderboard changed
         updateCompetitorSelection();
     }
 
