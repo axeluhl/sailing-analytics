@@ -5214,32 +5214,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
             List<UUID> eventIds) throws NotRevokableException {
-        
         List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
         boolean eventRevoked = false;
         for (Serializable idToRevoke : eventIds) {
             eventRevoked = false;
             for (AbstractLog<?, ?> abstractLog : logHierarchy) {
-                abstractLog.lockForRead();
-                AbstractLogEvent<?> event = abstractLog.getEventById(idToRevoke);
-                abstractLog.unlockAfterRead();
-                
-                if (event != null){
-                    //FIXME: abstractLog.revokeEvent(getService().getServerAuthor(), event, "revoke triggered by GWT user action"); does not work as event is expected to be a subclass of AbstractLogEvent<?> 
-                    if (abstractLog instanceof RaceLog){
-                        RaceLog raceLog = (RaceLog) abstractLog;
-                        raceLog.revokeEvent(getService().getServerAuthor(), (RaceLogEvent) event, "revoke triggered by GWT user action");
-                    } else if (abstractLog instanceof RegattaLog){
-                        RegattaLog regattaLog = (RegattaLog) abstractLog;
-                        regattaLog.revokeEvent(getService().getServerAuthor(), (RegattaLogEvent) event, "revoke triggered by GWT user action");
-                    }
-                    eventRevoked = true;
-                }
+                eventRevoked = revokeEvent(eventRevoked, idToRevoke, abstractLog);
             }
             if (!eventRevoked){
                 logger.warning("Could not revoke event with id "+idToRevoke);
             }
         }
+    }
+
+    private <EventT extends AbstractLogEvent<VisitorT>, VisitorT> boolean revokeEvent(boolean eventRevoked, Serializable idToRevoke, AbstractLog<EventT, VisitorT> abstractLog)
+            throws NotRevokableException {
+        final EventT event; 
+        abstractLog.lockForRead();
+        try {
+            event = abstractLog.getEventById(idToRevoke);
+        } finally {
+            abstractLog.unlockAfterRead();
+        }
+        if (event != null) {
+            abstractLog.revokeEvent(getService().getServerAuthor(), event, "revoke triggered by GWT user action"); 
+            eventRevoked = true;
+        }
+        return eventRevoked;
     }
     
     @Override
