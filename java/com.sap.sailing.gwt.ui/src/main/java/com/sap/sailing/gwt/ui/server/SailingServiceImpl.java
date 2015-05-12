@@ -5180,29 +5180,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mappingDTO, Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException {
         List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
-        
         for (AbstractLog<?, ?> abstractLog : logHierarchy) {
             //check if abstractLog is the correct log for the closingEvent
+            final AbstractLogEvent<?> event;
             abstractLog.lockForRead();
-            AbstractLogEvent<?> event = abstractLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
-            abstractLog.unlockAfterRead();
-            if (event != null){
+            try {
+                 event = abstractLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
+            } finally {
+                abstractLog.unlockAfterRead();
+            }
+            if (event != null) {
                 DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
-                if (abstractLog instanceof RegattaLog){
+                if (abstractLog instanceof RegattaLog) {
                     RegattaLog regattaLog = (RegattaLog) abstractLog;
                     List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents =
                             new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
                             new MillisecondsTimePoint(closingTimePoint)).analyze();
-                    
                     for (RegattaLogEvent closingEvent : closingEvents) {
                         regattaLog.add(closingEvent);            
                     }
-                } else if (abstractLog instanceof RaceLog){
+                } else if (abstractLog instanceof RaceLog) {
                     RaceLog raceLog = (RaceLog) abstractLog;
                     List<RaceLogCloseOpenEndedDeviceMappingEvent> closingEvents =
                             new RaceLogOpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
                             new MillisecondsTimePoint(closingTimePoint)).analyze();
-                    
                     for (RaceLogEvent closingEvent : closingEvents) {
                         raceLog.add(closingEvent);            
                     }
