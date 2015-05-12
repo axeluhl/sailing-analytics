@@ -87,7 +87,7 @@ public class LeaderboardCourseChangeTest {
         ScoringScheme scoringScheme = new LowPoint();
         Regatta mockedRegatta = new RegattaImpl(RegattaImpl.getDefaultName("TestRegatta", boatClass.getName()), boatClass, 
                 /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
-                UUID.randomUUID(), mock(CourseArea.class));
+                UUID.randomUUID(), mock(CourseArea.class), OneDesignRankingMetric::new);
         ControlPoint start = new MarkImpl("Start");
         ControlPoint m1 = new MarkImpl("M1");
         ControlPoint m2 = new MarkImpl("M2");

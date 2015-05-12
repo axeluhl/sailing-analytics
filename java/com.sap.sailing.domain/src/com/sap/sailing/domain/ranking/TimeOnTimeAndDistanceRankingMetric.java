@@ -55,13 +55,29 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
 
     private final Function<Competitor, Double> timeOnTimeFactor;
 
-    private final Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile;
+    private final Function<Competitor, Duration> timeOnDistanceFactorNauticalMile;
     
-    public TimeOnTimeAndDistanceRankingMetric(TrackedRace trackedRace, Function<Competitor, Double> timeOnTimeFactor,
-            Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
+    /**
+     * The regular constructor that can also be used as <code>TimeOnTimeAndDistanceRankingMetric::new</code>
+     * to obtain a {@link RankingMetricConstructor} implementation. It uses the {@link TrackedRace}'s regatta
+     * and its handicap figures to obtain each competitor's handicaps.
+     */
+    public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace) {
+        this(trackedRace,
+                c -> trackedRace.getTrackedRegatta().getRegatta().getTimeOnTimeFactor(c),
+                c -> trackedRace.getTrackedRegatta().getRegatta().getTimeOnDistanceAllowancePerNauticalMile(c));
+    }
+
+    /**
+     * Mostly to simplify testing; instead of obtaining the handicap numbers through the {@link TrackedRace} and
+     * its regatta, handicap mappings can be passed directly and overrule anything defined for the competitor or
+     * on the regatta.
+     */
+    public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace, Function<Competitor, Double> timeOnTimeFactor,
+            Function<Competitor, Duration> timeOnDistanceFactorInSecondsPerNauticalMile) {
         super(trackedRace);
-        this.timeOnTimeFactor = timeOnTimeFactor;
-        this.timeOnDistanceFactorInSecondsPerNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
+        this.timeOnTimeFactor = c->trackedRace.getTrackedRegatta().getRegatta().getTimeOnTimeFactor(c);
+        this.timeOnDistanceFactorNauticalMile = c->trackedRace.getTrackedRegatta().getRegatta().getTimeOnDistanceAllowancePerNauticalMile(c);
     }
 
     /**
@@ -185,8 +201,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         return timeOnTimeFactor.apply(competitor);
     }
 
-    double getTimeOnDistanceFactorInSecondsPerNauticalMile(Competitor competitor) {
-        return timeOnDistanceFactorInSecondsPerNauticalMile.apply(competitor);
+    Duration getTimeOnDistanceFactorInSecondsPerNauticalMile(Competitor competitor) {
+        return timeOnDistanceFactorNauticalMile.apply(competitor);
     }
 
     @Override
@@ -195,8 +211,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         return totalDurationSinceRaceStart == null ? null :
             totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
                 totalWindwardDistanceTraveled == null ? Duration.NULL :
-                    Duration.ONE_SECOND.times(totalWindwardDistanceTraveled.getNauticalMiles()
-                            * getTimeOnDistanceFactorInSecondsPerNauticalMile(who)));
+                    getTimeOnDistanceFactorInSecondsPerNauticalMile(who).times(totalWindwardDistanceTraveled.getNauticalMiles()));
     }
 
     /**
@@ -214,10 +229,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
         final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
         final double   f_to = getTimeOnTimeFactor(to);
-        final double   g_to = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
+        final double   g_to = getTimeOnDistanceFactorInSecondsPerNauticalMile(to).asSeconds();
         final Distance d_who = d_to;
         final double   f_who = getTimeOnTimeFactor(who);
-        final double   g_who = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
+        final double   g_who = getTimeOnDistanceFactorInSecondsPerNauticalMile(who).asSeconds();
         
         final Duration t_who = new MillisecondsDurationImpl(Double.valueOf(
                 (1./d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE - g_to + g_who)
@@ -267,13 +282,13 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final Duration t_k = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()).
                 getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
-        final double   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
+        final Duration   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
         final Duration t_i = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_i = getTimeOnTimeFactor(competitor);
-        final double   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
+        final Duration   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
         final Distance d   = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
         
-        final Duration diff_t_i = t_i.minus(t_k.times(f_k).plus(Duration.ONE_SECOND.times(d.getNauticalMiles() * (g_i - g_k))).divide(f_i));
+        final Duration diff_t_i = t_i.minus(t_k.times(f_k).plus((g_i.minus(g_k)).times(d.getNauticalMiles())).divide(f_i));
         return diff_t_i;
     }
 

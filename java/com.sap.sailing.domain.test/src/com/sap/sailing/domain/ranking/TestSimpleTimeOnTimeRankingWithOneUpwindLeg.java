@@ -52,6 +52,7 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
@@ -61,9 +62,9 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
     
     private class TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo extends TimeOnTimeAndDistanceRankingMetric {
         public TimeOnTimeAndDistanceRankingMetricWithAccessibleGetRankingInfo(TrackedRace trackedRace,
-                Function<Competitor, Double> timeOnTimeFactor,
-                Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
-            super(trackedRace, timeOnTimeFactor, timeOnDistanceFactorInSecondsPerNauticalMile);
+                final Function<Competitor, Double> timeOnTimeFactor,
+                final Function<Competitor, Double> timeOnDistanceFactorInSecondsPerNauticalMile) {
+            super(trackedRace, timeOnTimeFactor, c->new MillisecondsDurationImpl(timeOnDistanceFactorInSecondsPerNauticalMile.apply(c).longValue()));
         }
 
         private static final long serialVersionUID = 2450762527282968347L;

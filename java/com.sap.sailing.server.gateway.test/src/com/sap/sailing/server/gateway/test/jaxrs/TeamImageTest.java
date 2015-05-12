@@ -1,8 +1,8 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.io.InputStream;

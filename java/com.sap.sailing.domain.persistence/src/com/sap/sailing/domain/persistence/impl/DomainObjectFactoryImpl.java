@@ -161,6 +161,9 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.ranking.RankingMetrics;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -1141,11 +1144,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
+            final Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
+            final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass, startDate, endDate, series, /* persistent */true,
                     loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
-                            : useStartTimeInference);
+                            : useStartTimeInference, rankingMetricConstructor);
             result.setRegattaConfiguration(configuration);
+        }
+        return result;
+    }
+    
+    private RankingMetricConstructor loadRankingMetricConstructor(DBObject dbRegatta) {
+        DBObject rankingMetricJson = (DBObject) dbRegatta.get(FieldNames.REGATTA_RANKING_METRIC.name());
+        // default is OneDesignRankingMetric
+        final RankingMetricConstructor result;
+        if (rankingMetricJson == null) {
+            result = OneDesignRankingMetric::new;
+        } else {
+            final String rankingMetricTypeName = (String) rankingMetricJson.get(FieldNames.REGATTA_RANKING_METRIC_TYPE.name());
+            result = RankingMetrics.valueOf(rankingMetricTypeName).getRankingMetricConstructor();
         }
         return result;
     }

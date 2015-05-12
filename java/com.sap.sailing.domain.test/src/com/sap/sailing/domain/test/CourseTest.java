@@ -300,7 +300,7 @@ public class CourseTest {
         assertWaypointIndexes(course);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null)),
+                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
@@ -330,7 +330,7 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null)),
+                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
                         hasso), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,

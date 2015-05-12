@@ -45,7 +45,7 @@ public class UpdateMarkPassingTest {
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
         /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null,
-                "test", null)), race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
+                "test", null, OneDesignRankingMetric::new)), race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
         /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new);
         TimePoint now = MillisecondsTimePoint.now();

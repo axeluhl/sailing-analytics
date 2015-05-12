@@ -109,8 +109,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<? extends Series> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+        this(name, boatClass, startDate, endDate, series, persistent, scoringScheme, id, courseArea, OneDesignRankingMetric::new);
+    }
+    
+    /**
+     * Constructs a regatta with an empty {@link RaceLogStore}.
+     */
+    public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<? extends Series> series, boolean persistent,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
         this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+                scoringScheme, id, courseArea, /* useStartTimeInference */ true, rankingMetricConstructor);
     }
     
     /**
@@ -130,19 +138,20 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
-                scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+                scoringScheme, id, courseArea, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
     }
 
     /**
      * @param series
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
+     * @param rankingMetricConstructor TODO
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
+            Serializable id, CourseArea courseArea, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
         super(name);
-        this.rankingMetricConstructor = OneDesignRankingMetric::new;
+        this.rankingMetricConstructor = rankingMetricConstructor;
         this.useStartTimeInference = useStartTimeInference;
         this.id = id;
         this.raceLogStore = raceLogStore;
@@ -169,7 +178,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public RankingMetricConstructor getRankingMetricConstructor() {
-        return rankingMetricConstructor;
+        // if an old version was successfully de-serialized, this field may be null; default to OneDesignRankingMetric
+        return rankingMetricConstructor == null ? OneDesignRankingMetric::new : rankingMetricConstructor;
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {

@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.ranking.RankingMetrics;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -103,7 +104,7 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
         AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
-                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true);
+                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true, RankingMetrics.ONE_DESIGN);
         return master.apply(addRegattaOperation);
     }
 
