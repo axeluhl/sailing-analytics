@@ -660,7 +660,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
                 (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
             &&
-        (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
+        // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
+        (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
             result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
