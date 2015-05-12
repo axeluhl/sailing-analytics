@@ -18,9 +18,8 @@ public final class RankingMetricsFactory {
             return ORCPerformanceCurveRankingMetric::new;
         case TIME_ON_TIME_AND_DISTANCE:
             return TimeOnTimeAndDistanceRankingMetric::new;
-        default:
-            throw new IllegalArgumentException(rankingMetric.name());
         }
+        throw new IllegalArgumentException(rankingMetric.name());
     }
 
     private static final Map<Class<? extends RankingMetric>, RankingMetrics> byClass;

@@ -1275,4 +1275,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pleaseSelectAURLProvider();
     String sampleURL(String sampleURL);
     String rankingMetric();
+    String oneDesignRankingMetric();
+    String orcPerformanceCurveRankingMetric();
+    String timeOnTimeAndDistanceRankingMetric();
+    String oneDesignRankingMetricDescription();
+    String orcPerformanceCurveRankingMetricDescription();
+    String timeOnTimeAndDistanceRankingMetricDescription();
 }

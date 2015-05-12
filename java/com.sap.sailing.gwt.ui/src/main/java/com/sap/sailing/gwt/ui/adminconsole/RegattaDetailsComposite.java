@@ -19,6 +19,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -52,6 +54,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label endDate;
     private final Label boatClassName;
     private final Label scoringSystem;
+    private final Label rankingMetric;
     private final Label defaultCourseArea;
     private final Label useStartTimeInference;
     private final Label configuration;
@@ -87,6 +90,7 @@ public class RegattaDetailsComposite extends Composite {
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
+        rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
         
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
@@ -382,8 +386,11 @@ public class RegattaDetailsComposite extends Composite {
                 configuration.setText(stringMessages.none());
             }
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
-            String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
+            String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);
             scoringSystem.setText(scoringSystemText);
+            RankingMetrics rankingMetricType = regatta.rankingMetricType;
+            String rankingMetricText = rankingMetricType == null ? "" : RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages);
+            rankingMetric.setText(rankingMetricText);
             seriesListDataProvider.getList().clear();
             seriesListDataProvider.getList().addAll(regatta.series);
         } 

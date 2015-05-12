@@ -59,6 +59,7 @@ public class RegattaDTO extends NamedDTO {
         this.scoringScheme = other.scoringScheme;
         this.defaultCourseAreaUuid = other.defaultCourseAreaUuid;
         this.defaultCourseAreaName = other.defaultCourseAreaName;
+        this.rankingMetricType = other.rankingMetricType;
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
     }

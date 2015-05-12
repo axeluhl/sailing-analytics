@@ -786,6 +786,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         regattaDTO.useStartTimeInference = regatta.useStartTimeInference();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
+        regattaDTO.rankingMetricType = regatta.getRankingMetricType();
         return regattaDTO;
     }
 
