@@ -20,7 +20,6 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         LeaderboardUpdateListener {
 
     public SharedLeaderboardRegattaTabView() {
-
     }
 
     public LeaderboardPanel createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager) {
