@@ -6,6 +6,12 @@ import java.util.Map;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 
+/**
+ * All images are expected to be 140x140px with transparent background.
+ * 
+ * @author Steffen Tobias Wagner, Axel Uhl (D043530)
+ *
+ */
 public class BoatClassImageResolver {
     private static Map<String, ImageResource> boatClassIconsMap;
     private static BoatClassImageResources imageResources = BoatClassImageResources.INSTANCE;
