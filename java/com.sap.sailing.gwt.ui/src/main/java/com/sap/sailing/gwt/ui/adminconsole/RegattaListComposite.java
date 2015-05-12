@@ -216,7 +216,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         TextColumn<RegattaDTO> rankingMetricColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.rankingMetricType != null ? RankingMetricTypeFormatter.format(regatta.rankingMetricType) : "";
+                return regatta.rankingMetricType != null ? RankingMetricTypeFormatter.format(regatta.rankingMetricType, stringMessages) : "";
             }
         };
         regattaBoatClassColumn.setSortable(true);
