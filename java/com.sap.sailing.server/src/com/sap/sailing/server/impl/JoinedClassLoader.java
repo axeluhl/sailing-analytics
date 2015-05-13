@@ -24,7 +24,7 @@ public class JoinedClassLoader extends ClassLoader {
             }
         }
         if (result == null) {
-            throw new ClassNotFoundException();
+            throw new ClassNotFoundException(name);
         }
         return result;
     }

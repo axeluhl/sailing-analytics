@@ -122,7 +122,8 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final Iterable<Series> series = Collections.emptyList();
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true,
+                OneDesignRankingMetric.CONSTRUCTOR);
         assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertTrue(master.getAllRegattas().iterator().hasNext());
         assertNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
@@ -187,7 +188,8 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
-        ReplicationReceiver replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
+        ReplicationReceiver replicator = replicationDescriptorPair.getA()
+                .startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */true);
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);
         synchronized (replicator) {
