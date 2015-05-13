@@ -47,4 +47,10 @@ public interface RaceGroup extends Named {
      * Gets configuration objects for {@link RacingProcedure}s of this {@link RaceGroup}'s races.
      */
     public RegattaConfiguration getRegattaConfiguration();
+
+    /**
+     * An optional (may be <code>null</code>0 non-identifying name that may, e.g., be a short name
+     * for the necessarily unique and therefore potentially longer, maybe clumsy full {@link #getName()}.
+     */
+    String getDisplayName();
 }

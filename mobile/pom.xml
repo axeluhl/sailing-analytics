@@ -13,9 +13,12 @@
     <packaging>pom</packaging>
 
     <modules>
+<!--
         <module>com.sap.sailing.racecommittee.app</module>
         <module>com.sap.sailing.android.shared</module>
+	<module>com.sap.sailing.adnroid.buoy.positioning.app</module>
         <module>com.sap.sailing.android.tracking.app</module>
+-->
     </modules>
 
     <properties>
@@ -52,7 +55,12 @@
                 <plugin>
                     <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                     <artifactId>android-maven-plugin</artifactId>
-                    <version>3.8.0</version>
+		    <version>3.9.0-rc.1</version>
+		    <configuration>
+			<sdk>
+			    <platform>19</platform>
+			</sdk>
+		    </configuration>
                     <extensions>true</extensions>
                 </plugin>
 				<plugin>

@@ -8,6 +8,7 @@
   color: #fff;
   line-height: 5em;
   width: 100%;
+  margin-top: -5em;
   padding: 0 1.333333333333333em;
 }
 .sitefooter_copyright {
@@ -48,7 +49,7 @@
   }
 }
 .sitefooter_language_link {
-  color: #f0ab00;
+  color: #efaa00;
   display: inline-block;
   cursor: pointer;
   margin-left: 0.666666666666667em;
