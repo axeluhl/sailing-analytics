@@ -9,12 +9,12 @@ public class RaceMetadataDTO implements IsSerializable {
     
     private RegattaAndRaceIdentifier id;
 
-    private String regattaName;
     private String raceName;
     private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
     private String course;
+    private String boatClass;
 
     protected RaceMetadataDTO() {
     }
@@ -25,14 +25,6 @@ public class RaceMetadataDTO implements IsSerializable {
     
     public RegattaAndRaceIdentifier getID() {
         return id;
-    }
-
-    public String getRegattaName() {
-        return regattaName;
-    }
-
-    public void setRegattaName(String regattaName) {
-        this.regattaName = regattaName;
     }
 
     public String getRaceName() {
@@ -73,5 +65,13 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setCourse(String course) {
         this.course = course;
+    }
+
+    public String getBoatClass() {
+        return boatClass;
+    }
+
+    public void setBoatClass(String boatClass) {
+        this.boatClass = boatClass;
     }
 }

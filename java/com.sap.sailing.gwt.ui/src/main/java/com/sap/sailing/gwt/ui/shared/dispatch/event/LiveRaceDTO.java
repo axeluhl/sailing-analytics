@@ -8,11 +8,11 @@ import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 
 public class LiveRaceDTO extends RaceMetadataDTO {
     
+    private String regattaName;
+    
     private FlagStateDTO flagState;
     
     private SimpleWindDTO wind;
-    
-    private String boatClass;
     
     private RaceProgressDTO progress;
 
@@ -22,6 +22,14 @@ public class LiveRaceDTO extends RaceMetadataDTO {
     
     public LiveRaceDTO(RegattaAndRaceIdentifier id) {
         super(id);
+    }
+
+    public String getRegattaName() {
+        return regattaName;
+    }
+
+    public void setRegattaName(String regattaName) {
+        this.regattaName = regattaName;
     }
 
     public SimpleWindDTO getWind() {
@@ -38,14 +46,6 @@ public class LiveRaceDTO extends RaceMetadataDTO {
 
     public void setFlagState(FlagStateDTO flagState) {
         this.flagState = flagState;
-    }
-
-    public String getBoatClass() {
-        return boatClass;
-    }
-
-    public void setBoatClass(String boatClass) {
-        this.boatClass = boatClass;
     }
 
     public RaceProgressDTO getProgress() {
