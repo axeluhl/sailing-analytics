@@ -117,8 +117,17 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
         RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+        return getRaceViewerURL(leaderboard.name, raceIdentifier);
+    }
+    
+    public String getRaceViewerURL(RegattaAndRaceIdentifier raceIdentifier) {
         return EntryPointLinkFactory
-                .createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
+                .createRaceBoardLink(createRaceBoardLinkParameters(raceIdentifier.getRegattaName(), raceIdentifier));
+    }
+    
+    public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+        return EntryPointLinkFactory
+                .createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, raceIdentifier));
     }
 
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName,

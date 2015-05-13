@@ -3,9 +3,7 @@ package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -23,14 +21,17 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
@@ -58,19 +59,21 @@ public class RaceList extends Composite {
     private final SortedCellTable<LiveRaceDTO> cellTable = new SortedCellTable<LiveRaceDTO>(0,
             CleanCellTableResources.INSTANCE);
     private final DateTimeFormat startTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
+    private EventView.Presenter presenter;
 
     interface CellTemplate extends SafeHtmlTemplates {
         @Template("<div style=\"{1}\" class=\"{0}\"></div>")
         SafeHtml fleetCorner(String styleNames, SafeStyles color);
 
-        @Template("<a href=\"#\" class=\"{0}\">{1}</a>")
-        SafeHtml watchNowButton(String styleNames, String text);
+        @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
+        SafeHtml watchNowButton(String styleNames, String text, String link);
 
         @Template("<div>{3}</div><div class=\"{0}\"><div style=\"{2}\" class=\"{1}\"></div></div>")
         SafeHtml raceProgress(String styleNamesBar, String styleNamesProgress, SafeStyles width, String text);
     }
 
-    public RaceList() {
+    public RaceList(EventView.Presenter presenter) {
+        this.presenter = presenter;
         CSS.ensureInjected();
         this.cellTable.addStyleName(CSS.raceslist());
         this.cellTable.setHeaderBuilder(new StyledHeaderOrFooterBuilder<LiveRaceDTO>(cellTable, false, CSS
@@ -328,7 +331,7 @@ public class RaceList extends Composite {
             }
         });
 
-        RaceListColumn<String> watchNowButtonColumn = new RaceListColumn<String>("", new WatchNowButtonCell()) {
+        RaceListColumn<RegattaAndRaceIdentifier> watchNowButtonColumn = new RaceListColumn<RegattaAndRaceIdentifier>("", new WatchNowButtonCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return null;
@@ -345,16 +348,10 @@ public class RaceList extends Composite {
             }
 
             @Override
-            public String getValue(LiveRaceDTO object) {
-                return I18N_UBI.watchNow();
+            public RegattaAndRaceIdentifier getValue(LiveRaceDTO object) {
+                return object.getID();
             }
         };
-        watchNowButtonColumn.setFieldUpdater(new FieldUpdater<LiveRaceDTO, String>() {
-            @Override
-            public void update(int index, LiveRaceDTO object, String value) {
-                Window.alert("Watch now: " + object.getRegattaName() + " " + object.getRaceName()); // TODO
-            }
-        });
         add(watchNowButtonColumn);
     }
 
@@ -418,19 +415,23 @@ public class RaceList extends Composite {
         }
     }
 
-    private static class WatchNowButtonCell extends ButtonCell {
+    private class WatchNowButtonCell extends AbstractCell<RegattaAndRaceIdentifier> {
         @Override
-        public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
-                ValueUpdater<String> valueUpdater) {
-            event.preventDefault();
+        public void onBrowserEvent(Context context, Element parent, RegattaAndRaceIdentifier value, NativeEvent event,
+                ValueUpdater<RegattaAndRaceIdentifier> valueUpdater) {
+            if(LinkUtil.handleLinkClick(event.<Event>cast())) {
+                event.preventDefault();
+//                context.g
+            }
             super.onBrowserEvent(context, parent, value, event, valueUpdater);
         }
 
         @Override
-        public void render(Context context, String data, SafeHtmlBuilder sb) {
+        public void render(Context context, RegattaAndRaceIdentifier data, SafeHtmlBuilder sb) {
+            String raceViewerURL = presenter.getRaceViewerURL(data);
             String styleNames = Util.join(" ", MAIN_CSS.button(), MAIN_CSS.buttonstrong(), MAIN_CSS.buttonred(),
                     MAIN_CSS.buttonarrowrightwhite());
-            sb.append(TEMPLATE.watchNowButton(styleNames, data));
+            sb.append(TEMPLATE.watchNowButton(styleNames, I18N_UBI.watchNow(), raceViewerURL));
         }
     }
 

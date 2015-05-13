@@ -36,6 +36,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
     @Override
     public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
+        racesListLive = new RacesListLive(currentPresenter);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
@@ -59,7 +60,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
     
-    @UiField
+    @UiField(provided = true)
     RacesListLive racesListLive;
 
     @Override
