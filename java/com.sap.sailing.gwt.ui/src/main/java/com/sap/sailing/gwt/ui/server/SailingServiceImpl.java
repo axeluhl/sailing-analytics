@@ -3675,14 +3675,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate, 
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference) {
+            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
+            RankingMetrics rankingMetricType) {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
                         regattaName, boatClassName, startTimePoint, endTimePoint, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, useStartTimeInference, RankingMetrics.ONE_DESIGN));
+                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, useStartTimeInference,
+                        rankingMetricType));
         return convertToRegattaDTO(regatta);
     }
     
@@ -3948,7 +3950,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void createRegattaFromRegattaDTO(RegattaDTO regatta) {
         this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.startDate, regatta.endDate,
                         new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
-                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference);
+                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference,
+                        regatta.rankingMetricType);
     }
     
     private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {

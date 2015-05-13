@@ -51,8 +51,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     }
     
     @Override
-    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel){
-        Grid formGrid = (Grid)panel.getWidget(0);
+    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid) {
         formGrid.insertRow(0);
         formGrid.insertRow(0);
         formGrid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
