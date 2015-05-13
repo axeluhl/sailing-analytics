@@ -6,13 +6,13 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
-import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -21,6 +21,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
@@ -32,7 +33,6 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
-import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.regattaoverview.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
@@ -68,6 +69,9 @@ public class RaceList extends Composite {
 
         @Template("<div>{3}</div><div class=\"{0}\"><div style=\"{2}\" class=\"{1}\"></div></div>")
         SafeHtml raceProgress(String styleNamesBar, String styleNamesProgress, SafeStyles width, String text);
+
+        @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
+        SafeHtml windDirection(SafeStyles rotation);
     }
 
     public RaceList(EventView.Presenter presenter) {
@@ -268,7 +272,8 @@ public class RaceList extends Composite {
             }
         });
 
-        add(new RaceListColumn<Number>(I18N.from(), new NumberCell(NumberFormatterFactory.getDecimalFormat(0))) {
+        RaceListColumn<SimpleWindDTO> windDirectionColumn = new RaceListColumn<SimpleWindDTO>(I18N.from(),
+                new WindDirectionCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return null;
@@ -285,10 +290,12 @@ public class RaceList extends Composite {
             }
 
             @Override
-            public Number getValue(LiveRaceDTO object) {
-                return object.getWind() != null ? object.getWind().getTrueWindFromDeg() : null;
+            public SimpleWindDTO getValue(LiveRaceDTO object) {
+                return object.getWind();
             }
-        });
+        };
+        windDirectionColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        add(windDirectionColumn);
 
         add(new RaceListColumn<String>(I18N.courseArea(), new TextCell()) {
             @Override
@@ -439,6 +446,20 @@ public class RaceList extends Composite {
             if (value != null) {
                 sb.append(SailingFlagsBuilder.render(value, 0.363636, FlagsMeaningExplanator.getFlagsMeaning(I18N,
                         value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
+            }
+        }
+    }
+
+    private static class WindDirectionCell extends AbstractCell<SimpleWindDTO> {
+        @Override
+        public void render(Context context, SimpleWindDTO value, SafeHtmlBuilder sb) {
+            if (value != null) {
+                SafeStylesBuilder safeStyles = new SafeStylesBuilder();
+                safeStyles.trustedNameAndValue("transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
+                safeStyles.width(2.5, Unit.EM);
+                safeStyles.height(2.5, Unit.EM);
+                safeStyles.trustedNameAndValue("margin", "-0.75em auto");
+                sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles()));
             }
         }
     }
