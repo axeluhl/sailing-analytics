@@ -1,15 +1,14 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -21,12 +20,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
@@ -43,6 +41,7 @@ import com.sap.sailing.gwt.ui.regattaoverview.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
@@ -58,7 +57,6 @@ public class RaceList extends Composite {
 
     private final SortedCellTable<LiveRaceDTO> cellTable = new SortedCellTable<LiveRaceDTO>(0,
             CleanCellTableResources.INSTANCE);
-    private final DateTimeFormat startTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
     private EventView.Presenter presenter;
 
     interface CellTemplate extends SafeHtmlTemplates {
@@ -89,8 +87,9 @@ public class RaceList extends Composite {
     }
 
     public void setTableData(List<LiveRaceDTO> data) {
-        this.cellTable.setRowData(data);
+        this.cellTable.setList(data);
         this.cellTable.setPageSize(data.size());
+        this.cellTable.sort();
     }
 
     private void initColumns() {
@@ -114,7 +113,12 @@ public class RaceList extends Composite {
         add(new RaceListColumn<String>(I18N.regatta(), new TextCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
+                    @Override
+                    protected String getComparisonValue(LiveRaceDTO object) {
+                        return object.getRegattaName();
+                    }
+                };
             }
 
             @Override
@@ -136,7 +140,12 @@ public class RaceList extends Composite {
         add(new RaceListColumn<String>(I18N.race(), new TextCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
+                    @Override
+                    protected String getComparisonValue(LiveRaceDTO object) {
+                        return object.getRaceName();
+                    }
+                };
             }
 
             @Override
@@ -158,7 +167,12 @@ public class RaceList extends Composite {
         add(new RaceListColumn<String>(I18N.fleet(), new TextCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
+                    @Override
+                    protected String getComparisonValue(LiveRaceDTO object) {
+                        return object.getFleet() != null ? object.getFleet().getFleetName() : null;
+                    }
+                };
             }
 
             @Override
@@ -177,10 +191,16 @@ public class RaceList extends Composite {
             }
         });
 
-        add(new RaceListColumn<String>(I18N.start(), new TextCell()) {
+        add(new RaceListColumn<Date>(I18N.start(), new DateCell(
+                DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE))) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, Date>(new NullSafeComparableComparator<Date>()) {
+                    @Override
+                    protected Date getComparisonValue(LiveRaceDTO object) {
+                        return object.getStart();
+                    }
+                };
             }
 
             @Override
@@ -194,8 +214,8 @@ public class RaceList extends Composite {
             }
 
             @Override
-            public String getValue(LiveRaceDTO object) {
-                return object.getStart() == null ? "-" : startTimeFormat.format(object.getStart());
+            public Date getValue(LiveRaceDTO object) {
+                return object.getStart();
             }
         });
 
@@ -224,7 +244,12 @@ public class RaceList extends Composite {
         add(new RaceListColumn<Number>(I18N.wind(), new NumberCell(NumberFormatterFactory.getDecimalFormat(1))) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, Double>(new NullSafeComparableComparator<Double>()) {
+                    @Override
+                    protected Double getComparisonValue(LiveRaceDTO object) {
+                        return object.getWind() != null ? object.getWind().getTrueWindSpeedInKnots() : null;
+                    }
+                };
             }
 
             @Override
@@ -268,7 +293,12 @@ public class RaceList extends Composite {
         add(new RaceListColumn<String>(I18N.courseArea(), new TextCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
+                    @Override
+                    protected String getComparisonValue(LiveRaceDTO object) {
+                        return object.getCourseArea();
+                    }
+                };
             }
 
             @Override
@@ -290,7 +320,12 @@ public class RaceList extends Composite {
         add(new RaceListColumn<String>(I18N.course(), new TextCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
+                    @Override
+                    protected String getComparisonValue(LiveRaceDTO object) {
+                        return object.getCourse();
+                    }
+                };
             }
 
             @Override
@@ -305,14 +340,19 @@ public class RaceList extends Composite {
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return String.valueOf(object.getCourse());
+                return object.getCourse();
             }
         });
 
         add(new RaceListColumn<RaceProgressDTO>(I18N.status(), new RaceProgressCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorWrapper<LiveRaceDTO, Double>(new NullSafeComparableComparator<Double>()) {
+                    @Override
+                    protected Double getComparisonValue(LiveRaceDTO object) {
+                        return object.getProgress().getPercentageProgress();
+                    }
+                };
             }
 
             @Override
@@ -416,16 +456,6 @@ public class RaceList extends Composite {
     }
 
     private class WatchNowButtonCell extends AbstractCell<RegattaAndRaceIdentifier> {
-        @Override
-        public void onBrowserEvent(Context context, Element parent, RegattaAndRaceIdentifier value, NativeEvent event,
-                ValueUpdater<RegattaAndRaceIdentifier> valueUpdater) {
-            if(LinkUtil.handleLinkClick(event.<Event>cast())) {
-                event.preventDefault();
-//                context.g
-            }
-            super.onBrowserEvent(context, parent, value, event, valueUpdater);
-        }
-
         @Override
         public void render(Context context, RegattaAndRaceIdentifier data, SafeHtmlBuilder sb) {
             String raceViewerURL = presenter.getRaceViewerURL(data);
