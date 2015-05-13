@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sse.common.TimePoint;
@@ -211,11 +212,19 @@ public class RaceContext {
     }
 
     public LiveRaceDTO getLiveRaceDTO() {
+        TimePoint startTime = getStartTime();
+        RaceState raceState = RaceState.LIVE;
+        if(startTime == null || now.before(startTime)) {
+            raceState = RaceState.UPCOMING;
+        } else if(trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
+            raceState = RaceState.FINISHED;
+        }
         LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
+        liveRaceDTO.setState(raceState);
         liveRaceDTO.setRegattaName(getRegattaDisplayName());
         liveRaceDTO.setFleet(getFleetMetadataOrNull());
         liveRaceDTO.setRaceName(raceColumn.getName());
-        liveRaceDTO.setStart(getStartTime().asDate());
+        liveRaceDTO.setStart(startTime.asDate());
         liveRaceDTO.setBoatClass(getBoatClassName());
         liveRaceDTO.setCourseArea(getCourseArea());
         liveRaceDTO.setCourse(getCourseName());

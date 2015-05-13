@@ -7,6 +7,10 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class RaceMetadataDTO implements IsSerializable {
     
+    public enum RaceState {
+        UPCOMING, LIVE, FINISHED
+    }
+    
     private RegattaAndRaceIdentifier id;
 
     private String raceName;
@@ -15,6 +19,7 @@ public class RaceMetadataDTO implements IsSerializable {
     private String courseArea;
     private String course;
     private String boatClass;
+    private RaceState state;
 
     protected RaceMetadataDTO() {
     }
@@ -73,5 +78,13 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setBoatClass(String boatClass) {
         this.boatClass = boatClass;
+    }
+
+    public RaceState getState() {
+        return state;
+    }
+
+    public void setState(RaceState state) {
+        this.state = state;
     }
 }
