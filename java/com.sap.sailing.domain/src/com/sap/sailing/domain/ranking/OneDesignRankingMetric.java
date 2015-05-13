@@ -21,6 +21,8 @@ import com.sap.sse.common.TimePoint;
 
 public class OneDesignRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -8141113385324184349L;
+    
+    public final static RankingMetricConstructor CONSTRUCTOR = OneDesignRankingMetric::new;
 
     public OneDesignRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);

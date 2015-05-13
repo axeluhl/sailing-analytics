@@ -53,6 +53,8 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -2321904208518686420L;
 
+    public final static RankingMetricConstructor CONSTRUCTOR = TimeOnTimeAndDistanceRankingMetric::new;
+
     private final Function<Competitor, Double> timeOnTimeFactor;
 
     private final Function<Competitor, Duration> timeOnDistanceFactorNauticalMile;

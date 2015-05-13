@@ -18,6 +18,8 @@ import com.sap.sse.common.TimePoint;
 public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
 
+    public final static RankingMetricConstructor CONSTRUCTOR = ORCPerformanceCurveRankingMetric::new;
+
     public ORCPerformanceCurveRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
     }
