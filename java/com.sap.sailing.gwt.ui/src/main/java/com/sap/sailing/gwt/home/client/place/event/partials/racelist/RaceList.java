@@ -1,12 +1,17 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
+import java.util.List;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -28,7 +33,6 @@ import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
@@ -36,14 +40,13 @@ import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.regattaoverview.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.regattaoverview.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
-public class RaceList extends Composite implements RefreshableWidget<LiveRacesDTO> {
+public class RaceList extends Composite {
 
     private static final LocalCss CSS = RacesListLiveResources.INSTANCE.css();
     private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
@@ -60,7 +63,7 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
         @Template("<div style=\"{1}\" class=\"{0}\"></div>")
         SafeHtml fleetCorner(String styleNames, SafeStyles color);
 
-        @Template("<a class=\"{0}\">{1}</a>")
+        @Template("<a href=\"#\" class=\"{0}\">{1}</a>")
         SafeHtml watchNowButton(String styleNames, String text);
 
         @Template("<div>{3}</div><div class=\"{0}\"><div style=\"{2}\" class=\"{1}\"></div></div>")
@@ -80,6 +83,11 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
         });
         initColumns();
         initWidget(cellTable);
+    }
+
+    public void setTableData(List<LiveRaceDTO> data) {
+        this.cellTable.setRowData(data);
+        this.cellTable.setPageSize(data.size());
     }
 
     private void initColumns() {
@@ -362,12 +370,6 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
         this.cellTable.addColumn(column, header, column.getComparator(), ascending);
     }
 
-    @Override
-    public void setData(LiveRacesDTO data, long nextUpdate, int updateNo) {
-        this.cellTable.setRowData(data.getRaces());
-        this.cellTable.setPageSize(data.getRaces().size());
-    }
-
     private abstract static class RaceListColumn<C> extends SortableColumn<LiveRaceDTO, C> {
         private final String headerText;
 
@@ -417,6 +419,13 @@ public class RaceList extends Composite implements RefreshableWidget<LiveRacesDT
     }
 
     private static class WatchNowButtonCell extends ButtonCell {
+        @Override
+        public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+                ValueUpdater<String> valueUpdater) {
+            event.preventDefault();
+            super.onBrowserEvent(context, parent, value, event, valueUpdater);
+        }
+
         @Override
         public void render(Context context, String data, SafeHtmlBuilder sb) {
             String styleNames = Util.join(" ", MAIN_CSS.button(), MAIN_CSS.buttonstrong(), MAIN_CSS.buttonred(),

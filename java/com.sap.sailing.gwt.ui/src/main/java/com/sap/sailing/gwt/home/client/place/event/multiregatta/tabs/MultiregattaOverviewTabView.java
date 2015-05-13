@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceList;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.shared.dispatch.AutomaticBatchingDispatch;
 import com.sap.sailing.gwt.home.client.shared.dispatch.SimpleDispatch;
@@ -51,7 +51,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         // TODO CF
         RefreshManager refreshManager = new RefreshManager(this, new AutomaticBatchingDispatch(new SimpleDispatch(null)));
         
-        refreshManager.add(raceList, new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(racesListLive, new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
 
         contentArea.setWidget(this);
     }
@@ -66,7 +66,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
-    @UiField RaceList raceList;
+    @UiField RacesListLive racesListLive;
 
     @Override
     public MultiregattaOverviewPlace placeToFire() {

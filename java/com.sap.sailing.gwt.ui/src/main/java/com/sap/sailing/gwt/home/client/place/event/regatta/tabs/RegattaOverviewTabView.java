@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceList;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
@@ -42,7 +42,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         // TODO CF
         RefreshManager refreshManager = new RefreshManager(this, new AutomaticBatchingDispatch(new SimpleDispatch(null)));
         
-        refreshManager.add(raceList, new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO().getId(), currentPresenter.getCtx().getRegattaId()));
+        refreshManager.add(racesListLive, new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
+                .getId(), currentPresenter.getCtx().getRegattaId()));
 
         contentArea.setWidget(this);
     }
@@ -58,7 +59,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
     
-    @UiField RaceList raceList;
+    @UiField
+    RacesListLive racesListLive;
 
     @Override
     public RegattaOverviewPlace placeToFire() {
