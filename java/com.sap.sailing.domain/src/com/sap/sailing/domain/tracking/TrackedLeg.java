@@ -10,7 +10,10 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public interface TrackedLeg extends Serializable {
@@ -106,5 +109,14 @@ public interface TrackedLeg extends Serializable {
      * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
      */
     Position getMiddleOfLeg(TimePoint at);
+
+    /**
+     * @param timepoint Used for positions of marks and wind information
+     * @return estimated time it takes to complete the leg
+     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
+     * is not available
+     * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
+     */
+    Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
 }
