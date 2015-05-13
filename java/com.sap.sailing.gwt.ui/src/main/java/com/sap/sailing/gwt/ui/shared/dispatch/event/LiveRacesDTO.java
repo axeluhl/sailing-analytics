@@ -1,17 +1,19 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
 public class LiveRacesDTO implements DTO {
     private ArrayList<LiveRaceDTO> races = new ArrayList<>();
     
-    public ArrayList<LiveRaceDTO> getRaces() {
+    public List<LiveRaceDTO> getRaces() {
         return races;
     }
     
     public void addRace(LiveRaceDTO race) {
+        // TODO insert sorted
         this.races.add(race);
     }
     
