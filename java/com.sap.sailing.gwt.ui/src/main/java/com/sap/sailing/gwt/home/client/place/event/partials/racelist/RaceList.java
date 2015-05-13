@@ -241,7 +241,7 @@ public class RaceList extends Composite {
             }
         });
 
-        add(new RaceListColumn<Number>(I18N.wind(), new NumberCell(NumberFormatterFactory.getDecimalFormat(1))) {
+        add(new RaceListColumn<String>(I18N.wind(), new TextCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return new InvertibleComparatorWrapper<LiveRaceDTO, Double>(new NullSafeComparableComparator<Double>()) {
@@ -263,8 +263,8 @@ public class RaceList extends Composite {
             }
 
             @Override
-            public Number getValue(LiveRaceDTO object) {
-                return object.getWind() != null ? object.getWind().getTrueWindSpeedInKnots() : null;
+            public String getValue(LiveRaceDTO object) {
+                return object.getWind() != null ? I18N.knotsValue(object.getWind().getTrueWindSpeedInKnots()) : "-";
             }
         });
 
