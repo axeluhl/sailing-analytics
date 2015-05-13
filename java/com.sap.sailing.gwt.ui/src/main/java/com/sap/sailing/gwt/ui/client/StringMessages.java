@@ -1268,5 +1268,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
 
-    String currentOfTotalLegs(int currentLeg, @PluralCount(DefaultRule_1_0n.class) int totalLegs);
+    String currentOfTotalLegs(int currentLeg, int totalLegs);
 }
