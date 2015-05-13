@@ -33,10 +33,11 @@ public class SailingFlagsBuilder {
 
     public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, boolean isDisplayedChanged,
             double scale, String tooltip) {
+        int multiplier = getFlagScaleMultiplier(upperFlag, lowerFlag);
         SafeHtmlBuilder contentBuilder = new SafeHtmlBuilder();
         SafeHtmlBuilder flagsBuilder = new SafeHtmlBuilder();
-        flagsBuilder.append(getFlagBackgroundImage(upperFlag, isDisplayed, isDisplayedChanged, scale));
-        flagsBuilder.append(getFlagBackgroundImage(lowerFlag, isDisplayed, isDisplayedChanged, scale));
+        flagsBuilder.append(getFlagBackgroundImage(upperFlag, isDisplayed, isDisplayedChanged, scale * multiplier));
+        flagsBuilder.append(getFlagBackgroundImage(lowerFlag, isDisplayed, isDisplayedChanged, scale * multiplier));
 
         SafeStylesBuilder flagStyleBuilder = new SafeStylesBuilder();
         flagStyleBuilder.display(Display.INLINE_BLOCK);
@@ -48,9 +49,14 @@ public class SailingFlagsBuilder {
         return imageTemplate.cell(tooltip, contentBuilder.toSafeHtml());
     }
 
+    private static int getFlagScaleMultiplier(Flags upperFlag, Flags lowerFlag) {
+        return (upperFlag == null || upperFlag == Flags.NONE || lowerFlag == null || lowerFlag == Flags.NONE) ? 2 : 1;
+    }
+
     public static SafeHtml render(FlagStateDTO flagState, double scale, String tooltip) {
         return render(flagState.getLastUpperFlag(), flagState.getLastLowerFlag(), flagState.isLastFlagsAreDisplayed(),
                 flagState.isLastFlagsDisplayedStateChanged(), scale, tooltip);
+        // return render(Flags.AP, Flags.ALPHA, true, true, scale, tooltip);
     }
 
     private static SafeHtml getFlagBackgroundImage(Flags flag, boolean displayed, boolean displayedChanged, double scale) {
@@ -63,7 +69,7 @@ public class SailingFlagsBuilder {
         SafeStylesBuilder arrowStyleBuilder = new SafeStylesBuilder();
         arrowStyleBuilder.display(Display.INLINE_BLOCK);
         arrowStyleBuilder.verticalAlign(VerticalAlign.TOP);
-        return getBackgroundImage(flagImage, scale, arrowStyleBuilder);
+        return getBackgroundImage(flagImage, scale * 2, arrowStyleBuilder);
     }
 
     private static SafeHtml getBackgroundImage(ImageResource imageResource, double scale,
