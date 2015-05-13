@@ -3714,11 +3714,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public List<String> getUrlResultProviderNames() {
-        List<String> result = new ArrayList<String>();
+    public List<Pair<String, String>> getUrlResultProviderNamesAndOptionalSampleURL() {
+        List<Pair<String, String>> result = new ArrayList<>();
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider) {
-                result.add(scp.getName());
+                result.add(new Pair<>(scp.getName(), ((ResultUrlProvider) scp).getOptionalSampleURL()));
             }
         }
         return result;

@@ -1,0 +1,20 @@
+<resources>
+
+    <string name="app_name" translatable="false">SAP Buoy Positioning App</string>
+    <string name="title_activity_start" translatable="false">Buoy Positioning App</string>
+    <string name="course_type">Course Type</string>
+    <string name="marks">Marks</string>
+    <string name="longitude" translatable="false">Lng</string>
+    <string name="latitude" translatable="false">Lat</string>
+    <string name="set_position">Set Position</string>
+    <string name="reset_position">Reset Position</string>
+    <string name="getting_marks">Getting race marks..</string>
+    <string name="set">set</string>
+    <string name="not_set">not set</string>
+    <string name="mark_list_accuracy">(Accurary ca. %1$sm)</string>
+    <string name="buoy_detail_accuracy_ca" translatable="false">ca. %1$sm</string>
+    <string name="accuracy">Accuracy</string>
+    <string name="position_set">The position has been set</string>
+    <string name="no_information">No information</string>
+
+</resources>
