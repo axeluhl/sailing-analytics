@@ -132,8 +132,9 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
         this.timeOnTimeFactor = createDoubleBox(competitorToEdit.getTimeOnTimeFactor(), 10);
-        this.timeOnDistanceAllowanceInSecondsPerNauticalMile = createDoubleBox(competitorToEdit
-                .getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 10);
+        this.timeOnDistanceAllowanceInSecondsPerNauticalMile = createDoubleBox(
+                competitorToEdit.getTimeOnDistanceAllowancePerNauticalMile() == null ? null : competitorToEdit
+                        .getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 10);
     }
 
     @Override

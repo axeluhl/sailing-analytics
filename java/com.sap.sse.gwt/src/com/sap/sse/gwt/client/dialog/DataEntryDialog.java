@@ -266,7 +266,7 @@ public abstract class DataEntryDialog<T> {
         return longBox;
     }
 
-    public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+    public DoubleBox createDoubleBox(Double initialValue, int visibleLength) {
         return createDoubleBoxInternal(initialValue, visibleLength);
     }
 
