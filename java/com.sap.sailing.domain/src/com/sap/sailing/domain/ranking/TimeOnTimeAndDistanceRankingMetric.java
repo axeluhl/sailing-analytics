@@ -97,7 +97,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final RankingMetric.RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
-        return (c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().compareTo(
+        final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
+        return (c1, c2) -> durationComparatorNullsLast.compare(rankingInfo.getCompetitorRankingInfo().apply(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead(),
                 rankingInfo.getCompetitorRankingInfo().apply(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
     }
 
@@ -106,6 +107,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         // competitors that have not yet started the leg will get a duration based on Long.MAX_VALUE
         final Map<Competitor, Duration> correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace = new HashMap<>();
         final Competitor fastestCompetitorInLeg = getCompetitorFarthestAheadInLeg(trackedLeg, timePoint);
+        // FIXME handle fastestCompetitorInLeg == null...
         final TrackedLegOfCompetitor trackedLegOfFastestCompetitorInLeg = trackedLeg.getTrackedLeg(fastestCompetitorInLeg);
         final Distance totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
@@ -210,10 +212,11 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
+        final Duration timeOnDistanceFactorInSecondsPerNauticalMile = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
         return totalDurationSinceRaceStart == null ? null :
             totalDurationSinceRaceStart.times(getTimeOnTimeFactor(who)).minus(
-                totalWindwardDistanceTraveled == null ? Duration.NULL :
-                    getTimeOnDistanceFactorInSecondsPerNauticalMile(who).times(totalWindwardDistanceTraveled.getNauticalMiles()));
+                totalWindwardDistanceTraveled == null || timeOnDistanceFactorInSecondsPerNauticalMile == null ? Duration.NULL :
+                    timeOnDistanceFactorInSecondsPerNauticalMile.times(totalWindwardDistanceTraveled.getNauticalMiles()));
     }
 
     /**

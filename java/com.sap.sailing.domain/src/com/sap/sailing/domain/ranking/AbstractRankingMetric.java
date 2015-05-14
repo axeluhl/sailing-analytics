@@ -146,12 +146,15 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         private final Competitor leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead;
         
         public RankingInfoImpl(TimePoint timePoint, Map<Competitor, RankingMetric.CompetitorRankingInfo> competitorRankingInfo, Competitor competitorFarthestAhead) {
+            final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
             this.timePoint = timePoint;
             this.competitorRankingInfo = c->competitorRankingInfo.get(c); 
             this.competitorFarthestAhead = competitorFarthestAhead;
             leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead = competitorRankingInfo.keySet().stream().sorted(
-                    (c1, c2) -> competitorRankingInfo.get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().
-                      compareTo(competitorRankingInfo.get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead())).findFirst().get();
+                    (c1, c2) -> durationComparatorNullsLast.compare(
+                            competitorRankingInfo.get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead(),
+                            competitorRankingInfo.get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead())).
+                      findFirst().get();
         }
 
         @Override
@@ -219,25 +222,29 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             actualRaceDuration = null;
         } else {
             actualRaceDuration = startOfRace.until(timePoint);
-        for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-            final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead =
-                    getPredictedDurationToReachWindwardPositionOf(competitor, competitorFarthestAhead, timePoint, cache);
-            final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead =
-                    actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
-            final Duration correctedEstimatedTimeWhenReachingCompetitorFarthestAhead = getCorrectedTime(competitor,
-                    ()->getTrackedRace().getTrackedLeg(competitorFarthestAhead, timePoint).getLeg(),
-                    ()->getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(timePoint, /* extrapolate */ true),
-                    totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead, totalWindwardDistanceTraveled);
-            final Duration correctedTime = getCorrectedTime(competitor,
-                    ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
-                    ()->getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */ true),
-                    actualRaceDuration, totalWindwardDistanceTraveled);
-            RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
-                    getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, correctedTime,
-                    predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
-                    correctedEstimatedTimeWhenReachingCompetitorFarthestAhead);
-            result.put(competitor, rankingInfo);
-        }
+            for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+                final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
+                        competitor, competitorFarthestAhead, timePoint, cache);
+                final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
+                        : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
+                final Duration correctedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
+                        : getCorrectedTime(
+                                competitor,
+                                () -> getTrackedRace().getTrackedLeg(competitorFarthestAhead, timePoint).getLeg(),
+                                () -> getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(
+                                        timePoint, /* extrapolate */true),
+                                totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead,
+                                totalWindwardDistanceTraveled);
+                final Duration correctedTime = getCorrectedTime(competitor,
+                        () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
+                                .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
+                        actualRaceDuration, totalWindwardDistanceTraveled);
+                RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
+                        getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, correctedTime,
+                        predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
+                        correctedEstimatedTimeWhenReachingCompetitorFarthestAhead);
+                result.put(competitor, rankingInfo);
+            }
         }
         return new RankingInfoImpl(timePoint, result, competitorFarthestAhead);
     }
@@ -302,14 +309,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
         final TrackedLegOfCompetitor currentLegTo = getTrackedRace().getCurrentLeg(to, timePoint);
-        assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegWho.getLeg().getFrom()) <=
-                getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegTo.getLeg().getFrom());
         final Duration result;
         if (who == to) { // the same competitor requires no time to reach its own position; it's already there...
             result = Duration.NULL;
         } else if (currentLegWho == null || currentLegTo == null) {
             result = null;
         } else {
+            assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegWho.getLeg().getFrom()) <=
+                    getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegTo.getLeg().getFrom());
             final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(who, to, timePoint, currentLegWho, currentLegTo, cache);
             final Duration durationForSubsequentLegsToReachAtEqualPerformance;
             if (currentLegWho.getLeg() == currentLegTo.getLeg()) {
