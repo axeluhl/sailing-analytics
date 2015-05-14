@@ -40,9 +40,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbstractMockedRaceMarkPassingTest {
-    protected Competitor ron = new CompetitorImpl("Ron", "Ron", null, null, null, null, null);
-    protected Competitor tom = new CompetitorImpl("Tom", "Tom", null, null, null, null, null);
-    protected Competitor ben = new CompetitorImpl("Ben", "Ben", null, null, null, null, null);
+    protected Competitor ron = new CompetitorImpl("Ron", "Ron", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+    protected Competitor tom = new CompetitorImpl("Tom", "Tom", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+    protected Competitor ben = new CompetitorImpl("Ben", "Ben", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
 
     protected Mark m = new MarkImpl("Mark");
     protected Mark gate1 = new MarkImpl("Gate1");

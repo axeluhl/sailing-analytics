@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.Duration;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -68,8 +69,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         listeners.remove(listener);
     }
 
-    private Competitor createCompetitor(Serializable id, String name, Color displayColor, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
-        Competitor result = new CompetitorImpl(id, name, displayColor, email, flagImage, team, boat);
+    private Competitor createCompetitor(Serializable id, String name, Color displayColor, String email, URI flagImage,
+            DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
+        Competitor result = new CompetitorImpl(id, name, displayColor, email, flagImage, team, boat,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
         addNewCompetitor(id, result);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
@@ -93,21 +96,24 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
+            URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile) {
         Competitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
             try {
                 result = getExistingCompetitorById(competitorId); // try again, now while holding the write lock
                 if (result == null) {
-                    result = createCompetitor(competitorId, name, displayColor, email, flagImage, team, boat);
+                    result = createCompetitor(competitorId, name, displayColor, email, flagImage, team, boat,
+                            timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
             updateCompetitor(result.getId().toString(), name, displayColor, email, boat.getSailID(), team.getNationality(),
-                    team.getImage(), flagImage);
+                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
@@ -191,8 +197,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail, String newSailId,
-            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri) {
+    public Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail,
+            String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         DynamicCompetitor competitor = (DynamicCompetitor) getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
@@ -204,6 +211,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 competitor.getBoat().setSailId(newSailId);
                 competitor.getTeam().setNationality(newNationality);
                 competitor.getTeam().setImage(newTeamImageUri);
+                competitor.setTimeOnTimeFactor(timeOnTimeFactor);
+                competitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowancePerNauticalMile);
                 weakCompetitorDTOCache.remove(competitor);
             } finally {
                 LockUtil.unlockAfterWrite(lock);
@@ -238,7 +247,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                               c.getTeam().getImage() == null ? null : c.getTeam().getImage().toString(),
                               c.getFlagImage() == null ? null : c.getFlagImage().toString(),
                             new BoatClassDTO(c.getBoat().getBoatClass()
-                            .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength().getMeters()));
+                            .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength().getMeters()),
+                            c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile());
                     weakCompetitorDTOCache.put(c, competitorDTO);
                 }
             }

@@ -33,6 +33,8 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_DISPLAY_COLOR = "displayColor";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_FLAG_IMAGE_URI = "flagImageUri";
+    public static final String FIELD_TIME_ON_TIME_FACTOR = "timeOnTimeFactor";
+    public static final String FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE = "timeOnDistanceAllowanceInSecondsPerNauticalMile";
 
     private final JsonSerializer<Team> teamJsonSerializer;
     private final JsonSerializer<Boat> boatJsonSerializer;
@@ -86,6 +88,10 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         if (boatJsonSerializer != null) {
             result.put(FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
         }
+        result.put(FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
+        result.put(FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
+                    competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         return result;
     }
 

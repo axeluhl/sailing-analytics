@@ -1,5 +1,11 @@
 package com.sap.sailing.server.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -124,10 +130,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
-import static org.junit.Assert.*;
-
-import static org.mockito.Mockito.*;
-
 public class MasterDataImportTest {
 
     private static final String TEST_GROUP_NAME = "testGroup";
@@ -228,7 +230,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -239,7 +241,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null,null, 
-                team2, boat2);
+                team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -474,7 +476,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -482,7 +484,7 @@ public class MasterDataImportTest {
         DynamicPerson coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
-        CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", Color.RED, null, null, team2, boat2);
+        CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", Color.RED, null, null, team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -629,7 +631,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
@@ -788,7 +790,7 @@ public class MasterDataImportTest {
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         Competitor competitor = sourceDomainFactory.getOrCreateCompetitor(competitorUUID, "Froderik", Color.RED, "noone@nowhere.de", null, team,
-                boat);
+                boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -797,7 +799,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
         Competitor competitor2 = sourceDomainFactory.getCompetitorStore().getOrCreateCompetitor(competitor2UUID,
-                "Froderik", Color.RED, "noone@nowhere.de", null, team2, boat2);
+                "Froderik", Color.RED, "noone@nowhere.de", null, team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -943,7 +945,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -954,7 +956,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null, null, 
-                team2, boat2);
+                team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -1142,7 +1144,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1153,7 +1155,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null,
-                null, team2, boat2);
+                null, team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -1244,7 +1246,7 @@ public class MasterDataImportTest {
             DynamicBoat boatToOverride = new BoatImpl("Wingy", boatClassToOverride, "GER70133");
             String competitorOldName = "oldName";
             Competitor competitorToOverride = domainFactory.getOrCreateCompetitor(competitorUUID, competitorOldName,
-                    Color.BLUE, "noone@nowhere.de", null, teamToOverride, boatToOverride);
+                    Color.BLUE, "noone@nowhere.de", null, teamToOverride, boatToOverride, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
             competitorsToOverride.add(competitorToOverride);
 
             Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(
@@ -1437,7 +1439,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1448,7 +1450,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null,null, 
-                team2, boat2);
+                team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -1571,7 +1573,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1582,7 +1584,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null, null, 
-                team2, boat2);
+                team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
@@ -1815,7 +1817,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1826,7 +1828,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null, null, 
-                team2, boat2);
+                team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
 
@@ -2044,7 +2046,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -2055,7 +2057,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, null, null, 
-                team2, boat2);
+                team2, boat2, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, null, sourceService.getWindStore());
 

@@ -92,7 +92,7 @@ public class PolarSheetGenerationTest {
 
         BoatClass forelle = new BoatClassImpl("Forelle", true);
         Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, null, null, 
-                new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+                new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
 
         PolarFixAggregationWorker task = new PolarFixAggregationWorker(race,
  resultContainer, startTime, endTime,

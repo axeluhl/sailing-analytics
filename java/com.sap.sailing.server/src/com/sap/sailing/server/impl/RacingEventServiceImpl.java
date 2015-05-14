@@ -482,7 +482,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
                         .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
-                        competitor.getTeam().getImage(), competitor.getFlagImage()));
+                        competitor.getTeam().getImage(), competitor.getFlagImage(),
+                        competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile()));
             }
         });
         this.windStore = windStore;
@@ -2469,7 +2470,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
+                    dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
+                    dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 

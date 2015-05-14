@@ -46,8 +46,8 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         super.setUp();
         Competitor c = createCompetitors(1).get(0);
         competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(),
-                c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat());
-
+                c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat(),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,

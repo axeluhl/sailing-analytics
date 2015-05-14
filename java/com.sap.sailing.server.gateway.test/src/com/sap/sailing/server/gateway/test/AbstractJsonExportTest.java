@@ -94,7 +94,7 @@ public abstract class AbstractJsonExportTest {
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                                             /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                                    boatClass, null)); 
+                                    boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null); 
             result.add(competitor);
         }
         return result;

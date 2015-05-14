@@ -276,7 +276,7 @@ public class WindTest {
                         /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Test Competitor" + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
+                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         final BoatClass boatClass = domainFactory.getOrCreateBoatClass("ESS40");
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,

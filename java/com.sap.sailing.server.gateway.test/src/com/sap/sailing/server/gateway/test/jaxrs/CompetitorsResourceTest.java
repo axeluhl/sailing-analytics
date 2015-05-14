@@ -34,7 +34,7 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
         super.setUp();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(nationality), null, null)), null);
         DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);
-        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, team, boat);
+        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     }
 
     @Test

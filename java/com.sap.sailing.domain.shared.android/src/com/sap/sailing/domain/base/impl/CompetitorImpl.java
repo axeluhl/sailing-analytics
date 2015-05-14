@@ -27,7 +27,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         this.id = id;
         this.name = name;
         this.team = team;
@@ -35,6 +35,8 @@ public class CompetitorImpl implements DynamicCompetitor {
         this.color = color;
         this.email = email;
         this.flagImage = flagImage;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
     
@@ -81,7 +83,9 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(), getBoat());
+        Competitor result = domainFactory
+                .getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(),
+                        getBoat(), getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile());
         return result;
     }
 

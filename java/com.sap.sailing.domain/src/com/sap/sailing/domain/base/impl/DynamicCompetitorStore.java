@@ -5,6 +5,7 @@ import java.net.URI;
 
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 
 public interface DynamicCompetitorStore extends CompetitorStore {
     @Override
@@ -12,7 +13,7 @@ public interface DynamicCompetitorStore extends CompetitorStore {
 
     @Override
     DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImage, 
-            DynamicTeam team, DynamicBoat boat);
+            DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile);
 
     @Override
     Iterable<? extends DynamicCompetitor> getCompetitors();

@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 
 /**
  * Manages a set of {@link Competitor} objects. There may be a transient implementation based on a simple cache,
@@ -63,8 +64,9 @@ public interface CompetitorStore extends CompetitorFactory {
      * 
      * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
      */
-    Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail, String newSailId,
-            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri);
+    Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail,
+            String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
     

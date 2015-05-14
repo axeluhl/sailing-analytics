@@ -50,7 +50,7 @@ public class RaceLogSerializationTest {
     private final AbstractLogEventAuthor author = new LogEventAuthorImpl("test", 0);
     private static final Competitor competitor = new CompetitorImpl("a", "b", null,
             null, null,
-            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null), new BoatImpl("a", new BoatClassImpl("a", true), "abc"));
+            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null), new BoatImpl("a", new BoatClassImpl("a", true), "abc"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     
     @Before
     public void setup() {

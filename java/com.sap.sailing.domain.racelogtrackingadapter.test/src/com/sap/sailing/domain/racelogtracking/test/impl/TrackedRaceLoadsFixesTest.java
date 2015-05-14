@@ -50,7 +50,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException,
             InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null);
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");

@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
 
 public class SharedDomainFactoryImpl implements SharedDomainFactory {
@@ -333,11 +334,14 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
+            URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, email, flagImage, team, boat);
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, email, flagImage, team,
+                boat, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
     }
 
     @Override

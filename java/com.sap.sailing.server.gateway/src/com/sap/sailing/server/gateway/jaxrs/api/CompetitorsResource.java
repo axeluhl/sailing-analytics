@@ -158,7 +158,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         }
 
         getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(), competitor.getEmail(), 
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage());
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
 
         JSONObject result = new JSONObject();

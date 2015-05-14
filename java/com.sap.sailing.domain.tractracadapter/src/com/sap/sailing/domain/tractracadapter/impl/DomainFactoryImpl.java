@@ -75,6 +75,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
@@ -237,13 +238,15 @@ public class DomainFactoryImpl implements DomainFactory {
         final String nationalityAsString = competitor.getNationality();
         final String name = competitor.getName();
         final String shortName = competitor.getShortName();
-        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name, shortName);
+        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name,
+                shortName, competitor.getHandicapToT(), competitor.getHandicapToD());
         return result;
     }
 
     @Override
     public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
-            final String nationalityAsString, final String name, final String shortName) {
+            final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
+            float timeOnDistanceAllowanceInSecondsPerNauticalMile) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor result = competitorStore.getExistingCompetitorById(competitorId);
         if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
@@ -258,7 +261,9 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
-            result = competitorStore.getOrCreateCompetitor(competitorId, name, null /*displayColor*/, null /*email*/, null /*flagImag */, team, boat);
+            result = competitorStore.getOrCreateCompetitor(competitorId, name, null /* displayColor */,
+                    null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
+                    new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)));
         }
         return result;
     }

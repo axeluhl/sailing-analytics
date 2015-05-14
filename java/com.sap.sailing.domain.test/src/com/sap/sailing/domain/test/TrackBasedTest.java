@@ -66,7 +66,7 @@ public abstract class TrackBasedTest {
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
+                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     }
     
     /**
