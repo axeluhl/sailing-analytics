@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class RaceListDayDTO {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class RaceListDayDTO implements IsSerializable {
     
     private Date day;
     

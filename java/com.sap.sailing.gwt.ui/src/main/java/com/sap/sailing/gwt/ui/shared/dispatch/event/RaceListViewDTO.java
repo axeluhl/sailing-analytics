@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RaceListViewDTO {
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+
+public class RaceListViewDTO implements DTO {
     
     private LiveRacesDTO liveRaces;
     
