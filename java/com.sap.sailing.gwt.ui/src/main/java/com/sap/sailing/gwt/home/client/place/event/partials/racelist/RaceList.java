@@ -40,6 +40,8 @@ import com.sap.sailing.gwt.ui.regattaoverview.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.regattaoverview.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
+import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
@@ -97,7 +99,7 @@ public class RaceList extends Composite {
     }
 
     private void initColumns() {
-        add(new RaceListColumn<String>("", new FleetCornerCell()) {
+        add(new RaceListColumn<FleetMetadataDTO>("", new FleetCornerCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return null;
@@ -109,8 +111,8 @@ public class RaceList extends Composite {
             }
 
             @Override
-            public String getValue(LiveRaceDTO object) {
-                return object.getFleet() != null ? object.getFleet().getFleetColor() : "";
+            public FleetMetadataDTO getValue(LiveRaceDTO object) {
+                return object.getFleet();
             }
         });
 
@@ -191,7 +193,7 @@ public class RaceList extends Composite {
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return object.getFleet() != null ? object.getFleet().getFleetName() : "-";
+                return object.getFleet() != null ? object.getFleet().getFleetName() : null;
             }
         });
 
@@ -268,7 +270,7 @@ public class RaceList extends Composite {
 
             @Override
             public String getValue(LiveRaceDTO object) {
-                return object.getWind() != null ? I18N.knotsValue(object.getWind().getTrueWindSpeedInKnots()) : "-";
+                return object.getWind() != null ? I18N.knotsValue(object.getWind().getTrueWindSpeedInKnots()) : null;
             }
         });
 
@@ -351,7 +353,7 @@ public class RaceList extends Composite {
             }
         });
 
-        add(new RaceListColumn<RaceProgressDTO>(I18N.status(), new RaceProgressCell()) {
+        add(new RaceListColumn<LiveRaceDTO>(I18N.status(), new RaceProgressCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return new InvertibleComparatorWrapper<LiveRaceDTO, Double>(new NullSafeComparableComparator<Double>()) {
@@ -373,12 +375,12 @@ public class RaceList extends Composite {
             }
 
             @Override
-            public RaceProgressDTO getValue(LiveRaceDTO object) {
-                return object.getProgress();
+            public LiveRaceDTO getValue(LiveRaceDTO object) {
+                return object;
             }
         });
 
-        RaceListColumn<RegattaAndRaceIdentifier> watchNowButtonColumn = new RaceListColumn<RegattaAndRaceIdentifier>("", new WatchNowButtonCell()) {
+        add(new RaceListColumn<RegattaAndRaceIdentifier>("", new WatchNowButtonCell()) {
             @Override
             public InvertibleComparator<LiveRaceDTO> getComparator() {
                 return null;
@@ -398,8 +400,7 @@ public class RaceList extends Composite {
             public RegattaAndRaceIdentifier getValue(LiveRaceDTO object) {
                 return object.getID();
             }
-        };
-        add(watchNowButtonColumn);
+        });
     }
 
     private void add(RaceListColumn<?> column) {
@@ -432,11 +433,13 @@ public class RaceList extends Composite {
         }
     }
 
-    private static class FleetCornerCell extends AbstractCell<String> {
+    private static class FleetCornerCell extends AbstractCell<FleetMetadataDTO> {
         @Override
-        public void render(Context context, String value, SafeHtmlBuilder sb) {
-            sb.append(TEMPLATE.fleetCorner(CSS.race_fleetcorner_icon(),
-                    SafeStylesUtils.fromTrustedNameAndValue("border-top-color", value)));
+        public void render(Context context, FleetMetadataDTO value, SafeHtmlBuilder sb) {
+            if (value != null) {
+                sb.append(TEMPLATE.fleetCorner(CSS.race_fleetcorner_icon(),
+                        SafeStylesUtils.fromTrustedNameAndValue("border-top-color", value.getFleetColor())));
+            }
         }
     }
 
@@ -464,12 +467,16 @@ public class RaceList extends Composite {
         }
     }
 
-    private static class RaceProgressCell extends AbstractCell<RaceProgressDTO> {
+    private static class RaceProgressCell extends AbstractCell<LiveRaceDTO> {
         @Override
-        public void render(Context context, RaceProgressDTO value, SafeHtmlBuilder sb) {
-            if (value != null) {
-                SafeStyles width = SafeStylesUtils.forWidth(value.getPercentageProgress(), Unit.PCT);
-                String text = I18N.currentOfTotalLegs(value.getCurrentLeg(), value.getTotalLegs());
+        public void render(Context context, LiveRaceDTO value, SafeHtmlBuilder sb) {
+            RaceState state = value.getState();
+            RaceProgressDTO progress = value.getProgress();
+            if (state != RaceState.LIVE) {
+                sb.appendEscaped(state.name());
+            } else if (progress != null) {
+                SafeStyles width = SafeStylesUtils.forWidth(progress.getPercentageProgress(), Unit.PCT);
+                String text = I18N.currentOfTotalLegs(progress.getCurrentLeg(), progress.getTotalLegs());
                 sb.append(TEMPLATE.raceProgress(CSS.race_itemstatus_progressbar(),
                         CSS.race_itemstatus_progressbar_progress(), width, text));
             }
