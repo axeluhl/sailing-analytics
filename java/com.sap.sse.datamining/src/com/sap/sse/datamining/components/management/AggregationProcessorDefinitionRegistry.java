@@ -1,4 +1,6 @@
-package com.sap.sse.datamining;
+package com.sap.sse.datamining.components.management;
+
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 
 public interface AggregationProcessorDefinitionRegistry extends AggregationProcessorDefinitionProvider {
 

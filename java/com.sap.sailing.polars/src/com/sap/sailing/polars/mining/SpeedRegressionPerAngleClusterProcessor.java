@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;

@@ -12,13 +12,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AggregationProcessorDefinitionRegistry;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.SimpleDataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;

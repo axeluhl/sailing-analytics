@@ -12,14 +12,16 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.sap.sse.datamining.AggregationProcessorDefinition;
-import com.sap.sse.datamining.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningServer;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.SimpleDataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 

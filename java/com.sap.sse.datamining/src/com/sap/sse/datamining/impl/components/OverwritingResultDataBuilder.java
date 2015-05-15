@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Locale;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.data.Unit;

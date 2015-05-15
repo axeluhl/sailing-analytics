@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;

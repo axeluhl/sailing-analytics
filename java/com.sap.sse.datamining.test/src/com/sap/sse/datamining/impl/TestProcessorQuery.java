@@ -20,9 +20,9 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalQueryData;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;

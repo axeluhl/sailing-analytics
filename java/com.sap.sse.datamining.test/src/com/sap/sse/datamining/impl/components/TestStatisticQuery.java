@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -15,13 +15,15 @@ import java.util.concurrent.ExecutorService;
 
 import org.junit.Test;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
+import com.sap.sse.datamining.impl.AbstractDataSourceProvider;
+import com.sap.sse.datamining.impl.ModifiableStatisticQueryDefinition;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;

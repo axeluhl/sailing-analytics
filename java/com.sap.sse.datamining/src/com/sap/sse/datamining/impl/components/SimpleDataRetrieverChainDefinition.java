@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,8 +7,8 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.DataRetrieverChainBuilder;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 

@@ -3,7 +3,7 @@ package com.sap.sse.datamining.test.util.components;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;

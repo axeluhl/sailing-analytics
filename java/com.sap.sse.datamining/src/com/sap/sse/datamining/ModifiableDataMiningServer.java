@@ -1,5 +1,9 @@
 package com.sap.sse.datamining;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 

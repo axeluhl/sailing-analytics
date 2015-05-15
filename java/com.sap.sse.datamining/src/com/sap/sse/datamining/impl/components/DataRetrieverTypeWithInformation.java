@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import com.sap.sse.datamining.components.Processor;
 

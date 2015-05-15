@@ -13,11 +13,11 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;

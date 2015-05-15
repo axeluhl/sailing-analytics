@@ -20,8 +20,8 @@ import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 
 public class SailingDataRetrievalChainDefinitions {
 

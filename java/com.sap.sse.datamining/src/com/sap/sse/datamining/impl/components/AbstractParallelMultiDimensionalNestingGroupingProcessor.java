@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;

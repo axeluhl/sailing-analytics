@@ -1,13 +1,14 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components.management;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.sap.sse.datamining.DataMiningQueryManager;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.Query.QueryType;
+import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.SingleQueryPerDimensionManager.Key;
+import com.sap.sse.datamining.impl.AdditionalDimensionValuesQueryData;
+import com.sap.sse.datamining.impl.components.management.SingleQueryPerDimensionManager.Key;
 import com.sap.sse.datamining.shared.DataMiningSession;
 
 public class SingleQueryPerDimensionManager extends SingleQueryPerKeyManager<Key> {

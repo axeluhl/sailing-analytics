@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.DataRetrieverChainBuilder;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 
 public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetrieverChainBuilder<DataSourceType> {
     

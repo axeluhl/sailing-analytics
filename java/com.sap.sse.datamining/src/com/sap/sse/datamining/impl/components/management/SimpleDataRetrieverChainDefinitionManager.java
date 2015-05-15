@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components.management;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 
 public class SimpleDataRetrieverChainDefinitionManager implements DataRetrieverChainDefinitionRegistry {
 

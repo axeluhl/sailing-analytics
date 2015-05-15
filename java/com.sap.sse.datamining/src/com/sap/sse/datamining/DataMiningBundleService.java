@@ -1,5 +1,7 @@
 package com.sap.sse.datamining;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 import com.sap.sse.i18n.ResourceBundleStringMessages;

@@ -10,9 +10,10 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;

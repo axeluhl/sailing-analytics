@@ -1,4 +1,4 @@
-package com.sap.sse.datamining;
+package com.sap.sse.datamining.components;
 
 import java.util.Locale;
 

@@ -1,6 +1,7 @@
-package com.sap.sse.datamining;
+package com.sap.sse.datamining.components.management;
 
-import com.sap.sse.datamining.impl.NullDataMiningQueryManager;
+import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.impl.components.management.NullDataMiningQueryManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 

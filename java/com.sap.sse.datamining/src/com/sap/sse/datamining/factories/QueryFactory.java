@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.DataRetrieverChainBuilder;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;

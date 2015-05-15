@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;

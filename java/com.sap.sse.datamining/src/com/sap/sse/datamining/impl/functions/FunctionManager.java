@@ -13,14 +13,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;

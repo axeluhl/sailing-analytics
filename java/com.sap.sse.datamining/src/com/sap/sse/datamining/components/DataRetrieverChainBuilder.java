@@ -1,7 +1,5 @@
-package com.sap.sse.datamining;
+package com.sap.sse.datamining.components;
 
-import com.sap.sse.datamining.components.FilterCriterion;
-import com.sap.sse.datamining.components.Processor;
 
 /**
  * Used to construct a chain of retriever processors step by step. Allows to set the filter and result

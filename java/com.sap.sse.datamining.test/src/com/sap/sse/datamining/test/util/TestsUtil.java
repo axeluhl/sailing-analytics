@@ -1,11 +1,11 @@
 package com.sap.sse.datamining.test.util;
 
-import com.sap.sse.datamining.AggregationProcessorDefinitionRegistry;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
-import com.sap.sse.datamining.impl.AggregationProcessorDefinitionManager;
+import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.SimpleDataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;

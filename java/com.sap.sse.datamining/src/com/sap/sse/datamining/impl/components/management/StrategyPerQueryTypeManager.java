@@ -1,11 +1,11 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components.management;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.datamining.DataMiningQueryManager;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.Query.QueryType;
+import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 

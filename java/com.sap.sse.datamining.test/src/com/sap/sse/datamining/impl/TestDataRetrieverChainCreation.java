@@ -10,10 +10,12 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.DataRetrieverChainBuilder;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;

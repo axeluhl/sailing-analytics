@@ -1,11 +1,11 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components.management;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.sap.sse.datamining.DataMiningQueryManager;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
+import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 
