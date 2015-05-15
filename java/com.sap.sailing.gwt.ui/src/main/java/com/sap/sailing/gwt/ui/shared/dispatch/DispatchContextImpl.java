@@ -1,26 +1,33 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
-import org.osgi.framework.BundleContext;
+import java.util.Date;
+
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 
 public class DispatchContextImpl implements DispatchContext {
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final Date currentClientTime;
+    private final Date currentServerTime = new Date();
 
-    public  DispatchContextImpl() {
-        final BundleContext context = Activator.getDefault();
-//        final Activator activator = Activator.getInstance();
-
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+    public  DispatchContextImpl(Date currentClientTime, ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker) {
+        this.currentClientTime = currentClientTime;
+        this.racingEventServiceTracker = racingEventServiceTracker;
     }
     
     @Override
     public RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
+    }
+    
+    public Date getCurrentClientTime() {
+        return currentClientTime;
+    }
+    
+    public Date getCurrentServerTime() {
+        return currentServerTime;
     }
 }
