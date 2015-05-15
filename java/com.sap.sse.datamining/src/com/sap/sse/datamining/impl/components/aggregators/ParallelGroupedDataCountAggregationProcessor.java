@@ -12,7 +12,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.Unit;
 
 public class ParallelGroupedDataCountAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<?>, Map<GroupKey, Double>> {
+        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<?>, AnyDataType, Map<GroupKey, Double>> {
 
     private Map<GroupKey, Double> countMap;
     
@@ -20,6 +20,7 @@ public class ParallelGroupedDataCountAggregationProcessor extends
     public ParallelGroupedDataCountAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
         super((Class<GroupedDataEntry<?>>)(Class<?>) GroupedDataEntry.class,
+               AnyDataType.class,
               (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
               executor, resultReceivers, "Count");
         countMap = new HashMap<>();

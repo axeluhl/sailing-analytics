@@ -11,20 +11,28 @@ import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 
-public abstract class AbstractParallelStoringAggregationProcessor<InputType, AggregatedType> 
+public abstract class AbstractParallelStoringAggregationProcessor<InputType, ExtractedType, AggregatedType> 
                       extends AbstractParallelProcessor<InputType, AggregatedType> {
 
+    private final Class<ExtractedType> extractedType;
+    
     private final Lock storeLock;
     private final String aggregationNameMessageKey;
 
     public AbstractParallelStoringAggregationProcessor(Class<InputType> inputType,
+                                                       Class<ExtractedType> dataType,
                                                        Class<AggregatedType> resultType,
                                                        ExecutorService executor,
                                                        Collection<Processor<AggregatedType, ?>> resultReceivers,
                                                        String aggregationNameMessageKey) {
         super(inputType, resultType, executor, resultReceivers);
+        this.extractedType = dataType;
         storeLock = new ReentrantLock();
         this.aggregationNameMessageKey = aggregationNameMessageKey;
+    }
+    
+    public Class<ExtractedType> getExtractedType() {
+        return extractedType;
     }
 
     @Override

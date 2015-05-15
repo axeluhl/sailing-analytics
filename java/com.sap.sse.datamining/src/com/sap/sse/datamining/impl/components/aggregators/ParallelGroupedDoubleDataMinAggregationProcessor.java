@@ -10,7 +10,7 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelGroupedDoubleDataMinAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
+        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Double, Map<GroupKey, Double>> {
 
     private Map<GroupKey, Double> minMap;
     
@@ -18,6 +18,7 @@ public class ParallelGroupedDoubleDataMinAggregationProcessor extends
     public ParallelGroupedDoubleDataMinAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
         super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
+               Double.class,
               (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
               executor, resultReceivers, "Minimum");
         minMap = new HashMap<>();

@@ -11,15 +11,16 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelGroupedDoubleDataAverageAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
+        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Double, Map<GroupKey, Double>> {
 
-    private final AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor;
+    private final AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Double, Map<GroupKey, Double>> sumAggregationProcessor;
     private final Map<GroupKey, Integer> elementAmountPerKey;
 
     @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataAverageAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
         super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
+               Double.class,
               (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
               executor, resultReceivers, "Average");
         elementAmountPerKey = new HashMap<>();
