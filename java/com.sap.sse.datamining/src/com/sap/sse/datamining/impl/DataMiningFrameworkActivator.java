@@ -12,6 +12,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sse.datamining.AggregationProcessorDefinition;
+import com.sap.sse.datamining.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
@@ -37,8 +39,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
 
         FunctionManager functionManager = new FunctionManager();
-        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
-        dataMiningServer = new DataMiningServerImpl(executor, functionManager, functionManager, dataRetrieverChainDefinitionRegistry);
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new SimpleDataRetrieverChainDefinitionManager();
+        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
+        dataMiningServer = new DataMiningServerImpl(executor, functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
         dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningFrameworkActivator.class.getClassLoader()));
         
         serviceRegistrations = new HashSet<>();
@@ -79,6 +82,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }
+        for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : dataMiningBundleService.getAggregationProcessorDefinitions()) {
+            dataMiningServer.registerAggregationProcessor(aggregationProcessorDefinition);
+        }
     }
 
     private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
@@ -90,6 +96,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+        }
+        for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : dataMiningBundleService.getAggregationProcessorDefinitions()) {
+            dataMiningServer.unregisterAggregationProcessor(aggregationProcessorDefinition);
         }
     }
 

@@ -9,18 +9,14 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class ParallelGroupedDoubleDataMaxAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Double, Map<GroupKey, Double>> {
+public class ParallelGroupedDoubleDataMaxAggregationProcessor
+                extends AbstractParallelGroupedDataStoringAggregationProcessor<Double, Double> {
 
     private Map<GroupKey, Double> maxMap;
     
-    @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataMaxAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
-        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
-               Double.class,
-              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-              executor, resultReceivers, "Maximum");
+        super(executor, resultReceivers, "Maximum");
         maxMap = new HashMap<>();
     }
 

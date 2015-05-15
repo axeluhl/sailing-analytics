@@ -20,17 +20,13 @@ import com.sap.sse.datamining.shared.GroupKey;
  * @param <DataType> The data type for the elements in the resulting sets
  */
 public class ParallelGroupedDataCollectingAsSetProcessor<DataType>
-             extends AbstractParallelStoringAggregationProcessor<GroupedDataEntry<DataType>, DataType, Map<GroupKey, Set<DataType>>> {
+             extends AbstractParallelGroupedDataStoringAggregationProcessor<DataType, Set<DataType>> {
 
     private final Map<GroupKey, Set<DataType>> collectedDataMappedByGroupKey;
     
-    @SuppressWarnings("unchecked")
     public ParallelGroupedDataCollectingAsSetProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Set<DataType>>, ?>> resultReceivers) {
-        super((Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class,
-               null,
-              (Class<Map<GroupKey, Set<DataType>>>)(Class<?>) Map.class,
-              executor, resultReceivers, "Collecting");
+        super(executor, resultReceivers, "Collecting");
         collectedDataMappedByGroupKey = new HashMap<>();
     }
 

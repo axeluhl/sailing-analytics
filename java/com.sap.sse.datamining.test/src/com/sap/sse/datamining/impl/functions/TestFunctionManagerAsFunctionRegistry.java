@@ -12,11 +12,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sap.sse.datamining.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
@@ -52,9 +54,10 @@ public class TestFunctionManagerAsFunctionRegistry {
     
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
-        OpenFunctionManager functionRegistry = new OpenFunctionManager();
-        DataRetrieverChainDefinitionRegistry retrieverChainRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
-        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionRegistry, functionRegistry, retrieverChainRegistry);
+        OpenFunctionManager functionManager = new OpenFunctionManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new SimpleDataRetrieverChainDefinitionManager();
+        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
+        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
 
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
@@ -69,13 +72,13 @@ public class TestFunctionManagerAsFunctionRegistry {
         Collection<Function<?>> expectedDimensions = new HashSet<>();
         expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
         expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
-        assertThat(functionRegistry.getDimensions(), is(expectedDimensions));
+        assertThat(functionManager.getDimensions(), is(expectedDimensions));
         
         Collection<Function<?>> expectedStatistics = expectedFunctionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
         assertThat(server.getAllStatistics(), is(expectedStatistics));
         
         Collection<Function<?>> expectedExternalFunctions = expectedFunctionRegistryUtil.getExpectedExternalFunctionsFor(Test_ExternalLibraryClass.class);
-        assertThat(functionRegistry.getExternalFunctions(), is(expectedExternalFunctions));
+        assertThat(functionManager.getExternalFunctions(), is(expectedExternalFunctions));
     }
     
     @Test

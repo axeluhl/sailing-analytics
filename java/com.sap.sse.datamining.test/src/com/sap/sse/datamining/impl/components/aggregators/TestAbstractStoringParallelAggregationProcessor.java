@@ -41,7 +41,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer, Integer>(Integer.class, Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {
                 elementStore.add(element);
@@ -92,7 +92,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
                 }
             }
         });
-        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer, Integer>(Integer.class, Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
+        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {
                 if (element < 0) {

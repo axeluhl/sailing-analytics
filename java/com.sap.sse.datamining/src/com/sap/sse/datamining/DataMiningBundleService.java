@@ -39,5 +39,11 @@ public interface DataMiningBundleService {
      * @return a collection of {@link DataSourceProvider DataSourceProviders}, that are used to get the data sources for the queries
      */
     public Iterable<DataSourceProvider<?>> getDataSourceProviders();
+    
+    /**
+     * @return a collection of {@link AggregationProcessorDefinition AggregationProcessorDefinitions}, that are used by this
+     *         bundle to aggregate the result.
+     */
+    public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions();
 
 }

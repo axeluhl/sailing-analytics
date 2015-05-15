@@ -6,13 +6,14 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
+import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.datamining.AggregationProcessorDefinition;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataSourceProvider;
@@ -89,6 +90,11 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
             dataSourceProvidersHaveBeenInitialized = true;
         }
         return dataSourceProviders;
+    }
+    
+    @Override
+    public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions() {
+        return new HashSet<>();
     }
     
     private void initializeDataSourceProviders() {

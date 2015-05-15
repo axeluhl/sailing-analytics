@@ -11,23 +11,19 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.Unit;
 
-public class ParallelGroupedDataCountAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<?>, AnyDataType, Map<GroupKey, Double>> {
+public class ParallelGroupedDataCountAggregationProcessor
+                extends AbstractParallelGroupedDataStoringAggregationProcessor<Object, Double> {
 
     private Map<GroupKey, Double> countMap;
     
-    @SuppressWarnings("unchecked")
     public ParallelGroupedDataCountAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
-        super((Class<GroupedDataEntry<?>>)(Class<?>) GroupedDataEntry.class,
-               AnyDataType.class,
-              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-              executor, resultReceivers, "Count");
+        super(executor, resultReceivers, "Count");
         countMap = new HashMap<>();
     }
 
     @Override
-    protected void storeElement(GroupedDataEntry<?> element) {
+    protected void storeElement(GroupedDataEntry<Object> element) {
         GroupKey key = element.getKey();
         if (!countMap.containsKey(key)) {
             countMap.put(key, 0.0);

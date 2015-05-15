@@ -21,10 +21,10 @@ public interface DataMiningServer {
     
     public ExecutorService getExecutorService();
     public ResourceBundleStringMessages getStringMessages();
-    public FunctionProvider getFunctionProvider();
 
     public Date getComponentsChangedTimepoint();
 
+    public FunctionProvider getFunctionProvider();
     public Iterable<Function<?>> getAllStatistics();
     public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
     public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
@@ -36,25 +36,21 @@ public interface DataMiningServer {
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
 
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
-
     public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
             Class<DataSourceType> dataSourceType);
-
     public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
             Class<DataType> dataType);
-
     public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType);
-
     public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id);
     
-    public <DataSourceType, DataType, ResultType> StatisticQueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(StatisticQueryDefinitionDTO queryDefinitionDTO);
-
     public <DataSourceType> Query<Set<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, Locale locale);
-
+    public <DataSourceType, DataType, ResultType> StatisticQueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(StatisticQueryDefinitionDTO queryDefinitionDTO);
     public <DataSourceType, ResultType> Query<ResultType> createQuery(StatisticQueryDefinition<DataSourceType, ?, ResultType> queryDefinition);
-    
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query);
+    
+    public AggregationProcessorDefinitionProvider getAggregationProcessorProvider();
+    public <ExtractedType> Iterable<AggregationProcessorDefinition<ExtractedType, ?>> getAggregationProcessorDefinitions(Class<ExtractedType> extractedType);
     
 }

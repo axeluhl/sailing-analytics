@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.AggregationProcessorDefinition;
+import com.sap.sse.datamining.AggregationProcessorDefinitionProvider;
+import com.sap.sse.datamining.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.DataMiningQueryManager;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataRetrieverChainDefinitionProvider;
@@ -40,21 +43,22 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final DataMiningQueryManager dataMiningQueryManager;
     
     private final FunctionRegistry functionRegistry;
-    private final FunctionProvider functionProvider;
-    
     private final Map<Class<?>, DataSourceProvider<?>> dataSourceProviderMappedByDataSourceType;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
+    private final AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry;
 
-    public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
+    public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry,
+                                DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
+                                AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry) {
         this.stringMessages = new CompoundResourceBundleStringMessages();
         this.executorService = executorService;
         componentsChangedTimepoint = new Date();
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
         this.functionRegistry = functionRegistry;
-        this.functionProvider = functionProvider;
         dataSourceProviderMappedByDataSourceType = new HashMap<>();
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
+        this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
     }
     
     @Override
@@ -123,37 +127,37 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public FunctionProvider getFunctionProvider() {
-        return functionProvider;
+        return functionRegistry;
     }
 
     @Override
     public Iterable<Function<?>> getAllStatistics() {
-        return functionProvider.getAllStatistics();
+        return functionRegistry.getAllStatistics();
     }
 
     @Override
     public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return functionProvider.getFunctionsFor(sourceType);
+        return functionRegistry.getFunctionsFor(sourceType);
     }
 
     @Override
     public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType) {
-        return functionProvider.getStatisticsFor(sourceType);
+        return functionRegistry.getStatisticsFor(sourceType);
     }
 
     @Override
     public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType) {
-        return functionProvider.getDimensionsFor(sourceType);
+        return functionRegistry.getDimensionsFor(sourceType);
     }
 
     @Override
     public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionProvider.getDimensionsFor(dataRetrieverChainDefinition);
+        return functionRegistry.getDimensionsFor(dataRetrieverChainDefinition);
     }
 
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
-        return functionProvider.getFunctionForDTO(functionDTO);
+        return functionRegistry.getFunctionForDTO(functionDTO);
     }
     
     @Override
@@ -217,6 +221,32 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id) {
         return dataRetrieverChainDefinitionRegistry.get(id);
+    }
+
+    @Override
+    public AggregationProcessorDefinitionProvider getAggregationProcessorProvider() {
+        return aggregationProcessorDefinitionRegistry;
+    }
+
+    @Override
+    public <ExtractedType> Iterable<AggregationProcessorDefinition<ExtractedType, ?>> getAggregationProcessorDefinitions(
+            Class<ExtractedType> extractedType) {
+        return aggregationProcessorDefinitionRegistry.get(extractedType);
+    }
+
+    @Override
+    public AggregationProcessorDefinitionRegistry getAggregationProcessorRegistry() {
+        return aggregationProcessorDefinitionRegistry;
+    }
+
+    @Override
+    public void registerAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
+        aggregationProcessorDefinitionRegistry.register(aggregationProcessorDefinition);
+    }
+
+    @Override
+    public void unregisterAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
+        aggregationProcessorDefinitionRegistry.unregister(aggregationProcessorDefinition);
     }
     
     @Override
