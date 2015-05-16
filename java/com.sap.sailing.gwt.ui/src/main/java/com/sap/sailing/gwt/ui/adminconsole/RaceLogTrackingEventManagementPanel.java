@@ -22,8 +22,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -37,8 +35,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -370,7 +366,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 trackedRacesCaptionPanel.setVisible(true);
             }
             
-            sailingService.getRegattaLog(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
+            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
@@ -379,22 +375,15 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     }
 
     
-    private class RegattaLogCallBack implements AsyncCallback<RegattaLogDTO>{
+    private class RegattaLogCallBack implements AsyncCallback<Boolean>{
         @Override
         public void onFailure(Throwable caught) {
             regattaHasCompetitors = false;
         }
 
         @Override
-        public void onSuccess(RegattaLogDTO result) {
-            for (RegattaLogEventDTO event : result.getEntries()) {
-                if (event.getType().equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())
-                        || event.getType().equals(RegattaLogRegisterCompetitorEventImpl.class.getSimpleName())){
-                    regattaHasCompetitors = true;
-                    return;
-                }
-            }
-            regattaHasCompetitors = false;
+        public void onSuccess(Boolean result) {
+            regattaHasCompetitors = true;
         }
     }
     
