@@ -9,6 +9,6 @@ public interface AggregationProcessorDefinition<ExtractedType, AggregatedType> {
     
     public String getAggregationNameMessageKey();
     
-    public Class<AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> getAggregationProcessor();
+    public Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> getAggregationProcessor();
 
 }

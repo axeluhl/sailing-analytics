@@ -18,7 +18,7 @@ import com.sap.sse.datamining.components.management.DataRetrieverChainDefinition
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
-import com.sap.sse.datamining.impl.components.management.SimpleDataRetrieverChainDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
@@ -55,7 +55,7 @@ public class TestFunctionManagerAsFunctionRegistry {
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
         OpenFunctionManager functionManager = new OpenFunctionManager();
-        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new SimpleDataRetrieverChainDefinitionManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
         ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
 

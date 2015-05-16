@@ -2,7 +2,6 @@ package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +27,7 @@ import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunc
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.util.Classes;
 
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
@@ -249,7 +249,8 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
 
     private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, FunctionRetrievalStrategies retrievalStrategy) {
-        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
+        Collection<Class<?>> typesToRetrieve = Classes.getSupertypesOf(sourceType);
+        typesToRetrieve.remove(Object.class);
         typesToRetrieve.add(sourceType);
         return getFunctionsFor(typesToRetrieve, retrievalStrategy);
     }
@@ -263,44 +264,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             }
         }
         return functions;
-    }
-
-    private Collection<Class<?>> getSupertypesOf(Class<?> type) {
-        Collection<Class<?>> supertypes = new HashSet<>();
-        
-        supertypes.addAll(getInterfacesOf(type));
-        if (isSuperclassValid(type)) {
-            supertypes.add(type.getSuperclass());
-        }
-        
-        supertypes.addAll(getSupertypesOf(supertypes));
-        return supertypes;
-    }
-
-    private Collection<Class<?>> getInterfacesOf(Class<?> type) {
-        return Arrays.asList(type.getInterfaces());
-    }
-
-    private boolean isSuperclassValid(Class<?> subType) {
-        return subType.getSuperclass() != null && !subType.getSuperclass().equals(Object.class);
-    }
-
-    private Collection<Class<?>> getSupertypesOf(Collection<Class<?>> types) {
-        Collection<Class<?>> supertypes = new HashSet<>();
-        boolean supertypeAdded;
-        do {
-            Collection<Class<?>> supertypesToAdd = getSupertypesToAdd(types);
-            supertypeAdded = supertypes.addAll(supertypesToAdd);
-        } while (supertypeAdded);
-        return supertypes;
-    }
-
-    private Collection<Class<?>> getSupertypesToAdd(Collection<Class<?>> types) {
-        Collection<Class<?>> supertypesToAdd = new HashSet<>();
-        for (Class<?> supertype : types) {
-            supertypesToAdd.addAll(getSupertypesOf(supertype));
-        }
-        return supertypesToAdd;
     }
     
     @Override

@@ -5,7 +5,7 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
-import com.sap.sse.datamining.impl.components.management.SimpleDataRetrieverChainDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
@@ -39,7 +39,7 @@ public class TestsUtil {
     
     public static ModifiableDataMiningServer createNewServer() {
         FunctionManager functionManager = new FunctionManager();
-        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new SimpleDataRetrieverChainDefinitionManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
         return new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
     }

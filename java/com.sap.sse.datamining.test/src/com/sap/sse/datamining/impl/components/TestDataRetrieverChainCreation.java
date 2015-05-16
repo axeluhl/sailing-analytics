@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;

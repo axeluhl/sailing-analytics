@@ -55,6 +55,7 @@ public interface DataMiningServer {
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query);
     
     public AggregationProcessorDefinitionProvider getAggregationProcessorProvider();
-    public <ExtractedType> Iterable<AggregationProcessorDefinition<ExtractedType, ?>> getAggregationProcessorDefinitions(Class<ExtractedType> extractedType);
+    public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(Class<ExtractedType> extractedType);
+    public <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(Class<ExtractedType> extractedType, String aggregationNameMessageKey);
     
 }

@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -172,6 +173,11 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                 retrievalResultReceivers.add(filteringProcessor);
             }
 
+            
+            if (Modifier.isPublic(retrieverConstructor.getModifiers())) {
+                // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
+                retrieverConstructor.setAccessible(true);
+            }
             return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {

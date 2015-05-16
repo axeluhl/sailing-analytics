@@ -10,13 +10,13 @@ import java.util.UUID;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 
-public class SimpleDataRetrieverChainDefinitionManager implements DataRetrieverChainDefinitionRegistry {
+public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDefinitionRegistry {
 
     private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedBySourceType;
     private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedByDataType;
     private final Map<UUID, DataRetrieverChainDefinition<?, ?>> chainDefinitionsMappedByID;
     
-    public SimpleDataRetrieverChainDefinitionManager() {
+    public DataRetrieverChainDefinitionManager() {
         chainDefinitionsMappedBySourceType = new HashMap<>();
         chainDefinitionsMappedByDataType = new HashMap<>();
         chainDefinitionsMappedByID = new HashMap<>();

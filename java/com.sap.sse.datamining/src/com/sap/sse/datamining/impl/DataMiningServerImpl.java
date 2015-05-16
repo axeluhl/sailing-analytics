@@ -230,9 +230,15 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <ExtractedType> Iterable<AggregationProcessorDefinition<ExtractedType, ?>> getAggregationProcessorDefinitions(
+    public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(
             Class<ExtractedType> extractedType) {
-        return aggregationProcessorDefinitionRegistry.get(extractedType);
+        return aggregationProcessorDefinitionRegistry.getByExtractedType(extractedType);
+    }
+    
+    @Override
+    public <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(
+            Class<ExtractedType> extractedType, String aggregationNameMessageKey) {
+        return aggregationProcessorDefinitionRegistry.get(extractedType, aggregationNameMessageKey);
     }
 
     @Override
@@ -242,12 +248,18 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public void registerAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
-        aggregationProcessorDefinitionRegistry.register(aggregationProcessorDefinition);
+        boolean componentsChanged = aggregationProcessorDefinitionRegistry.register(aggregationProcessorDefinition);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
 
     @Override
     public void unregisterAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
-        aggregationProcessorDefinitionRegistry.unregister(aggregationProcessorDefinition);
+        boolean componentsChanged = aggregationProcessorDefinitionRegistry.unregister(aggregationProcessorDefinition);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override

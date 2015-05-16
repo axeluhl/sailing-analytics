@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components.management;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -21,6 +21,9 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.AdditionalDimensionValuesQueryData;
+import com.sap.sse.datamining.impl.AdditionalOtherQueryData;
+import com.sap.sse.datamining.impl.AdditionalStatisticQueryData;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
