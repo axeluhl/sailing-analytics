@@ -714,4 +714,18 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
             String emails, String localeInfoName, AsyncCallback<Void> callback);
 
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
+
+    void getMarksInRegattaLog(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
+
+    void getDeviceMappingsFromLogHierarchy(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
+
+    void getCompetitorRegistrationsInRegattaLog(String leaderboardName,
+            AsyncCallback<Collection<CompetitorDTO>> asyncCallback);
+
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds, AsyncCallback<Void> callback);
+
+    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint,
+            AsyncCallback<Void> asyncCallback);
+
+    void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback);
 }

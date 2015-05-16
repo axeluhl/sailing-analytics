@@ -136,11 +136,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                         }
                     }).show();
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    
-                    
-                    new AddDeviceMappingToRegattaLogDialog(sailingService, errorReporter, stringMessages,
-                            leaderboardName).show();
-                    //new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
+                    new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName).show();
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS.equals(value)) {
                     openChooseEventDialogAndSendMails(leaderboardName);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {

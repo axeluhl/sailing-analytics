@@ -9,8 +9,8 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.base.Mark;
 
-public class DefinedMarkFinder extends RaceLogAnalyzer<Iterable<Mark>> {
-    public DefinedMarkFinder(RaceLog raceLog) {
+public class RaceLogDefinedMarkFinder extends RaceLogAnalyzer<Iterable<Mark>> {
+    public RaceLogDefinedMarkFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
