@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -36,6 +38,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -384,7 +387,14 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
 
         @Override
         public void onSuccess(RegattaLogDTO result) {
-            regattaHasCompetitors = true;
+            for (RegattaLogEventDTO event : result.getEntries()) {
+                if (event.getType().equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())
+                        || event.getType().equals(RegattaLogRegisterCompetitorEventImpl.class.getSimpleName())){
+                    regattaHasCompetitors = true;
+                    return;
+                }
+            }
+            regattaHasCompetitors = false;
         }
     }
     
