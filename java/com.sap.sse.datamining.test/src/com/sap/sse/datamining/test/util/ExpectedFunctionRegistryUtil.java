@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Leg;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
-import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
+import com.sap.sse.datamining.test.data.Test_HasRaceContext;
+import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.domain.Test_Boat;
+import com.sap.sse.datamining.test.domain.Test_Competitor;
+import com.sap.sse.datamining.test.domain.Test_Leg;
+import com.sap.sse.datamining.test.domain.Test_Named;
 
 public class ExpectedFunctionRegistryUtil {
 

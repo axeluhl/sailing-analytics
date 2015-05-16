@@ -8,9 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.data.impl.DataTypeWithContext;
+import com.sap.sse.datamining.test.data.impl.DataTypeWithContextImpl;
+import com.sap.sse.datamining.test.data.impl.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestMethodWrappingFunctionInvocation {

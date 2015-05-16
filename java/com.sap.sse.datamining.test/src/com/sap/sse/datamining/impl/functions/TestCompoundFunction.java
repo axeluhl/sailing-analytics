@@ -12,10 +12,10 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.data.Unit;
-import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
-import com.sap.sse.datamining.test.functions.test_classes.ContainerElementImpl;
-import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
-import com.sap.sse.datamining.test.functions.test_classes.MarkedContainerImpl;
+import com.sap.sse.datamining.test.data.impl.ContainerElement;
+import com.sap.sse.datamining.test.data.impl.ContainerElementImpl;
+import com.sap.sse.datamining.test.data.impl.MarkedContainer;
+import com.sap.sse.datamining.test.data.impl.MarkedContainerImpl;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 

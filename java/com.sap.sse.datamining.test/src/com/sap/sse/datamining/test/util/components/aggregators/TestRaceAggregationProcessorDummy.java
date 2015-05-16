@@ -8,7 +8,7 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Race;
+import com.sap.sse.datamining.test.domain.Test_Race;
 
 public class TestRaceAggregationProcessorDummy extends
         AbstractParallelGroupedDataStoringAggregationProcessor<Test_Race, Test_Race> {

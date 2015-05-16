@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
+import com.sap.sse.datamining.test.domain.Test_Regatta;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 

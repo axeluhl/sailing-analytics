@@ -5,20 +5,20 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.sap.sse.datamining.factories.ProcessorFactory;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_BoatClass;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Leg;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Race;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Team;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_BoatClassImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_BoatImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_CompetitorImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_LegImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_RaceImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_RegattaImpl;
-import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_TeamImpl;
+import com.sap.sse.datamining.test.domain.Test_Boat;
+import com.sap.sse.datamining.test.domain.Test_BoatClass;
+import com.sap.sse.datamining.test.domain.Test_Competitor;
+import com.sap.sse.datamining.test.domain.Test_Leg;
+import com.sap.sse.datamining.test.domain.Test_Race;
+import com.sap.sse.datamining.test.domain.Test_Regatta;
+import com.sap.sse.datamining.test.domain.Test_Team;
+import com.sap.sse.datamining.test.domain.impl.Test_BoatClassImpl;
+import com.sap.sse.datamining.test.domain.impl.Test_BoatImpl;
+import com.sap.sse.datamining.test.domain.impl.Test_CompetitorImpl;
+import com.sap.sse.datamining.test.domain.impl.Test_LegImpl;
+import com.sap.sse.datamining.test.domain.impl.Test_RaceImpl;
+import com.sap.sse.datamining.test.domain.impl.Test_RegattaImpl;
+import com.sap.sse.datamining.test.domain.impl.Test_TeamImpl;
 
 public final class ComponentTestsUtil {
     

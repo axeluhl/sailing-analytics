@@ -10,12 +10,12 @@ import java.util.Set;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.functions.test_classes.ExtendingInterface;
-import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.data.impl.DataTypeInterface;
+import com.sap.sse.datamining.test.data.impl.DataTypeWithContext;
+import com.sap.sse.datamining.test.data.impl.DataTypeWithContextImpl;
+import com.sap.sse.datamining.test.data.impl.ExtendingInterface;
+import com.sap.sse.datamining.test.data.impl.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
 
 public class FunctionTestsUtil extends ConcurrencyTestsUtil {
 
