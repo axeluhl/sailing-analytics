@@ -716,4 +716,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
             String emails, String localeInfoName, AsyncCallback<Void> callback);
 
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
+
+    void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean>  regattaLogCallBack);
 }

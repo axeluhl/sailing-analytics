@@ -33,6 +33,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -222,6 +223,14 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                         service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
                 toRaceLog.add(event);
             }
+            
+            List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /* only unrevoked */ true, RaceLogDeviceMarkMappingEvent.class)
+                    .analyze();
+            
+            for (RaceLogEvent raceLogEvent : markEvents) {
+                toRaceLog.add(raceLogEvent);
+            }
+            
             int passId = toRaceLog.getCurrentPassId();
             RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
                     service.getServerAuthor(), passId, to);

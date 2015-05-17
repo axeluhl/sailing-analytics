@@ -611,4 +611,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String emails, String localeInfoName) throws MailException;
     
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
+
+    boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 }
