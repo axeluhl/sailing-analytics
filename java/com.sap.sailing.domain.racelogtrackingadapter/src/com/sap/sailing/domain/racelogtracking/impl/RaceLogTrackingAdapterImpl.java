@@ -206,7 +206,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
         final Set<Mark> marks = new HashSet<>();
         course.getWaypoints().forEach(wp->Util.addAll(wp.getMarks(), marks));
-        Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
+        final Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
+        final List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /* only unrevoked */ true, RaceLogDeviceMarkMappingEvent.class).analyze();
         for (RaceLog toRaceLog : toRaceLogs) {
             if (course == null || !new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 continue;
@@ -223,14 +224,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                         service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
                 toRaceLog.add(event);
             }
-            
-            List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /* only unrevoked */ true, RaceLogDeviceMarkMappingEvent.class)
-                    .analyze();
-            
             for (RaceLogEvent raceLogEvent : markEvents) {
                 toRaceLog.add(raceLogEvent);
             }
-            
             int passId = toRaceLog.getCurrentPassId();
             RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
                     service.getServerAuthor(), passId, to);
