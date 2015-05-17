@@ -3145,6 +3145,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
                 for (TrackedRace trackedRace : trackedRaces) {
                     trackedRace.setPolarDataService(service);
+                    service.insertExistingFixes(trackedRace);
                 }
             }
         }

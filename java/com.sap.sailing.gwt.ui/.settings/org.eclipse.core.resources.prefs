@@ -1,3 +1,7 @@
 eclipse.preferences.version=1
+encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages.properties=UTF-8
+encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages_cn.properties=UTF-8
+encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages.properties=UTF-8
+encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_cn.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_de.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_ru.properties=UTF-8

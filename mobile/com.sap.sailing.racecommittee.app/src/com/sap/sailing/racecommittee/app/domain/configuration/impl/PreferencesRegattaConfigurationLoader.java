@@ -3,21 +3,23 @@ package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
@@ -69,6 +71,11 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         basic.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.BASIC));
         configuration.setBasicConfiguration(basic);
 
+        LeagueConfigurationImpl league = new LeagueConfigurationImpl();
+        league.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.LEAGUE));
+        league.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.LEAGUE));
+        configuration.setLeagueConfiguration(league);
+
         return configuration.clone();
     }
 
@@ -108,6 +115,10 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         if (configuration.getBasicConfiguration() != null) {
             RacingProcedureConfiguration config = configuration.getBasicConfiguration();
             storeRacingProcedureConfiguration(RacingProcedureType.BASIC, config);
+        }
+        if (configuration.getLeagueConfiguration() != null) {
+            LeagueConfiguration config = configuration.getLeagueConfiguration();
+            storeRacingProcedureConfiguration(RacingProcedureType.LEAGUE, config);
         }
     }
 

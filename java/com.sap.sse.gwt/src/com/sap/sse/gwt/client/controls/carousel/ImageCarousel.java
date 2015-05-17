@@ -115,6 +115,8 @@ public class ImageCarousel extends Widget {
 			    lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
 			    swipeToSlide : false,
 			    arrows : true,
+			    prevArrow : "<div class='slick-prev'/>",
+			    nextArrow : "<div class='slick-next'/>",
 			    responsive : true,
 			    slidesToShow : 2
 
@@ -150,7 +152,6 @@ public class ImageCarousel extends Widget {
             setInfiniteScrolling(false);
             setShowDots(false);
         }
-
     }
 
     /**

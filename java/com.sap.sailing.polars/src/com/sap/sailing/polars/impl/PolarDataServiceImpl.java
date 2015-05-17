@@ -18,9 +18,9 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -162,11 +162,12 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, LegType legType, Speed windSpeed)
+    public BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, ManeuverType maneuverType, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
-        if (legType != LegType.DOWNWIND && legType != LegType.UPWIND) {
-            throw new IllegalArgumentException("LegType needs to be upwind or downwind.");
+        if (maneuverType != ManeuverType.TACK && maneuverType != ManeuverType.JIBE) {
+            throw new IllegalArgumentException("ManeuverType needs to be tack or jibe.");
         }
+        LegType legType = maneuverType == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND;
         if (boatClass == null || windSpeed == null) {
             throw new IllegalArgumentException("Boatclass and windspeed cannot be null.");
         }
@@ -186,6 +187,15 @@ public class PolarDataServiceImpl implements PolarDataService {
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
         return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, true);
+    }
+
+    @Override
+    public void insertExistingFixes(TrackedRace trackedRace) {
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            for (GPSFixMoving fix : trackedRace.getTrack(competitor).getFixes()) {
+                competitorPositionChanged(fix, competitor, trackedRace);
+            }
+        }
     }
 
 }

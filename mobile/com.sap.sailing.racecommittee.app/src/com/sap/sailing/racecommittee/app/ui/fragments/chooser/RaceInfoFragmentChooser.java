@@ -22,6 +22,8 @@ public abstract class RaceInfoFragmentChooser {
             return new ESSRaceInfoFragmentChooser();
         case BASIC:
             return new BasicRaceInfoFragmentChooser();
+        case LEAGUE:
+            return new LeagueRaceInfoFragmentChooser();
         default:
             throw new UnsupportedOperationException(racingProcedureType.toString());
         }

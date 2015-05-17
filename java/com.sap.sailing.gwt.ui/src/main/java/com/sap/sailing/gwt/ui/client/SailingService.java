@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -332,7 +333,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
-    List<String> getUrlResultProviderNames();
+    List<Pair<String, String>> getUrlResultProviderNamesAndOptionalSampleURL();
     
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints);
 
@@ -519,7 +520,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
      * This only affects such events that implement {@link Revokable}.
      */
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
             throws NotRevokableException;
     
     Collection<String> getGPSFixImporterTypes();
@@ -600,7 +601,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
-    
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
@@ -608,4 +608,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
+    
+    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
+
+    boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 }

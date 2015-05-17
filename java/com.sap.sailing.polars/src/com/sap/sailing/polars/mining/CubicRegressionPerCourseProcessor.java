@@ -132,7 +132,8 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
 
     @Override
     public void onFailure(Throwable failure) {
-        logger.severe("Polar Data Mining Pipe failed.");
+        failure.printStackTrace();
+        logger.severe("Polar Data Mining Pipe failed. Cause: " + failure.getMessage());
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
