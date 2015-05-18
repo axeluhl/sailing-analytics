@@ -20,7 +20,6 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -106,7 +105,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         // competitors that have not yet started the leg will get a duration based on Long.MAX_VALUE
         final Map<Competitor, Duration> correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace = new HashMap<>();
-        final Competitor fastestCompetitorInLeg = getCompetitorFarthestAheadInLeg(trackedLeg, timePoint);
+        final Competitor fastestCompetitorInLeg = getCompetitorFarthestAheadInLeg(trackedLeg, timePoint, cache);
         if (fastestCompetitorInLeg != null) {
             final TrackedLegOfCompetitor trackedLegOfFastestCompetitorInLeg = trackedLeg.getTrackedLeg(fastestCompetitorInLeg);
             final Distance totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd;
@@ -161,17 +160,21 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     /**
-     * @return <code>null</code> if no competitor has started the leg yet; the first competitor to finish the leg if any has already
-     * finished the leg; or the competitor with the greatest windward distance traveled in the leg at <code>timePoint</code> otherwise
+     * @return <code>null</code> if no competitor has started the leg yet; the first competitor to finish the leg if any
+     *         has already finished the leg at <code>timePoint</code>; or the competitor with the greatest windward
+     *         distance traveled in the leg at <code>timePoint</code> otherwise
      */
-    private Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint) {
+    private Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Iterable<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getTo());
         Competitor firstAroundMark = null;
         getTrackedRace().lockForRead(markPassingsForLegEnd);
         try {
             final Iterator<MarkPassing> i = markPassingsForLegEnd.iterator();
             if (i.hasNext()) {
-                firstAroundMark = i.next().getCompetitor();
+                MarkPassing markPassing = i.next();
+                if (!markPassing.getTimePoint().after(timePoint)) {
+                    firstAroundMark = markPassing.getCompetitor();
+                }
             }
         } finally {
             getTrackedRace().unlockAfterRead(markPassingsForLegEnd);
@@ -181,14 +184,18 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             result = firstAroundMark;
         } else {
             Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
-            Distance minRemainingDistance = new MeterDistance(Double.MAX_VALUE);
+            Distance maxWindwardDistanceTraveled = new MeterDistance(Double.MIN_VALUE);
             Competitor competitorFarthestAlong = null;
             getTrackedRace().lockForRead(markPassingsForLegStart);
             try {
                 for (MarkPassing mp : markPassingsForLegStart) {
-                    final Distance remainingWindwardDistance = trackedLeg.getTrackedLeg(mp.getCompetitor()).getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);
-                    if (remainingWindwardDistance.compareTo(minRemainingDistance) < 0) {
-                        minRemainingDistance = remainingWindwardDistance;
+                    if (mp.getTimePoint().after(timePoint)) {
+                        break;
+                    }
+                    final Distance windwardDistanceTraveled = getWindwardDistanceTraveled(mp.getCompetitor(), mp.getWaypoint(),
+                            timePoint, cache);
+                    if (windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
+                        maxWindwardDistanceTraveled = windwardDistanceTraveled;
                         competitorFarthestAlong = mp.getCompetitor();
                     }
                 }

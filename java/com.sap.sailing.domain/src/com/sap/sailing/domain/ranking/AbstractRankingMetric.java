@@ -217,7 +217,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
         }
-        return (c1, c2) -> windwardDistanceTraveledPerCompetitor.get(c2).compareTo(windwardDistanceTraveledPerCompetitor.get(c1));
+        final Comparator<Distance> nullsLastDistanceComparator = Comparator.nullsLast(Comparator.naturalOrder());
+        return (c1, c2) -> nullsLastDistanceComparator.compare(
+                windwardDistanceTraveledPerCompetitor.get(c2),
+                windwardDistanceTraveledPerCompetitor.get(c1));
     }
     
     public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
