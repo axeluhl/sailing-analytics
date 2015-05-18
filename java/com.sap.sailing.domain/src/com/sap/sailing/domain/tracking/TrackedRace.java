@@ -641,6 +641,12 @@ public interface TrackedRace extends Serializable {
     void attachRegattaLog(RegattaLog regattaLog);
     
     /**
+     * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware
+     * which races are scheduled around it in the execution order of a {@link Regatta}.
+     * */
+    void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
+    
+    /**
      * Returns the attached race log event track for this race if any.
      * Otherwise <code>null</code>.
      */
