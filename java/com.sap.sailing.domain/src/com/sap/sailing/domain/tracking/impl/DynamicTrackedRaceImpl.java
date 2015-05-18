@@ -482,6 +482,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             // clearMarkPassings(...) as well as inside the subsequent for-loop. It is important to always first obtain the mark passings lock
             // for the competitor mark passings before obtaining the lock for the mark passings in order for the waypoint to avoid
             // deadlocks.
+            getRace().getCourse().lockForRead();
             LockUtil.lockForWrite(markPassingsLock);
             try {
                 clearMarkPassings(competitor);
@@ -533,6 +534,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 }
             } finally {
                 LockUtil.unlockAfterWrite(markPassingsLock);
+                getRace().getCourse().unlockAfterRead();
             }
             updated(timePointOfLatestEvent);
             triggerManeuverCacheRecalculation(competitor);
