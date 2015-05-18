@@ -340,7 +340,7 @@ public class TrackedLegImpl implements TrackedLeg {
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode);
+        final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode, cache);
         final Distance result;
         if (preResult.getMeters() >= 0) {
             result = preResult;
@@ -351,19 +351,19 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Distance getWindwardDistanceFromLegStart(Position pos) {
+    public Distance getAbsoluteWindwardDistanceFromLegStart(Position pos) {
         final TimePoint referenceTimePoint = getReferenceTimePoint();
-        return getWindwardDistanceFromLegStart(pos, referenceTimePoint, new LeaderboardDTOCalculationReuseCache(referenceTimePoint));
+        return getAbsoluteWindwardDistanceFromLegStart(pos, referenceTimePoint, new LeaderboardDTOCalculationReuseCache(referenceTimePoint));
     }
     
     @Override
-    public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
+    public Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
         final TimePoint referenceTimePoint = getReferenceTimePoint();
-        return getWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
+        return getAbsoluteWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
     }
 
-    private Distance getWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
+    private Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getAbsoluteWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
                 pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
     }
     

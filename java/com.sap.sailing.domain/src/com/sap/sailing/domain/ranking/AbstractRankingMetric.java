@@ -19,7 +19,6 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
-import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.impl.RaceRankComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -251,7 +250,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     
     protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(TimePoint timePoint) {
         return getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(
-                getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache()).getCompetitorRankingInfo());
+                getRankingInfo(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint)).getCompetitorRankingInfo());
     }
 
     protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(
@@ -407,7 +406,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 if (count) {
                     if (trackedLeg.getLeg() == currentLeg.getLeg()) {
                         // partial distance sailed:
-                        d = d.add(trackedLeg.getWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
+                        d = d.add(trackedLeg.getAbsoluteWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
                                 .getEstimatedPosition(timePoint, /* extrapolate */true), cache));
                         break;
                     } else {

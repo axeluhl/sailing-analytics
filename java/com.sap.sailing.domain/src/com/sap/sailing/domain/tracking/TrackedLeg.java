@@ -148,12 +148,12 @@ public interface TrackedLeg extends Serializable {
      * between the leg's start waypoint position and <code>pos</code>. The reference time point is chosen as the middle between the first
      * leg entry and the last leg exit, both defaulting to "now" if no such time point exists.
      */
-    Distance getWindwardDistanceFromLegStart(Position pos);
+    Distance getAbsoluteWindwardDistanceFromLegStart(Position pos);
 
     /**
-     * Same as {@link #getWindwardDistanceFromLegStart(Position)}, offering the caller to pass in a cache
+     * Same as {@link #getAbsoluteWindwardDistanceFromLegStart(Position)}, offering the caller to pass in a cache
      */
-    Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
+    Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Determines an average true wind direction for this leg; it does so by querying the tracked race for
