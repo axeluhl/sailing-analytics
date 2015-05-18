@@ -12,8 +12,6 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregatt
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
-import com.sap.sailing.gwt.home.client.shared.dispatch.AutomaticBatchingDispatch;
-import com.sap.sailing.gwt.home.client.shared.dispatch.SimpleDispatch;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
 
 /**
@@ -49,8 +47,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
-        // TODO CF
-        RefreshManager refreshManager = new RefreshManager(this, new AutomaticBatchingDispatch(new SimpleDispatch(null)));
+        RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         
         refreshManager.add(racesListLive, new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
 

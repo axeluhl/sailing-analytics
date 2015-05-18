@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -28,7 +29,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
     public interface Presenter {
         EventContext getCtx();
-
+        
         void handleTabPlaceSelection(TabView<?, ? extends Presenter> selectedActivity);
 
         SafeUri getUrl(AbstractEventPlace place);
@@ -62,6 +63,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         void ensureMedia(AsyncCallback<MediaDTO> asyncCallback);
 
         boolean hasMedia();
+        
+        DispatchSystem getDispatch();
     }
     
     public interface PlaceCallback {

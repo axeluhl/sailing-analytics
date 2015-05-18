@@ -5,28 +5,28 @@ import java.util.Date;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.RequestWrapper;
 import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWrapper;
 import com.sap.sailing.gwt.ui.shared.dispatch.rpc.DispatchRPC;
 import com.sap.sailing.gwt.ui.shared.dispatch.rpc.DispatchRPCAsync;
-import com.sap.sse.gwt.client.mvp.ClientFactory;
 
 public class SimpleDispatch implements DispatchAsync {
     
-    // TODO: use CF
     private static final DispatchRPCAsync dispatchRPC = GWT.create(DispatchRPC.class);
     
-    private final ClientFactory clientFactory;
+    private final SailingClientFactory clientFactory;
     
     private Date lastServerTime;
     
     private Date lastClientTime;
     
-    public SimpleDispatch(ClientFactory clientFactory) {
+    public SimpleDispatch(SailingClientFactory clientFactory) {
         this.clientFactory = clientFactory;
-        ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint("/gwt/service/dispatch");
+        ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(RemoteServiceMappingConstants.dispatchServiceRemotePath);
         
     }
 

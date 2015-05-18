@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -68,6 +69,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     public SailingServiceAsync getSailingService() {
         return clientFactory.getSailingService();
+    }
+    
+    public DispatchSystem getDispatch() {
+        return clientFactory.getDispatch();
     }
 
     @Override
