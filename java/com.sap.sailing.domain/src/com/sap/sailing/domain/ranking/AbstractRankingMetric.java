@@ -19,7 +19,6 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
-import com.sap.sailing.domain.tracking.impl.RaceRankComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -208,13 +207,26 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return result;
     }
     
+    /**
+     * Constructs a comparator based on the results of
+     * {@link #getWindwardDistanceTraveled(Competitor, TimePoint, WindLegTypeAndLegBearingCache)} where competitors are
+     * "less" than other competitors ("better") if they have a greater windward distance traveled.
+     */
+    private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+        final Map<Competitor, Distance> windwardDistanceTraveledPerCompetitor = new HashMap<>();
+        for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
+        }
+        return (c1, c2) -> windwardDistanceTraveledPerCompetitor.get(c2).compareTo(windwardDistanceTraveledPerCompetitor.get(c1));
+    }
+    
     public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Map<Competitor, RankingMetric.CompetitorRankingInfo> result = new HashMap<>();
-        RaceRankComparator oneDesignComparator = new RaceRankComparator(getTrackedRace(), timePoint, cache);
+        Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
         Competitor competitorFarthestAhead = StreamSupport
                 .stream(getTrackedRace().getRace().getCompetitors().spliterator(), /* parallel */true).
                 sorted(oneDesignComparator).findFirst().get();
-        final Distance totalWindwardDistanceTraveled = getAbsoluteWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
+        final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         final Duration actualRaceDuration;
         if (startOfRace == null) {
@@ -239,7 +251,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                                 .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
                         actualRaceDuration, totalWindwardDistanceTraveled);
                 RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
-                        getAbsoluteWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, correctedTime,
+                        getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, correctedTime,
                         predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
                         correctedEstimatedTimeWhenReachingCompetitorFarthestAhead);
                 result.put(competitor, rankingInfo);
@@ -339,7 +351,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      */
     protected Duration getPredictedDurationToEndOfLegOrTo(Competitor who, Competitor to, TimePoint timePoint,
             final TrackedLegOfCompetitor currentLegWho, final TrackedLegOfCompetitor currentLegTo, WindLegTypeAndLegBearingCache cache) {
-        assert getAbsoluteWindwardDistanceTraveled(to, timePoint, cache).compareTo(getAbsoluteWindwardDistanceTraveled(who, timePoint, cache)) >= 0;
+        assert getWindwardDistanceTraveled(to, timePoint, cache).compareTo(getWindwardDistanceTraveled(who, timePoint, cache)) >= 0;
         final Position windwardPositionToReachInWhosCurrentLeg =
                 (currentLegWho.getLeg() == currentLegTo.getLeg())
                         // both are currently in the same leg; estimate who's arrival at to's current windward position
@@ -382,14 +394,17 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
     }
 
-    protected Distance getAbsoluteWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        return getAbsoluteWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint, cache);
-    }
-
     protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         return getWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint, cache);
     }
 
+    /**
+     * How far did <code>competitor</code> sail windwards/along-course since passing the <code>from</code> waypoint?
+     * 
+     * @param timePoint needed to determine <code>competitor</code>'s position at that time point; note that the
+     * time point for wind approximation is taken to be a reference time point selected based on the mark passings
+     * for the respective leg's from/to waypoints.
+     */
     protected Distance getWindwardDistanceTraveled(Competitor competitor, Waypoint from, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         TrackedLegOfCompetitor currentLeg = getTrackedRace().getCurrentLeg(competitor, timePoint);
         final Distance result;
@@ -408,38 +423,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         break;
                     } else {
                         d = d.add(trackedLeg.getWindwardDistance(cache));
-                    }
-                }
-            }
-            result = d;
-        }
-        return result;
-    }
-    /**
-     * How far did <code>competitor</code> sail windwards/along-course since passing the <code>from</code> waypoint?
-     * 
-     * @param timePoint needed to determine <code>competitor</code>'s position at that time point; note that the
-     * time point for wind approximation is taken to be a reference time point selected based on the mark passings
-     * for the respective leg's from/to waypoints.
-     */
-    protected Distance getAbsoluteWindwardDistanceTraveled(Competitor competitor, Waypoint from, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        TrackedLegOfCompetitor currentLeg = getTrackedRace().getCurrentLeg(competitor, timePoint);
-        final Distance result;
-        if (currentLeg == null || from == null) {
-            result = null;
-        } else {
-            Distance d = Distance.NULL;
-            boolean count = false; // start counting only once the "from" waypoint has been found
-            for (TrackedLeg trackedLeg : getTrackedRace().getTrackedLegs()) {
-                count = count || trackedLeg.getLeg().getFrom() == from;
-                if (count) {
-                    if (trackedLeg.getLeg() == currentLeg.getLeg()) {
-                        // partial distance sailed:
-                        d = d.add(trackedLeg.getAbsoluteWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
-                                .getEstimatedPosition(timePoint, /* extrapolate */true), cache));
-                        break;
-                    } else {
-                        d = d.add(trackedLeg.getAbsoluteWindwardDistance(cache));
                     }
                 }
             }

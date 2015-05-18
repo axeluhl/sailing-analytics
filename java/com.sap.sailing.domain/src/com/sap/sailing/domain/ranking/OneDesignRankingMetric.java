@@ -97,7 +97,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
                     @Override
                     public Distance getWindwardDistanceSailed() {
-                        return getAbsoluteWindwardDistanceTraveled(competitor, timePoint, cache);
+                        return getWindwardDistanceTraveled(competitor, timePoint, cache);
                     }
 
                     @Override

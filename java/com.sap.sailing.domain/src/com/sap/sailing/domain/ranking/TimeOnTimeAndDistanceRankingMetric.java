@@ -133,7 +133,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             } else {
                 positionOfFastestBoatInLegAtTimePointOrLegEnd = getTrackedRace().getTrack(fastestCompetitorInLeg)
                         .getEstimatedPosition(timePoint, /* extrapolate */true);
-                totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd = getAbsoluteWindwardDistanceTraveled(
+                totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd = getWindwardDistanceTraveled(
                         fastestCompetitorInLeg, timePoint, cache);
             }
             for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
@@ -203,7 +203,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final Duration timeActuallySpent = getActualTimeSinceStartOfRace(competitor, timePoint);
-        final Distance windwardDistanceSailed = getAbsoluteWindwardDistanceTraveled(competitor, timePoint, cache);
+        final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint, cache);
         return getCorrectedTime(competitor, ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
                 ()->getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */true),
                 timeActuallySpent, windwardDistanceSailed);
@@ -240,7 +240,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
         validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
         final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
-        final Distance d_to = getAbsoluteWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
+        final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
         final double   f_to = getTimeOnTimeFactor(to);
         final Duration timeOnDistanceFactorInSecondsPerNauticalMileTo = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
         final double   g_to = timeOnDistanceFactorInSecondsPerNauticalMileTo==null?0:timeOnDistanceFactorInSecondsPerNauticalMileTo.asSeconds();
