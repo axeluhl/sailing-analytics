@@ -14,6 +14,7 @@ public class Livestream extends Composite {
     }
 
     public Livestream() {
+        LivestreamResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
 

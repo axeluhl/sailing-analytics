@@ -18,7 +18,7 @@
      -moz-transform: translate(-50%, -50%);
       -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
-  background-image: url("../images/home/play.png");
+  background-image: url("images/home/play.png");
 }
 .videoitem .videoplaceholder {
   height: 100%;
