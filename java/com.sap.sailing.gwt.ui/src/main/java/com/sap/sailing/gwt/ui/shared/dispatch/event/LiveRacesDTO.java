@@ -30,4 +30,13 @@ public class LiveRacesDTO implements DTO {
         }
         return false;
     }
+
+    public boolean hasCourseAreas() {
+        for (LiveRaceDTO race : races) {
+            if (race.getCourseArea() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
