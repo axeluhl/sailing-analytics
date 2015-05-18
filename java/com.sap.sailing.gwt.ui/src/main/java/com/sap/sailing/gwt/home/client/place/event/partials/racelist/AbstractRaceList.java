@@ -21,6 +21,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
@@ -69,24 +70,27 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         SafeHtml windDirection(SafeStyles rotation);
     }
 
-    private final SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
+    private final SimplePanel cellTableContainer = new SimplePanel();
     private final EventView.Presenter presenter;
-
+    
+    private SortedCellTable<T> cellTable;
+    
     protected AbstractRaceList(EventView.Presenter presenter) {
+        CSS.ensureInjected();
         this.presenter = presenter;
-        this.initTableStyle();
-        this.initTableColumns();
-        this.initWidget(cellTable);
+        this.initWidget(cellTableContainer);
     }
 
-    public void setTableData(List<T> data) {
+    protected void setTableData(List<T> data) {
+        this.cellTable = new SortedCellTable<T>(data.size(), CleanCellTableResources.INSTANCE);
+        this.cellTableContainer.setWidget(this.cellTable);
+        this.initTableStyle();
+        this.initTableColumns();
         this.cellTable.setList(data);
-        this.cellTable.setPageSize(data.size());
         this.cellTable.sort();
     }
 
     private void initTableStyle() {
-        CSS.ensureInjected();
         this.cellTable.addStyleName(CSS.raceslist());
         this.cellTable.setHeaderBuilder(new StyledHeaderOrFooterBuilder<T>(cellTable, false, CSS.raceslist_head()));
         this.cellTable.setRowStyles(new RowStyles<T>() {
@@ -96,7 +100,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
             }
         });
     }
-
+    
     protected abstract void initTableColumns();
 
     protected void addFleetCornerColumn() {

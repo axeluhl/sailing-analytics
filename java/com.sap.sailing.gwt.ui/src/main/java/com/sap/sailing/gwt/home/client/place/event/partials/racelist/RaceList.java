@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesLi
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
@@ -21,15 +22,23 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
     private static final StringMessages I18N = StringMessages.INSTANCE;
 
     private final boolean showRegattaDetails;
+    private boolean showFleetDetails;
 
     public RaceList(EventView.Presenter presenter, boolean showRegattaDetails) {
         super(presenter);
         this.showRegattaDetails = showRegattaDetails;
     }
 
+    public void setListData(LiveRacesDTO data) {
+        this.showFleetDetails = data.hasFleets();
+        setTableData(data.getRaces());
+    }
+
     @Override
     protected void initTableColumns() {
-        addFleetCornerColumn();
+        if (showFleetDetails) {
+            addFleetCornerColumn();
+        }
 
         if (showRegattaDetails) {
             add(new SortableRaceListColumn<String>(I18N.regatta(), new TextCell()) {
@@ -61,7 +70,9 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
         }
 
         addRaceNameColumn();
-        addFleetNameColumn();
+        if (showFleetDetails) {
+            addFleetNameColumn();
+        }
         addStartTimeColumn();
 
         add(new RaceListColumn<FlagStateDTO>(I18N.flags(), new FlagsCell()) {

@@ -27,7 +27,7 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
 
     @Override
     public void setData(LiveRacesDTO data, long nextUpdate, int updateNo) {
-        this.raceList.setTableData(data.getRaces());
+        this.raceList.setListData(data);
     }
 
 }
