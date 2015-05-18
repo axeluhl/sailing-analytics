@@ -635,7 +635,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         } else {
             Mark m = null;
             if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard
-                    || instruction == PassingInstruction.FixedBearing) {
+                    || instruction == PassingInstruction.FixedBearing || instruction == PassingInstruction.Offset) {
                 m = w.getMarks().iterator().next();
             } else if (instruction == PassingInstruction.Gate) {
                 Util.Pair<Mark, Mark> pair = getPortAndStarboardMarks(t, w);
@@ -701,8 +701,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * If <code>m</code> is contained in <code>lineMarks</code>, the distance to that line is calculated, else simply
-     * the distance to the m.
+     * Calculates the distance from p to each mark of w at the timepoint t.
      */
     private List<Distance> calculateDistance(Position p, Waypoint w, TimePoint t) {
         List<Distance> distances = new ArrayList<>();
@@ -745,7 +744,9 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             break;
         case Offset:
-            // TODO
+            singleMark = true;
+            // TODO Actually an Offset mark has two marks, only the first of which actually counts as being rounded. The
+            // passing of the second mark is also of interest though.
             break;
         case None:
             break;
@@ -816,7 +817,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             if (instruction == PassingInstruction.FixedBearing) {
                 b = w.getFixedBearing();
             } else {
-                // TODO Mark at start or end of race
+                // TODO If the first of last waypoint is not a gate or line, this will lead to issues
                 Bearing before = race.getTrackedLegFinishingAt(w).getLegBearing(t);
                 Bearing after = race.getTrackedLegStartingAt(w).getLegBearing(t);
                 if (before != null && after != null) {
