@@ -38,6 +38,7 @@
     <dimen name="default_margin_twice">@dimen/default_padding_twice</dimen>
 
     <dimen name="lock_margin">5dp</dimen>
+    <dimen name="race_flag_margin">100dp</dimen>
 
     <dimen name="side_button_width">168dp</dimen>
     <dimen name="side_button_width_large">200dp</dimen>

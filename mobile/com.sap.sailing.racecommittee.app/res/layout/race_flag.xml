@@ -17,8 +17,10 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/default_margin"
+            android:layout_marginTop="@dimen/race_flag_margin"
             android:src="?arrow_up_large"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <ImageView
             android:id="@+id/flag"
@@ -44,8 +46,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/race_flag_margin"
             android:src="?arrow_down_large"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible"/>
     </LinearLayout>
 
     <View
