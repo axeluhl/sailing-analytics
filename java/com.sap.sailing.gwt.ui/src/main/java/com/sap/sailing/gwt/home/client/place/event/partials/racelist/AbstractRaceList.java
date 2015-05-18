@@ -377,9 +377,9 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         @Override
         public void render(Context context, T data, SafeHtmlBuilder sb) {
             String styleNames = data.getState() == RaceState.FINISHED ? analyseRaceStyle : watchNowStyle;
-            String buttonText = data.getState() == RaceState.FINISHED ? "TODO ANALYSE" : TextMessages.INSTANCE.watchNow();
+            String text = data.getState() == RaceState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
             String raceViewerURL = presenter.getRaceViewerURL(data.getID());
-            sb.append(TEMPLATE.watchNowButton(styleNames, buttonText, raceViewerURL));
+            sb.append(TEMPLATE.watchNowButton(styleNames, text, raceViewerURL));
         }
 
         private final String getButtonStyleNames(String buttonColor) {
