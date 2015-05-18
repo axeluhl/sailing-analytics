@@ -64,5 +64,4 @@ public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
     private void removeListener() {
         removeFromThisRaceLogWhenListenerNoLongerStronglyReferenced.removeListener(this);
     }
-
 }

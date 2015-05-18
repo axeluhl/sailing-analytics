@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -82,6 +83,11 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
         @Override
         public void visit(RaceLogRaceStatusEvent event) {
             nextStatus = event.getNextStatus();
+        }
+
+        @Override
+        public void visit(RaceLogDependentStartTimeEvent event) {
+            //FIXME: Calculate RaceStatus based on status of Fleet on which race depends on
         };
         
     };

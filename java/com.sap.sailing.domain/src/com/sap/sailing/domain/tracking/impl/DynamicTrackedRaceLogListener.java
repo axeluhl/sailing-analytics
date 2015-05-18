@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -253,5 +254,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                         ((FixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
         }
+    }
+
+    @Override
+    public void visit(RaceLogDependentStartTimeEvent event) {
+        analyzeStartTime(null);
     }
 }

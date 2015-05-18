@@ -57,6 +57,7 @@ public interface RaceLogEventVisitor {
     
     public void visit(FixedMarkPassingEvent event);
     
-
     public void visit(SuppressedMarkPassingsEvent event);
+    
+    public void visit(RaceLogDependentStartTimeEvent event);
 }
