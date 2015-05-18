@@ -50,4 +50,10 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
         return null;
     }
 
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionProvider() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

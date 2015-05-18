@@ -125,6 +125,12 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
         return null;
     }
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionProvider() {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
     
 }
