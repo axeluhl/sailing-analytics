@@ -602,4 +602,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
     }
+
+    @Override
+    public void detachRaceExecutionOrderProvider(Serializable identifier) {
+    }
 }

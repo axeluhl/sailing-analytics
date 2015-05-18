@@ -754,6 +754,20 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
         super.detachRaceLog(identifier);
     }
+    
+    @Override
+    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+        if(raceExecutionOrderProvider != null && raceExecutionOrderProvider.getId() != null){
+            super.attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider.getId(), raceExecutionOrderProvider);
+        }
+    }
+
+    @Override
+    public void detachRaceExecutionOrderProvider(Serializable identifier) {
+        if (identifier != null) {
+            super.attachedRaceExecutionOrderProvider.remove(identifier);
+        }
+    }
 
     @Override
     public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
@@ -813,8 +827,5 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
-
-    @Override
-    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-    }
+    
 }

@@ -618,6 +618,11 @@ public interface TrackedRace extends Serializable {
     void detachRaceLog(Serializable identifier);
     
     /**
+     * Detaches the link {@link RaceExecutionOrderProvider} with this <code>identifier</code>.
+     */
+    void detachRaceExecutionOrderProvider(Serializable identifier);
+    
+    /**
      * Detaches all {@link RaceLog} instances from this race
      */
     void detachAllRaceLogs();
