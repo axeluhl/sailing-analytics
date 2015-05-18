@@ -23,7 +23,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.util.CourseAsWaypointList;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -330,33 +330,32 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
             try {
                 Iterable<Waypoint> courseWaypoints = getWaypoints();
                 List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
-                // key existing waypoints by control points and re-use each one at most once during construction of the
+                // key existing waypoints by (ControlPoint, PassingInstruction) pairs and re-use them during construction of the
                 // new waypoint list; since several waypoints can have the same control point, the map goes from
-                // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
+                // Pair<ControlPoint, PassingInstruction> to List<Waypoint>. The waypoints in the lists are held in the order of their
                 // occurrence in courseToUpdate.getWaypoints().
-                Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint = new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
+                Map<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>, List<Waypoint>> existingWaypointsByControlPoint = new HashMap<>();
                 for (Waypoint waypoint : courseWaypoints) {
-                    List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
+                    List<Waypoint> wpl = existingWaypointsByControlPoint.get(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
                     if (wpl == null) {
                         wpl = new ArrayList<Waypoint>();
-                        existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
+                        existingWaypointsByControlPoint.put(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()), wpl);
                     }
                     wpl.add(waypoint);
                 }
-                for (Util.Pair<ControlPoint, PassingInstruction> newDomainControlPoint : newControlPoints) {
-                    List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
+                for (Pair<ControlPoint, PassingInstruction> newDomainControlPoint : newControlPoints) {
+                    List<Waypoint> waypoints = existingWaypointsByControlPoint.get(new Pair<>(newDomainControlPoint.getA(), newDomainControlPoint.getB()));
                     Waypoint waypoint;
                     if (waypoints == null || waypoints.isEmpty()) {
                         // must be a new control point for which we don't have a waypoint yet
-                        waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint.getA(),
-                                newDomainControlPoint.getB());
+                        waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint.getA(), newDomainControlPoint.getB());
                     } else {
                         waypoint = waypoints.remove(0); // take the first from the list
                     }

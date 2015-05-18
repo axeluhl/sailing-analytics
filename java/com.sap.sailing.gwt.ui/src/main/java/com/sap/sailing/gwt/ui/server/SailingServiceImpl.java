@@ -1972,18 +1972,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private ControlPoint getOrCreateControlPoint(ControlPointDTO dto) {
-        String id = dto.getIdAsString();
-        if (id == null) {
-            id = UUID.randomUUID().toString();
+        String idAsString = dto.getIdAsString();
+        if (idAsString == null) {
+            idAsString = UUID.randomUUID().toString();
         }
         if (dto instanceof GateDTO) {
             GateDTO gateDTO = (GateDTO) dto;
             Mark left = (Mark) getOrCreateControlPoint(gateDTO.getLeft());
             Mark right = (Mark) getOrCreateControlPoint(gateDTO.getRight());
-            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(id, gateDTO.getName(), left, right);
+            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right);
         } else {
             MarkDTO markDTO = (MarkDTO) dto;
-            return baseDomainFactory.getOrCreateMark(id, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         }
     }
 
