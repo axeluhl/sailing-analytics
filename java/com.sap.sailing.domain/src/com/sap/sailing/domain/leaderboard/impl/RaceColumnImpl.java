@@ -5,6 +5,7 @@ import java.util.Collections;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
@@ -42,6 +43,11 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     @Override
     public Iterable<? extends Fleet> getFleets() {
         return Collections.singleton(FlexibleLeaderboardImpl.defaultFleet);
+    }
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        return null;
     }
 
 }
