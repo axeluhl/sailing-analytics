@@ -128,8 +128,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
     @Override
     public RaceExecutionOrderProvider getRaceExecutionProvider() {
-        // TODO Auto-generated method stub
-        return null;
+        if (getRegatta() != null) {
+            return getRegatta().getRaceExecutionOrderProvider();
+        } else {
+            return null;
+        }
     }
     
     

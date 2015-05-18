@@ -439,6 +439,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
                     }
+
+                    @Override
+                    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+                        return null;
+                    }
                 };
             }
 

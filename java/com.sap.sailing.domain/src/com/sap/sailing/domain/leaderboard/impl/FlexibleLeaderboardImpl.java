@@ -172,7 +172,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace) {
-        return new RaceColumnImpl(column, medalRace);
+        // TODO hand over instance that implements RaceExecutionOrderProvider
+        return new RaceColumnImpl(column, medalRace, null);
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {

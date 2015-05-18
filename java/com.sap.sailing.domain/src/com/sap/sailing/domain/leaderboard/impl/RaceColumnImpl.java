@@ -12,11 +12,13 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private String name;
 
     private boolean medalRace;
+    private RaceExecutionOrderProvider raceExecutionOrderProvider;
 
-    public RaceColumnImpl(String name, boolean medalRace) {
+    public RaceColumnImpl(String name, boolean medalRace, RaceExecutionOrderProvider raceExecutionOrderProvider) {
         super();
         this.name = name;
         this.medalRace = medalRace;
+        this.raceExecutionOrderProvider = raceExecutionOrderProvider;
     }
 
     @Override
@@ -52,8 +54,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
 
     @Override
     public RaceExecutionOrderProvider getRaceExecutionProvider() {
-        // TODO Auto-generated method stub
-        return null;
+        return raceExecutionOrderProvider;
     }
 
 }
