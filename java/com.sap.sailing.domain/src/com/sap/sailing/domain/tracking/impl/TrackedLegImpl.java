@@ -30,9 +30,10 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -111,7 +112,7 @@ public class TrackedLegImpl implements TrackedLeg {
      * consider the order of the boats not currently in this leg, too.
      */
     protected List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
-        return getCompetitorTracksOrderedByRank(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getCompetitorTracksOrderedByRank(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
@@ -146,7 +147,7 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
-        return getRanks(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getRanks(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
@@ -333,7 +334,7 @@ public class TrackedLegImpl implements TrackedLeg {
 
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
-        return getAbsoluteWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getAbsoluteWindwardDistance(pos1, pos2, at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
     }
     
     @Override
@@ -351,24 +352,33 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getWindwardDistanceFromLegStart(Position pos) {
-        return getWindwardDistanceFromLegStart(pos, new NoCachingWindLegTypeAndLegBearingCache());
+        final TimePoint referenceTimePoint = getReferenceTimePoint();
+        return getWindwardDistanceFromLegStart(pos, referenceTimePoint, new LeaderboardDTOCalculationReuseCache(referenceTimePoint));
     }
     
     @Override
     public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
         final TimePoint referenceTimePoint = getReferenceTimePoint();
-        return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), referenceTimePoint),
-                pos, referenceTimePoint, WindPositionMode.LEG_MIDDLE, cache);
+        return getWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
+    }
+
+    private Distance getWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
+                pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
     }
     
     @Override
     public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
-        return getWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getWindwardDistance(pos1, pos2, at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
     }
     
     @Override
     public Distance getWindwardDistance() {
-        return getWindwardDistance(new NoCachingWindLegTypeAndLegBearingCache());
+        return getWindwardDistance(getReferenceTimePoint());
+    }
+    
+    private Distance getWindwardDistance(TimePoint timePoint) {
+        return getWindwardDistance(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override

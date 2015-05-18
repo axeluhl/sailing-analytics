@@ -6,11 +6,11 @@ import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
-import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -114,13 +114,13 @@ public interface RankingMetric extends Serializable {
     TrackedRace getTrackedRace();
 
     default Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint) {
-        return getRaceRankingComparator(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getRaceRankingComparator(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     default Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
-        return getLegRankingComparator(trackedLeg, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getLegRankingComparator(trackedLeg, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
@@ -142,7 +142,7 @@ public interface RankingMetric extends Serializable {
      * when the competitor finished the respective leg as <code>timePoint</code>.
      */
     default Duration getCorrectedTime(Competitor competitor, TimePoint timePoint) {
-        return getCorrectedTime(competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getCorrectedTime(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     /**
@@ -162,7 +162,7 @@ public interface RankingMetric extends Serializable {
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
      */
     default Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor) {
-        return getGapToLeaderInOwnTime(rankingInfo, competitor, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeaderInOwnTime(rankingInfo, competitor, new LeaderboardDTOCalculationReuseCache(rankingInfo.getTimePoint()));
     }
     
     default Duration getGapToLeaderInOwnTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
@@ -170,11 +170,11 @@ public interface RankingMetric extends Serializable {
     }
     
     default Duration getGapToLeaderInOwnTime(Competitor competitor, TimePoint timePoint) {
-        return getGapToLeaderInOwnTime(competitor, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeaderInOwnTime(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     default RankingInfo getRankingInfo(TimePoint timePoint) {
-        return getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getRankingInfo(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);

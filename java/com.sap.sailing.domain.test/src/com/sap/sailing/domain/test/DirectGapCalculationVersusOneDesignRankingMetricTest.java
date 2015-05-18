@@ -21,10 +21,10 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.WindPositionMode;
-import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -87,7 +87,7 @@ public class DirectGapCalculationVersusOneDesignRankingMetricTest extends Abstra
             timePoint = timePoint.plus(Duration.ONE_MINUTE);
             Competitor classicOverallLeader = getTrackedRace().getOverallLeader(timePoint);
             Competitor oneDesignRankingMetricLeader = getTrackedRace().getRankingMetric()
-                    .getRankingInfo(timePoint, new NoCachingWindLegTypeAndLegBearingCache())
+                    .getRankingInfo(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint))
                     .getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
             assertSame("At "+i+" minutes into the race ("+timePoint+"): ", classicOverallLeader, oneDesignRankingMetricLeader);
         }

@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -217,7 +218,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) {
-        return getWindwardDistanceToGo(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getWindwardDistanceToGo(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     /**
@@ -304,7 +305,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      */
     @Override
     public int getRank(TimePoint timePoint) {
-        return getRank(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getRank(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
@@ -319,7 +320,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getAverageVelocityMadeGood(TimePoint timePoint) {
-        return getAverageVelocityMadeGood(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getAverageVelocityMadeGood(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
@@ -406,7 +407,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) {
-        return getWindwardDistanceToOverallLeader(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getWindwardDistanceToOverallLeader(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
@@ -487,7 +488,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode)
             throws NoWindException {
-        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
@@ -503,13 +504,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode) {
-        return getGapToLeader(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeader(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
     public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return getGapToLeader(timePoint, ()->getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint),
-                windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+                windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
@@ -640,7 +641,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
-        return getVelocityMadeGood(at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getVelocityMadeGood(at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
     }
     
     @Override
@@ -678,7 +679,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) {
-        return getEstimatedTimeToNextMark(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+        return getEstimatedTimeToNextMark(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
@@ -871,7 +872,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     @Override
     public Bearing getBeatAngle(TimePoint at) throws NoWindException {
-        return getBeatAngle(at, new NoCachingWindLegTypeAndLegBearingCache());
+        return getBeatAngle(at, new LeaderboardDTOCalculationReuseCache(at));
     }
     
     @Override
