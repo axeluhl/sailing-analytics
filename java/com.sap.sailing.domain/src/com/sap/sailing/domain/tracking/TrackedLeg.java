@@ -109,9 +109,10 @@ public interface TrackedLeg extends Serializable {
      * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
      * that competitors need to travel in this leg. Due to the dynamics of the wind direction and the mark positions,
      * the result is time dependent. The wind direction is determined at the leg's middle at the time point <code>at</code>.
-     * @param cache TODO
      */
     Distance getWindwardDistance(TimePoint at, WindLegTypeAndLegBearingCache cache);
+
+    Distance getAbsoluteWindwardDistance(TimePoint at, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
@@ -127,6 +128,8 @@ public interface TrackedLeg extends Serializable {
      * Same as {@link #getWindwardDistance()}, but offering the client to use a cache
      */
     Distance getWindwardDistance(WindLegTypeAndLegBearingCache cache);
+
+    Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingCache cache);
 
     /**
      * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start
@@ -155,6 +158,8 @@ public interface TrackedLeg extends Serializable {
      */
     Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
 
+    Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
+
     /**
      * Determines an average true wind direction for this leg; it does so by querying the tracked race for
      * wind data at the leg's middle around a reference time point which is defined by the mark passings
@@ -169,4 +174,5 @@ public interface TrackedLeg extends Serializable {
      * "now" is used.
      */
     TimePoint getReferenceTimePoint();
+
 }
