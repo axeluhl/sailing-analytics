@@ -266,7 +266,7 @@
 
     <string name="race_started">Started %s</string>
     <string name="race_finished">Finished %s</string>
-    <string name="race_starts">Starts %s</string>
+    <string name="race_start">Start %s</string>
     <string name="race_unscheduled">Unscheduled</string>
 
     <string name="race_show_all">show all</string>

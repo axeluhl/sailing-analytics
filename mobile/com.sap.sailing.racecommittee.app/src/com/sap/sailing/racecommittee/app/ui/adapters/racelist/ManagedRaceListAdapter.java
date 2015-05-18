@@ -212,8 +212,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
-                    race_started.setText(
-                        mResources.getString(R.string.race_started, dateFormat.format(state.getStartTime().asDate())));
+                    int startRes = R.string.race_started;
+                    if (state.getFinishedTime() == null) {
+                        startRes = R.string.race_start;
+                    }
+                    String startTime = mResources.getString(startRes, dateFormat.format(state.getStartTime().asDate()));
+                    race_started.setText(startTime);
                     if (state.getFinishedTime() == null) {
                         String duration = getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime());
                         time.setText(duration);

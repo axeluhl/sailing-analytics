@@ -239,7 +239,7 @@
     <string name="races_all">ALLE RENNEN</string>
     <string name="races_current">AKTUELLE RENNEN</string>
     <string name="race_unscheduled">Ungeplant</string>
-    <string name="race_starts">Startet %s</string>
+    <string name="race_start">Start %s</string>
     <string name="race_show_all">zeige alle</string>
     <string name="race_show_less">zeige weniger</string>
     <string name="preference_wakelock_summary">Lässt den Bildschirm immer an. Achtung: Verbraucht mehr Strom.</string>
