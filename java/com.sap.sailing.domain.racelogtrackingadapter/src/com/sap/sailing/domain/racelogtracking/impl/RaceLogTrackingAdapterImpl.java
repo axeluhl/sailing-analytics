@@ -207,29 +207,29 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         final Set<Mark> marks = new HashSet<>();
         course.getWaypoints().forEach(wp->Util.addAll(wp.getMarks(), marks));
         final Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
-        final List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /* only unrevoked */ true, RaceLogDeviceMarkMappingEvent.class).analyze();
+        final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /* only unrevoked */ true, RaceLogDeviceMarkMappingEvent.class).analyze();
         for (RaceLog toRaceLog : toRaceLogs) {
             if (course == null || !new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 continue;
             }
-            CourseBase to = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
+            CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
             TimePoint now = MillisecondsTimePoint.now();
             int i = 0;
             revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
             for (Waypoint oldWaypoint : course.getWaypoints()) {
-                to.addWaypoint(i++, oldWaypoint);
+                newCourse.addWaypoint(i++, oldWaypoint);
             }
             for (Mark mark : marks) {
                 RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now,
                         service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
                 toRaceLog.add(event);
             }
-            for (RaceLogEvent raceLogEvent : markEvents) {
-                toRaceLog.add(raceLogEvent);
+            for (RaceLogEvent raceLogDeviceMarkMappingEvent : raceLogDeviceMarkMappingEvents) {
+                toRaceLog.add(raceLogDeviceMarkMappingEvent);
             }
             int passId = toRaceLog.getCurrentPassId();
             RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
-                    service.getServerAuthor(), passId, to);
+                    service.getServerAuthor(), passId, newCourse);
             toRaceLog.add(newCourseEvent);
             registerCompetitors(service, toRaceLog, competitors);
         }
