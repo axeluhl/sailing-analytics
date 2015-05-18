@@ -242,10 +242,12 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
         final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
         final double   f_to = getTimeOnTimeFactor(to);
-        final double   g_to = getTimeOnDistanceFactorInSecondsPerNauticalMile(to).asSeconds();
+        final Duration timeOnDistanceFactorInSecondsPerNauticalMileTo = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
+        final double   g_to = timeOnDistanceFactorInSecondsPerNauticalMileTo==null?0:timeOnDistanceFactorInSecondsPerNauticalMileTo.asSeconds();
         final Distance d_who = d_to;
         final double   f_who = getTimeOnTimeFactor(who);
-        final double   g_who = getTimeOnDistanceFactorInSecondsPerNauticalMile(who).asSeconds();
+        final Duration timeOnDistanceFactorInSecondsPerNauticalMileWho = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
+        final double   g_who = timeOnDistanceFactorInSecondsPerNauticalMileWho==null?0:timeOnDistanceFactorInSecondsPerNauticalMileWho.asSeconds();
         
         final Duration t_who = new MillisecondsDurationImpl(Double.valueOf(
                 (1./d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE - g_to + g_who)
