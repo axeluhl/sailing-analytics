@@ -1,0 +1,25 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.livestream.LivestreamResources" />
+  <g:HTMLPanel>
+    <div class="{local_res.css.livestream} {local_res.css.videoitem}">
+      <div class="{local_res.css.livestream_play} {local_res.css.playicon}"></div>
+      <div data-id="TODO" class="{local_res.css.videoplaceholder}">
+        <div data-img="TODO" class="{local_res.css.videoplaceholder_image}"></div>
+      </div>
+      <div class="{local_res.css.livestream_info} {local_res.css.info}">
+        <div class="{local_res.css.livestream_info_text}">
+          <h3>
+            <!-- livestream.title -->
+          </h3>
+        </div>
+        <div data-labeltype="live" class="{res.mainCss.label}">
+          <ui:text from='{i18n.playModeLive}' />
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

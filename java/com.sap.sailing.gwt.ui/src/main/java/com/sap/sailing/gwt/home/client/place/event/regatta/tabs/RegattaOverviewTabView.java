@@ -7,11 +7,13 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.place.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 
 /**
@@ -40,7 +42,9 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         
         // TODO CF
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        
+
+        // TODO regatta specific depending on event type
+        refreshManager.add(stage, new GetEventOverviewStageAction(currentPresenter.getCtx().getEventDTO().getId()));
         refreshManager.add(racesListLive, new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
 
@@ -60,6 +64,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @UiField(provided = true)
     RacesListLive racesListLive;
+    @UiField EventOverviewStage stage;
 
     @Override
     public RegattaOverviewPlace placeToFire() {
