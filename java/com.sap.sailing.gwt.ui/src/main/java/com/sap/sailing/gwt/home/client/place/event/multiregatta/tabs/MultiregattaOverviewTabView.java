@@ -43,7 +43,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
 
     @Override
     public void start(MultiregattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
-        racesListLive = new RacesListLive(currentPresenter);
+        racesListLive = new RacesListLive(currentPresenter, true);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         

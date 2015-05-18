@@ -34,7 +34,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
     @Override
     public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
-        racesListLive = new RacesListLive(currentPresenter);
+        racesListLive = new RacesListLive(currentPresenter, false);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         

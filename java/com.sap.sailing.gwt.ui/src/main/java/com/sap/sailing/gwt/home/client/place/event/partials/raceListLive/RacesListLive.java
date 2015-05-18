@@ -19,9 +19,9 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
 
     @UiField(provided = true) RaceList raceList;
     
-    public RacesListLive(EventView.Presenter presenter) {
+    public RacesListLive(EventView.Presenter presenter, boolean showRegattaDetails) {
         RacesListLiveResources.INSTANCE.css().ensureInjected();
-        raceList = new RaceList(presenter);
+        raceList = new RaceList(presenter, showRegattaDetails);
         initWidget(uiBinder.createAndBindUi(this));
     }
 
