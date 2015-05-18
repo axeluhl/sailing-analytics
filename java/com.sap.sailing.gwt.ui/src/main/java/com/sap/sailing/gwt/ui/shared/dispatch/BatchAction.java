@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 
 public class BatchAction implements Action<BatchResult> {
+    private static final Logger logger = Logger.getLogger(BatchAction.class.getName());
     private Action<?>[] actions;
 
     @SuppressWarnings("unused")
@@ -34,6 +37,7 @@ public class BatchAction implements Action<BatchResult> {
             } catch (Throwable e) {
                 DispatchException e2 = handleException(e);
                 exceptions.add(e2);
+                logger.log(Level.SEVERE, "Error trying to dispatch action from type " + a.getClass().getName(), e);
             }
             results.add(result);
         }

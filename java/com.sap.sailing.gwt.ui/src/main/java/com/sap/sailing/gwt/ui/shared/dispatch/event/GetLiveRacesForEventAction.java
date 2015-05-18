@@ -27,9 +27,9 @@ public class GetLiveRacesForEventAction implements Action<ResultWithTTL<LiveRace
             @Override
             public void doForRace(RaceContext rc) {
                 // TODO better condition after Frank implemented race state stuff
-                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive() || !rc.isStartTimeAvailable()) {
-                    return;
-                }
+//                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive() || !rc.isStartTimeAvailable()) {
+//                    return;
+//                }
                 
                 result.addRace(rc.getLiveRaceDTO());
             }

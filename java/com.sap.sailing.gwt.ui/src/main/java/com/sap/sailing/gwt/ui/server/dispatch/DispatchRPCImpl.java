@@ -16,21 +16,20 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements DispatchRPC {
-
     private static final long serialVersionUID = -245230476512348999L;
-    
+
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     public DispatchRPCImpl() {
         final BundleContext context = Activator.getDefault();
-//      final Activator activator = Activator.getInstance();
 
-      racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
     }
 
     @Override
     public <R extends Result, A extends Action<R>> ResultWrapper<R> execute(RequestWrapper<R, A> request) throws DispatchException {
-        return new ResultWrapper<R>(request.getAction().execute(new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker)));
+        R executionResult = request.getAction().execute(new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService()));
+        return new ResultWrapper<R>(executionResult);
     }
 
 }

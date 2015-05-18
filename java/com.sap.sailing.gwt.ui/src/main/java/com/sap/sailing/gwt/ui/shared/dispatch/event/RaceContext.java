@@ -8,9 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -22,7 +20,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -31,7 +28,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceState;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.LiveRaceState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sse.common.TimePoint;
@@ -81,7 +78,7 @@ public class RaceContext {
     }
 
     public RegattaAndRaceIdentifier getIdentifier() {
-        return new RegattaNameAndRaceName(getRegattaName(), raceDefinition.getName());
+        return new RegattaNameAndRaceName(getRegattaName(), raceColumn.getName());
     }
 
     public FleetMetadataDTO getFleetMetadataOrNull() {
@@ -92,20 +89,22 @@ public class RaceContext {
     }
 
     public SimpleWindDTO getWindOrNull() {
-        TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
-        TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-        if(newestEvent != null && newestEvent.before(toTimePoint)) {
-            toTimePoint = newestEvent;
-        }
-        
-        WindTrack windTrack = trackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.COMBINED));
-        
-        if(windTrack != null) {
-            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence =
-                    windTrack.getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(toTimePoint), toTimePoint);
-            if(averagedWindWithConfidence != null) {
-                Wind wind = averagedWindWithConfidence.getObject();
-                return new SimpleWindDTO(wind.getBearing().reverse().getDegrees(), wind.getKnots());
+        if(trackedRace != null) {
+            TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
+            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
+            if(newestEvent != null && newestEvent.before(toTimePoint)) {
+                toTimePoint = newestEvent;
+            }
+            
+            WindTrack windTrack = trackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.COMBINED));
+            
+            if(windTrack != null) {
+                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence =
+                        windTrack.getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(toTimePoint), toTimePoint);
+                if(averagedWindWithConfidence != null) {
+                    Wind wind = averagedWindWithConfidence.getObject();
+                    return new SimpleWindDTO(wind.getBearing().reverse().getDegrees(), wind.getKnots());
+                }
             }
         }
         return null;
@@ -162,7 +161,7 @@ public class RaceContext {
         return null;
     }
 
-    public String getCourseArea() {
+    public String getCourseAreaOrNull() {
         Regatta regatta = getRegatta();
         if(regatta != null && regatta.getDefaultCourseArea() != null) {
             return regatta.getDefaultCourseArea().getName();
@@ -171,19 +170,21 @@ public class RaceContext {
     }
 
     public RaceProgressDTO getProgressOrNull() {
-        List<Leg> legs = state.getCourseDesign() != null ? state.getCourseDesign().getLegs() : (raceDefinition.getCourse() != null ? raceDefinition.getCourse().getLegs() : null);
-        if(legs != null && trackedRace != null) {
-            return new RaceProgressDTO(trackedRace.getLastLegStarted(MillisecondsTimePoint.now()), legs.size());
+        RaceProgressDTO raceProgress = null;
+        if(raceDefinition != null && raceDefinition.getCourse() != null && trackedRace != null) {
+            int totalLegsCount = raceDefinition.getCourse().getLegs().size();
+            int currentLegNo = trackedRace.getLastLegStarted(MillisecondsTimePoint.now());
+            raceProgress = new RaceProgressDTO(currentLegNo, totalLegsCount);
         }
-        return null;
+        return raceProgress;
     }
 
-    public String getCourseName() {
-        Course course = raceDefinition.getCourse();
-        if(course != null) {
-            return course.getName();
+    public String getCourseNameOrNull() {
+        String courseName = null;
+        if(raceDefinition != null && raceDefinition.getCourse() != null) {
+            courseName = raceDefinition.getCourse().getName();
         }
-        return null;
+        return courseName;
     }
     
     public boolean isRaceDefinitionAvailable() {
@@ -198,10 +199,21 @@ public class RaceContext {
         return getStartTime() != null;
     }
 
-    public boolean isLive() {
-        // TODO
-//        return RaceLogRaceStatus.isActive(state.getStatus());
+    /**
+     * The 'public interest' of a race is a combination of it's 'live' state
+     * and special flags states indicating how the postponed/canceled races will be continued
+     * @return
+     */
+    public boolean isOfPublicInterest() {
+        
+        
         return true;
+    }
+    
+    public boolean isLive() {
+        return trackedRace.isLive(now);
+
+        // return true;
     }
 
     public TimePoint getStartTime() {
@@ -213,21 +225,21 @@ public class RaceContext {
 
     public LiveRaceDTO getLiveRaceDTO() {
         TimePoint startTime = getStartTime();
-        RaceState raceState = RaceState.LIVE;
+        LiveRaceState raceState = LiveRaceState.LIVE;
         if(startTime == null || now.before(startTime)) {
-            raceState = RaceState.UPCOMING;
-        } else if(trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
-            raceState = RaceState.FINISHED;
+            raceState = LiveRaceState.UPCOMING;
+        } else if(trackedRace != null && trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
+            raceState = LiveRaceState.FINISHED;
         }
         LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
         liveRaceDTO.setState(raceState);
         liveRaceDTO.setRegattaName(getRegattaDisplayName());
         liveRaceDTO.setFleet(getFleetMetadataOrNull());
         liveRaceDTO.setRaceName(raceColumn.getName());
-        liveRaceDTO.setStart(startTime.asDate());
+        liveRaceDTO.setStart(startTime != null ? startTime.asDate() : null);
         liveRaceDTO.setBoatClass(getBoatClassName());
-        liveRaceDTO.setCourseArea(getCourseArea());
-        liveRaceDTO.setCourse(getCourseName());
+        liveRaceDTO.setCourseArea(getCourseAreaOrNull());
+        liveRaceDTO.setCourse(getCourseNameOrNull());
         liveRaceDTO.setFlagState(getFlagStateOrNull());
         liveRaceDTO.setProgress(getProgressOrNull());
         liveRaceDTO.setWind(getWindOrNull());
