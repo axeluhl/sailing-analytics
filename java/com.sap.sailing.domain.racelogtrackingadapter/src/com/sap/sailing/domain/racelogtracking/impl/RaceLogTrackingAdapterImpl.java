@@ -212,7 +212,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             if (course == null || !new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 continue;
             }
-            CourseBase to = new CourseDataImpl("Copy of \"" + course.getName());
+            CourseBase to = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
             TimePoint now = MillisecondsTimePoint.now();
             int i = 0;
             revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
