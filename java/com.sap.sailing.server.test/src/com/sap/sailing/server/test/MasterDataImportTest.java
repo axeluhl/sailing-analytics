@@ -88,6 +88,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -1656,7 +1657,7 @@ public class MasterDataImportTest {
         assignedRaces.add(new RegattaNameAndRaceName("48er", "F2"));
         assignedRaces.add(new RegattaNameAndRaceName("48er", "F3"));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
-                MediaTrack.MimeType.mp4, assignedRaces);
+                MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
 
         // Serialize

@@ -1,0 +1,25 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+	<ui:style>
+	.holder {
+		border-radius: 2px;
+		cursor: pointer;
+	}
+	.thumbnail {
+		border-radius: 2px;
+		position: relative;
+		display: block;
+		width: 50%;
+		height: auto;
+		text-align: center;
+	}
+	.caption {
+		padding: 5px;
+	} 
+	
+	</ui:style>
+	<div class="{style.holder}">
+		<img class="{style.thumbnail}" ui:field="thumbnailUi"/>
+		<div class="{style.caption}" ui:field="captionUi" />
+	</div>
+</ui:UiBinder>

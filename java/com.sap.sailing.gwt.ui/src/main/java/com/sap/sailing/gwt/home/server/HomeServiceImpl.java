@@ -28,6 +28,8 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sailing.domain.common.media.MediaType;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -48,10 +50,9 @@ import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.media.VideoReferenceDTO.VideoType;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
@@ -182,12 +183,17 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             EventHolder holder = pair.getB();
             result.addStageEvent(convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType));
             
+            EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
+
             // TODO implement better that using a hard cast...
             Collection<URL> videosOfEvent = (Collection<URL>) holder.event.getVideoURLs();
             if (videosOfEvent.size() > 0 && result.getVideos().size() < MAX_VIDEO_COUNT) {
                 URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
-                VideoMetadataDTO candidate = new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName());
-                if (candidate.getType() == VideoType.YOUTUBE) {
+
+                MimeType type = MediaUtils.detectMimeTypeFromUrl(youTubeRandomUrl.toString());
+                if (type.mediaType == MediaType.video) {
+                    VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, youTubeRandomUrl, type,
+                            holder.event.getName());
                     result.addVideo(candidate);
                 }
             }
@@ -200,7 +206,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
         });
         
-        final Set<ImageReferenceDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable amount of shuffling
+        final Set<ImageMetadataDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
+                                                                        // amount of shuffling
         final List<VideoMetadataDTO> videoCandidates = new ArrayList<>();
         
         for(EventHolder holder : recentEventsOfLast12Month) {
@@ -209,21 +216,23 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
             
             EventBase event = holder.event;
+            EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
             for (URL url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
                 try {
                     ImageSize imageSize = event.getImageSize(url);
                     if(imageSize != null) {
-                        photoGalleryUrls.add(new ImageReferenceDTO(url, imageSize));
+                        // TODO: do we habe a title?
+                        photoGalleryUrls.add(new ImageMetadataDTO(eventRef, url, imageSize, null));
                     }
                 } catch (Exception e) {
                 }
             }
             for (URL videoUrl : event.getVideoURLs()) {
                 
-                
-                VideoMetadataDTO candidate = new VideoMetadataDTO(videoUrl, holder.event.getName());
-                if (candidate.getType() == VideoType.YOUTUBE) {
+                MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl.toString());
+                if (type.mediaType == MediaType.video) {
+                    VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, videoUrl, type, holder.event.getName());
                     videoCandidates.add(candidate);
                 }
             }
@@ -248,12 +257,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
         }
         Random random = new Random();
-        List<ImageReferenceDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
+        List<ImageMetadataDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
         final int gallerySize = photoGalleryUrls.size();
         for (int i = 0; i < gallerySize; i++) {
             Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
         }
-        for (ImageReferenceDTO holder : shuffledPhotoGallery) {
+        for (ImageMetadataDTO holder : shuffledPhotoGallery) {
             result.addPhoto(holder);
         }
         // TODO media
@@ -447,6 +456,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     @Override
     public MediaDTO getMediaForEvent(UUID eventId) {
         Event event = getService().getEvent(eventId);
+        EventReferenceDTO eventRef = new EventReferenceDTO(event);
+
         String eventName = event.getName();
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
@@ -457,12 +468,13 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
             }
-            ImageMetadataDTO entry = new ImageMetadataDTO(url, imageSize, eventName);
+            ImageMetadataDTO entry = new ImageMetadataDTO(eventRef, url, imageSize, eventName);
             media.addPhoto(entry);
         }
         for(URL url : event.getVideoURLs()) {
-            VideoMetadataDTO candidate = new VideoMetadataDTO(url, null /* eventName */);
-            if (candidate.getType() == VideoType.YOUTUBE) {
+            MimeType type = MediaUtils.detectMimeTypeFromUrl(url.toString());
+            if (type.mediaType == MediaType.video) {
+                VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, url, type, null);
                 media.addVideo(candidate);
             }
         }

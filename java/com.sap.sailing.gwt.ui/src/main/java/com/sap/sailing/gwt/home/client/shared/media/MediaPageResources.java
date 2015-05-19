@@ -13,5 +13,8 @@ public interface MediaPageResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String media();
         String dark();
+
+        String photolist();
+        String imggalleryitem();
     }
 }

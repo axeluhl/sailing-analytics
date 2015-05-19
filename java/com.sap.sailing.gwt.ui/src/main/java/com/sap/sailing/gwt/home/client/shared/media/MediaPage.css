@@ -9,3 +9,14 @@
   background: #333;
   color: #fff;
 }
+.photolist {
+	padding: 0 -1em;
+	font-size: 0px;
+}
+.imggalleryitem {
+	border: 1em solid transparent;
+	
+	box-sizing: border-box;
+	
+}
+
