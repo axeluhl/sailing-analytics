@@ -757,7 +757,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        if(raceExecutionOrderProvider != null && raceExecutionOrderProvider.getId() != null){
+        if (raceExecutionOrderProvider != null && raceExecutionOrderProvider.getId() != null && !super.attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider.getId())) {
             super.attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider.getId(), raceExecutionOrderProvider);
         }
     }
