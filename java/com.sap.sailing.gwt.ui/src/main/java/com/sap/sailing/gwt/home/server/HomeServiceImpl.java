@@ -40,7 +40,6 @@ import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
@@ -274,7 +273,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
-        dto.setState(calculateEventState(event));
+        dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
 
         boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
@@ -292,7 +291,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                     RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
                     regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
                     regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
-                    regattaDTO.setState(calculateRegattaState(regattaDTO));
+                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
                     dto.getRegattas().add(regattaDTO);
                     
                 } else if(leaderboard instanceof FlexibleLeaderboard) {
@@ -300,7 +299,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                     
                     regattaDTO.setStartDate(null);
                     regattaDTO.setEndDate(null);
-                    regattaDTO.setState(calculateRegattaState(regattaDTO));
+                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
                     dto.getRegattas().add(regattaDTO);
                 }
             }
@@ -350,40 +349,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         return regattaDTO;
     }
     
-    private RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
-        Date now = new Date();
-        Date startDate = regatta.getStartDate();
-        Date endDate = regatta.getEndDate();
-        if(startDate != null && now.compareTo(startDate) < 0) {
-            return RegattaState.UPCOMING;
-        }
-        if(endDate != null && now.compareTo(endDate) > 0) {
-            return RegattaState.FINISHED;
-        }
-        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
-            return RegattaState.RUNNING;
-        }
-        return RegattaState.UNKNOWN;
-    }
-    
-    private EventState calculateEventState(EventBase event) {
-        return calculateEventState(event.isPublic(), event.getStartDate().asDate(), event.getEndDate().asDate());
-    }
-    
-    private EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
-        Date now = new Date();
-        if(now.compareTo(startDate) < 0) {
-            if(isPublic) {
-                return EventState.UPCOMING;
-            }
-            return EventState.PLANNED;
-        }
-        if(now.compareTo(endDate) > 0) {
-            return EventState.FINISHED;
-        }
-        return EventState.RUNNING;
-    }
-
     @Override
     public EventSeriesViewDTO getEventSeriesViewById(UUID id) {
         Event o = getService().getEvent(id);
@@ -524,7 +489,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         dto.setDisplayName(event.getName());
         dto.setStartDate(event.getStartDate().asDate());
         dto.setEndDate(event.getEndDate().asDate());
-        dto.setState(calculateEventState(event));
+        dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
         if(HomeServiceUtil.isFakeSeries(event)) {
             dto.setLocation(getLocation(event));

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +22,11 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.Util;
 
 public final class HomeServiceUtil {
@@ -47,6 +52,53 @@ public final class HomeServiceUtil {
             return false;
         }
         return lg.hasOverallLeaderboard();
+    }
+    
+    public static boolean isSingleRegatta(Event event) {
+        boolean first = true;
+        for(LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            for(@SuppressWarnings("unused") Leaderboard lb: lg.getLeaderboards()) {
+                if(!first) {
+                    return false;
+                }
+                first = false;
+            }
+        }
+        return true;
+    }
+    
+    public static RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
+        Date now = new Date();
+        Date startDate = regatta.getStartDate();
+        Date endDate = regatta.getEndDate();
+        if(startDate != null && now.compareTo(startDate) < 0) {
+            return RegattaState.UPCOMING;
+        }
+        if(endDate != null && now.compareTo(endDate) > 0) {
+            return RegattaState.FINISHED;
+        }
+        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
+            return RegattaState.RUNNING;
+        }
+        return RegattaState.UNKNOWN;
+    }
+    
+    public static EventState calculateEventState(EventBase event) {
+        return calculateEventState(event.isPublic(), event.getStartDate().asDate(), event.getEndDate().asDate());
+    }
+    
+    public static EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
+        Date now = new Date();
+        if(now.compareTo(startDate) < 0) {
+            if(isPublic) {
+                return EventState.UPCOMING;
+            }
+            return EventState.PLANNED;
+        }
+        if(now.compareTo(endDate) > 0) {
+            return EventState.FINISHED;
+        }
+        return EventState.RUNNING;
     }
     
     private static URL findEventThumbnailImageUrl(EventBase event) {
