@@ -1,6 +1,13 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  			 xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive">
+  	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <g:HTMLPanel>
-        <g:FlowPanel ui:field="content" />
+      <div style="margin-top: 1em;" class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <r:RacesListLive ui:field="racesListLive" />
+        </div>
+      </div>
+      <g:SimplePanel ui:field="content" />
     </g:HTMLPanel>
 </ui:UiBinder>
