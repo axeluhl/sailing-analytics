@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.fileupload.util.Streams;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -117,8 +120,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitor-id}/team/image")
     @Produces("application/json;charset=UTF-8")
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
-            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) {
-
+            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
         RacingEventService service = getService();
         CompetitorStore store = service.getCompetitorStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
@@ -134,7 +136,13 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         } else if (fileType.equals("image/png")) {
             fileExtension = ".png";
         }
-
+        if (sizeInBytes <= 0) {
+            // size not provided; read the stream and determine length locally:
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            Streams.copy(uploadedInputStream, bos, /* close output stream */ true);
+            sizeInBytes = bos.size();
+            uploadedInputStream = new ByteArrayInputStream(bos.toByteArray());
+        }
         URI imageUri;
         try {
             if (sizeInBytes > 1024 * 1024 * MAX_SIZE_IN_MB) {

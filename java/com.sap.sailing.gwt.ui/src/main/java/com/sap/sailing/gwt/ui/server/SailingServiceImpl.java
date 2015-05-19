@@ -58,8 +58,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -81,6 +82,9 @@ import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOp
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
@@ -1965,18 +1969,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private ControlPoint getOrCreateControlPoint(ControlPointDTO dto) {
-        String id = dto.getIdAsString();
-        if (id == null) {
-            id = UUID.randomUUID().toString();
+        String idAsString = dto.getIdAsString();
+        if (idAsString == null) {
+            idAsString = UUID.randomUUID().toString();
         }
         if (dto instanceof GateDTO) {
             GateDTO gateDTO = (GateDTO) dto;
             Mark left = (Mark) getOrCreateControlPoint(gateDTO.getLeft());
             Mark right = (Mark) getOrCreateControlPoint(gateDTO.getRight());
-            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(id, gateDTO.getName(), left, right);
+            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right);
         } else {
             MarkDTO markDTO = (MarkDTO) dto;
-            return baseDomainFactory.getOrCreateMark(id, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         }
     }
 
@@ -3714,11 +3718,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public List<String> getUrlResultProviderNames() {
-        List<String> result = new ArrayList<String>();
+    public List<Pair<String, String>> getUrlResultProviderNamesAndOptionalSampleURL() {
+        List<Pair<String, String>> result = new ArrayList<>();
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider) {
-                result.add(scp.getName());
+                result.add(new Pair<>(scp.getName(), ((ResultUrlProvider) scp).getOptionalSampleURL()));
             }
         }
         return result;
@@ -5177,29 +5181,69 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mappingDTO, Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
-        List<RaceLogCloseOpenEndedDeviceMappingEvent> closingEvents =
-                new RaceLogOpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
-                new MillisecondsTimePoint(closingTimePoint)).analyze();
-        
-        for (RaceLogEvent event : closingEvents) {
-            raceLog.add(event);            
+        List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+        for (AbstractLog<?, ?> abstractLog : logHierarchy) {
+            //check if abstractLog is the correct log for the closingEvent
+            final AbstractLogEvent<?> event;
+            abstractLog.lockForRead();
+            try {
+                 event = abstractLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
+            } finally {
+                abstractLog.unlockAfterRead();
+            }
+            if (event != null) {
+                DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
+                if (abstractLog instanceof RegattaLog) {
+                    RegattaLog regattaLog = (RegattaLog) abstractLog;
+                    List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents =
+                            new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
+                            new MillisecondsTimePoint(closingTimePoint)).analyze();
+                    for (RegattaLogEvent closingEvent : closingEvents) {
+                        regattaLog.add(closingEvent);            
+                    }
+                } else if (abstractLog instanceof RaceLog) {
+                    RaceLog raceLog = (RaceLog) abstractLog;
+                    List<RaceLogCloseOpenEndedDeviceMappingEvent> closingEvents =
+                            new RaceLogOpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
+                            new MillisecondsTimePoint(closingTimePoint)).analyze();
+                    for (RaceLogEvent closingEvent : closingEvents) {
+                        raceLog.add(closingEvent);            
+                    }
+                }
+            }
         }
     }
     
     @Override
-    public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName,
+    public void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
             List<UUID> eventIds) throws NotRevokableException {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+        boolean eventRevoked = false;
         for (Serializable idToRevoke : eventIds) {
-            raceLog.lockForRead();
-            RaceLogEvent event = raceLog.getEventById(idToRevoke);
-            raceLog.unlockAfterRead();
-            if (event instanceof Revokable) {
-                raceLog.revokeEvent(getService().getServerAuthor(), event, "revoke triggered by GWT user action");
+            eventRevoked = false;
+            for (AbstractLog<?, ?> abstractLog : logHierarchy) {
+                eventRevoked = revokeEvent(eventRevoked, idToRevoke, abstractLog);
+            }
+            if (!eventRevoked){
+                logger.warning("Could not revoke event with id "+idToRevoke);
             }
         }
+    }
+
+    private <EventT extends AbstractLogEvent<VisitorT>, VisitorT> boolean revokeEvent(boolean eventRevoked, Serializable idToRevoke, AbstractLog<EventT, VisitorT> abstractLog)
+            throws NotRevokableException {
+        final EventT event; 
+        abstractLog.lockForRead();
+        try {
+            event = abstractLog.getEventById(idToRevoke);
+        } finally {
+            abstractLog.unlockAfterRead();
+        }
+        if (event != null) {
+            abstractLog.revokeEvent(getService().getServerAuthor(), event, "revoke triggered by GWT user action"); 
+            eventRevoked = true;
+        }
+        return eventRevoked;
     }
     
     @Override
@@ -5588,5 +5632,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
         }
         return result;
+    }
+
+    @Override
+    public boolean doesRegattaLogContainCompetitors(String leaderboardName) throws DoesNotHaveRegattaLogException {
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        
+        List<RegattaLogEvent> markEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class)
+                .analyze();
+        
+        if (markEvents.isEmpty()){
+            return false;
+        } else {
+            return true;
+        }
     }
 }

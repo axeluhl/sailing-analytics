@@ -16,7 +16,7 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
     private final RegattaLikeIdentifier identifier;
     private transient Set<RegattaLikeListener> listeners = new HashSet<>();
     
-    public BaseRegattaLikeImpl(RegattaLikeIdentifier identifier, RegattaLogStore store) {
+    public BaseRegattaLikeImpl(final RegattaLikeIdentifier identifier, RegattaLogStore store) {
         regattaLog = store.getRegattaLog(identifier, /*ignoreCache*/ true);
         this.identifier = identifier;
         

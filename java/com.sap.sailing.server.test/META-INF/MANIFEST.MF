@@ -19,7 +19,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.test,
  org.mockito.mockito-core;bundle-version="1.10.14",
  com.sap.sse.common,
- org.eclipse.jetty.server;bundle-version="9.2.2"
+ org.eclipse.jetty.server;bundle-version="9.2.2",
+ com.sap.sailing.domain.shared.android,
+ com.sap.sailing.domain.racelogtrackingadapter.testsupport
 Import-Package: com.sap.sailing.server.gateway.jaxrs,
  com.sap.sailing.server.gateway.jaxrs.spi,
  org.json.simple,
