@@ -120,7 +120,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 try {
                     for (TrackedLeg tl : getTrackedRace().getTrackedLegs()) {
                         totalWindwardDistanceIncludingCompleteLeg = totalWindwardDistanceIncludingCompleteLeg.add(tl
-                                .getWindwardDistance());
+                                .getWindwardDistance(cache));
                         if (tl == trackedLeg) {
                             break;
                         }
@@ -136,11 +136,11 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                         fastestCompetitorInLeg, timePoint, cache);
             }
             for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-                final TrackedLegOfCompetitor currentLeg = getTrackedRace().getCurrentLeg(competitor, timePoint);
+                final TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
                 final Duration correctedTime;
-                if (currentLeg != null && currentLeg.hasStartedLeg(timePoint)) {
-                    final Duration timeToReachFastest = getPredictedDurationToEndOfLegOrTo(competitor,
-                            fastestCompetitorInLeg, timePoint, currentLeg, trackedLegOfFastestCompetitorInLeg, cache);
+                if (competitorLeg != null && competitorLeg.hasStartedLeg(timePoint)) {
+                    final Duration timeToReachFastest = getPredictedDurationToEndOfLegOrTo(timePoint,
+                            competitorLeg, trackedLegOfFastestCompetitorInLeg, cache);
                     final Duration totalDurationSinceRaceStart = startOfRace.until(timePoint).plus(timeToReachFastest);
                     correctedTime = getCorrectedTime(competitor, () -> trackedLeg.getLeg(),
                             () -> positionOfFastestBoatInLegAtTimePointOrLegEnd, totalDurationSinceRaceStart,
@@ -150,8 +150,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                     // and greater than all competitors who have already started the leg
                     correctedTime = new MillisecondsDurationImpl(Long.MAX_VALUE);
                 }
-                correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.put(competitor,
-                        correctedTime);
+                correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.put(competitor, correctedTime);
             }
         }
         return (tloc1, tloc2) -> fastestCompetitorInLeg==null ? 0 :

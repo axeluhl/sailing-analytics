@@ -75,9 +75,10 @@ public interface RankingMetric extends Serializable {
         
         default Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
             final Duration estimatedActualDurationFromTimePointToCompetitorFarthestAhead = getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
-            return getActualTime() == null ? null :
+            final Duration actualTime = getActualTime();
+            return actualTime == null ? null :
                 estimatedActualDurationFromTimePointToCompetitorFarthestAhead == null ? null :
-                    getActualTime().plus(estimatedActualDurationFromTimePointToCompetitorFarthestAhead);
+                    actualTime.plus(estimatedActualDurationFromTimePointToCompetitorFarthestAhead);
         }
     
         /**

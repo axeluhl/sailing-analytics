@@ -1649,6 +1649,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             // fetch the gap in own corrected time from the ranking metric
+            // FIXME !!! bug 2864: need to determine the LEG's gap; if the competitor has already finished the leg, time needs to freeze at the leg's end, and a gap shall only be evaluated based on the mark passings; similarly, 
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, trackedLeg.getCompetitor(), cache);
             result.gapToLeaderInSeconds = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
             if (result.gapToLeaderInSeconds != null) {
