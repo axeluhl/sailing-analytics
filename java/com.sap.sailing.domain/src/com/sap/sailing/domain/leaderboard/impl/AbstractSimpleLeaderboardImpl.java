@@ -1655,9 +1655,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 // FIXME problem: asking just after the beginning of the leg yields very different values from asking for the end of the previous leg.
                 // This is because for the previous leg it's decided based on the mark passings; for the next (current) leg it's decided based on
                 // windward distance and VMG
-                Duration gapAtEndOfPreviousLegInSeconds = getGapAtEndOfPreviousLegInSeconds(trackedLeg, rankingInfo, cache);
-                if (gapAtEndOfPreviousLegInSeconds != null) {
-                    result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLegInSeconds.asSeconds();
+                Duration gapAtEndOfPreviousLeg = getGapAtEndOfPreviousLeg(trackedLeg, rankingInfo, cache);
+                if (gapAtEndOfPreviousLeg != null) {
+                    result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLeg.asSeconds();
                 }
             }
             LinkedHashMap<Competitor, Integer> legRanks = legRanksCache.get(trackedLeg.getLeg());
@@ -1740,7 +1740,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
-    private Duration getGapAtEndOfPreviousLegInSeconds(TrackedLegOfCompetitor trackedLeg, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    private Duration getGapAtEndOfPreviousLeg(TrackedLegOfCompetitor trackedLeg, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         final Duration result;
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
         course.lockForRead();
