@@ -485,6 +485,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
     String upcoming();
+    String next();
     String inProgress();
     String passedTo(String name);
     String gapChangeSinceLegStartInSeconds();
@@ -1280,4 +1281,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String followSapSports();
     String liveNow();
     String analyseRace();
+    String nextRaceStartingIn();
+    String startingIn(String name);
 }
