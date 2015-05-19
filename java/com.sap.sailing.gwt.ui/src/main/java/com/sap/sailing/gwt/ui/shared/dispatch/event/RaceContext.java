@@ -31,7 +31,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.LiveRaceState;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sse.common.TimePoint;
@@ -217,39 +217,34 @@ public class RaceContext {
         return startTime;
     }
 
-    /**
-     * The 'public interest' of a race is a combination of it's 'live' state
-     * and special flags states indicating how the postponed/canceled races will be continued
-     * @return
-     */
-    public boolean isOfPublicInterest() {
-        // TODO better condition after Frank implemented race state stuff
-        return isStartTimeAvailable() && isRaceLogAvailable();
-    }
-
-    public LiveRaceDTO getLiveRaceDTO() {
-        // the start time is always given for live races
-        TimePoint startTime = getStartTime();
-        LiveRaceState raceState = LiveRaceState.LIVE;
-        if (now.before(startTime)) {
-            raceState = LiveRaceState.UPCOMING;
-        } else if (state != null && state.getStatus() == RaceLogRaceStatus.FINISHED) {
-            raceState = LiveRaceState.FINISHED;
-        } else if (trackedRace != null && trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
-            raceState = LiveRaceState.FINISHED;
+    public void addLiveRace(LiveRacesDTO result) {
+        // a race is of 'public interest' of a race is a combination of it's 'live' state
+        // and special flags states indicating how the postponed/canceled races will be continued
+        if(isStartTimeAvailable() && isRaceLogAvailable()) {
+            // the start time is always given for live races
+            TimePoint startTime = getStartTime();
+            RaceViewState raceState = RaceViewState.RUNNING;
+            if (now.before(startTime)) {
+                raceState = RaceViewState.SCHEDULED;
+            } else if (state != null && state.getStatus() == RaceLogRaceStatus.FINISHED) {
+                raceState = RaceViewState.FINISHED;
+            } else if (trackedRace != null && trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
+                raceState = RaceViewState.FINISHED;
+            }
+            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
+            liveRaceDTO.setState(raceState);
+            liveRaceDTO.setRegattaName(getRegattaDisplayName());
+            liveRaceDTO.setFleet(getFleetMetadataOrNull());
+            liveRaceDTO.setRaceName(raceColumn.getName());
+            liveRaceDTO.setStart(startTime.asDate());
+            liveRaceDTO.setBoatClass(getBoatClassName());
+            liveRaceDTO.setCourseArea(getCourseAreaOrNull());
+            liveRaceDTO.setCourse(getCourseNameOrNull());
+            liveRaceDTO.setFlagState(getFlagStateOrNull());
+            liveRaceDTO.setProgress(getProgressOrNull());
+            liveRaceDTO.setWind(getWindOrNull());
+            
+            result.addRace(liveRaceDTO);        
         }
-        LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
-        liveRaceDTO.setState(raceState);
-        liveRaceDTO.setRegattaName(getRegattaDisplayName());
-        liveRaceDTO.setFleet(getFleetMetadataOrNull());
-        liveRaceDTO.setRaceName(raceColumn.getName());
-        liveRaceDTO.setStart(startTime.asDate());
-        liveRaceDTO.setBoatClass(getBoatClassName());
-        liveRaceDTO.setCourseArea(getCourseAreaOrNull());
-        liveRaceDTO.setCourse(getCourseNameOrNull());
-        liveRaceDTO.setFlagState(getFlagStateOrNull());
-        liveRaceDTO.setProgress(getProgressOrNull());
-        liveRaceDTO.setWind(getWindOrNull());
-        return liveRaceDTO;
     }
 }

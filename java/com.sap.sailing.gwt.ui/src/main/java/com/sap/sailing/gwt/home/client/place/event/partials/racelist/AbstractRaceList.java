@@ -41,7 +41,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.LiveRaceState;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
@@ -360,9 +360,9 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     protected class RaceProgressCell extends AbstractCell<LiveRaceDTO> {
         @Override
         public void render(Context context, LiveRaceDTO value, SafeHtmlBuilder sb) {
-            LiveRaceState state = value.getState();
+            RaceViewState state = value.getState();
             RaceProgressDTO progress = value.getProgress();
-            if (state != LiveRaceState.LIVE) {
+            if (state != RaceViewState.RUNNING) {
                 sb.appendEscaped(state.name());
             } else if (progress != null) {
                 SafeStyles width = SafeStylesUtils.forWidth(progress.getPercentageProgress(), Unit.PCT);
@@ -380,8 +380,8 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
 
         @Override
         public void render(Context context, T data, SafeHtmlBuilder sb) {
-            String styleNames = data.getState() == LiveRaceState.FINISHED ? analyseRaceStyle : watchNowStyle;
-            String text = data.getState() == LiveRaceState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
+            String styleNames = data.getState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
+            String text = data.getState() == RaceViewState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
             String raceViewerURL = presenter.getRaceViewerURL(data.getID());
             sb.append(TEMPLATE.watchNowButton(styleNames, text, raceViewerURL));
         }

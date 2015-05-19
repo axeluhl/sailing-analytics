@@ -28,11 +28,7 @@ public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRa
         RacesActionUtil.forRacesOfRegatta(context, eventId, regattaName, new RaceCallback() {
             @Override
             public void doForRace(RaceContext rc) {
-                if(!rc.isOfPublicInterest()) {
-                    return;
-                }
-                
-                result.addRace(rc.getLiveRaceDTO());
+                rc.addLiveRace(result);
             }
         });
         return new ResultWithTTL<LiveRacesDTO>(5000, result);
