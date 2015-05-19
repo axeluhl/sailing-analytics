@@ -8,6 +8,8 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -20,6 +22,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -32,6 +35,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.LiveRaceState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
@@ -45,8 +49,10 @@ public class RaceContext {
     public final TrackedRace trackedRace;
     private final RaceLog raceLog;
     private final ReadonlyRaceState state;
+    private final Event event;
 
-    public RaceContext(LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, Fleet fleet) {
+    public RaceContext(Event event, LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, Fleet fleet) {
+        this.event = event;
         this.lg = lg;
         this.lb = lb;
         this.raceColumn = raceColumn;
@@ -162,11 +168,18 @@ public class RaceContext {
     }
 
     public String getCourseAreaOrNull() {
-        Regatta regatta = getRegatta();
-        if(regatta != null && regatta.getDefaultCourseArea() != null) {
-            return regatta.getDefaultCourseArea().getName();
+        if(Util.size(event.getVenue().getCourseAreas()) <= 1) {
+            return null;
         }
-        return null;
+        CourseArea courseArea = null;
+        if(lb instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard)lb).getDefaultCourseArea();
+        }
+        Regatta regatta = getRegatta();
+        if(regatta != null) {
+            courseArea = regatta.getDefaultCourseArea();
+        }
+        return courseArea == null ? null : regatta.getDefaultCourseArea().getName();
     }
 
     public RaceProgressDTO getProgressOrNull() {
@@ -185,10 +198,6 @@ public class RaceContext {
             courseName = raceDefinition.getCourse().getName();
         }
         return courseName;
-    }
-    
-    public boolean isRaceDefinitionAvailable() {
-        return raceDefinition != null;
     }
     
     public boolean isRaceLogAvailable() {
