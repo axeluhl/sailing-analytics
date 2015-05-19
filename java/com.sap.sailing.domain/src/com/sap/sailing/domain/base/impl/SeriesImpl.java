@@ -106,6 +106,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void setRegatta(Regatta regatta) {
         this.regatta = regatta;
+        if (this.regatta != null) {
+            attachRaceExecutionOrderProviderToTrackedRacesInRaceCollumns();
+        } else {
+            detachRaceExecutionOrderProviderFromTrackedRacesInRaceCollumns();
+        }
     }
 
     public Iterable<? extends Fleet> getFleets() {
@@ -156,6 +161,28 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
                 raceColumnName, 
                 this, 
                 trackedRegattaRegistry);
+    }
+    
+    private void attachRaceExecutionOrderProviderToTrackedRacesInRaceCollumns(){
+        for(RaceColumnInSeries raceColumnInSeries : raceColumns){
+            for(Fleet fleet : raceColumnInSeries.getFleets()){
+                TrackedRace trackedRace =  raceColumnInSeries.getTrackedRace(fleet);
+                if(trackedRace != null && regatta != null){
+                    trackedRace.attachRaceExecutionProvider(regatta.getRaceExecutionOrderProvider());
+                }
+            }
+        }
+    }
+    
+    private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceCollumns(){
+        for(RaceColumnInSeries raceColumnInSeries : raceColumns){
+            for(Fleet fleet : raceColumnInSeries.getFleets()){
+                TrackedRace trackedRace =  raceColumnInSeries.getTrackedRace(fleet);
+                if(trackedRace != null && regatta != null && regatta.getRaceExecutionOrderProvider() != null){
+                    trackedRace.detachRaceExecutionOrderProvider(regatta.getRaceExecutionOrderProvider().getId());
+                }
+            }
+        }
     }
 
     @Override
