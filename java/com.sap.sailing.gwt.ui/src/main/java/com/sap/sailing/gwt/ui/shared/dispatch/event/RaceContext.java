@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -230,6 +231,8 @@ public class RaceContext {
         LiveRaceState raceState = LiveRaceState.LIVE;
         if(startTime == null || now.before(startTime)) {
             raceState = LiveRaceState.UPCOMING;
+        } else if(state != null && state.getStatus() == RaceLogRaceStatus.FINISHED) {
+            raceState = LiveRaceState.FINISHED;
         } else if(trackedRace != null && trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
             raceState = LiveRaceState.FINISHED;
         }
