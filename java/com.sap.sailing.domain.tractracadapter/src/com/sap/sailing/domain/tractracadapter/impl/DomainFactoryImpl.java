@@ -212,7 +212,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Course createCourse(String name, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> controlPoint: controlPoints) {
+        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> controlPoint : controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint.getA()), controlPoint.getB());
             waypointList.add(waypoint);
         }

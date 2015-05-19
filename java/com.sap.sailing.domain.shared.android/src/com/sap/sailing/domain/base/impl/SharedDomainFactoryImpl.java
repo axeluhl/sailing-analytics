@@ -222,7 +222,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = passingInstruction==null?new WaypointImpl(controlPoint):new WaypointImpl(controlPoint, passingInstruction);
+            Waypoint result = passingInstruction == null ?
+                    new WaypointImpl(controlPoint) : new WaypointImpl(controlPoint, passingInstruction);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
