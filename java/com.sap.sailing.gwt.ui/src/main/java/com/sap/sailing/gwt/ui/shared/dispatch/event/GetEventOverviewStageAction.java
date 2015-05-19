@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.Date;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -33,8 +36,8 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         
         EventState state = HomeServiceUtil.calculateEventState(event);
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
-            // TODO Type Event
-            return new ResultWithTTL<EventOverviewStageDTO>(5000, new EventOverviewTickerStageDTO());
+            return new ResultWithTTL<EventOverviewStageDTO>(5000, new EventOverviewTickerStageDTO(event.getStartDate()
+                    .asDate(), event.getName()));
         }
         
         if(state == EventState.RUNNING) {
@@ -56,8 +59,9 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
                 }
             }
             if(!HomeServiceUtil.isSingleRegatta(event) && nextRegatta != null) {
-                 // TODO Type regatta
-                return new ResultWithTTL<EventOverviewStageDTO>(5000, new EventOverviewTickerStageDTO());
+                return new ResultWithTTL<EventOverviewStageDTO>(5000, new EventOverviewRegattaTickerStageDTO(
+                        new RegattaName(nextRegatta.getName()), nextRegatta.getName(), nextRegatta.getStartDate()
+                                .asDate()));
             } else {
                 // TODO find next race or live race
 //                for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
@@ -69,8 +73,10 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //                        }
 //                    }
 //                }
-                // TODO Type race
-                return new ResultWithTTL<EventOverviewStageDTO>(5000, new EventOverviewTickerStageDTO());
+                // TODO Proper Implementation (Type race)
+                EventOverviewTickerStageDTO ticker = new EventOverviewRaceTickerStageDTO(new RegattaNameAndRaceName(
+                        "Regatta XY", "Race 1"), "Race 1 - Gold Fleet", new Date(new Date().getTime() + 5000));
+                return new ResultWithTTL<EventOverviewStageDTO>(5000, ticker);
             }
             // TODO clever fallback for live event/regatta?
 //            }

@@ -3,31 +3,26 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-  <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.countdown.CountdownResources" />
   <g:HTMLPanel addStyleNames="{local_res.css.countdown}">
       <div class="{local_res.css.countdown_image}"></div>
       <div class="{local_res.css.countdown_content}">
-        <h3 class="{local_res.css.countdown_content_title}">
-			TODO Next Race starting in<!-- <ui:text from='{i18n.nextRace}' /> -->
-        </h3>
+        <h3 class="{local_res.css.countdown_content_title}" ui:field="countdownTitle"></h3>
         <g:SimplePanel ui:field="tickerContainer"/>
       </div>
       <div class="{res.mediaCss.grid}">
-        <div class="{local_res.css.countdown_info}">
+        <div class="{local_res.css.countdown_info}" ui:field="countdownInfo">
           <div class="{res.mediaCss.small7} {res.mediaCss.large8} {res.mediaCss.columns} {local_res.css.countdown_info_text}">
-            <h3 class="{local_res.css.countdown_info_text_title}">
-              TODO This is the next races title
-            </h3>
+            <h3 class="{local_res.css.countdown_info_text_title}" ui:field="infoTitle"></h3>
             <div data-labeltype="next" class="{local_res.css.countdown_info_lable} {res.mainCss.label}">
-               TODONext<!-- <ui:text from='{i18n.playModeNext}' /> -->
+              <ui:text from='{i18n.next}' />
             </div>
           </div>
           <div class="{res.mediaCss.small5} {res.mediaCss.large4} {res.mediaCss.columns} {local_res.css.countdown_info_button}">
-            <a href="#" class="{res.mainCss.button} {res.mainCss.buttonsmall} {res.mainCss.buttonred} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}">
-              <ui:text from='{i18n_ubi.watchNow}' />
-            </a>
+          	<g:Anchor target="_blank" ui:field="navigationButton"
+			  addStyleNames="{res.mainCss.button} {res.mainCss.buttonsmall} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}">
+			</g:Anchor>
           </div>
         </div>
       </div>

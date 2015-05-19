@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.place.event.overview;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.client.place.event.partials.livestream.Livestream;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
@@ -15,8 +16,11 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     private final SimplePanel content = new SimplePanel();
     
     private Widget lastContent;
+
+    private final EventView.Presenter presenter;
     
-    public EventOverviewStage() {
+    public EventOverviewStage(EventView.Presenter presenter) {
+        this.presenter = presenter;
         initWidget(content);
     }
 
@@ -30,7 +34,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
         }
         if (data instanceof EventOverviewTickerStageDTO) {
             if (!(lastContent instanceof Countdown)) {
-                lastContent = new Countdown();
+                lastContent = new Countdown(presenter);
             }
             ((Countdown) lastContent).setData((EventOverviewTickerStageDTO) data);
         }

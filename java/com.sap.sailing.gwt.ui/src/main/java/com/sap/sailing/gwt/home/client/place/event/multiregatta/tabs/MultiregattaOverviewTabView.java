@@ -46,6 +46,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @Override
     public void start(MultiregattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
         racesListLive = new RacesListLive(currentPresenter, true);
+        stage = new EventOverviewStage(currentPresenter);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
@@ -68,7 +69,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
     @UiField(provided = true) RacesListLive racesListLive;
-    @UiField EventOverviewStage stage;
+    @UiField(provided = true) EventOverviewStage stage;
 
     @Override
     public MultiregattaOverviewPlace placeToFire() {
