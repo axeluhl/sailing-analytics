@@ -25,7 +25,6 @@ body ::-webkit-scrollbar-button {
 body ::-webkit-scrollbar-track {
     border-left: 6px solid transparent;
     border-right: 1px solid transparent;
-    background-clip: padding-box;
 }
 
 .collapsablePanel {
@@ -339,8 +338,10 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-TabBar {
-  background: #ccc;
-  padding-top: 6px;
+  margin-top: 20px;
+  border-bottom: 1px solid #dedede;
+  margin-bottom: 10px;
+  
 }
 
 .gwt-TabBar .gwt-TabBarFirst {
@@ -352,22 +353,27 @@ body ::-webkit-scrollbar-track {
 
 .gwt-TabBar .gwt-TabBarItem {
   margin-left: 4px;
-  padding: 4px 8px 4px 8px;
+  padding: 10px 12px;
   cursor: pointer;
   cursor: hand;
-  color: white;
+  color: black;
   font-weight: normal;
   text-align: center;
-  background: #8E8E8E;
-  -moz-border-radius: 3px 3px 0px 0px;
-  border-radius: 3px 3px 0px 0px;
+  background: #ebebeb;
+  border-radius: 4px 4px 0px 0px;
+  border-left: 1px solid #dedede;
+  border-top: 1px solid #dedede;
+  border-right: 1px solid #dedede;
+  
 }
 
+.gwt-TabBarItem:FOCUS {
+	outline: none;
+}
 .gwt-TabBar .gwt-TabBarItem-selected {
   cursor: default;
   background: white;
-  color: #333;
-  font-weight: bold;
+  color: black;
 }
 
 .gwt-TabBar .gwt-TabBarItem-disabled {
@@ -696,76 +702,54 @@ body ::-webkit-scrollbar-track {
 
 .gwt-DialogBox {
   line-height: 1.4;
+  background-color: #cecece;
+  border: 1px solid #3e3e3e;
+  border-radius: 4px;
+  box-shadow: 0px 0px 10px 0px #3e3e3e;
+}
+
+.gwt-PopupPanelGlass {
+	background-color: rgba(140,140,140,0.5);
 }
 
 .gwt-DialogBox .Caption {
     font-size: 14px;
     padding: 8px 10px;
-    background-color: #cecece;
-    border: 1px solid #cecece;
-    -webkit-border-top-left-radius: 5px;
-  -webkit-border-top-right-radius: 5px;
-  -moz-border-radius-topleft: 5px;
-  -moz-border-radius-topright: 5px;
-  -o-border-radius-topleft: 5px;
-  -o-border-radius-topright: 5px;
-  -ms-border-radius-topleft: 5px;
-  -ms-border-radius-topright: 5px;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+    background-color: #ededed;
+    border-bottom: 1px solid #3e3e3e;
+  	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
 }
 
 .gwt-DialogBox .dialogContent {
     background: #ffffff;
     padding: 10px;
-    border: 1px solid #cecece;
-  -webkit-border-bottom-right-radius: 5px;
-  -webkit-border-bottom-left-radius: 5px;
-  -o-border-bottom-right-radius: 5px;
-  -o-border-bottom-left-radius: 5px;
-  -ms-border-bottom-right-radius: 5px;
-  -ms-border-bottom-left-radius: 5px;
-  -moz-border-radius-bottomright: 5px;
-  -moz-border-radius-bottomleft: 5px;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
+   
+ 
 }
 
 .gwt-Button, .gwt-Button:visited {
-  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+  font-size: 0,9rem;
+  display: inline-block;
+  color: #fff;
   border: none;
-  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
-    display: inline-block;
-    padding: 2px 10px 4px;
-    color: #fff;
-    text-decoration: none;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -o-border-radius: 5px;
-    -ms-border-radius: 5px;
-    border-radius: 5px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    height: 24px;
-    white-space: nowrap;
-    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-	-o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-	-ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #efaa00;
+  -webkit-transition: background-color 0.2s;
+     -moz-transition: background-color 0.2s;
+          transition: background-color 0.2s;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .gwt-Button:active {
-    top: 1px;
-    position: relative;
     border: none;
 }
 
 .gwt-Button:hover {
-    background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
-    cursor: pointer;
+      background-color: #d79900;
+  outline: none;
+  text-decoration: none;
 }
 
 .gwt-Button[disabled] {
@@ -935,3 +919,9 @@ video {
 	padding: 8px 2px;
 	font-size: 10px;
 }
+
+
+label {
+	padding-left: 4px;
+}
+

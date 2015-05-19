@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -14,9 +13,9 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 
 /**
@@ -97,11 +96,6 @@ public class RegattaCompetitorAnalyticsTabView extends Composite implements
     public void setPresenter(EventRegattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
 
-    }
-
-    public boolean isSmallWidth() {
-        int width = Window.getClientWidth();
-        return width <= 720;
     }
 
 }

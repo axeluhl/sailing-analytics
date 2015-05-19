@@ -341,12 +341,13 @@ public class CourseImpl extends NamedImpl implements Course {
                 // new waypoint list; since several waypoints can have the same control point, the map goes from
                 // Pair<ControlPoint, PassingInstruction> to List<Waypoint>. The waypoints in the lists are held in the order of their
                 // occurrence in courseToUpdate.getWaypoints().
-                Map<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>, List<Waypoint>> existingWaypointsByControlPoint = new HashMap<>();
+                final Map<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>, List<Waypoint>> existingWaypointsByControlPoint = new HashMap<>();
                 for (Waypoint waypoint : courseWaypoints) {
-                    List<Waypoint> wpl = existingWaypointsByControlPoint.get(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+                    final Pair<ControlPoint, PassingInstruction> key = new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions());
+                    List<Waypoint> wpl = existingWaypointsByControlPoint.get(key);
                     if (wpl == null) {
                         wpl = new ArrayList<Waypoint>();
-                        existingWaypointsByControlPoint.put(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()), wpl);
+                        existingWaypointsByControlPoint.put(key, wpl);
                     }
                     wpl.add(waypoint);
                 }
