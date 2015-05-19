@@ -304,13 +304,18 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final Duration t_k = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()).
                 getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_k = getTimeOnTimeFactor(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
-        final Duration   g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
+        final Duration g_k = getTimeOnDistanceFactorInSecondsPerNauticalMile(rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead());
         final Duration t_i = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
         final double   f_i = getTimeOnTimeFactor(competitor);
-        final Duration   g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
+        final Duration g_i = getTimeOnDistanceFactorInSecondsPerNauticalMile(competitor);
         final Distance d   = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
         
-        final Duration diff_t_i = t_i.minus(t_k.times(f_k).plus((g_i.minus(g_k)).times(d.getNauticalMiles())).divide(f_i));
+        final Duration diff_t_i;
+        if (t_i == null || t_k == null || d == null) {
+            diff_t_i = null;
+        } else {
+            diff_t_i = t_i.minus(t_k.times(f_k).plus(((g_i==null?Duration.NULL:g_i).minus((g_k==null?Duration.NULL:g_k))).times(d.getNauticalMiles())).divide(f_i));
+        }
         return diff_t_i;
     }
 
