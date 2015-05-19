@@ -157,8 +157,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Same as {@link #getGapToLeader(TimePoint, WindPositionMode)}, only that a cache for wind and leg type data is used.
      */
-    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
