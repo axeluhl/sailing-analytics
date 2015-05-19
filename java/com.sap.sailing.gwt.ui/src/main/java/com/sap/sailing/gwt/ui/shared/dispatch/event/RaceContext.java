@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -42,19 +41,17 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 @GwtIncompatible
 public class RaceContext {
     private final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-    public final LeaderboardGroup lg;
-    public final Leaderboard lb;
-    public final RaceColumn raceColumn;
-    public final Fleet fleet;
-    public final RaceDefinition raceDefinition;
-    public final TrackedRace trackedRace;
+    private final Leaderboard lb;
+    private final RaceColumn raceColumn;
+    private final Fleet fleet;
+    private final RaceDefinition raceDefinition;
+    private final TrackedRace trackedRace;
     private final RaceLog raceLog;
     private final ReadonlyRaceState state;
     private final Event event;
 
-    public RaceContext(Event event, LeaderboardGroup lg, Leaderboard lb, RaceColumn raceColumn, Fleet fleet) {
+    public RaceContext(Event event, Leaderboard lb, RaceColumn raceColumn, Fleet fleet) {
         this.event = event;
-        this.lg = lg;
         this.lb = lb;
         this.raceColumn = raceColumn;
         this.raceDefinition = raceColumn.getRaceDefinition(fleet);
@@ -64,11 +61,11 @@ public class RaceContext {
         state = ReadonlyRaceStateImpl.create(raceLog);
     }
 
-    public boolean isShowFleetData() {
+    private boolean isShowFleetData() {
         return !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName());
     }
 
-    public String getRegattaName() {
+    private String getRegattaName() {
         if (lb instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) lb).getRegatta();
             return regatta.getName();
@@ -76,7 +73,7 @@ public class RaceContext {
         return lb.getName();
     }
 
-    public String getRegattaDisplayName() {
+    private String getRegattaDisplayName() {
         String displayName = lb.getDisplayName();
         if (displayName != null && !displayName.isEmpty()) {
             return displayName;
@@ -84,18 +81,18 @@ public class RaceContext {
         return lb.getName();
     }
 
-    public RegattaAndRaceIdentifier getIdentifier() {
+    private RegattaAndRaceIdentifier getIdentifier() {
         return new RegattaNameAndRaceName(getRegattaName(), raceColumn.getName());
     }
 
-    public FleetMetadataDTO getFleetMetadataOrNull() {
+    private FleetMetadataDTO getFleetMetadataOrNull() {
         if (!isShowFleetData()) {
             return null;
         }
         return new FleetMetadataDTO(fleet.getName(), fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
     }
 
-    public SimpleWindDTO getWindOrNull() {
+    private SimpleWindDTO getWindOrNull() {
         if(trackedRace != null) {
             TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
@@ -117,7 +114,7 @@ public class RaceContext {
         return null;
     }
 
-    public FlagStateDTO getFlagStateOrNull() {
+    private FlagStateDTO getFlagStateOrNull() {
         TimePoint startTime = state.getStartTime();
         if(startTime == null) {
             return null;
@@ -136,7 +133,7 @@ public class RaceContext {
         return null;
     }
     
-    public Regatta getRegatta() {
+    private Regatta getRegatta() {
         final Regatta regatta;
         if (lb instanceof RegattaLeaderboard) {
             regatta = ((RegattaLeaderboard) lb).getRegatta();
@@ -146,12 +143,12 @@ public class RaceContext {
         return regatta;
     }
     
-    public String getBoatClassName() {
+    private String getBoatClassName() {
         BoatClass boatClass = getBoatClass();
         return boatClass == null ? null : boatClass.getName();
     }
 
-    public BoatClass getBoatClass() {
+    private BoatClass getBoatClass() {
         final BoatClass boatClass;
         if (getRegatta() != null) {
             boatClass = getRegatta().getBoatClass();
@@ -168,7 +165,8 @@ public class RaceContext {
         return null;
     }
 
-    public String getCourseAreaOrNull() {
+    private String getCourseAreaOrNull() {
+        /** The course area will not be shown if there is only one course area defined for the event */
         if(Util.size(event.getVenue().getCourseAreas()) <= 1) {
             return null;
         }
@@ -183,7 +181,7 @@ public class RaceContext {
         return courseArea == null ? null : regatta.getDefaultCourseArea().getName();
     }
 
-    public RaceProgressDTO getProgressOrNull() {
+    private RaceProgressDTO getProgressOrNull() {
         RaceProgressDTO raceProgress = null;
         if(raceDefinition != null && raceDefinition.getCourse() != null && trackedRace != null) {
             int totalLegsCount = raceDefinition.getCourse().getLegs().size();
@@ -193,7 +191,7 @@ public class RaceContext {
         return raceProgress;
     }
 
-    public String getCourseNameOrNull() {
+    private String getCourseNameOrNull() {
         String courseName = null;
         if(raceDefinition != null && raceDefinition.getCourse() != null) {
             courseName = raceDefinition.getCourse().getName();
@@ -201,12 +199,22 @@ public class RaceContext {
         return courseName;
     }
     
-    public boolean isRaceLogAvailable() {
+    private boolean isRaceLogAvailable() {
         return raceLog != null;
     }
     
-    public boolean isStartTimeAvailable() {
+    private boolean isStartTimeAvailable() {
         return getStartTime() != null;
+    }
+
+    private TimePoint getStartTime() {
+        TimePoint startTime = null;
+        if (trackedRace != null) {
+            startTime = trackedRace.getStartOfRace();
+        } else if (state != null) {
+            startTime = state.getStartTime();
+        }
+        return startTime;
     }
 
     /**
@@ -219,21 +227,15 @@ public class RaceContext {
         return isStartTimeAvailable() && isRaceLogAvailable();
     }
 
-    public TimePoint getStartTime() {
-        if(state == null) {
-            return null;
-        }
-        return state.getStartTime();
-    }
-
     public LiveRaceDTO getLiveRaceDTO() {
+        // the start time is always given for live races
         TimePoint startTime = getStartTime();
         LiveRaceState raceState = LiveRaceState.LIVE;
-        if(startTime == null || now.before(startTime)) {
+        if (now.before(startTime)) {
             raceState = LiveRaceState.UPCOMING;
-        } else if(state != null && state.getStatus() == RaceLogRaceStatus.FINISHED) {
+        } else if (state != null && state.getStatus() == RaceLogRaceStatus.FINISHED) {
             raceState = LiveRaceState.FINISHED;
-        } else if(trackedRace != null && trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
+        } else if (trackedRace != null && trackedRace.getEndOfRace() != null && now.after(trackedRace.getEndOfRace())) {
             raceState = LiveRaceState.FINISHED;
         }
         LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
@@ -241,7 +243,7 @@ public class RaceContext {
         liveRaceDTO.setRegattaName(getRegattaDisplayName());
         liveRaceDTO.setFleet(getFleetMetadataOrNull());
         liveRaceDTO.setRaceName(raceColumn.getName());
-        liveRaceDTO.setStart(startTime != null ? startTime.asDate() : null);
+        liveRaceDTO.setStart(startTime.asDate());
         liveRaceDTO.setBoatClass(getBoatClassName());
         liveRaceDTO.setCourseArea(getCourseAreaOrNull());
         liveRaceDTO.setCourse(getCourseNameOrNull());

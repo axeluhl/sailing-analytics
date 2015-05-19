@@ -25,7 +25,7 @@ public final class RacesActionUtil {
             for (Leaderboard lb : lg.getLeaderboards()) {
                 for(RaceColumn raceColumn : lb.getRaceColumns()) {
                     for(Fleet fleet : raceColumn.getFleets()) {
-                        callback.doForRace(new RaceContext(event, lg, lb, raceColumn, fleet));
+                        callback.doForRace(new RaceContext(event, lb, raceColumn, fleet));
                     }
                 }
             }
@@ -36,10 +36,9 @@ public final class RacesActionUtil {
         Event event = context.getRacingEventService().getEvent(eventId);
         // TODO check that the leaderboard is part of the event
         Leaderboard lb = context.getRacingEventService().getLeaderboardByName(regattaName);
-        // TODO find leaderboard group by event id?
         for(RaceColumn raceColumn : lb.getRaceColumns()) {
             for(Fleet fleet : raceColumn.getFleets()) {
-                callback.doForRace(new RaceContext(event, null, lb, raceColumn, fleet));
+                callback.doForRace(new RaceContext(event, lb, raceColumn, fleet));
             }
         }
     }
