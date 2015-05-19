@@ -205,15 +205,8 @@ public class RaceContext {
      * @return
      */
     public boolean isOfPublicInterest() {
-        
-        
-        return true;
-    }
-    
-    public boolean isLive() {
-        return trackedRace.isLive(now);
-
-        // return true;
+        // TODO better condition after Frank implemented race state stuff
+        return isStartTimeAvailable() && isRaceLogAvailable();
     }
 
     public TimePoint getStartTime() {

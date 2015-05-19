@@ -28,8 +28,7 @@ public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRa
         RacesActionUtil.forRacesOfRegatta(context, eventId, regattaName, new RaceCallback() {
             @Override
             public void doForRace(RaceContext rc) {
-                // TODO better condition after Frank implemented race state stuff
-                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive() || !rc.isStartTimeAvailable()) {
+                if(!rc.isOfPublicInterest()) {
                     return;
                 }
                 

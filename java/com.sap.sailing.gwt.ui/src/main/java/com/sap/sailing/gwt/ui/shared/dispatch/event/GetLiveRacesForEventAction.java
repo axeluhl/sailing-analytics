@@ -26,10 +26,9 @@ public class GetLiveRacesForEventAction implements Action<ResultWithTTL<LiveRace
         RacesActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
             @Override
             public void doForRace(RaceContext rc) {
-                // TODO better condition after Frank implemented race state stuff
-//                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive() || !rc.isStartTimeAvailable()) {
-//                    return;
-//                }
+                if(!rc.isOfPublicInterest()) {
+                    return;
+                }
                 
                 result.addRace(rc.getLiveRaceDTO());
             }
