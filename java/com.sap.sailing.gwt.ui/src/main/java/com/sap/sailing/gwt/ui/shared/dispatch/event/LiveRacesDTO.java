@@ -40,4 +40,22 @@ public class LiveRacesDTO implements DTO {
         }
         return false;
     }
+    
+    public boolean hasCourses() {
+        for (LiveRaceDTO race : races) {
+            if (race.getCourse() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean hasWind() {
+        for (LiveRaceDTO race : races) {
+            if (race.getWind() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -24,6 +24,8 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
     private final boolean showRegattaDetails;
     private boolean showFleetDetails;
     private boolean showCourseAreaDetails;
+    private boolean showCourseDetails;
+    private boolean showWindDetails;
 
     public RaceList(EventView.Presenter presenter, boolean showRegattaDetails) {
         super(presenter);
@@ -33,6 +35,8 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
     public void setListData(LiveRacesDTO data) {
         this.showFleetDetails = data.hasFleets();
         this.showCourseAreaDetails = data.hasCourseAreas();
+        this.showCourseDetails = data.hasCourses();
+        this.showWindDetails = data.hasWind();
         setTableData(data.getRaces());
     }
 
@@ -50,12 +54,16 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
         }
         addStartTimeColumn();
         addFlagsColumn();
-        addWindSpeedColumn();
-        addWindDirectionColumn();
+        if(showWindDetails) {
+            addWindSpeedColumn();
+            addWindDirectionColumn();
+        }
         if (showCourseAreaDetails) {
             addCourseAreaColumn();
         }
-        addCourseColumn();
+        if(showCourseDetails) {
+            addCourseColumn();
+        }
         addRaceProgressColumn();
         addRaceViewerButtonCell();
     }
