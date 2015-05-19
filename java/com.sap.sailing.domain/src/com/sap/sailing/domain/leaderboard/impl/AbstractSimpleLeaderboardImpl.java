@@ -1647,7 +1647,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeader(timePoint,
-                    legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey(), WindPositionMode.LEG_MIDDLE).asSeconds();
+                    legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey(), WindPositionMode.LEG_MIDDLE, cache).asSeconds();
             if (result.gapToLeaderInSeconds != null) {
                 // FIXME problem: asking just after the beginning of the leg yields very different values from asking for the end of the previous leg.
                 // This is because for the previous leg it's decided based on the mark passings; for the next (current) leg it's decided based on

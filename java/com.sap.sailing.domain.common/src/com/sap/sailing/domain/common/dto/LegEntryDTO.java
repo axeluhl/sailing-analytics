@@ -49,6 +49,7 @@ public class LegEntryDTO implements Serializable {
     public Map<ManeuverType, Double> averageManeuverLossInMeters;
     public Double averageAbsoluteCrossTrackErrorInMeters;
     public Double averageSignedCrossTrackErrorInMeters;
+    
     @Override
     public int hashCode() {
         final int prime = 31;
