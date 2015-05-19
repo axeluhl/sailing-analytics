@@ -15,6 +15,7 @@ import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -23,6 +24,7 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -57,6 +59,15 @@ public class StartTimeFragment extends BaseFragment
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
         fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static StartTimeFragment newInstance(Serializable timePoint) {
+        StartTimeFragment fragment = newInstance(0);
+        if (timePoint != null) {
+            Bundle args = fragment.getArguments();
+            args.putSerializable(MainScheduleFragment.START_TIME, timePoint);
+        }
         return fragment;
     }
 
@@ -109,11 +120,27 @@ public class StartTimeFragment extends BaseFragment
             }
         };
         Calendar time = Calendar.getInstance();
-        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 2) {
-            if (getRace() != null && getRaceState() != null) {
-                time.setTime(getRaceState().getStartTime().asDate());
+        if (getArguments() != null) {
+            int startMode = getArguments().getInt(START_MODE, 0);
+            switch (startMode) {
+            case 0:
+                TimePoint timePoint = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
+                if (timePoint != null) {
+                    time.setTime(timePoint.asDate());
+                }
+                break;
+
+            case 2:
+                if (getRace() != null && getRaceState() != null) {
+                    time.setTime(getRaceState().getStartTime().asDate());
+                }
+                break;
+
+            default:
+                break;
             }
         }
+
         if (getView() != null) {
             if (getArguments() != null) {
                 switch (getArguments().getInt(START_MODE, 0)) {
@@ -153,7 +180,7 @@ public class StartTimeFragment extends BaseFragment
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);
                 int minutes = time.get(Calendar.MINUTE);
-                if (getArguments() != null && getArguments().getInt(START_MODE, 0) != 2) {
+                if (getArguments() != null && getArguments().getInt(START_MODE, 0) != 2 && getArguments().getSerializable(MainScheduleFragment.START_TIME) == null) {
                     // In 10 minutes from now, but always a 5-minute-mark.
                     time.add(Calendar.MINUTE, 10);
                     hours = time.get(Calendar.HOUR_OF_DAY);
@@ -346,6 +373,8 @@ public class StartTimeFragment extends BaseFragment
         int viewId = R.id.racing_view_container;
         RaceFragment fragment = MainScheduleFragment.newInstance();
         Bundle args = getRecentArguments();
+        RacingProcedureType procedureType = getRaceState().getTypedRacingProcedure().getType();
+        getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         if (getArguments() != null && startTime != null) {
             if (getArguments().getInt(START_MODE, 0) != 0) {
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), startTime);
@@ -353,7 +382,7 @@ public class StartTimeFragment extends BaseFragment
                 viewId = R.id.race_frame;
             }
             args.putAll(getArguments());
-            args.putSerializable(MainScheduleFragment.STARTTIME, startTime);
+            args.putSerializable(MainScheduleFragment.START_TIME, startTime);
         }
         fragment.setArguments(args);
         getFragmentManager().beginTransaction().replace(viewId, fragment).commit();

@@ -30,7 +30,7 @@ import java.util.Calendar;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
-    public static final String STARTTIME = "StartTime";
+    public static final String START_TIME = "startTime";
 
     private static final String TAG = MainScheduleFragment.class.getName();
 
@@ -115,7 +115,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getRace() != null) {
             if (getRaceState() != null) {
-                TimePoint timePoint = (TimePoint) getArguments().getSerializable(STARTTIME);
+                TimePoint timePoint = (TimePoint) getArguments().getSerializable(START_TIME);
                 RacingActivity activity = (RacingActivity) getActivity();
                 if (timePoint == null && activity != null) {
                     timePoint = activity.getStartTime();
@@ -212,7 +212,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 break;
 
             case R.id.start_time:
-                openFragment(StartTimeFragment.newInstance(0));
+                openFragment(StartTimeFragment.newInstance(getArguments().getSerializable(START_TIME)));
                 break;
 
             case R.id.wind:
@@ -255,7 +255,12 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void openFragment(RaceFragment fragment) {
-        fragment.setArguments(getRecentArguments());
+        Bundle args = getRecentArguments();
+        if (fragment.getArguments() != null) {
+            fragment.getArguments().putAll(args);
+        } else {
+            fragment.setArguments(args);
+        }
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.racing_view_container, fragment)
