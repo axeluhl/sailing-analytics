@@ -13,13 +13,12 @@ public class LiveRacesDTO implements DTO {
     }
     
     public void addRace(LiveRaceDTO race) {
-        // TODO: we can't expect to have a start time (e.g. tracking started, but no start time set yet)
-//        for(int i = 0; i < races.size(); i++) {
-//            if(races.get(i).getStart().compareTo(race.getStart()) < 0) {
-//                races.add(i, race);
-//                return;
-//            }
-//        }
+        for(int i = 0; i < races.size(); i++) {
+            if(races.get(i).getStart().compareTo(race.getStart()) < 0) {
+                races.add(i, race);
+                return;
+            }
+        }
         this.races.add(race);
     }
     
