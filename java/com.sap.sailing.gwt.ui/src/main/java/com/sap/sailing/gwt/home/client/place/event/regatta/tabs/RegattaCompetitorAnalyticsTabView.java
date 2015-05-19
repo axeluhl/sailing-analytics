@@ -136,5 +136,4 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
     }
-
 }

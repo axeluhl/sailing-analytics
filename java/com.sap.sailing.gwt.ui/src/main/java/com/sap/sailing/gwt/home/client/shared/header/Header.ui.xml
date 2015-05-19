@@ -5,9 +5,8 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.header.HeaderResources" />
-  <g:HTMLPanel>
+  <g:HTMLPanel tag="header" addStyleNames="{local_res.css.siteheader}">
     <!-- Website header-->
-    <header class="{local_res.css.siteheader}">
       <div class="{res.mediaCss.grid}">
         <div class="{local_res.css.siteheader_logo} {res.mediaCss.small2} {res.mediaCss.medium2} {res.mediaCss.large3} {res.mediaCss.columns}">
           <a href="http://sapsponsorships.com">
@@ -36,6 +35,5 @@
           <!-- IFEND siteNavigation.current -->
         </nav>
       </div>
-    </header>
   </g:HTMLPanel>
 </ui:UiBinder>
