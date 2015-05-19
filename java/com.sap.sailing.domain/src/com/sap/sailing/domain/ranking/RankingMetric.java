@@ -161,7 +161,7 @@ public interface RankingMetric extends Serializable {
      * @param competitor
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
      */
-    default Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor) {
+    default Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
         return getGapToLeaderInOwnTime(rankingInfo, competitor, new LeaderboardDTOCalculationReuseCache(rankingInfo.getTimePoint()));
     }
     
@@ -179,5 +179,5 @@ public interface RankingMetric extends Serializable {
     
     RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
-    Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
+    Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
 }
