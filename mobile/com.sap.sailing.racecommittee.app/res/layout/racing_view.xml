@@ -17,7 +17,7 @@
             android:fitsSystemWindows="true"
             android:orientation="vertical">
 
-            <include layout="@layout/toolbar" />
+            <include layout="@layout/toolbar_racing_activity" />
 
             <include layout="@layout/race_main_screen" />
         </LinearLayout>

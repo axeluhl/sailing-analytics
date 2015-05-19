@@ -44,4 +44,9 @@
     <dimen name="side_button_width_large">200dp</dimen>
     <dimen name="side_button_imageSize">100dp</dimen>
 
+    <dimen name="biggerActionBarSize">75dp</dimen>
+
+    <dimen name="bigger_over_flow_width">64dp</dimen>
+    <dimen name="bigger_over_flow_height">32dp</dimen>
+
 </resources>
