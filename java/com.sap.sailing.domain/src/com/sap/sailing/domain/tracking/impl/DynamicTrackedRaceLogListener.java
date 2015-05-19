@@ -19,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -162,9 +164,17 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         /* start time will be set by StartTimeFinder in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
 
-        TimePoint startTime = startTimeFinder.analyze();
+        Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = startTimeFinder.analyze();
+        TimePoint startTime = null;
+        
+        if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)) {
+            startTime = startTimeFinderResult.getB(); 
+        } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)) {
+            //FIXME: bug2467: get dependentStartTime e.g. via DependentStartTimeAnalyzer
+        }
+        
         if (startTime == null) {
-            startTime = startTimeProvidedByEvent;
+            startTime  = startTimeProvidedByEvent;
         }
 
         if (startTime != null) {

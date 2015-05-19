@@ -10,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
@@ -78,7 +79,15 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new StartTimeFinder(raceLog).analyze();
+            Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = new StartTimeFinder(raceLog).analyze();
+            
+            TimePoint startTime = null;
+            if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
+                startTime = startTimeFinderResult.getB();
+            } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)){
+                //FIXME: fetch start time e.g. via DepedentStartTimeAnalyzer
+            }
+            
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
             RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
             TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;

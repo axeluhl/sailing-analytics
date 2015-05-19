@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCours
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
@@ -33,6 +34,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Implementation of {@link ReadonlyRaceState}. Use the static factory methods to instantiate your race state.
@@ -313,7 +315,14 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
         }
 
-        TimePoint startTime = startTimeAnalyzer.analyze();
+        Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = startTimeAnalyzer.analyze();
+        TimePoint startTime = null;
+        if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
+            startTime = startTimeFinderResult.getB();
+        } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)){
+            //FIXME: fetch start time e.g. via DepedentStartTimeAnalyzer
+        }
+        
         if (!Util.equalsWithNull(cachedStartTime, startTime)) {
             cachedStartTime = startTime;
             changedListeners.onStartTimeChanged(this);

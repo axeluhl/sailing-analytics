@@ -38,6 +38,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -673,7 +674,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                startTime = new StartTimeFinder(raceLog).analyze();
+                
+                Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = new StartTimeFinder(raceLog).analyze();
+                if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
+                    startTime = startTimeFinderResult.getB();
+                } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)){
+                    //FIXME: fetch start time e.g. via DepedentStartTimeAnalyzer
+                }
+                
                 if (startTime != null) {
                     break;
                 }

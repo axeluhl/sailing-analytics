@@ -87,7 +87,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
         @Override
         public void visit(RaceLogDependentStartTimeEvent event) {
-            //FIXME: Calculate RaceStatus based on status of Fleet on which race depends on
+            //FIXME: Calculate RaceStatus based on status of Fleet on which race depends on or use StartTimeFinder
         };
         
     };

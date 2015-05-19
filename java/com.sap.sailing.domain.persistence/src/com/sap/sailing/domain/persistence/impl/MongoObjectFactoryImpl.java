@@ -1067,9 +1067,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeRaceLogDependentStartTimeEvent(RaceLogDependentStartTimeEvent dependentStartTimeEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(dependentStartTimeEvent, result);
-        //TODO: add other fields
         
-        
+        //FIXME: maybe also use fleetName in Event?
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
         
         result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_FLEET.name(), dependentStartTimeEvent.getDependentOnFleet().getName());
