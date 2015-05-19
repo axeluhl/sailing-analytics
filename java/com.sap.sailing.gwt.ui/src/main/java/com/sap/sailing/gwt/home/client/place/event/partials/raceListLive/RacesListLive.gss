@@ -152,6 +152,7 @@
   border-radius: 0.333333333333333em;
   border-spacing: 0;
   border-collapse: separate;
+  overflow: hidden;
 }
 .raceslist_head {
   color: #666;
@@ -194,4 +195,7 @@
 }
 .raceslistlive {
   font-size: 1rem;
+}
+.raceslistlive h3 {
+  font-size: 1.466666666666667em;
 }
