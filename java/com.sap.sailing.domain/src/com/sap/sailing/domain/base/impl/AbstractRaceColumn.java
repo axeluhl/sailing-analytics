@@ -75,6 +75,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
             if (trackedRace != null) {
                 trackedRace.attachRaceLog(getRaceLog(fleet));
+                trackedRace.attachRaceExecutionProvider(getRaceExecutionOrderProvider());
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
         }
@@ -199,5 +200,5 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         trackedRaces.setMasterDataExportOngoingThreadFlag(flagValue);
     }
     
-    public abstract RaceExecutionOrderProvider getRaceExecutionProvider();
+    public abstract RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 }

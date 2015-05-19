@@ -49,12 +49,6 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
 
     @Override
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
-        return null;
-    }
-
-    @Override
-    public RaceExecutionOrderProvider getRaceExecutionProvider() {
         return raceExecutionOrderProvider;
     }
-
 }
