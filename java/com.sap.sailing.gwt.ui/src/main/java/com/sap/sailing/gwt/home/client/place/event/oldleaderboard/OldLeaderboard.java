@@ -41,6 +41,8 @@ public class OldLeaderboard extends Composite {
     @UiField ParagraphElement lastScoringUpdateTextDiv;
     @UiField ParagraphElement lastScoringCommentDiv;
     @UiField ParagraphElement scoringSchemeDiv;
+    @UiField
+    EventRegattaLeaderboardResources local_res;
 
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
@@ -56,14 +58,18 @@ public class OldLeaderboard extends Composite {
     
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
+        autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
         if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
+                // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
             }
         }
     }

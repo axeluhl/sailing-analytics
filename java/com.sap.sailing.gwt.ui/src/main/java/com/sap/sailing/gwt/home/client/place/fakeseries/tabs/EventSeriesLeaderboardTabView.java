@@ -23,7 +23,6 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
@@ -80,11 +79,6 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             leaderboardPanel.addLeaderboardUpdateListener(this);
-            if (currentPresenter.getCtx().getSeriesDTO().getState() != EventSeriesState.RUNNING) {
-                this.leaderboard.hideRefresh();
-            } else {
-                // TODO: start autorefresh?
-            }
             regattaAnalyticsManager.hideCompetitorChart();
             contentArea.setWidget(this);
         } else {

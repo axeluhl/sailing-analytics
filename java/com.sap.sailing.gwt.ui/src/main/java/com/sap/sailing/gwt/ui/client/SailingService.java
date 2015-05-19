@@ -520,7 +520,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
      * This only affects such events that implement {@link Revokable}.
      */
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
             throws NotRevokableException;
     
     Collection<String> getGPSFixImporterTypes();
@@ -610,4 +610,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String emails, String localeInfoName) throws MailException;
     
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
+
+    boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 }
