@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.ranking;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -403,6 +404,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
 
     /**
      * How far did <code>competitor</code> sail windwards/along-course since passing the <code>from</code> waypoint?
+     * For each leg the total windward distance sailed is limited to the leg's windward distance at its
+     * {@link TrackedLeg#getReferenceTimePoint() reference time point}. This ensures that significantly "overstaying" the lay lines
+     * doesn't let a competitor rank better than one who already passed the mark but traveled little windward distance in
+     * the next leg.
      * 
      * @param timePoint needed to determine <code>competitor</code>'s position at that time point; note that the
      * time point for wind approximation is taken to be a reference time point selected based on the mark passings
@@ -421,8 +426,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 if (count) {
                     if (trackedLeg.getLeg() == currentLeg.getLeg()) {
                         // partial distance sailed:
-                        d = d.add(trackedLeg.getWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
-                                .getEstimatedPosition(timePoint, /* extrapolate */true), cache));
+                        final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(getTrackedRace().getTrack(competitor)
+                                .getEstimatedPosition(timePoint, /* extrapolate */true), cache);
+                        final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
+                        if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
+                            d = d.add(legWindwardDistance);
+                        } else {
+                            d = d.add(windwardDistanceFromLegStart);
+                        }
                         break;
                     } else {
                         d = d.add(trackedLeg.getWindwardDistance(cache));
