@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -27,7 +28,12 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
 
     @Override
     public void setData(LiveRacesDTO data, long nextUpdate, int updateNo) {
-        this.raceList.setListData(data);
+        if(data.getRaces().isEmpty()) {
+            getElement().getStyle().setDisplay(Display.NONE);
+        } else {
+            getElement().getStyle().clearDisplay();
+            this.raceList.setListData(data);
+        }
     }
 
 }
