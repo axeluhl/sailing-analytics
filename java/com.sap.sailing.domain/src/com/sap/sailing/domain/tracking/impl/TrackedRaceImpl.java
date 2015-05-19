@@ -1303,8 +1303,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TrackedLegOfCompetitor getCurrentLeg(Competitor competitor, TimePoint timePoint) {
+        // If the mark passing that starts a leg happened exactly at timePoint, the MarkPassingByTimeComparator won't consider
+        // them equal because 
         NavigableSet<MarkPassing> competitorMarkPassings = markPassingsForCompetitor.get(competitor);
-        DummyMarkPassingWithTimePointOnly markPassingTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
+        DummyMarkPassingWithTimePointAndCompetitor markPassingTimePoint = new DummyMarkPassingWithTimePointAndCompetitor(timePoint, competitor);
         TrackedLegOfCompetitor result = null;
         if (!competitorMarkPassings.isEmpty()) {
             final Course course = getRace().getCourse();

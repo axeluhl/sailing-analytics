@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -362,7 +363,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         ? getTrackedRace().getTrack(to).getEstimatedPosition(timePoint, /* extrapolate */ true)
                         // not in the same leg; let "who" travel to the end of the leg
                         : getTrackedRace().getApproximatePosition(currentLegWho.getLeg().getTo(), timePoint);
-        final Duration toEndOfLegOrTo = currentLegWho.getAverageVelocityMadeGood(timePoint, cache).getDuration(
+        final Speed currentVMG = currentLegWho.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
+        final Speed averageVMG = currentLegWho.getAverageVelocityMadeGood(timePoint, cache);
+        final Speed vmg = Double.isNaN(averageVMG.getKnots()) ? currentVMG : averageVMG;
+        final Duration toEndOfLegOrTo = vmg.getDuration(
                 currentLegWho.getTrackedLeg().getWindwardDistance(
                         getTrackedRace().getTrack(who).getEstimatedPosition(timePoint, /* extrapolate */true),
                         windwardPositionToReachInWhosCurrentLeg, timePoint, WindPositionMode.LEG_MIDDLE));

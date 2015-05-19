@@ -417,6 +417,7 @@ import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -2719,7 +2720,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    result = trackedLeg.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, cache).asSeconds();
+                    final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(competitor, timePoint, cache);
+                    result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
