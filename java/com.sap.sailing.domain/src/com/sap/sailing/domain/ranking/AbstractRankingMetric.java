@@ -533,7 +533,11 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                             if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
                                 d = d.add(legWindwardDistance);
                             } else {
-                                d = d.add(windwardDistanceFromLegStart);
+                                // if the competitor is currently at the mark rounding, the windward distance within the leg may
+                                // be negative; don't reduce the distance in this case
+                                if (windwardDistanceFromLegStart.getMeters() > 0) {
+                                    d = d.add(windwardDistanceFromLegStart);
+                                }
                             }
                             break;
                         } else {
