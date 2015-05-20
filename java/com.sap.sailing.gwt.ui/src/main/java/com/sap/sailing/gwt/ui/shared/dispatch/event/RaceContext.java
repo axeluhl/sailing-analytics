@@ -256,7 +256,7 @@ public class RaceContext {
     
     private boolean isLiveOrOfPublicInterest(TimePoint startTime, TimePoint finishTime) {
         boolean result = false;
-        if(startTime != null && raceLog != null) {
+        if(startTime != null) {
             if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                 result = trackedRace.isLive(now);
             } else {
@@ -268,14 +268,13 @@ public class RaceContext {
                 }
             }
 
-            if(result == false) {
-                // in case of aborted races we want to show them
-                RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
-                if(abortingFlagEvent != null) {
-                    TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
-                    if (now.minus(abortingTimeInPassBefore.asMillis()).asMillis() < TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) {
-                        result = true;
-                    }
+        } else if (raceLog != null) {
+            // in case there is not start time set it could be an postponed or abandoned race
+            RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
+            if(abortingFlagEvent != null) {
+                TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
+                if (now.minus(abortingTimeInPassBefore.asMillis()).asMillis() < TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) {
+                    result = true;
                 }
             }
         }
