@@ -104,7 +104,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             result = null;
         } else {
             final TimePoint timePointNotAfterFinishingOfLeg = getTimePointNotAfterFinishingOfLeg(timePoint);
-            result = timePointNotAfterFinishingOfLeg == null ? null : passedStartWaypoint.getTimePoint().until(timePoint);
+            result = timePointNotAfterFinishingOfLeg == null ? null : passedStartWaypoint.getTimePoint().until(timePointNotAfterFinishingOfLeg);
         }
         return result;
     }
