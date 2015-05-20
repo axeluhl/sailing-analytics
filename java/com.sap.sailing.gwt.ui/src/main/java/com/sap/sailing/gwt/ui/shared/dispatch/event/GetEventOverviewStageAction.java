@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.Date;
+import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -46,16 +46,19 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(Event event, EventState state, MillisecondsTimePoint now) {
+//        if(state == EventState.RUNNING && TODO live video) {
+//          return new EventOverviewVideoStageDTO();
+//      }
         
-        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
-            return new EventOverviewTickerStageDTO(event.getStartDate()
-                    .asDate(), event.getName());
-        }
+//        if(TODO highlight video) {
+//          return new EventOverviewVideoStageDTO();
+//      }
         
         if(state == EventState.RUNNING) {
-//            if(TODO live video) {
-//                return new ResultWithTTL<EventOverviewStageDTO>(5000, new EventOverviewVideoStageDTO());
-//            } else {
+//            TODO next race countdown if available
+            // TODO Proper Implementation (Type race)
+//            return new EventOverviewRaceTickerStageDTO(new RegattaNameAndRaceName(
+//                    "Regatta XY", "Race 1"), "Race 1 - Gold Fleet", new Date(new Date().getTime() + 5000));
             
             Regatta nextRegatta = null;
             for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
@@ -74,29 +77,23 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
                 return new EventOverviewRegattaTickerStageDTO(
                         new RegattaName(nextRegatta.getName()), nextRegatta.getName(), nextRegatta.getStartDate()
                                 .asDate());
-            } else {
-                // TODO find next race or live race
-//                for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-//                    for (Leaderboard lb : lg.getLeaderboards()) {
-//                        for(RaceColumn raceColumn : lb.getRaceColumns()) {
-//                            for(Fleet fleet : raceColumn.getFleets()) {
-//                                
-//                            }
-//                        }
-//                    }
-//                }
-                // TODO Proper Implementation (Type race)
-                EventOverviewTickerStageDTO ticker = new EventOverviewRaceTickerStageDTO(new RegattaNameAndRaceName(
-                        "Regatta XY", "Race 1"), "Race 1 - Gold Fleet", new Date(new Date().getTime() + 5000));
-                return ticker;
             }
-            // TODO clever fallback for live event/regatta?
-//            }
         }
-        // finished
-//        if(TODO highlights video) {
-        return new EventOverviewVideoStageDTO();
-//        } else {
-//        }
+        
+        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+            return new EventOverviewTickerStageDTO(event.getStartDate()
+                    .asDate(), event.getName());
+        }
+        
+        List<URL> photoGalleryImageURLs = HomeServiceUtil.getPhotoGalleryImageURLs(event);
+        if(photoGalleryImageURLs.size() >= 3) {
+            // TODO image gallery
+        }
+        
+        if(HomeServiceUtil.hasVideos(event)) {
+            // TODO first video
+        }
+        
+        return null;
     }
 }
