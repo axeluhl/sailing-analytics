@@ -8,9 +8,9 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
 
 public class Livestream extends Composite {
 
-    private static Livestream2UiBinder uiBinder = GWT.create(Livestream2UiBinder.class);
+    private static LivestreamUiBinder uiBinder = GWT.create(LivestreamUiBinder.class);
 
-    interface Livestream2UiBinder extends UiBinder<Widget, Livestream> {
+    interface LivestreamUiBinder extends UiBinder<Widget, Livestream> {
     }
 
     public Livestream() {
