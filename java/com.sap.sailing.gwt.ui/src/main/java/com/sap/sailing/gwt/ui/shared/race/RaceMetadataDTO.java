@@ -16,6 +16,12 @@ public class RaceMetadataDTO implements IsSerializable {
         CANCELED        // the running racing has been canceled
     }
     
+    public enum RaceTrackingState {
+        NOT_TRACKED,             // No tracking data -> probably just managed by race committee app
+        TRACKED_NO_VALID_DATA,   // tracking is connected but the required data for displaying the race viewer is not available
+        TRACKED_VALID_DATA       // tracking is connected and all required data for displaying the race viewer is available
+    }
+    
     private RegattaAndRaceIdentifier id;
 
     private String raceName;
@@ -25,6 +31,7 @@ public class RaceMetadataDTO implements IsSerializable {
     private String course;
     private String boatClass;
     private RaceViewState state;
+    private RaceTrackingState trackingState;
 
     protected RaceMetadataDTO() {
     }
@@ -91,5 +98,13 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setState(RaceViewState state) {
         this.state = state;
+    }
+
+    public RaceTrackingState getTrackingState() {
+        return trackingState;
+    }
+
+    public void setTrackingState(RaceTrackingState trackingState) {
+        this.trackingState = trackingState;
     }
 }
