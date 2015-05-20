@@ -16,18 +16,17 @@
 
     <com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText
         android:id="@+id/compass_view_degree"
-        android:layout_width="80dp"
+        style="?textLarge"
+        android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="false"
         android:layout_alignParentRight="false"
-        android:inputType="numberDecimal"
         android:layout_centerInParent="true"
         android:layout_gravity="center"
-        android:textColor="?white"
+        android:gravity="center_horizontal"
         android:hint="?sap_light_gray"
-        tools:text="300°"
-        android:gravity="center_horizontal">
-    </com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText>
+        android:inputType="numberDecimal"
+        tools:text="300°"/>
 
     <ImageView
         android:id="@+id/compass_view_needle"

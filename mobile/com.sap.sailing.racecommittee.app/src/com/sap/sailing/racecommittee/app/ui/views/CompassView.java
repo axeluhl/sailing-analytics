@@ -75,7 +75,7 @@ public class CompassView extends RelativeLayout {
                     value = value.replace("°", "");
                     value = value.replace(" ", "");
                     float degree = Float.valueOf(value);
-                    if (degree > 0.0 && degree < 360.0) {
+                    if (degree >= 0 && degree <= 360) {
                         setDirection(degree);
                     } else {
                         generateAndShowAlert();
@@ -98,8 +98,7 @@ public class CompassView extends RelativeLayout {
             public void onDismiss(DialogInterface dialog) {
                 degreeView.requestFocus();
                 degreeView.selectAll();
-                InputMethodManager imm = (InputMethodManager) getContext()
-                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(degreeView, InputMethodManager.SHOW_IMPLICIT);
             }
         });
