@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.CountdownResources.LocalCss;
+import com.sap.sailing.gwt.home.client.shared.stage.StageResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRaceTickerStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRegattaTickerStageDTO;
@@ -43,6 +44,7 @@ public class Countdown extends Composite {
     @UiField DivElement countdownInfo;
     @UiField HeadingElement infoTitle;
     @UiField(provided = true) NavigationAnchor navigationButton;
+    @UiField DivElement image;
 
     public Countdown(EventView.Presenter presenter) {
         CSS.ensureInjected();
@@ -51,6 +53,12 @@ public class Countdown extends Composite {
     }
 
     public void setData(EventOverviewTickerStageDTO data) {
+        String stageImageUrl = StageResources.INSTANCE.defaultStageEventTeaserImage().getSafeUri().asString();
+        if(data.getStageImageUrl() != null) {
+            stageImageUrl = data.getStageImageUrl();
+        }
+        image.getStyle().setBackgroundImage("url(\"" + stageImageUrl + "\")");
+        
         navigationButton.removeStyleName(MAIN_CSS.buttonred());
         navigationButton.removeStyleName(MAIN_CSS.buttonprimary());
         if (data instanceof EventOverviewRaceTickerStageDTO) {

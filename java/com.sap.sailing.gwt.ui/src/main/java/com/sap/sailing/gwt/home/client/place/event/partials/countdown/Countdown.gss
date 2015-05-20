@@ -66,9 +66,8 @@
 .countdown_image {
   width: 100%;
   height: 100%;
-  background-size: 67.8em 50.46666666666667em;
-  background-position: center -0.933333333333333em;
-  background-image: url("images/home/countdown-thumbnail.png");
+  background-size: cover;
+  background-position: center;
 }
 .countdown_info {
   position: absolute;

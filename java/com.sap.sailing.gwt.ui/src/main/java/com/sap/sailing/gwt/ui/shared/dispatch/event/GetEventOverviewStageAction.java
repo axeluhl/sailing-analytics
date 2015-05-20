@@ -48,6 +48,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(Event event, EventState state, MillisecondsTimePoint now) {
+        String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
 //        if(state == EventState.RUNNING && TODO live video) {
 //          return new EventOverviewVideoStageDTO();
 //      }
@@ -60,7 +61,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //            TODO next race countdown if available
             // TODO Proper Implementation (Type race)
 //            return new EventOverviewRaceTickerStageDTO(new RegattaNameAndRaceName(
-//                    "Regatta XY", "Race 1"), "Race 1 - Gold Fleet", new Date(new Date().getTime() + 5000));
+//                    "Regatta XY", "Race 1"), "Race 1 - Gold Fleet", new Date(new Date().getTime() + 5000), stageImageUrl);
             
             Regatta nextRegatta = null;
             for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
@@ -78,13 +79,13 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
             if(!HomeServiceUtil.isSingleRegatta(event) && nextRegatta != null) {
                 return new EventOverviewRegattaTickerStageDTO(
                         new RegattaName(nextRegatta.getName()), nextRegatta.getName(), nextRegatta.getStartDate()
-                                .asDate());
+                                .asDate(), stageImageUrl);
             }
         }
         
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
             return new EventOverviewTickerStageDTO(event.getStartDate()
-                    .asDate(), event.getName());
+                    .asDate(), event.getName(), stageImageUrl);
         }
         
         List<URL> photoGalleryImageURLs = HomeServiceUtil.getPhotoGalleryImageURLs(event);

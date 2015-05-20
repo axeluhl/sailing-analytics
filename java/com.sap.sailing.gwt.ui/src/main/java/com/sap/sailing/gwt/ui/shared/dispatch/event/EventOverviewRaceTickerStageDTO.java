@@ -12,8 +12,8 @@ public class EventOverviewRaceTickerStageDTO extends EventOverviewTickerStageDTO
     private EventOverviewRaceTickerStageDTO() {
     }
 
-    public EventOverviewRaceTickerStageDTO(RegattaAndRaceIdentifier identifier, String tickerInfo, Date startTime) {
-        super(startTime, tickerInfo);
+    public EventOverviewRaceTickerStageDTO(RegattaAndRaceIdentifier identifier, String tickerInfo, Date startTime, String stageImageUrl) {
+        super(startTime, tickerInfo, stageImageUrl);
         this.regattaAndRaceIdentifier = identifier;
     }
 

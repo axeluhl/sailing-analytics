@@ -6,13 +6,15 @@ public class EventOverviewTickerStageDTO implements EventOverviewStageContentDTO
 
     private Date startTime;
     private String tickerInfo;
+    private String stageImageUrl;
 
     protected EventOverviewTickerStageDTO() {
     }
 
-    public EventOverviewTickerStageDTO(Date startTime, String tickerInfo) {
+    public EventOverviewTickerStageDTO(Date startTime, String tickerInfo, String stageImageUrl) {
         this.startTime = startTime;
         this.tickerInfo = tickerInfo;
+        this.stageImageUrl = stageImageUrl;
     }
 
     public Date getStartTime() {
@@ -23,4 +25,7 @@ public class EventOverviewTickerStageDTO implements EventOverviewStageContentDTO
         return tickerInfo;
     }
 
+    public String getStageImageUrl() {
+        return stageImageUrl;
+    }
 }
