@@ -17,7 +17,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEven
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -133,9 +132,9 @@ public interface RaceLogEventFactory {
             List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint);
 
     RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable id, List<Competitor> involvedBoats, int passId, Fleet dependentsOnFleet,
+            AbstractLogEventAuthor author, Serializable id, List<Competitor> involvedBoats, int passId, SimpleRaceLogIdentifier dependentOnRace,
             Duration startTimeDifference);
 
     RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, int passId, Fleet dependentsOnFleet, Duration startTimeDifference);
+            AbstractLogEventAuthor author, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference);
 }

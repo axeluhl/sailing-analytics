@@ -15,6 +15,8 @@ public class RaceLogDependentStartTimeEventSerializer extends BaseRaceLogEventSe
 
     public static final String VALUE_CLASS = RaceLogDependentStartTimeEvent.class.getSimpleName();
 
+    public static final String FIELD_DEPDENDENT_ON_REGATTALIKE = "dependentOnRegattaLike";
+    public static final String FIELD_DEPDENDENT_ON_RACECOLUMN = "dependentOnRaceColumn";
     public static final String FIELD_DEPDENDENT_ON_FLEET = "dependentOnFleet";
     public static final String FIELD_START_TIME_DIFFERENCE = "startTimeDifference";
     
@@ -28,7 +30,9 @@ public class RaceLogDependentStartTimeEventSerializer extends BaseRaceLogEventSe
         RaceLogDependentStartTimeEvent event = (RaceLogDependentStartTimeEvent) object;
         
         JSONObject result = super.serialize(event);
-        result.put(FIELD_DEPDENDENT_ON_FLEET, event.getDependentOnFleet());
+        result.put(FIELD_DEPDENDENT_ON_FLEET, event.getDependentOnRaceIdentifier().getFleetName());
+        result.put(FIELD_DEPDENDENT_ON_RACECOLUMN, event.getDependentOnRaceIdentifier().getRaceColumnName());
+        result.put(FIELD_DEPDENDENT_ON_REGATTALIKE, event.getDependentOnRaceIdentifier().getRegattaLikeParentName());
         result.put(FIELD_START_TIME_DIFFERENCE, event.getStartTimeDifference().asMillis());
         return result;
     }

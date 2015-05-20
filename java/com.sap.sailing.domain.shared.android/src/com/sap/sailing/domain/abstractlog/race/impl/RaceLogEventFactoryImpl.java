@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
@@ -44,7 +45,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackin
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -85,16 +85,16 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     
     @Override
     public RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            Serializable id, List<Competitor> involvedBoats, int passId, Fleet dependentsOnFleet, Duration startTimeDifference) {
+            Serializable id, List<Competitor> involvedBoats, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference) {
         return new RaceLogDependentStartTimeEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, involvedBoats,
-                passId, dependentsOnFleet, startTimeDifference);
+                passId, dependentOnRace, startTimeDifference);
     }
 
     @Override
     public RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, int passId, Fleet dependentsOnFleet, Duration startTimeDifference) {
+            AbstractLogEventAuthor author, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference) {
         return createDependentStartTimeEvent(logicalTimePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId,
-                dependentsOnFleet, startTimeDifference);
+                dependentOnRace, startTimeDifference);
     }
 
     @Override
