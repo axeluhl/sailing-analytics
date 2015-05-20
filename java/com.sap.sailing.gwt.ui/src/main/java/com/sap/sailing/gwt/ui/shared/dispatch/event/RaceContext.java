@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -195,11 +196,11 @@ public class RaceContext {
     }
 
     private String getCourseNameOrNull() {
-        String courseName = null;
-        if(raceDefinition != null && raceDefinition.getCourse() != null) {
-            courseName = raceDefinition.getCourse().getName();
+        CourseBase lastCourse = state.getCourseDesign();
+        if (lastCourse != null) {
+            return lastCourse.getName();
         }
-        return courseName;
+        return null;
     }
     
     private TimePoint getStartTime() {
