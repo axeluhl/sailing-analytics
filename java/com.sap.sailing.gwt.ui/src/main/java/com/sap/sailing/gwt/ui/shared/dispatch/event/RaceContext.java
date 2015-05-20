@@ -6,6 +6,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -44,7 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 @GwtIncompatible
 public class RaceContext {
     private final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-    private final Leaderboard leeaderboard;
+    private final Leaderboard leaderboard;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
     private final RaceDefinition raceDefinition;
@@ -56,7 +57,7 @@ public class RaceContext {
     
     public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         this.event = event;
-        this.leeaderboard = leaderboard;
+        this.leaderboard = leaderboard;
         this.raceColumn = raceColumn;
         this.raceDefinition = raceColumn.getRaceDefinition(fleet);
         this.fleet = fleet;
@@ -70,19 +71,19 @@ public class RaceContext {
     }
 
     private String getRegattaName() {
-        if (leeaderboard instanceof RegattaLeaderboard) {
-            Regatta regatta = ((RegattaLeaderboard) leeaderboard).getRegatta();
+        if (leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
             return regatta.getName();
         }
-        return leeaderboard.getName();
+        return leaderboard.getName();
     }
 
     private String getRegattaDisplayName() {
-        String displayName = leeaderboard.getDisplayName();
+        String displayName = leaderboard.getDisplayName();
         if (displayName != null && !displayName.isEmpty()) {
             return displayName;
         }
-        return leeaderboard.getName();
+        return leaderboard.getName();
     }
 
     private FleetMetadataDTO getFleetMetadataOrNull() {
@@ -108,12 +109,15 @@ public class RaceContext {
                 if(averagedWindWithConfidence != null) {
                     Wind wind = averagedWindWithConfidence.getObject();
                     if (wind.getKnots() >= 0.05d) {
-                        return new SimpleWindDTO(wind.getBearing().reverse().getDegrees(), wind.getKnots());
+                        return new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
                     }
                 }
             }
         } else {
-            // TODO: Try to get manual set wind from racelog
+            Wind wind = checkForWindFixesFromRaceLog();
+            if(wind != null) {
+                return new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
+            }
         }
         return null;
     }
@@ -139,8 +143,8 @@ public class RaceContext {
     
     private Regatta getRegatta() {
         final Regatta regatta;
-        if (leeaderboard instanceof RegattaLeaderboard) {
-            regatta = ((RegattaLeaderboard) leeaderboard).getRegatta();
+        if (leaderboard instanceof RegattaLeaderboard) {
+            regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
         } else {
             regatta = null;
         }
@@ -163,7 +167,7 @@ public class RaceContext {
     }
 
     private BoatClass getBoatClassFromTrackedRaces() {
-        for (TrackedRace trackedRace : leeaderboard.getTrackedRaces()) {
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
             return trackedRace.getRace().getBoatClass();
         }
         return null;
@@ -175,8 +179,8 @@ public class RaceContext {
             return null;
         }
         CourseArea courseArea = null;
-        if(leeaderboard instanceof FlexibleLeaderboard) {
-            courseArea = ((FlexibleLeaderboard)leeaderboard).getDefaultCourseArea();
+        if(leaderboard instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard)leaderboard).getDefaultCourseArea();
         }
         Regatta regatta = getRegatta();
         if(regatta != null) {
@@ -300,6 +304,15 @@ public class RaceContext {
             // TODO: Resolve ABORTED and POSTPONED states
         }
         return raceState;
+    }
+    
+    private Wind checkForWindFixesFromRaceLog() {
+        WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
+        List<Wind> windList = windFixesFinder.analyze();
+        if(windList.size() > 0) {
+            return windList.get(windList.size()-1);
+        }
+        return null;
     }
     
     private RaceLogFlagEvent checkForAbortFlagEvent() {
