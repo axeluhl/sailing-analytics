@@ -274,7 +274,9 @@ public class RaceContext {
             if(abortingFlagEvent != null) {
                 TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
                 if (now.minus(abortingTimeInPassBefore.asMillis()).asMillis() < TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) {
-                    result = true;
+                    // result = true;
+                    // TODO: Problem: This causes the race added to the live races list without having a start time!!!
+                    // This does not work right now -> consider using a start time of the last pass. 
                 }
             }
         }
