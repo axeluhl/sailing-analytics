@@ -25,6 +25,6 @@ public class RaceProgressDTO implements IsSerializable {
     }
 
     public Double getPercentageProgress() {
-        return getTotalLegs().doubleValue() * 100.0 / getCurrentLeg().doubleValue();
+        return getCurrentLeg().doubleValue() * 100.0 / getTotalLegs().doubleValue();
     }
 }
