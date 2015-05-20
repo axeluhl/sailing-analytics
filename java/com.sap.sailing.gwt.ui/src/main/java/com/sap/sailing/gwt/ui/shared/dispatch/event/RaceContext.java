@@ -112,7 +112,9 @@ public class RaceContext {
                         windTrack.getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(toTimePoint), toTimePoint);
                 if(averagedWindWithConfidence != null) {
                     Wind wind = averagedWindWithConfidence.getObject();
-                    return new SimpleWindDTO(wind.getBearing().reverse().getDegrees(), wind.getKnots());
+                    if (wind.getKnots() >= 0.05d) {
+                        return new SimpleWindDTO(wind.getBearing().reverse().getDegrees(), wind.getKnots());
+                    }
                 }
             }
         }
