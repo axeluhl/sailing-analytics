@@ -191,7 +191,9 @@ public class RaceContext {
         if(raceDefinition != null && raceDefinition.getCourse() != null && trackedRace != null) {
             int totalLegsCount = raceDefinition.getCourse().getLegs().size();
             int currentLegNo = trackedRace.getLastLegStarted(MillisecondsTimePoint.now());
-            raceProgress = new RaceProgressDTO(currentLegNo, totalLegsCount);
+            if (currentLegNo > 0 && totalLegsCount > 0) {
+                raceProgress = new RaceProgressDTO(currentLegNo, totalLegsCount);
+            }
         }
         return raceProgress;
     }
