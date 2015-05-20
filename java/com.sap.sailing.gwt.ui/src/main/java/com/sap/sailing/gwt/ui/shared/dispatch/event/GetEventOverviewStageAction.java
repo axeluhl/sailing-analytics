@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.home.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO.Type;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

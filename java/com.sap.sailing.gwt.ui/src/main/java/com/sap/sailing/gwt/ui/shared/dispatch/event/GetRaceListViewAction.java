@@ -6,16 +6,12 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
 
 public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewDTO>> {
-    private UUID eventId;
-    
     public GetRaceListViewAction() {
     }
 
     public GetRaceListViewAction(UUID eventId) {
-        this.eventId = eventId;
     }
 
     @Override
