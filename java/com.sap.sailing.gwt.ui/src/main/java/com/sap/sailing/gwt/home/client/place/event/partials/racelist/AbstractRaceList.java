@@ -8,6 +8,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.TextTransform;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -41,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
@@ -66,6 +68,9 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
 
         @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
         SafeHtml windDirection(SafeStyles rotation);
+
+        @Template("<div style=\"{0}\">{1}</div>")
+        SafeHtml raceNotTracked(SafeStyles styles, String text);
 
         @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
         SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
@@ -378,16 +383,23 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     }
 
     private class RaceViewerButtonCell extends AbstractCell<T> {
+        private final TextMessages I18N_UBI = TextMessages.INSTANCE;
         private final MainCss css = SharedResources.INSTANCE.mainCss();
         private final String watchNowStyle = getButtonStyleNames(css.buttonred());
         private final String analyseRaceStyle = getButtonStyleNames(css.buttonprimary());
 
         @Override
         public void render(Context context, T data, SafeHtmlBuilder sb) {
-            String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
-            String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
-            String raceViewerURL = presenter.getRaceViewerURL(data.getID());
-            sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, raceViewerURL));
+            if (data.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA) {
+                SafeStylesBuilder styles = new SafeStylesBuilder();
+                styles.textTransform(TextTransform.UPPERCASE).trustedColor("#666").fontSize(15, Unit.PX).toSafeStyles();
+                sb.append(TEMPLATE.raceNotTracked(styles.toSafeStyles(), I18N_UBI.eventRegattaRaceNotTracked()));
+            } else {
+                String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
+                String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : I18N_UBI.watchNow();
+                String raceViewerURL = presenter.getRaceViewerURL(data.getID());
+                sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, raceViewerURL));
+            }
         }
 
         private final String getButtonStyleNames(String buttonColor) {
