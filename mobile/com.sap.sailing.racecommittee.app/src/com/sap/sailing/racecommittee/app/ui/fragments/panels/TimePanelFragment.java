@@ -126,12 +126,15 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
             if (mHeaderTime != null && startTime != null) {
                 String time;
-                if (startTime.asMillis() > now.asMillis()) {
+                int resId;
+                if (startTime.after(now)) {
+                    resId =  R.string.race_start_time_in;
                     time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
                 } else {
+                    resId =  R.string.race_start_time_ago;
                     time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
                 }
-                mHeaderTime.setText(getString(R.string.time).replace("#TIME#", time));
+                mHeaderTime.setText(getString(resId).replace("#TIME#", time));
             }
         }
     }
