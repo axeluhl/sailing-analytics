@@ -3,13 +3,10 @@ package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -17,30 +14,26 @@ import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
-import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class RegattaLeaderboardTabView extends Composite implements RegattaTabView<RegattaLeaderboardPlace>,
-        LeaderboardUpdateListener {
+public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<RegattaLeaderboardPlace> {
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaLeaderboardTabView> {
+    }
+
+    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     private Presenter currentPresenter;
 
     @UiField
     protected OldLeaderboard leaderboard;
 
-
     public RegattaLeaderboardTabView() {
-
+        super();
     }
 
     @Override
@@ -65,23 +58,12 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
-                    LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-            final LeaderboardSettings leaderboardSettings = EventParamUtils
-                    .createLeaderboardSettingsFromURLParameters(Window.Location
-                    .getParameterMap());
-            final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
-                    .getPreselectedRace(Window.Location.getParameterMap());
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
-                    leaderboardSettings, //
-                    preselectedRace, //
-                    "leaderboardGroupName", // TODO: keep using magic string? ask frank!
-                    leaderboardName, //
-                    true,
-                    autoExpandLastRaceColumn);
+            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel(); 
+            if(leaderboardPanel == null) {
+                leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
+            }
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-            leaderboardPanel.addLeaderboardUpdateListener(this);
             if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
                 // TODO: start autorefresh?
             }
@@ -105,22 +87,14 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
 
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-
     }
 
     @Override
     public void stop() {
-
     }
-
-    interface MyBinder extends UiBinder<HTMLPanel, RegattaLeaderboardTabView> {
-    }
-
-    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
     public RegattaLeaderboardPlace placeToFire() {
         return new RegattaLeaderboardPlace(currentPresenter.getCtx());
     }
-
 }
