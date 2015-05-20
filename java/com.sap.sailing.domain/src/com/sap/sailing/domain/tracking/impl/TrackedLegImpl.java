@@ -529,4 +529,9 @@ public class TrackedLegImpl implements TrackedLeg {
         final TimePoint timePoint = getReferenceTimePoint();
         return getTrackedRace().getWindWithConfidence(getMiddleOfLeg(timePoint), timePoint);
     }
+    
+    @Override
+    public String toString() {
+        return "TrackedLeg for "+getLeg();
+    }
 }

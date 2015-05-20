@@ -395,18 +395,24 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             // point for that competitor.
             for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
                 final TrackedLegOfCompetitor tloc = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(c);
-                final Duration predictedDurationFromTimePointToReachFarthestAheadInLeg = getPredictedDurationToReachWindwardPositionOf(tloc, tlocOfFarthestAhead, timePoint, cache);
-                final Duration cDurationFromRaceStartToReachFarthestInLeg = raceDurationAtTimePoint.plus(predictedDurationFromTimePointToReachFarthestAheadInLeg);
-                actualTimeFromRaceStartToReachFarthestAheadInLeg.put(c, cDurationFromRaceStartToReachFarthestInLeg);
-                final Duration correctedTimeWhenReachingFarthestAheadInLeg = getCorrectedTime(c, ()->tloc.getTrackedLeg().getLeg(),
-                        ()->farthestAheadAlreadyFinishedLeg?getTrackedRace().getApproximatePosition(tlocOfFarthestAhead.getTrackedLeg().getLeg().getTo(), tlocOfFarthestAhead.getFinishTime()):
-                            getTrackedRace().getTrack(farthestAheadOrEarliestLegFinisher).getEstimatedPosition(timePoint, /* extrapolate */ true),
-                            cDurationFromRaceStartToReachFarthestInLeg, windwardDistanceFarthestTraveledUntilFinishingLeg);
-                correctedTimeToReachFarthestAheadInLeg.put(c, correctedTimeWhenReachingFarthestAheadInLeg);
+                if (tloc.hasStartedLeg(timePoint)) {
+                    final Duration predictedDurationFromTimePointToReachFarthestAheadInLeg = getPredictedDurationToReachWindwardPositionOf(tloc, tlocOfFarthestAhead, timePoint, cache);
+                    final Duration cDurationFromRaceStartToReachFarthestInLeg = raceDurationAtTimePoint.plus(predictedDurationFromTimePointToReachFarthestAheadInLeg);
+                    actualTimeFromRaceStartToReachFarthestAheadInLeg.put(c, cDurationFromRaceStartToReachFarthestInLeg);
+                    final Duration correctedTimeWhenReachingFarthestAheadInLeg = getCorrectedTime(c, ()->tloc.getTrackedLeg().getLeg(),
+                            ()->farthestAheadAlreadyFinishedLeg?getTrackedRace().getApproximatePosition(tlocOfFarthestAhead.getTrackedLeg().getLeg().getTo(), tlocOfFarthestAhead.getFinishTime()):
+                                getTrackedRace().getTrack(farthestAheadOrEarliestLegFinisher).getEstimatedPosition(timePoint, /* extrapolate */ true),
+                                cDurationFromRaceStartToReachFarthestInLeg, windwardDistanceFarthestTraveledUntilFinishingLeg);
+                    correctedTimeToReachFarthestAheadInLeg.put(c, correctedTimeWhenReachingFarthestAheadInLeg);
+                } else {
+                    actualTimeFromRaceStartToReachFarthestAheadInLeg.put(c, null);
+                    correctedTimeToReachFarthestAheadInLeg.put(c, null);
+                }
             }
             // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
+            Comparator<Duration> durationComparatorNUllsLast = Comparator.nullsLast(Comparator.naturalOrder());
             final Competitor leader = correctedTimeToReachFarthestAheadInLeg.entrySet().stream()
-                    .sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).findFirst().get().getKey();
+                    .sorted((e1, e2) -> durationComparatorNUllsLast.compare(e1.getValue(), e2.getValue())).findFirst().get().getKey();
             result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), leader,
                     actualTimeFromRaceStartToReachFarthestAheadInLeg.get(trackedLegOfCompetitor.getCompetitor()),
                     actualTimeFromRaceStartToReachFarthestAheadInLeg.get(leader),

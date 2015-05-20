@@ -1342,16 +1342,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    int lastLegIndex = fieldsForRace.legDetails.size() - 1;
-                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
-                    // competitor may be in leg prior to the one the leader is in; find competitors current leg
-                    while (lastLegDetail == null && lastLegIndex > 0) {
-                        lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
-                    }
-                    if (lastLegDetail != null) {
-                        result = lastLegDetail.gapToLeaderInSeconds;
-                    }
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.gapToLeaderInOwnTime == null ? null : fieldsForRace.gapToLeaderInOwnTime.asSeconds();
                 }
                 return result;
             }

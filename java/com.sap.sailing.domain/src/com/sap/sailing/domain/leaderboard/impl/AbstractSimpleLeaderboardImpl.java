@@ -1399,6 +1399,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         : raceDetails.getAverageAbsoluteCrossTrackError().getMeters();
                 entryDTO.averageSignedCrossTrackErrorInMeters = raceDetails.getAverageSignedCrossTrackError() == null ? null
                         : raceDetails.getAverageSignedCrossTrackError().getMeters();
+                entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
                     Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
@@ -1481,13 +1482,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         private final Distance windwardDistanceToOverallLeader;
         private final Distance averageAbsoluteCrossTrackError;
         private final Distance averageSignedCrossTrackError;
+        private final Duration gapToLeaderInOwnTime;
         public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToOverallLeader,
-                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError) {
+                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError, Duration gapToLeaderInOwnTime) {
             super();
             this.legDetails = legDetails;
             this.windwardDistanceToOverallLeader = windwardDistanceToOverallLeader;
             this.averageAbsoluteCrossTrackError = averageAbsoluteCrossTrackError;
             this.averageSignedCrossTrackError = averageSignedCrossTrackError;
+            this.gapToLeaderInOwnTime = gapToLeaderInOwnTime;
         }
         public List<LegEntryDTO> getLegDetails() {
             return legDetails;
@@ -1501,6 +1504,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         public Distance getAverageSignedCrossTrackError() {
             return averageSignedCrossTrackError;
         }
+        public Duration getGapToLeaderInOwnTime() {
+            return gapToLeaderInOwnTime;
+        }
     }
 
     /**
@@ -1513,7 +1519,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
-     * @param rankingInfo TODO
      */
     private RaceDetails getRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
@@ -1597,7 +1602,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 // without wind information, use null meaning "unknown"
                 averageSignedCrossTrackError = null;
             }
-            return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError);
+            return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
+                    trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache));
         } finally {
             course.unlockAfterRead();
         }

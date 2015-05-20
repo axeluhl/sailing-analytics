@@ -862,4 +862,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
         return beatAngle;
     }
+    
+    @Override
+    public String toString() {
+        return "TrackedLegOfCompetitor for "+getCompetitor()+" in leg "+getLeg();
+    }
 }

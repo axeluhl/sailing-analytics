@@ -325,13 +325,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(who, timePoint);
         final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, timePoint);
-        return getPredictedDurationToReachWindwardPositionOf(currentLegWho, currentLegTo, timePoint, cache);
+        final Duration result = getPredictedDurationToReachWindwardPositionOf(currentLegWho, currentLegTo, timePoint, cache);
+        return result;
     }
 
     /**
      * Similar to
-     * {@link #getPredictedDurationToReachWindwardPositionOf(Competitor, Competitor, TimePoint, WindLegTypeAndLegBearingCache)}
-     * , allowing the caller to specify the legs to consider for the two competitors. This way, the "to" competitor's
+     * {@link #getPredictedDurationToReachWindwardPositionOf(Competitor, Competitor, TimePoint, WindLegTypeAndLegBearingCache)},
+     * allowing the caller to specify the legs to consider for the two competitors. This way, the "to" competitor's
      * leg may be set to one that is not necessarily the current leg at <code>timePoint</code>, enabling a comparison
      * for a specific leg.
      * <p>
@@ -344,31 +345,36 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      */
     protected Duration getPredictedDurationToReachWindwardPositionOf(final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
             TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getTrackedLeg().getLeg().getFrom()) <=
+        assert legWho == null || legTo == null ||
+                getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getTrackedLeg().getLeg().getFrom()) <=
                 getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getTrackedLeg().getLeg().getFrom());
-        final Competitor who = legWho.getCompetitor();
-        final Competitor to = legTo.getCompetitor();
         final Duration result;
-        if (who == to) { // the same competitor requires no time to reach its own position; it's already there...
-            // if legWho hasFinished at timePoint already, the duration will have to be negative, even if who==to
-            if (legWho.hasFinishedLeg(timePoint)) {
-                result = legWho.getFinishTime().until(timePoint);
-            } else {
-                result = Duration.NULL;
-            }
-        } else if (legWho == null || legTo == null) {
+        if (legWho == null || legTo == null || !legWho.hasStartedLeg(timePoint) || !legTo.hasStartedLeg(timePoint)) {
             result = null;
         } else {
-            assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <=
-                    getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
-            final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legTo, cache);
-            final Duration durationForSubsequentLegsToReachAtEqualPerformance;
-            if (legWho.getLeg() == legTo.getLeg()) {
-                durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
+            final Competitor who = legWho.getCompetitor();
+            final Competitor to = legTo.getCompetitor();
+            if (who == to) {
+                // the same competitor requires no time to reach its own position; it's already there...
+                // if legWho hasFinished at timePoint already, the duration will have to be negative, even if who==to
+                if (legWho.hasFinishedLeg(timePoint)) {
+                    result = legWho.getFinishTime().until(timePoint);
+                } else {
+                    result = Duration.NULL;
+                }
             } else {
-                durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to, legWho.getLeg().getTo(), timePoint, cache);
+                assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <= getTrackedRace()
+                        .getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
+                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legTo, cache);
+                final Duration durationForSubsequentLegsToReachAtEqualPerformance;
+                if (legWho.getLeg() == legTo.getLeg()) {
+                    durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
+                } else {
+                    durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
+                            legWho.getLeg().getTo(), timePoint, cache);
+                }
+                result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
             }
-            result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
         }
         return result;
     }
