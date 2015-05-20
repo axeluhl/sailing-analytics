@@ -41,6 +41,8 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
             ttl = Math.max(ttl, (int) now.until(event.getStartDate()).asMillis());
         }
+        
+        // TODO get correct message
         return new ResultWithTTL<>(ttl, new EventOverviewStageDTO(null, getStageContent(event, state, now)));
     }
 
