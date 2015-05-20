@@ -112,6 +112,8 @@ public class RaceContext {
                     }
                 }
             }
+        } else {
+            // TODO: Try to get manual set wind from racelog
         }
         return null;
     }
