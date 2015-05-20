@@ -187,6 +187,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return trackedRace;
     }
 
+    /**
+     * The time from the {@link TrackedRace#getStartOfRace() race start} until <code>timePoint</code> or until
+     * the point in time when <code>competitor</code> passed the finish mark, whichever comes first.
+     */
     protected Duration getActualTimeSinceStartOfRace(Competitor competitor, TimePoint timePoint) {
         final Duration result;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
@@ -198,7 +202,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 result = null;
             } else {
                 final MarkPassing finishingMarkPassing = getTrackedRace().getMarkPassing(competitor, finish);
-                if (finishingMarkPassing != null) {
+                if (finishingMarkPassing != null && finishingMarkPassing.getTimePoint().before(timePoint)) {
                     result = startOfRace.until(finishingMarkPassing.getTimePoint());
                 } else {
                     result = startOfRace.until(timePoint);

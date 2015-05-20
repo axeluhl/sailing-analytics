@@ -966,23 +966,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, new DistanceToStarboardSideOfStartLineInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.START_TACK, new StartingTackColumn(new TackWhenStarting(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
+            result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringMessages,
+                    LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                    LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG, new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.RACE_TIME_TRAVELED, getTimeTraveledRaceColumn());
+            result.put(DetailType.RACE_TIME_TRAVELED, new TimeTraveledRaceColumn(getLeaderboardPanel(), this,
+                    stringMessages, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE,
+                    LEG_DETAIL_COLUMN_STYLE));
+            result.put(DetailType.RACE_CORRECTED_TIME_TRAVELED,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CORRECTED_TIME_TRAVELED, new RaceCorrectedTimeTraveledInSeconds(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
 
             return result;
-        }
-
-        private TimeTraveledRaceColumn getTimeTraveledRaceColumn() {
-            return new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
-                    LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
-        }
-
-        private ManeuverCountRaceColumn getManeuverCountRaceColumn() {
-            return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringMessages,
-                    LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
-                    LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE, LeaderboardPanel.this);
         }
 
         @Override
@@ -1272,6 +1268,18 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             }
                         }
                     }
+                }
+                return result;
+            }
+        }
+
+        private class RaceCorrectedTimeTraveledInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.correctedTime == null ? null : fieldsForRace.correctedTime.asSeconds();
                 }
                 return result;
             }

@@ -1285,4 +1285,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String timeOnTimeAndDistanceRankingMetricDescription();
     String timeOnTimeFactor();
     String timeOnDistanceAllowanceInSecondsPerNauticalMile();
+    String correctedTimeTraveled();
+    String correctedTimeTraveledTooltip();
 }

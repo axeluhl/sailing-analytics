@@ -1399,6 +1399,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         : raceDetails.getAverageAbsoluteCrossTrackError().getMeters();
                 entryDTO.averageSignedCrossTrackErrorInMeters = raceDetails.getAverageSignedCrossTrackError() == null ? null
                         : raceDetails.getAverageSignedCrossTrackError().getMeters();
+                entryDTO.correctedTime = raceDetails.getCorrectedTime();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
@@ -1483,14 +1484,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         private final Distance averageAbsoluteCrossTrackError;
         private final Distance averageSignedCrossTrackError;
         private final Duration gapToLeaderInOwnTime;
+        private final Duration correctedTime;
         public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToOverallLeader,
-                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError, Duration gapToLeaderInOwnTime) {
+                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError, Duration gapToLeaderInOwnTime, Duration correctedTime) {
             super();
             this.legDetails = legDetails;
             this.windwardDistanceToOverallLeader = windwardDistanceToOverallLeader;
             this.averageAbsoluteCrossTrackError = averageAbsoluteCrossTrackError;
             this.averageSignedCrossTrackError = averageSignedCrossTrackError;
             this.gapToLeaderInOwnTime = gapToLeaderInOwnTime;
+            this.correctedTime = correctedTime;
         }
         public List<LegEntryDTO> getLegDetails() {
             return legDetails;
@@ -1506,6 +1509,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         public Duration getGapToLeaderInOwnTime() {
             return gapToLeaderInOwnTime;
+        }
+        public Duration getCorrectedTime() {
+            return correctedTime;
         }
     }
 
@@ -1603,7 +1609,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 averageSignedCrossTrackError = null;
             }
             return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
-                    trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache));
+                    trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
+                    trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint));
         } finally {
             course.unlockAfterRead();
         }
@@ -1657,6 +1664,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
+            result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
+                    trackedLeg.hasFinishedLeg(timePoint) ? trackedLeg.getFinishTime() : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, cache);

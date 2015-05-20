@@ -101,6 +101,12 @@ public class LeaderboardEntryDTO implements Serializable {
     public Duration gapToLeaderInOwnTime;
 
     /**
+     * The corrected time spent in the race; usually based on the current time and distance, calculated by the {@link RankingMetric}.
+     * For one-design classes this equals the time spent in the race.
+     */
+    public Duration correctedTime;
+
+    /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
      * haven't been requested from the server yet. Otherwise, the list holds one entry per <code>Leg</code> of the
      * <code>Course</code> being sailed in the race for which this object holds the scoring details.
@@ -128,6 +134,8 @@ public class LeaderboardEntryDTO implements Serializable {
                 + ((averageAbsoluteCrossTrackErrorInMeters == null) ? 0 : averageAbsoluteCrossTrackErrorInMeters.hashCode());
         result = prime * result
                 + ((gapToLeaderInOwnTime == null) ? 0 : gapToLeaderInOwnTime.hashCode());
+        result = prime * result
+                + ((correctedTime == null) ? 0 : correctedTime.hashCode());
         result = prime * result
                 + ((averageSignedCrossTrackErrorInMeters == null) ? 0 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
@@ -180,6 +188,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.gapToLeaderInOwnTime != null)
                 return false;
         } else if (!gapToLeaderInOwnTime.equals(other.gapToLeaderInOwnTime))
+            return false;
+        if (correctedTime == null) {
+            if (other.correctedTime != null)
+                return false;
+        } else if (!correctedTime.equals(other.correctedTime))
             return false;
         if (averageAbsoluteCrossTrackErrorInMeters == null) {
             if (other.averageAbsoluteCrossTrackErrorInMeters != null)

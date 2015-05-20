@@ -44,6 +44,8 @@ public class DetailTypeFormatter {
             return stringMessages.velocityMadeGoodInKnots();
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
+        case CORRECTED_TIME_TRAVELED:
+            return stringMessages.correctedTimeTraveled();
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
             return stringMessages.gapChangeSinceLegStartInSeconds();
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
@@ -122,6 +124,8 @@ public class DetailTypeFormatter {
             return stringMessages.speedOverGroundFiveSecondsBeforeStart();
         case RACE_TIME_TRAVELED:
             return stringMessages.time();
+        case RACE_CORRECTED_TIME_TRAVELED:
+            return stringMessages.correctedTimeTraveled();
         case RACE_TIME_TRAVELED_DOWNWIND:
             return stringMessages.timeDownwind();
         case RACE_TIME_TRAVELED_REACHING:
@@ -189,6 +193,8 @@ public class DetailTypeFormatter {
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case TIME_TRAVELED:
+        case CORRECTED_TIME_TRAVELED:
+        case RACE_CORRECTED_TIME_TRAVELED:
         case RACE_TIME_TRAVELED:
         case RACE_TIME_TRAVELED_DOWNWIND:
         case RACE_TIME_TRAVELED_REACHING:
@@ -271,6 +277,8 @@ public class DetailTypeFormatter {
             return stringMessages.estimatedTimeToNextWaypointInSecondsTooltip();
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
+        case CORRECTED_TIME_TRAVELED:
+            return stringMessages.correctedTimeTraveledTooltip();
         case JIBE:
             return stringMessages.jibeTooltip();
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
@@ -307,6 +315,8 @@ public class DetailTypeFormatter {
             return stringMessages.raceDistanceTraveledIncludingGateStartTooltip();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
+        case RACE_CORRECTED_TIME_TRAVELED:
+            return stringMessages.correctedTimeTraveledTooltip();
         case RACE_RANK:
             return stringMessages.rankTooltip();
         case REGATTA_RANK:
