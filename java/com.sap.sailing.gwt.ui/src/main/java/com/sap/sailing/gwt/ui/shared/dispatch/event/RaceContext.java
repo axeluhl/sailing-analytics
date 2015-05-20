@@ -252,7 +252,7 @@ public class RaceContext {
     private boolean isLiveOrOfPublicInterest(TimePoint startTime, TimePoint finishTime) {
         boolean result = false;
         if(startTime != null && raceLog != null) {
-            if(trackedRace != null) {
+            if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                 result = trackedRace.isLive(now);
             } else {
                 // no data from tracking but maybe a manual setting of the start and finish time
