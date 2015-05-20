@@ -355,17 +355,18 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             final Competitor who = legWho.getCompetitor();
             final Competitor to = legTo.getCompetitor();
             if (who == to) {
-                // the same competitor requires no time to reach its own position; it's already there...
-                // if legWho hasFinished at timePoint already, the duration will have to be negative, even if who==to
+                // the same competitor requires no time to reach its own position; it's already there;
+                // however, if the competitor has already finished the leg at or before timePoint, the duration will
+                // have to be negative, even if who==to
                 if (legWho.hasFinishedLeg(timePoint)) {
-                    result = legWho.getFinishTime().until(timePoint);
+                    result = timePoint.until(legWho.getFinishTime());
                 } else {
                     result = Duration.NULL;
                 }
             } else {
                 assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <= getTrackedRace()
                         .getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
-                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legTo, cache);
+                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
                 final Duration durationForSubsequentLegsToReachAtEqualPerformance;
                 if (legWho.getLeg() == legTo.getLeg()) {
                     durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
