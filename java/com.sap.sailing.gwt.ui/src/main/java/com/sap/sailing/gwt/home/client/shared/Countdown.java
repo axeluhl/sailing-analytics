@@ -5,6 +5,7 @@ import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -120,6 +121,9 @@ public class Countdown {
     
     private void update() {
         Duration diff = MillisecondsTimePoint.now().until(zeroDate);
+        if (diff.asMillis() < 0) {
+            diff = new MillisecondsDurationImpl(0);
+        }
         double asDays = diff.asDays();
         long wholeDaysRemaining = (long) asDays;
         double asHours = diff.asHours();
