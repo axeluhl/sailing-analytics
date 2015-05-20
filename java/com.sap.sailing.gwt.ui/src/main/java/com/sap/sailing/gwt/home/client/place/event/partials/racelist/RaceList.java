@@ -31,7 +31,7 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
             new TextCell(), new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
                 @Override
                 protected String getComparisonValue(LiveRaceDTO object) {
-                    return object.getRegattaName();
+                    return object.getRegattaDisplayName();
                 }
             }) {
         @Override
@@ -46,7 +46,7 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
 
         @Override
         public String getValue(LiveRaceDTO object) {
-            return object.getRegattaName();
+            return object.getRegattaDisplayName();
         }
     };
     private final SortableRaceListColumn<?> flagsColumn = new RaceListColumn<FlagStateDTO>(I18N.flags(),

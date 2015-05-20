@@ -234,6 +234,7 @@ public class RaceContext {
             // the start time is always given for live races
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
             liveRaceDTO.setViewState(getRaceViewState(startTime, finishTime));
+            liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());

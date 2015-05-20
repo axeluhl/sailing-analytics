@@ -55,6 +55,7 @@ public class RaceMetadataDTO implements IsSerializable {
     }
     
     private String regattaName;
+    private String regattaDisplayName;
     private String raceName;
     private String trackedRaceName;
     private FleetMetadataDTO fleet;
@@ -143,5 +144,13 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setTrackedRaceName(String trackedRaceName) {
         this.trackedRaceName = trackedRaceName;
+    }
+
+    public String getRegattaDisplayName() {
+        return regattaDisplayName;
+    }
+
+    public void setRegattaDisplayName(String regattaDisplayName) {
+        this.regattaDisplayName = regattaDisplayName;
     }
 }
