@@ -1,0 +1,12 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" xmlns:m="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.message">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <g:HTMLPanel>
+    <m:Message ui:field="message" />
+    <div class="{res.mediaCss.grid}">
+      <g:SimplePanel ui:field="stage" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

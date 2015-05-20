@@ -1,0 +1,31 @@
+.message {
+  font-size: 1rem;
+  margin-top: 2em;
+  line-height: 1.733333333333333em;
+  background: #f2f2f2;
+  border: 1px solid #dedede;
+  border-radius: 0.333333333333333em;
+  padding: 1.066666666666667em 2.533333333333333em 1.066666666666667em 2.733333333333333em;
+}
+.message img {
+  display: inline-block;
+  vertical-align: top;
+}
+.message_icon {
+  width: 1.733333333333333em;
+  height: 1.733333333333333em;
+  margin-left: -1.733333333333333em;
+}
+.message_text {
+  font-size: 1.2em;
+  display: inline-block;
+  margin-left: 0.833333333333333em;
+  font-weight: 700;
+}
+.message_close {
+  cursor: pointer;
+  float: right;
+  width: 1.733333333333333em;
+  height: 1.733333333333333em;
+  margin-right: -1.733333333333333em;
+}

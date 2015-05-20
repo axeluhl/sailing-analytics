@@ -4,10 +4,8 @@
   xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview">
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <g:HTMLPanel>
+    <o:EventOverviewStage ui:field="stage" />
     <div class="{res.mediaCss.grid}">
-      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <o:EventOverviewStage ui:field="stage" />
-      </div>
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <r:RacesListLive ui:field="racesListLive" />
       </div>
