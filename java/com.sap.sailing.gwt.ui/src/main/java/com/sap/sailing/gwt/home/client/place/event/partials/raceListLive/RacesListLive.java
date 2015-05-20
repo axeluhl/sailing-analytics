@@ -24,6 +24,7 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
         RacesListLiveResources.INSTANCE.css().ensureInjected();
         raceList = new RaceList(presenter, showRegattaDetails);
         initWidget(uiBinder.createAndBindUi(this));
+        getElement().getStyle().setDisplay(Display.NONE);
     }
 
     @Override
