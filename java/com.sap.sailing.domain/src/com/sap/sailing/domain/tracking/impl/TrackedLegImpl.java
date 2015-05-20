@@ -96,8 +96,15 @@ public class TrackedLegImpl implements TrackedLeg {
         return trackedLegsOfCompetitors.get(competitor);
     }
 
-    protected Competitor getLeader(TimePoint timePoint) {
+    @Override
+    public Competitor getLeader(TimePoint timePoint) {
         List<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint);
+        return byRank.get(0).getCompetitor();
+    }
+
+    @Override
+    public Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        List<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint, cache);
         return byRank.get(0).getCompetitor();
     }
 

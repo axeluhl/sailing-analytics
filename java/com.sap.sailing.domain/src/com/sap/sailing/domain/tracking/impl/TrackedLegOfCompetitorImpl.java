@@ -588,34 +588,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getCorrectedGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode)
-            throws NoWindException {
-        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
-        return getGapToLeader(timePoint, windPositionMode);
-    }
-
-    @Override
-    public Duration getCorrectedGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
-        return getGapToLeader(timePoint, windPositionMode, cache);
-    }
-
-    @Override
-    public Duration getCorrectedGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode) throws NoWindException {
-        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
-        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode);
-    }
-
-    @Override
-    public Duration getCorrectedGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
-        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, cache);
-    }
-
-    @Override
     public boolean hasStartedLeg(TimePoint timePoint) {
         MarkPassing markPassingForLegStart = getMarkPassingForLegStart();
         return markPassingForLegStart != null && markPassingForLegStart.getTimePoint().compareTo(timePoint) <= 0;

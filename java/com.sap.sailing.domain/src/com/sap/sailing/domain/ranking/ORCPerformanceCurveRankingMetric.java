@@ -63,4 +63,11 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingCache cache) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

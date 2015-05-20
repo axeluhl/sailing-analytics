@@ -175,4 +175,11 @@ public interface TrackedLeg extends Serializable {
      */
     TimePoint getReferenceTimePoint();
 
+    /**
+     * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}
+     * installed for the race.
+     */
+    Competitor getLeader(TimePoint timePoint);
+
+    Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 }

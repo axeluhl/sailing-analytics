@@ -325,20 +325,48 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(who, timePoint);
         final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, timePoint);
+        return getPredictedDurationToReachWindwardPositionOf(currentLegWho, currentLegTo, timePoint, cache);
+    }
+
+    /**
+     * Similar to
+     * {@link #getPredictedDurationToReachWindwardPositionOf(Competitor, Competitor, TimePoint, WindLegTypeAndLegBearingCache)}
+     * , allowing the caller to specify the legs to consider for the two competitors. This way, the "to" competitor's
+     * leg may be set to one that is not necessarily the current leg at <code>timePoint</code>, enabling a comparison
+     * for a specific leg.
+     * <p>
+     * 
+     * The resulting duration may be negative if <code>legWho</code>'s competitor has reached the position in question
+     * before <code>timePoint</code>.
+     * <p>
+     * 
+     * Precondition: <code>legWho</code>'s leg is the same as or an earlier leg than <code>legTo</code>'s leg.
+     */
+    protected Duration getPredictedDurationToReachWindwardPositionOf(final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
+            TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getTrackedLeg().getLeg().getFrom()) <=
+                getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getTrackedLeg().getLeg().getFrom());
+        final Competitor who = legWho.getCompetitor();
+        final Competitor to = legTo.getCompetitor();
         final Duration result;
         if (who == to) { // the same competitor requires no time to reach its own position; it's already there...
-            result = Duration.NULL;
-        } else if (currentLegWho == null || currentLegTo == null) {
+            // if legWho hasFinished at timePoint already, the duration will have to be negative, even if who==to
+            if (legWho.hasFinishedLeg(timePoint)) {
+                result = legWho.getFinishTime().until(timePoint);
+            } else {
+                result = Duration.NULL;
+            }
+        } else if (legWho == null || legTo == null) {
             result = null;
         } else {
-            assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegWho.getLeg().getFrom()) <=
-                    getTrackedRace().getRace().getCourse().getIndexOfWaypoint(currentLegTo.getLeg().getFrom());
-            final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, currentLegWho, currentLegTo, cache);
+            assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <=
+                    getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
+            final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legTo, cache);
             final Duration durationForSubsequentLegsToReachAtEqualPerformance;
-            if (currentLegWho.getLeg() == currentLegTo.getLeg()) {
+            if (legWho.getLeg() == legTo.getLeg()) {
                 durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
             } else {
-                durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to, currentLegWho.getLeg().getTo(), timePoint, cache);
+                durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to, legWho.getLeg().getTo(), timePoint, cache);
             }
             result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
         }
@@ -377,6 +405,9 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * them is returned.
      * <p>
      * 
+     * The result may be a negative duration in case <code>who</code> reached the position in question before
+     * <code>timePoint</code>.<p>
+     * 
      * Precondition: <code>who</code> and <code>to</code> have both started sailing the leg at <code>timePoint</code>
      * and <code>to</code> has sailed a greater or equal windward distance compared to <code>who</code>. If not, the
      * result is undefined.
@@ -392,6 +423,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
             final TimePoint whosLegFinishTime = legWho.getFinishTime();
             if (whosLegFinishTime != null) {
+                // who's leg finishing time is known; we don't need to extrapolate
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
@@ -448,6 +480,17 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
     }
 
+    /**
+     * How far did <code>competitor</code> sail windwards/along-course since the start of the race?
+     * For each leg the total windward distance sailed is limited to the leg's windward distance at its
+     * {@link TrackedLeg#getReferenceTimePoint() reference time point}. This ensures that significantly "overstaying" the lay lines
+     * doesn't let a competitor rank better than one who already passed the mark but traveled little windward distance in
+     * the next leg.
+     * 
+     * @param timePoint needed to determine <code>competitor</code>'s position at that time point; note that the
+     * time point for wind approximation is taken to be a reference time point selected based on the mark passings
+     * for the respective leg's from/to waypoints.
+     */
     protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         return getWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint, cache);
     }

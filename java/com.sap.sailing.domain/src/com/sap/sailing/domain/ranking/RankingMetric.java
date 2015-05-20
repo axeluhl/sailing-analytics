@@ -13,6 +13,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 /**
  * Evaluates a {@link Competitor}'s ranking metric, e.g., based on the windward distance to overall leader in case of a
@@ -36,10 +37,11 @@ import com.sap.sse.common.TimePoint;
  * @param <T>
  */
 public interface RankingMetric extends Serializable {
-    public interface CompetitorRankingInfo extends Serializable {
+    public interface CompetitorRankingInfo extends Timed, Serializable {
         /**
          * For which time point in the race was this ranking information computed?
          */
+        @Override
         TimePoint getTimePoint();
     
         /**
@@ -89,10 +91,11 @@ public interface RankingMetric extends Serializable {
         Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
     }
 
-    public interface RankingInfo extends Serializable {
+    public interface RankingInfo extends Timed, Serializable {
         /**
          * The time point for which this ranking information is valid
          */
+        @Override
         TimePoint getTimePoint();
     
         /**
@@ -109,6 +112,14 @@ public interface RankingMetric extends Serializable {
          * position at {@link #timePoint}.
          */
         Competitor getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
+    }
+    
+    public interface LegRankingInfo extends Timed, Serializable {
+        /**
+         * The time point for which this ranking information is valid
+         */
+        @Override
+        TimePoint getTimePoint();
     }
 
     /**
@@ -156,13 +167,18 @@ public interface RankingMetric extends Serializable {
 
     /**
      * Determines in <code>competitor</code>'s own time how much time earlier she would have had to be where she is at
-     * {@link RankingInfo#getTimePoint() the ranking info's time point} in order to rank equal to the race leader.
+     * {@link RankingInfo#getTimePoint() the ranking info's time point} in order to rank equal to the race leader. Note
+     * that this metric is not necessarily restricted to the scope of a single leg. The <code>competitor</code> will be
+     * projected to the position of the fastest boat which may be well beyond the <code>competitor</code>'s current
+     * leg end.
      * 
      * @param rankingInfo
      *            the pre-calculated ranking info for all competitors for a certain time point, as returned by
      *            {@link AbstractRankingMetric#getRankingInfo(TimePoint, WindLegTypeAndLegBearingCache)}
      * @param competitor
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
+     *            
+     * @see #getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor, TimePoint, WindLegTypeAndLegBearingCache)
      */
     default Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
         return getGapToLeaderInOwnTime(rankingInfo, competitor, new LeaderboardDTOCalculationReuseCache(rankingInfo.getTimePoint()));
@@ -183,4 +199,12 @@ public interface RankingMetric extends Serializable {
     RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache);
+
+    /**
+     * Computes the <code>competitor</code>'s gap in own time to the leader (or best leg finisher, in corrected time if
+     * handicap ranking is in effect) of the leg that the <code>competitor</code> is in at <code>timePoint</code> (or
+     * the last leg if <code>timePoint</code> is after <code>competitor</code> has finished the race). Returns
+     * <code>null</code> if <code>timePoint</code> is before <code>competitor</code> has started.
+     */
+    Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 }

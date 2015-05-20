@@ -1388,10 +1388,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         if (addLegDetails && trackedRace != null) {
             try {
-                RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache, cache);
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses,
+                        legRanksCache, rankingInfo, cache);
                 entryDTO.legDetails = raceDetails.getLegDetails();
                 entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader() == null ? null
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
+                entryDTO.gapToLeaderInOwnTime = trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                 entryDTO.averageAbsoluteCrossTrackErrorInMeters = raceDetails.getAverageAbsoluteCrossTrackError() == null ? null
                         : raceDetails.getAverageAbsoluteCrossTrackError().getMeters();
                 entryDTO.averageSignedCrossTrackErrorInMeters = raceDetails.getAverageSignedCrossTrackError() == null ? null
@@ -1510,22 +1513,23 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
+     * @param rankingInfo TODO
      */
     private RaceDetails getRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException, InterruptedException, ExecutionException {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) throws NoWindException, InterruptedException, ExecutionException {
         final RaceDetails raceDetails;
         if (trackedRace.getEndOfTracking() != null && trackedRace.getEndOfTracking().compareTo(timePoint) < 0) {
-            raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor, legRanksCache, cache);
+            raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor, legRanksCache, rankingInfo, cache);
         } else {
-            raceDetails = calculateRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache, cache);
+            raceDetails = calculateRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache, cache, rankingInfo);
         }
         return raceDetails;
     }
 
     private RaceDetails getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(final TrackedRace trackedRace,
             final Competitor competitor, final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            final WindLegTypeAndLegBearingCache cache) throws NoWindException, InterruptedException, ExecutionException {
+            RankingInfo rankingInfo, final WindLegTypeAndLegBearingCache cache) throws NoWindException, InterruptedException, ExecutionException {
         final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
         synchronized (raceDetailsAtEndOfTrackingCache) {
@@ -1542,7 +1546,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 // TODO see bug 1358: for now, use waitForLatest==false until we've switched to optimistic locking for the course read lock
                                 /* TODO old comment when it was still true: "because this is done only once after end of tracking" */
                                 /* waitForLatestAnalyses (maneuver and cross track error) */ false,
-                                legRanksCache, cache);
+                                legRanksCache, cache, rankingInfo);
                     }
                 });
                 raceDetailsExecutor.execute(raceDetails);
@@ -1557,12 +1561,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException {
+            WindLegTypeAndLegBearingCache cache, RankingInfo rankingInfo) throws NoWindException {
         final List<LegEntryDTO> legDetails = new ArrayList<LegEntryDTO>();
         final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // hold back any course re-configurations while looping over the legs
         try {
-            final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
             for (Leg leg : course.getLegs()) {
                 LegEntryDTO legEntry;
                 // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
@@ -1648,9 +1651,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
-            // fetch the gap in own corrected time from the ranking metric
-            // FIXME !!! bug 2864: need to determine the LEG's gap; if the competitor has already finished the leg, time needs to freeze at the leg's end, and a gap shall only be evaluated based on the mark passings; similarly, 
-            final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, trackedLeg.getCompetitor(), cache);
+            // fetch the leg gap in own corrected time from the ranking metric
+            final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
+                    getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, cache);
             result.gapToLeaderInSeconds = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
             if (result.gapToLeaderInSeconds != null) {
                 // FIXME problem: asking just after the beginning of the leg yields very different values from asking for the end of the previous leg.
@@ -1746,8 +1749,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
         course.lockForRead();
         try {
-            result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(
-                    trackedLeg.getCompetitor(), trackedLeg.getStartTime(), cache);
+            result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(
+                    trackedLeg, trackedLeg.getStartTime(), cache);
             return result;
         } finally {
             course.unlockAfterRead();

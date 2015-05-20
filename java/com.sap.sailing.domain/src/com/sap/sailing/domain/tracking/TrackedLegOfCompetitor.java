@@ -173,35 +173,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
-    /**
-     * Computes the gap in seconds to the leader / winner of this leg based on corrected times according to the handicap
-     * system in place for the race. If no handicap system is in place ("one-design class"), the method behaves like
-     * {@link #getGapToLeaderInSeconds(TimePoint, WindPositionMode). Returns <code>null</code> in case this leg's
-     * competitor hasn't started the leg yet.
-     */
-    Duration getCorrectedGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
-    
-    /**
-     * Same as {@link #getCorrectedGapToLeader(TimePoint, WindPositionMode)}, only that a cache for wind and leg type data is used.
-     */
-    Duration getCorrectedGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
-
-    /**
-     * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it can share
-     * this knowledge to speed up computation as compared to
-     * {@link #getCorrectedGapToLeader(TimePoint, WindPositionMode)}.
-     */
-    Duration getCorrectedGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode) throws NoWindException;
-
-    /**
-     * Same as {@link #getCorrectedGapToLeader(TimePoint, Competitor, WindPositionMode)}, only that an
-     * additional cache is used to avoid redundant evaluations of leg types and wind field information across various
-     * calculations that all can use the same basic information.
-     */
-    Duration getCorrectedGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException;
-
     boolean hasStartedLeg(TimePoint timePoint);
     
     boolean hasFinishedLeg(TimePoint timePoint);
