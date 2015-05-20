@@ -18,6 +18,7 @@ import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -79,6 +80,147 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     private final SimplePanel cellTableContainer = new SimplePanel();
     private final EventView.Presenter presenter;
     
+    protected final SortableRaceListColumn<?> fleetCornerColumn = new RaceListColumn<FleetMetadataDTO>("",
+            new FleetCornerCell()) {
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_fleetcorner();
+        }
+
+        @Override
+        public FleetMetadataDTO getValue(T object) {
+            return object.getFleet();
+        }
+    };
+    protected final SortableRaceListColumn<?> raceNameColumn = new SortableRaceListColumn<String>(I18N.race(),
+            new TextCell(), new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+                @Override
+                protected String getComparisonValue(T object) {
+                    return object.getRaceName();
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), CSS.race_itemname());
+        }
+
+        @Override
+        public String getValue(T object) {
+            return object.getRaceName();
+        }
+    }; 
+    protected final SortableRaceListColumn<?> fleetNameColumn = new SortableRaceListColumn<String>(I18N.fleet(),
+            new TextCell(), new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+                @Override
+                protected String getComparisonValue(T object) {
+                    return object.getFleet() != null ? object.getFleet().getFleetName() : null;
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+        }
+
+        @Override
+        public String getValue(T object) {
+            return object.getFleet() != null ? object.getFleet().getFleetName() : null;
+        }
+    }; 
+    protected final SortableRaceListColumn<?> startTimeColumn = new SortableRaceListColumn<Date>(I18N.start(),
+            new DateCell(DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)),
+            new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>()) {
+                @Override
+                protected Date getComparisonValue(T object) {
+                    return object.getStart();
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_item();
+        }
+
+        @Override
+        public Date getValue(T object) {
+            return object.getStart();
+        }
+    };
+    protected final SortableRaceListColumn<?> courseAreaColumn = new SortableRaceListColumn<String>(I18N.courseArea(),
+            new TextCell(), new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+                @Override
+                protected String getComparisonValue(T object) {
+                    return object.getCourseArea();
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+        }
+
+        @Override
+        public String getValue(T object) {
+            return object.getCourseArea();
+        }
+    };
+    protected final SortableRaceListColumn<?> courseColumn = new SortableRaceListColumn<String>(I18N.course(),
+            new TextCell(), new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+                @Override
+                protected String getComparisonValue(T object) {
+                    return object.getCourse();
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+        }
+
+        @Override
+        public String getValue(T object) {
+            return object.getCourse();
+        }
+    };
+    protected final SortableRaceListColumn<?> raceViewerButtonColumn = new RaceListColumn<T>("",
+            new RaceViewerButtonCell()) {
+        @Override
+        public String getHeaderStyle() {
+            return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), CSS.race_itemright());
+        }
+
+        @Override
+        public T getValue(T object) {
+            return object;
+        }
+    };
+    
     private SortedCellTable<T> cellTable;
     
     protected AbstractRaceList(EventView.Presenter presenter) {
@@ -88,12 +230,15 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     }
 
     protected void setTableData(List<T> data) {
+        Column<T, ?> sortColumn = (this.cellTable == null ? null : this.cellTable.getCurrentlySortedColumn());
         this.cellTable = new SortedCellTable<T>(data.size(), CleanCellTableResources.INSTANCE);
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initTableColumns();
         this.cellTable.setList(data);
-        this.cellTable.sort();
+        if (sortColumn != null && this.cellTable.getColumnIndex(sortColumn) >= 0) {
+            this.cellTable.sortColumn(sortColumn);
+        }
     }
 
     private void initTableStyle() {
@@ -109,185 +254,6 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     
     protected abstract void initTableColumns();
 
-    protected void addFleetCornerColumn() {
-        add(new RaceListColumn<FleetMetadataDTO>("", new FleetCornerCell()) {
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_fleetcorner();
-            }
-
-            @Override
-            public FleetMetadataDTO getValue(T object) {
-                return object.getFleet();
-            }
-        });
-    }
-
-    protected void addRaceNameColumn() {
-        add(new SortableRaceListColumn<String>(I18N.race(), new TextCell()) {
-            @Override
-            public InvertibleComparator<T> getComparator() {
-                return new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
-                    @Override
-                    protected String getComparisonValue(T object) {
-                        return object.getRaceName();
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), CSS.race_itemname());
-            }
-
-            @Override
-            public String getValue(T object) {
-                return object.getRaceName();
-            }
-        });
-    }
-
-    protected void addFleetNameColumn() {
-        add(new SortableRaceListColumn<String>(I18N.fleet(), new TextCell()) {
-            @Override
-            public InvertibleComparator<T> getComparator() {
-                return new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
-                    @Override
-                    protected String getComparisonValue(T object) {
-                        return object.getFleet() != null ? object.getFleet().getFleetName() : null;
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
-            }
-
-            @Override
-            public String getValue(T object) {
-                return object.getFleet() != null ? object.getFleet().getFleetName() : null;
-            }
-        });
-    }
-    
-    protected void addStartTimeColumn() {
-        add(new SortableRaceListColumn<Date>(I18N.start(), new DateCell(
-                DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE))) {
-            @Override
-            public InvertibleComparator<T> getComparator() {
-                return new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>()) {
-                    @Override
-                    protected Date getComparisonValue(T object) {
-                        return object.getStart();
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-
-            @Override
-            public Date getValue(T object) {
-                return object.getStart();
-            }
-        });
-    }
-
-    protected void addCourseAreaColumn() {
-        add(new SortableRaceListColumn<String>(I18N.courseArea(), new TextCell()) {
-            @Override
-            public InvertibleComparator<T> getComparator() {
-                return new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
-                    @Override
-                    protected String getComparisonValue(T object) {
-                        return object.getCourseArea();
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
-            }
-
-            @Override
-            public String getValue(T object) {
-                return object.getCourseArea();
-            }
-        });
-    }
-
-    protected void addCourseColumn() {
-        add(new SortableRaceListColumn<String>(I18N.course(), new TextCell()) {
-            @Override
-            public InvertibleComparator<T> getComparator() {
-                return new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
-                    @Override
-                    protected String getComparisonValue(T object) {
-                        return object.getCourse();
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
-            }
-
-            @Override
-            public String getValue(T object) {
-                return object.getCourse();
-            }
-        });
-    }
-
-    protected void addRaceViewerButtonCell() {
-        add(new RaceListColumn<T>("", new RaceViewerButtonCell()) {
-            @Override
-            public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), CSS.race_itemright());
-            }
-
-            @Override
-            public T getValue(T object) {
-                return object;
-            }
-        });
-    }
-
     protected void add(SortableRaceListColumn<?> column) {
         if (column.getColumnStyle() != null) {
             column.setCellStyleNames(column.getColumnStyle());
@@ -302,10 +268,17 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
 
     protected abstract class SortableRaceListColumn<C> extends SortableColumn<T, C> {
         private final String headerText;
+        private final InvertibleComparator<T> comparator;
 
-        protected SortableRaceListColumn(String headerText, Cell<C> cell) {
+        protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
             super(cell, SortingOrder.ASCENDING);
             this.headerText = headerText;
+            this.comparator = comparator;
+        }
+
+        @Override
+        public final InvertibleComparator<T> getComparator() {
+            return comparator;
         }
 
         @Override
@@ -320,12 +293,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
 
     protected abstract class RaceListColumn<C> extends SortableRaceListColumn<C> {
         protected RaceListColumn(String headerText, Cell<C> cell) {
-            super(headerText, cell);
-        }
-
-        @Override
-        public final InvertibleComparator<T> getComparator() {
-            return null;
+            super(headerText, cell, null);
         }
     }
 
@@ -363,7 +331,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         }
     }
 
-    protected class RaceProgressCell extends AbstractCell<LiveRaceDTO> {
+    protected class RaceViewStateCell extends AbstractCell<LiveRaceDTO> {
         @Override
         public void render(Context context, LiveRaceDTO value, SafeHtmlBuilder sb) {
             RaceViewState state = value.getViewState();
@@ -391,8 +359,9 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         @Override
         public void render(Context context, T data, SafeHtmlBuilder sb) {
             if (data.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA) {
-                SafeStylesBuilder styles = new SafeStylesBuilder();
-                styles.textTransform(TextTransform.UPPERCASE).trustedColor("#666").fontSize(15, Unit.PX).toSafeStyles();
+                SafeStylesBuilder styles = new SafeStylesBuilder().textTransform(TextTransform.UPPERCASE);
+                styles.trustedColor("#666").trustedNameAndValue("font-size", "0.933333333333333rem").toSafeStyles();
+                styles.trustedNameAndValue("padding", "0.714285714285714em 1.071428571428571em");
                 sb.append(TEMPLATE.raceNotTracked(styles.toSafeStyles(), I18N_UBI.eventRegattaRaceNotTracked()));
             } else {
                 String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;

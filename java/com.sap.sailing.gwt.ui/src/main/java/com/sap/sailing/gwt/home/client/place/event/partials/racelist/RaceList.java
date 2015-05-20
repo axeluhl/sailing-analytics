@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
 import com.google.gwt.cell.client.TextCell;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
@@ -12,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 
@@ -26,6 +26,115 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
     private boolean showCourseAreaDetails;
     private boolean showCourseDetails;
     private boolean showWindDetails;
+    
+    private final SortableRaceListColumn<?> regattaNameColumn = new SortableRaceListColumn<String>(I18N.regatta(),
+            new TextCell(), new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
+                @Override
+                protected String getComparisonValue(LiveRaceDTO object) {
+                    return object.getRegattaName();
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), CSS.race_itemname());
+        }
+
+        @Override
+        public String getValue(LiveRaceDTO object) {
+            return object.getRegattaName();
+        }
+    };
+    private final SortableRaceListColumn<?> flagsColumn = new RaceListColumn<FlagStateDTO>(I18N.flags(),
+            new FlagsCell()) {
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_item();
+        }
+
+        @Override
+        public FlagStateDTO getValue(LiveRaceDTO object) {
+            return object.getFlagState();
+        }
+    };
+    private final SortableRaceListColumn<?> windSpeedColumn = new SortableRaceListColumn<String>(I18N.wind(),
+            new TextCell(), new InvertibleComparatorWrapper<LiveRaceDTO, Double>(
+                    new NullSafeComparableComparator<Double>()) {
+                @Override
+                protected Double getComparisonValue(LiveRaceDTO object) {
+                    return object.getWind() != null ? object.getWind().getTrueWindSpeedInKnots() : null;
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_item();
+        }
+
+        @Override
+        public String getValue(LiveRaceDTO object) {
+            return object.getWind() != null ? I18N.knotsValue(object.getWind().getTrueWindSpeedInKnots()) : null;
+        }
+    };
+    private final SortableRaceListColumn<?> windDirectionColumn = new SortableRaceListColumn<SimpleWindDTO>(
+            I18N.from(), new WindDirectionCell(), new InvertibleComparatorWrapper<LiveRaceDTO, Double>(
+                    new NullSafeComparableComparator<Double>()) {
+                @Override
+                protected Double getComparisonValue(LiveRaceDTO object) {
+                    return object.getWind() != null ? object.getWind().getTrueWindFromDeg() : null;
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.hideonsmall());
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), MEDIA_CSS.hideonsmall());
+        }
+
+        @Override
+        public SimpleWindDTO getValue(LiveRaceDTO object) {
+            return object.getWind();
+        }
+    };
+    private final SortableRaceListColumn<?> raceViewStateColumn = new SortableRaceListColumn<LiveRaceDTO>(
+            I18N.status(), new RaceViewStateCell(), new InvertibleComparatorWrapper<LiveRaceDTO, RaceViewState>(
+                    new NullSafeComparableComparator<RaceViewState>()) {
+                @Override
+                protected RaceViewState getComparisonValue(LiveRaceDTO object) {
+                    return object.getViewState();
+                }
+            }) {
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_item();
+        }
+
+        @Override
+        public LiveRaceDTO getValue(LiveRaceDTO object) {
+            return object;
+        }
+    };
 
     public RaceList(EventView.Presenter presenter, boolean showRegattaDetails) {
         super(presenter);
@@ -43,153 +152,28 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
     @Override
     protected void initTableColumns() {
         if (showFleetDetails) {
-            addFleetCornerColumn();
+            add(fleetCornerColumn);
         }
         if (showRegattaDetails) {
-            addRegattaNameColumn();
+            add(regattaNameColumn);
         }
-        addRaceNameColumn();
+        add(raceNameColumn);
         if (showFleetDetails) {
-            addFleetNameColumn();
+            add(fleetNameColumn);
         }
-        addStartTimeColumn();
-        addFlagsColumn();
+        add(startTimeColumn);
+        add(flagsColumn);
         if(showWindDetails) {
-            addWindSpeedColumn();
-            addWindDirectionColumn();
+            add(windSpeedColumn);
+            add(windDirectionColumn);
         }
         if (showCourseAreaDetails) {
-            addCourseAreaColumn();
+            add(courseAreaColumn);
         }
         if(showCourseDetails) {
-            addCourseColumn();
+            add(courseColumn);
         }
-        addRaceProgressColumn();
-        addRaceViewerButtonCell();
-    }
-
-    private void addRegattaNameColumn() {
-        add(new SortableRaceListColumn<String>(I18N.regatta(), new TextCell()) {
-            @Override
-            public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return new InvertibleComparatorWrapper<LiveRaceDTO, String>(new NaturalComparator(false)) {
-                    @Override
-                    protected String getComparisonValue(LiveRaceDTO object) {
-                        return object.getRegattaName();
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), CSS.race_itemname());
-            }
-
-            @Override
-            public String getValue(LiveRaceDTO object) {
-                return object.getRegattaName();
-            }
-        });
-    }
-
-    private void addFlagsColumn() {
-        add(new RaceListColumn<FlagStateDTO>(I18N.flags(), new FlagsCell()) {
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-
-            @Override
-            public FlagStateDTO getValue(LiveRaceDTO object) {
-                return object.getFlagState();
-            }
-        });
-    }
-
-    private void addWindSpeedColumn() {
-        add(new SortableRaceListColumn<String>(I18N.wind(), new TextCell()) {
-            @Override
-            public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return new InvertibleComparatorWrapper<LiveRaceDTO, Double>(new NullSafeComparableComparator<Double>()) {
-                    @Override
-                    protected Double getComparisonValue(LiveRaceDTO object) {
-                        return object.getWind() != null ? object.getWind().getTrueWindSpeedInKnots() : null;
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-
-            @Override
-            public String getValue(LiveRaceDTO object) {
-                return object.getWind() != null ? I18N.knotsValue(object.getWind().getTrueWindSpeedInKnots()) : null;
-            }
-        });
-    }
-
-    private void addWindDirectionColumn() {
-        add(new RaceListColumn<SimpleWindDTO>(I18N.from(), new WindDirectionCell()) {
-            @Override
-            public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.hideonsmall());
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.hideonsmall());
-            }
-
-            @Override
-            public SimpleWindDTO getValue(LiveRaceDTO object) {
-                return object.getWind();
-            }
-        });
-    }
-
-    private void addRaceProgressColumn() {
-        add(new SortableRaceListColumn<LiveRaceDTO>(I18N.status(), new RaceProgressCell()) {
-            @Override
-            public InvertibleComparator<LiveRaceDTO> getComparator() {
-                return new InvertibleComparatorWrapper<LiveRaceDTO, Double>(new NullSafeComparableComparator<Double>()) {
-                    @Override
-                    protected Double getComparisonValue(LiveRaceDTO object) {
-                        return object.getProgress().getPercentageProgress();
-                    }
-                };
-            }
-
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-
-            @Override
-            public LiveRaceDTO getValue(LiveRaceDTO object) {
-                return object;
-            }
-        });
+        add(raceViewStateColumn);
+        add(raceViewerButtonColumn);
     }
 }

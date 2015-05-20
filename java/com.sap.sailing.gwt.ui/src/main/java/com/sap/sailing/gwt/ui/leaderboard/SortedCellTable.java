@@ -102,6 +102,13 @@ public class SortedCellTable<T> extends CellTable<T> {
         }
     }
 
+    public void sortColumn(Column<T, ?> column) {
+        InvertibleComparator<T> comparator = comparators.get(column);
+        if (comparator != null) {
+            sortColumn(column, comparator, comparator.isAscending());
+        }
+    }
+
     public void sortColumn(Column<T, ?> column, boolean ascending) {
         InvertibleComparator<T> comparator = comparators.get(column);
         if (comparator != null) {
