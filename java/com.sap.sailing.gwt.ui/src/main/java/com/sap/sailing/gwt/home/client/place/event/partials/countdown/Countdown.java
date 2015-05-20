@@ -94,7 +94,9 @@ public class Countdown extends Composite {
         }
 
         private void linkToRaceViewer(EventOverviewRaceTickerStageDTO data) {
-            String url = presenter.getRaceViewerURL(data.getRegattaAndRaceIdentifier());
+            // TODO implement correctly
+//            String url = presenter.getRaceViewerURL(data.getRegattaAndRaceIdentifier());
+            String url = "";
             this.update(MAIN_CSS.buttonprimary(), MAIN_CSS.buttonred(), I18N_UBI.watchNow(), null, url);
         }
 

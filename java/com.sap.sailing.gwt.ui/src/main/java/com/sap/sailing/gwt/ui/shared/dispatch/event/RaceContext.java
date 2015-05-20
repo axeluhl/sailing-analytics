@@ -18,8 +18,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -84,10 +82,6 @@ public class RaceContext {
             return displayName;
         }
         return leeaderboard.getName();
-    }
-
-    private RegattaAndRaceIdentifier getIdentifier() {
-        return new RegattaNameAndRaceName(getRegattaName(), raceColumn.getName());
     }
 
     private FleetMetadataDTO getFleetMetadataOrNull() {
@@ -235,12 +229,11 @@ public class RaceContext {
         // and special flags states indicating how the postponed/canceled races will be continued
         if(isLiveOrOfPublicInterest(startTime, finishTime)) {
             // the start time is always given for live races
-            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
+            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
             liveRaceDTO.setViewState(getRaceViewState(startTime, finishTime));
+            liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
-            liveRaceDTO.setRegattaName(getRegattaDisplayName());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());
-            liveRaceDTO.setRaceName(raceColumn.getName());
             liveRaceDTO.setStart(startTime.asDate());
             liveRaceDTO.setBoatClass(getBoatClassName());
             liveRaceDTO.setCourseArea(getCourseAreaOrNull());

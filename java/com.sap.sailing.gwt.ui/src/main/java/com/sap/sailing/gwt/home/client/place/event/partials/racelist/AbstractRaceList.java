@@ -366,7 +366,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
             } else {
                 String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
                 String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : I18N_UBI.watchNow();
-                String raceViewerURL = presenter.getRaceViewerURL(data.getID());
+                String raceViewerURL = presenter.getRaceViewerURL(data.getRegattaName(), data.getTrackedRaceName());
                 sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, raceViewerURL));
             }
         }

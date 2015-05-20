@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.WindStatisticsDTO;
@@ -15,8 +14,8 @@ public class RaceListRaceDTO extends RaceMetadataDTO {
     private RaceListRaceDTO() {
     }
     
-    public RaceListRaceDTO(RegattaAndRaceIdentifier id) {
-        super(id);
+    public RaceListRaceDTO(String regattaName, String raceName) {
+        super(regattaName, raceName);
     }
 
     public WindStatisticsDTO getWind() {

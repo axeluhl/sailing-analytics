@@ -120,32 +120,34 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return new EventContext(ctx).withRegattaId(regattaId);
     }
 
+    @Override
     public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
         RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
         return getRaceViewerURL(leaderboard.name, raceIdentifier);
     }
     
-    public String getRaceViewerURL(RegattaAndRaceIdentifier raceIdentifier) {
+    @Override
+    public String getRaceViewerURL(String regattaName, String trackedRaceName) {
         return EntryPointLinkFactory
-                .createRaceBoardLink(createRaceBoardLinkParameters(raceIdentifier.getRegattaName(), raceIdentifier));
+                .createRaceBoardLink(createRaceBoardLinkParameters(regattaName, regattaName, trackedRaceName));
     }
     
     public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
         return EntryPointLinkFactory
-                .createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, raceIdentifier));
+                .createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
     }
 
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName,
-            RegattaAndRaceIdentifier raceIdentifier) {
+            String regattaName, String trackedRaceName) {
         Map<String, String> linkParams = new HashMap<String, String>();
         linkParams.put("eventId", ctx.getEventId());
         linkParams.put("leaderboardName", leaderboardName);
-        linkParams.put("raceName", raceIdentifier.getRaceName());
+        linkParams.put("raceName", trackedRaceName);
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
-        linkParams.put("regattaName", raceIdentifier.getRegattaName());
+        linkParams.put("regattaName", regattaName);
         return linkParams;
     }
 

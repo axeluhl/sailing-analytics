@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.shared.race;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RaceMetadataDTO implements IsSerializable {
@@ -55,9 +54,9 @@ public class RaceMetadataDTO implements IsSerializable {
         TRACKED_VALID_DATA       // tracking is connected and all required data for displaying the race viewer is available
     }
     
-    private RegattaAndRaceIdentifier id;
-
+    private String regattaName;
     private String raceName;
+    private String trackedRaceName;
     private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
@@ -69,20 +68,17 @@ public class RaceMetadataDTO implements IsSerializable {
     protected RaceMetadataDTO() {
     }
     
-    public RaceMetadataDTO(RegattaAndRaceIdentifier id) {
-        this.id = id;
+    public RaceMetadataDTO(String regattaName, String raceName) {
+        this.regattaName = regattaName;
+        this.raceName = raceName;
     }
-    
-    public RegattaAndRaceIdentifier getID() {
-        return id;
+
+    public String getRegattaName() {
+        return regattaName;
     }
 
     public String getRaceName() {
         return raceName;
-    }
-
-    public void setRaceName(String raceName) {
-        this.raceName = raceName;
     }
 
     public FleetMetadataDTO getFleet() {
@@ -139,5 +135,13 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setTrackingState(RaceTrackingState trackingState) {
         this.trackingState = trackingState;
+    }
+
+    public String getTrackedRaceName() {
+        return trackedRaceName;
+    }
+
+    public void setTrackedRaceName(String trackedRaceName) {
+        this.trackedRaceName = trackedRaceName;
     }
 }
