@@ -49,14 +49,13 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/minute_dec"
+                android:id="@+id/minute_inc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:background="?button_filled_bordered"
                 android:drawableLeft="?chevron_left_36dp"
                 android:paddingRight="@dimen/default_padding_half"
-                android:tag="+"
                 android:textAppearance="?textLarge"
                 android:textColor="?white"
                 tools:text="@string/race_start_time_in"/>
@@ -73,14 +72,13 @@
                 tools:text="@string/race_start_time_in"/>
 
             <Button
-                android:id="@+id/minute_inc"
+                android:id="@+id/minute_dec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:background="?button_filled_bordered"
                 android:drawableRight="?chevron_right_36dp"
                 android:paddingLeft="@dimen/default_padding_half"
-                android:tag="-"
                 android:textAppearance="?textLarge"
                 android:textColor="?white"
                 tools:text="@string/race_start_time_in"/>
@@ -135,5 +133,16 @@
             android:inputType="textMultiLine"
             android:maxWidth="200dp"
             android:text="@string/race_set_start"/>
+
+        <TextView
+            android:id="@+id/debug_time"
+            style="?textSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:visibility="gone"
+            tools:text="12:12:12"/>
     </RelativeLayout>
 </RelativeLayout>

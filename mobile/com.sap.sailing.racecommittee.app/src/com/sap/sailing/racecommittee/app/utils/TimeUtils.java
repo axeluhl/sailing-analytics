@@ -74,10 +74,11 @@ public class TimeUtils {
         int hours = secondsTillStart / 3600;
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);
-        String timePattern = "%s:%s:%s";
-        String secondsString = seconds < 10 ? "0" + seconds : "" + seconds;
-        String minutesString = minutes < 10 ? "0" + minutes : "" + minutes;
-        String hoursString = hours < 10 ? "0" + hours : "" + hours;
+        boolean negative = (hours < 0 || minutes < 0 || seconds < 0);
+        String timePattern = ((negative) ? "-" : "") + "%s:%s:%s";
+        String secondsString = seconds < 10 ? "0" + Math.abs(seconds) : "" + Math.abs(seconds);
+        String minutesString = minutes < 10 ? "0" + Math.abs(minutes) : "" + Math.abs(minutes);
+        String hoursString = hours < 10 ? "0" + Math.abs(hours) : "" + Math.abs(hours);
         return String.format(timePattern, hoursString, minutesString, secondsString);
     }
 }
