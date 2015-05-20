@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
@@ -54,20 +55,20 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     private static final LocalCss CSS = RacesListLiveResources.INSTANCE.css();
     private static final MediaCss MEDIA_CSS = SharedResources.INSTANCE.mediaCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private static final CellTemplate TEMPLATE = GWT.create(CellTemplate.class);
+    private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
 
-    interface CellTemplate extends SafeHtmlTemplates {
+    interface CellTemplates extends SafeHtmlTemplates {
         @Template("<div style=\"{1}\" class=\"{0}\"></div>")
         SafeHtml fleetCorner(String styleNames, SafeStyles color);
 
-        @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
-        SafeHtml watchNowButton(String styleNames, String text, String link);
-
         @Template("<div>{3}</div><div class=\"{0}\"><div style=\"{2}\" class=\"{1}\"></div></div>")
-        SafeHtml raceProgress(String styleNamesBar, String styleNamesProgress, SafeStyles width, String text);
+        SafeHtml viewStateRunning(String styleNamesBar, String styleNamesProgress, SafeStyles width, String text);
 
         @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
         SafeHtml windDirection(SafeStyles rotation);
+
+        @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
+        SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
     }
 
     private final SimplePanel cellTableContainer = new SimplePanel();
@@ -362,13 +363,16 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         public void render(Context context, LiveRaceDTO value, SafeHtmlBuilder sb) {
             RaceViewState state = value.getViewState();
             RaceProgressDTO progress = value.getProgress();
-            if (state != RaceViewState.RUNNING) {
-                sb.appendEscaped(state.name());
-            } else if (progress != null) {
+            if (state == RaceViewState.SCHEDULED) {
+                double min = MillisecondsTimePoint.now().until(new MillisecondsTimePoint(value.getStart())).asMinutes();
+                sb.appendEscaped(I18N.startingInMinutes((int) min));
+            } else if (state == RaceViewState.RUNNING && progress != null) {
                 SafeStyles width = SafeStylesUtils.forWidth(progress.getPercentageProgress(), Unit.PCT);
                 String text = I18N.currentOfTotalLegs(progress.getCurrentLeg(), progress.getTotalLegs());
-                sb.append(TEMPLATE.raceProgress(CSS.race_itemstatus_progressbar(),
+                sb.append(TEMPLATE.viewStateRunning(CSS.race_itemstatus_progressbar(),
                         CSS.race_itemstatus_progressbar_progress(), width, text));
+            } else {
+                sb.appendEscaped(state.getLabel());
             }
         }
     }
@@ -383,7 +387,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
             String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
             String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
             String raceViewerURL = presenter.getRaceViewerURL(data.getID());
-            sb.append(TEMPLATE.watchNowButton(styleNames, text, raceViewerURL));
+            sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, raceViewerURL));
         }
 
         private final String getButtonStyleNames(String buttonColor) {

@@ -4,16 +4,49 @@ import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RaceMetadataDTO implements IsSerializable {
     
     public enum RaceViewState {
-        PLANNED,        // no start time set
-        SCHEDULED,      // the start time is set and in the future 
-        RUNNING,        // start time is the past and end time is not set or in the future
-        FINISHED,       // the end time is set and is in the past
-        POSTPONED,      // the start has been postponed
-        CANCELED        // the running racing has been canceled
+        PLANNED {       // no start time set
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsPlanned();
+            }
+        },
+        SCHEDULED {     // the start time is set and in the future
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsScheduled(); // fallback representation
+            }
+        },
+        RUNNING {       // start time is the past and end time is not set or in the future
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsRunning(); // fallback representation
+            }
+        },
+        FINISHED {      // the end time is set and is in the past
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsFinished();
+            }
+        },
+        POSTPONED {     // the start has been postponed
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsPostponed();
+            }
+        },
+        CANCELED {      // the running racing has been canceled
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsCanceled();
+            }
+        };
+
+        public abstract String getLabel();
     }
     
     public enum RaceTrackingState {
