@@ -255,11 +255,13 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void openFragment(RaceFragment fragment) {
-        Bundle args = getRecentArguments();
         if (fragment.getArguments() != null) {
-            fragment.getArguments().putAll(args);
+            fragment.getArguments().putAll(getRecentArguments());
         } else {
-            fragment.setArguments(args);
+            fragment.setArguments(getRecentArguments());
+        }
+        if (mProtestTime != null) {
+            fragment.getArguments().putSerializable(START_TIME, mProtestTime);
         }
         getFragmentManager()
                 .beginTransaction()
