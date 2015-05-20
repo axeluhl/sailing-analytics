@@ -3,13 +3,9 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:style>
     
-    	.outerBox {
-		padding-top: 10px;
-
-	}
     
     </ui:style>
-    <g:HTMLPanel styleName="{style.outerBox}">
+    <g:HTMLPanel >
 		<s:oldleaderboard.OldLeaderboard ui:field='leaderboard'/>
     </g:HTMLPanel>
 </ui:UiBinder>
