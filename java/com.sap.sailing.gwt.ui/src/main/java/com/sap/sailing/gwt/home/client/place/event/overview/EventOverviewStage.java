@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.client.place.event.partials.livestream.Livestream;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
@@ -25,7 +26,8 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     }
 
     @Override
-    public void setData(EventOverviewStageDTO data, long nextUpdate, int updateNo) {
+    public void setData(EventOverviewStageDTO stageData, long nextUpdate, int updateNo) {
+        EventOverviewStageContentDTO data = stageData.getStageContent();
         if(data instanceof EventOverviewVideoStageDTO) {
             if(!(lastContent instanceof Livestream)) {
                 lastContent = new Livestream();

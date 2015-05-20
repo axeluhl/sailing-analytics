@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Date;
 
-public class EventOverviewTickerStageDTO implements EventOverviewStageDTO {
+public class EventOverviewTickerStageDTO implements EventOverviewStageContentDTO {
 
     private Date startTime;
     private String tickerInfo;
