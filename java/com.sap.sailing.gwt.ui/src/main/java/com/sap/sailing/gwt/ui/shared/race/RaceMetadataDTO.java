@@ -92,11 +92,11 @@ public class RaceMetadataDTO implements IsSerializable {
         this.boatClass = boatClass;
     }
 
-    public RaceViewState getState() {
+    public RaceViewState getViewState() {
         return state;
     }
 
-    public void setState(RaceViewState state) {
+    public void setViewState(RaceViewState state) {
         this.state = state;
     }
 

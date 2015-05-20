@@ -360,7 +360,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     protected class RaceProgressCell extends AbstractCell<LiveRaceDTO> {
         @Override
         public void render(Context context, LiveRaceDTO value, SafeHtmlBuilder sb) {
-            RaceViewState state = value.getState();
+            RaceViewState state = value.getViewState();
             RaceProgressDTO progress = value.getProgress();
             if (state != RaceViewState.RUNNING) {
                 sb.appendEscaped(state.name());
@@ -380,8 +380,8 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
 
         @Override
         public void render(Context context, T data, SafeHtmlBuilder sb) {
-            String styleNames = data.getState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
-            String text = data.getState() == RaceViewState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
+            String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
+            String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : TextMessages.INSTANCE.watchNow();
             String raceViewerURL = presenter.getRaceViewerURL(data.getID());
             sb.append(TEMPLATE.watchNowButton(styleNames, text, raceViewerURL));
         }

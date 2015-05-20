@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
@@ -231,7 +232,8 @@ public class RaceContext {
         if(isLiveOrOfPublicInterest(startTime, finishTime)) {
             // the start time is always given for live races
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getIdentifier());
-            liveRaceDTO.setState(getRaceViewState(startTime, finishTime));
+            liveRaceDTO.setViewState(getRaceViewState(startTime, finishTime));
+            liveRaceDTO.setTrackingState(getRaceTrackingState());
             liveRaceDTO.setRegattaName(getRegattaDisplayName());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());
             liveRaceDTO.setRaceName(raceColumn.getName());
@@ -276,6 +278,17 @@ public class RaceContext {
         return result;
     }
 
+    private RaceTrackingState getRaceTrackingState() {
+        RaceTrackingState trackingState = RaceTrackingState.NOT_TRACKED;
+        if(trackedRace != null) {
+            trackingState = RaceTrackingState.TRACKED_NO_VALID_DATA;
+            if(trackedRace.hasWindData() && trackedRace.hasGPSData()) {
+                trackingState = RaceTrackingState.TRACKED_VALID_DATA;
+            }
+        }
+        return trackingState;
+    }
+    
     private RaceViewState getRaceViewState(TimePoint startTime, TimePoint finishTime) {
         RaceViewState raceState = RaceViewState.RUNNING;
         if (now.before(startTime)) {
