@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
+import android.text.TextUtils;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -49,7 +50,14 @@ public class RaceGroupSeriesFleet {
     }
 
     public String getDisplayName() {
-        String name = raceGroup.getName();
+        return getDisplayName(false);
+    }
+
+    public String getDisplayName(boolean useDisplayName) {
+        String name = raceGroup.getDisplayName();
+        if (!useDisplayName || TextUtils.isEmpty(name)) {
+            name = raceGroup.getName();
+        }
         if (series != null && !series.getName().equals(AppConstants.DEFAULT)) {
             name += " - " + series.getName();
         }
