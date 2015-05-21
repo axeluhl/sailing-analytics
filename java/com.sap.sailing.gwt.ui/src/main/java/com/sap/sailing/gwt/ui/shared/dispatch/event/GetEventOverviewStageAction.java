@@ -54,7 +54,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
             String videoUrl = Util.get(videoURLs, i).toString();
             MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl);
-            if(type == MimeType.qt || type == MimeType.vimeo || type == MimeType.mp4) {
+            if (type == MimeType.youtube || type == MimeType.vimeo || type == MimeType.mp4) {
                 return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, type, videoUrl);
             }
         }
