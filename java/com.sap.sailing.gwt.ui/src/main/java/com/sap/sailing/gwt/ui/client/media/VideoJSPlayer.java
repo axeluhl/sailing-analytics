@@ -71,7 +71,7 @@ public class VideoJSPlayer extends Widget {
 
     @Override
     protected void onLoad() {
-        _onLoad();
+        _onLoad(autoplay);
 
     }
 
@@ -112,7 +112,7 @@ public class VideoJSPlayer extends Widget {
      *
      * @param uniqueId
      */
-    native void _onLoad() /*-{
+    native void _onLoad(boolean autoplay) /*-{
 
 	var player = $wnd
 		.videojs(
@@ -120,41 +120,17 @@ public class VideoJSPlayer extends Widget {
 			{
 			    "width" : "auto",
 			    "height" : "auto",
-
 			    "playsInline" : true,
 			    "customControlsOnMobile" : true
 
-			},
-			function() {
-			    if (this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::autoplay) {
+			}, function() {
+			    console.log("play: " + autoplay);
+			    if (autoplay) {
 				this.play();
 			    }
 			});
 
 	this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
-
-    }-*/;
-
-    public native String getThumbnailData() /*-{
-
-	var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
-
-	var oImg = document.createElement("img");
-	oImg.setAttribute('src', player.poster());
-	oImg.style.display = "none";
-	document.body.appendChild(oImg);
-
-	var canvas = document.createElement("canvas");
-	canvas.width = oImg.width;
-	canvas.height = oImg.height;
-
-	// Copy the image contents to the canvas
-	var ctx = canvas.getContext("2d");
-	ctx.drawImage(oImg, 0, 0);
-
-	var dataURL = canvas.toDataURL("image/png");
-
-	return dataURL;
 
     }-*/;
 

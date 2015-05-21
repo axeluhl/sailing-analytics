@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.client.shared.media;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -137,13 +135,5 @@ public class MediaPage extends Composite {
         videoDisplayUi = new VideoJSPlayer(true, autoplay);
         videoDisplayUi.setSource(videoCandidateInfo.getSourceRef(), videoCandidateInfo.getMimeType());
         videoDisplayHolderUi.setWidget(videoDisplayUi);
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                if (videoCandidateInfo.getThumbnailRef() == null) {
-                    GWT.log(videoDisplayUi.getThumbnailData());
-                }
-            }
-        });
     }
 }
