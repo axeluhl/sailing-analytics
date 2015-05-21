@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
 public class RefreshManager {
 
-    private static final long PAUSE_ON_ERROR = 5000;
+    private static final long PAUSE_ON_ERROR = 1000 * 30;
     private List<RefreshHolder<DTO, Action<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
 
     private final Timer timer = new Timer() {
