@@ -14,7 +14,7 @@ final class LiveRaceCalculator implements RaceCallback {
     }
 
     public ResultWithTTL<LiveRacesDTO> getResult() {
-        int ttl = 1000 * 60 * 2;
+        long ttl = 1000 * 60 * 2;
         for(LiveRaceDTO race : result.getRaces()) {
             if(race.getViewState() == RaceViewState.RUNNING) {
                 ttl = Math.min(ttl, 1000 * 30);

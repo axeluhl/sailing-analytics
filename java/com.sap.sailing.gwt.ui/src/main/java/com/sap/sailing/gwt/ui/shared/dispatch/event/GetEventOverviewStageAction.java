@@ -31,12 +31,12 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState state = HomeServiceUtil.calculateEventState(event);
-        int ttl = 1000 * 60 * 5;
+        long ttl = 1000 * 60 * 5;
         if(state == EventState.RUNNING) {
             ttl = 1000 * 60 * 2;
         }
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
-            ttl = Math.min(ttl, (int) now.until(event.getStartDate()).asMillis());
+            ttl = Math.min(ttl, now.until(event.getStartDate()).asMillis());
         }
         
         // TODO get correct message
