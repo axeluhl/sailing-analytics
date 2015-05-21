@@ -640,18 +640,24 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
         private List<TrackedRace> reloadRacesInExecutionOrder() {
             List<TrackedRace> raceIdListInExecutionOrder = new ArrayList<TrackedRace>();
-            Iterator<? extends Series> seriesInRegatta = getSeries().iterator();
-            while (seriesInRegatta.hasNext()) {
-                Series currentSeries = seriesInRegatta.next();
-                Iterator<? extends RaceColumn> raceColumns = currentSeries.getRaceColumns().iterator();
-                while (raceColumns.hasNext()) {
-                    RaceColumn currentRaceColumn = raceColumns.next();
-                    Iterator<? extends Fleet> fleetsInRaceColumn = currentRaceColumn.getFleets().iterator();
-                    while (fleetsInRaceColumn.hasNext()) {
-                        TrackedRace trackedRaceInColumnForFleet = currentRaceColumn.getTrackedRace(fleetsInRaceColumn
-                                .next());
-                        if (trackedRaceInColumnForFleet != null) {
-                            raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
+            if (getSeries() != null) {
+                Iterator<? extends Series> seriesInRegatta = getSeries().iterator();
+                while (seriesInRegatta.hasNext()) {
+                    Series currentSeries = seriesInRegatta.next();
+                    if (currentSeries.getRaceColumns() != null) {
+                        Iterator<? extends RaceColumn> raceColumns = currentSeries.getRaceColumns().iterator();
+                        while (raceColumns.hasNext()) {
+                            RaceColumn currentRaceColumn = raceColumns.next();
+                            if (currentRaceColumn.getFleets() != null) {
+                                Iterator<? extends Fleet> fleetsInRaceColumn = currentRaceColumn.getFleets().iterator();
+                                while (fleetsInRaceColumn.hasNext()) {
+                                    TrackedRace trackedRaceInColumnForFleet = currentRaceColumn
+                                            .getTrackedRace(fleetsInRaceColumn.next());
+                                    if (trackedRaceInColumnForFleet != null) {
+                                        raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
