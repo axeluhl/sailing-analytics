@@ -60,6 +60,8 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         result = prime * result + ((imageURL == null) ? 0 : imageURL.hashCode());
         result = prime * result + ((flagImageURL == null) ? 0 : flagImageURL.hashCode());
+        result = prime * result + ((timeOnTimeFactor == null) ? 0 : timeOnTimeFactor.hashCode());
+        result = prime * result + ((timeOnDistanceAllowancePerNauticalMile == null) ? 0 : timeOnDistanceAllowancePerNauticalMile.hashCode());
         return result;
     }
 
@@ -111,6 +113,16 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
             if (other.flagImageURL != null)
                 return false;
         } else if (!flagImageURL.equals(other.flagImageURL))
+            return false;
+        if (timeOnTimeFactor == null) {
+            if (other.timeOnTimeFactor != null)
+                return false;
+        } else if (!timeOnTimeFactor.equals(other.timeOnTimeFactor))
+            return false;
+        if (timeOnDistanceAllowancePerNauticalMile == null) {
+            if (other.timeOnDistanceAllowancePerNauticalMile != null)
+                return false;
+        } else if (!timeOnDistanceAllowancePerNauticalMile.equals(other.timeOnDistanceAllowancePerNauticalMile))
             return false;
         return true;
     }
