@@ -62,7 +62,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule, container, false);
 
-        mDateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
         View startTime = ViewHolder.get(layout, R.id.start_time);
         if (startTime != null) {
@@ -112,7 +112,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         TickSingleton.INSTANCE.registerListener(this);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getRace() != null) {
             if (getRaceState() != null) {
                 TimePoint timePoint = (TimePoint) getArguments().getSerializable(START_TIME);
@@ -125,7 +124,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                         activity.setStartTime(timePoint);
                     }
                     mProtestTime = timePoint;
-                    mStartTimeString = dateFormat.format(timePoint.asDate());
+                    mStartTimeString = mDateFormat.format(timePoint.asDate());
                 }
 
                 mRacingProcedureType = getRaceState().getRacingProcedure().getType();
