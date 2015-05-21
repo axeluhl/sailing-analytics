@@ -8,8 +8,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.Countdown;
-import com.sap.sailing.gwt.home.client.place.event.partials.livestream.Livestream;
 import com.sap.sailing.gwt.home.client.place.event.partials.message.Message;
+import com.sap.sailing.gwt.home.client.place.event.partials.video.Video;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
@@ -41,10 +41,10 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
         
         EventOverviewStageContentDTO data = stageData.getStageContent();
         if(data instanceof EventOverviewVideoStageDTO) {
-            if(!(lastContent instanceof Livestream)) {
-                lastContent = new Livestream();
+            if(!(lastContent instanceof Video)) {
+                lastContent = new Video();
             }
-            ((Livestream)lastContent).setData((EventOverviewVideoStageDTO) data);
+            ((Video)lastContent).setData((EventOverviewVideoStageDTO) data);
         } else if (data instanceof EventOverviewTickerStageDTO) {
             if (!(lastContent instanceof Countdown)) {
                 lastContent = new Countdown(presenter);

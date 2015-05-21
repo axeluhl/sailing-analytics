@@ -1,0 +1,48 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.video.VideoResources" />
+  <g:HTMLPanel>
+    <div class="{local_res.css.video}">
+      <div class="{local_res.css.video_content}">
+        <div class="{local_res.css.video_content_item} {local_res.css.videoitem}">
+          <div class="{local_res.css.video_content_item_play} {local_res.css.playicon}"></div>
+          <div data-id="<!-- videoId -->" class="{local_res.css.videoplaceholder}">
+            <div class="{local_res.css.videoplaceholder_image}" style="background-image: url(http://storage.ubidev.net/sap-sailing-analytics/6120578021/desktop/latest/images/home/f1958116.livestream-thumbnail.png);"></div>
+          </div>
+          <div class="{res.mediaCss.grid}">
+            <div class="{local_res.css.video_content_item_info} {local_res.css.info}">
+              <!-- IF buttonText ADD class 'small-8' ELSE ADD class 'small-12' -->
+              <div class="{local_res.css.video_content_item_info_text} {res.mediaCss.columns} {res.mediaCss.small8}">
+                <!-- IF END -->
+                <!-- IF subtitle ADD class 'video__content__item__info__text__title--small' -->
+                <h3 class="{local_res.css.video_content_item_info_text_title} {local_res.css.video_content_item_info_text_titlesmall}">
+                  <!-- IF END -->
+                  <!-- IF label -->
+                  <div data-labeltype="<!-- label -->" class="{res.mainCss.label}">
+                    <!-- label -->
+                  </div>
+                  <!-- IF END -->
+                </h3>
+                <!-- IF subtitle -->
+                <p>
+                  <!-- subtitle -->
+                </p>
+                <!-- IF subtitle -->
+              </div>
+              <!-- IF buttonText -->
+              <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
+                <div class="{local_res.css.video_content_item_info_button} {res.mainCss.button} {local_res.css.playbutton} {res.mainCss.buttonsmall} {res.mainCss.buttonstrong} {res.mainCss.buttonprimary} {res.mainCss.buttonarrowrightwhite}">
+                  <!-- buttonText -->
+                </div>
+              </div>
+              <!-- IF END -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>
