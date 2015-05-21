@@ -661,8 +661,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
+        long conditional_time_before_start_to_track_wind = getConditionalTimeBeforeStartToTrackWind();
+        if ((startOfTracking == null || !startOfTracking.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint())))
             &&
         // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
         (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||
@@ -675,6 +676,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             result = false;
         }
         return result;
+    }
+    
+    private long getConditionalTimeBeforeStartToTrackWind(){
+        TrackedRace previosRaceInExecutionOrder = getPreviousRaceFromAttachedRaceExecutionOrderProviders();
+        if (previosRaceInExecutionOrder == null || previosRaceInExecutionOrder.getEndOfTracking() != null || !previosRaceInExecutionOrder.hasWindData()) {
+            return EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
+        } else {
+            return TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
+        }
     }
 
     @Override
