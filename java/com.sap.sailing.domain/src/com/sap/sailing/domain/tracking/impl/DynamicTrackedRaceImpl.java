@@ -833,6 +833,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders() {
+        if (attachedRaceExecutionOrderProvider != null && attachedRaceExecutionOrderProvider.values() != null) {
+            if (attachedRaceExecutionOrderProvider.values().isEmpty()) {
+                return null;
+            } else {
+                Iterator<RaceExecutionOrderProvider> raceExecutionOrderProviders = attachedRaceExecutionOrderProvider.values().iterator();
+                TrackedRace firstPreviousRaceInExecutionOrder = raceExecutionOrderProviders.next().getPreviousRaceInExecutionOrder(this);
+                while (raceExecutionOrderProviders.hasNext()) {
+                    RaceExecutionOrderProvider raceExecutionOrderProvider = raceExecutionOrderProviders.next();
+                    TrackedRace currentPreviousRaceInExecutionOrder = raceExecutionOrderProvider.getPreviousRaceInExecutionOrder(this);
+                    if (currentPreviousRaceInExecutionOrder == null || !currentPreviousRaceInExecutionOrder.equals(firstPreviousRaceInExecutionOrder)) {
+                        return null;
+                    }
+                }
+                return firstPreviousRaceInExecutionOrder;
+            }
+        }
         return null;
     }
     
