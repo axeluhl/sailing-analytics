@@ -45,7 +45,9 @@
                     android:layout_marginLeft="@dimen/lock_margin"
                     android:layout_marginRight="@dimen/lock_margin"
                     android:src="?lock_outline"
-                    android:visibility="visible"/>
+                    android:tint="?sap_light_gray"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -100,7 +102,9 @@
                     android:layout_marginLeft="@dimen/lock_margin"
                     android:layout_marginRight="@dimen/lock_margin"
                     android:src="?lock_outline"
-                    android:visibility="gone"/>
+                    android:tint="?sap_light_gray"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -152,7 +156,9 @@
                     android:layout_marginLeft="@dimen/lock_margin"
                     android:layout_marginRight="@dimen/lock_margin"
                     android:src="?lock_outline"
-                    android:visibility="gone"/>
+                    android:tint="?sap_light_gray"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -206,7 +212,9 @@
                     android:layout_marginLeft="@dimen/lock_margin"
                     android:layout_marginRight="@dimen/lock_margin"
                     android:src="?lock_outline"
-                    android:visibility="gone"/>
+                    android:tint="?sap_light_gray"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout

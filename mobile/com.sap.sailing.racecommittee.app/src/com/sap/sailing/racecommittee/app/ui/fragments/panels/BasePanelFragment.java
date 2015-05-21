@@ -14,43 +14,45 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
-    protected int toggleMarker(View v, @IdRes int resId) {
+    protected int toggleMarker(View view, @IdRes int resId) {
         int retValue = -1;
-        ImageView view = (ImageView) v.findViewById(resId);
-        if (view != null) {
-            Drawable drawable = view.getDrawable();
+
+        ImageView image = (ImageView) view.findViewById(resId);
+        if (image != null) {
+            Drawable drawable = image.getDrawable();
             if (drawable != null) {
                 int level = drawable.getLevel();
-                retValue = setMarkerLevel(v, resId, 1 - level);
+                retValue = setMarkerLevel(view, resId, 1 - level);
             }
         }
 
         return retValue;
     }
 
-    protected int setMarkerLevel(View v, @IdRes int resId, int level) {
+    protected int setMarkerLevel(View view, @IdRes int resId, int level) {
         int retValue = -1;
 
         if (isAdded()) {
             int offset = 0;
-            ImageView view = (ImageView) v.findViewById(resId);
-            if (view != null) {
-                Drawable drawable = view.getDrawable();
+            ImageView image = (ImageView) view.findViewById(resId);
+            if (image != null) {
+                Drawable drawable = image.getDrawable();
                 if (drawable != null) {
                     drawable.setLevel(level + offset);
                     retValue = drawable.getLevel() - offset;
                     switch (retValue) {
                     case 1:
-                        v.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
+                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
                         break;
 
                     default:
-                        v.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
+                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
                         break;
                     }
                 }
             }
         }
+
         return retValue;
     }
 
