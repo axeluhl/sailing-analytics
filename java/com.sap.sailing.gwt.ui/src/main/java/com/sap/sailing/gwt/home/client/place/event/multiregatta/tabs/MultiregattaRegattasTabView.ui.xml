@@ -2,12 +2,18 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
   			 xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive">
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  	<ui:style>
+  		.space-top {
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+  	</ui:style>
     <g:HTMLPanel>
-      <div style="margin-top: 1em; margin-bottom: 2em;" class="{res.mediaCss.grid}">
+      <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <r:RacesListLive ui:field="racesListLive" />
+          <r:RacesListLive ui:field="racesListLive" addStyleNames="{style.space-top}" />
         </div>
       </div>
-      <g:SimplePanel ui:field="content" />
+      <g:SimplePanel ui:field="content" addStyleNames="{style.space-top}" />
     </g:HTMLPanel>
 </ui:UiBinder>
