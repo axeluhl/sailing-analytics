@@ -68,9 +68,14 @@ public class Countdown extends Composite {
             this.updateUi(I18N.startingIn(data.getTickerInfo()), data.getTickerInfo());
             this.navigationButton.linkToRegatta((EventOverviewRegattaTickerStageDTO) data);
         } else {
-            this.updateUi(I18N.startingIn(data.getTickerInfo()), null);
+            this.updateUi(data.getTickerInfo() != null ? I18N.startingIn(data.getTickerInfo()) : null, null);
         }
-        this.tickerContainer.setWidget(new CountdownTicker(data.getStartTime()));
+        
+        if(data.getStartTime() != null) {
+            this.tickerContainer.setWidget(new CountdownTicker(data.getStartTime()));
+        } else {
+            this.tickerContainer.setWidget(null);
+        }
     }
 
     private void updateUi(String title, String info) {

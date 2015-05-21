@@ -97,6 +97,6 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //          return new EventOverviewVideoStageDTO(Type.MEDIA);
         }
         
-        return null;
+        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
     }
 }
