@@ -6,11 +6,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.home.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
@@ -57,35 +52,35 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //          return new EventOverviewVideoStageDTO(Type.HIGHLIGHTS);
 //      }
         
-        if(state == EventState.RUNNING) {
-            NextRaceFinder nextRaceFinder = new NextRaceFinder();
-            RacesActionUtil.forRacesOfEvent(context, eventId, nextRaceFinder);
-            
-            RaceContext nextRace = nextRaceFinder .getNextRace();
-            if(nextRace != null) {
-                return new EventOverviewRaceTickerStageDTO(nextRace.getRaceIdentifier(), nextRace.getStageText(), nextRaceFinder.getNextStartTime().asDate(), stageImageUrl);
-            }
-            
-            // TODO This is not a good idea due to Axel and Frank as regatta start times aren't correctly set.
-            Regatta nextRegatta = null;
-            for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-                for (Leaderboard lb : lg.getLeaderboards()) {
-                    if(lb instanceof RegattaLeaderboard) {
-                        Regatta regatta = ((RegattaLeaderboard) lb).getRegatta();
-                        if (regatta.getStartDate() != null
-                                && now.before(regatta.getStartDate())
-                                && (nextRegatta == null || nextRegatta.getStartDate().after(regatta.getStartDate()))) {
-                            nextRegatta = regatta;
-                        }
-                    }
-                }
-            }
-            if(!HomeServiceUtil.isSingleRegatta(event) && nextRegatta != null) {
-                return new EventOverviewRegattaTickerStageDTO(
-                        new RegattaName(nextRegatta.getName()), nextRegatta.getName(), nextRegatta.getStartDate()
-                                .asDate(), stageImageUrl);
-            }
-        }
+//        if(state == EventState.RUNNING) {
+//            NextRaceFinder nextRaceFinder = new NextRaceFinder();
+//            RacesActionUtil.forRacesOfEvent(context, eventId, nextRaceFinder);
+//            
+//            RaceContext nextRace = nextRaceFinder .getNextRace();
+//            if(nextRace != null) {
+//                return new EventOverviewRaceTickerStageDTO(nextRace.getRaceIdentifier(), nextRace.getStageText(), nextRaceFinder.getNextStartTime().asDate(), stageImageUrl);
+//            }
+//            
+//            // TODO This is not a good idea due to Axel and Frank as regatta start times aren't correctly set.
+//            Regatta nextRegatta = null;
+//            for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+//                for (Leaderboard lb : lg.getLeaderboards()) {
+//                    if(lb instanceof RegattaLeaderboard) {
+//                        Regatta regatta = ((RegattaLeaderboard) lb).getRegatta();
+//                        if (regatta.getStartDate() != null
+//                                && now.before(regatta.getStartDate())
+//                                && (nextRegatta == null || nextRegatta.getStartDate().after(regatta.getStartDate()))) {
+//                            nextRegatta = regatta;
+//                        }
+//                    }
+//                }
+//            }
+//            if(!HomeServiceUtil.isSingleRegatta(event) && nextRegatta != null) {
+//                return new EventOverviewRegattaTickerStageDTO(
+//                        new RegattaName(nextRegatta.getName()), nextRegatta.getName(), nextRegatta.getStartDate()
+//                                .asDate(), stageImageUrl);
+//            }
+//        }
         
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
             return new EventOverviewTickerStageDTO(event.getStartDate()
