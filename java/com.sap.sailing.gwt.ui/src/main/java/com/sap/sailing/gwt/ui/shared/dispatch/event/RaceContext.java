@@ -213,7 +213,8 @@ public class RaceContext {
         TimePoint startTime = null;
         if (trackedRace != null) {
             startTime = trackedRace.getStartOfRace();
-        } else if (state != null) {
+        }
+        if (startTime == null && state != null) {
             startTime = state.getStartTime();
         }
         return startTime;
@@ -274,7 +275,7 @@ public class RaceContext {
             if(abortingFlagEvent != null) {
                 TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
                 if (now.minus(abortingTimeInPassBefore.asMillis()).asMillis() < TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) {
-                    // result = true;
+                    result = true;
                     // TODO: Problem: This causes the race added to the live races list without having a start time!!!
                     // This does not work right now -> consider using a start time of the last pass. 
                 }
@@ -297,7 +298,7 @@ public class RaceContext {
     
     private RaceViewState getRaceViewState(TimePoint startTime, TimePoint finishTime) {
         RaceViewState raceState = RaceViewState.RUNNING;
-        if (now.before(startTime)) {
+        if (startTime != null && now.before(startTime)) {
             raceState = RaceViewState.SCHEDULED;
         } else if (finishTime != null && now.after(finishTime)) {
             raceState = RaceViewState.FINISHED;

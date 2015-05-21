@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
@@ -14,7 +15,10 @@ public class LiveRacesDTO implements DTO {
     
     public void addRace(LiveRaceDTO race) {
         for(int i = 0; i < races.size(); i++) {
-            if(races.get(i).getStart().compareTo(race.getStart()) < 0) {
+            LiveRaceDTO foundRace = races.get(i);
+            Date foundStart = foundRace.getStart();
+            Date newStart = race.getStart();
+            if(foundStart == null || (newStart != null && foundStart.compareTo(newStart) < 0)) {
                 races.add(i, race);
                 return;
             }
