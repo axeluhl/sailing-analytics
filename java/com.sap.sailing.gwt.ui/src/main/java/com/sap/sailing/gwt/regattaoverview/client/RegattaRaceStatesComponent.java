@@ -84,7 +84,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private List<RegattaOverviewEntryDTO> allEntries;
 
-    private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
+    private CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
     private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
     private final VerticalPanel mainPanel;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
@@ -126,6 +126,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private TextColumn<RegattaOverviewEntryDTO> startTimeColumn;
 
+    private SimplePanel tableHolder = new SimplePanel();
+
     public void setEntryClickedHandler(EntryHandler handler) {
         this.entryClickedHandler = handler;
     }
@@ -161,7 +163,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
 
-        mainPanel.add(regattaOverviewTable);
+        mainPanel.add(tableHolder);
         setWidget(mainPanel);
     }
 
@@ -177,7 +179,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         loadAndUpdateEventLog();
     }
 
+    @SuppressWarnings("unchecked")
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
+
+
+        regattaOverviewTable = createRegattaTable();
         allEntries = newEntries;
         String lastCourseAreaName = null;
         String lastRegattaName = null;
@@ -214,13 +220,15 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         }
         StringBuilder repeatedInfosBuilder = new StringBuilder();
-        if (false && canRemoveRegatta) {
+        GWT.log("canRemoveRegatta: " + canRemoveRegatta);
+        if (canRemoveRegatta) {
             if (regattaOverviewTable.getColumnIndex(regattaNameColumn) >= 0) {
+                GWT.log("did remove ");
                 regattaOverviewTable.removeColumn(regattaNameColumn);
             }
             repeatedInfosBuilder.append(stringMessages.regatta()).append(": ").append(lastRegattaName);
         }
-        if (false && canRemoveCourseArea) {
+        if (canRemoveCourseArea) {
             if (regattaOverviewTable.getColumnIndex(courseAreaColumn) >= 0) {
                 regattaOverviewTable.removeColumn(courseAreaColumn);
             }
@@ -229,7 +237,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
             repeatedInfosBuilder.append(stringMessages.courseArea()).append(": ").append(lastCourseAreaName);
         }
-        if (false && canRemoveCourse) {
+        if (canRemoveCourse) {
             if (regattaOverviewTable.getColumnIndex(raceCourseColumn) >= 0) {
                 regattaOverviewTable.removeColumn(raceCourseColumn);
             }
@@ -238,7 +246,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
             repeatedInfosBuilder.append(stringMessages.racecourse()).append(": ").append(lastCourseName);
         }
-        if (false && canRemoveBoatClass) {
+        if (canRemoveBoatClass) {
             if (regattaOverviewTable.getColumnIndex(boatClass) >= 0) {
                 regattaOverviewTable.removeColumn(boatClass);
             }
@@ -321,6 +329,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private CellTable<RegattaOverviewEntryDTO> createRegattaTable() {
         CellTable<RegattaOverviewEntryDTO> table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
+        tableHolder.setWidget(table);
         regattaOverviewDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
