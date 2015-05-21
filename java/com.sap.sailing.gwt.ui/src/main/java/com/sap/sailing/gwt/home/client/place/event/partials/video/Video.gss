@@ -36,6 +36,7 @@
   font-size: 1rem;
   height: 28.333333333333332em;
   position: relative;
+  margin-top: 1.333333333333333em;
 }
 @media (max-width: 976px) {
   .video {

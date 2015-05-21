@@ -1,0 +1,20 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+	<ui:style gss="true">
+		@external vjs-big-play-button;
+		.vjs-big-play-button {
+			background-image: url("images/home/play.png") !important;
+			width: 80px !important;
+			height: 80px !important;
+			background-color: transparent !important;
+			background-repeat: no-repeat !important; 
+			padding: 0 !important;
+			border: none !important;
+			box-shadow: none !important;
+		}
+		.vjs-big-play-button:BEFORE {
+			content: "" !important;
+		}
+	</ui:style>
+	<video class="video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
+</ui:UiBinder>

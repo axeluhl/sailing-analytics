@@ -1,22 +1,29 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SourceElement;
 import com.google.gwt.dom.client.VideoElement;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaSubType;
 import com.sap.sailing.domain.common.media.MediaType;
 import com.sap.sailing.domain.common.media.MimeType;
 
 public class VideoJSPlayer extends Widget {
+    
+    private static VideoJSPlayerUiBinder uiBinder = GWT.create(VideoJSPlayerUiBinder.class);
 
-    private VideoElement ve;
+    interface VideoJSPlayerUiBinder extends UiBinder<Element, VideoJSPlayer> {
+    }
+
+    @UiField VideoElement videoElement;
+    
     private final String elementId;
     private JavaScriptObject player;
-    private String type = null;
-    private String source = null;
     private boolean autoplay;
 
     public VideoJSPlayer() {
@@ -25,54 +32,37 @@ public class VideoJSPlayer extends Widget {
 
     public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay) {
         this.autoplay = autoplay;
-        elementId = "videojs_" + Document.get().createUniqueId();
-        ve = Document.get().createVideoElement();
-        DivElement div = Document.get().createDivElement();
-        setElement(div);
-        div.appendChild(ve);
-        ve.setId(elementId);
-        StringBuilder sb = new StringBuilder("video-js vjs-default-skin vjs-big-play-centered ");
+        setElement(uiBinder.createAndBindUi(this));
+        videoElement.setId(elementId = "videojs_" + Document.get().createUniqueId());
         if (fullHeightWidth) {
-            sb.append("video-js-fullscreen");
+            videoElement.addClassName("video-js-fullscreen");
         }
-        ve.setClassName(sb.toString());
-        ve.setAttribute("controls", "");
-
-
+        videoElement.setAttribute("controls", "");
     }
 
-
-
-    public void setSource(String source, MimeType type) {
-
-        if (type == null || type.mediaType != MediaType.video) {
+    public void setSource(String source, MimeType mimeType) {
+        if (mimeType == null || mimeType.mediaType != MediaType.video) {
             return;
         }
-
-
-
-        if (type.mediaSubType == MediaSubType.youtube) {
-            this.type = "video/youtube";
-        } else if (type.mediaSubType == MediaSubType.vimeo) {
-            this.type = "video/vimeo";
-        } else if (type.mediaSubType == MediaSubType.mp4) {
-            this.type = "video/mp4";
+        String type = null;
+        if (mimeType.mediaSubType == MediaSubType.youtube) {
+            type = "video/youtube";
+        } else if (mimeType.mediaSubType == MediaSubType.vimeo) {
+            type = "video/vimeo";
+        } else if (mimeType.mediaSubType == MediaSubType.mp4) {
+            type = "video/mp4";
         }
-        if (this.type != null) {
+        if (type != null) {
             SourceElement se = Document.get().createSourceElement();
             se.setSrc(source);
-            se.setType(this.type);
-            ve.appendChild(se);
+            se.setType(type);
+            videoElement.appendChild(se);
         }
     }
-
-
-
 
     @Override
     protected void onLoad() {
         _onLoad(autoplay);
-
     }
 
     /**
@@ -81,8 +71,7 @@ public class VideoJSPlayer extends Widget {
      * @return duration in seconds
      */
     public native int getDuration() /*-{
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-		.duration();
+	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.duration();
     }-*/;
 
     /**
@@ -91,9 +80,7 @@ public class VideoJSPlayer extends Widget {
      * @return duration in seconds
      */
     public native int getCurrentTime() /*-{
-
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-		.currentTime();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime();
     }-*/;
 
     /**
@@ -102,36 +89,30 @@ public class VideoJSPlayer extends Widget {
      * @return duration in seconds
      */
     public native void setCurrentTime(int currentTime) /*-{
-
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-		.currentTime(currentTime);
+	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
 
     /**
-     * JSNI wrapper that does setup the slider
+     * JSNI wrapper that does setup the video player
      *
      * @param uniqueId
      */
     native void _onLoad(boolean autoplay) /*-{
-
-	var player = $wnd
-		.videojs(
-			this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
-			{
-			    "width" : "auto",
-			    "height" : "auto",
-			    "playsInline" : true,
-			    "customControlsOnMobile" : true
-
-			}, function() {
-			    console.log("play: " + autoplay);
-			    if (autoplay) {
-				this.play();
-			    }
-			});
-
+	var player = $wnd.videojs(
+	    this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
+	    {
+		"width" : "auto",
+		"height" : "auto",
+		"playsInline" : true,
+		"customControlsOnMobile" : true
+	    }, 
+	    function() {
+		console.log("play: " + autoplay);
+		if (autoplay) {
+		    this.play();
+		}
+	    });
 	this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
-
     }-*/;
 
 }
