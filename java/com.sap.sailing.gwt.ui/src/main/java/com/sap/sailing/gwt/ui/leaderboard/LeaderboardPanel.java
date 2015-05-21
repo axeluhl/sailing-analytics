@@ -880,7 +880,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                                   DetailType.TOTAL_DISTANCE_TRAVELED,
                                   DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
                                   DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
-                                  DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+                                  DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+                                  DetailType.TIME_ON_TIME_FACTOR,
+                                  DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE};
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -1943,6 +1945,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
     
+    private static class TimeOnTimeFactorColumn implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.competitor.getTimeOnTimeFactor();
+        }
+    }
+    
+    private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
+                row.competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds();
+        }
+    }
+    
     private static class TotalAverageSpeedOverGroundField implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
@@ -1961,15 +1978,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         result.put(DetailType.TOTAL_DISTANCE_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
                         new TotalDistanceTraveledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        
         result.put(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
                 new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
                         new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE, this));
-        
         result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
+        result.put(DetailType.TIME_ON_TIME_FACTOR,
+                new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
+                        new TimeOnTimeFactorColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+        result.put(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                        new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+
         return result;
     }
 

@@ -100,6 +100,10 @@ public class DetailTypeFormatter {
             return stringMessages.maximumSpeedOverGroundInKnots();
         case TOTAL_DISTANCE_TRAVELED:
             return stringMessages.totalDistanceTraveled();
+        case TIME_ON_TIME_FACTOR:
+            return stringMessages.timeOnTimeFactor();
+        case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+            return stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile();
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
             return stringMessages.totalTimeSailedDownwindInSeconds();
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
@@ -202,6 +206,9 @@ public class DetailTypeFormatter {
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
             return stringMessages.secondsUnit();
 
+        case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+            return stringMessages.secondsPerNauticalMileUnit();
+            
         case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
             return stringMessages.ratio();
             
@@ -228,6 +235,7 @@ public class DetailTypeFormatter {
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case BEAT_ANGLE:
+        case TIME_ON_TIME_FACTOR:
             return "";
         }
         // Throwing an exception to get notified if an implementation of
@@ -347,6 +355,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalDistanceTraveledTooltip();
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.totalAverageSpeedOverGroundTooltip();
+        case TIME_ON_TIME_FACTOR:
+            return stringMessages.timeOnTimeFactorTooltip();
+        case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+            return stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
         case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
