@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -31,7 +32,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @Override
     public TabView.State getState() {
-        return TabView.State.VISIBLE;
+        return currentPresenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA ? TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE
+                : TabView.State.VISIBLE;
     }
 
     @Override

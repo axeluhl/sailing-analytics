@@ -10,5 +10,6 @@
         <r:RacesListLive ui:field="racesListLive" />
       </div>
     </div>
+    <g:SimplePanel ui:field="content" />
   </g:HTMLPanel>
 </ui:UiBinder>
