@@ -15,6 +15,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.mongodb.MongoDBService;
 
@@ -97,9 +98,9 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
 
     @Override
     public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newEmail, String newSailId,
-            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri) {
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newEmail, newSailId, newNationality,
-                newTeamImageUri, newFlagImageUri);
+                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
         storeTo.storeCompetitor(result);
         return result;
     }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -19,6 +20,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -43,6 +45,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final StringMessages stringMessages;
     private final URLFieldWithFileUpload flagImageURL;
     private final URLFieldWithFileUpload imageUrlAndUploadComposite;
+    private final DoubleBox timeOnTimeFactor;
+    private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
     
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
             DialogCallback<CompetitorDTO> callback) {
@@ -127,6 +131,10 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
+        this.timeOnTimeFactor = createDoubleBox(competitorToEdit.getTimeOnTimeFactor(), 10);
+        this.timeOnDistanceAllowanceInSecondsPerNauticalMile = createDoubleBox(
+                competitorToEdit.getTimeOnDistanceAllowancePerNauticalMile() == null ? null : competitorToEdit
+                        .getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 10);
     }
 
     @Override
@@ -182,13 +190,16 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
-                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boatClass);
+                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boatClass,
+                timeOnTimeFactor.getValue(),
+                timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)));
         return result;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(8, 2);
+        Grid result = new Grid(10, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
@@ -205,6 +216,10 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(6, 1, flagImageURL);
         result.setWidget(7, 0, new Label(stringMessages.imageURL()));
         result.setWidget(7, 1, imageUrlAndUploadComposite);
+        result.setWidget(8, 0, new Label(stringMessages.timeOnTimeFactor()));
+        result.setWidget(8, 1, timeOnTimeFactor);
+        result.setWidget(9, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
+        result.setWidget(9, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
         return result;
     }
 

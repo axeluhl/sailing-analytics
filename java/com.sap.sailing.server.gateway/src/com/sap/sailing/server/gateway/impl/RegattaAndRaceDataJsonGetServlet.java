@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -293,17 +294,13 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                             } catch (NoWindException e) {
                                 // well, we don't know the wind direction... then no VMG will be shown...
                             }
-                            try {
-                                Speed averageVelocityMadeGood = trackedLegOfCompetitor
-                                        .getAverageVelocityMadeGood(timePoint);
-                                if (averageVelocityMadeGood != null) {
-                                    jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
-                                            averageVelocityMadeGood.getKnots());
-                                    jsonCompetitorInLeg.put("averageVelocityMadeGoodInMetersPerSecond",
-                                            averageVelocityMadeGood.getMetersPerSecond());
-                                }
-                            } catch (NoWindException e1) {
-                                // well, we don't know the wind direction... then no average VMG will be shown...
+                            Speed averageVelocityMadeGood = trackedLegOfCompetitor
+                                    .getAverageVelocityMadeGood(timePoint);
+                            if (averageVelocityMadeGood != null) {
+                                jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
+                                        averageVelocityMadeGood.getKnots());
+                                jsonCompetitorInLeg.put("averageVelocityMadeGoodInMetersPerSecond",
+                                        averageVelocityMadeGood.getMetersPerSecond());
                             }
                             try {
                                 Integer rank = ranks.get(competitor);
@@ -318,18 +315,12 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                                     throw re;
                                 }
                             }
-                            try {
-                                jsonCompetitorInLeg.put("gapToLeaderInSeconds",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
-                            } catch (NoWindException e1) {
-                                // well, we don't know the wind direction... then no gap to leader will be shown...
-                            }
-                            try {
-                                jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds",
-                                        trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(timePoint, WindPositionMode.EXACT));
-                            } catch (NoWindException e) {
-                                // well, we don't know the wind direction... then no windward distance will be shown...
-                            }
+                            jsonCompetitorInLeg.put("gapToLeaderInSeconds",
+                                    trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE));
+                            final Duration estimatedTimeToNextMarkInSeconds = trackedLegOfCompetitor
+                                    .getEstimatedTimeToNextMark(timePoint, WindPositionMode.EXACT);
+                            jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds",
+                                    estimatedTimeToNextMarkInSeconds == null ? null : estimatedTimeToNextMarkInSeconds);
                             jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
                                     .getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE).getMeters());
                             jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));

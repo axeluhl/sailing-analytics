@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
@@ -25,11 +26,13 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private BoatClassDTO boatClass;
     private String imageURL;
     private String flagImageURL;
+    private Double timeOnTimeFactor;
+    private Duration timeOnDistanceAllowancePerNauticalMile;
     
     public CompetitorDTOImpl() {}
     
     public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
-            String countryName, String sailID, String idAsString, String imageURL, String flagImageURL, BoatClassDTO boatClass) {
+            String countryName, String sailID, String idAsString, String imageURL, String flagImageURL, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         super(name);
         this.color = color;
         this.email = email;
@@ -41,6 +44,8 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         this.imageURL = imageURL;
         this.flagImageURL = flagImageURL;
         this.boatClass = boatClass;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
     }
 
     @Override
@@ -55,6 +60,8 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         result = prime * result + ((imageURL == null) ? 0 : imageURL.hashCode());
         result = prime * result + ((flagImageURL == null) ? 0 : flagImageURL.hashCode());
+        result = prime * result + ((timeOnTimeFactor == null) ? 0 : timeOnTimeFactor.hashCode());
+        result = prime * result + ((timeOnDistanceAllowancePerNauticalMile == null) ? 0 : timeOnDistanceAllowancePerNauticalMile.hashCode());
         return result;
     }
 
@@ -106,6 +113,16 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
             if (other.flagImageURL != null)
                 return false;
         } else if (!flagImageURL.equals(other.flagImageURL))
+            return false;
+        if (timeOnTimeFactor == null) {
+            if (other.timeOnTimeFactor != null)
+                return false;
+        } else if (!timeOnTimeFactor.equals(other.timeOnTimeFactor))
+            return false;
+        if (timeOnDistanceAllowancePerNauticalMile == null) {
+            if (other.timeOnDistanceAllowancePerNauticalMile != null)
+                return false;
+        } else if (!timeOnDistanceAllowancePerNauticalMile.equals(other.timeOnDistanceAllowancePerNauticalMile))
             return false;
         return true;
     }
@@ -170,5 +187,15 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public boolean hasEmail() {
         return email != null && !email.isEmpty();
+    }
+
+    @Override
+    public Double getTimeOnTimeFactor() {
+        return timeOnTimeFactor;
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile() {
+        return timeOnDistanceAllowancePerNauticalMile;
     }
 }

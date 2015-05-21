@@ -77,7 +77,15 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         setupEventAndCourseAreaListBoxes(stringMessages);
     }
 
-    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
+    /**
+     * @param panel
+     *            the panel holding dialog elements
+     * @param formGrid
+     *            a grid at the top of the <code>panel</code> in which the default label/checkbox pairs are presented;
+     *            implementors may use this to {@link Grid#insertRow(int) insert} more rows which then are formatted
+     *            properly together with the label/checkbox pairs provided by this class.
+     */
+    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid);
 
     protected abstract ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series);
     
@@ -106,7 +114,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(4, 1, courseAreaListBox);
         formGrid.setWidget(5, 0, new Label(stringMessages.useStartTimeInference() + ":"));
         formGrid.setWidget(5, 1, useStartTimeInferenceCheckBox);
-        setupAdditionalWidgetsOnPanel(panel);
+        setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
 

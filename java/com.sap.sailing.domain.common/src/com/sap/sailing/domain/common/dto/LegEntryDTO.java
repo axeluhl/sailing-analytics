@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sse.common.Duration;
 
 /**
  * Holds data about one competitor's performance in one leg of one race represented in the
@@ -49,6 +50,13 @@ public class LegEntryDTO implements Serializable {
     public Map<ManeuverType, Double> averageManeuverLossInMeters;
     public Double averageAbsoluteCrossTrackErrorInMeters;
     public Double averageSignedCrossTrackErrorInMeters;
+    
+    /**
+     * The corrected time spent since the start of the race up to the current time point or the finishing of
+     * the leg, whichever comes first
+     */
+    public Duration correctedTotalTime;
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -81,6 +89,8 @@ public class LegEntryDTO implements Serializable {
         result = prime * result + ((velocityMadeGoodInKnots == null) ? 0 : velocityMadeGoodInKnots.hashCode());
         result = prime * result
                 + ((windwardDistanceToGoInMeters == null) ? 0 : windwardDistanceToGoInMeters.hashCode());
+        result = prime * result
+                + ((correctedTotalTime == null) ? 0 : correctedTotalTime.hashCode());
         return result;
     }
     @Override
@@ -171,6 +181,11 @@ public class LegEntryDTO implements Serializable {
             if (other.windwardDistanceToGoInMeters != null)
                 return false;
         } else if (!windwardDistanceToGoInMeters.equals(other.windwardDistanceToGoInMeters))
+            return false;
+        if (correctedTotalTime == null) {
+            if (other.correctedTotalTime != null)
+                return false;
+        } else if (!correctedTotalTime.equals(other.correctedTotalTime))
             return false;
         return true;
     }

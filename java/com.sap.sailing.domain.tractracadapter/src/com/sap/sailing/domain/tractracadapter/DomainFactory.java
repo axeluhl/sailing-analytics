@@ -74,7 +74,7 @@ public interface DomainFactory {
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
-            String nationalityAsString, String name, String shortName);
+            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile);
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the

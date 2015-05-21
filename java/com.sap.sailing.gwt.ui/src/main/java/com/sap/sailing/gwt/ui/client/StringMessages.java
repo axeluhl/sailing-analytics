@@ -170,6 +170,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String distance();
     String in();
     String secondsUnit();
+    String secondsPerNauticalMileUnit();
     String metersUnit();
     @Override
     String close();
@@ -1276,4 +1277,21 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sampleURL(String sampleURL);
     String sapSportsOn();
     String followSapSports();
+    String showCompetitorTimeOnTimeFactorColumn();
+    String showCompetitorTimeOnDistanceAllowanceColumn();
+    String rankingMetric();
+    String oneDesignRankingMetric();
+    String orcPerformanceCurveRankingMetric();
+    String timeOnTimeAndDistanceRankingMetric();
+    String oneDesignRankingMetricDescription();
+    String orcPerformanceCurveRankingMetricDescription();
+    String timeOnTimeAndDistanceRankingMetricDescription();
+    String timeOnTimeFactor();
+    String timeOnDistanceAllowanceInSecondsPerNauticalMile();
+    String correctedTimeTraveled();
+    String correctedTimeTraveledTooltip();
+    String timeOnTimeFactorTooltip();
+    String timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
+    String raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
+    String raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
 }

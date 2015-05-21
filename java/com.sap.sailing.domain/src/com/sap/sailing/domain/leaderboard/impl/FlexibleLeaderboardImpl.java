@@ -32,6 +32,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
@@ -280,6 +281,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         regattaLikeHelper.removeListener(listener);
     }
     
+    @Override
+    public Double getTimeOnTimeFactor(Competitor competitor) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor);
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
+    }
+
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<>();

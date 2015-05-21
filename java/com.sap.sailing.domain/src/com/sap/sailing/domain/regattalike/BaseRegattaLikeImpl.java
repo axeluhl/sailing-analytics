@@ -7,8 +7,12 @@ import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnDistanceAllowancePerNauticalMileFinder;
+import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnTimeFactorFinder;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogEventListener;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sse.common.Duration;
 
 public class BaseRegattaLikeImpl implements IsRegattaLike {
     private static final long serialVersionUID = -5629172342837950344L;
@@ -53,5 +57,37 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();
+    }
+
+    @Override
+    public Double getTimeOnTimeFactor(Competitor competitor) {
+        final Double timeOnTimeFactorFromRegattaLog = getTimeOnTimeFactorFromRegattaLog(competitor);
+        final Double result;
+        if (timeOnTimeFactorFromRegattaLog == null) {
+            result = competitor.getTimeOnTimeFactor();
+        } else {
+            result = timeOnTimeFactorFromRegattaLog;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+        final Duration timeOnDistanceAllowancePerNauticalMileFromRegattaLog = getTimeOnDistanceAllowancePerNauticalMileFromRegattaLog(competitor);
+        final Duration result;
+        if (timeOnDistanceAllowancePerNauticalMileFromRegattaLog == null) {
+            result = competitor.getTimeOnDistanceAllowancePerNauticalMile();
+        } else {
+            result = timeOnDistanceAllowancePerNauticalMileFromRegattaLog;
+        }
+        return result;
+    }
+
+    private Double getTimeOnTimeFactorFromRegattaLog(Competitor competitor) {
+        return new CompetitorTimeOnTimeFactorFinder(getRegattaLog(), competitor).analyze();
+    }
+
+    private Duration getTimeOnDistanceAllowancePerNauticalMileFromRegattaLog(Competitor competitor) {
+        return new CompetitorTimeOnDistanceAllowancePerNauticalMileFinder(getRegattaLog(), competitor).analyze();
     }
 }

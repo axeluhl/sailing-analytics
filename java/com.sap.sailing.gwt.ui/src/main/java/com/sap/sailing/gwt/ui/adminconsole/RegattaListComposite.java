@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -212,6 +213,20 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
+        TextColumn<RegattaDTO> rankingMetricColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regatta.rankingMetricType != null ? RankingMetricTypeFormatter.format(regatta.rankingMetricType, stringMessages) : "";
+            }
+        };
+        regattaBoatClassColumn.setSortable(true);
+        columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
+            @Override
+            public int compare(RegattaDTO r1, RegattaDTO r2) {
+                return new NaturalComparator(false).compare(r1.rankingMetricType.name(), r2.rankingMetricType.name());
+            }
+        });
+
         ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell> regattaActionColumn = new ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell>(
                 new RegattaConfigImagesBarCell(stringMessages));
         regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
@@ -231,6 +246,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
+        table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
         table.addColumn(regattaActionColumn, stringMessages.actions());
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
 
