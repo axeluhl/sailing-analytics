@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -47,7 +45,30 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, MillisecondsTimePoint now) {
+        // Simple solution:
+        // P1: Show the last video if available
+        // P2: Show Countdown for upcoming events
+        // P3: Show Stage image without Countdown
+        
+        Iterable<URL> videoURLs = event.getVideoURLs();
+        for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
+            String videoUrl = Util.get(videoURLs, i).toString();
+            MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl);
+            if(type == MimeType.qt || type == MimeType.vimeo || type == MimeType.mp4) {
+                return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, type, videoUrl);
+            }
+        }
         String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
+        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+            return new EventOverviewTickerStageDTO(event.getStartDate().asDate(), event.getName(), stageImageUrl);
+        }
+        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
+        
+        
+        
+        // TODO do the full implementation
+        
+//        String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
 //        if(state == EventState.RUNNING && TODO live video) {
 //          return new EventOverviewVideoStageDTO(Type.LIVESTREAM);
 //      }
@@ -85,25 +106,17 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //                                .asDate(), stageImageUrl);
 //            }
 //        }
-        
-        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
-            return new EventOverviewTickerStageDTO(event.getStartDate()
-                    .asDate(), event.getName(), stageImageUrl);
-        }
-        
-        List<URL> photoGalleryImageURLs = HomeServiceUtil.getPhotoGalleryImageURLs(event);
-        if(photoGalleryImageURLs.size() >= 3) {
-            // TODO image gallery
-        }
-        
-//            Iterable<URL> videoURLs = event.getVideoURLs();
-//            for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
-//                URL videoUrl = Util
-//            }
-//            MimeType type = MediaUtils.detectMimeTypeFromUrl(url.toString());
-            // TODO first video
-          return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, null, null);
-        
+//        
+//        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+//            return new EventOverviewTickerStageDTO(event.getStartDate()
+//                    .asDate(), event.getName(), stageImageUrl);
+//        }
+//        
+//        List<URL> photoGalleryImageURLs = HomeServiceUtil.getPhotoGalleryImageURLs(event);
+//        if(photoGalleryImageURLs.size() >= 3) {
+//            // TODO image gallery
+//        }
+//        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
     }
 }
