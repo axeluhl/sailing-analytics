@@ -8,8 +8,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.shared.media.MediaPage;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
@@ -29,8 +29,7 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public TabView.State getState() {
-        return TabView.State.INVISIBLE;
-        // TODO return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override

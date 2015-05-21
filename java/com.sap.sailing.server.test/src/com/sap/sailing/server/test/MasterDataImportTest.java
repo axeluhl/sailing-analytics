@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -77,8 +78,10 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -90,6 +93,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -114,6 +118,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
+import com.sap.sailing.server.impl.MediaMasterDataExportTest;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
@@ -1673,17 +1678,45 @@ public class MasterDataImportTest {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
-        assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
-        assignedRaces.add(new RegattaNameAndRaceName("49er", "R2"));
-        assignedRaces.add(new RegattaNameAndRaceName("48er", "F1"));
-        assignedRaces.add(new RegattaNameAndRaceName("48er", "F2"));
-        assignedRaces.add(new RegattaNameAndRaceName("48er", "F3"));
+        String regattaName1 = "49er";
+        String regattaName2 = "49er FX";
+        String missingRegattaName = "Missing Regatta";
+        String raceName1 = "R1";
+        String raceName2 = "R2";
+        String raceName3 = "R3";
+        String raceName4 = "R4";
+        String raceName5 = "R5";
+        String missingRaceName = "Missing Race";
+        assignedRaces.add(new RegattaNameAndRaceName(regattaName1, raceName1));
+        assignedRaces.add(new RegattaNameAndRaceName(regattaName1, raceName2));
+        assignedRaces.add(new RegattaNameAndRaceName(regattaName1, raceName3));
+        assignedRaces.add(new RegattaNameAndRaceName(regattaName2, raceName4));
+        assignedRaces.add(new RegattaNameAndRaceName(regattaName2, raceName5));
+        assignedRaces.add(new RegattaNameAndRaceName(missingRegattaName, missingRaceName));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
-                MediaTrack.MimeType.mp4, assignedRaces);
+ MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
-
+        
+        Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);
+        Regatta regatta = MediaMasterDataExportTest.createTestRegatta(regattaName1, raceColumnNames);
+        sourceService.addRegattaWithoutReplication(regatta);
+        int[] discardThresholds = new int[0];
+        RegattaLeaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "leaderboard display name", discardThresholds);
+        Collection<RaceIdentifier> raceIdentifiers = Arrays.asList(
+                new RegattaNameAndRaceName(regattaName1, raceName1),
+                new RegattaNameAndRaceName(regattaName1, raceName2),
+                new RegattaNameAndRaceName(regattaName1, raceName3),
+                new RegattaNameAndRaceName(regattaName2, raceName4),
+                new RegattaNameAndRaceName(regattaName2, raceName5)
+        );
+        MediaMasterDataExportTest.assignRacesToRegattaLeaderboardColumns(leaderboard, raceIdentifiers);
+        boolean displayGroupsInReverseOrder = false;
+        int[] overallLeaderboardDiscardThresholds = new int[0];
+        UUID leaderboardGropuUuid = UUID.randomUUID();
+        LeaderboardGroup leaderboardGroup = sourceService.addLeaderboardGroup(leaderboardGropuUuid , "leaderboard group name", "leaderboard group description", "leaderboard group display name", displayGroupsInReverseOrder, Collections.singletonList(leaderboard.getName()), overallLeaderboardDiscardThresholds, ScoringSchemeType.LOW_POINT);
+        
         // Serialize
-        List<String> groupNamesToExport = new ArrayList<String>();
+        List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getName());
 
         RacingEventService destService;
         DomainFactory domainFactory;

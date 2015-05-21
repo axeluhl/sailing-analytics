@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.server;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -254,7 +253,7 @@ public final class HomeServiceUtil {
      */
     public static URL getStageImageURL(final EventBase event) {
         final URL result;
-        if (!event.getImageURLs().iterator().hasNext()) {
+        if (Util.isEmpty(event.getImageURLs())) {
             result = null;
         } else {
             Comparator<URL> stageImageComparator = new Comparator<URL>() {
@@ -340,21 +339,13 @@ public final class HomeServiceUtil {
     }
 
     public static int calculateCompetitorsCount(Leaderboard sl) {
-        int count=0;
-        for (Iterator<Competitor> iterator = sl.getCompetitors().iterator(); iterator.hasNext();) {
-            iterator.next();
-            count++;
-        }
-        return count;
+        return Util.size(sl.getCompetitors());
     }
     
     public static int calculateRaceCount(Leaderboard sl) {
         int count=0;
         for (RaceColumn column : sl.getRaceColumns()) {
-            for (Iterator<? extends Fleet> iterator = column.getFleets().iterator(); iterator.hasNext();) {
-                iterator.next();
-                count++;
-            }
+            count += Util.size(column.getFleets());
         }
         return count;
     }
@@ -396,16 +387,11 @@ public final class HomeServiceUtil {
     
     public static boolean hasPhotos(Event event) {
         // FIXME filter teaser images
-        Iterator<URL> iterator = event.getImageURLs().iterator();
-        if(!iterator.hasNext()) {
-            return false;
-        }
-        iterator.next();
-        return iterator.hasNext();
+        return Util.size(event.getImageURLs()) > 1;
     }
     
     public static boolean hasVideos(Event event) {
-        return event.getVideoURLs().iterator().hasNext();
+        return !Util.isEmpty(event.getVideoURLs());
     }
 
     public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
@@ -417,11 +403,11 @@ public final class HomeServiceUtil {
         return false;
     }
     
-    public static URL getRandomURL(Collection<URL> urls) {
-        List<URL> videoURLs = new ArrayList<URL>((Collection<URL>)urls);
-        if (videoURLs.isEmpty()) {
+    public static URL getRandomURL(Iterable<URL> urls) {
+        if(Util.isEmpty(urls)) {
             return null;
         }
-        return videoURLs.get(new Random(videoURLs.size()).nextInt(videoURLs.size()));
+        int size = Util.size(urls);
+        return Util.get(urls, new Random(size).nextInt(size));
     }
 }

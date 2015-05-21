@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
@@ -39,18 +39,18 @@ public class MainMedia extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setData(Collection<VideoMetadataDTO> videos, ArrayList<ImageReferenceDTO> photos) {
+    public void setData(Collection<VideoMetadataDTO> videos, ArrayList<ImageMetadataDTO> photos) {
         Iterator<VideoMetadataDTO> videoIterator = videos.iterator();
         int videoCount = 0;
         while(videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
             VideoMetadataDTO videoDTO = videoIterator.next();
-            MainMediaVideo video = new MainMediaVideo(videoDTO.getTitle(), videoDTO.getRef());
+            MainMediaVideo video = new MainMediaVideo(videoDTO.getTitle(), videoDTO.getSourceRef(),
+                    videoDTO.getMimeType());
             videosPanel.add(video);
             videoCount++;
         }
-        
-        for (ImageReferenceDTO image : photos) {
-            imageCarousel.addImage(image.getImageURL(), image.getHeightInPx(), image.getWidthInPx());
+        for (ImageMetadataDTO image : photos) {
+            imageCarousel.addImage(image.getSourceRef(), image.getHeightInPx(), image.getWidthInPx());
         }
     }
 }
