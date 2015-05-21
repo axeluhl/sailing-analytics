@@ -1671,7 +1671,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, cache);
             result.gapToLeaderInSeconds = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
             if (result.gapToLeaderInSeconds != null) {
-                Duration gapAtEndOfPreviousLeg = getGapAtEndOfPreviousLeg(trackedLeg, cache);
+                final Duration gapAtEndOfPreviousLeg = getGapAtEndOfPreviousLeg(trackedLeg, cache);
                 if (gapAtEndOfPreviousLeg != null) {
                     result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLeg.asSeconds();
                 }
@@ -1759,14 +1759,18 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private Duration getGapAtEndOfPreviousLeg(TrackedLegOfCompetitor trackedLeg, WindLegTypeAndLegBearingCache cache) {
         final Duration result;
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
-        course.lockForRead();
-        try {
-            result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(
-                    trackedLeg, trackedLeg.getStartTime(), cache);
-            return result;
-        } finally {
-            course.unlockAfterRead();
+        // if trackedLeg is the first leg, compute the gap at the start of this leg; otherwise, compute gap
+        // at the end of the previous leg
+        final TimePoint timePoint = trackedLeg.getStartTime();
+        final TrackedLegOfCompetitor tloc;
+        if (course.getFirstWaypoint() == trackedLeg.getLeg().getFrom()) {
+            tloc = trackedLeg;
+        } else {
+            tloc = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLegFinishingAt(trackedLeg.getLeg().getFrom())
+                    .getTrackedLeg(trackedLeg.getCompetitor());
         }
+        result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(tloc, timePoint, cache);
+        return result;
     }
 
     private LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
