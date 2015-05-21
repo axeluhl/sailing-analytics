@@ -43,11 +43,11 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         }
         
         // TODO get correct message
-        return new ResultWithTTL<>(ttl, new EventOverviewStageDTO(null, getStageContent(event, state, now)));
+        return new ResultWithTTL<>(ttl, new EventOverviewStageDTO(null, getStageContent(context, event, state, now)));
     }
 
     @GwtIncompatible
-    public EventOverviewStageContentDTO getStageContent(Event event, EventState state, MillisecondsTimePoint now) {
+    public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, MillisecondsTimePoint now) {
         String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
 //        if(state == EventState.RUNNING && TODO live video) {
 //          return new EventOverviewVideoStageDTO(Type.LIVESTREAM);
@@ -58,11 +58,15 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //      }
         
         if(state == EventState.RUNNING) {
-//            TODO next race countdown if available
-            // TODO Proper Implementation (Type race)
-//            return new EventOverviewRaceTickerStageDTO(new RegattaNameAndRaceName(
-//                    "Regatta XY", "Race 1"), "Race 1 - Gold Fleet", new Date(new Date().getTime() + 5000), stageImageUrl);
+            NextRaceFinder nextRaceFinder = new NextRaceFinder();
+            RacesActionUtil.forRacesOfEvent(context, eventId, nextRaceFinder);
             
+            RaceContext nextRace = nextRaceFinder .getNextRace();
+            if(nextRace != null) {
+                return new EventOverviewRaceTickerStageDTO(nextRace.getRaceIdentifier(), nextRace.getStageText(), nextRaceFinder.getNextStartTime().asDate(), stageImageUrl);
+            }
+            
+            // TODO This is not a good idea due to Axel and Frank as regatta start times aren't correctly set.
             Regatta nextRegatta = null;
             for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
                 for (Leaderboard lb : lg.getLeaderboards()) {

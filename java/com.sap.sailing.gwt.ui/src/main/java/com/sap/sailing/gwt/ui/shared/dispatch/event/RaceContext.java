@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -209,7 +210,7 @@ public class RaceContext {
         return null;
     }
     
-    private TimePoint getStartTime() {
+    public TimePoint getStartTime() {
         TimePoint startTime = null;
         if (trackedRace != null) {
             startTime = trackedRace.getStartOfRace();
@@ -285,7 +286,7 @@ public class RaceContext {
         return result;
     }
 
-    private RaceTrackingState getRaceTrackingState() {
+    public RaceTrackingState getRaceTrackingState() {
         RaceTrackingState trackingState = RaceTrackingState.NOT_TRACKED;
         if(trackedRace != null) {
             trackingState = RaceTrackingState.TRACKED_NO_VALID_DATA;
@@ -330,5 +331,14 @@ public class RaceContext {
             }
         }
         return result;
+    }
+
+    public String getStageText() {
+        // TODO fleet
+        return getRegattaDisplayName() + " - " + raceColumn.getName();
+    }
+
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return trackedRace.getRaceIdentifier();
     }
 }
