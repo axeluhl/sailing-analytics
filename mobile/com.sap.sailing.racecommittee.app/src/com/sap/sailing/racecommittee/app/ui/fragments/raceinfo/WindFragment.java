@@ -144,8 +144,9 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         mLayoutSpeed = layout.findViewById(R.id.layout_speed);
         mLayoutAddress = layout.findViewById(R.id.address);
         mPositionHeader = layout.findViewById(R.id.position_header);
-        mWindOff = layout.findViewById(R.id.wind_off);
-        mWindOn = layout.findViewById(R.id.wind_on);
+        // disabled, because of bug #2871
+//        mWindOff = layout.findViewById(R.id.wind_off);
+//        mWindOn = layout.findViewById(R.id.wind_on);
         mAddressSearch = layout.findViewById(R.id.address_search);
         mSetData = layout.findViewById(R.id.set_data);
         mSetPosition = layout.findViewById(R.id.set_position);

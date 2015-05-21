@@ -25,7 +25,9 @@
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
             android:text="@string/wind_off"
-            android:textAppearance="?textNormal"/>
+            android:textAppearance="?textNormal"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <ImageView
             android:id="@+id/wind_off"
@@ -36,7 +38,9 @@
             android:layout_marginRight="@dimen/default_margin_half"
             android:layout_toLeftOf="@id/wind_sensor"
             android:layout_toStartOf="@id/wind_sensor"
-            android:src="?wind_off"/>
+            android:src="?wind_off"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <ImageView
             android:id="@+id/wind_on"
@@ -47,8 +51,8 @@
             android:layout_marginRight="@dimen/default_margin_half"
             android:layout_toLeftOf="@id/wind_sensor"
             android:layout_toStartOf="@id/wind_sensor"
-            android:src="@drawable/wind_on_dark"
-            android:visibility="invisible"/>
+            android:src="?wind_on"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/header_text"
