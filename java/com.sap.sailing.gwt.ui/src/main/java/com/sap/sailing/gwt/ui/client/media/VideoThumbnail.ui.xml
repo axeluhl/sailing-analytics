@@ -2,14 +2,12 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
 	<ui:style>
 	.holder {
-		border-radius: 2px;
 		cursor: pointer;
 	}
 	.thumbnail {
-		border-radius: 2px;
-		position: relative;
+		
 		display: block;
-		width: 50%;
+		width: 100%;
 		height: auto;
 		text-align: center;
 	}

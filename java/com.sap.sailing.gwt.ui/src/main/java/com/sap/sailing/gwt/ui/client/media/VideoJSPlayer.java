@@ -124,9 +124,11 @@ public class VideoJSPlayer extends Widget {
 			    "playsInline" : true,
 			    "customControlsOnMobile" : true
 
-			}, function() {
-			    this.play();
-
+			},
+			function() {
+			    if (this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::autoplay) {
+				this.play();
+			    }
 			});
 
 	this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;

@@ -4,8 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -18,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
 import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
@@ -25,7 +24,6 @@ import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
 
 public class MediaPage extends Composite {
-
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
 
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
@@ -35,29 +33,23 @@ public class MediaPage extends Composite {
     SharedResources res;
     @UiField
     MediaPageResources local_res;
-
     @UiField
     DivElement videoSectionUi;
     @UiField
     DivElement videoDisplayOuterBoxUi;
     @UiField
     DivElement videoListOuterBoxUi;
-
     @UiField
     FlowPanel videosListUi;
     @UiField
     SimplePanel videoDisplayHolderUi;
-
     @UiField
     DivElement photoSectionUi;
     @UiField
-    DivElement photoListOuterBoxUi;
-
+    FlowPanel photoListOuterBoxUi;
     @UiField
     StringMessages i18n;
-
     private final SimplePanel contentPanel;
-
     private VideoJSPlayer videoDisplayUi;
 
     public MediaPage() {
@@ -68,9 +60,7 @@ public class MediaPage extends Composite {
 
     public void setMedia(MediaDTO media) {
         Widget mediaUi = uiBinder.createAndBindUi(this);
-
         int photosCount = media.getPhotos().size();
-
         if (photosCount > 0) {
             photoSectionUi.getStyle().clearDisplay();
             String photoCss = null;
@@ -98,48 +88,44 @@ public class MediaPage extends Composite {
             }
 
             for (ImageMetadataDTO holder : media.getPhotos()) {
-                ImageElement img = Document.get().createImageElement();
-                img.addClassName(photoCss);
-                img.addClassName(local_res.css().imggalleryitem());
-                img.setSrc(holder.getSourceRef());
-                photoListOuterBoxUi.appendChild(img);
+                if (holder.getSourceRef() != null) {
+
+                    GalleryImageHolder gih = new GalleryImageHolder(holder);
+                    gih.addStyleName(photoCss);
+                    gih.addStyleName(res.mediaCss().columns());
+
+                    photoListOuterBoxUi.add(gih);
+                }
             }
         }
-
         int videoCount = media.getVideos().size();
         if (videoCount > 0) {
             videoSectionUi.getStyle().clearDisplay();
-
             if (videoCount == 1) {
                 videoDisplayOuterBoxUi.addClassName(res.mediaCss().large12());
                 videoListOuterBoxUi.getStyle().setDisplay(Display.NONE);
             } else if (videoCount > 1) {
                 videoDisplayOuterBoxUi.addClassName(res.mediaCss().large9());
                 videoListOuterBoxUi.addClassName(res.mediaCss().large3());
-
             }
-
             boolean first = true;
             for (final VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
                 if (first) {
-                    putVideoOnDisplay(videoCandidateInfo);
+                    putVideoOnDisplay(videoCandidateInfo, false);
                     first = false;
                 }
                 if (videoCount > 1) {
                     VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo);
                     thumbnail.addClickHandler(new ClickHandler() {
-
                         @Override
                         public void onClick(ClickEvent event) {
-                            putVideoOnDisplay(videoCandidateInfo);
-
+                            putVideoOnDisplay(videoCandidateInfo, true);
                         }
                     });
                     videosListUi.add(thumbnail);
                 }
             }
         }
-
         if (photosCount == 0 && videoCount == 0) {
             contentPanel.setWidget(new InfoPlaceholder(i18n.mediaNoContent()));
         } else {
@@ -147,60 +133,17 @@ public class MediaPage extends Composite {
         }
     }
 
-    private void putVideoOnDisplay(final VideoMetadataDTO videoCandidateInfo) {
-
-
-        videoDisplayUi = new VideoJSPlayer(true, true);
+    private void putVideoOnDisplay(final VideoMetadataDTO videoCandidateInfo, boolean autoplay) {
+        videoDisplayUi = new VideoJSPlayer(true, autoplay);
         videoDisplayUi.setSource(videoCandidateInfo.getSourceRef(), videoCandidateInfo.getMimeType());
         videoDisplayHolderUi.setWidget(videoDisplayUi);
-
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
             @Override
             public void execute() {
                 if (videoCandidateInfo.getThumbnailRef() == null) {
                     GWT.log(videoDisplayUi.getThumbnailData());
                 }
-
             }
         });
-
     }
-
-    // private ImageGalleryData mapPhotoData(ArrayList<MediaEntryDTO> photos) {
-    // List<ImageDescriptor> images = new ArrayList<>();
-    // for(MediaEntryDTO entry : photos) {
-    // ImageDescriptor descriptor = new ImageDescriptor(entry.getMediaURL());
-    // descriptor.setTitle(entry.getTitle());
-    // descriptor.setSubtitle(entry.getSubtitle());
-    // descriptor.setAuthor(entry.getAuthor());
-    // descriptor.setCreatedAtDate(entry.getCreatedAtDate());
-    // descriptor.setWidthInPx(entry.getWidthInPx());
-    // descriptor.setHeightInPx(entry.getHeightInPx());
-    // descriptor.setThumbnailURL(entry.getThumbnailURL());
-    // descriptor.setThumbnailWidthInPx(entry.getThumbnailWidthInPx());
-    // descriptor.setThumbnailHeightInPx(entry.getThumbnailHeightInPx());
-    // images.add(descriptor);
-    // }
-    // return new ImageGalleryData(StringMessages.INSTANCE.photos(), images);
-    // }
-    //
-    // private VideoGalleryData mapVideoData(ArrayList<MediaEntryDTO> photos) {
-    // List<VideoDescriptor> images = new ArrayList<>();
-    // for(MediaEntryDTO entry : photos) {
-    // VideoDescriptor descriptor = new VideoDescriptor(entry.getMediaURL());
-    // descriptor.setTitle(entry.getTitle());
-    // descriptor.setSubtitle(entry.getSubtitle());
-    // descriptor.setAuthor(entry.getAuthor());
-    // descriptor.setCreatedAtDate(entry.getCreatedAtDate());
-    // descriptor.setWidthInPx(entry.getWidthInPx());
-    // descriptor.setHeightInPx(entry.getHeightInPx());
-    // descriptor.setThumbnailURL(entry.getThumbnailURL());
-    // descriptor.setThumbnailWidthInPx(entry.getThumbnailWidthInPx());
-    // descriptor.setThumbnailHeightInPx(entry.getThumbnailHeightInPx());
-    // images.add(descriptor);
-    // }
-    // return new VideoGalleryData(StringMessages.INSTANCE.videos(), images);
-    // }
-
 }

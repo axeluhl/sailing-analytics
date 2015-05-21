@@ -32,7 +32,7 @@
 		margin-right: 10px;
 		width: 256px;
 		height: 144px;
-		border: 1px solid black;
+		
 	}
 	
 	
@@ -46,7 +46,6 @@
 		.videoList .videoThumbnail {
 			display: inline-block;
 			margin-bottom: 10px;
-			border: 1px solid black;
 			width: 100%;
 			height: auto;
 		}
@@ -80,8 +79,9 @@
 				</header>
 				
 			</div>
-			<div ui:field="photoListOuterBoxUi" class="{local_res.css.photolist} {res.mediaCss.columns}">
-			</div>
+		</div>
+		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
+			<g:FlowPanel ui:field="photoListOuterBoxUi"  />
 		</div>
 
 	</g:HTMLPanel>
