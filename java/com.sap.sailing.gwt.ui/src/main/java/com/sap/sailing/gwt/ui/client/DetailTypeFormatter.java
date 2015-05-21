@@ -130,6 +130,8 @@ public class DetailTypeFormatter {
             return stringMessages.time();
         case RACE_CORRECTED_TIME_TRAVELED:
             return stringMessages.correctedTimeTraveled();
+        case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
         case RACE_TIME_TRAVELED_DOWNWIND:
             return stringMessages.timeDownwind();
         case RACE_TIME_TRAVELED_REACHING:
@@ -204,6 +206,7 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
+        case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.secondsUnit();
 
         case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
@@ -325,6 +328,8 @@ public class DetailTypeFormatter {
             return stringMessages.gapToLeaderInSecondsTooltip();
         case RACE_CORRECTED_TIME_TRAVELED:
             return stringMessages.correctedTimeTraveledTooltip();
+        case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
         case RACE_RANK:
             return stringMessages.rankTooltip();
         case REGATTA_RANK:

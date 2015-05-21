@@ -1292,4 +1292,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String correctedTimeTraveledTooltip();
     String timeOnTimeFactorTooltip();
     String timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
+    String raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
+    String raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
 }

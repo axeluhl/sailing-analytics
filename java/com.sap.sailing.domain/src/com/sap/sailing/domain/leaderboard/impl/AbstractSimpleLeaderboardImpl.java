@@ -1400,6 +1400,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 entryDTO.averageSignedCrossTrackErrorInMeters = raceDetails.getAverageSignedCrossTrackError() == null ? null
                         : raceDetails.getAverageSignedCrossTrackError().getMeters();
                 entryDTO.correctedTime = raceDetails.getCorrectedTime();
+                entryDTO.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
@@ -1485,8 +1486,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         private final Distance averageSignedCrossTrackError;
         private final Duration gapToLeaderInOwnTime;
         private final Duration correctedTime;
+        private final Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
+
         public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToOverallLeader,
-                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError, Duration gapToLeaderInOwnTime, Duration correctedTime) {
+                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError,
+                Duration gapToLeaderInOwnTime, Duration correctedTime,
+                Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
             super();
             this.legDetails = legDetails;
             this.windwardDistanceToOverallLeader = windwardDistanceToOverallLeader;
@@ -1494,6 +1499,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             this.averageSignedCrossTrackError = averageSignedCrossTrackError;
             this.gapToLeaderInOwnTime = gapToLeaderInOwnTime;
             this.correctedTime = correctedTime;
+            this.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
         }
         public List<LegEntryDTO> getLegDetails() {
             return legDetails;
@@ -1512,6 +1518,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         public Duration getCorrectedTime() {
             return correctedTime;
+        }
+        public Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead() {
+            return correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
         }
     }
 
@@ -1610,7 +1619,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
             return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
-                    trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint));
+                    trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint),
+                    rankingInfo.getCompetitorRankingInfo().apply(competitor).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
         } finally {
             course.unlockAfterRead();
         }
