@@ -12,7 +12,7 @@
 .race_fleetcorner {
   width: 1em;
   vertical-align: top;
-  border-bottom: 1px solid #ebebeb;
+  border-bottom: 1px solid #dfdfdf;
 }
 .race_fleetcorner_icon {
   width: 1em;
@@ -27,7 +27,7 @@
 .race_item {
   text-align: left;
   vertical-align: baseline;
-  border-bottom: 1px solid #ebebeb;
+  border-bottom: 1px solid #dfdfdf;
   white-space: nowrap;
   padding: 1.4em 0.666666666666667em 0.733333333333333em 1.333333333333333em;
 }
@@ -153,10 +153,11 @@
   border-spacing: 0;
   border-collapse: separate;
   overflow: hidden;
+  background-color: #f2f2f2;
 }
 .raceslist_head {
   color: #666;
-  background-color: #f2f2f2;
+  background-color: #dfdfdf;
   border-bottom: 1px solid #dedede;
   text-transform: uppercase;
   font-weight: 600;
