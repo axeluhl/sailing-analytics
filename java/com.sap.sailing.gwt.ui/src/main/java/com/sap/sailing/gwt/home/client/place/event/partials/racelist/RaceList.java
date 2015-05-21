@@ -58,7 +58,7 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
 
         @Override
         public String getColumnStyle() {
-            return CSS.race_item();
+            return getStyleNamesString(CSS.race_item(), CSS.racesListIcon());
         }
 
         @Override
@@ -104,7 +104,7 @@ public class RaceList extends AbstractRaceList<LiveRaceDTO> {
 
         @Override
         public String getColumnStyle() {
-            return getStyleNamesString(CSS.race_item(), MEDIA_CSS.hideonsmall());
+            return getStyleNamesString(CSS.race_item(), CSS.racesListIcon(), MEDIA_CSS.hideonsmall());
         }
 
         @Override

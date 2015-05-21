@@ -199,3 +199,15 @@
 .raceslistlive h3 {
   font-size: 1.466666666666667em;
 }
+.racesListIcon {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.racesListIcon > div:BEFORE {
+  height: 100%;
+  display: inline-block;
+}
+.racesListIcon > div {
+  vertical-align: middle;	
+  display: inline-block;
+}

@@ -28,29 +28,25 @@ public class SailingFlagsBuilder {
     }
     
     public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, boolean displayStateChanged, String tooltip) {
-        return render(upperFlag, lowerFlag, isDisplayed, displayStateChanged, 1, tooltip);
+        return render(upperFlag, lowerFlag, isDisplayed, displayStateChanged, 0.75, tooltip);
     }
 
     public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, boolean isDisplayedChanged,
             double scale, String tooltip) {
-        int multiplier = getFlagScaleMultiplier(upperFlag, lowerFlag);
+        Scales scales = new Scales(scale, upperFlag, lowerFlag);
         SafeHtmlBuilder contentBuilder = new SafeHtmlBuilder();
         SafeHtmlBuilder flagsBuilder = new SafeHtmlBuilder();
-        flagsBuilder.append(getFlagBackgroundImage(upperFlag, isDisplayed, isDisplayedChanged, scale * multiplier));
-        flagsBuilder.append(getFlagBackgroundImage(lowerFlag, isDisplayed, isDisplayedChanged, scale * multiplier));
+        flagsBuilder.append(getFlagBackgroundImage(upperFlag, isDisplayed, isDisplayedChanged, scales));
+        flagsBuilder.append(getFlagBackgroundImage(lowerFlag, isDisplayed, isDisplayedChanged, scales));
 
         SafeStylesBuilder flagStyleBuilder = new SafeStylesBuilder();
         flagStyleBuilder.display(Display.INLINE_BLOCK);
         flagStyleBuilder.verticalAlign(VerticalAlign.TOP);
-        flagStyleBuilder.paddingRight(10 * scale, Unit.PX);
+        flagStyleBuilder.paddingRight(10 * scales.defaultScale, Unit.PX);
         contentBuilder.append(imageTemplate.cell(flagStyleBuilder.toSafeStyles(), flagsBuilder.toSafeHtml()));
 
-        contentBuilder.append(getArrowBackgroundImage(isDisplayed, isDisplayedChanged, scale));
+        contentBuilder.append(getArrowBackgroundImage(isDisplayed, isDisplayedChanged, scales));
         return imageTemplate.cell(tooltip, contentBuilder.toSafeHtml());
-    }
-
-    private static int getFlagScaleMultiplier(Flags upperFlag, Flags lowerFlag) {
-        return (upperFlag == null || upperFlag == Flags.NONE || lowerFlag == null || lowerFlag == Flags.NONE) ? 2 : 1;
     }
 
     public static SafeHtml render(FlagStateDTO flagState, double scale, String tooltip) {
@@ -59,17 +55,19 @@ public class SailingFlagsBuilder {
         // return render(Flags.AP, Flags.ALPHA, true, true, scale, tooltip);
     }
 
-    private static SafeHtml getFlagBackgroundImage(Flags flag, boolean displayed, boolean displayedChanged, double scale) {
+    private static SafeHtml getFlagBackgroundImage(Flags flag, boolean displayed, boolean displayedChanged,
+            Scales scales) {
         ImageResource flagImage = flagImageResolver.resolveFlagToImage(flag, displayed, displayedChanged);
-        return getBackgroundImage(flagImage, scale, new SafeStylesBuilder());
+        return getBackgroundImage(flagImage, scales.flagsScale, new SafeStylesBuilder());
     }
 
-    private static SafeHtml getArrowBackgroundImage(boolean displayed, boolean displayedChanged, double scale) {
+    private static SafeHtml getArrowBackgroundImage(boolean displayed, boolean displayedChanged, Scales scales) {
         ImageResource flagImage = flagImageResolver.resolveFlagDirectionToImage(displayed, displayedChanged);
         SafeStylesBuilder arrowStyleBuilder = new SafeStylesBuilder();
         arrowStyleBuilder.display(Display.INLINE_BLOCK);
         arrowStyleBuilder.verticalAlign(VerticalAlign.TOP);
-        return getBackgroundImage(flagImage, scale * 2, arrowStyleBuilder);
+        arrowStyleBuilder.marginTop(flagImage.getHeight() * scales.arrowPadding, Unit.PX);
+        return getBackgroundImage(flagImage, scales.arrowScale, arrowStyleBuilder);
     }
 
     private static SafeHtml getBackgroundImage(ImageResource imageResource, double scale,
@@ -83,6 +81,23 @@ public class SailingFlagsBuilder {
             return imageTemplate.cell(stylesBuilder.toSafeStyles(), SafeHtmlUtils.EMPTY_SAFE_HTML);
         }
         return SafeHtmlUtils.EMPTY_SAFE_HTML;
+    }
+
+    private static class Scales {
+        private final double arrowScale, arrowPadding, flagsScale, defaultScale;
+
+        private Scales(double defaultScale, Flags upperFlag, Flags lowerFlag) {
+            this.defaultScale = defaultScale;
+            boolean singleFlag = isSingleFlag(defaultScale, upperFlag, lowerFlag);
+            this.arrowScale = defaultScale * (singleFlag ? 1.5 : 1.5);
+            this.arrowPadding = defaultScale * (singleFlag ? 0 : 0.25);
+            this.flagsScale = defaultScale * (singleFlag ? 1.5 : 1);
+        }
+
+        private boolean isSingleFlag(double defaultScale, Flags upperFlag, Flags lowerFlag) {
+            return (upperFlag == null || upperFlag == Flags.NONE || lowerFlag == null || lowerFlag == Flags.NONE);
+        }
+
     }
 
 }

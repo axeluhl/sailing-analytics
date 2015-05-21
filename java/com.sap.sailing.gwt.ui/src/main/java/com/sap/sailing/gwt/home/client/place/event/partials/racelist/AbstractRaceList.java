@@ -311,7 +311,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         @Override
         public void render(Context context, FlagStateDTO value, SafeHtmlBuilder sb) {
             if (value != null) {
-                sb.append(SailingFlagsBuilder.render(value, 0.363636, FlagsMeaningExplanator.getFlagsMeaning(I18N,
+                sb.append(SailingFlagsBuilder.render(value, 0.55, FlagsMeaningExplanator.getFlagsMeaning(I18N,
                         value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
             }
         }
@@ -323,9 +323,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
             if (value != null) {
                 SafeStylesBuilder safeStyles = new SafeStylesBuilder();
                 safeStyles.trustedNameAndValue("transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
-                safeStyles.width(2.5, Unit.EM);
-                safeStyles.height(2.5, Unit.EM);
-                safeStyles.trustedNameAndValue("margin", "-0.75em auto");
+                safeStyles.width(2.75, Unit.EM).height(2.75, Unit.EM);
                 sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles()));
             }
         }
