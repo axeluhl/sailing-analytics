@@ -49,7 +49,7 @@ import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.SimulatorImpl;
-import com.sap.sailing.simulator.impl.SparsePolarDataException;
+import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
@@ -304,12 +304,26 @@ public class SimulationServiceImpl implements SimulationService {
         return result;
     }
 
+    private List<Position> getLinePositions(Waypoint wayPoint, TimePoint at, TrackedRace trackedRace) {
+        List<Position> line = new ArrayList<Position>();
+        if (wayPoint != null) {
+            for (Mark lineMark : wayPoint.getMarks()) {
+                Position estimatedMarkPosition = trackedRace.getOrCreateTrack(lineMark).getEstimatedPosition(at, /* extrapolate */ false);
+                if (estimatedMarkPosition != null) {
+                    line.add(estimatedMarkPosition);
+                }
+            }
+        }
+        return line;
+    }
+
     public SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
-            Leg leg = trackedRace.getRace().getCourse().getLegs().get(legIdentifier.getLegNumber());
+            int legNumber = legIdentifier.getLegNumber();
+            Leg leg = trackedRace.getRace().getCourse().getLegs().get(legNumber);
             // get previous mark or start line as start-position
             Waypoint fromWaypoint = leg.getFrom();
             // get next mark as end-position
@@ -341,9 +355,13 @@ public class SimulationServiceImpl implements SimulationService {
                 legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
             }
             Position startPosition = null;
+            List<Position> startLine = null;
             Position endPosition = null;
             if (startTimePoint != null) {
                 startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
+                if (legNumber == 0) {
+                    startLine = this.getLinePositions(fromWaypoint, startTimePoint, trackedRace);
+                }
             }
             if (endTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
@@ -373,17 +391,17 @@ public class SimulationServiceImpl implements SimulationService {
             PolarDiagram polarDiagram;
             try {
                 polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
-            } catch (SparsePolarDataException e) {
+            } catch (SparseSimulationDataException e) {
                 polarDiagram = null;
                 // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
             }
-            double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                    / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
-            Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-            SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
-                    simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
             Map<PathType, Path> paths = null;
             if (polarDiagram != null) {
+                double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
+                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
+                Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
+                SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, polarDiagram,
+                        windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
             }
             // prepare simulator-results
@@ -406,11 +424,15 @@ public class SimulationServiceImpl implements SimulationService {
             executor.execute(taskOmniscient);
         }
 
-        // schedule 1-turner tasks
-        FutureTask<Path> task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
-        FutureTask<Path> task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
-        executor.execute(task1TurnerLeft);
-        executor.execute(task1TurnerRight);
+        FutureTask<Path> task1TurnerLeft = null;
+        FutureTask<Path> task1TurnerRight = null;
+        if (simulationParameters.getLegType() != LegType.REACHING) {
+            // schedule 1-turner tasks
+            task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
+            task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
+            executor.execute(task1TurnerLeft);
+            executor.execute(task1TurnerRight);
+        }
 
         FutureTask<Path> taskOpportunistLeft = null;
         FutureTask<Path> taskOpportunistRight = null;
@@ -422,20 +444,32 @@ public class SimulationServiceImpl implements SimulationService {
             executor.execute(taskOpportunistRight);
         }
 
-        // collect 1-turner results
-        result.put(PathType.ONE_TURNER_LEFT, task1TurnerLeft.get());
-        result.put(PathType.ONE_TURNER_RIGHT, task1TurnerRight.get());
-
+        Path path1TurnerLeft = null;
+        Path path1TurnerRight = null;
+        if (simulationParameters.getLegType() != LegType.REACHING) {
+            // collect 1-turner results
+            path1TurnerLeft = task1TurnerLeft.get();
+            result.put(PathType.ONE_TURNER_LEFT, path1TurnerLeft);
+            path1TurnerRight = task1TurnerRight.get();
+            result.put(PathType.ONE_TURNER_RIGHT, path1TurnerRight);
+        }
+        
+        Path pathOpportunistLeft = null;
+        Path pathOpportunistRight = null;
         if (simulationParameters.showOpportunist()) {
             // collect opportunist results
-            Path pathOpportunistLeft = taskOpportunistLeft.get();
-            if (pathOpportunistLeft.getTurnCount() == 1) {
-                pathOpportunistLeft = result.get(PathType.ONE_TURNER_LEFT);
+            pathOpportunistLeft = taskOpportunistLeft.get();
+            if (path1TurnerLeft != null) {
+                if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOpportunistLeft.getTurnCount() == 1)) {
+                    pathOpportunistLeft = path1TurnerLeft;
+                }
             }
             result.put(PathType.OPPORTUNIST_LEFT, pathOpportunistLeft);
-            Path pathOpportunistRight = taskOpportunistRight.get();
-            if (pathOpportunistRight.getTurnCount() == 1) {
-                pathOpportunistRight = result.get(PathType.ONE_TURNER_RIGHT);
+            pathOpportunistRight = taskOpportunistRight.get();
+            if (path1TurnerRight != null) {
+                if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOpportunistRight.getTurnCount() == 1)) {
+                    pathOpportunistRight = path1TurnerRight;
+                }
             }
             result.put(PathType.OPPORTUNIST_RIGHT, pathOpportunistRight);
         }
@@ -443,11 +477,25 @@ public class SimulationServiceImpl implements SimulationService {
         if (simulationParameters.showOmniscient()) {
             // collect omniscient result (last, since usually slowest calculation)
             Path pathOmniscient = taskOmniscient.get();
-            if (pathOmniscient.getFinalTime().after(result.get(PathType.ONE_TURNER_LEFT).getFinalTime())) {
-                pathOmniscient = result.get(PathType.ONE_TURNER_LEFT);
+            if (path1TurnerLeft != null) {
+                if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerLeft.getFinalTime()))) {
+                    pathOmniscient = path1TurnerLeft;
+                }
             }
-            if (pathOmniscient.getFinalTime().after(result.get(PathType.ONE_TURNER_RIGHT).getFinalTime())) {
-                pathOmniscient = result.get(PathType.ONE_TURNER_RIGHT);
+            if (path1TurnerRight != null) {
+                if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerRight.getFinalTime()))) {
+                    pathOmniscient = path1TurnerRight;
+                }
+            }
+            if (pathOpportunistLeft != null) {
+                if (!pathOpportunistLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistLeft.getFinalTime()))) {
+                    pathOmniscient = pathOpportunistLeft;
+                }
+            }
+            if (pathOpportunistRight != null) {
+                if (!pathOpportunistRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistRight.getFinalTime()))) {
+                    pathOmniscient = pathOpportunistRight;
+                }
             }
             result.put(PathType.OMNISCIENT, pathOmniscient);
         }

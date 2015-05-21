@@ -49,7 +49,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
         DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
         selectionDockPanel.addNorth(createLogoAndTitlePanel(), 68);
-        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), sailingService, dataMiningService, this);
+        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), dataMiningService, this);
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         

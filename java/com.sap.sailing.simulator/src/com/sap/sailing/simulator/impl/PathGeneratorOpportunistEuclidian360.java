@@ -28,14 +28,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-    SimulationParameters simulationParameters;
     int turns;
     boolean startLeft;
     boolean upwindLeg = false;
 
     public PathGeneratorOpportunistEuclidian360(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
-        simulationParameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
+        parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
                 params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
@@ -48,7 +47,10 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
     }
     
     public boolean isSameBaseDirection(BoatDirection direction1, BoatDirection direction2) {
-        return (isBaseDirectionLeft(direction1)&&isBaseDirectionLeft(direction2))||(isBaseDirectionRight(direction1)&&isBaseDirectionRight(direction2));
+        boolean result = isBaseDirectionLeft(direction1)&&isBaseDirectionLeft(direction2);
+        result |= isBaseDirectionRight(direction1)&&isBaseDirectionRight(direction2);
+        result |= (direction1 == BoatDirection.NONE) || (direction2 == BoatDirection.NONE);
+        return result;
     }
     
     public boolean isBaseDirectionLeft(BoatDirection direction) {
@@ -61,14 +63,14 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
     
     @Override
-    public Path getPath() {
+    public Path getPath() throws SparseSimulationDataException {
         this.algorithmStartTime = MillisecondsTimePoint.now();
 
-        WindFieldGenerator wf = simulationParameters.getWindField();
-        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
+        WindFieldGenerator wf = parameters.getWindField();
+        PolarDiagram polarDiagram = parameters.getBoatPolarDiagram();
 
-        Position startPos = simulationParameters.getCourse().get(0);
-        Position endPos = simulationParameters.getCourse().get(1);
+        Position startPos = parameters.getCourse().get(0);
+        Position endPos = parameters.getCourse().get(1);
 
         TimePoint startTime = wf.getStartTime();
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
@@ -79,6 +81,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         double currentHeight = startPos.getDistance(endPos).getMeters();
 
         BoatDirection prevDirection = BoatDirection.NONE;
+        BoatDirection prevPrevDirection = BoatDirection.NONE;
         long turnLoss = polarDiagram.getTurnLoss(); // time lost when doing a turn
         double fracFinishPhase = 0.05;
 
@@ -92,11 +95,22 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         path.add(new TimedPositionWithSpeedImpl(startTime, startPos, wndStart));
         pathStr = "0";
 
-        long timeStep = wf.getTimeStep().asMillis() / 2;
+        long timeStep;
+        if (this.parameters.getSimuStep() != null) {
+            // time-step larger than turn-loss is required (this may be removed by
+            // extended handling of turn-loss)
+            if (this.parameters.getSimuStep().asMillis() > 2*turnLoss) {
+                timeStep = this.parameters.getSimuStep().asMillis();
+            } else {
+                timeStep = 2*turnLoss;
+            }
+        } else {
+            timeStep = wf.getTimeStep().asMillis() / 2; 
+        }
         logger.fine("Time step :" + timeStep);
 
         String legType = "none";
-        if (this.simulationParameters.getLegType() == null) {
+        if (this.parameters.getLegType() == null) {
             Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearStart);
             legType = "downwind";
             this.upwindLeg = false;
@@ -105,7 +119,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 this.upwindLeg = true;
             }
         } else {
-            if (this.simulationParameters.getLegType() == LegType.UPWIND) {
+            if (this.parameters.getLegType() == LegType.UPWIND) {
                 legType = "upwind";
                 this.upwindLeg = true;
             } else {
@@ -127,8 +141,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
         // StrategicPhase: start & intermediate course until close to target
         //
         turns = 0;
-        while ((currentHeight > 0)
-                && (currentPosition.getDistance(endPos).compareTo(startPos.getDistance(endPos).scale(fracFinishPhase)) > 0)
+        while ((currentHeight > startPos.getDistance(endPos).getMeters()*fracFinishPhase)
                 && (path.size() < 500) && (!this.isTimedOut())) {
 
             long nextTimeVal = currentTime.asMillis() + timeStep;
@@ -158,7 +171,15 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 }
                 // get boat speed at current position
                 SpeedWithBearing boatSpeedLeft = polarDiagram.getSpeedAtBearing(bearLeft);
+                if (boatSpeedLeft.getKnots() == 0) {
+                    logger.severe("Travel Speed for NextDirection '" + "L" + "' is ZERO. This must NOT happen.");            
+                    throw new SparseSimulationDataException();
+                }
                 SpeedWithBearing boatSpeedRight = polarDiagram.getSpeedAtBearing(bearRight);
+                if (boatSpeedRight.getKnots() == 0) {
+                    logger.severe("Travel Speed for NextDirection '" + "R" + "' is ZERO. This must NOT happen.");            
+                    throw new SparseSimulationDataException();
+                }
                 logger.finest("left boat speed:" + boatSpeedLeft.getKnots() + " angle:" + boatSpeedLeft.getBearing().getDegrees()
                         + "  right boat speed:" + boatSpeedRight.getKnots() + " angle:" + boatSpeedRight.getBearing().getDegrees());
 
@@ -174,7 +195,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                     travelTimeRight = new MillisecondsTimePoint(nextTimeVal);
                 }
                 
-                // get next boat positions by travelling left and right
+                // get next boat positions by traveling left and right
                 Position nextBoatPositionLeft = boatSpeedLeft.travelTo(currentPosition, currentTime, travelTimeLeft);
                 Position nextBoatPositionRight = boatSpeedRight.travelTo(currentPosition, currentTime, travelTimeRight);
                 // calculate distance to target left and right
@@ -182,9 +203,10 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 Distance targetDistanceRight = nextBoatPositionRight.getDistance(endPos);
                 double targetDistanceMetersLeft = Math.round(targetDistanceLeft.getMeters() * 1000.) / 1000.;
                 double targetDistanceMetersRight = Math.round(targetDistanceRight.getMeters() * 1000.) / 1000.;
-
+                prevPrevDirection = prevDirection;
+                
                 if (prevDirection == BoatDirection.NONE) {
-
+                    
                     if (startLeft) {
                         if (pointOfSail == PointOfSail.TACKING) {
                             path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionLeft, currentWind));
@@ -193,9 +215,9 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                             prevDirection = BoatDirection.BEAT_LEFT;
                         } else {
                             path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionRight, currentWind));
-                            pathStr += "l";
+                            pathStr += "r";
                             currentPosition = nextBoatPositionRight;
-                            prevDirection = BoatDirection.JIBE_LEFT;                        
+                            prevDirection = BoatDirection.JIBE_RIGHT;                        
                         }
                     } else {
                         if (pointOfSail == PointOfSail.TACKING) {
@@ -205,9 +227,9 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                             prevDirection = BoatDirection.BEAT_RIGHT;
                         } else {
                             path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionLeft, currentWind));
-                            pathStr += "r";
+                            pathStr += "l";
                             currentPosition = nextBoatPositionLeft;
-                            prevDirection = BoatDirection.JIBE_RIGHT;                        
+                            prevDirection = BoatDirection.JIBE_LEFT;                        
                         }
                     }
 
@@ -258,7 +280,11 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 } else {
                     boatSpeedTarget = polarDiagram.getSpeedAtBearing(bearTarget);                    
                 }
-                // get next boat positions by travelling left and right
+                if ((boatSpeedTarget.getKnots() == 0)&&(!polarDiagram.hasCurrent())) {
+                    logger.severe("Travel Speed for NextDirection '" + (reachingSide==BoatDirection.REACH_LEFT?"D":"E") + "' is ZERO. This must NOT happen.");            
+                    throw new SparseSimulationDataException();
+                }
+                // get next boat positions by traveling reach
                 Position nextBoatPositionReach = boatSpeedTarget.travelTo(currentPosition, currentTime, travelTimeReach);
                 path.add(new TimedPositionWithSpeedImpl(nextTime, nextBoatPositionReach, currentWind));
                 currentPosition = nextBoatPositionReach;
@@ -266,6 +292,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                     turns++;
                 }
                 
+                prevPrevDirection = prevDirection;
                 prevDirection = reachingSide;
                 if (reachingSide == BoatDirection.REACH_LEFT) {
                     pathStr += "D";
@@ -278,12 +305,32 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             Position posHeight = currentPosition.projectToLineThrough(startPos, bearStart);
             currentHeight = startPos.getDistance(endPos).getMeters() - posHeight.getDistance(startPos).getMeters();
         }
-        
+
+        // remove last position, if already too close to target for finish-phase
+        if (currentHeight < startPos.getDistance(endPos).getMeters()*fracFinishPhase/2) {
+            path.remove(path.size()-1);
+            currentTime = path.get(path.size()-1).getTimePoint();
+            currentPosition = path.get(path.size()-1).getPosition();
+            prevDirection = prevPrevDirection;
+        } else {
+            // get bearing to target            
+            Bearing nextBearTarget = currentPosition.getBearingGreatCircle(endPos);
+            // get point-of-sail and reaching-side
+            Pair<PointOfSail, BoatDirection> nextPointOfSailAndReachingSide = polarDiagram.getPointOfSail(nextBearTarget);
+            PointOfSail nextPointOfSail = nextPointOfSailAndReachingSide.getA();
+            if (nextPointOfSail == PointOfSail.REACHING) {
+                path.remove(path.size()-1);
+                currentTime = path.get(path.size()-1).getTimePoint();
+                currentPosition = path.get(path.size()-1).getPosition();
+                prevDirection = prevPrevDirection;                
+            }
+        }
+
         if (!this.isTimedOut()) {
             //
             // FinishPhase: get 1-turners to finalize course
             //
-            PathGenerator1Turner360 generator1Turner = new PathGenerator1Turner360(simulationParameters);
+            PathGenerator1Turner360 generator1Turner = new PathGenerator1Turner360(parameters);
             TimePoint leftTurningTime;
             TimePoint rightTurningTime;
             if (isBaseDirectionLeft(prevDirection)) {
@@ -294,10 +341,13 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 rightTurningTime = currentTime;
             }
 
-            generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, timeStep / (5 * 3), 100, 0.05, this.upwindLeg);
+            long finishTimeStep = Math.max(500, timeStep / 10);
+            int finishStepsLeft = (int) Math.round(5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
+            generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, finishTimeStep, finishStepsLeft, 0.2, this.upwindLeg);
             Path leftPath = generator1Turner.getPath();
 
-            generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, timeStep / (5 * 3), 100, 0.05, this.upwindLeg);
+            int finishStepsRight = (int) Math.round(5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
+            generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, finishTimeStep, finishStepsRight, 0.2, this.upwindLeg);
             Path rightPath = generator1Turner.getPath();
 
             if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {

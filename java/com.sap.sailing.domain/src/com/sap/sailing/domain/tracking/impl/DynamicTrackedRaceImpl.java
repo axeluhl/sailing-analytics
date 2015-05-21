@@ -43,6 +43,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -479,6 +480,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             // clearMarkPassings(...) as well as inside the subsequent for-loop. It is important to always first obtain the mark passings lock
             // for the competitor mark passings before obtaining the lock for the mark passings in order for the waypoint to avoid
             // deadlocks.
+            getRace().getCourse().lockForRead();
             LockUtil.lockForWrite(markPassingsLock);
             try {
                 clearMarkPassings(competitor);
@@ -530,6 +532,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 }
             } finally {
                 LockUtil.unlockAfterWrite(markPassingsLock);
+                getRace().getCourse().unlockAfterRead();
             }
             updated(timePointOfLatestEvent);
             triggerManeuverCacheRecalculation(competitor);
@@ -668,7 +671,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if ((startOfTracking == null || !startOfTracking.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint()) ||
                 (startOfRace != null && !startOfRace.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint())))
             &&
-        (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
+        // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
+        (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
             result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
@@ -760,6 +764,20 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
         super.detachRaceLog(identifier);
     }
+    
+    @Override
+    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+        if (raceExecutionOrderProvider != null && raceExecutionOrderProvider.getId() != null && !super.attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider.getId())) {
+            super.attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider.getId(), raceExecutionOrderProvider);
+        }
+    }
+
+    @Override
+    public void detachRaceExecutionOrderProvider(Serializable identifier) {
+        if (identifier != null) {
+            super.attachedRaceExecutionOrderProvider.remove(identifier);
+        }
+    }
 
     @Override
     public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
@@ -819,4 +837,5 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
+    
 }

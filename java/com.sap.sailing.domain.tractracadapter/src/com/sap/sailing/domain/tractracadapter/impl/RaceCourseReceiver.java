@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -113,11 +114,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
         Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
-        List<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
+        final List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 0;
         for (IControl cp : event.getA().getControls()) {
-            PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
-            ttControlPoints.add(new com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
+            PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : PassingInstruction.None;
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }
 

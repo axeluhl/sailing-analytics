@@ -111,6 +111,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -130,6 +131,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -276,6 +278,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     protected transient WeakHashMap<RaceLog, ReadonlyRaceState> raceStates;
 
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
+    
+    protected transient ConcurrentHashMap<Serializable, RaceExecutionOrderProvider> attachedRaceExecutionOrderProvider;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -337,6 +341,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRegattaLogs = new ConcurrentHashMap<>();
+        attachedRaceExecutionOrderProvider = new ConcurrentHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.loadingFromWindStoreLock = new NamedReentrantReadWriteLock("Loading from wind store lock for tracked race "
@@ -2778,7 +2783,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 } else {
                     result = new Pair<Double, Double>(averageAngleInDegMinusThreshold, average.getConfidence());
                 }
-            } catch (NotEnoughDataHasBeenAddedException e) {
+            } catch (NotEnoughDataHasBeenAddedException | IllegalArgumentException e) {
                 result = new Pair<Double, Double>(defaultAngle, 0.1);
             }
         } else {
@@ -3517,6 +3522,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = Distance.NULL;
         }
         return result;
+    }
+    
+    @Override
+    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+            NoWindException {
+       if (polarDataService == null) {
+            throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
+        }
+        Duration durationOfAllLegs = new MillisecondsDurationImpl(0);
+        for (TrackedLeg leg : trackedLegs.values()) {
+            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint);
+            durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
+        }
+        return durationOfAllLegs;
     }
     
     @Override

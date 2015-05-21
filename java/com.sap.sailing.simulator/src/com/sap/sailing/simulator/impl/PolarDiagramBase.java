@@ -538,13 +538,13 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         if (targetDirection.equals(new DegreeBearingImpl(0))) {
             Bearing floorBeatAngle;
             if (beatAngles.floorEntry(wind) == null) {
-                floorBeatAngle = beatAngles.ceilingEntry(wind).getValue();
+                floorBeatAngle = beatAngles.ceilingEntry(wind)==null?null:beatAngles.ceilingEntry(wind).getValue();
             } else {
                 floorBeatAngle = beatAngles.floorEntry(wind).getValue();
             }
             Bearing ceilingBeatAngle;
             if (beatAngles.ceilingEntry(wind) == null) {
-                ceilingBeatAngle = beatAngles.floorEntry(wind).getValue();
+                ceilingBeatAngle = beatAngles.floorEntry(wind)==null?null:beatAngles.floorEntry(wind).getValue();
             } else {
                 ceilingBeatAngle = beatAngles.ceilingEntry(wind).getValue();
             }

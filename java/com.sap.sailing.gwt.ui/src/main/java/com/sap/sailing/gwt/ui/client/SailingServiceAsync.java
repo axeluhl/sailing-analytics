@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -77,6 +78,7 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
@@ -430,7 +432,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void addResultImportUrl(String resultProviderName, String url, AsyncCallback<Void> callback);
 
-    void getUrlResultProviderNames(AsyncCallback<List<String>> callback);
+    void getUrlResultProviderNamesAndOptionalSampleURL(AsyncCallback<List<Pair<String, String>>> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Util.Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -628,7 +630,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mapping, Date closingTimePoint, AsyncCallback<Void> callback);
 
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds,
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds,
             AsyncCallback<Void> callback);
 
     void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
@@ -710,4 +712,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName, AsyncCallback<Void> callback);
+
+    void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
+
+    void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean>  regattaLogCallBack);
 }

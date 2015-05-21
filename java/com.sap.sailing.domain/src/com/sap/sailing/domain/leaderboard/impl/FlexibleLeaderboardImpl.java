@@ -3,10 +3,12 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -18,6 +20,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.AbstractRaceColumnListener;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -31,7 +34,12 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
+
+import difflib.PatchFailedException;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
@@ -53,6 +61,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
     private transient RaceLogStore raceLogStore;
     private CourseArea courseArea;
+    private RaceExecutionOrderProvider raceExecutionOrderProvider;
     
     /**
      * @see RegattaLog for the reason why the leaderboard manages a {@code RegattaLog}
@@ -78,6 +87,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
+        this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
     }
 
     /**
@@ -168,11 +178,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+        if (races != null) {
+            return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+        } else {
+            return null;
+        }
     }
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace) {
-        return new RaceColumnImpl(column, medalRace);
+        return new RaceColumnImpl(column, medalRace, raceExecutionOrderProvider);
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {
@@ -290,5 +304,117 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
         result.addAll(viaLog);
         return result;
+    }
+    
+    private class RaceExecutionOrderCache extends AbstractRaceColumnListener implements RaceExecutionOrderProvider {
+
+        private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
+        private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
+        private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
+        private static final long serialVersionUID = -1016823551825618490L;
+
+        public RaceExecutionOrderCache() {
+            racesOrderCache = createRacesOrderCache();
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+            addRaceColumnListener(this);
+        }
+
+        public List<TrackedRace> getRacesInExecutionOrder() {
+            List<TrackedRace> result;
+            result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY,/*waitForLatest*/ true);
+            return result;
+        }
+        
+        @Override
+        public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+
+        @Override
+        public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+
+        @Override
+        public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+
+        @Override
+        public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+
+        @Override
+        public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+
+        private List<TrackedRace> reloadRacesInExecutionOrder() {
+            List<TrackedRace> raceIdListInExecutionOrder = new ArrayList<TrackedRace>();
+            if (getRaceColumns() != null) {
+                Iterator<? extends RaceColumn> raceColumns = getRaceColumns().iterator();
+                if (raceColumns != null) {
+                    while (raceColumns.hasNext()) {
+                        RaceColumn currentRaceColumn = raceColumns.next();
+                        if (currentRaceColumn.getFleets() != null) {
+                            Iterator<? extends Fleet> fleetsInRaceColumn = currentRaceColumn.getFleets().iterator();
+                            if (fleetsInRaceColumn != null) {
+                                while (fleetsInRaceColumn.hasNext()) {
+                                    TrackedRace trackedRaceInColumnForFleet = currentRaceColumn
+                                            .getTrackedRace(fleetsInRaceColumn.next());
+                                    if (trackedRaceInColumnForFleet != null) {
+                                        raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return raceIdListInExecutionOrder;
+        }
+
+        
+        
+        private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
+            ois.defaultReadObject();
+            racesOrderCache = createRacesOrderCache();
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+        
+        private SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> createRacesOrderCache() {
+            return new SmartFutureCache<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>(
+                    new SmartFutureCache.AbstractCacheUpdater<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>() {
+
+                        @Override
+                        public List<TrackedRace> computeCacheUpdate(String key,
+                                EmptyUpdateInterval updateInterval) throws Exception {
+                            if (key.equals(RACES_ORDER_LIST_CACHE_KEY)) {
+                                return reloadRacesInExecutionOrder();
+                            } else {
+                                List<TrackedRace> emptyList = new ArrayList<TrackedRace>();
+                                return emptyList;
+                            }
+                        }
+                    }, RACES_ORDER_LIST_LOCKS_NAME);
+        }
+
+        @Override
+        public TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race) {
+            List<TrackedRace> racesInOrder = getRacesInExecutionOrder();
+            if (racesInOrder != null) {
+                int indexOfRace = racesInOrder.indexOf(race);
+                if (indexOfRace != -1 && indexOfRace != 0) {
+                    return racesInOrder.get(indexOfRace - 1);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Serializable getId() {
+            return serialVersionUID;
+        }
     }
 }

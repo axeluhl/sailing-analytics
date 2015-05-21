@@ -1,0 +1,16 @@
+apply plugin: "java"
+
+sourceSets {
+    main {
+        java.srcDirs = ["src"]
+    }
+}
+
+dependencies {
+    compile "javax.servlet:javax.servlet-api:3.1.0"
+    compile "org.eclipse:osgi:3.10.0-v20140606-1445"
+
+    /* local dependencies */
+    compile project(":java:com.sap.sse.common")
+    compile project(":java:com.sap.sse")
+}

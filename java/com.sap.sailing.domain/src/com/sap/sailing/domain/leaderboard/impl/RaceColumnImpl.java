@@ -5,17 +5,20 @@ import java.util.Collections;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
     private String name;
 
     private boolean medalRace;
+    private RaceExecutionOrderProvider raceExecutionOrderProvider;
 
-    public RaceColumnImpl(String name, boolean medalRace) {
+    public RaceColumnImpl(String name, boolean medalRace, RaceExecutionOrderProvider raceExecutionOrderProvider) {
         super();
         this.name = name;
         this.medalRace = medalRace;
+        this.raceExecutionOrderProvider = raceExecutionOrderProvider;
     }
 
     @Override
@@ -44,4 +47,8 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
         return Collections.singleton(FlexibleLeaderboardImpl.defaultFleet);
     }
 
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        return raceExecutionOrderProvider;
+    }
 }

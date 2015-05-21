@@ -35,10 +35,12 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -616,6 +618,11 @@ public interface TrackedRace extends Serializable {
     void detachRaceLog(Serializable identifier);
     
     /**
+     * Detaches the link {@link RaceExecutionOrderProvider} with this <code>identifier</code>.
+     */
+    void detachRaceExecutionOrderProvider(Serializable identifier);
+    
+    /**
      * Detaches all {@link RaceLog} instances from this race
      */
     void detachAllRaceLogs();
@@ -637,6 +644,12 @@ public interface TrackedRace extends Serializable {
      * This also causes fixes from the {@link GPSFixStore} to be loaded (see {@link #attachRaceLog} for details).
      */
     void attachRegattaLog(RegattaLog regattaLog);
+    
+    /**
+     * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware
+     * which races are scheduled around it in the execution order of a {@link Regatta}.
+     * */
+    void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
      * Returns the attached race log event track for this race if any.
@@ -770,6 +783,15 @@ public interface TrackedRace extends Serializable {
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
     boolean isUsingMarkPassingCalculator();
+    
+    /**
+     * @param timepoint Used for positions of marks and wind information
+     * @return estimated time it takes to complete the race
+     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
+     * is not available
+     * @throws NoWindException 
+     */
+    Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
 

@@ -81,7 +81,8 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void testRemoveDataRetrieverChainDefinition() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
 
-        dataRetrieverChainDefinitionRegistry.unregister(legRetrieverChainDefinition);
+        assertThat(dataRetrieverChainDefinitionRegistry.unregister(legRetrieverChainDefinition), is(true));
+        assertThat(dataRetrieverChainDefinitionRegistry.unregister(legRetrieverChainDefinition), is(false));
         Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
         assertThat(dataRetrieverChainDefinitionRegistry.get(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedEmptyDataRetrieverChainDefinitions));
     }
@@ -91,7 +92,7 @@ public class TestDataRetrieverChainDefinitionRegistry {
     public void testAddingDataRetrieverChainDefinitionTwice() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
 
-        dataRetrieverChainDefinitionRegistry.register(legRetrieverChainDefinition);
+        assertThat(dataRetrieverChainDefinitionRegistry.register(legRetrieverChainDefinition), is(false));
         Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedDataRetrieverChainDefinitions = new HashSet<>();
         expectedDataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
         assertThat(dataRetrieverChainDefinitionRegistry.get(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedDataRetrieverChainDefinitions));

@@ -45,8 +45,16 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
         return retrievedDataTypesChain.get(retrievedDataTypesChain.size() - 1).getTypeName();
     }
     
-    public List<LocalizedTypeDTO> getRetrievedDataTypesChain() {
+    public Collection<LocalizedTypeDTO> getRetrievedDataTypesChain() {
         return retrievedDataTypesChain;
+    }
+    
+    public int size() {
+        return retrievedDataTypesChain.size();
+    }
+    
+    public LocalizedTypeDTO getRetrievedDataType(int retrieverLevel) {
+        return retrievedDataTypesChain.get(retrieverLevel);
     }
 
     @Override

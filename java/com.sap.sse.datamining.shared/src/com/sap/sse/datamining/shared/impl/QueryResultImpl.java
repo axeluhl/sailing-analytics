@@ -6,8 +6,8 @@ import java.util.Map;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.QueryResultState;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.QueryResultState;
+import com.sap.sse.datamining.shared.data.Unit;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = 5173796619174827696L;
