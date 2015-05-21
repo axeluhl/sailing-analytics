@@ -11,6 +11,7 @@ import android.widget.Button;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 
 public class FinishedSubmitFragment extends BasePanelFragment {
 
@@ -29,16 +30,7 @@ public class FinishedSubmitFragment extends BasePanelFragment {
             protest.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    String extra = getRace().getRaceGroup().getName();
-                    if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
-                        extra += " - " + getRace().getSeries().getName();
-                    }
-                    if (!getRace().getFleet().getName().equals(AppConstants.DEFAULT)) {
-                        extra += " - " + getRace().getFleet().getName();
-                    }
-                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
-                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                    RaceListFragment.showProtest(getActivity(), getRace());
                 }
             });
         }

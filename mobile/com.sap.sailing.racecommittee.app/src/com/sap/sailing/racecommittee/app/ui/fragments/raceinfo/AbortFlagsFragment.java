@@ -15,7 +15,7 @@ import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -95,8 +95,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     }
 
     private void setProtestTime() {
-        ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(getRace());
-        fragment.show(getFragmentManager(), null);
+        RaceListFragment.showProtest(getActivity(), getRace());
     }
 
     @Override

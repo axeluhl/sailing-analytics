@@ -352,6 +352,19 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         super.onStop();
     }
 
+    public static void showProtest(Context context, ManagedRace race) {
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+        String extra = race.getRaceGroup().getName();
+        if (!race.getSeries().getName().equals(AppConstants.DEFAULT)) {
+            extra += " - " + race.getSeries().getName();
+        }
+        if (!race.getFleet().getName().equals(AppConstants.DEFAULT)) {
+            extra += " - " + race.getFleet().getName();
+        }
+        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    }
+
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().addChangedListener(stateListener);
