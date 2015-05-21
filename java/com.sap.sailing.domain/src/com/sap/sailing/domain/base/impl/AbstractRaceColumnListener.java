@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Alexander Ries (D062114)
  *
  */
-public abstract class AbstractRaceColumnListener implements RaceColumnListener{
+public abstract class AbstractRaceColumnListener implements RaceColumnListener {
 
     private static final long serialVersionUID = -6210815580399401162L;
 
@@ -61,11 +61,6 @@ public abstract class AbstractRaceColumnListener implements RaceColumnListener{
     @Override
     public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         defaultAction(); 
-    }
-
-    @Override
-    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-        return false;
     }
 
     @Override

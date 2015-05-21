@@ -25,6 +25,11 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Util;
 
+/**
+ * A series listens on its columns; however, a veto for column addition isn't done here but in a {@link RegattaLeaderboard}.
+ * 
+ * @see #addRaceColumn(String, TrackedRegattaRegistry)
+ */
 public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListener {
     private static final long serialVersionUID = -1640404303144907381L;
     private final Map<String, Fleet> fleetsByName;
@@ -164,21 +169,21 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
     
     private void attachRaceExecutionOrderProviderToTrackedRacesInRaceCollumns(){
-        for(RaceColumnInSeries raceColumnInSeries : raceColumns){
-            for(Fleet fleet : raceColumnInSeries.getFleets()){
-                TrackedRace trackedRace =  raceColumnInSeries.getTrackedRace(fleet);
-                if(trackedRace != null && regatta != null){
+        for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
+            for (Fleet fleet : raceColumnInSeries.getFleets()) {
+                TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);
+                if (trackedRace != null && regatta != null) {
                     trackedRace.attachRaceExecutionProvider(regatta.getRaceExecutionOrderProvider());
                 }
             }
         }
     }
     
-    private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceCollumns(){
-        for(RaceColumnInSeries raceColumnInSeries : raceColumns){
-            for(Fleet fleet : raceColumnInSeries.getFleets()){
-                TrackedRace trackedRace =  raceColumnInSeries.getTrackedRace(fleet);
-                if(trackedRace != null && regatta != null && regatta.getRaceExecutionOrderProvider() != null){
+    private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceCollumns() {
+        for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
+            for (Fleet fleet : raceColumnInSeries.getFleets()) {
+                TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);
+                if (trackedRace != null && regatta != null && regatta.getRaceExecutionOrderProvider() != null) {
                     trackedRace.detachRaceExecutionOrderProvider(regatta.getRaceExecutionOrderProvider().getId());
                 }
             }
@@ -300,16 +305,6 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
-    }
-
-    /**
-     * A series listens on its columns; individual columns, however, don't ask whether they can be added; the series itself does.
-     * 
-     * @see #addRaceColumn(String, TrackedRegattaRegistry)
-     */
-    @Override
-    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-        return true;
     }
 
     @Override
