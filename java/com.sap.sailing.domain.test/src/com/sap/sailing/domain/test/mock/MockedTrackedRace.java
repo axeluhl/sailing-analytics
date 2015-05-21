@@ -932,4 +932,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void detachRaceExecutionOrderProvider(Serializable identifier) {
     }
+
+    @Override
+    public TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders() {
+        return null;
+    }
 }

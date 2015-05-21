@@ -44,6 +44,7 @@ import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -605,5 +606,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void detachRaceExecutionOrderProvider(Serializable identifier) {
+    }
+
+    @Override
+    public TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders() {
+        return null;
     }
 }

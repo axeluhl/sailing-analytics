@@ -632,4 +632,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public void detachRaceExecutionOrderProvider(Serializable identifier) {
     }
 
+    @Override
+    public TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders() {
+        return null;
+    }
+
 }

@@ -795,4 +795,5 @@ public interface TrackedRace extends Serializable {
 
     void setPolarDataService(PolarDataService polarDataService);
 
+    TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders();
 }
