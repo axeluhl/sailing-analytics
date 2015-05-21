@@ -130,15 +130,16 @@ public class StartTimeFragment extends BaseFragment
             int startMode = getArguments().getInt(START_MODE, 0);
             switch (startMode) {
             case 0:
-                TimePoint timePoint = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
-                if (timePoint != null) {
-                    time.setTime(timePoint.asDate());
+                mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
+                if (mStartTime != null) {
+                    time.setTime(mStartTime.asDate());
                 }
                 break;
 
             case 2:
                 if (getRace() != null && getRaceState() != null) {
-                    time.setTime(getRaceState().getStartTime().asDate());
+                    mStartTime = getRaceState().getStartTime();
+                    time.setTime(mStartTime.asDate());
                 }
                 break;
 
