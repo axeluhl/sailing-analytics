@@ -46,7 +46,6 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -661,15 +660,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        TrackedRace previosRaceInExecutionOrder = getTrackedRegatta().getPreviousRaceInExecutionOrder(this);
-        long conditional_time_before_start_to_track_wind;
-        if(previosRaceInExecutionOrder == null || previosRaceInExecutionOrder.getEndOfTracking() != null || !previosRaceInExecutionOrder.hasWindData()){
-            conditional_time_before_start_to_track_wind = EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS;
-        }else{
-            conditional_time_before_start_to_track_wind = TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS;
-        }
-        if ((startOfTracking == null || !startOfTracking.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint())))
+        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
             &&
         // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
         (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||

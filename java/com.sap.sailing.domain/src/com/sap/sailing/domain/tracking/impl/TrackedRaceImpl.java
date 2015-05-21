@@ -152,13 +152,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
 
-    public static final long TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS = 4 * 60 * 1000l; // let wind start four minutes before race
-    
-    /**
-     * To make wind accessible 30 minutes before first race starts, there is a additional time buffer to record wind.
-     */
-    public static final long EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_IN_MILLISECONDS = 30 * 60 * 1000l;
-    
+    public static final long TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = 4 * 60 * 1000l; // let wind start four minutes before race
+
     private TrackedRaceStatus status;
 
     private final Object statusNotifier;

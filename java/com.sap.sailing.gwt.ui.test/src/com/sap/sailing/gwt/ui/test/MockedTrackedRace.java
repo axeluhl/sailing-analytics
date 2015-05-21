@@ -491,11 +491,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     boolean useMarkPassingCalculator) {
                 return null;
             }
-
-            @Override
-            public TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race) {
-                return null;
-            }
         };
     }
 

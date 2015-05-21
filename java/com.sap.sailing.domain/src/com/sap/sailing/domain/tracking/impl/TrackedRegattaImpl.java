@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -16,13 +14,9 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.impl.AbstractRaceColumnListener;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -32,16 +26,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.util.SmartFutureCache;
-import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
-import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
-
-import difflib.PatchFailedException;
 
 public class TrackedRegattaImpl implements TrackedRegatta {
-    
-    private RaceExecutionOrderCache raceExecutionOrderCache;
-    
     private static final long serialVersionUID = 6480508193567014285L;
 
     private static final Logger logger = Logger.getLogger(TrackedRegattaImpl.class.getName());
@@ -57,13 +43,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         raceListeners = new HashSet<RaceListener>();
-        this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         this.raceListeners = new HashSet<RaceListener>();
-        this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -200,103 +184,5 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         addTrackedRace(result);
         return result;
     }
-    
-    @Override
-    public TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race) {
-        List<TrackedRace> racesInOrder = raceExecutionOrderCache.getRacesInExecutionOrder();
-        if (racesInOrder != null) {
-            int indexOfRace = racesInOrder.indexOf(race);
-            if (indexOfRace != -1 && indexOfRace != 0) {
-                return racesInOrder.get(indexOfRace - 1);
-            }
-        }
-        return null;
-    }
-    
-    private class RaceExecutionOrderCache extends AbstractRaceColumnListener {
 
-        private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
-        private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
-        private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
-        private static final long serialVersionUID = -1016823551825618490L;
-
-        public RaceExecutionOrderCache() {
-            racesOrderCache = createRacesOrderCache();
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-            getRegatta().addRaceColumnListener(this);
-        }
-
-        public List<TrackedRace> getRacesInExecutionOrder() {
-            List<TrackedRace> result;
-            result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY,/*waitForLatest*/ true);
-            return result;
-        }
-        
-        @Override
-        public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        private List<TrackedRace> reloadRacesInExecutionOrder() {
-            List<TrackedRace> raceIdListInExecutionOrder = new ArrayList<TrackedRace>();
-            Iterator<? extends Series> seriesInRegatta = getRegatta().getSeries().iterator();
-            while (seriesInRegatta.hasNext()) {
-                Series currentSeries = seriesInRegatta.next();
-                Iterator<? extends RaceColumn> raceColumns = currentSeries.getRaceColumns().iterator();
-                while (raceColumns.hasNext()) {
-                    RaceColumn currentRaceColumn = raceColumns.next();
-                    Iterator<? extends Fleet> fleetsInRaceColumn = currentRaceColumn.getFleets().iterator();
-                    while (fleetsInRaceColumn.hasNext()) {
-                        TrackedRace trackedRaceInColumnForFleet = currentRaceColumn.getTrackedRace(fleetsInRaceColumn
-                                .next());
-                        if (trackedRaceInColumnForFleet != null) {
-                            raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
-                        }
-                    }
-                }
-            }
-            return raceIdListInExecutionOrder;
-        }
-
-        private SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> createRacesOrderCache() {
-            return new SmartFutureCache<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>(
-                    new AbstractCacheUpdater<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>() {
-
-                        @Override
-                        public List<TrackedRace> computeCacheUpdate(String key,
-                                EmptyUpdateInterval updateInterval) throws Exception {
-                            if (key.equals(RACES_ORDER_LIST_CACHE_KEY)) {
-                                return reloadRacesInExecutionOrder();
-                            } else {
-                                return null;
-                            }
-                        }
-                    }, RACES_ORDER_LIST_LOCKS_NAME);
-        }
-        
-        private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
-            ois.defaultReadObject();
-            racesOrderCache = createRacesOrderCache();
-        }
-    }
 }
