@@ -59,7 +59,11 @@ public class VideoJSPlayer extends Widget {
             videoElement.appendChild(se);
         }
     }
-
+    
+    public VideoElement getVideoElement() {
+        return videoElement;
+    }
+    
     @Override
     protected void onLoad() {
         _onLoad(autoplay);
@@ -91,7 +95,25 @@ public class VideoJSPlayer extends Widget {
     public native void setCurrentTime(int currentTime) /*-{
 	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
+    
+    /**
+     * Check whether or not the player is running in full screen mode
+     * 
+     * @return <code>true</code> if the player is running in full screen mode, <code>false</code> otherwise
+     */
+    public native boolean isFullscreen() /*-{
+	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.isFullscreen();
+    }-*/;
 
+    /**
+     * Check whether the player is currently paused or playing.
+     * 
+     * @return <code>true</code> if the player is paused, <code>false</code> if it is playing
+     */
+    public native boolean paused() /*-{
+	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.paused();
+    }-*/;
+    
     /**
      * JSNI wrapper that does setup the video player
      *
@@ -113,6 +135,11 @@ public class VideoJSPlayer extends Widget {
 		}
 	    });
 	this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
+    }-*/;
+    
+    native void _onUnload() /*-{
+       var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
+       player.dispose();     
     }-*/;
 
 }

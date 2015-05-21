@@ -5,17 +5,12 @@
     <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.video.VideoResources" />
-  <ui:style>
-  	.video-js-customsize {
-		padding-top: 0;
-	}
-  </ui:style>
   <g:HTMLPanel>
     <div class="{local_res.css.video}">
       <div class="{local_res.css.video_content}">
         <div class="{local_res.css.video_content_item} {local_res.css.videoitem}">
           <div class="{local_res.css.videoplaceholder} {res.mediaCss.small12}">
-          	<v:VideoJSPlayer addStyleNames="{local_res.css.videoplaceholder_image} {style.video-js-customsize}" ui:field="videoPlayer"/>
+          	<v:VideoJSPlayer addStyleNames="{local_res.css.videoplaceholder_image}" ui:field="videoPlayer"/>
           </div>
         </div>
       </div>
