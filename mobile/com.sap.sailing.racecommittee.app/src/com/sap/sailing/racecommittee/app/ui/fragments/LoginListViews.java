@@ -23,6 +23,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
     private LoginActivity activity;
     private RelativeLayout event_header;
+    private RelativeLayout area_header;
+    private RelativeLayout position_header;
     private FrameLayout event_listView;
     private FrameLayout area_listView;
     private FrameLayout position_listView;
@@ -30,7 +32,12 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     private TextView area_selected;
     private TextView position_selected;
     private Button sign_up;
+    private IntentListener listener;
 
+    public LoginListViews() {
+        listener = new IntentListener();
+    }
+    
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -46,11 +53,11 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         if (event_header != null) {
             event_header.setOnClickListener(this);
         }
-        RelativeLayout area_header = (RelativeLayout) view.findViewById(R.id.area_header);
+        area_header = (RelativeLayout) view.findViewById(R.id.area_header);
         if (area_header != null) {
             area_header.setOnClickListener(this);
         }
-        RelativeLayout position_header = (RelativeLayout) view.findViewById(R.id.position_header);
+        position_header = (RelativeLayout) view.findViewById(R.id.position_header);
         if (position_header != null) {
             position_header.setOnClickListener(this);
         }
@@ -89,6 +96,17 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         if (position_selected != null) {
             position_selected.setText(null);
         }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(listener, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(listener);
     }
 
     @Override
@@ -207,5 +225,30 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         Point point = new Point();
         display.getSize(point);
         return point.y;
+    }
+
+    private class IntentListener extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action) {
+            case AppConstants.INTENT_ACTION_TOGGLE:
+                String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
+                    onClick(event_header);
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
+                    onClick(area_header);
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
+                    onClick(position_header);
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
     }
 }

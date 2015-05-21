@@ -96,6 +96,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
+
+            Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
+            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
+            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
@@ -108,6 +112,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
+
+            Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
+            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
+            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
     private Serializable mSelectedEvent;
