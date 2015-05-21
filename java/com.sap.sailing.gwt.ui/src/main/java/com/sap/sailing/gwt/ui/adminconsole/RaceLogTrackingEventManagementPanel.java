@@ -50,6 +50,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
     private CheckBox trackWind;
+    protected boolean regattaHasCompetitors = false;
     
     public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -351,6 +352,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     @Override
     protected void leaderboardSelectionChanged() {
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
+        regattaHasCompetitors = false;
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
@@ -363,6 +365,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             if (!selectedLeaderboard.type.isMetaLeaderboard()) {
                 trackedRacesCaptionPanel.setVisible(true);
             }
+            
+            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
@@ -370,6 +374,19 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         raceColumnTableSelectionModel.clear();
     }
 
+    
+    private class RegattaLogCallBack implements AsyncCallback<Boolean>{
+        @Override
+        public void onFailure(Throwable caught) {
+            regattaHasCompetitors = false;
+        }
+
+        @Override
+        public void onSuccess(Boolean result) {
+            regattaHasCompetitors = true;
+        }
+    }
+    
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
         sailingService.denoteForRaceLogTracking(leaderboard.name, new AsyncCallback<Void>() {
             @Override
@@ -419,9 +436,12 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
         //prompt user if competitor registrations are missing for same races
         String namesOfRacesMissingRegistrations = "";
-        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
-            if (!doCompetitorResgistrationsExist(race)) {
-                namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
+        
+        if (!regattaHasCompetitors) {
+            for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
+                if (!doCompetitorResgistrationsExist(race)) {
+                    namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
+                }
             }
         }
         if (! namesOfRacesMissingRegistrations.isEmpty()) {
@@ -451,7 +471,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             });
         }
     }
-    
+
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
         new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
                 fleetDTO.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {

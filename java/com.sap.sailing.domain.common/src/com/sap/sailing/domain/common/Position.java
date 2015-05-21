@@ -104,5 +104,16 @@ public interface Position extends Serializable {
      * The method executes efficiently and requires only one call to the cosine method.
      */
     double getQuickApproximateNauticalMileDistance(Position p);
+
+    /**
+     * Computes the intersection of two paths. The first path is defined by the underlying position and the parameter
+     * <code>thisBearing</code>. The second path is defined by parameters <code>to</code> and <code>toBearing</code>
+     * 
+     * @param thisBearing defines first path with <code>this</code> position
+     * @param to defines second path with <code>toBearing</code>
+     * @param toBearing defines second path <code>to</code> position
+     * @return position of intersection. Since there are usually 2 intersections, we return the smaller intersection.
+     */
+    Position getIntersection(Bearing thisBearing, Position to, Bearing toBearing);
     
 }

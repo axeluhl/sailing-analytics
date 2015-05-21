@@ -1261,11 +1261,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String startLineToFirstMarkTriangle(String distanceInMeters);
     String dataMiningComponentsHaveBeenUpdated();
     String dataMiningComponentsNeedReloadDialogMessage();
-    
+
     String noDataForEvent();
     String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String racesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String clone();
+    String changed();
+    String matcher();
+    String any();
+    String urlProviders();
+    String pleaseSelectAURLProvider();
+    String sampleURL(String sampleURL);
+    String sapSportsOn();
+    String followSapSports();
 }

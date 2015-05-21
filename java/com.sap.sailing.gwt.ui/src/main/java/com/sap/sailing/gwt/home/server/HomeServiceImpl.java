@@ -4,13 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -58,6 +56,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -182,9 +181,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             EventHolder holder = pair.getB();
             result.addStageEvent(convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType));
             
-            // TODO implement better that using a hard cast...
-            Collection<URL> videosOfEvent = (Collection<URL>) holder.event.getVideoURLs();
-            if (videosOfEvent.size() > 0 && result.getVideos().size() < MAX_VIDEO_COUNT) {
+            Iterable<URL> videosOfEvent = holder.event.getVideoURLs();
+            if (!Util.isEmpty(videosOfEvent) && result.getVideos().size() < MAX_VIDEO_COUNT) {
                 URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
                 VideoMetadataDTO candidate = new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName());
                 if (candidate.getType() == VideoType.YOUTUBE) {
@@ -279,9 +277,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
 
         boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
         
-        for (Iterator<LeaderboardGroup> iter = event.getLeaderboardGroups().iterator(); iter.hasNext();) {
-            LeaderboardGroup leaderboardGroup = iter.next();
-            
+        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if(leaderboard instanceof RegattaLeaderboard) {
                     Regatta regatta = getService().getRegattaByName(leaderboard.getName());

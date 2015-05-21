@@ -22,7 +22,7 @@
   padding: 1em 0 0.733333333333333em 0;
   border-bottom: 0.266666666666667em solid transparent;
   font-weight: 600;
-  color: #666;
+  color: #333;
   -webkit-transition: 0.2s border ease;
   -moz-transition: 0.2s border ease;
   -o-transition: 0.2s border ease;
@@ -35,7 +35,7 @@
 .solutions_nav_linkactive {
   border-bottom-color: #f0ab00;
   text-decoration: none;
-  color: #333;
+  color: #666;
 }
 .solutions_nav_link:last-child {
   margin-right: 0;
