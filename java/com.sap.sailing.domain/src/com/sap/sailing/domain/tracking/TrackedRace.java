@@ -514,6 +514,9 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
+    /**
+     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}
+     */
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
