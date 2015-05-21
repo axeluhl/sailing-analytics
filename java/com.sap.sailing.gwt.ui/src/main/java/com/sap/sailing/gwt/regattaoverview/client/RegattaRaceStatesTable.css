@@ -1,6 +1,6 @@
 .cellTableWidget {
 	border-spacing: 0px;
-	font-size:18px;
+	font-size:16px;
 }
 .cellTableWidget a {
 	color: black;
@@ -13,14 +13,14 @@
  */
 .cellTableHeader {
 	position: relative;
-	vertical-align: middle;
+	vertical-align: bottom;
 	background-color: #f2f2f2;
 	background-color: #fff;
 	padding: 20px 5px;
 	text-align: left;
 	border-bottom: 1px solid black;
 	text-shadow: none;
-	font-size: 18px;
+	font-size: 16px;
 }
 
 .cellTableHeader:FOCUS {
