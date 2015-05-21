@@ -9,7 +9,7 @@
       <div class="{local_res.css.video_content}">
         <div class="{local_res.css.video_content_item} {local_res.css.videoitem}">
           <div class="{local_res.css.video_content_item_play} {local_res.css.playicon}"></div>
-          <div data-id="<!-- videoId -->" class="{local_res.css.videoplaceholder}">
+          <div class="{local_res.css.videoplaceholder}">
             <div class="{local_res.css.videoplaceholder_image}" style="background-image: url(http://storage.ubidev.net/sap-sailing-analytics/6120578021/desktop/latest/images/home/f1958116.livestream-thumbnail.png);"></div>
           </div>
           <div class="{res.mediaCss.grid}">
@@ -17,11 +17,11 @@
               <!-- IF buttonText ADD class 'small-8' ELSE ADD class 'small-12' -->
               <div class="{local_res.css.video_content_item_info_text} {res.mediaCss.columns} {res.mediaCss.small8}">
                 <!-- IF END -->
-                <!-- IF subtitle ADD class 'video__content__item__info__text__title--small' -->
+                <!-- IF subtitle ADD class 'video__content__item__info__text__title-small' -->
                 <h3 class="{local_res.css.video_content_item_info_text_title} {local_res.css.video_content_item_info_text_titlesmall}">
                   <!-- IF END -->
                   <!-- IF label -->
-                  <div data-labeltype="<!-- label -->" class="{res.mainCss.label}">
+                  <div data-labeltype="TODO" class="{res.mainCss.label}">
                     <!-- label -->
                   </div>
                   <!-- IF END -->
