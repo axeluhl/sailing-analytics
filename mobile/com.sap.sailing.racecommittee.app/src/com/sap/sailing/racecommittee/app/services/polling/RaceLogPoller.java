@@ -1,5 +1,17 @@
 package com.sap.sailing.racecommittee.app.services.polling;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
+import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
+import com.sap.sse.common.Util;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -10,19 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
-import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
-import com.sap.sse.common.Util;
 
 /**
  * <p>

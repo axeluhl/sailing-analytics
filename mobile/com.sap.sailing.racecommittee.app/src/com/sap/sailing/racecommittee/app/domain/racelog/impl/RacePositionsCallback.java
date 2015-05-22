@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import android.content.Context;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
@@ -11,7 +10,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sailing.racecommittee.app.domain.impl.MapMarkerImpl;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

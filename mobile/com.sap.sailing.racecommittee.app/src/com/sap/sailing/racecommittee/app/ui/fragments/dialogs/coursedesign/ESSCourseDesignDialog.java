@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Bundle;
@@ -14,21 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ListView;
-import android.widget.Toast;
-
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
-import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
-import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.*;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -47,6 +33,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ESSCourseDesignDialog extends RaceDialogFragment {
 	// private final static String TAG =

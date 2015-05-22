@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
-import java.util.Collections;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -14,13 +11,15 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListAdapter;
-
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.Collections;
+import java.util.List;
 
 public class ByNameCourseDesignDialog extends RaceDialogFragment {
 

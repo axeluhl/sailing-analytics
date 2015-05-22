@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import com.sap.sailing.domain.base.CourseBase;
@@ -15,8 +14,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.CourseNameAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseFragmentName extends CourseFragment implements CourseNameAdapter.CourseItemClick {
-
-    private static final String TAG = CourseFragmentName.class.getName();
 
     private ListView mListView;
 

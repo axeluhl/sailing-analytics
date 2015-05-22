@@ -1,21 +1,23 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class AutoUpdaterChecker {
 
@@ -176,14 +178,21 @@ public class AutoUpdaterChecker {
             updater.updateFromFile(result);
         }
 
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onError() {
             dialog.dismiss();
+            Drawable drawable;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                drawable = context.getDrawable(android.R.drawable.ic_dialog_alert);
+            } else {
+                drawable = context.getResources().getDrawable(android.R.drawable.ic_dialog_alert);
+            }
             AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
             errorDialog
                 .setTitle(R.string.auto_update)
                 .setMessage(R.string.auto_update_error)
-                .setIcon(context.getResources().getDrawable(android.R.drawable.ic_dialog_alert))
+                .setIcon(drawable)
                 .setPositiveButton(context.getString(android.R.string.ok), new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -204,6 +213,5 @@ public class AutoUpdaterChecker {
             return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(), serverUrl.getPath()
                     + "/apps/" + apkFileName);
         }
-    };
-
+    }
 }

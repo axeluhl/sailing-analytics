@@ -9,35 +9,17 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRa
 import com.sap.sailing.racecommittee.app.R;
 
 public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<GateStartRacingProcedure> {
-    
-    private final ChangeListener changeListener;
-    
+
     private TextView pathfinderTextView;
     private TextView gateLaunchTimeTextView;
-    
+
     public GateStartStartphaseRaceFragment() {
-        this.changeListener = new ChangeListener();
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
     }
-    
-    @Override
-    public void onStart() {
-        super.onStart();
-
-//        getRacingProcedure().addChangedListener(changeListener);
-    }
-    
-    @Override
-    public void onStop() {
-        super.onStop();
-
-//        getRacingProcedure().removeChangedListener(changeListener);
-    }
-
 
     @Override
     protected void setupUi() {

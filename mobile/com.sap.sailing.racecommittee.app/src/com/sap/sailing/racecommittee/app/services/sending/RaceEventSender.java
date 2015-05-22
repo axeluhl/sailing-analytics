@@ -1,17 +1,15 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
-import java.io.UnsupportedEncodingException;
-
-import org.json.simple.JSONObject;
-
 import android.app.Service;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import org.json.simple.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 
 public class RaceEventSender implements RaceLogChangedListener {
     private static final String TAG = RaceEventSender.class.getName();

@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -12,15 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.TimePicker;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
@@ -43,6 +33,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceC
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.Calendar;
+import java.util.Date;
 
 public class SetStartTimeRaceFragment extends RaceFragment {
 

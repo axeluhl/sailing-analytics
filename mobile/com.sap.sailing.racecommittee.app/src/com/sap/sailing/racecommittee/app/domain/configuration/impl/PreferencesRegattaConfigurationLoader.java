@@ -1,18 +1,10 @@
 package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.*;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
@@ -20,6 +12,9 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 

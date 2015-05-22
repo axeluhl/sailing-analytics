@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
@@ -22,6 +19,8 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Date;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
     

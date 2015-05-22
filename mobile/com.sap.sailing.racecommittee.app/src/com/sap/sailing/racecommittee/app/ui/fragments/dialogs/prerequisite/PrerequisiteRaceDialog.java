@@ -2,10 +2,9 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite;
 
 import android.app.Activity;
 import android.os.Bundle;
-
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public abstract class PrerequisiteRaceDialog<PrerequisiteType extends RacingProcedurePrerequisite, ChosenType> extends

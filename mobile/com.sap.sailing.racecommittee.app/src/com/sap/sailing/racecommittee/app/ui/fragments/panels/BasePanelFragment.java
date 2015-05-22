@@ -7,7 +7,6 @@ import android.support.annotation.IdRes;
 import android.view.View;
 import android.widget.ImageView;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;

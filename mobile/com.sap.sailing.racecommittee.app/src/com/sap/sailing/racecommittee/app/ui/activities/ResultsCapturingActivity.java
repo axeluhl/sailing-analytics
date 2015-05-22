@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -10,25 +7,21 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
 import com.sap.sailing.racecommittee.app.ui.views.CameraView;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 // Deprecation of Camera API.
 // New Camera API in Android 5.0

@@ -117,21 +117,21 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     private void loadCourses(final EventBase event) {
-        setSupportProgressBarIndeterminateVisibility(true);
+        setProgressSpinnerVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of courses from data manager");
         getLoaderManager().initLoader(CourseLoaderId, null, dataManager.createCourseAreasLoader(event, new CourseLoadClient()));
     }
 
     private void loadRaces(final CourseArea courseArea) {
-        setSupportProgressBarIndeterminateVisibility(true);
+        setProgressSpinnerVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
         getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
     private void loadEvents() {
-        setSupportProgressBarIndeterminateVisibility(true);
+        setProgressSpinnerVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of events from data manager");
         getLoaderManager().initLoader(EventsLoaderId, null, dataManager.createEventsLoader(new EventLoadClient()));
@@ -408,10 +408,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }).run();
     }
 
-    @Override
-    public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
-        super.setSupportProgressBarIndeterminateVisibility(visible);
-
+    public void setProgressSpinnerVisibility(boolean visible) {
         if (mProgressSpinner != null) {
             if (visible) {
                 mProgressSpinner.setVisibility(View.VISIBLE);
@@ -525,13 +522,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         @Override
         public void onLoadFailed(Exception ex) {
-            setSupportProgressBarIndeterminateVisibility(false);
+            setProgressSpinnerVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
                 .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        setSupportProgressBarIndeterminateVisibility(true);
+                        setProgressSpinnerVisibility(true);
 
                         ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
                         getLoaderManager().restartLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
@@ -559,7 +556,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
 
-            setSupportProgressBarIndeterminateVisibility(false);
+            setProgressSpinnerVisibility(false);
         }
     }
 
@@ -567,13 +564,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         @Override
         public void onLoadFailed(Exception ex) {
-            setSupportProgressBarIndeterminateVisibility(false);
+            setProgressSpinnerVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
                 .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        setSupportProgressBarIndeterminateVisibility(true);
+                        setProgressSpinnerVisibility(true);
                         dialog.cancel();
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -587,7 +584,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         @Override
         public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
             Toast.makeText(RacingActivity.this, getString(R.string.loading_events_succeded), Toast.LENGTH_SHORT).show();
-            setSupportProgressBarIndeterminateVisibility(false);
+            setProgressSpinnerVisibility(false);
 
             for (EventBase event : data) {
                 dataManager.getDataStore().addEvent(event);
@@ -608,7 +605,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         @Override
         public void onLoadFailed(Exception reason) {
-            setSupportProgressBarIndeterminateVisibility(false);
+            setProgressSpinnerVisibility(false);
             ExLog.e(getApplicationContext(), TAG, "Errors loading CourseData");
             ExLog.e(getApplicationContext(), TAG, reason.getMessage());
         }
@@ -617,7 +614,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
             String toastText = getString(R.string.loading_of_course_area_succeeded);
             Toast.makeText(RacingActivity.this, toastText, Toast.LENGTH_SHORT).show();
-            setSupportProgressBarIndeterminateVisibility(false);
+            setProgressSpinnerVisibility(false);
 
             for (CourseArea course : data) {
                 if (course.getId().toString().equals(mCourseAreaId.toString())) {

@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import android.content.Context;
-
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;

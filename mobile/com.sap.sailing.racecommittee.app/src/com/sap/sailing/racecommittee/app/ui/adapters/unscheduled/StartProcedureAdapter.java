@@ -1,14 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
 
-import java.util.List;
-
-import android.text.TextUtils;
-import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.app.Activity;
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,7 +10,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.util.List;
 
 public class StartProcedureAdapter extends BaseAdapter implements OnClickListener {
 

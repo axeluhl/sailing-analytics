@@ -1,20 +1,18 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
-import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import android.content.Context;
 import android.content.Intent;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class EventRestorer implements MessageRestorer {
     private final static String TAG = EventRestorer.class.getName();

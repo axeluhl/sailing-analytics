@@ -1,43 +1,20 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.*;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
-import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MarkImpl;
-import com.sap.sailing.domain.base.impl.StrippedEventImpl;
+import com.sap.sailing.domain.base.impl.*;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
@@ -56,6 +33,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public class OfflineDataManager extends DataManager {
 

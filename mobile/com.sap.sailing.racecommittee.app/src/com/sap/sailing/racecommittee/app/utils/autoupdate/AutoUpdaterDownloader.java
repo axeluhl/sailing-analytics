@@ -1,11 +1,10 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.net.URL;
-
 import android.content.Context;
 import android.os.AsyncTask;
-
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
+
+import java.net.URL;
 
 public abstract class AutoUpdaterDownloader<T> extends AsyncTask<URL, Float, T> {
 

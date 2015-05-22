@@ -16,17 +16,16 @@
 
 package com.sap.sailing.racecommittee.app.ui.views;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Set;
-
 import android.content.Context;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.util.AttributeSet;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * Applies the fix of

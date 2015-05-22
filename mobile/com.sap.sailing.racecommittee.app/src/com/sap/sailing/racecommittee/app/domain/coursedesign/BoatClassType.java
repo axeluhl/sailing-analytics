@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 @SuppressWarnings("serial")
 public enum BoatClassType {
     boatClass470erMen("470er Men", new HashMap<CourseLayouts, TargetTime>() {

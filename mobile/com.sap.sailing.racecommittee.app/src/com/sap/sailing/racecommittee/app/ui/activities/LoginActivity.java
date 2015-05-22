@@ -299,7 +299,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadFailed(Exception reason) {
-                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         if (reason instanceof FileNotFoundException) {
@@ -316,7 +315,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         // this is our 'global' configuration, let's store it in app preferences
@@ -344,7 +342,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             // always reload the configuration...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
-            setSupportProgressBarIndeterminate(false);
             progressDialog.dismiss();
         }
     }

@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import android.content.Context;
-
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 

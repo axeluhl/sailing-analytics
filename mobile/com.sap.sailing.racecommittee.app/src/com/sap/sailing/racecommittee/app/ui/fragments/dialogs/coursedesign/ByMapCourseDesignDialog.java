@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
-import java.text.DecimalFormat;
-
 import android.app.DialogFragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,14 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.Spinner;
-import android.widget.Toast;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -33,25 +25,18 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesign;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesignComputer;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.*;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ByMapCourseDesignDialog extends RaceDialogFragment {
+import java.text.DecimalFormat;
 
-    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
+public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
     private MapView mMapView;
     private GoogleMap courseAreaMap;
@@ -61,7 +46,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
     private Button publishButton;
     private Button unpublishButton;
-    private ImageButton windButton;
     private Spinner spinnerBoatClass;
     private Spinner spinnerCourseLayout;
     private Spinner spinnerNumberOfRounds;
@@ -73,8 +57,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
     private ArrayAdapter<TargetTime> targetTimeAdapter;
 
-    private WindFragment windFragment;
-    
     public ByMapCourseDesignDialog() {
         super();
         // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" -
@@ -132,17 +114,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
         });
 
-        windButton = (ImageButton) getView().findViewById(R.id.windButton);
-        /*windButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-            	((RacingActivity)getActivity()).loadWindFragment();
-            	//TODO: catch result WIND_ACTIVITY_REQUEST_CODE !
-            }
-
-        });
-		*/
         courseDesignComputer = new CourseDesignComputer();
 
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
@@ -165,15 +136,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_set_wind), Toast.LENGTH_LONG).show();
         }
-    }
-
-
-    private void onWindEntered(Wind windFix) {
-        getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
-        courseDesignComputer.setStartBoatPosition(windFix.getPosition());
-        courseDesignComputer.setWindDirection(windFix.getBearing());
-        courseDesignComputer.setWindSpeed(windFix.getKnots());
-        recomputeCourseDesign();
     }
 
     private void recomputeCourseDesign() {

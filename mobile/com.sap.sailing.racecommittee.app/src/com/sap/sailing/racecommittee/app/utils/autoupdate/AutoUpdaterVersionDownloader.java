@@ -1,16 +1,15 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
+import android.content.Context;
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
+import com.sap.sse.common.Util;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
-
-import android.content.Context;
-
-import com.sap.sailing.android.shared.data.http.HttpGetRequest;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
-import com.sap.sse.common.Util;
 
 public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pair<Integer, String>> {
 

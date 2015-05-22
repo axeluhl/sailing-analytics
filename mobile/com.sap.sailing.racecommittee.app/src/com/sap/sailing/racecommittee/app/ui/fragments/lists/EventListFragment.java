@@ -1,18 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.Collection;
-
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-
-import android.os.Bundle;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+
+import java.util.Collection;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 

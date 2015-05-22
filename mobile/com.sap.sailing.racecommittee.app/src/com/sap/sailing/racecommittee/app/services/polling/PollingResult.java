@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.services.polling;
 
+import com.sap.sse.common.Util;
+
 import java.io.InputStream;
 import java.io.Serializable;
-
-import com.sap.sse.common.Util;
 
 public class PollingResult {
     public final boolean isSuccess;

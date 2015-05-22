@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+
+import java.io.Serializable;
 
 public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements ManagedRaceIdentifier {
 

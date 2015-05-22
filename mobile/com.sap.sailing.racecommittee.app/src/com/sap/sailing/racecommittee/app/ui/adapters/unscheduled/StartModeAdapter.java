@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,11 +9,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.util.List;
 
 public class StartModeAdapter extends BaseAdapter implements OnClickListener {
 

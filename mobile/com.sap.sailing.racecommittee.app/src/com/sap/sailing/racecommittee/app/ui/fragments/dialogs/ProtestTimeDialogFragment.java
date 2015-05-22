@@ -11,7 +11,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TimePicker;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;

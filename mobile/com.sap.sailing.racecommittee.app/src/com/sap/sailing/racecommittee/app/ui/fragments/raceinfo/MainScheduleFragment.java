@@ -32,8 +32,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     public static final String START_TIME = "startTime";
 
-    private static final String TAG = MainScheduleFragment.class.getName();
-
     private TextView mStartTime;
     private String mStartTimeString;
     private TimePoint mProtestTime;

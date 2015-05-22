@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.util.Calendar;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,12 +8,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.Calendar;
 
 public class RaceFinishedTimeDialog extends RaceDialogFragment {
 

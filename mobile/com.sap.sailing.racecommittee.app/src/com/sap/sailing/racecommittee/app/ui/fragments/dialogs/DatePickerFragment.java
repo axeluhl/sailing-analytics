@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.DatePicker;
-
 import com.sap.sailing.racecommittee.app.R;
 
 public class DatePickerFragment extends LoggableDialogFragment implements DatePickerDialog.OnDateSetListener,

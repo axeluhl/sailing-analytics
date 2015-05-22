@@ -1,18 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.finishing;
 
-import java.io.Serializable;
-import java.util.List;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.Util;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class CompetitorPositioningListAdapter extends ArrayAdapter<Util.Triple<Serializable, String, MaxPointsReason>> {
     

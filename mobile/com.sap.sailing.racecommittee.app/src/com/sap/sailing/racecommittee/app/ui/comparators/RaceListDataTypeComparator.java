@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.comparators;
 
-import java.util.Comparator;
-
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+
+import java.util.Comparator;
 
 public class RaceListDataTypeComparator implements Comparator<RaceListDataType> {
 

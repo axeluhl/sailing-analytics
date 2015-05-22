@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.chooser;
 
 import android.content.Context;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
