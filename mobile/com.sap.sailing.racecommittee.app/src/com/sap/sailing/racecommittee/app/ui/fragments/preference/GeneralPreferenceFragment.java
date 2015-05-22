@@ -75,8 +75,10 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     protected void setupDeveloperOptions() {
         PreferenceScreen screen = getPreferenceScreen();
         PreferenceCategory category = (PreferenceCategory)findPreference(getString(R.string.preference_developer_key));
-        if (!BuildConfig.DEBUG && screen != null && category != null) {
-            screen.removePreference(category);
+        if (!BuildConfig.DEBUG) {
+            if (screen != null && category != null) {
+                screen.removePreference(category);
+            }
         }
     }
 

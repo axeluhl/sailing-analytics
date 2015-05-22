@@ -248,8 +248,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
-        if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
-            GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
+        if (!BuildConfig.DEBUG) {
+            if (resultCode != ConnectionResult.SUCCESS) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
+            }
         }
 
         if (mSelectedEvent != null && preferences.isSetUp()) {
