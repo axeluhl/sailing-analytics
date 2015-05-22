@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,10 +14,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import com.sap.sailing.racecommittee.app.R;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.sap.sailing.racecommittee.app.R;
 
 public class PhotoAdapter extends ArrayAdapter<Uri> {
 

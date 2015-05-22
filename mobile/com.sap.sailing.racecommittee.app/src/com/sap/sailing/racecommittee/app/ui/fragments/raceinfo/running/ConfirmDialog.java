@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import com.sap.sailing.racecommittee.app.R;
 
 public class ConfirmDialog extends DialogFragment {

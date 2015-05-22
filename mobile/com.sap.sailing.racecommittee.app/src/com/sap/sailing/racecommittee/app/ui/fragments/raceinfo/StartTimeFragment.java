@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -32,7 +33,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
 
-    private static final String TAG = StartTimeFragment.class.getName();
     private static final String START_MODE = "startMode";
     private static final int MAX_DAYS = 30;
 

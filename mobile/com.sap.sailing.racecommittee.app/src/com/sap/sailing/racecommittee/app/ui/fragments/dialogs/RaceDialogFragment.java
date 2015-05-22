@@ -1,7 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import java.io.Serializable;
+
 import android.app.Activity;
 import android.os.Bundle;
+
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -9,8 +12,6 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
-
-import java.io.Serializable;
 
 public abstract class RaceDialogFragment extends LoggableDialogFragment implements TickListener {
 

@@ -1,12 +1,13 @@
 package com.sap.sailing.racecommittee.app.data.parsers;
 
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import java.io.Reader;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.io.Reader;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class DeviceConfigurationParser implements DataParser<DeviceConfiguration> {
     

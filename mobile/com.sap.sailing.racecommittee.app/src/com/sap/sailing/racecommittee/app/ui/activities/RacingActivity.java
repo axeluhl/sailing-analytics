@@ -17,7 +17,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -72,9 +71,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private static final String RACE = "race";
 
     private static final int RacesLoaderId = 2;
-    private static final int EventsLoaderId = 1;
-    private static final int CourseLoaderId = 0;
-
     private static ProgressBar mProgressSpinner;
 
     private IntentReceiver mReceiver;
@@ -84,24 +80,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
     private WindFragment windFragment;
-    private Serializable mEventId;
-    private EventBase mEvent;
     private CourseArea mCourseArea;
-    private Serializable mCourseAreaId;
     private TimePoint startTime;
-
-    private void setupFragments() {
-        new Handler().post(new Runnable() {
-
-            public void run() {
-                loadRaces(mCourseArea);
-                loadNavDrawer(mCourseArea);
-                if (mSelectedRace == null) {
-                    loadWelcomeFragment();
-                }
-            }
-        });
-    }
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -128,13 +108,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             return null;
         }
         return eventId;
-    }
-
-    private void loadCourses(final EventBase event) {
-        setProgressSpinnerVisibility(true);
-
-        ExLog.i(this, TAG, "Issuing loading of courses from data manager");
-        getLoaderManager().initLoader(CourseLoaderId, null, dataManager.createCourseAreasLoader(event, new CourseLoadClient()));
     }
 
     private void loadRaces(final CourseArea courseArea) {
@@ -215,7 +188,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
-        mCourseAreaId = courseAreaId;
         if (courseAreaId == null) {
             throw new IllegalStateException("There was no course area id transmitted...");
         }
@@ -226,8 +198,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (eventId == null) {
             throw new IllegalStateException("There was no event id transmitted...");
         }
-        mEventId = eventId;
-
         EventBase event = dataManager.getDataStore().getEvent(eventId);
         if (event == null) {
             ExLog.e(this, TAG, "Noooo the event is null :/");
@@ -567,32 +537,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    private class CourseLoadClient implements LoadClient<Collection<CourseArea>> {
-
-        @Override
-        public void onLoadFailed(Exception reason) {
-            setProgressSpinnerVisibility(false);
-            ExLog.e(getApplicationContext(), TAG, "Errors loading CourseData");
-            ExLog.e(getApplicationContext(), TAG, reason.getMessage());
-        }
-
-        @Override
-        public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
-            String toastText = getString(R.string.loading_of_course_area_succeeded);
-            Toast.makeText(RacingActivity.this, toastText, Toast.LENGTH_SHORT).show();
-            setProgressSpinnerVisibility(false);
-
-            for (CourseArea course : data) {
-                if (course.getId().toString().equals(mCourseAreaId.toString())) {
-                    mCourseArea = course;
-                    setupFragments();
-                }
-            }
-        }
-    }
-
     private class IntentReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();

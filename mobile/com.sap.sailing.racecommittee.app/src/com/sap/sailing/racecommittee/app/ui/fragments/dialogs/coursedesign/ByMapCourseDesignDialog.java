@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
+import java.text.DecimalFormat;
+
 import android.app.DialogFragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,8 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -28,13 +35,16 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.*;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesign;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesignComputer;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.DecimalFormat;
 
 public class ByMapCourseDesignDialog extends RaceDialogFragment {
 

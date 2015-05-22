@@ -44,12 +44,8 @@ public class ThemeHelper {
         Resources system = Resources.getSystem();
         int hourId = system.getIdentifier("hour", "id", "android");
         int minuteId = system.getIdentifier("minute", "id", "android");
-        int amPmId = system.getIdentifier("amPm", "id", "android");
-
         NumberPicker hourPicker = (NumberPicker) timePicker.findViewById(hourId);
         NumberPicker minutePicker = (NumberPicker) timePicker.findViewById(minuteId);
-        NumberPicker amPmPicker = (NumberPicker) timePicker.findViewById(amPmId);
-
         if (hourPicker != null && setPickerTextColor(context, hourPicker, color)) {
             if (minutePicker != null && setPickerTextColor(context, minutePicker, color)) {
                 return true;

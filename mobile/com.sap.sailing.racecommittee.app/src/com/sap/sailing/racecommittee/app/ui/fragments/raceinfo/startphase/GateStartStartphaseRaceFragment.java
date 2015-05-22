@@ -3,10 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 
 public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<GateStartRacingProcedure> {
@@ -41,19 +38,4 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
         }
         super.setupUi();
     }
-    
-    private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
-
-        @Override
-        public void onGateLaunchTimeChanged(ReadonlyGateStartRacingProcedure gateStartRacingProcedure) {
-            setupUi();
-        }
-
-        @Override
-        public void onPathfinderChanged(ReadonlyGateStartRacingProcedure procedure) {
-            setupUi();
-        }
-        
-    }
-
 }

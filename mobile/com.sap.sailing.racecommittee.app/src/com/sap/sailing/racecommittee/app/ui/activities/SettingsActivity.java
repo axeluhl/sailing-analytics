@@ -1,12 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.util.List;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import com.sap.sailing.racecommittee.app.R;
 
-import java.util.List;
+import com.sap.sailing.racecommittee.app.R;
 
 public class SettingsActivity extends PreferenceActivity {
 

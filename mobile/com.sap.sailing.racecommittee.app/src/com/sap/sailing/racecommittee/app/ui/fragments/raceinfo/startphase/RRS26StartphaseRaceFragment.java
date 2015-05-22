@@ -1,12 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
 import android.os.Bundle;
-import android.widget.ImageButton;
 
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26ChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 
 public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS26RacingProcedure> {
 

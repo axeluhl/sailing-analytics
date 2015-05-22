@@ -7,6 +7,7 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.AsyncTask;
+
 import com.sap.sailing.android.shared.data.http.HttpJsonGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sse.common.Util;
