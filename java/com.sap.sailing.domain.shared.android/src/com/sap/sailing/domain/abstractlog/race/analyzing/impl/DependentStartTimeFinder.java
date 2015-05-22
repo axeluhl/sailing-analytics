@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -8,6 +10,7 @@ import com.sap.sse.common.TimePoint;
 
 public class DependentStartTimeFinder extends RaceLogAnalyzer<TimePoint> {
 
+    private static final Logger logger = Logger.getLogger(DependentStartTimeFinder.class.getName());
     private final RaceLogResolver resolver;
     
     public DependentStartTimeFinder(RaceLogResolver resolver, RaceLog raceLog) {
@@ -26,7 +29,7 @@ public class DependentStartTimeFinder extends RaceLogAnalyzer<TimePoint> {
                     DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(resolver);
                      return dependentStartTimeResolver.resolve((RaceLogDependentStartTimeEvent) event);
                 } catch (RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException e) {
-                    //TODO: Log error
+                    logger.warning("Regata Like Name of identifier doesn't match actual RegattaLikeName");
                     return null;
                 }
             }
