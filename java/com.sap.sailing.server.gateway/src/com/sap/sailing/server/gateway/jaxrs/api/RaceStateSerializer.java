@@ -7,10 +7,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastFlagsFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
@@ -18,12 +17,23 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Fleet>> {
+    private HasRegattaLike regattaLike = null;
+
+    public RaceStateSerializer(Leaderboard leaderboard) {
+        if (leaderboard instanceof HasRegattaLike){
+            regattaLike  = (HasRegattaLike) leaderboard;
+        }
+    }
+
     @Override
     public JSONObject serialize(Pair<RaceColumn, Fleet> raceColumnAndFleet) {
         RaceColumn raceColumn = raceColumnAndFleet.getA();
@@ -37,7 +47,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver(regattaLike),raceLog);
             RaceLogRaceStatus status = state.getStatus();
             TimePoint startTime = state.getStartTime();
             TimePoint finishedTime = state.getFinishedTime();
@@ -79,14 +89,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = new StartTimeFinder(raceLog).analyze();
-            
-            TimePoint startTime = null;
-            if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
-                startTime = startTimeFinderResult.getB();
-            } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)){
-                //FIXME: fetch start time e.g. via DepedentStartTimeAnalyzer
-            }
+            TimePoint startTime = new DependentStartTimeFinder(new ServerSideRaceLogResolver(regattaLike), raceLog).analyze();
             
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
             RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();

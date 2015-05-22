@@ -28,15 +28,18 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
     }
     
     private final EventDispatcher eventDispatcher;
+    private RaceLogResolver resolver;
     
-    public RaceStatusAnalyzer(RaceLog raceLog, ReadonlyRacingProcedure racingProcedure) {
+    public RaceStatusAnalyzer(RaceLogResolver resolver, RaceLog raceLog, ReadonlyRacingProcedure racingProcedure) {
         super(raceLog);
         this.eventDispatcher = new EventDispatcher(new StandardClock(), racingProcedure);
+        this.resolver = resolver;
     }
     
-    public RaceStatusAnalyzer(RaceLog raceLog, Clock clock, ReadonlyRacingProcedure racingProcedure) {
+    public RaceStatusAnalyzer(RaceLogResolver resolver, RaceLog raceLog, Clock clock, ReadonlyRacingProcedure racingProcedure) {
         super(raceLog);
         this.eventDispatcher = new EventDispatcher(clock, racingProcedure);
+        this.resolver = resolver;
     }
 
     @Override
@@ -70,10 +73,15 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
         @Override
         public void visit(RaceLogStartTimeEvent event) {
+            TimePoint startTime = event.getStartTime();
+            setRaceLogStatusBasedOnStartTime(startTime);
+        }
+
+        private void setRaceLogStatusBasedOnStartTime(TimePoint startTime) {
             TimePoint now = clock.now();
-            if (racingProcedure.isStartphaseActive(event.getStartTime(), now)) {
+            if (racingProcedure.isStartphaseActive(startTime, now)) {
                 nextStatus = RaceLogRaceStatus.STARTPHASE;
-            } else if (now.before(event.getStartTime())) {
+            } else if (now.before(startTime)) {
                 nextStatus = RaceLogRaceStatus.SCHEDULED;
             } else {
                 nextStatus = RaceLogRaceStatus.RUNNING;
@@ -87,9 +95,13 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
         @Override
         public void visit(RaceLogDependentStartTimeEvent event) {
-            //FIXME: Calculate RaceStatus based on status of Fleet on which race depends on or use StartTimeFinder
+            DependentStartTimeResolver startTimeResolver = new DependentStartTimeResolver(resolver);
+            try {
+                TimePoint startTime = startTimeResolver.resolve(event);
+                setRaceLogStatusBasedOnStartTime(startTime);
+            } catch (RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException e) {
+                nextStatus = RaceLogRaceStatus.UNKNOWN;
+            }
         };
-        
     };
-
 }

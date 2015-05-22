@@ -1,33 +1,17 @@
 package com.sap.sailing.domain.abstractlog.race;
 
+import com.sap.sse.common.Util.Triple;
 
-public class SimpleRaceLogIdentifier{
+public interface SimpleRaceLogIdentifier {
 
-    private final String regattaLikeParentName;
-    private final String raceColumnName;
-    private final String fleetName;
+    String getRegattaLikeParentName();
+
+    String getRaceColumnName();
+
+    String getFleetName();
     
-    public SimpleRaceLogIdentifier(String regattaLikeParentName, String raceColumnName, String fleetName) {
-        this.regattaLikeParentName = regattaLikeParentName;
-        this.raceColumnName = raceColumnName;
-        this.fleetName = fleetName;
-    }
+    Triple<String, String, String> getIdentifier();
+    
+    String getDeprecatedIdentifier();
 
-    public String getRegattaLikeParentName() {
-        return regattaLikeParentName;
-    }
-
-    public String getRaceColumnName() {
-        return raceColumnName;
-    }
-
-    public String getFleetName() {
-        return fleetName;
-    }
-
-    @Override
-    public String toString() {
-        return "SimpleRaceLogIdentifier [regattaLikeParentName=" + regattaLikeParentName + ", raceCloumnName=" + raceColumnName
-                + ", fleetName=" + fleetName + "]";
-    }
 }

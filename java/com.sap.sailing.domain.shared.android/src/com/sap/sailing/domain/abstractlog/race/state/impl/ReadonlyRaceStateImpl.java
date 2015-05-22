@@ -5,17 +5,17 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * Implementation of {@link ReadonlyRaceState}. Use the static factory methods to instantiate your race state.
@@ -50,16 +49,16 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     /**
      * Creates a {@link ReadonlyRaceState}.
      */
-    public static ReadonlyRaceState create(RaceLog raceLog,
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog,
             ConfigurationLoader<RegattaConfiguration> configurationLoader) {
-        return new ReadonlyRaceStateImpl(raceLog, new ReadonlyRacingProcedureFactory(configurationLoader));
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(configurationLoader));
     }
 
     /**
      * Creates a {@link ReadonlyRaceState} with an empty configuration ( {@link EmptyRegattaConfiguration} ).
      */
-    public static ReadonlyRaceState create(RaceLog raceLog) {
-        return new ReadonlyRaceStateImpl(raceLog, new ReadonlyRacingProcedureFactory(new EmptyRegattaConfiguration()));
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(new EmptyRegattaConfiguration()));
     }
 
     /**
@@ -83,7 +82,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private RaceStatusAnalyzer statusAnalyzer;
     private final RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
 
-    private final StartTimeFinder startTimeAnalyzer;
+    private final DependentStartTimeFinder startTimeAnalyzer;
     private final FinishingTimeFinder finishingTimeAnalyzer;
     private final FinishedTimeFinder finishedTimeAnalyzer;
     private final ProtestStartTimeFinder protestTimeAnalyzer;
@@ -116,25 +115,28 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CompetitorResults cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
+    private RaceLogResolver raceLogResolver;
 
-    private ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureFactory procedureFactory) {
-        this(raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */ true);
+    private ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, RacingProcedureFactory procedureFactory) {
+        this(raceLogResolver, raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */ true);
     }
 
     /**
+     * @param raceLogResolver 
      * @param update
      *            if <code>true</code>, the race state will be updated whenever the underlying <code>raceLog</code>
      *            changes.
      */
-    protected ReadonlyRaceStateImpl(RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory, boolean update) {
+    protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory, boolean update) {
         this.raceLog = raceLog;
+        this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
         this.changedListeners = new RaceStateChangedListeners();
 
         this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         this.statusAnalyzerClock = analyzersClock;
         // status analyzer will get initialized when racing procedure is ready
-        this.startTimeAnalyzer = new StartTimeFinder(raceLog);
+        this.startTimeAnalyzer = new DependentStartTimeFinder(raceLogResolver, raceLog);
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
         this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
         this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
@@ -315,14 +317,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
         }
 
-        Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = startTimeAnalyzer.analyze();
-        TimePoint startTime = null;
-        if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
-            startTime = startTimeFinderResult.getB();
-        } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)){
-            //FIXME: fetch start time e.g. via DepedentStartTimeAnalyzer
-        }
-        
+        TimePoint startTime = startTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedStartTime, startTime)) {
             cachedStartTime = startTime;
             changedListeners.onStartTimeChanged(this);
@@ -382,7 +377,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
 
-        statusAnalyzer = new RaceStatusAnalyzer(raceLog, statusAnalyzerClock, racingProcedure);
+        statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update();
     }

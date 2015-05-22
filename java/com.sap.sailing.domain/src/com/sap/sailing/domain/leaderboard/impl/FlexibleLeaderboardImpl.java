@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
@@ -22,8 +25,10 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
 import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -290,5 +295,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
         result.addAll(viaLog);
         return result;
+    }
+
+    @Override
+    public RaceLog getRacelog(SimpleRaceLogIdentifier identifier) throws RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException {
+        if (!identifier.getRegattaLikeParentName().equals(this.getName())){
+            throw new RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException();
+        }
+        
+        RaceLogIdentifier raceLogIdentifier = new RaceLogIdentifierImpl(regattaLikeHelper.getRegattaLikeIdentifier(), identifier.getRaceColumnName(), identifier.getFleetName());
+        
+        return raceLogStore.getRaceLog(raceLogIdentifier, true);
     }
 }

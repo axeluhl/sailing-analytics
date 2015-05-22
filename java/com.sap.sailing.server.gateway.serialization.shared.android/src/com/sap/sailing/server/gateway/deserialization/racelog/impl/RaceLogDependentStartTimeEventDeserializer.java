@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -36,7 +37,7 @@ public class RaceLogDependentStartTimeEventDeserializer extends RaceLogRaceStatu
 
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
 
-        SimpleRaceLogIdentifier dependentOnRace = new SimpleRaceLogIdentifier(regattaLikeParentName, raceColumnName, fleetName);
+        SimpleRaceLogIdentifier dependentOnRace = new SimpleRaceLogIdentifierImpl(regattaLikeParentName, raceColumnName, fleetName);
         
         return factory.createDependentStartTimeEvent(event.getCreatedAt(), author, event.getLogicalTimePoint(), event.getId(), event.getInvolvedBoats(), 
                 event.getPassId(), dependentOnRace, startTimeDifference);

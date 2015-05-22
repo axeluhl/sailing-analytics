@@ -5,7 +5,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 public class FlexibleLeaderboardAsRegattaLikeIdentifier implements RegattaLikeIdentifier {
     private static final long serialVersionUID = -2770908733100377885L;
     private final String leaderboardName;
-    
+
     public FlexibleLeaderboardAsRegattaLikeIdentifier(FlexibleLeaderboard leaderboard) {
         this.leaderboardName = leaderboard.getName();
     }
@@ -44,7 +44,7 @@ public class FlexibleLeaderboardAsRegattaLikeIdentifier implements RegattaLikeId
             return false;
         return true;
     }
-    
+
     @Override
     public String getIdentifierType() {
         return FlexibleLeaderboard.class.getName();

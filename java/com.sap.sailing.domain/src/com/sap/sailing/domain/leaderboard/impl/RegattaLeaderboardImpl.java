@@ -3,6 +3,9 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -113,5 +116,17 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;
+    }
+    
+    @Override
+    public RaceLog getRacelog(SimpleRaceLogIdentifier identifier) throws RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException {
+        if (!identifier.getRegattaLikeParentName().equals(this.getName())){
+            throw new RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException();
+        }
+        
+        RaceColumnInSeries raceColumn = getRaceColumnByName(identifier.getRaceColumnName());
+        Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
+        
+        return raceColumn.getRaceLog(fleet);
     }
 }

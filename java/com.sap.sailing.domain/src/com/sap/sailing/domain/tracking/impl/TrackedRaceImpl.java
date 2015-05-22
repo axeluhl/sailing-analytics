@@ -37,8 +37,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -104,6 +103,7 @@ import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -675,13 +675,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
                 
-                Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = new StartTimeFinder(raceLog).analyze();
-                if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
-                    startTime = startTimeFinderResult.getB();
-                } else if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_DEPENDENT)){
-                    //FIXME: fetch start time e.g. via DepedentStartTimeAnalyzer
-                }
-                
+                //FIXME: how to get the HasRegattaLike?
+                startTime = new DependentStartTimeFinder(new ServerSideRaceLogResolver(null), raceLog).analyze();
                 if (startTime != null) {
                     break;
                 }
@@ -2991,7 +2986,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (raceStates) {
             result = raceStates.get(raceLog);
             if (result == null) {
-                result = RaceStateImpl.create(raceLog);
+                //FIXME: how to get the corresponding RegattaLike?
+                result = RaceStateImpl.create(new ServerSideRaceLogResolver(null), raceLog);
                 raceStates.put(raceLog, result);
             }
         }

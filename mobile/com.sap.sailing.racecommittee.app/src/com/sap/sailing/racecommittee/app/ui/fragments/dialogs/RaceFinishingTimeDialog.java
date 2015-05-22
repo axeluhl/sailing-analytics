@@ -11,12 +11,11 @@ import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderStatus;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceFinishingTimeDialog extends RaceDialogFragment {
@@ -34,20 +33,8 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
 
     private void setAndAnnounceFinishedTime() {
         TimePoint finishingTime = getFinishingTime();
-        StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
-        
-        Pair<StartTimeFinderStatus, TimePoint> startTimeFinderResult = stf.analyze();
-        if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_UNKNOWN)){
-            return;
-        }
-        
-        TimePoint startTime;
-        if (startTimeFinderResult.getA().equals(StartTimeFinderStatus.STARTTIME_FOUND)){
-            startTime = startTimeFinderResult.getB();
-        } else { //DependentStartTime
-            //FIXME: bug2467 fetch dependentStartTime via DependentStartTimeAnalyzer
-            startTime = MillisecondsTimePoint.now();
-        }
+        DependentStartTimeFinder dependentStartTimeFinder = new DependentStartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
+        TimePoint startTime = dependentStartTimeFinder.analyze();
         
         if (getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
             if (startTime.before(finishingTime)) {

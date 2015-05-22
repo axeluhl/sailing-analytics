@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -79,7 +80,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
-        RaceState state = RaceStateImpl.create(raceLog, author, configurationLoader);
+        RaceState state = RaceStateImpl.create(new AndroidRaceLogResolver(), raceLog, author, configurationLoader);
         return new ManagedRaceImpl(identifier, state);
     }
 

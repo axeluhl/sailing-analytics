@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
@@ -40,27 +41,27 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
-    public static RaceState create(RaceLog raceLog, AbstractLogEventAuthor author) {
-        return create(raceLog, author, new EmptyRegattaConfiguration());
+    public static RaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author) {
+        return create(raceLogResolver, raceLog, author, new EmptyRegattaConfiguration());
     }
     
     /**
      * Creates a {@link RaceState}.
      */
-    public static RaceState create(RaceLog raceLog, AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
-        return new RaceStateImpl(raceLog, author, 
+    public static RaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
+        return new RaceStateImpl(raceLogResolver, raceLog, author, 
                 RaceLogEventFactory.INSTANCE,
                 new RacingProcedureFactoryImpl(author, RaceLogEventFactory.INSTANCE, configuration));
     }
     
-    public RaceStateImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory,
+    public RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureFactory procedureFactory) {
-        this(raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
+        this(raceLogResolver, raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
-    private RaceStateImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
+    private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
-        super(raceLog, analyzersClock, procedureFactory, /* update */ true);
+        super(raceLogResolver, raceLog, analyzersClock, procedureFactory, /* update */ true);
         this.author = author;
         this.factory = eventFactory;
     }
