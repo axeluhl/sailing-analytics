@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;

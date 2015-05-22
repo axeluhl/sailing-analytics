@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -11,8 +17,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TimePicker;
+
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
@@ -23,12 +29,6 @@ import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.utils.ScreenHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 

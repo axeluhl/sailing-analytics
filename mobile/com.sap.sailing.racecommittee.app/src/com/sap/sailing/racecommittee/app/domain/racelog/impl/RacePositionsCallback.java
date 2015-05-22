@@ -1,5 +1,16 @@
 package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import android.content.Context;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -11,17 +22,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sailing.racecommittee.app.domain.impl.MapMarkerImpl;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  *

@@ -5,16 +5,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -30,7 +29,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class SetupPanelFragment extends BasePanelFragment {
 
@@ -139,18 +137,7 @@ public class SetupPanelFragment extends BasePanelFragment {
         if (mCourseValue != null) {
             mCourseValue.setText(null);
             mCourseValue.setCompoundDrawables(null, null, null, null);
-            Drawable drawable = null;
             String courseName = getCourseName();
-            if (!TextUtils.isEmpty(courseName)) {
-                int resId;
-                if (courseName.toLowerCase().startsWith("i")) {
-                    resId = R.attr.course_updown_64dp;
-                } else {
-                    resId = R.attr.course_triangle_64dp;
-                }
-                drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
-            }
-            //mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             mCourseValue.setText(courseName);
         }
 

@@ -1,9 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -15,11 +23,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.Toolbar;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
@@ -42,15 +56,15 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.*;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, OnClickListener {
     private static final String TAG = RacingActivity.class.getName();
@@ -128,13 +142,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
         getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
-    }
-
-    private void loadEvents() {
-        setSupportProgressBarIndeterminateVisibility(true);
-
-        ExLog.i(this, TAG, "Issuing loading of events from data manager");
-        getLoaderManager().initLoader(EventsLoaderId, null, dataManager.createEventsLoader(new EventLoadClient()));
     }
 
     public void loadWindFragment() {
@@ -560,47 +567,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
 
             setSupportProgressBarIndeterminateVisibility(false);
-        }
-    }
-
-    private class EventLoadClient implements LoadClient<Collection<EventBase>> {
-
-        @Override
-        public void onLoadFailed(Exception ex) {
-            setSupportProgressBarIndeterminateVisibility(false);
-            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
-            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
-                .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
-                .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        setSupportProgressBarIndeterminateVisibility(true);
-                        dialog.cancel();
-                    }
-                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    dialog.cancel();
-                }
-            });
-            builder.create().show();
-        }
-
-        @Override
-        public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
-            Toast.makeText(RacingActivity.this, getString(R.string.loading_events_succeded), Toast.LENGTH_SHORT).show();
-            setSupportProgressBarIndeterminateVisibility(false);
-
-            for (EventBase event : data) {
-                dataManager.getDataStore().addEvent(event);
-                if (event.getId().toString().equals(mEventId.toString())) {
-                    mEvent = event;
-                }
-            }
-
-            if (mCourseArea != null) {
-                setupFragments();
-            } else {
-                loadCourses(mEvent);
-            }
         }
     }
 

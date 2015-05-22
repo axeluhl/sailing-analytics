@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
 import android.view.View;
+
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.AppConstants;

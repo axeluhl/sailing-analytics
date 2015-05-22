@@ -1,15 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
+import java.util.ArrayList;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-
-import java.util.ArrayList;
 
 public class FlagsResources {
 

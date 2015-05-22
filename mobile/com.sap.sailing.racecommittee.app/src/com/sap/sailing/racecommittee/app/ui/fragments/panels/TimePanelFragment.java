@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import java.text.SimpleDateFormat;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -22,8 +25,6 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
 
 public class TimePanelFragment extends BasePanelFragment implements TickListener {
 

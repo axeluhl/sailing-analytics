@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
-import org.w3c.dom.Text;
 
 public class SystemInformationActivityHelper {
     private final SendingServiceAwareActivity activity;

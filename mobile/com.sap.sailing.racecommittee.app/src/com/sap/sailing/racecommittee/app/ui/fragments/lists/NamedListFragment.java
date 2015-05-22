@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -11,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -24,10 +29,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Named;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
     implements LoadClient<Collection<T>>, DialogListenerHost {

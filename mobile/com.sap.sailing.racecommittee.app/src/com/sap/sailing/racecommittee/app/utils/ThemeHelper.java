@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.lang.reflect.Field;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -11,12 +13,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-
-import java.lang.reflect.Field;
 
 public class ThemeHelper {
 

@@ -1,11 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.List;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -13,13 +21,9 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.Calendar;
-import java.util.List;
 
 public class RaceFlagViewerFragment extends BaseFragment {
 

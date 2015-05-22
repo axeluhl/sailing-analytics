@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.UUID;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -19,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -50,10 +55,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.UUID;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {

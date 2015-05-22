@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
 import android.os.Bundle;
 import android.widget.TextView;
+
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;

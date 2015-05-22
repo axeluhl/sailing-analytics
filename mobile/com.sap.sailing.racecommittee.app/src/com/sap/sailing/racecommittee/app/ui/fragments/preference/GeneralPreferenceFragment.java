@@ -1,30 +1,31 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.*;
+import android.preference.CheckBoxPreference;
+import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.support.v4.content.LocalBroadcastManager;
+import android.preference.PreferenceCategory;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 

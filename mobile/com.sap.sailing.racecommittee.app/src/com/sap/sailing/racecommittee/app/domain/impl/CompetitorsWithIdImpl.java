@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.Util;
-
-import java.io.Serializable;
 
 public class CompetitorsWithIdImpl {
 

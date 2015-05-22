@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHolder;
@@ -25,12 +32,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.finishing.FinishListPhotoAd
 import com.sap.sailing.racecommittee.app.ui.views.DividerItemDecoration;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class PhotoListFragment extends BaseFragment {
 

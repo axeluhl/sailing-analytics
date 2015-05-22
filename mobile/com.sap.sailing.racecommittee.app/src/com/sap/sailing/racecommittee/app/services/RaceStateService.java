@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
@@ -32,7 +33,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPoller;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;

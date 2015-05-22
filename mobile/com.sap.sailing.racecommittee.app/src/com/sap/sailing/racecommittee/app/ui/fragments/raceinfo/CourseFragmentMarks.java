@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -15,13 +20,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
-import com.sap.sailing.domain.base.*;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -44,11 +54,6 @@ import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 public class CourseFragmentMarks extends CourseFragment implements MarkLongClick, ElementLongClick, EventListener {
 
     private RecyclerViewDragDropManager mDragDropManager;
@@ -62,7 +67,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     private RecyclerView mCurrentCourse;
     private RecyclerView mMarkGrid;
     private CourseElementAdapter mHistoryAdapter;
-    private RecyclerView.Adapter mCourseAdapter;
+    private RecyclerView.Adapter<?> mCourseAdapter;
     private CourseMarkAdapter mMarkAdapter;
     private int mId;
 

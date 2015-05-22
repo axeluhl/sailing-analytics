@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.Calendar;
+
 import android.app.FragmentTransaction;
-import android.os.Bundle;
 import android.support.annotation.IdRes;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-
-import java.util.Calendar;
 
 public class BaseFragment extends RaceFragment {
 

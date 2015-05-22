@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
+import java.util.List;
+
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.MarkType;
-
-import java.util.List;
 
 public abstract class MarkImageHelper {
     protected MarkImageDescriptor defaultCourseMarkDescriptor;

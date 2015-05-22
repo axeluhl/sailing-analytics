@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -8,13 +10,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.text.SimpleDateFormat;
 
 public class RaceFinishingFragment extends BaseFragment {
 

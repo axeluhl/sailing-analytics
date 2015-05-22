@@ -1,16 +1,17 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import android.content.Context;
-import android.net.Uri;
-import android.support.annotation.Nullable;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import android.content.Context;
+import android.net.Uri;
+import android.support.annotation.Nullable;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class CameraHelper {
 

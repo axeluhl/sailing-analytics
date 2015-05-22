@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.finishing;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -11,13 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.List;
 
 public class FinishListPhotoAdapter extends RecyclerView.Adapter<FinishListPhotoAdapter.ViewHolder> {
 

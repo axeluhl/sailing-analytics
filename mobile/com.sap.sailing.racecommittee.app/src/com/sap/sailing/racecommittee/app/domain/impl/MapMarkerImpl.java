@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
 import android.content.Context;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -9,9 +12,6 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sse.common.Color;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;

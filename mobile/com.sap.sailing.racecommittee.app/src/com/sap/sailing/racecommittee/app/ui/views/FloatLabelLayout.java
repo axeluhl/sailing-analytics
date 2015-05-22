@@ -34,6 +34,7 @@ import android.view.animation.Interpolator;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.sap.sailing.racecommittee.app.R;
 
 /**

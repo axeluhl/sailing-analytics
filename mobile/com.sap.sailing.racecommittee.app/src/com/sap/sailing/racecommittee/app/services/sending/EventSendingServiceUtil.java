@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import android.content.Context;
 import android.content.Intent;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
