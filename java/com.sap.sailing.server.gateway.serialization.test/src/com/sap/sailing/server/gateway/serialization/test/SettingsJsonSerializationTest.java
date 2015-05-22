@@ -1,4 +1,4 @@
-package com.sap.sse.common.settings;
+package com.sap.sailing.server.gateway.serialization.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,6 +14,13 @@ import org.junit.Test;
 
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.TextOperator.Operators;
+import com.sap.sse.common.settings.EnumSetting;
+import com.sap.sse.common.settings.ListSetting;
+import com.sap.sse.common.settings.MapSettings;
+import com.sap.sse.common.settings.NumberSetting;
+import com.sap.sse.common.settings.Setting;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.StringSetting;
 import com.sap.sse.settings.SettingsToJsonSerializer;
 
 public class SettingsJsonSerializationTest {

@@ -5,7 +5,7 @@ import java.util.Map;
 public class MapSettings extends AbstractSettings {
     private final Map<String, Setting> settingsMap;
     
-    protected MapSettings(Map<String, Setting> settingsMap) {
+    public MapSettings(Map<String, Setting> settingsMap) {
         this.settingsMap = settingsMap;
     }
 
