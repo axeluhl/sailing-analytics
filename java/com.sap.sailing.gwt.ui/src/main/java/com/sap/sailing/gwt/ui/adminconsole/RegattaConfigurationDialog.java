@@ -385,21 +385,17 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     @Override
     protected RegattaConfigurationDTO getResult() {
         DeviceConfigurationDTO.RegattaConfigurationDTO result = new DeviceConfigurationDTO.RegattaConfigurationDTO();
-
         int index = racingProcedureListBox.getSelectedIndex();
         if (index >= 0) {
             RacingProcedureType type = RacingProcedureType.valueOf(racingProcedureListBox.getValue(index));
             result.defaultRacingProcedureType = type == RacingProcedureType.UNKNOWN ? null : type;
         }
-
         result.defaultRacingProcedureType = getSelectedRacingProcedure();
-
         index = designerModeEntryListBox.getSelectedIndex();
         if (index >= 0) {
             CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
-
         if (rrs26EnabledBox.getValue()) {
             result.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             getRacingProcedureConfigurationResults(result.rrs26Configuration, rrs26ClassFlagListBox, rrs26RecallBox);
