@@ -18,14 +18,14 @@ public class SimpleDispatch implements DispatchAsync {
     
     private static final DispatchRPCAsync dispatchRPC = GWT.create(DispatchRPC.class);
     
-    private final SailingClientFactory clientFactory;
+//    private final SailingClientFactory clientFactory;
     
     private Date lastServerTime;
     
     private Date lastClientTime;
     
     public SimpleDispatch(SailingClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
+//        this.clientFactory = clientFactory;
         ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(RemoteServiceMappingConstants.dispatchServiceRemotePath);
         
     }
