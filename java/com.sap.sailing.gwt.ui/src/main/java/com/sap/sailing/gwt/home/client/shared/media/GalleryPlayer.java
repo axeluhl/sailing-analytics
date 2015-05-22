@@ -37,20 +37,25 @@ public class GalleryPlayer extends ResizeComposite {
         initWidget(uiBinder.createAndBindUi(this));
         selectedIdx = Math.max(selectedIdx, images.indexOf(selected));
         for (ImageMetadataDTO i : images) {
-            mainSliderUi.appendChild(createImgElement(i, false));
-            subSliderUi.appendChild(createImgElement(i, true));
+            mainSliderUi.appendChild(createMainImgElement(i));
+            subSliderUi.appendChild(createThumbImgElement(i));
         }
     }
 
-    private ImageElement createImgElement(ImageMetadataDTO i, boolean thumb) {
+    private ImageElement createThumbImgElement(ImageMetadataDTO i ) {
         ImageElement img = Document.get().createImageElement();
         img.setAttribute("src", i.getSourceRef());
-        if (thumb) {
-            img.setHeight(100);
-            img.setWidth(i.getWidthInPx() * 100 / i.getHeightInPx());
-        } else {
-            img.setPropertyString("height", "100%");
-        }
+        img.setHeight(100);
+        img.setWidth(i.getWidthInPx() * 100 / i.getHeightInPx());
+        return img;
+    }
+    
+    private DivElement createMainImgElement(ImageMetadataDTO i) {
+        DivElement img = Document.get().createDivElement();
+        img.getStyle().setBackgroundImage("url(\"" + i.getSourceRef() + "\")");
+        img.getStyle().setProperty("backgroundSize", "contain");
+        img.getStyle().setProperty("backgroundRepeat", "no-repeat");
+        img.getStyle().setProperty("backgroundPosition", "center");
         return img;
     }
 

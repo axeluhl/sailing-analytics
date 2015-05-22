@@ -6,12 +6,9 @@
 	
 	.mainSlider {
 		height: 100%;
-
 	}
-	.mainSlider img {
-		margin: 10px;
-		height: auto;
-		width: auto;
+	.mainSlider div {
+		height: 100%;
 	}
 	.subSlider img {
 		margin-top: 10px;
