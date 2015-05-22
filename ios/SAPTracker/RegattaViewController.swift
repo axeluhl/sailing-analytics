@@ -211,12 +211,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     // MARK: - Start tracking
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        if isFinished {
-            DataManager.sharedManager.deleteCheckIn(DataManager.sharedManager.selectedCheckIn!)
-            DataManager.sharedManager.saveContext()
-            navigationController!.popViewControllerAnimated(true)
-            return
-        }
         let errorMessage = LocationManager.sharedManager.startTracking()
         if errorMessage != nil {
             let alertView = UIAlertView(title: errorMessage, message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
