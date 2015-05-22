@@ -320,7 +320,7 @@
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
-    <string name="race_begin_finish_header">Beginn der Z</string>
+    <string name="race_begin_finish_header">Beginn des Zieleinlaufs</string>
     <string name="race_begin_finish_current">Aktuelle Zeit verwenden</string>
     <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #FROM#° / #SPEED# kn]]></string>
@@ -401,5 +401,10 @@
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
     <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
+
+    <string name="author_type_officer_start">Startschiff-Wettfahrtleiter</string>
+    <string name="author_type_officer_finish">Zielschiff-Wettfahrtleiter</string>
+    <string name="author_type_shore_control">Regattaleitung an Land</string>
+    <string name="author_viewer">Demo-Modus</string>
 
 </resources>

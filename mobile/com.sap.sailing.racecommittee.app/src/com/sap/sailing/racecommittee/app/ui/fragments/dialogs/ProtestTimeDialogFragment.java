@@ -6,10 +6,12 @@ import android.support.v7.app.AlertDialog;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TimePicker;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -18,6 +20,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.utils.ScreenHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -103,6 +106,15 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         setupRacesList(racesList);
         timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
+
+        ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
+        layoutParams.height = 49 * races.size();
+        int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
+        if (layoutParams.height > screenHeight) {
+            layoutParams.height = screenHeight;
+        }
+        view.setLayoutParams(layoutParams);
+
         return view;
     }
     

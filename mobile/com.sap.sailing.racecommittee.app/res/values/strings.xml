@@ -424,4 +424,9 @@
     <string name="error_wrong_degree_value_title">Error</string>
     <string name="error_wrong_degree_value_message">Please provide a value between 0 and 360</string>
 
+    <string name="author_type_officer_start">Race Officer on Start Vessel</string>
+    <string name="author_type_officer_finish">Race Officer on Finish Vessel</string>
+    <string name="author_type_shore_control">Shore Control</string>
+    <string name="author_viewer">Viewer</string>
+
 </resources>
