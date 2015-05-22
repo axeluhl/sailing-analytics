@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import android.content.Context;
-
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;

@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.comparators;
 
-import java.util.Comparator;
-
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+
+import java.util.Comparator;
 
 public class ManagedRaceStartTimeComparator implements Comparator<ManagedRace> {
 

@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
-import java.util.List;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,10 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
+
+import java.util.List;
 
 public class MarkGridAdapter extends ArrayAdapter<Mark> {
 

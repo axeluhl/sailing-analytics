@@ -16,8 +16,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseFragmentName extends CourseFragment implements CourseNameAdapter.CourseItemClick {
 
-    private static final String TAG = CourseFragmentName.class.getName();
-
     private ListView mListView;
 
     public static CourseFragmentName newInstance(int startMode) {

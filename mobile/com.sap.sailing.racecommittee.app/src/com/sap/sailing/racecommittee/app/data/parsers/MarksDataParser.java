@@ -1,16 +1,15 @@
 package com.sap.sailing.racecommittee.app.data.parsers;
 
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collection;
-
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class MarksDataParser implements DataParser<Collection<Mark>> {
 

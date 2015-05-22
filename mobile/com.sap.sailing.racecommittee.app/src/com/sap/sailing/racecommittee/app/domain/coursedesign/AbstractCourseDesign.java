@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class AbstractCourseDesign implements CourseDesign{
     Position startBoatPosition;

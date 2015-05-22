@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
-import java.util.ArrayList;
-
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.racecommittee.app.R;
+
+import java.util.ArrayList;
 
 public class ESSMarkImageHelper extends MarkImageHelper {
     private static ESSMarkImageHelper instance = null;

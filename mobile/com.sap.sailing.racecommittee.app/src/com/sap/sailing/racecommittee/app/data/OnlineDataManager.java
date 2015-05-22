@@ -1,73 +1,40 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.concurrent.Callable;
-
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.*;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.NullDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.*;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks.LoaderCreator;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.data.loaders.OnlineDataLoader;
-import com.sap.sailing.racecommittee.app.data.parsers.CompetitorsDataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.CourseBaseParser;
-import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
-import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.*;
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.*;
+import com.sap.sailing.server.gateway.deserialization.impl.*;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
+
+import java.io.Serializable;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 /**
  * Enables accessing of data.

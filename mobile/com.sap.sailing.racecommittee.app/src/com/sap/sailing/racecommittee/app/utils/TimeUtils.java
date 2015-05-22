@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.utils;
 import java.util.Calendar;
 
 import android.text.format.DateFormat;
-
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

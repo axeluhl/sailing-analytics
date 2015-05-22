@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
-import java.io.IOException;
-
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
@@ -11,6 +9,8 @@ import android.media.AudioManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.io.IOException;
 
 // Deprecation of Camera API.
 // New Camera API in Android 5.0

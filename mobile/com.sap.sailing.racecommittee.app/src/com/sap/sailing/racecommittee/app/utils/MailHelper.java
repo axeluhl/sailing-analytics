@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MailHelper {
 

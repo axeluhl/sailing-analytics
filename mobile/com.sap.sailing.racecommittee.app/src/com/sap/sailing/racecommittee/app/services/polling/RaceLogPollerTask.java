@@ -1,16 +1,15 @@
 package com.sap.sailing.racecommittee.app.services.polling;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sse.common.Util;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
-
-import android.content.Context;
-import android.os.AsyncTask;
-
-import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
-import com.sap.sailing.android.shared.data.http.HttpRequest;
-import com.sap.sse.common.Util;
 
 public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
 

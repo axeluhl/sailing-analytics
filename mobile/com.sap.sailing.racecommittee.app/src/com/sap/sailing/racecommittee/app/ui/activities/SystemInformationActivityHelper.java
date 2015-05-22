@@ -1,19 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Date;
 
 public class SystemInformationActivityHelper {
     private final SendingServiceAwareActivity activity;

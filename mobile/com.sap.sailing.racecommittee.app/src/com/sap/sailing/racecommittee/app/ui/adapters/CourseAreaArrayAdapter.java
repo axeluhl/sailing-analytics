@@ -1,11 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.List;
-
 import android.content.Context;
-
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+
+import java.util.List;
 
 public class CourseAreaArrayAdapter extends NamedArrayAdapter<CourseArea> {
 

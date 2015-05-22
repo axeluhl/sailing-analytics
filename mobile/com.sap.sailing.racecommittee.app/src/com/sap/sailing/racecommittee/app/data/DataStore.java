@@ -1,16 +1,12 @@
 package com.sap.sailing.racecommittee.app.data;
 
+import com.sap.sailing.domain.base.*;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
-
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {
     

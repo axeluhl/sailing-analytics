@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
@@ -10,6 +7,9 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     

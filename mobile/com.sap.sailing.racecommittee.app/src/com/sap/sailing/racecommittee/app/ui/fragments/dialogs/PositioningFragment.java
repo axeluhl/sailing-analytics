@@ -1,12 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Bundle;
@@ -21,7 +14,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -42,6 +34,9 @@ import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.Serializable;
+import java.util.*;
 
 public class PositioningFragment extends RaceDialogFragment {
     

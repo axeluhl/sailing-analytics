@@ -3,8 +3,6 @@
  */
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite;
 
-import java.util.List;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,13 +12,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
-
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsBitmapCache;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.List;
 
 public class RaceChooseStartModeDialog extends PrerequisiteRaceDialog<StartmodePrerequisite, Flags> {
     

@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.data.loaders;
 
-import java.util.concurrent.Callable;
-
 import android.content.Context;
 import android.content.Loader;
+
+import java.util.concurrent.Callable;
 
 /**
  * A {@link Loader} that (immediately) returns a {@link Callable}'s result. All results are announced as non-cached.

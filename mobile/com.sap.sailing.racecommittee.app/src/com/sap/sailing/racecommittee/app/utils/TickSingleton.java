@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import android.os.Handler;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import android.os.Handler;
 
 /**
  * Reports a tick every second as a singleton
