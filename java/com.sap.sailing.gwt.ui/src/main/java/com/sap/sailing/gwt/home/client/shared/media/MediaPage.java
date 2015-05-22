@@ -96,7 +96,7 @@ public class MediaPage extends Composite {
                     gih.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            FullscreenViewer fs = new FullscreenViewer(holder, media.getPhotos());
+                            new FullscreenViewer(holder, media.getPhotos());
                         }
                     });
                 }

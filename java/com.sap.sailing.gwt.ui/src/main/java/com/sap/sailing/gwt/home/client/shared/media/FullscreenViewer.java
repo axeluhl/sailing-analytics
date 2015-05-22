@@ -16,10 +16,8 @@ import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 
 public class FullscreenViewer {
     private PopupPanel popup = new PopupPanel(true);
-    private final List<ImageMetadataDTO> images;
 
     public FullscreenViewer(ImageMetadataDTO selected, List<ImageMetadataDTO> images) {
-        this.images = images;
         final GalleryPlayer viewer = new GalleryPlayer(selected, images);
 
         Window.addResizeHandler(new ResizeHandler() {
