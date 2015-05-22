@@ -26,21 +26,24 @@
 		overflow-x: scroll;
 		height: 160px;
 		margin-top:20px;
+		white-space: nowrap;
 	}
 	.videoList .videoThumbnail {
 		display: inline-block;
 		margin-right: 10px;
 		width: 256px;
 		height: 144px;
-		
 	}
-	
+	.videoList .videoThumbnail:last-of-type {
+		margin-right: 0;
+	}
 	
 	@media (min-width:61em) {
 		.videoList {
+			white-space: normal;
 			overflow-y: scroll;
 			overflow-x: hidden;
-			height: 100%;
+			height: 490px;
 			margin-top: 0px;
 		}
 		.videoList .videoThumbnail {
@@ -49,7 +52,12 @@
 			width: 100%;
 			height: auto;
 		}
+		.videoList .videoThumbnail:last-of-type {
+			margin-right: 10px;
+			margin-bottom: 0;
+		}
 	}
+	
 	</ui:style>
 	<g:HTMLPanel>
 		<div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
@@ -83,6 +91,5 @@
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
 			<g:FlowPanel ui:field="photoListOuterBoxUi"  />
 		</div>
-
 	</g:HTMLPanel>
 </ui:UiBinder> 

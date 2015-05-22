@@ -1,9 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.race;
 
-import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 
 public class FlagStateDTO implements IsSerializable {
@@ -16,12 +13,13 @@ public class FlagStateDTO implements IsSerializable {
     private FlagStateDTO() {
     }
 
-    @GwtIncompatible
-    public FlagStateDTO(FlagPole mostInterestingFlagPole, FlagPoleState previousFlagState) {
-        lastLowerFlag = mostInterestingFlagPole.getLowerFlag();
-        lastUpperFlag = mostInterestingFlagPole.getUpperFlag();
-        lastFlagsAreDisplayed = mostInterestingFlagPole.isDisplayed();
-        lastFlagsDisplayedStateChanged = previousFlagState.hasPoleChanged(mostInterestingFlagPole);
+    public FlagStateDTO(Flags lastUpperFlag, Flags lastLowerFlag, boolean lastFlagsAreDisplayed,
+            boolean lastFlagsDisplayedStateChanged) {
+        super();
+        this.lastUpperFlag = lastUpperFlag;
+        this.lastLowerFlag = lastLowerFlag;
+        this.lastFlagsAreDisplayed = lastFlagsAreDisplayed;
+        this.lastFlagsDisplayedStateChanged = lastFlagsDisplayedStateChanged;
     }
 
     public Flags getLastUpperFlag() {
