@@ -1,4 +1,4 @@
-package com.sap.sse.common.settings;
+package com.sap.sse.settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,15 @@ import java.util.Map.Entry;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.EnumSetting;
+import com.sap.sse.common.settings.ListSetting;
+import com.sap.sse.common.settings.MapSettings;
+import com.sap.sse.common.settings.NumberSetting;
+import com.sap.sse.common.settings.Setting;
+import com.sap.sse.common.settings.SettingType;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.StringSetting;
 
 /**
  * Serializes a {@link Settings} object to a {@link JSONObject}. All setting types are supported as top-level entities.
@@ -27,7 +35,6 @@ import com.google.gwt.core.shared.GwtIncompatible;
  * @author Axel Uhl (D043530)
  *
  */
-@GwtIncompatible
 public class SettingsToJsonSerializer {
     private final static String TYPE_PROPERTY_SUFFIX = "___TYPE";
     private final static char TYPE_PROPERTY_SUFFIX_ESCAPE = ':';
@@ -139,11 +146,11 @@ public class SettingsToJsonSerializer {
                 if (json.containsKey(typePropertyName)) {
                     String[] typeNameAndClassName = ((String) json.get(typePropertyName)).split("/");
                     type = SettingType.valueOf(typeNameAndClassName[0]);
-                    if (typeNameAndClassName.length > 1) {
-                        clazz = Class.forName(typeNameAndClassName[1]);
-                    } else {
+                    // if (typeNameAndClassName.length > 1) {
+                        // clazz = Class.forName(typeNameAndClassName[1]);
+                    // } else {
                         clazz = null;
-                    }
+                    // }
                 } else {
                     type = getSettingType(value);
                     clazz = null;
