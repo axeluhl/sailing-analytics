@@ -87,7 +87,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final VerticalPanel mainPanel;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT);
-    private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final UUID eventId;
@@ -339,7 +338,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     private void createColumns() {
         regattaOverviewListHandler = new ListHandler<RegattaOverviewEntryDTO>(regattaOverviewDataProvider.getList());
         courseAreaColumn = new TextColumn<RegattaOverviewEntryDTO>() {

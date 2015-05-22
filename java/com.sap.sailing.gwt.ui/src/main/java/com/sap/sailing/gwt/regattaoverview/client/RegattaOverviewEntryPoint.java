@@ -32,7 +32,6 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
-    private SAPHeader2 logoAndTitlePanel;
     private final Label eventNameLabel = new Label();
     private final Label venueNameLabel = new Label();
     private final Label clockLabel = new Label();
