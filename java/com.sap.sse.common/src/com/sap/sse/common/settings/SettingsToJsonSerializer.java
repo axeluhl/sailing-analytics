@@ -139,11 +139,11 @@ public class SettingsToJsonSerializer {
                 if (json.containsKey(typePropertyName)) {
                     String[] typeNameAndClassName = ((String) json.get(typePropertyName)).split("/");
                     type = SettingType.valueOf(typeNameAndClassName[0]);
-                    if (typeNameAndClassName.length > 1) {
-                        clazz = Class.forName(typeNameAndClassName[1]);
-                    } else {
+                    // if (typeNameAndClassName.length > 1) {
+                        // clazz = Class.forName(typeNameAndClassName[1]);
+                    // } else {
                         clazz = null;
-                    }
+                    // }
                 } else {
                     type = getSettingType(value);
                     clazz = null;
