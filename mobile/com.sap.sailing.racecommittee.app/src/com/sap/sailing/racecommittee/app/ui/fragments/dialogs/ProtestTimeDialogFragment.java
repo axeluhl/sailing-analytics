@@ -109,9 +109,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 
         ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
         layoutParams.height = 49 * races.size();
-        int screenHeight = ScreenHelper.on(getActivity()).getScreenHeight();
+        int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
         if (layoutParams.height > screenHeight) {
-            layoutParams.height = (int)(screenHeight * 0.65);
+            layoutParams.height = screenHeight;
         }
         view.setLayoutParams(layoutParams);
 
