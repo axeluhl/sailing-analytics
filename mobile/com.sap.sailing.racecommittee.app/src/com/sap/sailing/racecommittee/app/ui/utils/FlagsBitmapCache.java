@@ -8,9 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Pair;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class FlagsBitmapCache {
 

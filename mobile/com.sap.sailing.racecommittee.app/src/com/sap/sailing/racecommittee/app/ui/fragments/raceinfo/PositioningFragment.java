@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -14,8 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
@@ -39,12 +45,6 @@ import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 public class PositioningFragment extends BaseFragment
     implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents {
 
@@ -55,7 +55,7 @@ public class PositioningFragment extends BaseFragment
     private RecyclerView mCompetitorView;
     private Button mConfirm;
 
-    private RecyclerView.Adapter mFinishedAdapter;
+    private RecyclerView.Adapter<?> mFinishedAdapter;
     private FinishListAdapter mAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private ArrayList<CompetitorsWithIdImpl> mFinishedData;
@@ -250,7 +250,7 @@ public class PositioningFragment extends BaseFragment
     private ArrayList<CompetitorsWithIdImpl> initializeFinishList() {
         ArrayList<CompetitorsWithIdImpl> positioning = new ArrayList<>();
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) {
-            for (Util.Triple results : getRaceState().getFinishPositioningList()) {
+            for (Util.Triple<Serializable, String, MaxPointsReason> results : getRaceState().getFinishPositioningList()) {
                 positioning.add(new CompetitorsWithIdImpl(mId, results));
                 mId++;
             }

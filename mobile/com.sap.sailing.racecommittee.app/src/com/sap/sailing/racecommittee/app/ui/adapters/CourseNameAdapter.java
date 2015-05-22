@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.Collections;
+import java.util.List;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -11,13 +14,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.util.Collections;
-import java.util.List;
 
 public class CourseNameAdapter extends BaseAdapter implements View.OnClickListener {
 

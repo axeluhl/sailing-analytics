@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.maps;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
@@ -21,9 +24,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Convenience class extending MapFragment, including some functions for animation.

@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.UUID;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -19,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -50,10 +55,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.UUID;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -247,8 +248,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
-        if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
-            GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
+        if (!BuildConfig.DEBUG) {
+            if (resultCode != ConnectionResult.SUCCESS) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
+            }
         }
 
         if (mSelectedEvent != null && preferences.isSetUp()) {
@@ -299,7 +302,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadFailed(Exception reason) {
-                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         if (reason instanceof FileNotFoundException) {
@@ -316,7 +318,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         // this is our 'global' configuration, let's store it in app preferences
@@ -344,7 +345,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             // always reload the configuration...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
-            setSupportProgressBarIndeterminate(false);
             progressDialog.dismiss();
         }
     }

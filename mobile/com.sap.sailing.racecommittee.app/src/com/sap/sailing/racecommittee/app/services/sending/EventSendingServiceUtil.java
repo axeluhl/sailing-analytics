@@ -6,15 +6,12 @@ import java.io.UnsupportedEncodingException;
 import android.content.Context;
 import android.content.Intent;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class EventSendingServiceUtil {
-    
-    private static final String TAG = EventSendingServiceUtil.class.getName();
-    
+
     /**
      * Creates an intent that contains the event to be sent and the race id which shall be sent to the back end. See
      * constants in <code>AddEntryToRaceLogJsonPostServlet</code> for URL construction rules.

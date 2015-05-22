@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+
 import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemViewHolder;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemViewHolder;

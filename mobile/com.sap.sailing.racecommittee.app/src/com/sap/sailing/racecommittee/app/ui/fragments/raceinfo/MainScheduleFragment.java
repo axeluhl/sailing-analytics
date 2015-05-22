@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -11,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.Wind;
@@ -25,14 +29,9 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
     public static final String START_TIME = "startTime";
-
-    private static final String TAG = MainScheduleFragment.class.getName();
 
     private TextView mStartTime;
     private String mStartTimeString;

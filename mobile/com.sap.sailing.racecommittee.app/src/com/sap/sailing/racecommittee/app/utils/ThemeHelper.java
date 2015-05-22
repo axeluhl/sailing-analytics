@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.lang.reflect.Field;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -11,12 +13,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-
-import java.lang.reflect.Field;
 
 public class ThemeHelper {
 
@@ -43,12 +44,8 @@ public class ThemeHelper {
         Resources system = Resources.getSystem();
         int hourId = system.getIdentifier("hour", "id", "android");
         int minuteId = system.getIdentifier("minute", "id", "android");
-        int amPmId = system.getIdentifier("amPm", "id", "android");
-
         NumberPicker hourPicker = (NumberPicker) timePicker.findViewById(hourId);
         NumberPicker minutePicker = (NumberPicker) timePicker.findViewById(minuteId);
-        NumberPicker amPmPicker = (NumberPicker) timePicker.findViewById(amPmId);
-
         if (hourPicker != null && setPickerTextColor(context, hourPicker, color)) {
             if (minutePicker != null && setPickerTextColor(context, minutePicker, color)) {
                 return true;

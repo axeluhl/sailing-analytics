@@ -14,6 +14,7 @@ import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
 import com.sap.sailing.racecommittee.app.R;
 
 public class CompassView extends RelativeLayout {

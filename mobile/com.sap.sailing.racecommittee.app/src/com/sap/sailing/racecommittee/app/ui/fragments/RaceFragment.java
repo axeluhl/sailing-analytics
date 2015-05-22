@@ -1,9 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
@@ -15,10 +20,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.Util;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 

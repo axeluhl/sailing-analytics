@@ -13,11 +13,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.*;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PositioningFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
 

@@ -15,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -33,7 +32,6 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -44,14 +42,11 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ByMapCourseDesignDialog extends RaceDialogFragment {
-
-    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
 
     private MapView mMapView;
     private GoogleMap courseAreaMap;
@@ -61,7 +56,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
     private Button publishButton;
     private Button unpublishButton;
-    private ImageButton windButton;
     private Spinner spinnerBoatClass;
     private Spinner spinnerCourseLayout;
     private Spinner spinnerNumberOfRounds;
@@ -73,8 +67,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
     private ArrayAdapter<TargetTime> targetTimeAdapter;
 
-    private WindFragment windFragment;
-    
     public ByMapCourseDesignDialog() {
         super();
         // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" -
@@ -132,17 +124,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
         });
 
-        windButton = (ImageButton) getView().findViewById(R.id.windButton);
-        /*windButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-            	((RacingActivity)getActivity()).loadWindFragment();
-            	//TODO: catch result WIND_ACTIVITY_REQUEST_CODE !
-            }
-
-        });
-		*/
         courseDesignComputer = new CourseDesignComputer();
 
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
@@ -165,15 +146,6 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_set_wind), Toast.LENGTH_LONG).show();
         }
-    }
-
-
-    private void onWindEntered(Wind windFix) {
-        getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
-        courseDesignComputer.setStartBoatPosition(windFix.getPosition());
-        courseDesignComputer.setWindDirection(windFix.getBearing());
-        courseDesignComputer.setWindSpeed(windFix.getKnots());
-        recomputeCourseDesign();
     }
 
     private void recomputeCourseDesign() {

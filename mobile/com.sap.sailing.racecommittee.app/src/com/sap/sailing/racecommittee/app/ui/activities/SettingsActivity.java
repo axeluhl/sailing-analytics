@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class SettingsActivity extends PreferenceActivity {
 

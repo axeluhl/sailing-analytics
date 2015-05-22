@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,7 +16,7 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import com.sap.sailing.android.shared.logging.ExLog;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -25,15 +30,9 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
 
-    private static final String TAG = StartTimeFragment.class.getName();
     private static final String START_MODE = "startMode";
     private static final int MAX_DAYS = 30;
 

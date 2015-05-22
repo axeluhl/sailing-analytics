@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.view.View;
 import android.widget.ImageView;
+
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -62,7 +62,7 @@ public abstract class BasePanelFragment extends RaceFragment {
         }
     }
 
-    protected void resetFragment(View lockIcon, @IdRes int idRes, Class cls) {
+    protected void resetFragment(View lockIcon, @IdRes int idRes, Class<?> cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
             if (getFragmentManager() != null) {
                 Fragment fragment = getFragmentManager().findFragmentById(idRes);

@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.TextUtils;
@@ -8,13 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.Named;
-
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * @author D053502

@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
-import android.support.annotation.IdRes;
 import android.util.TypedValue;
 
 public class BitmapHelper {

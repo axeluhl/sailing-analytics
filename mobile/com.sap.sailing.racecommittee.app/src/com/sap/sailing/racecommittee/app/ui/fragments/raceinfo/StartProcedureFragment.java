@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -7,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -14,8 +17,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.ArrayList;
 
 public class StartProcedureFragment extends BaseFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
 

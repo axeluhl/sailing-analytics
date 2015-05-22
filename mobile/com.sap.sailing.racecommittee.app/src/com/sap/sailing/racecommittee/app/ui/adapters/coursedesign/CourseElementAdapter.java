@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -10,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
@@ -22,9 +26,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolde
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElementAdapter.ViewHolder> {
 
