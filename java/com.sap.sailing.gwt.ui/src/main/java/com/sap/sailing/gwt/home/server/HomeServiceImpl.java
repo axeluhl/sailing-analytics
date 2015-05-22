@@ -4,13 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -28,6 +26,8 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sailing.domain.common.media.MediaType;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -40,7 +40,6 @@ import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
@@ -48,16 +47,16 @@ import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.media.ImageReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.media.VideoReferenceDTO.VideoType;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -182,12 +181,16 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             EventHolder holder = pair.getB();
             result.addStageEvent(convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType));
             
-            // TODO implement better that using a hard cast...
-            Collection<URL> videosOfEvent = (Collection<URL>) holder.event.getVideoURLs();
-            if (videosOfEvent.size() > 0 && result.getVideos().size() < MAX_VIDEO_COUNT) {
+            EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
+
+            Iterable<URL> videosOfEvent = holder.event.getVideoURLs();
+            if (!Util.isEmpty(videosOfEvent) && result.getVideos().size() < MAX_VIDEO_COUNT) {
                 URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
-                VideoMetadataDTO candidate = new VideoMetadataDTO(youTubeRandomUrl, holder.event.getName());
-                if (candidate.getType() == VideoType.YOUTUBE) {
+
+                MimeType type = MediaUtils.detectMimeTypeFromUrl(youTubeRandomUrl.toString());
+                if (type.mediaType == MediaType.video) {
+                    VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, youTubeRandomUrl, type,
+                            holder.event.getName());
                     result.addVideo(candidate);
                 }
             }
@@ -200,7 +203,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
         });
         
-        final Set<ImageReferenceDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable amount of shuffling
+        final Set<ImageMetadataDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
+                                                                        // amount of shuffling
         final List<VideoMetadataDTO> videoCandidates = new ArrayList<>();
         
         for(EventHolder holder : recentEventsOfLast12Month) {
@@ -209,21 +213,23 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
             
             EventBase event = holder.event;
+            EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
             for (URL url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
                 try {
                     ImageSize imageSize = event.getImageSize(url);
                     if(imageSize != null) {
-                        photoGalleryUrls.add(new ImageReferenceDTO(url, imageSize));
+                        // TODO: do we habe a title?
+                        photoGalleryUrls.add(new ImageMetadataDTO(eventRef, url, imageSize, null));
                     }
                 } catch (Exception e) {
                 }
             }
             for (URL videoUrl : event.getVideoURLs()) {
                 
-                
-                VideoMetadataDTO candidate = new VideoMetadataDTO(videoUrl, holder.event.getName());
-                if (candidate.getType() == VideoType.YOUTUBE) {
+                MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl.toString());
+                if (type.mediaType == MediaType.video) {
+                    VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, videoUrl, type, holder.event.getName());
                     videoCandidates.add(candidate);
                 }
             }
@@ -248,12 +254,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
         }
         Random random = new Random();
-        List<ImageReferenceDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
+        List<ImageMetadataDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
         final int gallerySize = photoGalleryUrls.size();
         for (int i = 0; i < gallerySize; i++) {
             Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
         }
-        for (ImageReferenceDTO holder : shuffledPhotoGallery) {
+        for (ImageMetadataDTO holder : shuffledPhotoGallery) {
             result.addPhoto(holder);
         }
         // TODO media
@@ -274,14 +280,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
-        dto.setState(calculateEventState(event));
+        dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
 
         boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
         
-        for (Iterator<LeaderboardGroup> iter = event.getLeaderboardGroups().iterator(); iter.hasNext();) {
-            LeaderboardGroup leaderboardGroup = iter.next();
-            
+        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if(leaderboard instanceof RegattaLeaderboard) {
                     Regatta regatta = getService().getRegattaByName(leaderboard.getName());
@@ -292,7 +296,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                     RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
                     regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
                     regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
-                    regattaDTO.setState(calculateRegattaState(regattaDTO));
+                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
                     dto.getRegattas().add(regattaDTO);
                     
                 } else if(leaderboard instanceof FlexibleLeaderboard) {
@@ -300,7 +304,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                     
                     regattaDTO.setStartDate(null);
                     regattaDTO.setEndDate(null);
-                    regattaDTO.setState(calculateRegattaState(regattaDTO));
+                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
                     dto.getRegattas().add(regattaDTO);
                 }
             }
@@ -350,40 +354,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         return regattaDTO;
     }
     
-    private RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
-        Date now = new Date();
-        Date startDate = regatta.getStartDate();
-        Date endDate = regatta.getEndDate();
-        if(startDate != null && now.compareTo(startDate) < 0) {
-            return RegattaState.UPCOMING;
-        }
-        if(endDate != null && now.compareTo(endDate) > 0) {
-            return RegattaState.FINISHED;
-        }
-        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
-            return RegattaState.RUNNING;
-        }
-        return RegattaState.UNKNOWN;
-    }
-    
-    private EventState calculateEventState(EventBase event) {
-        return calculateEventState(event.isPublic(), event.getStartDate().asDate(), event.getEndDate().asDate());
-    }
-    
-    private EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
-        Date now = new Date();
-        if(now.compareTo(startDate) < 0) {
-            if(isPublic) {
-                return EventState.UPCOMING;
-            }
-            return EventState.PLANNED;
-        }
-        if(now.compareTo(endDate) > 0) {
-            return EventState.FINISHED;
-        }
-        return EventState.RUNNING;
-    }
-
     @Override
     public EventSeriesViewDTO getEventSeriesViewById(UUID id) {
         Event o = getService().getEvent(id);
@@ -447,6 +417,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     @Override
     public MediaDTO getMediaForEvent(UUID eventId) {
         Event event = getService().getEvent(eventId);
+        EventReferenceDTO eventRef = new EventReferenceDTO(event);
+
         String eventName = event.getName();
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
@@ -457,12 +429,13 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
             }
-            ImageMetadataDTO entry = new ImageMetadataDTO(url, imageSize, eventName);
+            ImageMetadataDTO entry = new ImageMetadataDTO(eventRef, url, imageSize, eventName);
             media.addPhoto(entry);
         }
         for(URL url : event.getVideoURLs()) {
-            VideoMetadataDTO candidate = new VideoMetadataDTO(url, null /* eventName */);
-            if (candidate.getType() == VideoType.YOUTUBE) {
+            MimeType type = MediaUtils.detectMimeTypeFromUrl(url.toString());
+            if (type.mediaType == MediaType.video) {
+                VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, url, type, null);
                 media.addVideo(candidate);
             }
         }
@@ -524,7 +497,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         dto.setDisplayName(event.getName());
         dto.setStartDate(event.getStartDate().asDate());
         dto.setEndDate(event.getEndDate().asDate());
-        dto.setState(calculateEventState(event));
+        dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
         if(HomeServiceUtil.isFakeSeries(event)) {
             dto.setLocation(getLocation(event));

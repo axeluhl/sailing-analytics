@@ -6,6 +6,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.HomeServiceAsync;
@@ -15,6 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -27,7 +29,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
     public interface Presenter {
         EventContext getCtx();
-
+        
         void handleTabPlaceSelection(TabView<?, ? extends Presenter> selectedActivity);
 
         SafeUri getUrl(AbstractEventPlace place);
@@ -50,6 +52,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         HasRegattaMetadata getRegattaMetadata();
 
         String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race);
+        
+        String getRaceViewerURL(String regattaName, String trackedRaceName);
 
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
         PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);
@@ -59,6 +63,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         void ensureMedia(AsyncCallback<MediaDTO> asyncCallback);
 
         boolean hasMedia();
+        
+        DispatchSystem getDispatch();
     }
     
     public interface PlaceCallback {

@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -68,6 +69,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     public SailingServiceAsync getSailingService() {
         return clientFactory.getSailingService();
+    }
+    
+    public DispatchSystem getDispatch() {
+        return clientFactory.getDispatch();
     }
 
     @Override
@@ -115,23 +120,34 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return new EventContext(ctx).withRegattaId(regattaId);
     }
 
+    @Override
     public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
         RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+        return getRaceViewerURL(leaderboard.name, raceIdentifier);
+    }
+    
+    @Override
+    public String getRaceViewerURL(String regattaName, String trackedRaceName) {
         return EntryPointLinkFactory
-                .createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
+                .createRaceBoardLink(createRaceBoardLinkParameters(regattaName, regattaName, trackedRaceName));
+    }
+    
+    public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+        return EntryPointLinkFactory
+                .createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
     }
 
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName,
-            RegattaAndRaceIdentifier raceIdentifier) {
+            String regattaName, String trackedRaceName) {
         Map<String, String> linkParams = new HashMap<String, String>();
         linkParams.put("eventId", ctx.getEventId());
         linkParams.put("leaderboardName", leaderboardName);
-        linkParams.put("raceName", raceIdentifier.getRaceName());
+        linkParams.put("raceName", trackedRaceName);
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
-        linkParams.put("regattaName", raceIdentifier.getRegattaName());
+        linkParams.put("regattaName", regattaName);
         return linkParams;
     }
 

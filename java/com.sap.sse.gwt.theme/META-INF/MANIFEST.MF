@@ -15,5 +15,6 @@ Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
  com.sap.sse.common
 Web-ContextPath: /theme
 Export-Package: com.sap.sse.gwt.theme.client,
+ com.sap.sse.gwt.theme.client.component.celltable,
  com.sap.sse.gwt.theme.client.component.imagegallery,
  com.sap.sse.gwt.theme.client.component.videogallery

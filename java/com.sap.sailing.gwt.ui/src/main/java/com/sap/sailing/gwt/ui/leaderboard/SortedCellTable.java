@@ -47,7 +47,7 @@ public class SortedCellTable<T> extends CellTable<T> {
      */
     private ListHandler<T> columnSortHandler;
 
-    public SortedCellTable(int pageSize, LeaderboardTableResources resources) {
+    public SortedCellTable(int pageSize, CellTable.Resources resources) {
         super(pageSize, resources);
         dataProvider = new ListDataProvider<T>();
         dataProvider.addDataDisplay(this);
@@ -99,6 +99,13 @@ public class SortedCellTable<T> extends CellTable<T> {
             if (comparator != null) {
                 sortColumn(currentlySortedColumn, comparator, comparator.isAscending());
             }            
+        }
+    }
+
+    public void sortColumn(Column<T, ?> column) {
+        InvertibleComparator<T> comparator = comparators.get(column);
+        if (comparator != null) {
+            sortColumn(column, comparator, comparator.isAscending());
         }
     }
 

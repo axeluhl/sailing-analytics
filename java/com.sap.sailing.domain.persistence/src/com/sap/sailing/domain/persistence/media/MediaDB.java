@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
