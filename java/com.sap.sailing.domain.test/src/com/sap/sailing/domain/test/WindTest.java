@@ -270,7 +270,7 @@ public class WindTest {
         Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
         Waypoint w2 = domainFactory.createWaypoint(top, /*passingInstruction*/ null);
         Waypoint w3 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
-        Competitor competitor = new CompetitorImpl(123, "Test Competitor", Color.RED, null, new TeamImpl("STG", Collections.singleton(
+        Competitor competitor = new CompetitorImpl(123, "Test Competitor", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl("Test Competitor", new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),

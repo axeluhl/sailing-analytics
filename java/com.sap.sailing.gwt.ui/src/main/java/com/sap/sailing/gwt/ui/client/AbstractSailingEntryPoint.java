@@ -16,6 +16,6 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
     
     @Override
     protected StringMessages createStringMessages() {
-        return GWT.create(StringMessages.class);
+        return StringMessages.INSTANCE;
     }
 }

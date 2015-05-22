@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**

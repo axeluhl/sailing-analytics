@@ -3,6 +3,9 @@ package com.sap.sse.datamining.shared;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.sap.sse.datamining.shared.data.QueryResultState;
+import com.sap.sse.datamining.shared.data.Unit;
+
 public interface QueryResult<AggregatedType> extends Serializable {
     
     public QueryResultState getState();

@@ -29,12 +29,12 @@ public class CompoundResourceBundleStringMessages implements ResourceBundleStrin
         this.stringMessages = new HashSet<>(stringMessages);
     }
     
-    public void addStringMessages(ResourceBundleStringMessages stringMessages) {
-        this.stringMessages.add(stringMessages);
+    public boolean addStringMessages(ResourceBundleStringMessages stringMessages) {
+        return this.stringMessages.add(stringMessages);
     }
     
-    public void removeStringMessages(ResourceBundleStringMessages stringMessages) {
-        this.stringMessages.remove(stringMessages);
+    public boolean removeStringMessages(ResourceBundleStringMessages stringMessages) {
+        return this.stringMessages.remove(stringMessages);
     }
     
     @Override

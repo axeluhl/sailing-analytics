@@ -33,6 +33,8 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
      */
     CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion);
 
+    String getFlagImageURL();
+
     String getImageURL();
     
 }

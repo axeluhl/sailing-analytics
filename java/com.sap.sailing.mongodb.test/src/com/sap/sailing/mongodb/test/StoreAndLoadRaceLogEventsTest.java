@@ -174,7 +174,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndLoadDeviceCompetitorMappingEvent() {
         DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-        Competitor mappedTo = DomainFactory.INSTANCE.getOrCreateCompetitor("abc", "abc", null, null, null, null);
+        Competitor mappedTo = DomainFactory.INSTANCE.getOrCreateCompetitor("abc", "abc", null, null, null, null, null);
         TimePoint from = new MillisecondsTimePoint(20);
         TimePoint to = new MillisecondsTimePoint(30);
         RaceLogDeviceCompetitorMappingEvent expectedEvent = eventFactory.createDeviceCompetitorMappingEvent(
@@ -251,7 +251,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void testStoreAndLoadRegisterCompetitorEvent() {
         RaceLogRegisterCompetitorEvent expectedEvent = eventFactory.createRegisterCompetitorEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId,
-        		DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null));
+        		DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogRegisterCompetitorEvent actualEvent = loadEvent(dbObject);

@@ -3,6 +3,7 @@ package com.sap.sailing.xrr.structureimport;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -202,11 +203,12 @@ public class StructureImporter {
                     String name = person.getGivenName() + " " + person.getFamilyName();
                     Color color = null;
                     String email = null;
+                    URI flagImage = null;
                     Nationality nationality = (person.getNOC() == null) ? null : getNationality(person.getNOC()
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
-                            UUID.fromString(idAsString), name, color, email, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
+                            UUID.fromString(idAsString), name, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
                 } else {
                     break;
                 }

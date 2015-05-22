@@ -7,7 +7,7 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {

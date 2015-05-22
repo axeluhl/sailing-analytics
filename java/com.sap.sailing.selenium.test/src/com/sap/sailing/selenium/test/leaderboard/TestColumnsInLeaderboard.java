@@ -145,6 +145,4 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(this.trackedRace);
     }
-    
-    
 }

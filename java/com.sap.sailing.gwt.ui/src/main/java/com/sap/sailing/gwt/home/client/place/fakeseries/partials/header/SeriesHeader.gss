@@ -1,0 +1,114 @@
+/**
+ * The header of the pages to an event series
+ */
+.leaderboardquickaccess {
+  font-size: 1rem;
+  text-align: right;
+}
+.eventheader {
+  position: relative;
+  font-size: 1rem;
+  color: #666;
+  background: #f2f2f2;
+  border-bottom: 1px solid #dedede;
+}
+.eventheader_breadcrumb {
+  font-size: 1rem;
+  /* @alternate */font-size: 0.866666666666667em;
+  font-weight: 600;
+  padding: 0.666666666666667em 0;
+}
+.eventheader_breadcrumbback {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1.333333333333333em;
+  border-right: 1px solid #cfcfcf;
+  background-color: #dedede;
+  background-image: url("images/home/breadcrumb-arrow__back.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 50%;
+  -webkit-transition: background-color 0.2s, border-color 0.2s;
+     -moz-transition: background-color 0.2s, border-color 0.2s;
+          transition: background-color 0.2s, border-color 0.2s;
+}
+.eventheader_breadcrumbback:hover {
+  background-color: #cfcfcf;
+}
+.eventheader_intro {
+  padding-left: 6em;
+  margin: 0.666666666666667em 0;
+  min-height: 5em;
+  position: relative;
+}
+.eventheader_intro_logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5em;
+  height: 5em;
+  border: 0.333333333333333em solid #f6f9fc;
+  box-shadow: 0 0 5px rgba(238,238,238,0.5);
+}
+.eventheader_intro_logo_image {
+  height: 100%;
+  width: 100%;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.eventheader_intro_name {
+  display: inline-block;
+  margin: 0 0.333333333333333em 0 0;
+  font-size: 1.866666666666667em;
+  color: #333;
+}
+.eventheader_intro_details {
+  margin-bottom: 0.666666666666667em;
+  padding-bottom: 0.666666666666667em;
+  font-weight: 700;
+  color: #333;
+}
+.eventheader_intro_details_item {
+  display: inline-block;
+  border-left: 1px solid #cfcfcf;
+  margin: 0.266666666666667em 0 0.266666666666667em 0.333333333333333em;
+  padding-left: 0.666666666666667em;
+  color: #666;
+}
+.eventheader_intro_details_item_inactive {
+  color: #AAA;
+}
+.eventheader_intro_details_itemlink {
+  color: inherit;
+}
+.eventheader_intro_details_item:first-child {
+  margin-left: 0;
+  padding-left: 0;
+  border: none;
+}
+.eventheader_status {
+  text-align: right;
+}
+.eventheader_status_title {
+  text-transform: uppercase;
+}
+.eventheader_status_body {
+  font-size: 1rem;
+}
+.locationicon {
+  vertical-align: text-bottom;
+  margin-right: 0.333333333333333em;
+}
+.eventnavigation {
+  font-size: 0;
+  margin-bottom: -1px;
+}
+.eventnavigationnormal {
+  position: relative;
+}
+.eventnavigation .navbar_button {
+  font-size: 1.2rem;
+}

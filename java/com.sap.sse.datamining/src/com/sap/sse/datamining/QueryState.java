@@ -1,6 +1,6 @@
 package com.sap.sse.datamining;
 
-import com.sap.sse.datamining.shared.QueryResultState;
+import com.sap.sse.datamining.shared.data.QueryResultState;
 
 public enum QueryState {
     

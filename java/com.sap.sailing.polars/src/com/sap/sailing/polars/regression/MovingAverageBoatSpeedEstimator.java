@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.mining.MovingAverageProcessorImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;

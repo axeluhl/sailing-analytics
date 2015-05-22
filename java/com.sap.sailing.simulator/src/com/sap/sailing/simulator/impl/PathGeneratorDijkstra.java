@@ -32,10 +32,10 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
     // @Override
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
 
         // retrieve simulation parameters
-        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
-                .getCourse().get(1));// simulationParameters.getBoundaries();
+        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters.getCourse().get(1));// simulationParameters.getBoundaries();
         WindFieldGenerator windField = this.parameters.getWindField();
         PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
         Position start = this.parameters.getCourse().get(0);
@@ -46,8 +46,8 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
 
         // initiate grid
-        int gridv = this.parameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
-        int gridh = this.parameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
+        int gridv = 10; // number of vertical grid steps
+        int gridh = 100; // number of horizontal grid
         // steps
         Position[][] sailGrid = boundary.generatePositions(gridh, gridv, 0, 0);
 
@@ -91,7 +91,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
 
         // search loop
         // ends when the end is visited
-        while (currentPosition != end) {
+        while ((currentPosition != end)&&(!this.isTimedOut())) {
             // set the polar diagram to the wind at the current position and time
             TimedPosition currentTimedPosition = new TimedPositionImpl(currentTime, currentPosition);
             SpeedWithBearing currentWind = windField.getWind(currentTimedPosition);
@@ -154,7 +154,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
          * currentPosition = p; currentTime = new MillisecondsTimePoint(minTime); } } } //I need to add the first point
          * to the path lst.addFirst(new TimedPositionWithSpeedImpl(startTime, start, null));
          */
-        while (currentPosition != null) {
+        while ((currentPosition != null)&&(!this.isTimedOut())) {
             currentTime = new MillisecondsTimePoint(tentativeDistances.get(currentPosition).getA());
             SpeedWithBearing windAtPoint = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
             TimedPositionWithSpeed current = new TimedPositionWithSpeedImpl(currentTime, currentPosition, windAtPoint);
@@ -162,7 +162,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
             currentPosition = tentativeDistances.get(currentPosition).getB();
         }
 
-        return new PathImpl(lst, windField);
+        return new PathImpl(lst, windField, this.algorithmTimedOut);
 
     }
 

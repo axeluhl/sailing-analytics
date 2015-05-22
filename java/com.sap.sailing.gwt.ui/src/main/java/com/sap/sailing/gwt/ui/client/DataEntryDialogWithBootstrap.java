@@ -4,9 +4,9 @@ import java.util.Date;
 
 import com.github.gwtbootstrap.datetimepicker.client.ui.base.HasViewMode.ViewMode;
 import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DialogUtils;

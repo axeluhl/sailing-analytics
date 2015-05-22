@@ -20,7 +20,7 @@
 		* The `ResourceBundleStringMessages` needs the resource base name, which should be `<string messages package name>/<string messages base name>`
 		* A reference to this `ResourceBundleStringMessages` should be returned by the method `getStringMessages()`
 
-## Adding a completely new Data Type
+## Adding an absolute new Data Type
 
 A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](wiki/data-mining-architecture#Data-Mining-Functions).
 
@@ -50,7 +50,7 @@ A data type is an atomic unit on which the processing components operate. A data
 
 * Add a `DataSourceProvider` to the `DataMiningBundleService`, if it doesn't contain one for the data source of the data type.
 * Implement a retrieval processor for each data type.
-	* Retrieval processors should extend `AbstractSimpleRetrievalProcessor`.
+	* Retrieval processors should extend `AbstractRetrievalProcessor`.
 	* Retrieval processors used by retriever chains need a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)`.
 	* A retrieval processor describes how to get from the input data type (like `RacingEventService` or `TrackedRace`) to the result data type (like `TrackedLeg`) with the method `retrieveData`.
 * Create a `DataRetrieverChainDefinition` and add it to the `DataMiningBundleService`.

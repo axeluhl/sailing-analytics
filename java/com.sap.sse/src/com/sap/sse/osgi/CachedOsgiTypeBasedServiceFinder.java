@@ -37,7 +37,6 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     @Override
     public ServiceT findService(String type) {
         ServiceT service = services.get(type);
-
         if (service == null) {
             if (fallback != null) {
                 return fallback;
@@ -45,7 +44,6 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
                 throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType.getSimpleName());       
             }
         }
-
         return service;
     }
 
@@ -60,7 +58,6 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     @Override
     public void modifiedService(ServiceReference<ServiceT> reference, ServiceT service) {
         addingService(reference);
-
     }
 
     @Override

@@ -7,22 +7,18 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewResources" />
     <g:HTMLPanel>
 	<div class="{local_res.css.whatsnew_nav}">
-	    <div class="{res.mainCss.grid}">
+	    <div class="{res.mediaCss.grid}">
 	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 	          <g:Anchor ui:field="sailingAnalyticsNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsSAPHeadline}'/></g:Anchor>
-	          <!-- 
-		       <g:Anchor ui:field="sailingSimulatorNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsSimulatorHeadline}'/></g:Anchor>
-	           -->
+		      <g:Anchor ui:field="sailingSimulatorNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsSimulatorHeadline}'/></g:Anchor>
 	          <g:Anchor ui:field="raceCommitteeAppNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsRaceHeadline}'/></g:Anchor>
 		  </div>
 	    </div>
 	</div>
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
 	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
     	    <g:HTML ui:field="sailingAnalyticsNotes" />
-    	    <!-- 
 		    <g:HTML ui:field="sailingSimulatorNotes" />
-    	     -->
 			<g:HTML ui:field="raceCommitteeAppNotes" />
     	</div>
 	</div>

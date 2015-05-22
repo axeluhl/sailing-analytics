@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:style>
+  .container {
+    padding-top: 3em;
+    padding-bottom: 3em;
+  }
+  </ui:style>
+  <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {style.container}">
+  </g:HTMLPanel>
+</ui:UiBinder>

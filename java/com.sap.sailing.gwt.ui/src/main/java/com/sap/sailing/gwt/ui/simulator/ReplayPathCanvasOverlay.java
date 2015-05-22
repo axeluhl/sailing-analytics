@@ -18,8 +18,8 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private List<SimulatorWindDTO> windDTOToDraw;
 
     public ReplayPathCanvasOverlay(MapWidget map, int zIndex, final String name, final Timer timer,
-            WindFieldGenParamsDTO windParams, CoordinateSystem coordinateSystem) {
-        super(map, zIndex, name, timer, windParams, coordinateSystem);
+            WindFieldGenParamsDTO windParams, boolean algorithmTimedOut, boolean mixedLeg, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, name, timer, windParams, algorithmTimedOut, mixedLeg, coordinateSystem);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
         canvas.setStyleName("replayPanel");
@@ -34,6 +34,10 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     @Override
     public void timeChanged(final Date newTime, Date oldTime) {
 
+        if (windFieldDTO == null) {
+            return;
+        }
+        
         canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
 
@@ -50,7 +54,10 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
     @Override
     public boolean shallStop() {
-        if (!isVisible() || windDTOToDraw == null || windFieldDTO == null) {
+        if (windDTOToDraw == null || windFieldDTO == null) {
+            return false;
+        }
+        if (!isVisible()) {
             return true;
         }
         if (windDTOToDraw.size() >= (windFieldDTO.getMatrix().size()-1)) {

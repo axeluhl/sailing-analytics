@@ -9,14 +9,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sse.gwt.client.controls.carousel.WidgetCarousel;
 
 public class Stage extends Composite {
-
-    @SuppressWarnings("unused")
-    private List<Pair<StageEventType, EventBaseDTO>> featuredEvents;
 
     private List<StageTeaser> stageTeaserComposites;
 
@@ -41,19 +37,18 @@ public class Stage extends Composite {
         stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 
-    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
-        this.featuredEvents = featuredEvents;
+    public void setFeaturedEvents(List<EventStageDTO> list) {
 
-        for (Pair<StageEventType, EventBaseDTO> typeAndEvent : featuredEvents) {
-            switch (typeAndEvent.getA()) {
+        for (EventStageDTO event : list) {
+            switch (event.getStageType()) {
             case POPULAR:
-                stageTeaser = new PopularEventStageTeaser(typeAndEvent.getB(), placeNavigator);
+                stageTeaser = new PopularEventStageTeaser(event, placeNavigator);
                 break;
             case RUNNING:
-                stageTeaser = new LiveEventStageTeaser(typeAndEvent.getB(), placeNavigator);
+                stageTeaser = new LiveEventStageTeaser(event, placeNavigator);
                 break;
             case UPCOMING_SOON:
-                stageTeaser = new UpcomingEventStageTeaser(typeAndEvent.getB(), placeNavigator);
+                stageTeaser = new UpcomingEventStageTeaser(event, placeNavigator);
                 break;
             }
             widgetCarousel.addWidget(stageTeaser);

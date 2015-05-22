@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -86,7 +85,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     interface AnchorTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
 
@@ -218,9 +217,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public SafeHtml getValue(EventDTO event) {
                 String link = "";
                 if(event != null && event.id != null){
-                    Map<String, String> eventLinkParameters = new HashMap<String, String>();
-                    eventLinkParameters.put("navigationTab", "Regattas");
-                    link = EntryPointLinkFactory.createEventLink(eventLinkParameters, event.id.toString());
+                    link = EntryPointLinkFactory.createEventPlaceLink(event.id.toString(), new HashMap<String, String>());
                 }
                 return ANCHORTEMPLATE.cell(link, event.getName());
             }

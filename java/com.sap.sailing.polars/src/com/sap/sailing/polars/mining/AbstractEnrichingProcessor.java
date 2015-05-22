@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
+import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 
-public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends
-        AbstractSimpleParallelProcessor<InputType, ResultType> {
+public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
 
     public AbstractEnrichingProcessor(Class<InputType> inputType, Class<ResultType> resultType,
             ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
@@ -17,7 +17,7 @@ public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends
     }
 
     @Override
-    protected AbstractProcessorInstruction<ResultType> createInstruction(final InputType element) {
+    protected ProcessorInstruction<ResultType> createInstruction(final InputType element) {
         return new AbstractProcessorInstruction<ResultType>(this) {
 
             @Override

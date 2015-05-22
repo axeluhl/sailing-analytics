@@ -7,8 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 
-public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParallelProcessor<InputType, InputType> {
+public class ParallelFilteringProcessor<InputType> extends AbstractParallelProcessor<InputType, InputType> {
 
     private final FilterCriterion<InputType> filterCriterion;
     private final AtomicInteger filteredDataAmount;
@@ -20,7 +21,7 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
     }
 
     @Override
-    protected AbstractProcessorInstruction<InputType> createInstruction(final InputType element) {
+    protected ProcessorInstruction<InputType> createInstruction(final InputType element) {
         return new AbstractProcessorInstruction<InputType>(this, ProcessorInstructionPriority.Filtration) {
             @Override
             public InputType computeResult() {

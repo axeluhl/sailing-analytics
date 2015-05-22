@@ -20,9 +20,9 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.regression.MovingAverageBoatSpeedEstimator;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
@@ -48,6 +48,12 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
+    }
+    
+    @Override
+    public boolean canProcessElements() {
+        // TODO Auto-generated method stub
+        return true;
     }
 
     @Override
@@ -89,10 +95,21 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
+    
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
+    }
+    
+    @Override
+    public boolean isAborted() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override

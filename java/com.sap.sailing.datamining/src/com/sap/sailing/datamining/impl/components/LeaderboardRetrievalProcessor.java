@@ -9,10 +9,9 @@ import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.datamining.impl.data.LeaderboardWithContext;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class LeaderboardRetrievalProcessor extends
-        AbstractSimpleRetrievalProcessor<LeaderboardGroupWithContext, HasLeaderboardContext> {
+public class LeaderboardRetrievalProcessor extends AbstractRetrievalProcessor<LeaderboardGroupWithContext, HasLeaderboardContext> {
 
     public LeaderboardRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasLeaderboardContext, ?>> resultReceivers, int retrievalLevel) {

@@ -2,7 +2,9 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.net.URI;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
@@ -22,6 +24,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
     protected final CompetitorFactory competitorStore;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
+    private static final Logger logger = Logger.getLogger(CompetitorJsonDeserializer.class.getName());
 
     public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
         return new CompetitorJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
@@ -53,6 +56,16 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             String displayColorAsString = (String) object.get(CompetitorJsonSerializer.FIELD_DISPLAY_COLOR);
             String email = (String) object.get(CompetitorJsonSerializer.FIELD_EMAIL);
             
+            URI flagImageURI = null;
+            String flagImageURIAsString = (String) object.get(CompetitorJsonSerializer.FIELD_FLAG_IMAGE_URI);
+            if (flagImageURIAsString != null) {
+                try {
+                    flagImageURI = URI.create(flagImageURIAsString);
+                } catch (IllegalArgumentException e) {
+                    logger.warning("Illegal flag image URI " + e.getMessage());
+                }
+            }
+
             final Color displayColor;
             if (displayColorAsString == null || displayColorAsString.isEmpty()) {
                 displayColor = null;
@@ -70,7 +83,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                         CompetitorJsonSerializer.FIELD_BOAT));
             }
             
-            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email, team, boat);
+            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email, flagImageURI, team, boat);
             return competitor;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

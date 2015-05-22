@@ -97,10 +97,6 @@ public class TestDataRetrieverChainCreation {
         } catch (IllegalStateException e) {
         }
         try {
-            chainBuilder.getCurrentRetrieverLevel();
-        } catch (IllegalStateException e) {
-        }
-        try {
             chainBuilder.setFilter(null);
         } catch (IllegalStateException e) {
         }

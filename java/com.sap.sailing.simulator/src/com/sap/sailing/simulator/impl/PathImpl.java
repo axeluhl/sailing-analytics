@@ -27,20 +27,66 @@ public class PathImpl implements Path, Serializable {
     private static final long serialVersionUID = -6354445155884413937L;
     private List<TimedPositionWithSpeed> pathPoints;
     private WindField windField;
+    private int turnCount;
+    private long maxTurnTime;
+    private boolean algorithmTimedOut;
+    private boolean mixedLeg = false;
 
     private static final double TRESHOLD_DEGREES = 25.0;
     private static final double THRESHOLD_DISTANCE_METERS = 15.0;
 
-    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
-
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, boolean algorithmTimedOut) {
         this.pathPoints = pointsList;
         this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+    }
 
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, boolean algorithmTimedOut, boolean mixedLeg) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
+    }
+
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime, boolean algorithmTimedOut, boolean mixedLeg) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = 0;
+        this.maxTurnTime = maxTurnTime;
+        this.algorithmTimedOut = algorithmTimedOut;
+        this.mixedLeg = mixedLeg;
+    }
+
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, int turnCount, boolean algorithmTimedOut) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = turnCount;
+        this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
+    }
+
+    @Override
+    public boolean getAlgorithmTimedOut() {
+        return this.algorithmTimedOut;
+    }
+
+    @Override
+    public boolean getMixedLeg() {
+        return this.mixedLeg;
     }
 
     @Override
     public List<TimedPositionWithSpeed> getPathPoints() {
         return this.pathPoints;
+    }
+    
+    @Override
+    public int getTurnCount() {
+        return this.turnCount;
     }
 
     @Override
@@ -49,8 +95,18 @@ public class PathImpl implements Path, Serializable {
     }
 
     @Override
+    public long getMaxTurnTime() {
+        return this.maxTurnTime;
+    }
+    
+    @Override
+    public void setMaxTurnTime(long maxTurnTime) {
+        this.maxTurnTime = maxTurnTime;
+    }
+    
+    @Override
     public Path getEvenTimedPath(long timestep) {
-        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField);
+        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField, this.algorithmTimedOut, this.mixedLeg);
     }
 
     private List<TimedPositionWithSpeed> getEvenTimedPathAsList(long timeStep) {
@@ -84,9 +140,6 @@ public class PathImpl implements Path, Serializable {
                 TimedPositionWithSpeed p1 = this.pathPoints.get(idx - 1);
                 TimedPositionWithSpeed p2 = this.pathPoints.get(idx);
                 Distance dist = p1.getPosition().getDistance(p2.getPosition());
-                // long nextTime = (double)nextTimePoint.asMillis();
-                // System.out.println(""+(nextTimePoint.asMillis() -
-                // p1.getTimePoint().asMillis())+" - "+(p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()));
                 double scale1 = nextTimePoint.asMillis() - p1.getTimePoint().asMillis();
                 double scale2 = p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis();
                 Position nextPosition = p1.getPosition().translateGreatCircle(
@@ -112,32 +165,42 @@ public class PathImpl implements Path, Serializable {
                 double scaleDist = 0.01 * nextPoint.getPosition().getDistance(prevPoint.getPosition())
                         .getMeters();
 
-                // evaluate collected points to potentially find turn/corner
-                double maxDist = 0;
-                TimedPositionWithSpeed maxPoint = null;
+                // evaluate collected points to potentially find turn/corner (up to two)
+                double prevSide = 0;
+                int maxCnt = 0;
+                ArrayList<TimedPositionWithSpeed> maxPoint = new ArrayList<TimedPositionWithSpeed>();
+                maxPoint.add(path.get(0));
+                ArrayList<Double> maxDist = new ArrayList<Double>();
+                maxDist.add(new Double(0));
                 Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
                 for (int jdx = 0; jdx < points.size(); jdx++) {
 
                     Position pcur = points.get(jdx).getPosition();
                     Position ptmp = pcur.projectToLineThrough(prevPoint.getPosition(), nextBear);
-                    double lineDist = ptmp.getDistance(pcur).getMeters();
-                    if (lineDist > maxDist) {
-                        maxPoint = points.get(jdx);
-                        maxDist = lineDist;
+                    double side = Math.signum(nextBear.getDifferenceTo(prevPoint.getPosition().getBearingGreatCircle(pcur)).getDegrees());
+                    boolean sideChange = (prevSide != 0)&&(side != prevSide);
+                    double lineDist = Math.round(ptmp.getDistance(pcur).getMeters()*1000.0)/1000.0;
+                    if (sideChange) {
+                        maxCnt++;
+                        maxDist.add(new Double(0));
+                        maxPoint.add(path.get(0));
                     }
-
+                    if (lineDist > maxDist.get(maxCnt)) {
+                        maxPoint.set(maxCnt, points.get(jdx));
+                        maxDist.set(maxCnt, lineDist);
+                    }
+                    prevSide = side;
                 }
-
-                if (maxDist > scaleDist) {
-                    // add intermediate corner point
-                    SpeedWithBearing maxWind = null;
-                    if (this.windField != null) {
-                        maxWind = this.windField.getWind(new TimedPositionImpl(maxPoint.getTimePoint(), maxPoint
-                                .getPosition()));
-                        maxPoint = new TimedPositionWithSpeedImpl(maxPoint.getTimePoint(), maxPoint.getPosition(),
-                                maxWind);
+                for(int cnt=0; cnt<=maxCnt; cnt++) {
+                    if (maxDist.get(cnt) > scaleDist) {
+                        // add intermediate corner point
+                        SpeedWithBearing maxWind = null;
+                        if (this.windField != null) {
+                            maxWind = this.windField.getWind(new TimedPositionImpl(maxPoint.get(cnt).getTimePoint(), maxPoint.get(cnt).getPosition()));
+                            maxPoint.set(cnt, new TimedPositionWithSpeedImpl(maxPoint.get(cnt).getTimePoint(), maxPoint.get(cnt).getPosition(), maxWind));
+                        }
+                        path.add(maxPoint.get(cnt));
                     }
-                    path.add(maxPoint);
                 }
 
                 // add next even timed point
@@ -372,5 +435,16 @@ public class PathImpl implements Path, Serializable {
         }
 
         return !((diff >= 0 && diff <= TRESHOLD_DEGREES) || (diff >= (180 - TRESHOLD_DEGREES) && diff <= (180 + TRESHOLD_DEGREES)) || (diff >= (360 - TRESHOLD_DEGREES) && diff <= 360));
+    }
+
+    @Override
+    public TimePoint getFinalTime() {
+        TimePoint finalTime = null;
+        if (this.pathPoints != null) {
+            if (this.pathPoints.size() > 0) {
+                finalTime = this.pathPoints.get(this.pathPoints.size()-1).getTimePoint();
+            }
+        }
+        return finalTime;
     }
 }

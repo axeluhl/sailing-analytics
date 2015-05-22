@@ -12,10 +12,9 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class TrackedRaceRetrievalProcessor extends
-        AbstractSimpleRetrievalProcessor<HasLeaderboardContext, HasTrackedRaceContext> {
+public class TrackedRaceRetrievalProcessor extends AbstractRetrievalProcessor<HasLeaderboardContext, HasTrackedRaceContext> {
 
     public TrackedRaceRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasTrackedRaceContext, ?>> resultReceivers, int retrievalLevel) {

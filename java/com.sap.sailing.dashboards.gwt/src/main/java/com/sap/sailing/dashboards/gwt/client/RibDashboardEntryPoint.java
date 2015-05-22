@@ -8,6 +8,8 @@ import com.googlecode.mgwt.ui.client.MGWTSettings;
 import com.googlecode.mgwt.ui.client.MGWTSettings.StatusBarStyle;
 import com.googlecode.mgwt.ui.client.MGWTSettings.ViewPort;
 import com.googlecode.mgwt.ui.client.MGWTStyle;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetriever;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetriever;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -61,6 +63,6 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
 
     @Override
     protected StringMessages createStringMessages() {
-        return GWT.create(StringMessages.class);
+        return StringMessages.INSTANCE;
     }
 }

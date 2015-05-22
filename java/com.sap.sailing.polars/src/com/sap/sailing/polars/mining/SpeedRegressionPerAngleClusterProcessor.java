@@ -13,8 +13,8 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
@@ -35,6 +35,12 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
+    
+    @Override
+        public boolean canProcessElements() {
+            // TODO Auto-generated method stub
+            return true;
+        }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
@@ -134,11 +140,22 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
+    
+    @Override
+        public boolean isFinished() {
+            return false;
+        }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
     }
+    
+    @Override
+        public boolean isAborted() {
+            // TODO Auto-generated method stub
+            return false;
+        }
 
     @Override
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {

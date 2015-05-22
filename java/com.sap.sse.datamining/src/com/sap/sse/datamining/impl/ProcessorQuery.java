@@ -23,7 +23,7 @@ import com.sap.sse.datamining.impl.components.OverwritingResultDataBuilder;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.QueryResultState;
+import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.impl.NullAdditionalResultData;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -224,6 +224,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
 
         @Override
+        public boolean canProcessElements() {
+            return true;
+        }
+
+        @Override
         public void processElement(Map<GroupKey, AggregatedType> groupedAggregations) {
             resultsLock.lock();
             try {
@@ -260,9 +265,19 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
         
         @Override
+        public boolean isFinished() {
+            return false;
+        }
+        
+        @Override
         public void abort() {
             results = new HashMap<>();
             occuredFailures = new ArrayList<>();
+        }
+        
+        @Override
+        public boolean isAborted() {
+            return false;
         }
         
         public Map<GroupKey, AggregatedType> getResult() {

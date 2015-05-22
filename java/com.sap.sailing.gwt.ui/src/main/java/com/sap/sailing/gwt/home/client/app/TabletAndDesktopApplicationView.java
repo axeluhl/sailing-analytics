@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,8 +35,8 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     SimplePanel mainContentPanel;
 
-    public TabletAndDesktopApplicationView(HomePlacesNavigator navigator) {
-        headerPanel = new Header(navigator);
+    public TabletAndDesktopApplicationView(HomePlacesNavigator navigator, EventBus eventBus) {
+        headerPanel = new Header(navigator, eventBus);
         footerPanel = new Footer(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }

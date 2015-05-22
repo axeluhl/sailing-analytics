@@ -17,7 +17,7 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;

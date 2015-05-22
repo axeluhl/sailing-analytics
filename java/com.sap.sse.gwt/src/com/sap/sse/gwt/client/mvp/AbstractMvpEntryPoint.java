@@ -11,6 +11,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
+import com.sap.sse.gwt.client.mvp.impl.CustomActivityManager;
 
 /**
  * Subclasses implement their {@link EntryPoint#onModuleLoad()} by delegating to
@@ -46,7 +47,7 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages> extends Ab
             activityMapperRegistry.addActivityMapper(activityMapper);
         }
         EventBus eventBus = clientFactory.getEventBus();
-        ActivityManager activityManager = new ActivityManager(activityMapperRegistry, eventBus);
+        ActivityManager activityManager = new CustomActivityManager(activityMapperRegistry, eventBus);
         activityManager.setDisplay(clientFactory.getContent());
 
         // Start PlaceHistoryHandler with our PlaceHistoryMapper

@@ -110,10 +110,6 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     
     @Override
     public int getCurrentRetrieverLevel() {
-        if (!hasBeenInitialized()) {
-            throw new IllegalStateException("The builder hasn't been initialized");
-        }
-        
         return currentRetrieverTypeIndex;
     }
 

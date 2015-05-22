@@ -12,7 +12,7 @@
     <div class="{local_res.css.videopreview_videocontainer}">
       <iframe ui:field="youtubeEmbed" frameborder="0" class="{local_res.css.videopreview_videocontainer_video} allowfullscreen"></iframe>
     </div>
-    <figcaption>
+    <figcaption ui:field="videoTitleWrapper">
         <span ui:field="videoTitle" class="{local_res.css.videopreview_title}" />
     </figcaption>
   </figure>
