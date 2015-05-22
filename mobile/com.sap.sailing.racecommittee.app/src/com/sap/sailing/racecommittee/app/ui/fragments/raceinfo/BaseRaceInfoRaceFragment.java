@@ -178,6 +178,23 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
 
         @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            super.onStatusChanged(state);
+
+            switch (state.getStatus()) {
+            case UNSCHEDULED:
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (activity != null) {
+                    activity.onRaceItemClicked(getRace());
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        @Override
         public void onFinishedTimeChanged(ReadonlyRaceState state) {
             super.onFinishedTimeChanged(state);
 
