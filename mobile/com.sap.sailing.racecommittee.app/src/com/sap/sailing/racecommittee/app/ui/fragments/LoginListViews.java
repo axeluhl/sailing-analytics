@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +17,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
 
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
@@ -37,7 +37,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     public LoginListViews() {
         listener = new IntentListener();
     }
-    
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -113,59 +113,59 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     public void onClick(View view) {
         final int[] pos = new int[2];
         switch (view.getId()) {
-            case R.id.event_header:
-                if (event_selected != null) {
-                    event_selected.setText(null);
+        case R.id.event_header:
+            if (event_selected != null) {
+                event_selected.setText(null);
+            }
+            if (event_listView != null && event_listView.getLayoutParams() != null) {
+                if (event_listView.getLayoutParams().height == 0) {
+                    event_listView.getLocationOnScreen(pos);
+                    event_listView.getLayoutParams().height = getScreenHeight() - pos[1];
+                } else {
+                    closeEvent();
                 }
-                if (event_listView != null && event_listView.getLayoutParams() != null) {
-                    if (event_listView.getLayoutParams().height == 0) {
-                        event_listView.getLocationOnScreen(pos);
-                        event_listView.getLayoutParams().height = getScreenHeight() - pos[1];
-                    } else {
-                        closeEvent();
-                    }
-                    event_listView.requestLayout();
-                }
-                closeArea();
-                closePosition();
-                break;
+                event_listView.requestLayout();
+            }
+            closeArea();
+            closePosition();
+            break;
 
-            case R.id.area_header:
-                closeEvent();
-                if (area_selected != null) {
-                    area_selected.setText(null);
+        case R.id.area_header:
+            closeEvent();
+            if (area_selected != null) {
+                area_selected.setText(null);
+            }
+            if (area_listView != null && area_listView.getLayoutParams() != null) {
+                if (area_listView.getLayoutParams().height == 0) {
+                    area_listView.getLocationOnScreen(pos);
+                    area_listView.getLayoutParams().height = getScreenHeight() - pos[1];
+                } else {
+                    closeArea();
                 }
-                if (area_listView != null && area_listView.getLayoutParams() != null) {
-                    if (area_listView.getLayoutParams().height == 0) {
-                        area_listView.getLocationOnScreen(pos);
-                        area_listView.getLayoutParams().height = getScreenHeight() - pos[1];
-                    } else {
-                        closeArea();
-                    }
-                    area_listView.requestLayout();
-                }
-                closePosition();
-                break;
+                area_listView.requestLayout();
+            }
+            closePosition();
+            break;
 
-            case R.id.position_header:
-                closeEvent();
-                closeArea();
-                if (position_selected != null) {
-                    position_selected.setText(null);
+        case R.id.position_header:
+            closeEvent();
+            closeArea();
+            if (position_selected != null) {
+                position_selected.setText(null);
+            }
+            if (position_listView != null && position_listView.getLayoutParams() != null) {
+                if (position_listView.getLayoutParams().height == 0) {
+                    position_listView.getLocationOnScreen(pos);
+                    position_listView.getLayoutParams().height = getScreenHeight() - pos[1];
+                } else {
+                    closePosition();
                 }
-                if (position_listView != null && position_listView.getLayoutParams() != null) {
-                    if (position_listView.getLayoutParams().height == 0) {
-                        position_listView.getLocationOnScreen(pos);
-                        position_listView.getLayoutParams().height = getScreenHeight() - pos[1];
-                    } else {
-                        closePosition();
-                    }
-                    position_listView.requestLayout();
-                }
-                break;
+                position_listView.requestLayout();
+            }
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         showButton();
@@ -203,7 +203,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             position_listView.getLayoutParams().height = 0;
             position_listView.requestLayout();
             if (activity != null) {
-                position_selected.setText(activity.getPositionName());
+                position_selected.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
             }
         }
     }

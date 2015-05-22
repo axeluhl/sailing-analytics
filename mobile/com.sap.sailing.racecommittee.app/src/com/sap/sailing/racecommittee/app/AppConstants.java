@@ -18,6 +18,11 @@ public class AppConstants {
     public final static String FLAG_KEY = "raceFlag";
     public final static String EXTRAS_WIND_FIX = "windfix";
 
+    public final static String AUTHOR_TYPE_OFFICER_START = "Race Officer on Start Vessel";
+    public final static String AUTHOR_TYPE_OFFICER_FINISH = "Race Officer on Finish Vessel";
+    public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
+    public final static String AUTHOR_TYPE_VIEWER = "Viewer";
+
     public final static String DARK_THEME = "dark";
     public final static String LIGHT_THEME = "light";
 
