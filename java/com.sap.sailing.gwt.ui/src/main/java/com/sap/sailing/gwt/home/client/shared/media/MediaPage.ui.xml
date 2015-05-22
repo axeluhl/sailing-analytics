@@ -26,6 +26,7 @@
 		overflow-x: scroll;
 		height: 160px;
 		margin-top:20px;
+		white-space: nowrap;
 	}
 	.videoList .videoThumbnail {
 		display: inline-block;
@@ -33,9 +34,13 @@
 		width: 256px;
 		height: 144px;
 	}
+	.videoList .videoThumbnail:last-of-type {
+		margin-right: 0;
+	}
 	
 	@media (min-width:61em) {
 		.videoList {
+			white-space: normal;
 			overflow-y: scroll;
 			overflow-x: hidden;
 			height: 490px;
@@ -48,9 +53,11 @@
 			height: auto;
 		}
 		.videoList .videoThumbnail:last-of-type {
+			margin-right: 10px;
 			margin-bottom: 0;
 		}
 	}
+	
 	</ui:style>
 	<g:HTMLPanel>
 		<div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
