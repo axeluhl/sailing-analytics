@@ -244,7 +244,7 @@ public class RaceContext {
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());
-            liveRaceDTO.setStart(startTime.asDate());
+            liveRaceDTO.setStart(startTime == null ? null : startTime.asDate());
             liveRaceDTO.setBoatClass(getBoatClassName());
             liveRaceDTO.setCourseArea(getCourseAreaOrNull());
             liveRaceDTO.setCourse(getCourseNameOrNull());
