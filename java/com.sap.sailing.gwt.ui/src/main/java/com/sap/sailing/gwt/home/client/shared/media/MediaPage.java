@@ -56,7 +56,7 @@ public class MediaPage extends Composite {
         initWidget(contentPanel);
     }
 
-    public void setMedia(MediaDTO media) {
+    public void setMedia(final MediaDTO media) {
         Widget mediaUi = uiBinder.createAndBindUi(this);
         int photosCount = media.getPhotos().size();
         if (photosCount > 0) {
@@ -85,7 +85,7 @@ public class MediaPage extends Composite {
                 break;
             }
 
-            for (ImageMetadataDTO holder : media.getPhotos()) {
+            for (final ImageMetadataDTO holder : media.getPhotos()) {
                 if (holder.getSourceRef() != null) {
 
                     GalleryImageHolder gih = new GalleryImageHolder(holder);
@@ -93,6 +93,12 @@ public class MediaPage extends Composite {
                     gih.addStyleName(res.mediaCss().columns());
 
                     photoListOuterBoxUi.add(gih);
+                    gih.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            new FullscreenViewer(holder, media.getPhotos());
+                        }
+                    });
                 }
             }
         }
