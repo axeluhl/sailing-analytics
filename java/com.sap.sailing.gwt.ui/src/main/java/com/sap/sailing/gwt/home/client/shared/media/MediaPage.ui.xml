@@ -32,15 +32,13 @@
 		margin-right: 10px;
 		width: 256px;
 		height: 144px;
-		
 	}
-	
 	
 	@media (min-width:61em) {
 		.videoList {
 			overflow-y: scroll;
 			overflow-x: hidden;
-			height: 100%;
+			height: 490px;
 			margin-top: 0px;
 		}
 		.videoList .videoThumbnail {
@@ -48,6 +46,9 @@
 			margin-bottom: 10px;
 			width: 100%;
 			height: auto;
+		}
+		.videoList .videoThumbnail:last-of-type {
+			margin-bottom: 0;
 		}
 	}
 	</ui:style>
@@ -83,6 +84,5 @@
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
 			<g:FlowPanel ui:field="photoListOuterBoxUi"  />
 		</div>
-
 	</g:HTMLPanel>
 </ui:UiBinder> 
