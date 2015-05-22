@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.google.gwt.core.shared.GwtIncompatible;
+
 /**
  * Serializes a {@link Settings} object to a {@link JSONObject}. All setting types are supported as top-level entities.
  * Nesting of {@link Settings} is generally supported. For example, a {@link Settings} object can be contains as one
@@ -25,6 +27,7 @@ import org.json.simple.JSONObject;
  * @author Axel Uhl (D043530)
  *
  */
+@GwtIncompatible
 public class SettingsToJsonSerializer {
     private final static String TYPE_PROPERTY_SUFFIX = "___TYPE";
     private final static char TYPE_PROPERTY_SUFFIX_ESCAPE = ':';
