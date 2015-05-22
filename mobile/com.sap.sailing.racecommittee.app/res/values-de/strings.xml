@@ -320,7 +320,7 @@
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
-    <string name="race_begin_finish_header">Beginn der Z</string>
+    <string name="race_begin_finish_header">Beginn des Zieleinlaufs</string>
     <string name="race_begin_finish_current">Aktuelle Zeit verwenden</string>
     <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #FROM#° / #SPEED# kn]]></string>
