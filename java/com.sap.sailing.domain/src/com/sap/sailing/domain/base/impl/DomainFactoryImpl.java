@@ -165,58 +165,64 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, Collection<MediaTrack> mediaTracks) {
         TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
-        
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
-
         Competitor leaderOrWinner = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
-            if(trackedRace.isLive(now)) {
+            if (trackedRace.isLive(now)) {
                 leaderOrWinner = trackedRace.getOverallLeader(now);
             } else if (trackedRace.getEndOfRace() != null) {
-                for(Competitor competitor: leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
+                for (Competitor competitor : leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                    if(fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
+                    if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
                         break;
                     }
                 }
-            }                
-            if(leaderOrWinner != null) {
+            }
+            if (leaderOrWinner != null) {
                 statisticsDTO.hasLeaderOrWinnerData = true;
                 statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
-                if(track != null) {
+                if (track != null) {
                     statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
                 }
             }
         } catch (NoWindException e) {
         }
-        
+
         // Measured wind sources data
         statisticsDTO.measuredWindSourcesCount = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
-        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0; 
+        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0;
 
         // leg progress data
         RaceDefinition race = trackedRace.getRace();
-        if(race.getCourse() != null) {
+        if (race.getCourse() != null) {
             statisticsDTO.hasLegProgressData = true;
             statisticsDTO.totalLegsCount = race.getCourse().getLegs().size();
             statisticsDTO.currentLegNo = trackedRace.getLastLegStarted(MillisecondsTimePoint.now());
         }
-        
+
         // media data
-        if(mediaTracks != null) {
-            for(MediaTrack track: mediaTracks) {
-                switch(track.mimeType.mediaType) {
+        if (mediaTracks != null) {
+            for (MediaTrack track : mediaTracks) {
+                switch (track.mimeType.mediaType) {
                 case audio:
                     statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1 : statisticsDTO.audioTracksCount++;   
+                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                            : statisticsDTO.audioTracksCount++;
                     break;
                 case video:
                     statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1 : statisticsDTO.videoTracksCount++;   
+                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                            : statisticsDTO.videoTracksCount++;
+                    break;
+                case image: // TODO should this add to an image count?
+                    break;
+                case unknown: // TODO should this add to an "unknown media" count? Probably not
+                    break;
+                default:
                     break;
                 }
             }
