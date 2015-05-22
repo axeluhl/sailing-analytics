@@ -36,6 +36,6 @@ public class Video extends Composite {
     }
     
     private boolean canCurrentVideoBeReplaced() {
-        return !videoPlayer.isFullscreen() || videoPlayer.paused();
+        return !videoPlayer.isFullscreen() && videoPlayer.paused();
     }
 }
