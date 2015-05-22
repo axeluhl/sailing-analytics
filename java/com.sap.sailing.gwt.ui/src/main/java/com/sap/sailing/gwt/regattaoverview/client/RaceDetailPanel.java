@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.regattaoverview;
+package com.sap.sailing.gwt.regattaoverview.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,6 +42,8 @@ public class RaceDetailPanel extends SimplePanel {
     private final NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
     private final RaceStateFlagsInterpreter flagInterpreter;
     private final StringMessages stringMessages;
+    
+    private static RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
 
     private final Button closeButton;
     private final Label headerLabel = new Label();
@@ -75,10 +77,10 @@ public class RaceDetailPanel extends SimplePanel {
             }
         });
 
-        this.addStyleName("RaceDetailPanel");
+        this.addStyleName(style.raceDetailPanel());
 
         HorizontalPanel headerPanel = new HorizontalPanel();
-        headerPanel.addStyleName("RaceDetailPanel-header");
+        headerPanel.addStyleName(style.raceDetailPanel_header());
         headerPanel.setWidth("100%");
         headerPanel.add(headerLabel);
         headerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -113,7 +115,7 @@ public class RaceDetailPanel extends SimplePanel {
         resetProcedureGrid();
 
         HorizontalPanel contentPanel = new HorizontalPanel();
-        contentPanel.addStyleName("RaceDetailPanel-content");
+        contentPanel.addStyleName(style.raceDetailPanel_content());
         contentPanel.add(basicsGrid);
         contentPanel.add(managementGrid);
         contentPanel.add(procedureGrid);
