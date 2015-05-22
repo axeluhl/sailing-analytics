@@ -5,10 +5,8 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.*;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -83,7 +81,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
             public void run() {
                 loadRaces(mCourseArea);
-                loadNavDrawer(mCourseArea, mEvent);
+                loadNavDrawer(mCourseArea);
                 if (mSelectedRace == null) {
                     loadWelcomeFragment();
                 }
@@ -122,16 +120,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         setSupportProgressBarIndeterminateVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of courses from data manager");
-        getLoaderManager()
-            .initLoader(CourseLoaderId, null, dataManager.createCourseAreasLoader(event, new CourseLoadClient()));
+        getLoaderManager().initLoader(CourseLoaderId, null, dataManager.createCourseAreasLoader(event, new CourseLoadClient()));
     }
 
     private void loadRaces(final CourseArea courseArea) {
         setSupportProgressBarIndeterminateVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
-        getLoaderManager().initLoader(RacesLoaderId, null,
-            dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+        getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
     private void loadEvents() {
@@ -148,8 +144,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
             getFragmentManager().beginTransaction()
                 // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                .replace(R.id.racing_view_container, windFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
+                .replace(R.id.racing_view_container, windFragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null)
+                .commit();
         }
     }
 
@@ -241,7 +237,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
-            loadNavDrawer(mCourseArea, event);
+            loadNavDrawer(mCourseArea);
             loadWelcomeFragment();
         }
     }
@@ -266,14 +262,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
-    private void loadNavDrawer(CourseArea courseArea, EventBase event) {
-        mRaceList.setUp((DrawerLayout) findViewById(R.id.drawer_layout), courseArea.getName(), event.getName(),
-            preferences.getAuthor().getName());
+    private void loadNavDrawer(CourseArea courseArea) {
+        mRaceList.setUp((DrawerLayout) findViewById(R.id.drawer_layout), courseArea.getName(), preferences.getAuthor().getName());
     }
 
     private void loadWelcomeFragment() {
-        getFragmentManager().beginTransaction().replace(R.id.racing_view_container, WelcomeFragment.newInstance())
-            .commit();
+        getFragmentManager().beginTransaction().replace(R.id.racing_view_container, WelcomeFragment.newInstance()).commit();
     }
 
     public TimePoint getStartTime() {
@@ -374,8 +368,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         TextView windValue = (TextView) findViewById(R.id.wind_value);
         if (windFix != null) {
             if (windValue != null) {
-                windValue.setText(String.format(getString(R.string.wind_info), windFix.getKnots(),
-                    windFix.getBearing().reverse().toString()));
+                windValue.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
             }
             if (mSelectedRace != null) {
                 mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
@@ -462,8 +455,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId().toString());
-                ExLog.w(RacingActivity.this, TAG,
-                    String.format("Race %s is selected for reset.", mSelectedRace.getId()));
+                ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
                 onRaceItemClicked(mSelectedRace);
             }
@@ -504,8 +496,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 TintImageView overflow = (TintImageView) outViews.get(0);
                 overflow.setMinimumWidth((int) getResources().getDimension(R.dimen.bigger_over_flow_width));
                 overflow.setMinimumHeight((int) getResources().getDimension(R.dimen.bigger_over_flow_height));
-                Bitmap bitmap = BitmapHelper
-                    .decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon_32dp, 6, 8);
+                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon_32dp, 6, 8);
                 overflow.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
                 // Remove listener on layout
                 removeOnGlobalLayoutListener(decorView, this);
@@ -536,16 +527,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         public void onLoadFailed(Exception ex) {
             setSupportProgressBarIndeterminateVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
-            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
-                .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_warning_grey600_36dp)
-                .setCancelable(true)
+            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
+                .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         setSupportProgressBarIndeterminateVisibility(true);
 
                         ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
-                        getLoaderManager().restartLoader(RacesLoaderId, null,
-                            dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                        getLoaderManager().restartLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
                         dialog.cancel();
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -567,8 +556,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 registerOnService(data);
                 mRaceList.setupOn(data);
 
-                Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()),
-                    Toast.LENGTH_SHORT).show();
+                Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
 
             setSupportProgressBarIndeterminateVisibility(false);
@@ -581,9 +569,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         public void onLoadFailed(Exception ex) {
             setSupportProgressBarIndeterminateVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
-            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
-                .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_warning_grey600_36dp)
-                .setCancelable(true)
+            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
+                .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         setSupportProgressBarIndeterminateVisibility(true);

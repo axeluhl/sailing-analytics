@@ -402,4 +402,9 @@
     <string name="error_wrong_degree_value_title">Fehler</string>
     <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
 
+    <string name="author_type_officer_start">Startschiff-Wettfahrtleiter</string>
+    <string name="author_type_officer_finish">Zielschiff-Wettfahrtleiter</string>
+    <string name="author_type_shore_control">Regattaleitung an Land</string>
+    <string name="author_viewer">Demo-Modus</string>
+
 </resources>
