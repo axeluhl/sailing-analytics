@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.TextOperator.Operators;
+import com.sap.sse.settings.SettingsToJsonSerializer;
 
 public class SettingsJsonSerializationTest {
     @Test
@@ -48,7 +49,6 @@ public class SettingsJsonSerializationTest {
      * A white-box test that tests property name escaping in case the property name conflicts with how type
      * names (used particularly for enum settings) are represented in JSON.
      */
-    @Ignore("doesn't compile for gwt yet")
     @Test
     public void testJsonSerializationWithFunnyPropertyName() throws ClassNotFoundException {
         final Map<String, Setting> settingsMap = new HashMap<>();
@@ -65,7 +65,6 @@ public class SettingsJsonSerializationTest {
      * A white-box test that tests property name escaping in case the property name conflicts with how type
      * names (used particularly for enum settings) are represented in JSON.
      */
-    @Ignore("doesn't compile for gwt yet")
     @Test
     public void testJsonSerializationWithEnumTypedList() throws ClassNotFoundException {
         final Map<String, Setting> settingsMap = new HashMap<>();
@@ -84,7 +83,6 @@ public class SettingsJsonSerializationTest {
      * A white-box test that tests property name escaping in case the property name conflicts with how type
      * names (used particularly for enum settings) are represented in JSON.
      */
-    @Ignore("Class.forName doesn't compile for gwt yet")
     @Test
     public void testJsonSerializationWithStringifiedEnum() throws ClassNotFoundException {
         final Map<String, Setting> settingsMap = new HashMap<>();
