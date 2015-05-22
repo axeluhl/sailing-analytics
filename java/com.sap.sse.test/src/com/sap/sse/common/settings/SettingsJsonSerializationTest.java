@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.TextOperator.Operators;
+import com.sap.sse.settings.SettingsToJsonSerializer;
 
 public class SettingsJsonSerializationTest {
     @Test
