@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -124,21 +125,60 @@ public class RaceContext {
     }
 
     private FlagStateDTO getFlagStateOrNull() {
+        // Code extracted from SailingServiceImpl.createRaceInfoDTO
+        // TODO extract to to util to be used from both places
         TimePoint startTime = state.getStartTime();
-        if(startTime == null) {
-            return null;
+        
+        Flags lastUpperFlag = null;
+        Flags lastLowerFlag = null;
+        boolean lastFlagsAreDisplayed = false;
+        boolean lastFlagsDisplayedStateChanged = false;
+        
+        if (startTime != null) {
+            FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, now);
+            List<FlagPole> activeFlags = activeFlagState.getCurrentState();
+            FlagPoleState previousFlagState = activeFlagState.getPreviousState(state.getRacingProcedure(), startTime);
+            List<FlagPole> previousFlags = previousFlagState.getCurrentState();
+            FlagPole mostInterestingFlagPole = FlagPoleState.getMostInterestingFlagPole(previousFlags, activeFlags);
+
+            // TODO: adapt the LastFlagFinder#getMostRecent method!
+            if (mostInterestingFlagPole != null) {
+                lastUpperFlag = mostInterestingFlagPole.getUpperFlag();
+                lastLowerFlag = mostInterestingFlagPole.getLowerFlag();
+                lastFlagsAreDisplayed = mostInterestingFlagPole.isDisplayed();
+                lastFlagsDisplayedStateChanged = previousFlagState.hasPoleChanged(mostInterestingFlagPole);
+            }
         }
         
-        FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, now);
-        List<FlagPole> activeFlags = activeFlagState.getCurrentState();
-        FlagPoleState previousFlagState = activeFlagState.getPreviousState(state.getRacingProcedure(), startTime);
-        List<FlagPole> previousFlags = previousFlagState.getCurrentState();
-        FlagPole mostInterestingFlagPole = FlagPoleState.getMostInterestingFlagPole(previousFlags, activeFlags);
-
-        // TODO: adapt the LastFlagFinder#getMostRecent method!
-        if (mostInterestingFlagPole != null) {
-            return new FlagStateDTO(mostInterestingFlagPole, previousFlagState);
+        RaceLogRaceStatus lastStatus = state.getStatus();
+        
+        AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+        
+        RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+        if (abortingFlagEvent != null) {
+            if (lastStatus == RaceLogRaceStatus.UNSCHEDULED) {
+                lastUpperFlag = abortingFlagEvent.getUpperFlag();
+                lastLowerFlag = abortingFlagEvent.getLowerFlag();
+                lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
+                lastFlagsDisplayedStateChanged = true;
+            }
         }
+        
+        
+        if (lastStatus == RaceLogRaceStatus.FINISHED) {
+            TimePoint protestStartTime = state.getProtestTime();
+            if (protestStartTime != null) {
+                lastUpperFlag = Flags.BRAVO;
+                lastLowerFlag = Flags.NONE;
+                lastFlagsAreDisplayed = true;
+                lastFlagsDisplayedStateChanged = true;
+            }
+        }
+        
+        if(lastUpperFlag != null || lastLowerFlag != null) {
+            return new FlagStateDTO(lastUpperFlag, lastLowerFlag, lastFlagsAreDisplayed, lastFlagsDisplayedStateChanged);
+        }
+        
         return null;
     }
     
