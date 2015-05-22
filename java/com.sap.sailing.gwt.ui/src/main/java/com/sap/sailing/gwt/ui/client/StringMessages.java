@@ -759,6 +759,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dropReplicaConnection();
     String timePanelName();
     String competitorFilterExplanation();
+    String protestTime();
     String protestTimeFinishesAt();
     String protestTimeFinishedAt();
     String flags();
@@ -1264,7 +1265,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String startLineToFirstMarkTriangle(String distanceInMeters);
     String dataMiningComponentsHaveBeenUpdated();
     String dataMiningComponentsNeedReloadDialogMessage();
-    
+
     String noDataForEvent();
     String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String racesCount(@PluralCount(DefaultRule_1_0n.class) int count);

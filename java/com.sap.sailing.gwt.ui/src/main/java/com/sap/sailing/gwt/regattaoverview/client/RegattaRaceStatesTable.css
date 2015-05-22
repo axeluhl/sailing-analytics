@@ -1,0 +1,89 @@
+.cellTableWidget {
+	border-spacing: 0px;
+	font-size:16px;
+}
+.cellTableWidget a {
+	color: black;
+	
+}
+
+
+/** v-align images in the table header
+ * grey background for table header
+ */
+.cellTableHeader {
+	position: relative;
+	vertical-align: bottom;
+	background-color: #f2f2f2;
+	background-color: #fff;
+	padding: 20px 5px;
+	text-align: left;
+	border-bottom: 1px solid black;
+	text-shadow: none;
+	font-size: 16px;
+}
+
+.cellTableHeader:FOCUS {
+	outline: none;
+}
+
+.cellTableFirstColumnHeader {
+	
+}
+
+.cellTableLastColumnHeader {
+	
+}
+
+.cellTableHeader>span>img:first-child {
+	position: relative;
+	vertical-align: middle;
+}
+
+.cellTableEvenRow {
+	background-color: #fafafa;
+}
+
+.cellTableEvenRowCell {
+	border: none;
+	border-bottom: 1px solid #dedede;
+	padding: 20px 5px 20px 10px;
+	vertical-align: top;
+	
+}
+
+.cellTableOddRow {
+	background-color: #fdfdfd;
+}
+
+.cellTableOddRowCell {
+	border: none;
+	border-bottom: 1px solid #dedede;
+	padding: 20px 5px 20px 10px;
+	vertical-align: top;
+
+}
+
+.cellTableHoveredRow {
+	background-color: rgba(229, 242, 249, 0.5);
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.cellTableSelectedRow {
+	color: #000000;
+	background-color: rgba(229, 242, 249, 0.5);
+}
+
+.cellTableSelectedRowCell {
+	border-top: 2px solid #21a0e4 !important;
+	border-bottom: 2px solid #21a0e4 !important;
+}
+
+.cellTableRaceNameColumnHeader {
+	background-color: #e0e0e0;
+	padding: 5px 20px;
+}
+
+.cellTableRaceNameColumn {
+	background-color: #e0e0e0 !important;
+}

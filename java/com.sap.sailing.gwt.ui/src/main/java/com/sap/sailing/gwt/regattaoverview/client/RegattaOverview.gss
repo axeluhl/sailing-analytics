@@ -1,0 +1,180 @@
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+.container {
+	width: 100%;
+	height: 100%;
+}
+
+.titleLabel {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.eventDescription {
+  vertical-align: top;
+  height: 40px;
+}
+
+.repeatedInfoLabel {
+  margin: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.eventLabel {
+  color: #fff;
+  vertical-align: top;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.venueLabel {
+  color: #fff;
+  font-size: 18px;
+  vertical-align: top;
+}
+
+
+.clockLabel {
+  margin-left:30px;
+  margin-right:10px;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  
+}
+
+.refreshStopTime {
+  float:right;
+  margin-left:10px;
+}
+
+.functionBar {
+  height: 80px;
+  background-color: #fff;  
+  padding: 2px 2px 5px 0px;
+  text-align: right;
+}
+.functionBarLeft {
+  height: 80px;
+  background-color: #fff;  
+  padding: 2px 2px 5px 0px;
+  text-align: left;
+}
+
+.contentWrapper {
+ 
+}
+
+.circle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  float: left;
+  margin: 2px 6px 0 0;
+}
+
+.circleBlue {
+  background: #008fcc;
+}
+
+.circleYellow {
+  background: #fbba00;
+}
+
+.circleGreen {
+  background: #8ab54e;
+}
+
+.circleGrey {
+  background: #ebebeb;
+}
+
+.raceDetailPanel {
+  background: #f2f2f2;
+  border-top: 1px solid #dedede;
+  padding: 6px;
+}
+
+.raceDetailPanel_header {
+  font-weight: bold;
+}
+
+.raceDetailPanel_content td {
+  padding-right: 20px;
+}
+
+.leaderboards {
+  padding-top: 20px;	
+  font-size: 16px;
+  margin: 10px;
+  width: calc(100% - 20px);
+}
+
+.viewerToolbar_innerElement {
+ 	font-size: 13px;
+	display: inline-block;
+	color: white;
+	border: none;
+	padding: 2px 8px 4px 8px;
+	border-radius: 3px;
+	height: 26px;
+	line-height: 24px;
+	background-color: #efaa00;
+	-webkit-transition: background-color 0.2s;
+	-moz-transition: background-color 0.2s;
+	transition: background-color 0.2s;
+	text-decoration: none;
+	cursor: pointer;
+	margin: 5px;
+}
+
+.viewerToolbar_innerElement:active {
+}
+
+.viewerToolbar_innerElement:hover {
+    cursor: pointer;
+}
+
+.viewerToolbar_innerElement label {
+	cursor: pointer;
+}
+
+.button {
+	margin: 10px;
+}
+
+.buttonLeaderboard {
+	height: 2.666666666666667em;
+ 	background-color: #9f9f9f;
+}
+ 
+.refreshButton, .refreshButton:ACTIVE {
+	width: 2.666666666666667em;
+	height: 2.666666666666667em;
+ 	background-color: #9f9f9f;
+  	background-image: url("images/home/reload.png");
+	background-size: 40%;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.refreshButton_live {
+  background-color: #f0ab00;
+}
+.refreshButton_playing {
+  background-color: #f0ab00;
+}
+
+.settingsButton {
+  width: 2.666666666666667em;
+  height: 2.666666666666667em;
+ 
+  background-color: #9f9f9f;
+  background-image: url("images/home/settings.png");
+  background-size: 40%;
+  background-repeat: no-repeat;
+  background-position: center center;
+}

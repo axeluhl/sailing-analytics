@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.regattaoverview;
+package com.sap.sailing.gwt.regattaoverview.client;
 
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.ui.client.StringMessages;
