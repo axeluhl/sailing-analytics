@@ -58,11 +58,17 @@ public class SailingFlagsBuilder {
     private static SafeHtml getFlagBackgroundImage(Flags flag, boolean displayed, boolean displayedChanged,
             Scales scales) {
         ImageResource flagImage = flagImageResolver.resolveFlagToImage(flag, displayed, displayedChanged);
+        if (flagImage == null) {
+            return SafeHtmlUtils.EMPTY_SAFE_HTML;
+        }
         return getBackgroundImage(flagImage, scales.flagsScale, new SafeStylesBuilder());
     }
 
     private static SafeHtml getArrowBackgroundImage(boolean displayed, boolean displayedChanged, Scales scales) {
         ImageResource flagImage = flagImageResolver.resolveFlagDirectionToImage(displayed, displayedChanged);
+        if (flagImage == null) {
+            return SafeHtmlUtils.EMPTY_SAFE_HTML;
+        }
         SafeStylesBuilder arrowStyleBuilder = new SafeStylesBuilder();
         arrowStyleBuilder.display(Display.INLINE_BLOCK);
         arrowStyleBuilder.verticalAlign(VerticalAlign.TOP);
