@@ -11,6 +11,7 @@
 			padding: 0 !important;
 			border: none !important;
 			box-shadow: none !important;
+			z-index: auto !important;
 		}
 		.vjs-big-play-button:BEFORE {
 			content: "" !important;
