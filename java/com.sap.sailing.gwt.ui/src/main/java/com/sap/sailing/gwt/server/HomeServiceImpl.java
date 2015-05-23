@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.server;
+package com.sap.sailing.gwt.server;
 
 import java.net.MalformedURLException;
 import java.net.URL;
