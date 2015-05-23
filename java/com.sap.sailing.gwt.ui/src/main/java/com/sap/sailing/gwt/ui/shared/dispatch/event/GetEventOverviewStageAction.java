@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.media.MimeType;
-import com.sap.sailing.gwt.home.server.HomeServiceUtil;
+import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
