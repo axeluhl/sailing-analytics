@@ -253,9 +253,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             for (int i = 0; i < columnSortList.size(); i++) {
                 sortInfos.addFirst(columnSortList.get(i));
             }
+            table.removeFromParent();
+            while (table.getColumnCount() > 0) {
+                table.removeColumn(0);
+            }
         }
         table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
         tableHolder.setWidget(table);
+        regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.addDataDisplay(table);
         table.setWidth("100%");
         if (!canRemoveRegatta) {
