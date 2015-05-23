@@ -205,7 +205,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference);
     
-    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
+            List<Pair<String, Integer>> columnNames);
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
