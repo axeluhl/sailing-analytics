@@ -79,7 +79,7 @@
     <bool name="preference_isSendingActive_default">false</bool>
     
     <string name="preference_wakelock_key" translatable="false">enable_wakelock</string>
-    <bool name="preference_wakelock_default">true</bool>
+    <bool name="preference_wakelock_default">false</bool>
 
     <string name="preference_developer_key" translatable="false">developer_options</string>
     <string name="preference_offline_key" translatable="false">is_data_offline</string>
