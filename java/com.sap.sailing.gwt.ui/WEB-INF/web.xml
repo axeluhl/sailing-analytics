@@ -75,7 +75,7 @@
 	<servlet>
 	    <display-name>Home Service</display-name>
 	    <servlet-name>HomeService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.home.server.HomeServiceImpl</servlet-class>
+    	<servlet-class>com.sap.sailing.gwt.server.HomeServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>HomeService</servlet-name>
