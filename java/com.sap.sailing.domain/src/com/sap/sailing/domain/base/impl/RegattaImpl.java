@@ -233,7 +233,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<? extends Series> getSeries() {
-        return Collections.unmodifiableCollection(series);
+        if (series != null) {
+            return Collections.unmodifiableCollection(series);
+        } else {
+            return null;
+        }
     }
     
     @Override
