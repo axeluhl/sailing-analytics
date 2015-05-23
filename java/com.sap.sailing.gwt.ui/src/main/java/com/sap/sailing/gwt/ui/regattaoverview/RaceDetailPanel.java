@@ -191,7 +191,7 @@ public class RaceDetailPanel extends SimplePanel {
                                 + getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.getLngDeg()) + " ")
                         .getHTML();
             }
-            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindBearingDeg) + "&deg; "
+            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindFromDeg) + "&deg; "
                     + decimalFormat.format(data.raceInfo.lastWind.trueWindSpeedInKnots) + "knts").getHTML();
         }
         vesselPositionLabel.setText(vesselPositionText);
