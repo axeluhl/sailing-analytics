@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,12 +8,14 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
@@ -22,6 +23,9 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.util.Date;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
     
@@ -93,7 +97,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
-            menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, R.attr.sap_red_1));
+            menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             String statusText = getString(R.string.events_waiting_to_be_sent);
             sendingServiceStatus = String.format(statusText,
@@ -142,10 +146,15 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         return String.format(getString(R.string.connected_to_wp), PrefUtils.getString(this, R.string.preference_server_url_key,
                 R.string.preference_server_url_default), sendingServiceStatus);
     }
-    
-    private Drawable getTintedDrawable(Resources res, int drawableResId, int colorResId) {
-        Drawable drawable = res.getDrawable(drawableResId);
-        int color = res.getColor(colorResId);
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private Drawable getTintedDrawable(Resources res, @DrawableRes int drawableResId, @ColorRes int color) {
+        Drawable drawable;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            drawable = getDrawable(drawableResId);
+        } else {
+            drawable = res.getDrawable(drawableResId);
+        }
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         return drawable;
     }
