@@ -3,8 +3,9 @@
 	font-size:16px;
 }
 .cellTableWidget a {
-	color: black;
 	
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 

@@ -31,12 +31,16 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -103,7 +107,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private EntryHandler entryClickedHandler;
     private TextColumn<RegattaOverviewEntryDTO> courseAreaColumn;
     private Column<RegattaOverviewEntryDTO, Anchor> regattaNameColumn;
-    private Label repeatedInfoLabel;
+    private FlowPanel repeatedInfoLabel;
     private Column<RegattaOverviewEntryDTO, SafeHtml> raceCourseColumn;
     private TextColumn<RegattaOverviewEntryDTO> boatClass;
     private TextColumn<RegattaOverviewEntryDTO> startTimeColumn;
@@ -179,7 +183,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         boolean canRemoveBoatClass = true;
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
+        boolean isAppending = false;
+        RegattaOverviewEntryDTO firstEntry = null;
         for (RegattaOverviewEntryDTO entryDTO : allEntries) {
+            if (firstEntry == null) {
+                firstEntry = entryDTO;
+            }
+            if (lastRegattaName == null) {
+                lastRegattaName = entryDTO.regattaDisplayName;
+            } else if (canRemoveRegatta && !lastRegattaName.equals(entryDTO.regattaDisplayName)) {
+                canRemoveRegatta = false;
+            }
             if (canRemoveLastUpdate && timePassedInSeconds(entryDTO.raceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveLastUpdate = false;
             }
@@ -197,27 +211,40 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             } else if (canRemoveCourse && !lastCourseName.equals(entryDTO.raceInfo.lastCourseName)) {
                 canRemoveCourse = false;
             }
-            if (lastRegattaName == null) {
-                lastRegattaName = entryDTO.regattaDisplayName;
-            } else if (canRemoveRegatta && !lastRegattaName.equals(entryDTO.regattaDisplayName)) {
-                canRemoveRegatta = false;
-            }
+
             if (lastBoatClass == null) {
                 lastBoatClass = entryDTO.boatClassName;
             } else if (canRemoveBoatClass && !lastBoatClass.equals(entryDTO.boatClassName)) {
                 canRemoveBoatClass = false;
             }
         }
-        StringBuilder repeatedInfosBuilder = new StringBuilder();
-        collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta, repeatedInfosBuilder);
-        collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea, repeatedInfosBuilder);
-        collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfosBuilder);
-        collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass, repeatedInfosBuilder);
-        collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfosBuilder);
-        collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfosBuilder);
-        if (repeatedInfoLabel != null) {
-            repeatedInfoLabel.setText(repeatedInfosBuilder.toString());
-        }
+        final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
+        repeatedInfoLabel.clear();
+        isAppending = collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
+                repeatedInfoLabel, isAppending, new Command() {
+                    @Override
+                    public void execute() {
+                        Window.open(createRegattaLink(entryForRepeatedInfos), "_blank", "");
+                    }
+                });
+        // private boolean collectRepeatedInfos(String label, String info,
+        // boolean canRemove, FlowPanel panel, boolean append,
+        // final Command linkAction) {
+        isAppending = collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
+                repeatedInfoLabel,
+                isAppending, null);
+        isAppending = collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
+                isAppending, new Command() {
+                    @Override
+                    public void execute() {
+                        raceCourseClicked(entryForRepeatedInfos);
+                    }
+                });
+        isAppending = collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
+                repeatedInfoLabel,
+                isAppending, null);
+        isAppending = collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
+        isAppending = collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
         LinkedList<ColumnSortInfo> sortInfos = new LinkedList<ColumnSortList.ColumnSortInfo>();
         if (table != null) {
             ColumnSortList columnSortList = table.getColumnSortList();
@@ -287,13 +314,30 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
     }
 
-    private void collectRepeatedInfos(String label, String info, boolean canRemove, StringBuilder repeatedInfosBuilder) {
+    private boolean collectRepeatedInfos(String label, String info, boolean canRemove, FlowPanel panel, boolean append,
+            final Command linkAction) {
         if (canRemove && info != null && !info.isEmpty()) {
-            if (repeatedInfosBuilder.length() > 0) {
-                repeatedInfosBuilder.append(", ");
+            
+            if (append) {
+                panel.add(new InlineLabel(", "));
             }
-            repeatedInfosBuilder.append(label).append(": ").append(info);
+            if (linkAction == null) {
+                panel.add(new InlineLabel(new StringBuilder(label).append(": ").append(info).toString()));
+            } else {
+                panel.add(new InlineLabel(new StringBuilder(label).append(": ").toString()));
+                Anchor anchor = new Anchor(info);
+                anchor.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        linkAction.execute();
+                    }
+                });
+                panel.add(anchor);
+                
+            }
+            return true;
         }
+        return false;
     }
 
     protected void loadAndUpdateEventLog() {
@@ -357,14 +401,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(leaderboardAnchorCell) {
             @Override
             public Anchor getValue(RegattaOverviewEntryDTO entryDTO) {
-                Map<String, String> leaderboardLinkParameters = new HashMap<String, String>();
-                leaderboardLinkParameters.put("name", entryDTO.regattaName);
-                leaderboardLinkParameters.put("showRaceDetails", String.valueOf(true));
-                leaderboardLinkParameters.put("displayName", entryDTO.regattaDisplayName);
-                String leaderboardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
+                String leaderboardLink = createRegattaLink(entryDTO);
                 Anchor result = new Anchor(entryDTO.regattaDisplayName, leaderboardLink);
                 return result;
             }
+
+
         };
         regattaNameColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(regattaNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
@@ -393,21 +435,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(raceCell) {
             @Override
             public Anchor getValue(RegattaOverviewEntryDTO entryDTO) {
-                Anchor result = null;
-                if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
-                    Map<String, String> raceLinkParameters = new HashMap<String, String>();
-                    raceLinkParameters.put("leaderboardName", entryDTO.regattaName);
-                    raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
-                    raceLinkParameters.put("canReplayDuringLiveRaces", "true");
-                    raceLinkParameters.put("regattaName", entryDTO.regattaName);
-                    String raceBoardLink = EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);
-                    result = new Anchor(entryDTO.raceInfo.raceName, raceBoardLink);
-                } else {
-                    result = new Anchor(entryDTO.raceInfo.raceName);
-                    result.setEnabled(false);
+                String raceBoardLink = createRaceLink(entryDTO);
+                String raceName = entryDTO.raceInfo.raceName;
+                Anchor result = new Anchor(raceName);
+                result.setEnabled(raceBoardLink != null);
+                if (raceBoardLink != null) {
+                    result.setHref(raceBoardLink);
                 }
                 return result;
             }
+
+
         };
         raceNameColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(raceNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
@@ -488,14 +526,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
-                if (courseDTO != null && courseDTO.waypoints.size() > 0) {
-                    DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
-                    courseViewDialogBox.center();
-                    courseViewDialogBox.setGlassEnabled(true);
-                    courseViewDialogBox.setAnimationEnabled(true);
-                    courseViewDialogBox.show();
-                }
+                raceCourseClicked(object);
             }
         });
         // raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -806,6 +837,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return result;
     }
 
+    private void raceCourseClicked(RegattaOverviewEntryDTO object) {
+        RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+        if (courseDTO != null && courseDTO.waypoints.size() > 0) {
+            DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
+            courseViewDialogBox.center();
+            courseViewDialogBox.setGlassEnabled(true);
+            courseViewDialogBox.setAnimationEnabled(true);
+            courseViewDialogBox.show();
+        }
+    }
+
     private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
         switch (passingInstructions) {
         case Port:
@@ -834,7 +876,26 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return "regattaRaceStates";
     }
 
-    public void setRepeatedInfoLabel(Label repeatedInfoLabel) {
+    private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
+        if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
+            Map<String, String> raceLinkParameters = new HashMap<String, String>();
+            raceLinkParameters.put("leaderboardName", entryDTO.regattaName);
+            raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
+            raceLinkParameters.put("canReplayDuringLiveRaces", "true");
+            raceLinkParameters.put("regattaName", entryDTO.regattaName);
+            return EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);
+        }
+        return null;
+    }
+    private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
+        Map<String, String> leaderboardLinkParameters = new HashMap<String, String>();
+        leaderboardLinkParameters.put("name", entryDTO.regattaName);
+        leaderboardLinkParameters.put("showRaceDetails", String.valueOf(true));
+        leaderboardLinkParameters.put("displayName", entryDTO.regattaDisplayName);
+        String leaderboardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
+        return leaderboardLink;
+    }
+    public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {
         this.repeatedInfoLabel = repeatedInfoLabel;
     }
 }
