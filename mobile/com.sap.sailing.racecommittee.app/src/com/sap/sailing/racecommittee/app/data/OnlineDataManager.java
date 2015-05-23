@@ -128,8 +128,10 @@ public class OnlineDataManager extends DataManager {
                             EventBase event = dataStore.getEvent(parentEventId);
                             return dataStore.getCourseAreas(event);
                         } else {
-                            throw new DataLoadingException(String.format(
-                                    "Unable to load course areas for unknown event %s.", parentEventId));
+//                            throw new DataLoadingException(String.format(
+//                                    "Unable to load course areas for unknown event %s.", parentEventId));
+                            //TODO: Quickfix for #2889
+                            return null;
                         }
                     }
                 });
