@@ -27,6 +27,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
@@ -286,6 +287,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
         table.addColumnSortHandler(regattaOverviewListHandler);
+        regattaOverviewDataProvider.getList().clear();
+        regattaOverviewDataProvider.getList().addAll(allEntries);
+        if (entryClickedHandler != null) {
+            for (RegattaOverviewEntryDTO entry : allEntries) {
+                entryClickedHandler.onEntryUpdated(entry);
+            }
+        }
         boolean isSortedOk = false;
         if (sortInfos.size() > 0) {
             GWT.log("Using existing sort info");
@@ -305,13 +313,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             ColumnSortInfo initialSortinfo = new ColumnSortInfo(courseAreaColumn, /* ascending */false);
             table.getColumnSortList().push(initialSortinfo);
         }
-        regattaOverviewDataProvider.getList().clear();
-        regattaOverviewDataProvider.getList().addAll(allEntries);
-        if (entryClickedHandler != null) {
-            for (RegattaOverviewEntryDTO entry : allEntries) {
-                entryClickedHandler.onEntryUpdated(entry);
-            }
-        }
+        ColumnSortEvent.fire(table, table.getColumnSortList());
     }
 
     private boolean collectRepeatedInfos(String label, String info, boolean canRemove, FlowPanel panel, boolean append,
