@@ -14,7 +14,6 @@
 
   <modules>
     <module>com.sap.sse</module>
-    <module>com.sap.sse.test</module>
     <module>com.sap.sse.common</module>
     <module>com.sap.sse.shared.android</module>
     <module>com.sap.sse.mail</module>
