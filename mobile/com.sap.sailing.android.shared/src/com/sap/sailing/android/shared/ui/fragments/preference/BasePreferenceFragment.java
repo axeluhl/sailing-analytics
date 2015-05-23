@@ -14,7 +14,6 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 

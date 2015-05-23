@@ -92,10 +92,8 @@
 	<source path='ui/adminconsole' />
 	<source path='ui/usermanagement' />
 	<source path='ui/masterdataimport' />
-	<source path='ui/regattaoverview' />
+	<source path='regattaoverview' />
 	<source path='ui/leaderboard'/>
-	
-	
-		<entry-point class='com.sap.sailing.gwt.home.client.HomeEntryPoint' />
-	
+
+  	<entry-point class='com.sap.sailing.gwt.home.client.HomeEntryPoint' />
 </module>

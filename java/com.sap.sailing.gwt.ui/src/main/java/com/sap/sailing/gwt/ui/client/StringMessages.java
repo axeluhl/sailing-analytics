@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
-import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
+import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
@@ -486,6 +486,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
     String upcoming();
+    String next();
     String inProgress();
     String passedTo(String name);
     String gapChangeSinceLegStartInSeconds();
@@ -495,6 +496,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
+    String knotsValue(double value);
     String averageJibeLossInMetersTooltip();
     String averageManeuverLossInMetersTooltip();
     String averageTackLossInMetersTooltip();
@@ -1065,7 +1067,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
-    String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
+    String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_n.class) int days);
     String sharingMailTooltip();
     String sharingTwitterTooltip();
     String sharingFacebookTooltip();
@@ -1269,6 +1271,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String currentOfTotalLegs(int currentLeg, int totalLegs);
     String clone();
     String changed();
     String matcher();
@@ -1278,6 +1281,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sampleURL(String sampleURL);
     String sapSportsOn();
     String followSapSports();
+    String liveNow();
+    String analyseRace();
+    String nextRaceStartingIn();
+    String startingIn(String name);
+    String raceIsPlanned();
+    String raceIsCanceled();
+    String raceIsPostponed();
+    String startingInMinutes(@PluralCount(DefaultRule_0_1_n.class) int minutes);
     String showCompetitorTimeOnTimeFactorColumn();
     String showCompetitorTimeOnDistanceAllowanceColumn();
     String rankingMetric();

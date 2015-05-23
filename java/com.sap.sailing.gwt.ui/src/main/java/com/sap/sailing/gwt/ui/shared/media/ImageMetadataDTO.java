@@ -5,34 +5,28 @@ import java.util.Date;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sailing.domain.common.media.MimeType;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
-public class ImageMetadataDTO extends ImageReferenceDTO {
+public class ImageMetadataDTO extends AbstractMediaDTO {
     
-    private String title;
+    private static final long serialVersionUID = 1L;
+
+    private int widthInPx;
+    private int heightInPx;
+
     private String subtitle;
     private Date createdAtDate;
     private String author;
-    
-    // TODO do we need this?
-//    private String thumbnailURL;
-//    private int thumbnailWidthInPx;
-//    private int thumbnailHeightInPx;
-    
+
     protected ImageMetadataDTO() {
     }
 
     @GwtIncompatible
-    public ImageMetadataDTO(URL imageURL, ImageSize size, String title) {
-        super(imageURL, size);
-        this.title = title;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+    public ImageMetadataDTO(EventReferenceDTO eventRef, URL imageURL, ImageSize size, String title) {
+        super(eventRef, imageURL.toString(), MimeType.image, title);
+        this.widthInPx = size.getWidth();
+        this.heightInPx = size.getHeight();
     }
 
     public String getSubtitle() {
@@ -58,4 +52,21 @@ public class ImageMetadataDTO extends ImageReferenceDTO {
     public void setAuthor(String author) {
         this.author = author;
     }
+
+    public int getWidthInPx() {
+        return widthInPx;
+    }
+
+    public void setWidthInPx(int widthInPx) {
+        this.widthInPx = widthInPx;
+    }
+
+    public int getHeightInPx() {
+        return heightInPx;
+    }
+
+    public void setHeightInPx(int heightInPx) {
+        this.heightInPx = heightInPx;
+    }
+
 }

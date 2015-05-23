@@ -93,6 +93,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -1694,7 +1695,7 @@ public class MasterDataImportTest {
         assignedRaces.add(new RegattaNameAndRaceName(regattaName2, raceName5));
         assignedRaces.add(new RegattaNameAndRaceName(missingRegattaName, missingRaceName));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
-                MediaTrack.MimeType.mp4, assignedRaces);
+ MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
         
         Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);
