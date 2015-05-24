@@ -121,9 +121,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         setListShown(true);
         namedList.clear();
-        namedList.addAll(data);
-        Collections.sort(namedList, new NaturalNamedComparator());
-        listAdapter.notifyDataSetChanged();
+        //TODO: Quickfix for 2889
+        if (data != null) {
+            namedList.addAll(data);
+            Collections.sort(namedList, new NaturalNamedComparator());
+            listAdapter.notifyDataSetChanged();
+        }
 
         showProgressBar(false);
     }
