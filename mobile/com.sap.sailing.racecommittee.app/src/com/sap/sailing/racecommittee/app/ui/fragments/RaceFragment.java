@@ -1,8 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.content.Intent;
