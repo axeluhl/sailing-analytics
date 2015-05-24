@@ -181,9 +181,16 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
 
-            RacingActivity activity = (RacingActivity) getActivity();
-            if (activity != null) {
-                activity.onRaceItemClicked(getRace());
+            switch(state.getStatus()) {
+            case RUNNING:
+            case FINISHING:
+                break;
+
+            default:
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (activity != null) {
+                    activity.onRaceItemClicked(getRace());
+                }
             }
         }
 
