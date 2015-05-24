@@ -79,7 +79,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         super.onStart();
 
         TickSingleton.INSTANCE.registerListener(this);
-        notifyTick();
+        notifyTick(MillisecondsTimePoint.now());
         checkStatus();
 
         getRaceState().addChangedListener(mStateListener);
@@ -103,10 +103,8 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     }
 
     @Override
-    public void notifyTick() {
-        super.notifyTick();
-
-        TimePoint now = MillisecondsTimePoint.now();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
 
         if (mCurrentTime != null) {
             mCurrentTime.setText(dateFormat.format(now.asMillis()));

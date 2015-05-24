@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.os.Handler;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Reports a tick every second as a singleton
@@ -30,9 +32,10 @@ public enum TickSingleton implements Runnable {
     }
 
     public void run() {
+        TimePoint now = MillisecondsTimePoint.now();
         for (TickListener item : listeners) {
             if (item != null) {
-                item.notifyTick();
+                item.notifyTick(now);
             }
         }
         handler.removeCallbacks(this);

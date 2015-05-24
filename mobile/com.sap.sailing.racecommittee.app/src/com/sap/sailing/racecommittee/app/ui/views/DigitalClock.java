@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DigitalClock extends TextView implements TickListener {
     private Calendar calendar = Calendar.getInstance();
@@ -32,7 +34,7 @@ public class DigitalClock extends TextView implements TickListener {
     protected void onAttachedToWindow() {
         timerIsStopped = false;
         super.onAttachedToWindow();
-        notifyTick();
+        notifyTick(MillisecondsTimePoint.now());
         TickSingleton.INSTANCE.registerListener(this);
     }
 
@@ -43,11 +45,11 @@ public class DigitalClock extends TextView implements TickListener {
         timerIsStopped = true;
     }
 
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
         if (timerIsStopped) {
             return;
         }
-        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.setTimeInMillis(now.asMillis());
         setText(DateFormat.format(mFormat, calendar));
         invalidate();
     }

@@ -49,6 +49,7 @@ import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sse.common.TimePoint;
 
 import java.io.Serializable;
 import java.util.*;
@@ -198,7 +199,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
         if (mAdapter != null && mAdapter.getCount() >= 0 && mUpdateList) {
             mAdapter.notifyDataSetChanged();
         }

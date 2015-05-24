@@ -13,12 +13,11 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class RaceFlagViewerFragment extends BaseFragment {
@@ -68,13 +67,13 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     @Override
-    public void notifyTick() {
-        super.notifyTick();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
 
-        updateFlags();
+        updateFlags(now);
     }
 
-    private void updateFlags() {
+    private void updateFlags(TimePoint timePoint) {
         if (getRace() == null || getRaceState() == null || getRaceState().getStartTime() == null) {
             return;
         }
@@ -90,15 +89,14 @@ public class RaceFlagViewerFragment extends BaseFragment {
             if (mLayout != null) {
                 mLayout.setVisibility(View.VISIBLE);
             }
-            FlagPoleState poleState = getRaceState().getRacingProcedure()
-                .getActiveFlags(getRaceState().getStartTime(), MillisecondsTimePoint.now());
+            FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(), timePoint);
             List<FlagPole> currentState = poleState.getCurrentState();
             List<FlagPole> upcoming = poleState.computeUpcomingChanges();
             mLayout.removeAllViews();
             int size = 0;
             for (FlagPole flagPole : currentState) {
                 size++;
-                mLayout.addView(renderFlag(poleState, flagPole, FlagPoleState.getMostInterestingFlagPole(upcoming),
+                mLayout.addView(renderFlag(timePoint, poleState, flagPole, FlagPoleState.getMostInterestingFlagPole(upcoming),
                     currentState.size() == size));
             }
         } else {
@@ -107,20 +105,18 @@ public class RaceFlagViewerFragment extends BaseFragment {
             }
             String time = getString(R.string.until_xray_removed);
             if (mXrayCountdown != null) {
-                TimePoint now = MillisecondsTimePoint.now();
                 TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
-                if (now.before(flagDown)) {
-                    time = time.replace("#TIME#", getDuration(flagDown.asDate(), MillisecondsTimePoint.now().asDate())
-                        .replace("-", ""));
+                if (timePoint.before(flagDown)) {
+                    time = time.replace("#TIME#", TimeUtils.formatDurationUntil(flagDown.minus(timePoint.asMillis()).asMillis()).replace("-", ""));
                     mXrayCountdown.setText(time);
                 } else {
-                    procedure.removeIndividualRecall(now);
+                    procedure.removeIndividualRecall(timePoint);
                 }
             }
         }
     }
 
-    private RelativeLayout renderFlag(FlagPoleState poleState, final FlagPole flag, FlagPole nextFlag, boolean lastEntry) {
+    private RelativeLayout renderFlag(TimePoint timePoint, FlagPoleState poleState, final FlagPole flag, FlagPole nextFlag, boolean lastEntry) {
         RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         layout.setLayoutParams(layoutParams);
@@ -155,7 +151,13 @@ public class RaceFlagViewerFragment extends BaseFragment {
         textView.setText("");
         if (changeAt != null && next) {
             textView.setVisibility(View.VISIBLE);
-            textView.setText(getDuration(changeAt.asDate(), MillisecondsTimePoint.now().asDate()).replace("-", ""));
+            String timer;
+            if (changeAt.after(timePoint)) {
+                timer = TimeUtils.formatDurationUntil(changeAt.minus(timePoint.asMillis()).asMillis());
+            } else {
+                timer = TimeUtils.formatDurationSince(timePoint.minus(changeAt.asMillis()).asMillis());
+            }
+            textView.setText(timer.replace("-", ""));
             if (flag.isDisplayed()) {
                 downView.setVisibility(View.VISIBLE);
                 upView.setVisibility(View.GONE);

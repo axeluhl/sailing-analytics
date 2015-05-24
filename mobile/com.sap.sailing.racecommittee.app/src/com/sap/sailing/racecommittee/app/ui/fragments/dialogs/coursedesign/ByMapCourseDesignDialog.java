@@ -33,7 +33,6 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -46,6 +45,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -296,7 +296,7 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     }
 
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
 
     }
 

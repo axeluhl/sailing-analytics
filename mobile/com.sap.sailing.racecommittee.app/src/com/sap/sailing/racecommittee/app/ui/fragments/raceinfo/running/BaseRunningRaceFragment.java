@@ -135,21 +135,21 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     }
 
     @Override
-    public void notifyTick() {
-        TimePoint now = MillisecondsTimePoint.now();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
+
         TimePoint startTime = getRaceState().getStartTime();
         if (startTime != null) {
             long millisecondsSinceStart = now.minus(startTime.asMillis()).asMillis();
-            
+
             startCountUpTextView.setText(String.format(
                     getString(R.string.race_running_since_template),
                     getRace().getName(), TimeUtils.formatDurationSince(millisecondsSinceStart)));
-            
+
             if (!updateFlagChangesCountdown(nextCountdownTextView)) {
                 nextCountdownTextView.setText("");
             }
         }
-        super.notifyTick();
     }
 
     protected int getActionsLayoutId() {

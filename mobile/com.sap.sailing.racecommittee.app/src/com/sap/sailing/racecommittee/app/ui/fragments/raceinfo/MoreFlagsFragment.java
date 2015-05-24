@@ -191,10 +191,8 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         @Override
-        public void notifyTick() {
-            super.notifyTick();
-
-            TimePoint now = MillisecondsTimePoint.now();
+        public void notifyTick(TimePoint now) {
+            super.notifyTick(now);
 
             if (mCurrentTime != null) {
                 mCurrentTime.setText(mDateFormat.format(now.asMillis()));
