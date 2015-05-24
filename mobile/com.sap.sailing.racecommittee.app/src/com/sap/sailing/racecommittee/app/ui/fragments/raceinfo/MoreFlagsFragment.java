@@ -118,9 +118,10 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
             mTimePicker = ViewHolder.get(layout, R.id.time_picker);
             if (mTimePicker != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker,
-                    ThemeHelper.getColor(getActivity(), R.attr.white));
+                Calendar calendar = Calendar.getInstance();
+                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mTimePicker.setIs24HourView(true);
+                mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
             }
 
             mCurrentTime = ViewHolder.get(layout, R.id.current_time);
