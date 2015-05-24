@@ -117,7 +117,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
 
     protected EventContext contextForRegatta(String regattaId) {
-        return new EventContext(ctx).withRegattaId(regattaId);
+        return new EventContext(ctx).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
     }
 
     @Override
