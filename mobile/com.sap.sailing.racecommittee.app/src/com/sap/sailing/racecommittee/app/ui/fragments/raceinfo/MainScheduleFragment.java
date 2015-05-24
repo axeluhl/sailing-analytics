@@ -223,11 +223,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     @Override
-    public void notifyTick() {
-        super.notifyTick();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
 
         if (mStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
-            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString).replace("#COUNTDOWN#", calcCountdown());
+            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString).replace("#COUNTDOWN#", calcCountdown(now));
             mStartTime.setText(startTimeValue);
         }
 
@@ -241,9 +241,9 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
-    private String calcCountdown() {
+    private String calcCountdown(TimePoint timePoint) {
         Calendar now = (Calendar) mCalendar.clone();
-        now.setTime(MillisecondsTimePoint.now().asDate());
+        now.setTime(timePoint.asDate());
 
         RacingActivity activity = (RacingActivity) getActivity();
         Calendar startTime = (Calendar) mCalendar.clone();

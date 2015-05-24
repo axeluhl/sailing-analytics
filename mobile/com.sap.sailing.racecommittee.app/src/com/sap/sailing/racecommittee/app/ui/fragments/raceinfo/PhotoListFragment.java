@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -177,7 +178,10 @@ public class PhotoListFragment extends BaseFragment {
     }
 
     private String getRaceName() {
-        String name = getRace().getRaceGroup().getName();
+        String name = getRace().getRaceGroup().getDisplayName();
+        if (TextUtils.isEmpty(name)) {
+            name = getRace().getRaceGroup().getName();
+        }
 
         if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
             name += " - " + getRace().getSeries().getName();
@@ -186,6 +190,8 @@ public class PhotoListFragment extends BaseFragment {
         if (!getRace().getFleet().getName().equals(AppConstants.DEFAULT)) {
             name += " - " + getRace().getFleet().getName();
         }
+
+        name += " - " + getRace().getName();
 
         return name;
     }

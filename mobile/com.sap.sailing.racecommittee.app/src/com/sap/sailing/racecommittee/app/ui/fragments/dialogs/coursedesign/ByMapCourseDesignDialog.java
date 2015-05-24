@@ -43,6 +43,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -268,7 +269,7 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     }
 
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
 
     }
 

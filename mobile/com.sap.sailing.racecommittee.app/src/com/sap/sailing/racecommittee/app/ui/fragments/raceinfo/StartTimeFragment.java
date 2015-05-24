@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -121,7 +120,7 @@ public class StartTimeFragment extends BaseFragment
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
                 mStartTime = state.getStartTime();
-                notifyTick();
+                notifyTick(MillisecondsTimePoint.now());
             }
         };
         Calendar time = Calendar.getInstance();
@@ -204,15 +203,14 @@ public class StartTimeFragment extends BaseFragment
     }
 
     @Override
-    public void notifyTick() {
-        super.notifyTick();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
 
         int resId;
         TimePoint timePoint;
         String time;
         String timeLeft;
         String timeRight;
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
         if (mStartTime == null) {
             mStartTime = getPickerTime(true);
         }

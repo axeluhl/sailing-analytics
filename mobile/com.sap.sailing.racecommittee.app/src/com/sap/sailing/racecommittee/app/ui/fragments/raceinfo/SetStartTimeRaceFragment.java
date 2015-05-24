@@ -219,10 +219,10 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     @Override
-    public void notifyTick() {
-        super.notifyTick();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
 
-        textInfoText.setText(String.format(getString(R.string.start_w_placeholder), getTimeStringToStart()));
+        textInfoText.setText(String.format(getString(R.string.start_w_placeholder), getTimeStringToStart(now)));
     }
 
     private Date getStartTime() {
@@ -238,9 +238,9 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         return newStartTime;
     }
 
-    private String getTimeStringToStart() {
+    private String getTimeStringToStart(TimePoint timePoint) {
         Date startTime = getStartTime();
-        Date now = new Date();
+        Date now = timePoint.asDate();
 
         long differenceInSeconds = (startTime.getTime() - now.getTime()) / 1000;
         boolean isInPast = Math.signum(differenceInSeconds) < 0;

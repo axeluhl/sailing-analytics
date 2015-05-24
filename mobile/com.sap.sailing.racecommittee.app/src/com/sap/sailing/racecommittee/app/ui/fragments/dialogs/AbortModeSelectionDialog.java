@@ -108,7 +108,7 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
     }
 
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
         
     }
 }

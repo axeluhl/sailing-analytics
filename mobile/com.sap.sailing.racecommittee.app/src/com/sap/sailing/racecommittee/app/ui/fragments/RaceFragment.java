@@ -19,7 +19,9 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
@@ -34,54 +36,6 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     protected ManagedRace managedRace;
 
     protected AppPreferences preferences;
-    public String fill2(int value) {
-        String erg = String.valueOf(value);
-
-        if (erg.length() < 2) {
-            erg = "0" + erg;
-        }
-        return erg;
-    }
-
-    public String getDuration(Date date1, Date date2) {
-        TimeUnit timeUnit = TimeUnit.SECONDS;
-
-        long diffInMilli = date2.getTime() - date1.getTime();
-        long s = timeUnit.convert(diffInMilli, TimeUnit.MILLISECONDS);
-
-        long days = s / (24 * 60 * 60);
-        long rest = s - (days * 24 * 60 * 60);
-        long hrs = rest / (60 * 60);
-        long rest1 = rest - (hrs * 60 * 60);
-        long min = rest1 / 60;
-        long sec = s % 60;
-
-        String dates = "";
-        if (days < 0 || hrs < 0 || min < 0 || sec < 0) {
-            dates += "-";
-            if (days < 0) {
-                days *= -1;
-            }
-            if (hrs < 0) {
-                hrs *= -1;
-            }
-            if (min < 0) {
-                min *= -1;
-            }
-            if (sec < 0) {
-                sec *= -1;
-            }
-        }
-        if (days != 0) {
-            dates = days + ":";
-        }
-
-        dates += fill2((int) hrs) + ":";
-        dates += fill2((int) min) + ":";
-        dates += fill2((int) sec);
-
-        return dates;
-    }
 
     public ManagedRace getRace() {
         return managedRace;
@@ -103,7 +57,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
         // see subclasses.
     }
 
@@ -134,7 +88,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         super.onStart();
 
         TickSingleton.INSTANCE.registerListener(this);
-        notifyTick();
+        notifyTick(MillisecondsTimePoint.now());
     }
 
     @Override

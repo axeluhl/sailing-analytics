@@ -22,7 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -405,15 +405,17 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     private void setupActionBar(ManagedRace race) {
-        String title = "";
-        if (race.getSeries() != null && !race.getSeries().getName().equals("Default")) {
-            title = race.getSeries().getName() + " / ";
+        String title = race.getRaceGroup().getDisplayName();
+        if (TextUtils.isEmpty(title)) {
+            title = race.getRaceGroup().getName();
         }
-        if (race.getFleet() != null && !race.getFleet().getName().equals("Default")) {
-            title += race.getFleet().getName() + " / " + race.getRaceName();
-        } else {
-            title += race.getRaceName();
+        if (race.getSeries() != null && !race.getSeries().getName().equals(AppConstants.DEFAULT)) {
+            title += " / " + race.getSeries().getName();
         }
+        if (race.getFleet() != null && !race.getFleet().getName().equals(AppConstants.DEFAULT)) {
+            title += " / " + race.getFleet().getName();
+        }
+        title += " / " + race.getRaceName();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(title);
