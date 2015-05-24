@@ -12,7 +12,10 @@
 <h2>URL: /api/v1/regattas/{regattaname}/races/{racename}/targettime</h2>
 
 <b>Description:</b>
-<p>Gets the estimated target time of the race</p>
+<p>Gets the estimated time it will take to sail a race. The mark positions and the wind data are
+taken from the optional timeasmillis parameter which defaults to the current time. Note that sometimes the marks are not in place yet
+when the race starts and that a windward mark may be collected already before the race finishes.
+</p>
 <br/>
 <table>
 	<tr>
