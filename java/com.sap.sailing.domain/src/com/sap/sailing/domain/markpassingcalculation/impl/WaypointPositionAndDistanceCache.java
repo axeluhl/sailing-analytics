@@ -75,6 +75,9 @@ public class WaypointPositionAndDistanceCache {
 
     private final TrackedRace trackedRace;
     
+    /**
+     * A synchronized list
+     */
     private final List<Waypoint> waypoints;
     
     public WaypointPositionAndDistanceCache(TrackedRace race, Duration timeRangeResolution) {
@@ -190,6 +193,7 @@ public class WaypointPositionAndDistanceCache {
         SortedMap<TimePoint, Position> map = waypointPositionCache.get(controlPoint);
         if (map != null) {
             final SortedMap<TimePoint, Position> tailMap = map.tailMap(roundToResolution(affectedTimeRange.from()));
+            synchronized (map) {
             for (Entry<TimePoint, Position> e : tailMap.entrySet()) {
                 final TimePoint timePoint = e.getKey();
                 if (timePoint.after(affectedTimeRange.to())) {

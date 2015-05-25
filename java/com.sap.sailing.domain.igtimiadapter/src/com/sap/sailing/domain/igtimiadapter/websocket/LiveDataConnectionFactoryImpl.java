@@ -33,9 +33,12 @@ public class LiveDataConnectionFactoryImpl implements LiveDataConnectionFactory 
         Util.addAll(deviceSerialNumbers, deviceSerialNumbersAsSet);
         LiveDataConnection result = dataConnectionsForDeviceSerialNumbers.get(deviceSerialNumbersAsSet);
         if (result == null) {
+            logger.info("Didn't find an existing Igtimi LiveDataConnection for devices "+deviceSerialNumbersAsSet+"; creating one...");
             result = new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, account);
             dataConnectionsForDeviceSerialNumbers.put(deviceSerialNumbersAsSet, result);
             deviceSerialNumersForDataConnections.put(result, deviceSerialNumbersAsSet);
+        } else {
+            logger.info("Found an existing Igtimi LiveDataConnection for devices "+deviceSerialNumbersAsSet+"; using it.");
         }
         Integer usageCount = usageCounts.get(result);
         if (usageCount == null) {
