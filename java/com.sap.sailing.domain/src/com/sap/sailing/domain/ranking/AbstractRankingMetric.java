@@ -427,8 +427,9 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             WindLegTypeAndLegBearingCache cache) {
         assert legWho.hasStartedLeg(timePoint);
         assert legTo.hasStartedLeg(timePoint);
-        assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
-                getWindwardDistanceTraveled(legWho.getCompetitor(), legWho.hasFinishedLeg(timePoint)?legWho.getFinishTime():timePoint, cache)) >= 0;
+        // FIXME see bug 2907!!!
+        //assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
+          //      getWindwardDistanceTraveled(legWho.getCompetitor(), legWho.hasFinishedLeg(timePoint)?legWho.getFinishTime():timePoint, cache)) >= 0;
         final Duration toEndOfLegOrTo;
         if (legTo.hasFinishedLeg(timePoint)) {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
