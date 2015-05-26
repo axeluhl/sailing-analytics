@@ -38,8 +38,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private RaceInfoFragmentChooser infoFragmentChooser;
     private RaceFragment infoFragment;
 
-    private TextView fleetInfoHeader;
-    private TextView raceInfoHeader;
     private TextView courseInfoHeader;
 
     private View resetRaceDialogView;
@@ -65,15 +63,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
         infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
-        fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
-        raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
+        TextView fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
+        TextView raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
         courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
 
-        fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
-                .getName()));
+        fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet().getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
-
-        // TODO: catch result WIND_ACTIVITY_REQUEST_CODE ;
 
         Button resetButton = (Button) getView().findViewById(R.id.btnResetRace);
         resetButton.setOnClickListener(new OnClickListener() {
