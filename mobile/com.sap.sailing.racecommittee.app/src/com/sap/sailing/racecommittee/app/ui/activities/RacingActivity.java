@@ -52,7 +52,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, OnClickListener {
+public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
     private static final String RACE = "race";
@@ -66,7 +66,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private Wind mWind;
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
-    private WindFragment windFragment;
     private CourseArea mCourseArea;
     private TimePoint startTime;
 
@@ -104,18 +103,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
-    public void loadWindFragment() {
-        // check if the fragment is actively shown already, otherwise show it
-        if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
-            windFragment = WindFragment.newInstance(0);
-
-            getFragmentManager().beginTransaction()
-                // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                .replace(R.id.racing_view_container, windFragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null)
-                .commit();
-        }
-    }
-
     public void logout() {
         logoutSession();
     }
@@ -138,18 +125,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
         } else {
             logoutSession();
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-        case R.id.wind:
-            loadWindFragment();
-            break;
-
-        default:
-            break;
         }
     }
 

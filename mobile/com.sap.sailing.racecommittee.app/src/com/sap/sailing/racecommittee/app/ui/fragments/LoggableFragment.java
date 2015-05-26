@@ -12,10 +12,6 @@ private LifecycleLogger lifeLogger;
     public LoggableFragment() {
         this.lifeLogger = new LifecycleLogger();
     }
-    
-	public boolean isFragmentUIActive() {
-	    return isAdded() && !isDetached() && !isRemoving();
-	}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

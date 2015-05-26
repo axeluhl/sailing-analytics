@@ -59,6 +59,10 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         // see subclasses.
     }
 
+    public boolean isFragmentUIActive() {
+        return isAdded() && !isDetached() && !isRemoving();
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
