@@ -1,5 +1,11 @@
 package com.sap.sailing.server.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -87,6 +93,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -122,10 +129,6 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
-
-import static org.junit.Assert.*;
-
-import static org.mockito.Mockito.*;
 
 public class MasterDataImportTest {
 
@@ -1691,7 +1694,7 @@ public class MasterDataImportTest {
         assignedRaces.add(new RegattaNameAndRaceName(regattaName2, raceName5));
         assignedRaces.add(new RegattaNameAndRaceName(missingRegattaName, missingRaceName));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
-                MediaTrack.MimeType.mp4, assignedRaces);
+ MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
         
         Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);

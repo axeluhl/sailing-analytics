@@ -1,5 +1,8 @@
 package com.sap.sailing.server.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,7 +33,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -49,10 +52,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import static org.junit.Assert.*;
-
-import static org.mockito.Mockito.*;
 
 public class MediaMasterDataExportTest {
     
