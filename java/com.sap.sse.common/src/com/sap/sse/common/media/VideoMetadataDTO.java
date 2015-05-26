@@ -1,10 +1,8 @@
-package com.sap.sailing.gwt.ui.shared.media;
+package com.sap.sse.common.media;
 
 import java.net.URL;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.common.media.MimeType;
-import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
 public class VideoMetadataDTO extends AbstractMediaDTO {
     
@@ -13,18 +11,18 @@ public class VideoMetadataDTO extends AbstractMediaDTO {
     private int length;
     private String thumbnailRef;
 
-    @SuppressWarnings("unused")
-    private VideoMetadataDTO() {
+
+    protected VideoMetadataDTO() {
     }
 
     @GwtIncompatible
-    public VideoMetadataDTO(EventReferenceDTO eventRef, URL url, MimeType mimeType, String title) {
-        this(eventRef, url.toString(), mimeType, title);
+    public VideoMetadataDTO(URL url, MimeType mimeType, String title) {
+        this(url.toString(), mimeType, title);
     }
     
     @GwtIncompatible
-    public VideoMetadataDTO(EventReferenceDTO eventRef, String url, MimeType mimeType, String title) {
-        super(eventRef, url, mimeType, title);
+    public VideoMetadataDTO(String url, MimeType mimeType, String title) {
+        super(url, mimeType, title);
     }
 
     public void setLength(int length) {

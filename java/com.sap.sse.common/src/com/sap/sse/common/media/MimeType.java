@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.media;
+package com.sap.sse.common.media;
 
 public enum MimeType {
 

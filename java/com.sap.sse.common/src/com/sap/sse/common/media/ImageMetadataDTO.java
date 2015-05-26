@@ -1,12 +1,6 @@
-package com.sap.sailing.gwt.ui.shared.media;
+package com.sap.sse.common.media;
 
-import java.net.URL;
 import java.util.Date;
-
-import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.common.ImageSize;
-import com.sap.sailing.domain.common.media.MimeType;
-import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
 public class ImageMetadataDTO extends AbstractMediaDTO {
     
@@ -19,12 +13,12 @@ public class ImageMetadataDTO extends AbstractMediaDTO {
     private Date createdAtDate;
     private String author;
 
+
     protected ImageMetadataDTO() {
     }
 
-    @GwtIncompatible
-    public ImageMetadataDTO(EventReferenceDTO eventRef, URL imageURL, ImageSize size, String title) {
-        super(eventRef, imageURL.toString(), MimeType.image, title);
+    public ImageMetadataDTO(String imageURL, ImageSize size, String title) {
+        super(imageURL, MimeType.image, title);
         this.widthInPx = size.getWidth();
         this.heightInPx = size.getHeight();
     }
@@ -68,5 +62,6 @@ public class ImageMetadataDTO extends AbstractMediaDTO {
     public void setHeightInPx(int heightInPx) {
         this.heightInPx = heightInPx;
     }
+
 
 }

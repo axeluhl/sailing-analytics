@@ -25,9 +25,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
-import com.sap.sailing.domain.common.ImageSize;
-import com.sap.sailing.domain.common.media.MediaType;
-import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -45,10 +42,10 @@ import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesSt
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
-import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
@@ -60,6 +57,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MediaType;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -189,7 +189,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
 
                 MimeType type = MediaUtils.detectMimeTypeFromUrl(youTubeRandomUrl.toString());
                 if (type.mediaType == MediaType.video) {
-                    VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, youTubeRandomUrl, type,
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl, type,
                             holder.event.getName());
                     result.addVideo(candidate);
                 }
@@ -203,9 +203,9 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
         });
         
-        final Set<ImageMetadataDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
+        final Set<SailingImageDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
                                                                         // amount of shuffling
-        final List<VideoMetadataDTO> videoCandidates = new ArrayList<>();
+        final List<SailingVideoDTO> videoCandidates = new ArrayList<>();
         
         for(EventHolder holder : recentEventsOfLast12Month) {
             if(result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
@@ -220,7 +220,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                     ImageSize imageSize = event.getImageSize(url);
                     if(imageSize != null) {
                         // TODO: do we habe a title?
-                        photoGalleryUrls.add(new ImageMetadataDTO(eventRef, url, imageSize, null));
+                        photoGalleryUrls.add(new SailingImageDTO(eventRef, url.toString(), imageSize, null));
                     }
                 } catch (Exception e) {
                 }
@@ -229,7 +229,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 
                 MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl.toString());
                 if (type.mediaType == MediaType.video) {
-                    VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, videoUrl, type, holder.event.getName());
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl, type, holder.event.getName());
                     videoCandidates.add(candidate);
                 }
             }
@@ -238,7 +238,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         final int numberOfCandidatesAvailable = videoCandidates.size();
         if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - result.getVideos().size())) {
             // add all we have, no randomize
-            for (VideoMetadataDTO video : videoCandidates) {
+            for (SailingVideoDTO video : videoCandidates) {
                 result.addVideo(video);
             }
         } else {
@@ -246,7 +246,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             final Random videosRandomizer = new Random(numberOfCandidatesAvailable);
             randomlyPick: for (int i = 0; i < numberOfCandidatesAvailable; i++) {
                 int nextVideoindex = videosRandomizer.nextInt(numberOfCandidatesAvailable);
-                final VideoMetadataDTO video = videoCandidates.get(nextVideoindex);
+                final SailingVideoDTO video = videoCandidates.get(nextVideoindex);
                 result.addVideo(video);
                 if (result.getVideos().size() == MAX_VIDEO_COUNT) {
                     break randomlyPick;
@@ -254,12 +254,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             }
         }
         Random random = new Random();
-        List<ImageMetadataDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
+        List<SailingImageDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
         final int gallerySize = photoGalleryUrls.size();
         for (int i = 0; i < gallerySize; i++) {
             Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
         }
-        for (ImageMetadataDTO holder : shuffledPhotoGallery) {
+        for (SailingImageDTO holder : shuffledPhotoGallery) {
             result.addPhoto(holder);
         }
         // TODO media
@@ -429,13 +429,13 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
             }
-            ImageMetadataDTO entry = new ImageMetadataDTO(eventRef, url, imageSize, eventName);
+            SailingImageDTO entry = new SailingImageDTO(eventRef, url.toString(), imageSize, eventName);
             media.addPhoto(entry);
         }
         for(URL url : event.getVideoURLs()) {
             MimeType type = MediaUtils.detectMimeTypeFromUrl(url.toString());
             if (type.mediaType == MediaType.video) {
-                VideoMetadataDTO candidate = new VideoMetadataDTO(eventRef, url, type, null);
+                SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url, type, null);
                 media.addVideo(candidate);
             }
         }

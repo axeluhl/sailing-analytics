@@ -12,8 +12,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
+import com.sap.sailing.gwt.home.client.shared.media.SailingFullscreenViewer;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
 public class MainMedia extends Composite {
@@ -27,7 +28,7 @@ public class MainMedia extends Composite {
     DivElement videoLightBoxData;
 
     @UiField
-    ImageCarousel imageCarousel;
+    ImageCarousel<SailingImageDTO> imageCarousel;
 
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }
@@ -37,20 +38,21 @@ public class MainMedia extends Composite {
     public MainMedia(PlaceNavigator navigator) {
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer());
     }
 
-    public void setData(Collection<VideoMetadataDTO> videos, ArrayList<ImageMetadataDTO> photos) {
-        Iterator<VideoMetadataDTO> videoIterator = videos.iterator();
+    public void setData(Collection<SailingVideoDTO> videos, ArrayList<SailingImageDTO> photos) {
+        Iterator<SailingVideoDTO> videoIterator = videos.iterator();
         int videoCount = 0;
         while(videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
-            VideoMetadataDTO videoDTO = videoIterator.next();
+            SailingVideoDTO videoDTO = videoIterator.next();
             MainMediaVideo video = new MainMediaVideo(videoDTO.getTitle(), videoDTO.getSourceRef(),
                     videoDTO.getMimeType());
             videosPanel.add(video);
             videoCount++;
         }
-        for (ImageMetadataDTO image : photos) {
-            imageCarousel.addImage(image.getSourceRef(), image.getHeightInPx(), image.getWidthInPx());
+        for (SailingImageDTO image : photos) {
+            imageCarousel.addImage(image);
         }
     }
 }

@@ -27,7 +27,6 @@ import org.mockito.Mockito;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -37,6 +36,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.MimeType;
 
 public class MasterDataImporterMediaTest {
 

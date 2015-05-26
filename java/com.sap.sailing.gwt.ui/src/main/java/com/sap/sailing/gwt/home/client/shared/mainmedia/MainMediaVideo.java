@@ -9,10 +9,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
-import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
+import com.sap.sse.common.media.MimeType;
 
 public class MainMediaVideo extends Composite {
 
@@ -64,7 +64,7 @@ public class MainMediaVideo extends Composite {
 
     }
 
-    public void show(VideoMetadataDTO videoCandidateInfo) {
+    public void show(SailingVideoDTO videoCandidateInfo) {
         vJs.setSource(videoCandidateInfo.getSourceRef(), videoCandidateInfo.getMimeType());
 
     }

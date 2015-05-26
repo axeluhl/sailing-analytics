@@ -8,6 +8,8 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.media.MediaSubType;
+import com.sap.sse.common.media.MimeType;
 
 /**
  * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
