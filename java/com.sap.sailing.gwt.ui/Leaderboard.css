@@ -124,7 +124,8 @@ body, table td, select, button {
 }
 
 .bold {
-	font-family: "OpenSansCondensedBold", sans-serif;
+	font-family: 'Open Sans Condensed', sans-serif;
+	font-weight: bold;
 }
 
 .trackingQuality-circle {
