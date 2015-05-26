@@ -247,7 +247,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (selectedItem instanceof RaceListDataTypeRace) {
             RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
             selectedElement.setUpdateIndicatorVisible(false);
-            // ((ImageView) findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
 
             mSelectedRace = selectedElement.getRace();
             ExLog.i(this, LogEvent.RACE_SELECTED_ELEMENT, mSelectedRace.getId() + " " + mSelectedRace.getStatus());
@@ -267,9 +266,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         setupActionBar(managedRace);
 
         getFragmentManager().beginTransaction()
-            //                .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
             .replace(R.id.racing_view_container, infoFragment)
-                //                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
             .commit();
     }
 
@@ -286,13 +283,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (mWind != null) {
             onWindEntered(mWind);
         }
-
-        //        //TODO Implement reload after return
-        //        Serializable raceId  = savedInstanceState.getSerializable(RACE);
-        //        mSelectedRace = OnlineDataManager.create(this).getDataStore().getRace(raceId);
-        //        if (mSelectedRace != null) {
-        //            onRaceItemClicked(mSelectedRace);
-        //        }
     }
 
     @Override
