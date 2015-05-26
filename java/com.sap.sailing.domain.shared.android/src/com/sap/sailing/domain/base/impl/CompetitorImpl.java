@@ -145,6 +145,12 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public void setFlagImage(URI flagImage) {
+        final URI oldFlagImage = this.flagImage;
         this.flagImage = flagImage;
+        if (!Util.equalsWithNull(oldFlagImage, flagImage)) {
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.flagImageChanged(oldFlagImage, flagImage);
+            }
+        }
     }
 }

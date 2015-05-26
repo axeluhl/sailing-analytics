@@ -23,14 +23,12 @@
 		<g:HTMLPanel
 			styleName="{style.wind_bot_component_windchart_container} {style.wind_bot_component_left}">
 			<windchart:VerticalWindChart ui:field="trueWindSpeedVerticalWindChart"
-				styleName="{style.wind_bot_component_windchart}" positiveFillColor="#008FFF"
-				negativeFillColor="#6ADBFF"></windchart:VerticalWindChart>
+				styleName="{style.wind_bot_component_windchart}"></windchart:VerticalWindChart>
 		</g:HTMLPanel>
 		<g:HTMLPanel
 			styleName="{style.wind_bot_component_windchart_container} {style.wind_bot_component_right}">
 			<windchart:VerticalWindChart ui:field="trueWindDirectionVerticalWindChart"
-				styleName="{style.wind_bot_component_windchart}" positiveFillColor="#008FFF"
-				negativeFillColor="#6ADBFF"></windchart:VerticalWindChart>
+				styleName="{style.wind_bot_component_windchart}"></windchart:VerticalWindChart>
 		</g:HTMLPanel>
 		<g:HTMLPanel styleName="{style.wind_bot_component_compass_container}">
 			<compass:LocationPointerCompass

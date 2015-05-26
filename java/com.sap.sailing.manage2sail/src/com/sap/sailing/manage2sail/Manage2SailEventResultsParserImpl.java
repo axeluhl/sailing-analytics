@@ -16,6 +16,17 @@ import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.util.DateParser;
 
+/**
+ * URLs should be of the form
+ * <pre>
+ * http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
+ * </pre>
+ * where the UUID following the <code>event</code> path element represents the event ID. Events can be
+ * discovered by the manage2sail.com website.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class Manage2SailEventResultsParserImpl implements Manage2SailEventResultsParser {
 
     /**

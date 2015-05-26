@@ -62,17 +62,16 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
     }
 
     private void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
-        if (toMove.isEmpty()) {
-            return;
+        if (!toMove.isEmpty()) {
+            List<CompetitorDTO> newFromList = new ArrayList<>();
+            Util.addAll(from.getFilterField().getAll(), newFromList);
+            newFromList.removeAll(toMove);
+            from.getFilterField().updateAll(newFromList);
+            List<CompetitorDTO> newToList = new ArrayList<>();
+            Util.addAll(to.getFilterField().getAll(), newToList);
+            newToList.addAll(toMove);
+            to.getFilterField().updateAll(newToList);
         }
-        List<CompetitorDTO> newFromList = new ArrayList<>();
-        Util.addAll(from.getFilterField().getAll(), newFromList);
-        newFromList.removeAll(toMove);
-        from.getFilterField().updateAll(newFromList);
-        List<CompetitorDTO> newToList = new ArrayList<>();
-        Util.addAll(to.getFilterField().getAll(), newToList);
-        newToList.addAll(toMove);
-        to.getFilterField().updateAll(newToList);
     }
 
     private void moveSelected(CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> from,

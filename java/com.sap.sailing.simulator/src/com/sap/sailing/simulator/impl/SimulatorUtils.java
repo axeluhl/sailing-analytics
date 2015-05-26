@@ -11,8 +11,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,12 +20,6 @@ import java.util.logging.Logger;
 import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.regattalog.RegattaLogStore;
-import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -36,7 +28,6 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 import com.sap.sse.common.Util;
 
-@SuppressWarnings("restriction")
 public class SimulatorUtils {
 
     private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
@@ -76,7 +67,7 @@ public class SimulatorUtils {
         return prependedBundlePath;
     }
 
-    public static RaceHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory,
+    /*public static RaceHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory,
             URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds) throws Exception {
         // TODO: TracTrac Username / Password
@@ -87,7 +78,7 @@ public class SimulatorUtils {
                         timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.ONLINE_STATUS,
                         TracTracConnectionConstants.ONLINE_VISIBILITY);
         return raceHandle;
-    }
+    }*/
 
     public static boolean savePathsToFiles(Map<String, Path> paths, Path raceCourse) {
         if (paths == null) {

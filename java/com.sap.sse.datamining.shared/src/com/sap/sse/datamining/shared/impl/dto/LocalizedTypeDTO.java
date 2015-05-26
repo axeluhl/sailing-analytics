@@ -26,6 +26,11 @@ public class LocalizedTypeDTO implements Serializable {
     public String getDisplayName() {
         return displayName;
     }
+    
+    @Override
+    public String toString() {
+        return getTypeName() + "[" + getDisplayName() + "]";
+    }
 
     @Override
     public int hashCode() {

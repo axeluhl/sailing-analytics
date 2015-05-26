@@ -70,11 +70,9 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 ImageResourceRenderer renderer = new ImageResourceRenderer();
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-
-                final String imageURL = competitor.getImageURL();
-
-                if (imageURL != null && !imageURL.isEmpty()) {
-                    sb.appendHtmlConstant("<img src=\"" + imageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                final String flagImageURL = competitor.getFlagImageURL();
+                if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                    sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                     sb.appendHtmlConstant("&nbsp;");
                 } else {
                     final ImageResource flagImageResource;
@@ -113,8 +111,8 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
             public SafeHtml getValue(CompetitorDTO competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 if (competitor.getImageURL() != null && !competitor.getImageURL().isEmpty()) {
-                    sb.appendHtmlConstant("<img src=\"/sailingserver/api/v1/file?uri=" + competitor.getImageURL()
-                            + "\" height=\"40px\" title=\"" + competitor.getImageURL() + "\"/>");
+                    sb.appendHtmlConstant("<img src=\"" + competitor.getImageURL() + "\" height=\"40px\" title=\""
+                            + competitor.getImageURL() + "\"/>");
                 }
                 return sb.toSafeHtml();
             }

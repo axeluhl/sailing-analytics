@@ -39,7 +39,7 @@ public class DeviceConfigurationListComposite extends Composite {
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
 
     public DeviceConfigurationListComposite(final SailingServiceAsync sailingService, 
             final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
@@ -130,7 +130,7 @@ public class DeviceConfigurationListComposite extends Composite {
                 new TextColumn<DeviceConfigurationMatcherDTO>() {
             @Override
             public String getValue(DeviceConfigurationMatcherDTO identifier) {
-                return DeviceConfigurationPanel.renderIdentifiers(identifier.clients);
+                return DeviceConfigurationPanel.renderIdentifiers(identifier.clients, stringMessages);
             }
         };
         identifierNameColumn.setSortable(true);
@@ -141,8 +141,8 @@ public class DeviceConfigurationListComposite extends Composite {
             }
         });
 
-        table.addColumn(identifierTypeColumn, "Matcher");
-        table.addColumn(identifierNameColumn, "Device");
+        table.addColumn(identifierTypeColumn, stringMessages.matcher());
+        table.addColumn(identifierNameColumn, stringMessages.device());
         return table;
     }
 

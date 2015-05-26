@@ -2,24 +2,26 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
     xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.events"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:style>
-		.events-overview-navigation {
-    		font-size: 1rem;
-		}
-	</ui:style>
-   	<g:HTMLPanel>
-		<div class="{style.events-overview-navigation} {res.mainCss.navbar}">
-		  <div class="{res.mainCss.grid}">
-		    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-		        <g:Anchor href="javascript:;" ui:field="recentEventsLink" styleName="{res.mainCss.navbar_button} {res.mainCss.navbar_buttonactive}" ><ui:text from='{i18n.eventOverviewRecentEvents}'/></g:Anchor>
-		        <g:Anchor href="javascript:;" ui:field="upcomingEventsLink" styleName="{res.mainCss.navbar_button}" ><ui:text from='{i18n.eventOverviewUpcomingSchedule}'/></g:Anchor>
-	        </div>
-		  </div>
-		</div>
-   	    <p:recent.EventsOverviewRecent ui:field='recentEventsWidget'/>
-   	    <p:upcoming.EventsOverviewUpcoming ui:field='upcomingEventsWidget'/>
-	</g:HTMLPanel>
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:style>
+    .events-overview-navigation {
+        font-size: 1rem;
+    }
+    .breadcrumb {
+      font-size: 1rem;
+      /* @alternate */ font-size: 0.866666666666667em;
+      font-weight: 600;
+      padding: 0.666666666666667em 0;
+  }
+  </ui:style>
+  <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+      <c:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{style.breadcrumb}" />
+      <p:upcoming.EventsOverviewUpcoming ui:field='upcomingEventsWidget'/>
+      <p:recent.EventsOverviewRecent ui:field='recentEventsWidget'/>
+    </div>
+  </g:HTMLPanel>
 </ui:UiBinder>    

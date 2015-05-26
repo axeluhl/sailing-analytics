@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class StrippedFunctionDTO implements Comparable<StrippedFunctionDTO> {
 

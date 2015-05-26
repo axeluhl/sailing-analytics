@@ -43,11 +43,9 @@ public class RaceGroupFactory {
         String name = leaderboard.getName();
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
         Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-
-        return new RaceGroupImpl(name, regatta.getBoatClass(), courseArea, series,
-                regatta.getRegattaConfiguration());
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), courseArea,
+                series, regatta.getRegattaConfiguration());
     }
 
     /**
@@ -57,20 +55,15 @@ public class RaceGroupFactory {
      */
     public RaceGroup convert(FlexibleLeaderboard leaderboard) {
         String name = leaderboard.getName();
-
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
         BoatClass boatClass = null;
         RegattaConfiguration configuration = null;
-
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-
-        return new RaceGroupImpl(name, boatClass, courseArea, series, configuration);
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, courseArea, series, configuration);
     }
 
     public Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {
-
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
-
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
         for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
             seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), getRows(series,

@@ -10,7 +10,7 @@
  <g:HTMLPanel>
   <!-- Partial for media like image and video -->
   <div class="{res.mainCss.mainsection} {local_res.css.media}">
-   <div class="{res.mainCss.grid}">
+   <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
      <header class="{res.mainCss.mainsection_header}">
       <h3 class="{res.mainCss.mainsection_header_title}">
@@ -22,7 +22,7 @@
      </header>
     </div>
    </div>
-   <div class="{res.mainCss.grid}">
+   <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <sse:carousel.ImageCarousel ui:field="imageCarousel" /> 
     </div>
@@ -30,7 +30,7 @@
   </div>
   <div
    class="{res.mainCss.mainsection} {local_res.css.media} {local_res.css.mediavideos}">
-   <div class="{res.mainCss.grid}">
+   <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
      <header class="{res.mainCss.mainsection_header}">
       <h3 class="{res.mainCss.mainsection_header_title}">
@@ -42,8 +42,8 @@
      </header>
     </div>
    </div>
-   <div class="{res.mainCss.grid} {res.mainCss.lightbox}">
-    <div ui:field="videoLightBoxData" class="{res.mainCss.lightbox_data}"></div>
+   <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
+    <div ui:field="videoLightBoxData" class="{res.mainCss.lightbox_content}"></div>
     <g:HTMLPanel ui:field="videosPanel" />
    </div>
   </div>

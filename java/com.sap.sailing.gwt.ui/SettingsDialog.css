@@ -4,16 +4,11 @@
 }
 
 .dialogInnerHeadline {
-    border: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
     font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
     height: 21px;
-    padding: 2px 0 0 7px;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -o-border-radius: 3px;
-    -ms-border-radius: 3px;
-    margin: 0 0 10px 0;
+    padding: 2px 0 0 2px;
+    margin-bottom: 4px;
 }
 
 .dialogInnerHeadlineOther {
@@ -27,5 +22,5 @@
 }
 
 .SettingsDialogComponent .gwt-CheckBox {
-  padding: 0 10px 0 0;
+  padding: 0 10px 10px 0;
 }

@@ -11,8 +11,15 @@
     
     <string name="preference_enableLifecycleLogging_key">enableLifecycleLogging</string>
     <bool name="preference_enableLifecycleLogging_default">false</bool>
-    
-    <!-- the following strings should be overridden by apps using this library (e.g. in their own preferences.xml -->
+
+    <string name="preference_eventid_key">event</string>
+    <string name="preference_eventid_default">-1</string>
+
+    <string name="preference_competitor_key">competitor</string>
+    <string name="preference_competitor_default">-1</string>
+    <string name="preference_last_scanned_qr_code">lastScannedQRCode</string>
+
+    <!-- the following strings should be overridden by apps using this library (e.g. in their own preferences.xml) -->
     <string name="app_folder">com.sap.sailing</string>
     <string name="intent_send_saved_intents">com.sap.sailing.android.shared.action.sendSavedIntents</string>
     <string name="intent_send_message">com.sap.sailing.android.shared.action.sendMessage</string>

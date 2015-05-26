@@ -6,7 +6,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.placeholder.PlaceholderResources" />
 	<g:HTMLPanel>
-		  <div class="{res.mainCss.grid}">
+		  <div class="{res.mediaCss.grid}">
 		    <div class="{res.mediaCss.columns}">
 		        <div class="{local_res.css.content}">
 		            <span style="margin-right: 10px">Loading...</span>

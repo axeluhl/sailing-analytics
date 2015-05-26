@@ -2,28 +2,31 @@ package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
-import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
 
 public class PlaceNavigation<T extends Place> {
+    private final PlaceNavigator placeNavigator;
+
+    private final ApplicationHistoryMapper mapper = GWT.create(ApplicationHistoryMapper.class);
+
     private final T destinationPlace;
-    private final PlaceTokenizer<T> tokenizer;
     private final String baseUrl;
     private final boolean isDestinationOnRemoteServer;
-    
-    public PlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
+
+    public PlaceNavigation(T destinationPlace, PlaceNavigator placeNavigator) {
+        this.placeNavigator = placeNavigator;
         this.destinationPlace = destinationPlace;
-        this.tokenizer = tokenizer;
         String locationURL = getLocationURL();
-        this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
-        this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL; 
+        this.isDestinationOnRemoteServer = !(isLocationOnLocalhostOrDevServer(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
+        this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL;
     }
 
-    public PlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer, boolean isDestinationOnRemoteServer) {
+    public PlaceNavigation(String baseUrl, T destinationPlace, boolean isDestinationOnRemoteServer,
+            PlaceNavigator placeNavigator) {
         this.destinationPlace = destinationPlace;
-        this.tokenizer = tokenizer;
         this.isDestinationOnRemoteServer = isDestinationOnRemoteServer;
-        this.baseUrl = isDestinationOnRemoteServer ? baseUrl : getLocationURL(); 
+        this.placeNavigator = placeNavigator;
+        this.baseUrl = isDestinationOnRemoteServer ? baseUrl : getLocationURL();
     }
 
     public String getTargetUrl() {
@@ -32,7 +35,7 @@ public class PlaceNavigation<T extends Place> {
 
     public String getHistoryUrl() {
         String placeUrl = buildPlaceUrl();
-        if(placeUrl.startsWith("#")) {
+        if (placeUrl.startsWith("#")) {
             placeUrl = placeUrl.substring(1, placeUrl.length());
         }
         return placeUrl;
@@ -44,10 +47,10 @@ public class PlaceNavigation<T extends Place> {
 
     private String buildPlaceUrl() {
         String url = "";
-        if(isRemotePlace()) {
+        if (isRemotePlace()) {
             url = baseUrl + "/gwt/Home.html";
-            if(!GWT.isProdMode()) {
-                url += "?gwt.codesvr=127.0.0.1:9997"; 
+            if (!GWT.isProdMode()) {
+                url += "?gwt.codesvr=127.0.0.1:9997";
             }
             url += getPlaceToken();
         } else {
@@ -55,24 +58,30 @@ public class PlaceNavigation<T extends Place> {
         }
         return url;
     }
-    
+
     public boolean isRemotePlace() {
         return isDestinationOnRemoteServer;
     }
 
     private String getPlaceToken() {
-        return "#" + destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
+        return "#" + mapper.getToken(destinationPlace);
+
     }
 
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
         return urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER);
     }
 
-    private boolean isLocationOnLocalhost(String urlToCheck) {
-        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1");
+    private boolean isLocationOnLocalhostOrDevServer(String urlToCheck) {
+        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1")
+                || urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_DEV_SERVER);
     }
-    
+
     private String getLocationURL() {
         return Window.Location.getProtocol() + "//" + Window.Location.getHostName() + ":" + Window.Location.getPort();
+    }
+
+    public void goToPlace() {
+        placeNavigator.goToPlace(this);
     }
 }

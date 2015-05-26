@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -121,7 +123,11 @@ public class LeaderboardCacheManager {
         public void emailChanged(String oldEmail, String newEmail) {
             //ignore (email not shown in leaderboard)
         }
-        
+
+        @Override
+        public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
+            removeFromCache(leaderboard);
+        }
     }
     
     private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
@@ -149,6 +155,17 @@ public class LeaderboardCacheManager {
 
         @Override
         public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void timePointOfLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
+                TimePoint newTimePointOfLastCorrectionsValidity) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void commentChanged(String oldComment, String newComment) {
             removeFromCache(leaderboard);
         }
     }

@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -18,6 +19,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     private RRS26Configuration rrs26Configuration;
     private GateStartConfiguration gateStartConfiguration;
     private ESSConfiguration essConfiguration;
+    private LeagueConfiguration leagueConfiguration;
     private RacingProcedureConfiguration basicConfiguration;
 
     @Override
@@ -66,6 +68,15 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     }   
 
     @Override
+    public LeagueConfiguration getLeagueConfiguration() {
+        return leagueConfiguration;
+    }
+
+    public void setLeagueConfiguration(LeagueConfiguration leagueConfiguration) {
+        this.leagueConfiguration = leagueConfiguration;
+    }   
+
+    @Override
     public RacingProcedureConfiguration getBasicConfiguration() {
         return basicConfiguration;
     }     
@@ -83,6 +94,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);
         copy.setBasicConfiguration(basicConfiguration);
+        copy.setLeagueConfiguration(leagueConfiguration);
         return copy;
     }
 
@@ -111,6 +123,10 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         if (update.getBasicConfiguration() != null) {
             target.setBasicConfiguration(
                     (RacingProcedureConfiguration) target.getBasicConfiguration().merge(update.getBasicConfiguration()));
+        }
+        if (update.getLeagueConfiguration() != null) {
+            target.setLeagueConfiguration(
+                    (LeagueConfiguration) target.getLeagueConfiguration().merge(update.getLeagueConfiguration()));
         }
 
         return target;

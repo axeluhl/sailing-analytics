@@ -190,4 +190,48 @@ public class AbstractPosition implements Position {
         return "(" + getLatDeg() + "," + getLngDeg() + ")";
     }
 
+    @Override
+    public Position getIntersection(Bearing thisBearing, Position to, Bearing toBearing) {
+        /*
+         * See http://www.movable-type.co.uk/scripts/latlong-vectors.html#intersection for explanation
+         */
+        double radBearing1 = thisBearing.getRadians();
+        double radLatPos1 = getLatRad();
+        double radLngPos1 = getLngRad();
+        double[] greatCircle1 = createGreatCircleVector(radBearing1, radLatPos1, radLngPos1);
+        double radBearing2 = toBearing.getRadians();
+        double radLatPos2 = to.getLatRad();
+        double radLngPos2 = to.getLngRad();
+        double[] greatCircle2 = createGreatCircleVector(radBearing2, radLatPos2, radLngPos2);
+        double[] intersection1 = computeCrossProductOf3PartVectors(greatCircle1, greatCircle2);
+        double[] intersection2 = computeCrossProductOf3PartVectors(greatCircle2, greatCircle1);
+        Position intersectionPosition1 = cartesianVectorToPosition(intersection1);
+        Position intersectionPosition2 = cartesianVectorToPosition(intersection2);
+        Distance sumOfDistances1 = getDistance(intersectionPosition1).add(intersectionPosition1.getDistance(to));
+        Distance sumOfDistances2 = getDistance(intersectionPosition2).add(intersectionPosition2.getDistance(to));
+        return sumOfDistances1.compareTo(sumOfDistances2) < 0 ? intersectionPosition1 : intersectionPosition2;
+    }
+
+    private Position cartesianVectorToPosition(double[] vector) {
+        double lat = Math.atan2(vector[2], Math.sqrt(vector[0]*vector[0] + vector[1]*vector[1]));
+        double lng = Math.atan2(vector[1], vector[0]);
+        return new RadianPosition(lat, lng);
+    }
+
+    private double[] computeCrossProductOf3PartVectors(double[] vec1, double[] vec2) {
+        double[] crossProduct= new double[3];
+        crossProduct[0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
+        crossProduct[1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
+        crossProduct[2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
+        return crossProduct;
+    }
+
+    private double[] createGreatCircleVector(double radBearing, double radLatPos, double radLngPos) {
+        double[] greatCircle = new double[3];
+        greatCircle[0] = Math.sin(radLngPos) * Math.cos(radBearing) - Math.sin(radLatPos) * Math.cos(radLngPos) * Math.sin(radBearing);
+        greatCircle[1] = -Math.cos(radLngPos) * Math.cos(radBearing) - Math.sin(radLatPos) * Math.sin(radLngPos) * Math.sin(radBearing);
+        greatCircle[2] = Math.cos(radLatPos) * Math.sin(radBearing);
+        return greatCircle;
+    }
+
 }

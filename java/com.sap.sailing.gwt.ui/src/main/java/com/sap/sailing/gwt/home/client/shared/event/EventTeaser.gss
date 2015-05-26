@@ -1,0 +1,73 @@
+/**
+ * A event teaser with image
+ */
+.eventteasercontainer {
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+}
+.eventteaser {
+  font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 2.666666666666667em;
+  text-align: left;
+  max-width: 100%;
+  width: 100%;
+}
+.eventteaser:hover {
+  text-decoration: none;
+}
+.eventteaser:hover .eventteaser_title {
+  font-size: inherit;
+}
+.eventteaser:hover .eventteaser_title_name {
+  text-decoration: underline;
+}
+.eventteaser:hover .eventteaser_image {
+  opacity: 0.9;
+}
+.eventteaser_image {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  height: 240px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.eventteaser_image .eventteaser_series {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.eventteaser_name {
+  width: 100%;
+  margin-top: 0.333333333333333em;
+  font-size: 1.466666666666667em;
+  font-weight: bold;
+  color: #008fcc;
+}
+.eventteaser_title {
+  clear: both;
+  overflow: hidden;
+  margin-top: 1em;
+}
+.eventteaser_title_name {
+  width: 100%;
+  float: right;
+  font-size: 22px;
+  font-weight: bold;
+  color: #008fcc;
+}
+.eventteaser_title_name_label {
+  float: right;
+  margin-left: 1.333333333333333em;
+}
+.eventteaser_title_name .label {
+  margin-top: 0;
+  vertical-align: top;
+}
+.eventteaser_location {
+  color: #222;
+}

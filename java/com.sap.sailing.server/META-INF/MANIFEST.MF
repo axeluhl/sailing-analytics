@@ -6,9 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.polars,
- com.sap.sailing.polars.factory,
- com.sap.sailing.server.gateway.deserialization,
+Import-Package: com.sap.sailing.server.gateway.deserialization,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.3.0",
@@ -24,14 +22,14 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.gateway.serialization,
- com.sap.sailing.polars,
  com.sap.sse.common,
  com.sap.sse.operationaltransformation,
  com.sap.sse.replication,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.shared.android,
- com.sap.sse.filestorage
+ com.sap.sse.filestorage,
+ com.sap.sailing.simulator;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
@@ -43,5 +41,6 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.server.replication.test,
    com.sap.sailing.domain.racelogtrackingadapter.test",
  com.sap.sailing.server.masterdata,
- com.sap.sailing.server.operationaltransformation
+ com.sap.sailing.server.operationaltransformation,
+ com.sap.sailing.server.simulation
 

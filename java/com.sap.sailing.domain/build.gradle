@@ -1,0 +1,16 @@
+apply plugin: "java"
+
+sourceSets {
+    main {
+        java.srcDirs = ["src"]
+    }
+}
+
+dependencies {
+    /* local dependencies */
+    compile project(":java:com.googlecode.java-diff-utils")
+    compile project(":java:com.sap.sailing.domain.common")
+    compile project(":java:com.sap.sailing.domain.shared.android")
+    compile project(":java:com.sap.sailing.geocoding")
+    compile project(":java:com.sap.sse.replication")
+}

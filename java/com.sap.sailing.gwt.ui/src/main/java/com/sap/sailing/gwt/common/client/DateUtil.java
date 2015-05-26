@@ -57,4 +57,10 @@ public class DateUtil {
         Date now = new Date();
         return date.before(now) && !isToday(date);
     }
+    
+    public static int daysFromNow(Date date) {
+        long day = date.getTime() / DAY_IN_MILLIS;
+        long today= new Date().getTime() / DAY_IN_MILLIS;
+        return (int) (day - today);
+    }
 }

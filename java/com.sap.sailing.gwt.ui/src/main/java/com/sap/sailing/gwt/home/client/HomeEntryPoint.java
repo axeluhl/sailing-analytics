@@ -16,6 +16,7 @@ public class HomeEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
     public void doOnModuleLoad() {
         ApplicationClientFactory clientFactory = GWT.create(ApplicationClientFactory.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getSailingService(), RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getHomeService(), RemoteServiceMappingConstants.homeServiceRemotePath);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new ApplicationActivityMapper(clientFactory));
 
