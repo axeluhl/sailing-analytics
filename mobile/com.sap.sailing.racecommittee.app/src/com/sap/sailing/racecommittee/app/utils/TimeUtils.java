@@ -45,6 +45,34 @@ public class TimeUtils {
         return formatDuration(secondsTillStart);
     }
 
+    public static String calcDuration(Calendar from, Calendar to) {
+        String retValue;
+
+        long millis = to.getTimeInMillis() - from.getTimeInMillis();
+
+        long min = millis / (1000 * 60);
+        long sec = (millis - (min * 60 * 1000)) / 1000;
+
+        retValue = String.valueOf(sec) + "\"";
+        if (retValue.length() == 2) {
+            retValue = "0" + retValue;
+        }
+        if (min > 0) {
+            retValue = String.valueOf(min) + "' " + retValue;
+        }
+
+        return retValue;
+    }
+
+    public static Calendar floorTime(Calendar calendar) {
+        if (calendar == null) {
+            calendar = Calendar.getInstance();
+        }
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar;
+    }
+
     public static int daysBetween(Calendar day1, Calendar day2){
         Calendar dayOne = (Calendar) day1.clone();
         Calendar dayTwo = (Calendar) day2.clone();

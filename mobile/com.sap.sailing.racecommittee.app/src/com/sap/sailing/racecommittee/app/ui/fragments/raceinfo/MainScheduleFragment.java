@@ -22,6 +22,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -259,7 +260,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         Calendar startTime = (Calendar) mCalendar.clone();
         startTime.setTime(activity.getStartTime().asDate());
 
-        return calcDuration(floorTime(now), floorTime(startTime));
+        return TimeUtils.calcDuration(TimeUtils.floorTime(now), TimeUtils.floorTime(startTime));
     }
 
     private void openFragment(RaceFragment fragment) {

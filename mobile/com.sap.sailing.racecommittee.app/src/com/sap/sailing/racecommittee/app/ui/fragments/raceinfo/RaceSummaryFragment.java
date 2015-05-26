@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public class RaceSummaryFragment extends BaseFragment {
 
@@ -41,16 +42,16 @@ public class RaceSummaryFragment extends BaseFragment {
 
             Calendar start = (Calendar) calendar.clone();
             start.setTime(getRaceState().getStartTime().asDate());
-            Calendar startTime = floorTime(start);
+            Calendar startTime = TimeUtils.floorTime(start);
 
             Calendar finishing = (Calendar) calendar.clone();
             finishing.setTime(getRaceState().getFinishingTime().asDate());
-            Calendar finishingTime = floorTime(finishing);
+            Calendar finishingTime = TimeUtils.floorTime(finishing);
 
             Calendar finished = (Calendar) calendar.clone();
             finished.setTime(getRaceState().getFinishedTime().asDate());
 
-            Calendar finishedTime = floorTime(finished);
+            Calendar finishedTime = TimeUtils.floorTime(finished);
 
             final ImageView button = ViewHolder.get(getView(), R.id.edit_summary);
             if (button != null) {
@@ -74,7 +75,7 @@ public class RaceSummaryFragment extends BaseFragment {
 
             TextView finish_start_duration = ViewHolder.get(getView(), R.id.race_finish_begin_duration);
             if (finish_start_duration != null) {
-                finish_start_duration.setText(calcDuration(startTime, finishingTime));
+                finish_start_duration.setText(TimeUtils.calcDuration(startTime, finishingTime));
             }
 
             TextView finish_end_time = ViewHolder.get(getView(), R.id.race_finish_end_time);
@@ -84,12 +85,12 @@ public class RaceSummaryFragment extends BaseFragment {
 
             TextView finish_end_duration = ViewHolder.get(getView(), R.id.race_finish_end_duration);
             if (finish_end_duration != null) {
-                finish_end_duration.setText(calcDuration(startTime, finishedTime));
+                finish_end_duration.setText(TimeUtils.calcDuration(startTime, finishedTime));
             }
 
             TextView finish_duration = ViewHolder.get(getView(), R.id.race_finish_duration);
             if (finish_duration != null) {
-                finish_duration.setText(calcDuration(finishingTime, finishedTime));
+                finish_duration.setText(TimeUtils.calcDuration(finishingTime, finishedTime));
             }
 
             View region_wind = ViewHolder.get(getView(), R.id.region_wind);
