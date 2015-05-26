@@ -8,57 +8,74 @@
       visibility: hidden;
 */
 
-iframe {display: block; width: 100%; height: 100%; border: none; overflow-y: auto; overflow-x: hidden;}
+
+ * {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+}
+
+ 
+iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: none;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
 
 .clear {
-    clear: both;
-    font-size: 1px;
-    height: 0px;
-    line-height: 0px;
-    margin: -1px 0 0;
-    width: 100%;
+	clear: both;
+	font-size: 1px;
+	height: 0px;
+	line-height: 0px;
+	margin: -1px 0 0;
+	width: 100%;
 }
 
 .cover {
-    left: -1000px;
-    overflow: hidden;
-    position: absolute;
-    top: -1000px;
+	left: -1000px;
+	overflow: hidden;
+	position: absolute;
+	top: -1000px;
 }
 
 body {
-    background: white;
-    font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
-    line-height: 1;
-    font-size: 14px;
-    font-weight: 400;
-    margin: 0;
-	color: #3b3b3b;
+	background: white;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	line-height: 1;
+	font-size: 14px;
+	font-weight: 400;
+	margin: 0;
+	
 }
 
-table td,select,button {
-    font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
-    line-height: 1;
-    font-size: 14px;
+table td, select, button {
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	line-height: 1;
+	font-size: 14px;
 }
 
 .contentOuterPanel {
-    background: #dddcdc;
-    margin: 0 12px 0 12px;
-    padding: 12px;
+	background: #dddcdc;
+	margin: 0 12px 0 12px;
+	padding: 12px;
 }
+
+
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
-    font-size: 2em;
-    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
-    color: #777777;
-    margin: 40px 0px 70px;
-    text-align: center;
+	font-size: 2em;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: 700;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
 }
 
 table {
-    border-collapse: separate;
+	border-collapse: separate;
 }
 
 .CombinedWindPanelParentDiv {
@@ -72,620 +89,590 @@ table {
 }
 
 .RaceMap-HeaderPanel {
-    height: 60px;
-    width: 100%;
-    background-color: #333;
-    opacity: .5;
+	height: 60px;
+	width: 100%;
+	background-color: #333;
+	opacity: .5;
 }
 
 .leaderboardLabel {
-    border-bottom: 2px solid #007dc0;
-    padding: 0 0 6px 0;
-    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	border-bottom: 2px solid #007dc0;
+	padding: 0 0 6px 0;
+	font-weight: 700;
 }
 
 .refreshAndSettings {
-    background: #f2f2f2;
-    border-bottom: 2px solid #fff;
-    border-top: 2px solid #fff;
-    height: 30px;
+	background: #f2f2f2;
+	border-bottom: 2px solid #fff;
+	border-top: 2px solid #fff;
+	height: 30px;
 }
 
 .refreshAndSettings table td {
-    padding: 0 10px 0 0;
+	padding: 0 10px 0 0;
 }
 
 .refreshAndSettings table table td {
-    padding: 0 0 0 0;
+	padding: 0 0 0 0;
 }
 
 .race-name {
-    line-height: 1.0;
+	line-height: 1.0;
 }
 
 .openColumn {
-    position: relative;
-    vertical-align: middle;
+	position: relative;
+	vertical-align: middle;
 }
 
 img.openColumn {
-    display: block;
-    margin: 3px auto 3px auto !important;
+	display: block;
+	margin: 3px auto 3px auto !important;
 }
 
 .breadcrumbPanel {
-    height: 30px;
-    margin: 0 12px 13px 12px;
+	height: 30px;
+	margin: 0 12px 13px 12px;
 }
 
 .mainPanel {
-    width: 100%;
+	width: 100%;
 }
 
 .raceBoardNavigation {
-    float: left;
-    margin: 9px 0 0 12px;
-    font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
+	float: left;
+	margin: 9px 0 0 12px;
+	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
 }
 
 .raceBoardControls {
-    float: right;
-    margin: 9px 0 0 12px;
-    font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
+	float: right;
+	margin: 9px 0 0 12px;
+	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
 }
 
 .raceBoardNavigation-navigationitem {
-    color: #dddcdc;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin: 0 12px 0 0;
-    padding: 0 0 5px 0;
+	color: #dddcdc;
+	text-transform: uppercase;
+	font-weight: 500;
+	margin: 0 12px 0 0;
+	padding: 0 0 5px 0;
 }
 
 .raceBoardNavigation-navigationitem:hover {
-    border-bottom: 4px solid #f0ab00;
-    color: #dddcdc;
-    text-decoration: none;
+	border-bottom: 4px solid #f0ab00;
+	color: #dddcdc;
+	text-decoration: none;
 }
 
 .raceBoardNavigation-navigationitem:active {
-    border-bottom: 4px solid #f0ab00;
-    color: #dddcdc;
-    text-decoration: none;
+	border-bottom: 4px solid #f0ab00;
+	color: #dddcdc;
+	text-decoration: none;
 }
 
 .competitorInfo-Canvas {
-    pointer-events: none;
+	pointer-events: none;
 }
 
 .gwt-DialogBox {
-    z-index: 20;
+	z-index: 20;
 }
 
 .abstractChartPanel-importantMessageOfChart {
-    font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
-    font-size: 20px;
-    height: 70px;
-    margin: 0 auto;
-    padding: 49px 0 0 80px;
-    width: 300px;
-    color: #7c7c7c;
-    background: url(images/important-message.png) left center no-repeat;
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	font-size: 20px;
+	height: 70px;
+	margin: 0 auto;
+	padding: 49px 0 0 80px;
+	width: 300px;
+	color: #7c7c7c;
+	background: url(images/important-message.png) left center no-repeat;
 }
 
 .breadcrumbPanel-NextArrow {
-    display: none;
+	display: none;
 }
 
 .errorLabel {
-    color: #FF0000;
+	color: #FF0000;
 }
 
 .raceBoardNavigation-settingsButtonPanel {
-    float: right;
-    margin: 9px 12px 0 0;
+	float: right;
+	margin: 9px 12px 0 0;
 }
 
 .raceBoardNavigation-settingsButton {
-    background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
-    background-position: center, center 0;
-    background-repeat: no-repeat, repeat-x;
-    width: 27px;
-    height: 23px;
-    margin: 0 12px 0 1px;
-    -webkit-border-radius: 0px 3px 3px 0px;
-    -moz-border-radius: 0px 3px 3px 0px;
-    -o-border-radius: 0px 3px 3px 0px;
-    -ms-border-radius: 0px 3px 3px 0px;
-    border-radius: 0px 3px 3px 0px;
+	background: url(images/settings_white.png),
+		url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
+	width: 27px;
+	height: 23px;
+	margin: 0 12px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	-moz-border-radius: 0px 3px 3px 0px;
+	-o-border-radius: 0px 3px 3px 0px;
+	-ms-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px;
 }
 
 .raceBoardNavigation-settingsButton:hover {
-    background-image: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
-    background-position: center, center -30px;
-    background-repeat: no-repeat, repeat-x;
-    cursor: pointer;
+	background-image: url(images/settings_white.png),
+		url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+	cursor: pointer;
 }
 
 .raceBoardNavigation-filterButton:hover {
-    background-image: url(images/filter_white.png), url(images/btn-cta-orangeleft.png);
-    background-position: center, center -30px;
-    background-repeat: no-repeat, repeat-x;
-    cursor: pointer;
+	background-image: url(images/filter_white.png),
+		url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+	cursor: pointer;
 }
 
 .raceBoardNavigation-innerElement {
-    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
-    border-bottom-left-radius: 3px;
-    border-top-left-radius: 3px;
-    color: #FFFFFF;
-    cursor: pointer;
-    font-family: OpenSansSemiBold,Verdana,Arial,sans-serif;
-    font-size: 14px;
-    margin: 0 0 0 0;
-    padding: 2px 7px 2px 3px;
-    height: 18px;
-    display: inline-block;
-    text-decoration: none;
-    -moz-border-radius: 5px 0 0 5px;
-    -webkit-border-radius: 5px 0 0 5px;
-    -o-border-radius: 5px 0 0 5px;
-    -ms-border-radius: 5px 0 0 5px;
-    border-radius: 5px 0 0 5px;
-    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+	background: url("images/btn-cta-orangeleft.png") repeat-x scroll center
+		0 transparent;
+	color: #FFFFFF;
+	cursor: pointer;
+	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+	font-size: 14px;
+	margin: 0 0 0 0;
+	padding: 2px 7px 2px 3px;
+	height: 18px;
+	display: inline-block;
+	text-decoration: none;
+	border-radius: 5px 0 0 5px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .raceBoardNavigation-innerElement:active {
-    top: 1px;
-    position: relative;
+	top: 1px;
+	position: relative;
 }
 
 .raceBoardNavigation-innerElement:hover {
-    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
-    cursor: pointer;
+	background: url("images/btn-cta-orangeleft.png") repeat-x scroll center
+		-30px transparent;
+	cursor: pointer;
 }
 
 .raceBoardNavigation-innerElement label {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .raceBoardNavigation-standaloneElement {
-    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
-    color: #FFFFFF;
-    cursor: pointer;
-    font-family: OpenSansSemiBold,Verdana,Arial,sans-serif;
-    font-size: 14px;
-    margin: 0 0 0 0;
-    padding: 2px 7px 2px 3px;
-    height: 23px;
-    display: inline-block;
-    text-decoration: none;
-    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 0 0 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    -o-border-radius: 5px 5px 5px 5px;
-    -ms-border-radius: 5px 5px 5px 5px;
+	background: url("images/btn-cta-orangeleft.png") repeat-x scroll center
+		0 transparent;
+	color: #FFFFFF;
+	cursor: pointer;
+	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+	font-size: 14px;
+	margin: 0 0 0 0;
+	padding: 2px 7px 2px 3px;
+	height: 23px;
+	display: inline-block;
+	text-decoration: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+	border-radius: 5px 5px 5px 5px;
+
 }
 
 .raceBoardNavigation-standaloneElement:active {
-    top: 1px;
-    position: relative;
+	top: 1px;
+	position: relative;
 }
 
 .raceBoardNavigation-standaloneElement:hover {
-    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
-    cursor: pointer;
+	background: url("images/btn-cta-orangeleft.png") repeat-x scroll center
+		-30px transparent;
+	cursor: pointer;
 }
 
 .raceBoardNavigation-standaloneElement label {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .timePanelButton {
-    float: left;
-    margin: 0 0 0 5px;
+	float: left;
+	margin: 0 0 0 5px;
 }
 
 .timePanelButton-SlowDown {
-    background-color: red !important;
+	background-color: red !important;
 }
 
 .timePanelButton-SpeedUp {
-    background-color: green !important;
+	background-color: green !important;
 }
 
 .playPauseButton {
-    padding: 0;
-    float: left;
-    width: 32px;
-    height: 28px;
-    background: url(images/viewicons/@1x/img/SAP_RV_Play_INACTIVE.png) center no-repeat;
-    cursor: pointer;
-    border: 1px solid #cecece;
-    border-radius: 4px;
-    outline: 0;
+	padding: 0;
+	float: left;
+	width: 32px;
+	height: 28px;
+	background: url(images/viewicons/@1x/img/SAP_RV_Play_INACTIVE.png)
+		center no-repeat;
+	cursor: pointer;
+	border: 1px solid #cecece;
+	border-radius: 4px;
+	outline: 0;
 }
 
-.playPauseButton:hover{
-  cursor: pointer;
-  background-color: #cecece;
+.playPauseButton:hover {
+	cursor: pointer;
+	background-color: #cecece;
 }
 
 .playPauseButtonPause {
-    background: url(images/viewicons/@2x/img/SAP_RV_Pause_INACTIVE.png) 2px 0 no-repeat;
-    outline: 0;
-    background-size: contain;
+	background: url(images/viewicons/@2x/img/SAP_RV_Pause_INACTIVE.png) 2px
+		0 no-repeat;
+	outline: 0;
+	background-size: contain;
 }
 
 .playPauseButtonPause:hover {
-  cursor: pointer;
+	cursor: pointer;
 }
 
 .backToLivePlayButton {
-    position: absolute;
-    right: 15px;
-    top: 8px;
-    width: 42px;
-    height: 38px;
-    font-size: 8px;
-    white-space: normal;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -o-border-radius: 5px;
-    -ms-border-radius: 5px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
+	position: absolute;
+	right: 15px;
+	top: 8px;
+	width: 42px;
+	height: 38px;
+	font-size: 8px;
+	white-space: normal;
+	border-radius: 4px;
+	border: none;
+	cursor: pointer;
 }
 
 .backToLivePlayButton-Inactive {
-    color: #6dc021;
-    background-color: white;
-    font-weight: bold;
+	color: #6dc021;
+	background-color: white;
+	font-weight: bold;
 }
 
 .backToLivePlayButton-Active {
-    background-color: #6dc021;
-    color: white;
-    font-weight: normal;
+	background-color: #6dc021;
+	color: white;
+	font-weight: normal;
 }
 
 .backToLivePlayButton:hover {
-    border: 2px solid gray;
+	border: 2px solid gray;
 }
 
 .backToLivePlayButton:focus {
-    outline: 0 !important;
+	outline: 0 !important;
 }
 
-.dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
-    z-index: 10;
+.dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"]
+	{
+	z-index: 10;
 }
 
 .browserOptimizedMessage {
-    padding: 15px 0px;
+	padding: 15px 0px;
 }
 
-
 .trackingQuality-circle {
-  width: 8px;
-  height: 8px;
-  -moz-border-radius-topleft: 50%;
-  -webkit-border-top-left-radius: 50%;
-  -o-border-top-left-radius: 50%;
-  -ms-border-top-left-radius: 50%;
-  border-top-left-radius: 50%;
-  -moz-border-radius-topright: 50%;
-  -webkit-border-top-right-radius: 50%;
-  -o-border-top-right-radius: 50%;
-  -ms-border-top-right-radius: 50%;
-  border-top-right-radius: 50%;
-  -moz-border-radius-bottomleft: 50%;
-  -webkit-border-bottom-left-radius: 50%;
-  -o-border-bottom-left-radius: 50%;
-  -ms-border-bottom-left-radius: 50%;
-  border-bottom-left-radius: 50%;
-  -moz-border-radius-bottomright: 50%;
-  -webkit-border-bottom-right-radius: 50%;
-  -o-border-bottom-right-radius: 50%;
-  -ms-border-bottom-right-radius: 50%;
-  border-bottom-right-radius: 50%;
-  float: left;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	float: left;
 }
 
 .circleYellow {
-  background: #fbba00;
+	background: #fbba00;
 }
 
 .circleGreen {
-  background: #8ab54e;
+	background: #8ab54e;
 }
 
 .circleRed {
-  background: #f01010;
+	background: #f01010;
 }
 
 .busyIndicator-Simple {
-    position: absolute;
-    top: 0.7em;
-    right: 7.4em;
+	position: absolute;
+	top: 0.7em;
+	right: 7.4em;
 }
 
 .busyIndicator-Circle {
+	
 }
 
 .raceBoard-TitlePanel {
-    position: relative;
-    top: 10px;
-    z-index: 10;
-    color: #fff;
-    margin-left: auto;
-    margin-right: auto;
+	position: relative;
+	top: 10px;
+	z-index: 10;
+	color: #fff;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .raceBoard-TitlePanel-RaceNameLabel {
-    font-size: 32px;
-    font-weight: bold;
-    padding: 7px;
+	font-size: 32px;
+	font-weight: bold;
+	padding: 7px;
 }
 
 .raceBoard-Logo {
-    position: absolute;
-    top: 6px;
-    left: 10px;
-    z-index: 10;
-    cursor: pointer;
+	position: absolute;
+	top: 6px;
+	left: 10px;
+	z-index: 10;
+	cursor: pointer;
 }
 
 .SideBySideComponentViewer-MainPanel {
-    top: 12px;
+	top: 12px;
 }
 
 .TimePanel-ShowExtended-Button {
-    width: 29px;
-    height: 28px;
-    float: left;
-    cursor: pointer;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border: 1px solid #ececec;
+	width: 29px;
+	height: 28px;
+	float: left;
+	cursor: pointer;
+	border-radius: 4px;
+	border: 1px solid #ececec;
 }
 
 .TimePanel-ShowExtended-Button-Open {
-    background: white url(images/arrows_bottom_black.png) center no-repeat;
+	background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button-Closed {
-    background: white url(images/arrows_top_black.png) center no-repeat;
+	background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button:hover {
-    background-color: #cecece;
+	background-color: #cecece;
 }
 
 .TimePanel-ShowExtended-Button:focus {
-    outline: 0 !important;
+	outline: 0 !important;
 }
 
 .RaceBoard-globalNavigation-Link {
-    display: inline;
-    margin-right: 3px;
+	display: inline;
+	margin-right: 3px;
 }
 
 .RaceBoard-globalNavigation-Link a {
-    color: #fff;
-    cursor: pointer;
+	color: #fff;
+	cursor: pointer;
 }
 
-.RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before {
-    content: ' \00bb\00a0';
+.RaceBoard-globalNavigation-Link+.RaceBoard-globalNavigation-Link:before
+	{
+	content: ' \00bb\00a0';
 }
 
 .TimePanel-settingsButtonStyle {
-    position: absolute;
-    right: 0px;
-    z-index: 1;
-    border: none;
+	position: absolute;
+	right: 0px;
+	z-index: 1;
+	border: none;
 }
 
 .TimePanel-settingsButtonStyle:focus {
-    outline: 0 !important;
+	outline: 0 !important;
 }
 
 .TimePanel-settingsButtonStyle:hover {
-    border: 1px solid gray;
+	border: 1px solid gray;
 }
 
-.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-multiCompetitorRaceChart {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 5% 50%, 95% 50%
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-multiCompetitorRaceChart
+	{
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png),
+		url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
 }
 
-.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-multiCompetitorRaceChart {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png), url(images/arrows_bottom_black_small.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 5% 50%, 95% 50%
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-multiCompetitorRaceChart
+	{
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png),
+		url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-windChart {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png), url(images/arrows_top_black_small.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 5% 50%, 95% 50%
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_INACTIVE.png),
+		url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-windChart {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png), url(images/arrows_bottom_black_small.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 5% 50%, 95% 50%
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png),
+		url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png), url(images/arrows_top_black_small.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 4% 50%, 96% 50%
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png),
+		url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png), url(images/arrows_bottom_black_small.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 4% 50%, 96% 50%
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png),
+		url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 4% 50%, 96% 50%
 }
 
-.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media, .gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-media {
-    background-color: white;
-    background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 10% 50%, 90% 50%
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media,
+	.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-media {
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 10% 50%, 90% 50%
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-mediaplaying {
-    background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_GHOSTED.png);
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_AudioVideo_GHOSTED.png);
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Small-media {
-    background-position: 5% 50%, 100% 50% !important;
-    margin-left: 0px !important;
-    padding: 2px 35px !important;
+	background-position: 5% 50%, 100% 50% !important;
+	margin-left: 0px !important;
+	padding: 2px 35px !important;
 }
 
 @external gwt-ToggleButton-up, gwt-ToggleButton-down, gwt-ToggleButton-up-hovering, gwt-ToggleButton-down-hovering;
 .gwt-ToggleButton-up, .gwt-ToggleButton-up-hovering {
-   background: url(images/unlock.png) center no-repeat;
-   margin-left: 5px;
-} 
+	background: url(images/unlock.png) center no-repeat;
+	margin-left: 5px;
+}
+
 .gwt-ToggleButton-down, .gwt-ToggleButton-down-hovering {
-   background: url(images/lock.png) center no-repeat;
-   margin-left: 5px;
+	background: url(images/lock.png) center no-repeat;
+	margin-left: 5px;
 }
 
 .RegattaRaceInformation-Header {
-    position: relative;
-    left: 140px;
-    top: 11px;
+	position: relative;
+	left: 140px;
+	top: 11px;
 }
 
 .RegattaRaceInformation-Header .RaceName-Label {
-    display: inline;
-    color: white;
-    margin-right: 10px;
-    font-size: 36px;
+	display: inline;
+	color: white;
+	margin-right: 10px;
+	font-size: 36px;
 }
 
 .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
-    display: inline;
-    color: white;
-    font-size: 15px;
+	display: inline;
+	color: white;
+	font-size: 15px;
 }
 
 .RegattaAndRaceTime-Header {
-    position: absolute;
-    right: 10px;
-    top: 13px;
-    text-align: right;
-    color: white;
+	position: absolute;
+	right: 10px;
+	top: 13px;
+	text-align: right;
+	color: white;
 }
 
 .RegattaAndRaceTime-Header .RegattaName-Anchor {
-    font-size: 15px;
-    color: white;
-    text-decoration: none;
-    padding-left: 25px;
-    background-image: url(images/home.png);
-    background-repeat: no-repeat;
-    background-size: 17px;
-    background-position: 4px 1px;
+	font-size: 15px;
+	color: white;
+	text-decoration: none;
+	padding-left: 25px;
+	background-image: url(images/home.png);
+	background-repeat: no-repeat;
+	background-size: 17px;
+	background-position: 4px 1px;
 }
 
 .RegattaAndRaceTime-Header .RegattaName-Anchor:hover {
-    text-decoration: underline;
+	text-decoration: underline;
 }
-    
+
 .RegattaAndRaceTime-Header .RaceTime-Label {
-    font-size: 15px;
-    margin-top: 5px;
+	font-size: 15px;
+	margin-top: 5px;
 }
 
 .VideoPopup-Close-Button {
-    border: none;
-}
-
-.gwt-Button, .gwt-Button:visited, .test, .test:visited {
-    background-color: #fcbb22;
-    background-image: none !important;
-    -moz-box-shadow: none;
-    -webkit-box-shadow: none;
-    -o-box-shadow: none;
-    -ms-box-shadow: none;
-    box-shadow: none;
-    text-shadow: none;
-}
-
-.gwt-Button:hover {
-    background-color: #fcbb22 !important;
+	border: none;
 }
 
 .Media-Select-Button {
-  font-size: 15px;
-  font-size: 1rem;
-  display: inline-block;
-  font-weight: 400;
-  color: #111;
-  border: none;
-  padding: 0.5em 0.3em 0.5em 0.8em;
-  background-color: #fff;
-  -webkit-transition: background-color 0.2s;
-  -moz-transition: background-color 0.2s;
-  -o-transition: background-color 0.2s;
-  -ms-transition: background-color 0.2s;
-  transition: background-color 0.2s;
-  width: 100%;
-  max-width: 25em;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	font-size: 15px;
+	font-size: 1rem;
+	display: inline-block;
+	font-weight: 400;
+	color: #111;
+	border: none;
+	padding: 0.5em 0.3em 0.5em 0.8em;
+	background-color: #fff;
+	-webkit-transition: background-color 0.2s;
+	-moz-transition: background-color 0.2s;
+	-o-transition: background-color 0.2s;
+	-ms-transition: background-color 0.2s;
+	transition: background-color 0.2s;
+	width: 100%;
+	max-width: 25em;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
-.Media-Select-Button:hover,
-.Media-Select-Button:focus {
-  background-color: #f0ab00;
+
+.Media-Select-Button:hover, .Media-Select-Button:focus {
+	background-color: #f0ab00;
 }
 
 .Media-Select-Button-playing {
-  color: #999;
-}
-.Media-Select-Button-playing:hover,
-.Media-Select-Button-playing:focus {
- color: #fff;
- background-color: #ccc;
+	color: #999;
 }
 
+.Media-Select-Button-playing:hover, .Media-Select-Button-playing:focus {
+	color: #fff;
+	background-color: #ccc;
+}
 
 .Media-Select-Popup .dialogMiddleCenterInner {
-    padding: 0;
+	padding: 0;
 }
 
 .Media-Select-Popup .Caption {
-    padding: 4px 10px;
+	padding: 4px 10px;
 }
