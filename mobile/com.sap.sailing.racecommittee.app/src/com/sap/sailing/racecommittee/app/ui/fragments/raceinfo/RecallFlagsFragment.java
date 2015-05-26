@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -17,7 +16,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemClick{
+public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemClick {
 
     private RecallFlagsAdapter mAdapter;
 
@@ -54,8 +53,6 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
         if (flag.flag.equals(Flags.XRAY)) {
             RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
             procedure.displayIndividualRecall(MillisecondsTimePoint.now());
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         }
         if (flag.flag.equals(Flags.FIRSTSUBSTITUTE)) {
             TimePoint now = MillisecondsTimePoint.now();

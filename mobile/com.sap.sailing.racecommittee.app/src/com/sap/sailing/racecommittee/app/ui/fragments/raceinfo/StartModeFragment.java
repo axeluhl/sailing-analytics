@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +7,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -21,18 +15,14 @@ import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 public class StartModeFragment extends BaseFragment implements StartModeAdapter.StartModeClick {
 
     private final static String START_MODE = "startMode";
-
-    private class StartModeComparator implements Comparator<StartMode> {
-
-        @Override
-        public int compare(StartMode left, StartMode right) {
-            return left.getFlagName().compareToIgnoreCase(right.getFlagName());
-        }
-    }
-
     private ListView mListView;
     private RRS26RacingProcedure mProcedure;
 
@@ -50,15 +40,15 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
 
         if (getArguments() != null) {
             switch (getArguments().getInt(START_MODE, 0)) {
-                case 1:
-                    if (getView() != null)  {
-                        View header = getView().findViewById(R.id.header);
-                        header.setVisibility(View.GONE);
-                    }
-                    break;
+            case 1:
+                if (getView() != null) {
+                    View header = getView().findViewById(R.id.header);
+                    header.setVisibility(View.GONE);
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
@@ -119,8 +109,16 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
         if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
             openMainScheduleFragment();
-        } else {
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+//        } else {
+//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        }
+    }
+
+    private class StartModeComparator implements Comparator<StartMode> {
+
+        @Override
+        public int compare(StartMode left, StartMode right) {
+            return left.getFlagName().compareToIgnoreCase(right.getFlagName());
         }
     }
 }

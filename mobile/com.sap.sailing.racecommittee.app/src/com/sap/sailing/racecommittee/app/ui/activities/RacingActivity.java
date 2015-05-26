@@ -1,17 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -23,17 +15,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
@@ -56,15 +42,15 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.*;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, OnClickListener {
     private static final String TAG = RacingActivity.class.getName();
@@ -559,7 +545,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
             Fragment fragment;
 
-            if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
+            if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action) && findViewById(R.id.race_frame) != null) {
                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                     fragment = RaceFlagViewerFragment.newInstance();
                 } else {

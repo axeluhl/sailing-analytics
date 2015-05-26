@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -10,12 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
@@ -28,6 +20,9 @@ import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagIt
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick {
 
@@ -142,7 +137,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             }
 
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
+            case 1: // Race-State: Finishing -> End Finishing
                 ImageView flag = ViewHolder.get(layout, R.id.header_flag);
                 if (flag != null) {
                     int resId = R.drawable.flag_blue_48dp;
@@ -159,6 +154,9 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 if (headline != null) {
                     headline.setText(getString(R.string.race_end_finish_header));
                 }
+                break;
+
+            default: // Race-State: Running -> Start Finishing
                 break;
             }
 
@@ -191,7 +189,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 break;
 
             default:
-                replaceFragment(MoreFlagsFragment.newInstance(), R.id.race_frame);
+                // currently unused, because of no other button
                 break;
             }
         }
@@ -223,28 +221,26 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 finishTime = getFinishTime();
             }
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
+            case 1: // Race-State: Finishing -> End Finishing
                 FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
                 if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
                     if (ftf.analyze().before(finishTime)) {
                         getRaceState().setFinishedTime(finishTime);
                     } else {
-                        Toast.makeText(getActivity(),
-                            "The given finish time is earlier than than the first finisher time. Please recheck the time.",
-                            Toast.LENGTH_LONG).show();
+                        Toast
+                            .makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG)
+                            .show();
                     }
                 }
                 break;
 
-            default:
+            default: // Race-State: Running -> Start Finishing
                 StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
                 if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
                     if (stf.analyze().before(finishTime)) {
                         getRace().getState().setFinishingTime(finishTime);
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     } else {
-                        Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG)
-                            .show();
+                        Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
                     }
                 }
                 break;

@@ -5,14 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -74,9 +72,6 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             break;
         }
         state.setAdvancePass(now);
-
-        RacingActivity activity = (RacingActivity) getActivity();
-        activity.onRaceItemClicked(getRace());
     }
 
     private void logFlag(Flags flag) {

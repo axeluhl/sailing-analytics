@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
-
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -9,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -17,6 +14,8 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.ArrayList;
 
 public class StartProcedureFragment extends BaseFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
 
@@ -60,15 +59,15 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
 
         if (getArguments() != null) {
             switch (getArguments().getInt(START_MODE, 0)) {
-                case 1:
-                    if (getView() != null) {
-                        View header = getView().findViewById(R.id.header);
-                        header.setVisibility(View.GONE);
-                    }
-                    break;
+            case 1:
+                if (getView() != null) {
+                    View header = getView().findViewById(R.id.header);
+                    header.setVisibility(View.GONE);
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
@@ -111,7 +110,6 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
                 openMainScheduleFragment();
             } else {
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             }
         } else {
             if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {

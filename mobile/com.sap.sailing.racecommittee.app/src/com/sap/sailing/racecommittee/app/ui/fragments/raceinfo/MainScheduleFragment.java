@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -14,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.Wind;
@@ -28,6 +24,9 @@ import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
@@ -180,45 +179,45 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.start_course:
-                openFragment(CourseFragment.newInstance(0, getRace()));
-                break;
+        case R.id.start_course:
+            openFragment(CourseFragment.newInstance(0, getRace()));
+            break;
 
-            case R.id.start_mode:
-                openFragment(StartModeFragment.newInstance(0));
-                break;
+        case R.id.start_mode:
+            openFragment(StartModeFragment.newInstance(0));
+            break;
 
-            case R.id.start_procedure:
-                openFragment(StartProcedureFragment.newInstance(0));
-                break;
+        case R.id.start_procedure:
+            openFragment(StartProcedureFragment.newInstance(0));
+            break;
 
-            case R.id.start_race:
-                RRS26RacingProcedure procedure = null;
-                Flags flag = null;
-                if (getRaceState().getRacingProcedure().getType().equals(RacingProcedureType.RRS26)) {
-                    procedure = getRaceState().getTypedRacingProcedure();
-                    flag = procedure.getStartModeFlag();
-                }
-                TimePoint now = MillisecondsTimePoint.now();
-                getRaceState().setAdvancePass(now);
-                getRaceState().setRacingProcedure(now, mRacingProcedureType);
-                getRaceState().forceNewStartTime(now, mProtestTime);
-                if (procedure != null) {
-                    procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
-                }
-                openFragment(RaceInfoRaceFragment.newInstance());
-                break;
+        case R.id.start_race:
+            RRS26RacingProcedure procedure = null;
+            Flags flag = null;
+            if (getRaceState().getRacingProcedure().getType().equals(RacingProcedureType.RRS26)) {
+                procedure = getRaceState().getTypedRacingProcedure();
+                flag = procedure.getStartModeFlag();
+            }
+            TimePoint now = MillisecondsTimePoint.now();
+            getRaceState().setAdvancePass(now);
+            getRaceState().setRacingProcedure(now, mRacingProcedureType);
+            getRaceState().forceNewStartTime(now, mProtestTime);
+            if (procedure != null) {
+                procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
+            }
+            openFragment(RaceInfoRaceFragment.newInstance());
+            break;
 
-            case R.id.start_time:
-                openFragment(StartTimeFragment.newInstance(getArguments().getSerializable(START_TIME)));
-                break;
+        case R.id.start_time:
+            openFragment(StartTimeFragment.newInstance(getArguments().getSerializable(START_TIME)));
+            break;
 
-            case R.id.wind:
-                openFragment(WindFragment.newInstance(0));
-                break;
+        case R.id.wind:
+            openFragment(WindFragment.newInstance(0));
+            break;
 
-            default:
-                Toast.makeText(getActivity(), "Clicked on " + v, Toast.LENGTH_SHORT).show();
+        default:
+            Toast.makeText(getActivity(), "Clicked on " + v, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -227,7 +226,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         super.notifyTick(now);
 
         if (mStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
-            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString).replace("#COUNTDOWN#", calcCountdown(now));
+            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString)
+                .replace("#COUNTDOWN#", calcCountdown(now));
             mStartTime.setText(startTimeValue);
         }
 
@@ -261,9 +261,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         if (mProtestTime != null) {
             fragment.getArguments().putSerializable(START_TIME, mProtestTime);
         }
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.racing_view_container, fragment)
-                .commitAllowingStateLoss();
+        getFragmentManager().beginTransaction().replace(R.id.racing_view_container, fragment).commitAllowingStateLoss();
     }
 }

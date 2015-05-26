@@ -1,17 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -26,12 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -62,10 +45,21 @@ import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks,
-    GoogleApiClient.OnConnectionFailedListener, LocationListener, OnClickListener, OnMarkerDragListener,
-    OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener {
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+
+public class WindFragment extends BaseFragment
+    implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
+    OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
@@ -243,8 +237,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
      */
     public void setupWindSpeedPicker() {
         String nums[] = generateNumbers();
-        ThemeHelper.setPickerTextColor(getActivity(), mWindSpeed, ThemeHelper
-            .getColor(getActivity(), R.attr.white));
+        ThemeHelper.setPickerTextColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
         mWindSpeed.setMaxValue(nums.length - 1);
         mWindSpeed.setMinValue(0);
         mWindSpeed.setWrapSelectorWheel(false);
@@ -318,8 +311,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             if (bigMap) {
                 showBigMap();
                 if (savedInstanceState.getDouble("lat", -1) != -1) {
-                    windMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"),
-                        savedInstanceState.getFloat("zoom"));
+                    windMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"), savedInstanceState.getFloat("zoom"));
                     if (markerLat != -1) {
                         windMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
                     }
@@ -427,7 +419,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
         case 1:
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             break;
 
         default:
@@ -470,9 +462,8 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private void showElements(boolean show) {
         if (mSetData != null) {
             mSetData.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-            mSetData.setEnabled(
-                windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null
-                    && mCurrentLocation != null);
+            mSetData
+                .setEnabled(windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null && mCurrentLocation != null);
         }
         if (mSetPosition != null) {
             mSetPosition.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
@@ -628,9 +619,8 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             StringBuilder responseBody = new StringBuilder();
             JSONObject locJSON = null;
             try {
-                URL website = new URL(
-                    getString(R.string.url_google_geocoder) + URLEncoder.encode(location, "UTF-8") + getString(
-                        R.string.urlpart_google_geocoder_sensor));
+                URL website = new URL(getString(R.string.url_google_geocoder) + URLEncoder.encode(location, "UTF-8")
+                    + getString(R.string.urlpart_google_geocoder_sensor));
                 ExLog.i(getActivity(), TAG, website.toString());
                 HttpURLConnection urlConnection = (HttpURLConnection) website.openConnection();
                 BufferedReader in;
@@ -641,8 +631,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                         responseBody.append(line);
                     }
                     JSONObject jObject = new JSONObject(responseBody + "");
-                    locJSON = jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry")
-                        .getJSONObject("location");
+                    locJSON = jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
                 } finally {
                     urlConnection.disconnect();
                 }
@@ -660,9 +649,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                 return;
             }
             try {
-                ExLog.i(getActivity(), TAG,
-                    "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON
-                        .getDouble("lng"));
+                ExLog.i(getActivity(), TAG, "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng"));
                 windMap.centerMap(locJSON.getDouble("lat"), locJSON.getDouble("lng"));
             } catch (JSONException e) {
                 ExLog.ex(WindFragment.this.getActivity(), TAG, e);

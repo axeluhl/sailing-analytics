@@ -1,13 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -17,6 +14,8 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -28,6 +27,8 @@ import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.List;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
@@ -128,8 +129,9 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     private void renderFlagChangesCountdown(TextView targetView, TimePoint changeAt, FlagPole changePole) {
         long millisecondsTillChange = TimeUtils.timeUntil(changeAt);
-        int formatTextResourceId = changePole.isDisplayed() ? R.string.race_startphase_countdown_mode_display :
-                R.string.race_startphase_countdown_mode_remove;
+        int formatTextResourceId = changePole.isDisplayed() ?
+            R.string.race_startphase_countdown_mode_display :
+            R.string.race_startphase_countdown_mode_remove;
         StringBuilder flagName = new StringBuilder();
         flagName.append(changePole.getUpperFlag().toString());
         if (changePole.getLowerFlag() != Flags.NONE) {
@@ -182,9 +184,8 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
 
-            switch(state.getStatus()) {
+            switch (state.getStatus()) {
             case RUNNING:
-            case FINISHING:
                 break;
 
             default:
@@ -196,31 +197,46 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         }
 
         @Override
-        public void onFinishedTimeChanged(ReadonlyRaceState state) {
-            super.onFinishedTimeChanged(state);
+        public void onCourseDesignChanged(ReadonlyRaceState state) {
+            super.onCourseDesignChanged(state);
 
-            RacingActivity activity = (RacingActivity) getActivity();
-            if (activity != null) {
-                activity.onRaceItemClicked(getRace());
-            }
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        }
+
+        @Override
+        public void onWindFixChanged(ReadonlyRaceState state) {
+            super.onWindFixChanged(state);
+
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 
     private class ProcedureChangedListener extends BaseRacingProcedureChangedListener {
+
         @Override
         public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
             setupUi();
             flagPoleCache = null;
+
+            if (getRaceState().getStatus() == RaceLogRaceStatus.SCHEDULED) {
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            }
         }
 
         @Override
         public void onIndividualRecallDisplayed(ReadonlyRacingProcedure racingProcedure) {
             onIndividualRecallChanged(true);
+
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         }
 
         @Override
         public void onIndividualRecallRemoved(ReadonlyRacingProcedure racingProcedure) {
             onIndividualRecallChanged(false);
+
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         }
     }
 }
