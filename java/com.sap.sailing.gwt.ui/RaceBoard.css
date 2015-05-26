@@ -142,13 +142,15 @@ img.openColumn {
 .raceBoardNavigation {
 	float: left;
 	margin: 9px 0 0 12px;
-	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: 300;
 }
 
 .raceBoardControls {
 	float: right;
 	margin: 9px 0 0 12px;
-	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: 300;
 }
 
 .raceBoardNavigation-navigationitem {
@@ -180,7 +182,8 @@ img.openColumn {
 }
 
 .abstractChartPanel-importantMessageOfChart {
-	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: 600;
 	font-size: 20px;
 	height: 70px;
 	margin: 0 auto;
@@ -239,7 +242,8 @@ img.openColumn {
 		0 transparent;
 	color: #FFFFFF;
 	cursor: pointer;
-	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+	font-family: 'Open Sans', Verdana, Arial, sans-serif;
+	font-weight: 600;
 	font-size: 14px;
 	margin: 0 0 0 0;
 	padding: 2px 7px 2px 3px;
@@ -272,7 +276,8 @@ img.openColumn {
 		0 transparent;
 	color: #FFFFFF;
 	cursor: pointer;
-	font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+	font-family: 'Open Sans', Verdana, Arial, sans-serif;
+	font-weight: 600;
 	font-size: 14px;
 	margin: 0 0 0 0;
 	padding: 2px 7px 2px 3px;

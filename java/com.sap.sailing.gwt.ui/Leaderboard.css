@@ -24,7 +24,7 @@
 
 body {
 	background: #fff;
-	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -81,7 +81,8 @@ input.magnifier{
 }
 
 body, table td, select, button {
-    font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
+    font-family: 'Open Sans', Arial, Verdana, sans-serif;
+    font-weight: 300;
     font-size: 14px;
 }
 
@@ -90,7 +91,8 @@ body, table td, select, button {
 }
 
 .abstractChartPanel-importantMessageOfChart {
-    font-family: 'OpenSansBold',Arial,Verdana,sans-serif;
+    font-family: 'Open Sans',Arial,Verdana,sans-serif;
+    font-weight: bold;
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
@@ -105,7 +107,7 @@ body, table td, select, button {
 	margin: 0 auto;
 	width: 400px;
 	text-align: center;
-	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	font-size: 18px;
 	color: #fff;
 	margin-top: 22px;
@@ -113,7 +115,7 @@ body, table td, select, button {
 
 .leaderboardHeading {
 	font-size: 16px;
-	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	font-weight: bold;
 }
 
