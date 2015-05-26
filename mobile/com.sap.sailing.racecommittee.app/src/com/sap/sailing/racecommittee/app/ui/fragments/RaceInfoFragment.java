@@ -97,10 +97,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         super.onStop();
     }
 
-    public RaceFragment getInfoFragment() {
-        return infoFragment;
-    }
-
     protected void switchToInfoFragment() {
         RaceFragment newInfoFragment = infoFragmentChooser.choose(getActivity(), getRace());
         if (infoFragment == null || !newInfoFragment.getClass().equals(infoFragment.getClass())) {
@@ -118,7 +114,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     private void displayInfoFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.infoContainer, infoFragment);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.commit();
@@ -179,15 +174,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                 windValue.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing()
                         .reverse().toString()));
             }
-        }
-    }
-
-    public void updateArguments(Bundle args) {
-        Serializable raceId = args.getSerializable(AppConstants.RACE_ID_KEY);
-        managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
-        if (managedRace == null) {
-            throw new IllegalStateException(
-                    String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
         }
     }
 
