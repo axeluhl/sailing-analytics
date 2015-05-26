@@ -8,7 +8,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
+import android.support.annotation.DrawableRes;
 import android.util.TypedValue;
+import android.view.View;
 
 public class BitmapHelper {
 
@@ -86,5 +88,26 @@ public class BitmapHelper {
             return getAttrDrawable(context, attrRes);
         }
         return null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void setBackground(View view, Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            view.setBackground(drawable);
+        }
+        else{
+            view.setBackgroundDrawable(drawable);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static Drawable getDrawable(Context context, @DrawableRes int id) {
+        Drawable drawable;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            drawable = context.getDrawable(id);
+        } else {
+            drawable = context.getResources().getDrawable(id);
+        }
+        return drawable;
     }
 }
