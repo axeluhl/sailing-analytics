@@ -618,9 +618,9 @@ public interface TrackedRace extends Serializable {
     void detachRaceLog(Serializable identifier);
     
     /**
-     * Detaches the link {@link RaceExecutionOrderProvider} with this <code>identifier</code>.
+     * Detaches the link {@link RaceExecutionOrderProvider}
      */
-    void detachRaceExecutionOrderProvider(Serializable identifier);
+    void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
      * Detaches all {@link RaceLog} instances from this race
@@ -795,5 +795,5 @@ public interface TrackedRace extends Serializable {
 
     void setPolarDataService(PolarDataService polarDataService);
 
-    TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders();
+    Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders();
 }

@@ -152,9 +152,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
 
-    public static final long TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = 4 * 60 * 1000l; // let wind start four minutes before race
+    public static final Duration TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = Duration.ONE_MINUTE.times(4); // let wind start four minutes before race
     
-    public static final long EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = 60 * 60 * 1000l;
+    public static final Duration EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = Duration.ONE_HOUR;
 
     private TrackedRaceStatus status;
 
@@ -276,7 +276,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
     
-    protected transient ConcurrentHashMap<Serializable, RaceExecutionOrderProvider> attachedRaceExecutionOrderProvider;
+    protected transient ConcurrentHashMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProvider;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -531,6 +531,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         ois.defaultReadObject();
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
+        attachedRaceExecutionOrderProvider = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);

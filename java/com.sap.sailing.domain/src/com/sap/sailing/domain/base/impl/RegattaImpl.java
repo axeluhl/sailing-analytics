@@ -5,9 +5,10 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -53,10 +54,6 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
-import com.sap.sse.util.SmartFutureCache;
-import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
-
-import difflib.PatchFailedException;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
 
@@ -598,95 +595,30 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return raceExecutionOrderCache;
     }
     
-    private class RaceExecutionOrderCache implements RaceExecutionOrderProvider, RaceColumnListenerWithDefaultAction {
-
-        private static final long serialVersionUID = 4795731834688229568L;
-        private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
-        private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
-        private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
+    private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
+        private static final long serialVersionUID = 1658153438012186894L;
 
         public RaceExecutionOrderCache() {
-            racesOrderCache = createRacesOrderCache();
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+            super();
             addRaceColumnListener(this);
         }
 
         @Override
-        public void defaultAction() {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        public List<TrackedRace> getRacesInExecutionOrder() {
-            List<TrackedRace> result;
-            result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY,/*waitForLatest*/ true);
-            return result;
-        }
-        
-        private List<TrackedRace> reloadRacesInExecutionOrder() {
-            List<TrackedRace> raceIdListInExecutionOrder = new ArrayList<TrackedRace>();
-            if (getSeries() != null) {
-                Iterator<? extends Series> seriesInRegatta = getSeries().iterator();
-                while (seriesInRegatta.hasNext()) {
-                    Series currentSeries = seriesInRegatta.next();
-                    if (currentSeries.getRaceColumns() != null) {
-                        Iterator<? extends RaceColumn> raceColumns = currentSeries.getRaceColumns().iterator();
-                        while (raceColumns.hasNext()) {
-                            RaceColumn currentRaceColumn = raceColumns.next();
-                            if (currentRaceColumn.getFleets() != null) {
-                                Iterator<? extends Fleet> fleetsInRaceColumn = currentRaceColumn.getFleets().iterator();
-                                while (fleetsInRaceColumn.hasNext()) {
-                                    TrackedRace trackedRaceInColumnForFleet = currentRaceColumn
-                                            .getTrackedRace(fleetsInRaceColumn.next());
-                                    if (trackedRaceInColumnForFleet != null) {
-                                        raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
-                                    }
-                                }
+        protected Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries() {
+            final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
+            final Iterable<? extends Series> mySeries = getSeries();
+            if (mySeries != null) {
+                for (Series currentSeries : mySeries) {
+                    if (currentSeries.getFleets() != null) {
+                        for (Fleet fleet : currentSeries.getFleets()) {
+                            if (currentSeries.getRaceColumns() != null) {
+                                result.put(fleet, currentSeries.getRaceColumns());
                             }
                         }
                     }
                 }
             }
-            return raceIdListInExecutionOrder;
-        }
-
-        private SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> createRacesOrderCache() {
-            return new SmartFutureCache<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>(
-                    new SmartFutureCache.AbstractCacheUpdater<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>() {
-
-                        @Override
-                        public List<TrackedRace> computeCacheUpdate(String key,
-                                EmptyUpdateInterval updateInterval) throws Exception {
-                            if (key.equals(RACES_ORDER_LIST_CACHE_KEY)) {
-                                return reloadRacesInExecutionOrder();
-                            } else {
-                                List<TrackedRace> emptyList = new ArrayList<TrackedRace>();
-                                return emptyList;
-                            }
-                        }
-                    }, RACES_ORDER_LIST_LOCKS_NAME);
-        }
-        
-        private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
-            ois.defaultReadObject();
-            racesOrderCache = createRacesOrderCache();
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race) {
-            List<TrackedRace> racesInOrder = getRacesInExecutionOrder();
-            if (racesInOrder != null) {
-                int indexOfRace = racesInOrder.indexOf(race);
-                if (indexOfRace != -1 && indexOfRace != 0) {
-                    return racesInOrder.get(indexOfRace - 1);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public Serializable getId() {
-            return serialVersionUID;
+            return result;
         }
     }
 }

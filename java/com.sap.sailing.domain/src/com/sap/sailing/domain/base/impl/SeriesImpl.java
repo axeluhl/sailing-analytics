@@ -84,8 +84,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         fleetsInAscendingOrder = new ArrayList<Fleet>();
         Util.addAll(fleets, fleetsInAscendingOrder);
         Collections.sort(fleetsInAscendingOrder);
-        List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
-        this.raceColumns = myRaceColumns;
+        this.raceColumns = new ArrayList<RaceColumnInSeries>();
         this.isMedal = isMedal;
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
@@ -184,7 +183,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
             for (Fleet fleet : raceColumnInSeries.getFleets()) {
                 TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);
                 if (trackedRace != null && regatta != null && regatta.getRaceExecutionOrderProvider() != null) {
-                    trackedRace.detachRaceExecutionOrderProvider(regatta.getRaceExecutionOrderProvider().getId());
+                    trackedRace.detachRaceExecutionOrderProvider(regatta.getRaceExecutionOrderProvider());
                 }
             }
         }

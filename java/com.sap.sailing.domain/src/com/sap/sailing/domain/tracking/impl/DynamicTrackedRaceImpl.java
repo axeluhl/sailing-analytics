@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +52,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -661,9 +663,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        long conditional_time_before_start_to_track_wind = getConditionalTimeBeforeStartToTrackWind();
-        if ((startOfTracking == null || !startOfTracking.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.minus(conditional_time_before_start_to_track_wind).after(wind.getTimePoint())))
+        final Duration conditionalTimeBeforeStartToTrackWind = getConditionalTimeBeforeStartToTrackWind();
+        if ((startOfTracking == null || !startOfTracking.minus(conditionalTimeBeforeStartToTrackWind).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(conditionalTimeBeforeStartToTrackWind).after(wind.getTimePoint())))
             &&
         // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
         (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||
@@ -678,9 +680,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return result;
     }
     
-    private long getConditionalTimeBeforeStartToTrackWind(){
-        TrackedRace previosRaceInExecutionOrder = getPreviousRaceFromAttachedRaceExecutionOrderProviders();
-        if (previosRaceInExecutionOrder == null || previosRaceInExecutionOrder.getEndOfTracking() != null || !previosRaceInExecutionOrder.hasWindData()) {
+    private Duration getConditionalTimeBeforeStartToTrackWind(){
+        Set<TrackedRace> previosRaceInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
+        if (previosRaceInExecutionOrder == null || !previosRaceInExecutionOrder.stream().filter(tr->tr.getEndOfTracking() != null).findAny().isPresent()) {
             return EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
         } else {
             return TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
@@ -770,15 +772,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        if (raceExecutionOrderProvider != null && raceExecutionOrderProvider.getId() != null && !super.attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider.getId())) {
-            super.attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider.getId(), raceExecutionOrderProvider);
+        if (raceExecutionOrderProvider != null && !super.attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider)) {
+            super.attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider, raceExecutionOrderProvider);
         }
     }
 
     @Override
-    public void detachRaceExecutionOrderProvider(Serializable identifier) {
-        if (identifier != null) {
-            super.attachedRaceExecutionOrderProvider.remove(identifier);
+    public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+        if (raceExecutionOrderProvider != null) {
+            super.attachedRaceExecutionOrderProvider.remove(raceExecutionOrderProvider);
         }
     }
 
@@ -842,24 +844,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public TrackedRace getPreviousRaceFromAttachedRaceExecutionOrderProviders() {
-        if (attachedRaceExecutionOrderProvider != null && attachedRaceExecutionOrderProvider.values() != null) {
-            if (attachedRaceExecutionOrderProvider.values().isEmpty()) {
-                return null;
-            } else {
-                Iterator<RaceExecutionOrderProvider> raceExecutionOrderProviders = attachedRaceExecutionOrderProvider.values().iterator();
-                TrackedRace firstPreviousRaceInExecutionOrder = raceExecutionOrderProviders.next().getPreviousRaceInExecutionOrder(this);
-                while (raceExecutionOrderProviders.hasNext()) {
-                    RaceExecutionOrderProvider raceExecutionOrderProvider = raceExecutionOrderProviders.next();
-                    TrackedRace currentPreviousRaceInExecutionOrder = raceExecutionOrderProvider.getPreviousRaceInExecutionOrder(this);
-                    if (currentPreviousRaceInExecutionOrder == null || !currentPreviousRaceInExecutionOrder.equals(firstPreviousRaceInExecutionOrder)) {
-                        return null;
-                    }
-                }
-                return firstPreviousRaceInExecutionOrder;
-            }
+    public Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
+        final Set<TrackedRace> result;
+        if (attachedRaceExecutionOrderProvider != null) {
+            result = attachedRaceExecutionOrderProvider.values().stream().map(reop->reop.getPreviousRaceInExecutionOrder(this)).collect(HashSet::new, (r, e)->r.addAll(e), (r, e)->r.addAll(e));
+        } else {
+            result = Collections.emptySet();
         }
-        return null;
+        return result;
     }
     
 }

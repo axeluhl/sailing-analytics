@@ -3,13 +3,13 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
+import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -36,10 +36,6 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.util.SmartFutureCache;
-import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
-
-import difflib.PatchFailedException;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
@@ -306,94 +302,19 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return result;
     }
     
-    private class RaceExecutionOrderCache implements RaceExecutionOrderProvider, RaceColumnListenerWithDefaultAction {
-        private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
-        private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
-        private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
-        private static final long serialVersionUID = -1016823551825618490L;
+    private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
+        private static final long serialVersionUID = 652833386555762661L;
 
         public RaceExecutionOrderCache() {
-            racesOrderCache = createRacesOrderCache();
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+            super();
             addRaceColumnListener(this);
         }
 
-        public List<TrackedRace> getRacesInExecutionOrder() {
-            List<TrackedRace> result;
-            result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY,/*waitForLatest*/ true);
+        @Override
+        protected Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries() {
+            final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
+            result.put(FlexibleLeaderboardImpl.defaultFleet, getRaceColumns());
             return result;
-        }
-        
-        @Override
-        public void defaultAction() {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        private List<TrackedRace> reloadRacesInExecutionOrder() {
-            List<TrackedRace> raceIdListInExecutionOrder = new ArrayList<TrackedRace>();
-            if (getRaceColumns() != null) {
-                Iterator<? extends RaceColumn> raceColumns = getRaceColumns().iterator();
-                if (raceColumns != null) {
-                    while (raceColumns.hasNext()) {
-                        RaceColumn currentRaceColumn = raceColumns.next();
-                        if (currentRaceColumn.getFleets() != null) {
-                            Iterator<? extends Fleet> fleetsInRaceColumn = currentRaceColumn.getFleets().iterator();
-                            if (fleetsInRaceColumn != null) {
-                                while (fleetsInRaceColumn.hasNext()) {
-                                    TrackedRace trackedRaceInColumnForFleet = currentRaceColumn
-                                            .getTrackedRace(fleetsInRaceColumn.next());
-                                    if (trackedRaceInColumnForFleet != null) {
-                                        raceIdListInExecutionOrder.add(trackedRaceInColumnForFleet);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return raceIdListInExecutionOrder;
-        }
-
-        
-        
-        private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
-            ois.defaultReadObject();
-            racesOrderCache = createRacesOrderCache();
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-        
-        private SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> createRacesOrderCache() {
-            return new SmartFutureCache<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>(
-                    new SmartFutureCache.AbstractCacheUpdater<String, List<TrackedRace>, SmartFutureCache.EmptyUpdateInterval>() {
-
-                        @Override
-                        public List<TrackedRace> computeCacheUpdate(String key,
-                                EmptyUpdateInterval updateInterval) throws Exception {
-                            if (key.equals(RACES_ORDER_LIST_CACHE_KEY)) {
-                                return reloadRacesInExecutionOrder();
-                            } else {
-                                List<TrackedRace> emptyList = new ArrayList<TrackedRace>();
-                                return emptyList;
-                            }
-                        }
-                    }, RACES_ORDER_LIST_LOCKS_NAME);
-        }
-
-        @Override
-        public TrackedRace getPreviousRaceInExecutionOrder(TrackedRace race) {
-            List<TrackedRace> racesInOrder = getRacesInExecutionOrder();
-            if (racesInOrder != null) {
-                int indexOfRace = racesInOrder.indexOf(race);
-                if (indexOfRace != -1 && indexOfRace != 0) {
-                    return racesInOrder.get(indexOfRace - 1);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public Serializable getId() {
-            return serialVersionUID;
         }
     }
 }
