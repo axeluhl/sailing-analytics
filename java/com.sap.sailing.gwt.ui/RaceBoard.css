@@ -589,6 +589,7 @@ img.openColumn {
 }
 
 .RegattaRaceInformation-Header {
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	position: relative;
 	left: 140px;
 	top: 11px;
