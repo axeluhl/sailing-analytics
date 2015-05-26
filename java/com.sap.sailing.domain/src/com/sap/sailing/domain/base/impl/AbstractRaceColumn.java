@@ -15,7 +15,6 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
-import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
@@ -199,6 +198,4 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
         trackedRaces.setMasterDataExportOngoingThreadFlag(flagValue);
     }
-    
-    public abstract RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 }

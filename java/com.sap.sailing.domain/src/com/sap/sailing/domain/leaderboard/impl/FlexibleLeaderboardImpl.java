@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.impl.AbstractRaceColumnListener;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -306,8 +306,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return result;
     }
     
-    private class RaceExecutionOrderCache extends AbstractRaceColumnListener implements RaceExecutionOrderProvider {
-
+    private class RaceExecutionOrderCache implements RaceExecutionOrderProvider, RaceColumnListenerWithDefaultAction {
         private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
         private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
         private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
@@ -326,27 +325,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         }
         
         @Override
-        public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        public void defaultAction() {
             racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
         }
 

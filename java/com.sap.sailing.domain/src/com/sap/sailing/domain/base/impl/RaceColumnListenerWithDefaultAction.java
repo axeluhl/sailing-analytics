@@ -18,89 +18,84 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Alexander Ries (D062114)
  *
  */
-public abstract class AbstractRaceColumnListener implements RaceColumnListener {
-
-    private static final long serialVersionUID = -6210815580399401162L;
-
+public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener {
     /**
      * This implementation of the default action to which all other operations delegate does nothing. Subclasses can
      * choose to override this method to provide this as the default behavior for all other methods and then still
      * override individual {@link RaceColumnListener} methods, or they can leave the default action empty and just
      * override {@link RaceColumnListener} methods.
      */
-    protected void defaultAction() {
-        // Does nothing
-    }
+    void defaultAction();
     
     @Override
-    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+    default void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         defaultAction(); 
     }
 
     @Override
-    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+    default void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         defaultAction(); 
     }
 
     @Override
-    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+    default void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         defaultAction(); 
     }
 
     @Override
-    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+    default void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         defaultAction(); 
     }
 
     @Override
-    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
+    default void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
             boolean firstColumnIsNonDiscardableCarryForward) {
         defaultAction(); 
     }
 
     @Override
-    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+    default void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         defaultAction(); 
     }
 
     @Override
-    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+    default void raceColumnAddedToContainer(RaceColumn raceColumn) {
         defaultAction(); 
     }
 
     @Override
-    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+    default void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
         defaultAction(); 
     }
 
     @Override
-    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+    default void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         defaultAction(); 
     }
 
     @Override
-    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+    default void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         defaultAction(); 
     }
 
     @Override
-    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+    default void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         defaultAction(); 
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
+    default void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
             ResultDiscardingRule newDiscardingRule) {
         defaultAction(); 
     }
 
     @Override
-    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+    default void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         defaultAction(); 
     }
 
     @Override
-    public boolean isTransient() {
+    default boolean isTransient() {
         return false;
     }
 }

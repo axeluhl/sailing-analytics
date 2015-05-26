@@ -598,7 +598,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return raceExecutionOrderCache;
     }
     
-    private class RaceExecutionOrderCache extends AbstractRaceColumnListener implements RaceExecutionOrderProvider {
+    private class RaceExecutionOrderCache implements RaceExecutionOrderProvider, RaceColumnListenerWithDefaultAction {
 
         private static final long serialVersionUID = 4795731834688229568L;
         private transient SmartFutureCache<String, List<TrackedRace>, EmptyUpdateInterval> racesOrderCache;
@@ -611,37 +611,17 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             addRaceColumnListener(this);
         }
 
+        @Override
+        public void defaultAction() {
+            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
+        }
+
         public List<TrackedRace> getRacesInExecutionOrder() {
             List<TrackedRace> result;
             result = racesOrderCache.get(RACES_ORDER_LIST_CACHE_KEY,/*waitForLatest*/ true);
             return result;
         }
         
-        @Override
-        public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
-        @Override
-        public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-            racesOrderCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/*update interval*/ null);
-        }
-
         private List<TrackedRace> reloadRacesInExecutionOrder() {
             List<TrackedRace> raceIdListInExecutionOrder = new ArrayList<TrackedRace>();
             if (getSeries() != null) {
