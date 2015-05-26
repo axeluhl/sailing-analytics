@@ -1,16 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
-import java.util.ArrayList;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
-
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+
+import java.util.ArrayList;
 
 public class FlagsResources {
 
@@ -139,17 +137,12 @@ public class FlagsResources {
         return result;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static LayerDrawable getFlagDrawable(Context context, String flag, int size) {
         ArrayList<Integer> drawables = FlagsResources.getResId(context, flag, size);
         ArrayList<Drawable> layers = new ArrayList<>();
         for (Integer resId : drawables) {
             if (resId != 0) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    layers.add(context.getDrawable(resId));
-                } else {
-                    layers.add(context.getResources().getDrawable(resId));
-                }
+                layers.add(BitmapHelper.getDrawable(context, resId));
             }
         }
         return new LayerDrawable(layers.toArray(new Drawable[layers.size()]));

@@ -1,8 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import android.annotation.TargetApi;
 import android.app.Fragment;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -11,7 +9,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.R;
 
@@ -46,7 +43,6 @@ public class MainPreferenceFragment extends LoggableFragment implements OnClickL
         super.onPause();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onClick(View view) {
         if (view != null && view instanceof Button) {

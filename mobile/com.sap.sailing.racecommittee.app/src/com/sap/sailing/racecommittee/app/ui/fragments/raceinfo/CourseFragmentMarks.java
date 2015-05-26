@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
@@ -40,6 +39,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdap
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkLongClick;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -82,7 +82,6 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
         return fragment;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
@@ -103,11 +102,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
             mGuardManager.setEnabled(true);
 
             mDragDropManager = new RecyclerViewDragDropManager();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mDragDropManager.setDraggingItemShadowDrawable((NinePatchDrawable) getActivity().getDrawable(R.drawable.material_shadow_z3));
-            } else {
-                mDragDropManager.setDraggingItemShadowDrawable((NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z3));
-            }
+            NinePatchDrawable drawable = (NinePatchDrawable) BitmapHelper.getDrawable(getActivity(),R.drawable.material_shadow_z3);
+            mDragDropManager.setDraggingItemShadowDrawable(drawable);
 
             mSwipeManager = new RecyclerViewSwipeManager();
 

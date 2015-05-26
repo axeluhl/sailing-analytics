@@ -1,24 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.Collections;
-import java.util.List;
-
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+
+import java.util.Collections;
+import java.util.List;
 
 public class CourseNameAdapter extends BaseAdapter implements View.OnClickListener {
 
@@ -49,7 +46,6 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
         return position;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {

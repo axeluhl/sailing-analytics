@@ -1,16 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
@@ -42,8 +33,15 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorsWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class PositioningFragment extends BaseFragment
     implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents {
@@ -78,7 +76,6 @@ public class PositioningFragment extends BaseFragment
         return layout;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -94,13 +91,8 @@ public class PositioningFragment extends BaseFragment
                 mGuardManager.setEnabled(true);
 
                 mDragDropManager = new RecyclerViewDragDropManager();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mDragDropManager.setDraggingItemShadowDrawable(
-                        (NinePatchDrawable) getActivity().getDrawable(R.drawable.material_shadow_z3));
-                } else {
-                    mDragDropManager.setDraggingItemShadowDrawable(
-                        (NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z3));
-                }
+                NinePatchDrawable drawable = (NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z3);
+                mDragDropManager.setDraggingItemShadowDrawable(drawable);
 
                 mSwipeManager = new RecyclerViewSwipeManager();
 

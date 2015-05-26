@@ -1,11 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -13,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -132,7 +129,6 @@ public class SetupPanelFragment extends BasePanelFragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void refreshPanel() {
         if (mCourseValue != null) {
             mCourseValue.setText(null);

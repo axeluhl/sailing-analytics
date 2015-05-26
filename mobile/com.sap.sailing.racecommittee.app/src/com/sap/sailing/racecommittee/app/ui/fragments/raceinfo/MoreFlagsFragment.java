@@ -1,8 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +15,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -104,7 +103,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             return fragment;
         }
 
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = inflater.inflate(R.layout.race_finish_config, container, false);
@@ -141,12 +139,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 ImageView flag = ViewHolder.get(layout, R.id.header_flag);
                 if (flag != null) {
                     int resId = R.drawable.flag_blue_48dp;
-                    Drawable drawable;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        drawable = getResources().getDrawable(resId, null);
-                    } else {
-                        drawable = getResources().getDrawable(resId);
-                    }
+                    Drawable drawable = BitmapHelper.getDrawable(getActivity(), resId);
                     flag.setImageDrawable(drawable);
                 }
 

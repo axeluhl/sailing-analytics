@@ -1,11 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.ArrayList;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +10,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+
+import java.util.ArrayList;
 
 public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
@@ -82,7 +79,6 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         return position;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -98,11 +94,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             flagImage.setVisibility(View.INVISIBLE);
             int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
             if (flagResId != 0) {
-                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    flagDrawable = mContext.getDrawable(flagResId);
-                } else {
-                    flagDrawable = mContext.getResources().getDrawable(flagResId);
-                }
+                flagDrawable = BitmapHelper.getDrawable(mContext, flagResId);
             } else {
                 flagDrawable = BitmapHelper.getAttrDrawable(mContext, item.file_name);
             }
