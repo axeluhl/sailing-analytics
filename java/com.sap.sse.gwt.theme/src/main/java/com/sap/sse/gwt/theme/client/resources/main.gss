@@ -44,7 +44,7 @@ h2 {
   font-size: 1.466666666666667em;
   font-weight: bold;
   color: #008fcc;
-  margin-top: 0.7em;
+  margin-top: 0;
   margin-bottom: 0.7em;
 }
 h3 {
@@ -128,6 +128,14 @@ figcaption {
   background-color: #d79900;
   outline: none;
   text-decoration: none;
+}
+.buttontextonly {
+  color: #333;
+  background: none;
+  -webkit-transition: none;
+     -moz-transition: none;
+          transition: none;
+  font-weight: normal;
 }
 .buttonsmall {
   visibility: inherit;
@@ -338,8 +346,7 @@ figcaption {
           transform: translate(-50%, -50%);
 }
 .mainsection {
-  padding-top: 5.333333333333333em;
-  padding-bottom: 5.333333333333333em;
+  padding: 5.333333333333333em 0;
 }
 .mainsection_header {
   text-align: center;
@@ -399,6 +406,28 @@ figcaption {
   right: 1.333333333333333em;
   cursor: pointer;
   z-index: 2;
+}
+.spacer {
+  width: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+.spacersmall {
+  height: 1em;
+}
+.spacermediumsmall {
+  height: 1.333333333333333em;
+}
+.spacermedium {
+  height: 2em;
+}
+.spacermediumbig {
+  height: 4em;
+}
+.spacerbig {
+  height: 5.333333333333333em;
 }
 .stickyheader {
   background: inherit;
