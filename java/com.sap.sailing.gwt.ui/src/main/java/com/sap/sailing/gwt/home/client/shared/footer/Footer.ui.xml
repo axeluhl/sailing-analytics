@@ -6,6 +6,9 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.footer.FooterResources" />
   <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.client.app.PlaceNavigation" />
   <ui:style gss="true">
+    .languageSelect::-ms-expand {
+      display: none;
+    }
     .languageSelect {
       -webkit-appearance: none;
       -moz-appearance: none;
