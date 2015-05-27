@@ -168,7 +168,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
     @Override
     public Iterable<? extends TrackedRace> getTrackedRaces() {
-        if (trackedRacesLock.getReadHoldCount() <= 0) {
+        if (trackedRacesLock.getReadHoldCount() <= 0 && trackedRacesLock.getWriteHoldCount() <= 0) {
             throw new IllegalStateException("Callers of TrackedRegatta.getTrackedRaces() must hold the read lock; see TrackedRegatta.lockTrackedRacesForRead()");
         }
         return trackedRaces.values();
