@@ -103,6 +103,14 @@ public class AbstractMediaDTO implements Serializable, Comparable<AbstractMediaD
         this.createdAtDate = createdAtDate;
     }
 
+    public String getCopyright() {
+        return copyright;
+    }
+
+    public void setCopyright(String copyright) {
+        this.copyright = copyright;
+    }
+
     @Override
     public int compareTo(AbstractMediaDTO o) {
         return createdAtDate.compareTo(o.createdAtDate);
