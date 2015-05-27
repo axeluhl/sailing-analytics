@@ -16,8 +16,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
-import difflib.PatchFailedException;
-
 public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutionOrderProvider, RaceColumnListenerWithDefaultAction {
     private static final long serialVersionUID = 4795731834688229568L;
     private transient SmartFutureCache<String, Map<TrackedRace, Set<TrackedRace>>, EmptyUpdateInterval> raceOrderCacheMappingRaceToItsPredecessor;
@@ -26,11 +24,16 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     public AbstractRaceExecutionOrderProvider() {
         raceOrderCacheMappingRaceToItsPredecessor = createRacesOrderCache();
-        raceOrderCacheMappingRaceToItsPredecessor.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, /* update interval */null);
+        triggerUpdate();
     }
 
     @Override
     public void defaultAction() {
+        triggerUpdate();
+    }
+
+    @Override
+    public void triggerUpdate() {
         raceOrderCacheMappingRaceToItsPredecessor.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, /* update interval */null);
     }
 
@@ -59,7 +62,9 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
                     predecessors = new HashSet<>();
                     raceIdListInExecutionOrder.put(trackedRaceInColumnForFleet, predecessors);
                 }
-                predecessors.add(predecessor);
+                if (predecessor != null) {
+                    predecessors.add(predecessor);
+                }
                 predecessor = trackedRaceInColumnForFleet;
             }
         }
@@ -80,11 +85,13 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
                     }
                 }, RACES_ORDER_LIST_LOCKS_NAME);
     }
-
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        raceOrderCacheMappingRaceToItsPredecessor = createRacesOrderCache();
-        raceOrderCacheMappingRaceToItsPredecessor.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY,/* update interval */null);
+        this.raceOrderCacheMappingRaceToItsPredecessor = createRacesOrderCache();
+        // don't call triggerUpdate() as of now because the cache's owner may not yet be fully initialized,
+        // so the getRaceColumnsOfSeries() method may not yet be able to do its work. The owner must call
+        // triggerUpdate when fully initialized.
     }
 
     @Override

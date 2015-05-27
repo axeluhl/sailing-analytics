@@ -681,8 +681,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     private Duration getConditionalTimeBeforeStartToTrackWind(){
-        Set<TrackedRace> previosRaceInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
-        if (previosRaceInExecutionOrder == null || !previosRaceInExecutionOrder.stream().filter(tr->tr.getEndOfTracking() != null).findAny().isPresent()) {
+        Set<TrackedRace> previosRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
+        if (previosRacesInExecutionOrder == null || !previosRacesInExecutionOrder.stream().filter(tr->tr.getEndOfTracking() != null).findAny().isPresent()) {
             return EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
         } else {
             return TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;

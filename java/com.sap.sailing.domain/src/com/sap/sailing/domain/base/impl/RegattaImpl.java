@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -207,6 +208,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         } else {
             raceLogStore = EmptyRaceLogStore.INSTANCE;
         }
+    }
+    
+    protected Object readResolve() throws ObjectStreamException {
+        raceExecutionOrderCache.triggerUpdate(); // now we're fully initialized and the cache can do its job
+        return this;
     }
     
     /**

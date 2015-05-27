@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,7 +80,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
         this.name = name;
-        this.races = new ArrayList<FlexibleRaceColumn>();
+        this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
@@ -98,6 +99,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         for (RaceColumn column : getRaceColumns()) {
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
         }
+    }
+    
+    protected Object readResolve() throws ObjectStreamException {
+        raceExecutionOrderProvider.triggerUpdate();
+        return this;
     }
 
     @Override

@@ -16,4 +16,12 @@ public interface RaceExecutionOrderProvider {
      * by this method must all have been finished before <code>race</code> can start.
      */
     Set<TrackedRace> getPreviousRaceInExecutionOrder(TrackedRace race);
+
+    /**
+     * When the owner of this cache-like provider has initialized all its structures that this cache requires
+     * it shall call this method. This applies in particular after de-serializing the owner because during de-serialization,
+     * even during the <code>readObject</code> method, the owner's fields may not all be initialized. The
+     * <code>readResolve()</code> method is usually a good place to do so.
+     */
+    void triggerUpdate();
 }
