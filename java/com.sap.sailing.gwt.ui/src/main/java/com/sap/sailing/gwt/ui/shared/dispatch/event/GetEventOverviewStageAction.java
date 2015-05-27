@@ -139,7 +139,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         stage.addNews(lbEntryWithExternalLink);
         
         CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null);
-        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R7", "R7 - Gold", BoatClassMasterdata.PIRAT.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
-        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R6", "R6 - Gold", BoatClassMasterdata.PIRAT.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
+        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R7", "R7 - Gold", BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
+        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R6", "R6 - Gold", BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
     }
 }
