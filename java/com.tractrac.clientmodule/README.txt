@@ -44,10 +44,37 @@ Build number: 10715
    
  - It is possible to add two or more subscriptions for the same subscriber (Reported by Jorge Piera, 02/05/2015)
  
- - If a race is in a not initialized state and it is loaded using the parameters file, the library assumes that 
- the consumer application wants to load the race and it changes its initialized attribute to true. This assumption 
- is  wrong. Now, if a race is not initialized it will continue being uninitialized until the event administrator 
- changes its state to initialized (Reported by Axel Uhl, 17/05/2015)
+ - An initialized race is a race where the tracking is on. A not 
+initialized race is a race where the tracking is off. If a race is in a 
+not initialized state and it is loaded using the parameters file, the 
+library assumes that the consumer application wants to load the race and 
+it changes its initialized  attribute to true (the tracking is on). This 
+assumption is wrong. Now, if a race is not initialized it will continue 
+being uninitialized until the event administrator changes its state to 
+initialized.
+    When a race changes its state from not initialized to initialized, 
+some events are thrown in the system:
+       1. 
+IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, 
+IStartStopData): where the IStartStopData object contains the new 
+tracking interval.
+       2. IRacesListener.startTracking(UUID): the UUID is the race 
+identifier
+       3. IRacesListener.updateRace(IRace): IRace is the new updated 
+race where the IRace.isInitialized is true and it has values for both 
+the getTrackingStartTime and the getTrackingEndTime methods.
+    When a race changes its state from initialized to not initialized, 
+the following events are thrown in the system:
+       1. 
+IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, 
+IStartStopData): where the IStartStopData object contains the null 
+interval ([0, 0])
+       2. IRacesListener.abandonRace(UUID): the UUID is the race identifier
+       3. IRacesListener.updateRace(IRace): IRace is the new updated 
+race where the IRace.isInitialized is false and it has null values for 
+both the getTrackingStartTime and the getTrackingEndTime methods.
+   (Reported by Axel Uhl, 17/05/2015)
+
  
 ********************************************
 ************* TracAPI 3.0.10 ***************

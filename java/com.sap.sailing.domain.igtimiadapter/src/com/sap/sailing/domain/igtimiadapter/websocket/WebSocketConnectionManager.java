@@ -152,6 +152,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         listeners.put(listener, listener);
     }
 
+    @Override
+    public void removeListener(BulkFixReceiver listener) {
+        listeners.remove(listener);
+    }
+
     private void notifyListeners(List<Fix> fixes) {
         for (BulkFixReceiver listener : listeners.keySet()) {
             try {
