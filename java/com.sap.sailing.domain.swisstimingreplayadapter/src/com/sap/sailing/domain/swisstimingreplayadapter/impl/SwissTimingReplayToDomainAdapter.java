@@ -53,6 +53,7 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
@@ -294,9 +295,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             Course course = race.getCourse();
             try {
                 // TODO: Does SwissTiming also deliver the passing side for course marks?
-                List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
+                List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<>();
                 for (ControlPoint cp : currentCourseDefinition) {
-                    courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
+                    courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, PassingInstruction.None));
                 }
                 course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
             } catch (PatchFailedException e) {
