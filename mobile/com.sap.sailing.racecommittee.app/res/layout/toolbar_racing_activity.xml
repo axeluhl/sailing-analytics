@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         app:theme="@style/ToolBarRacingStyle"
-        app:popupTheme="@style/Theme.AppCompat.Light">
+        app:popupTheme="@style/Theme.AppCompat.Light"
+        app:titleTextAppearance="@style/RacingToolBarTitle">
 
         <LinearLayout
             android:layout_width="wrap_content"
