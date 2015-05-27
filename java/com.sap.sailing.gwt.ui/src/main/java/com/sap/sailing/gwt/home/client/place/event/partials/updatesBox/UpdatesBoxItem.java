@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -88,7 +89,13 @@ public class UpdatesBoxItem extends Widget {
                 }
             });
         } else {
-            link.removeClassName(UpdatesBoxResources.INSTANCE.css().updatesbox_itemlink());
+            link.removeFromParent();
+            while(link.hasChildNodes()) {
+                Node firstChild = link.getChild(0);
+                firstChild.removeFromParent();
+                getElement().appendChild(firstChild);
+            }
+            addStyleName(UpdatesBoxResources.INSTANCE.css().updatesbox_item());
         }
     }
 
