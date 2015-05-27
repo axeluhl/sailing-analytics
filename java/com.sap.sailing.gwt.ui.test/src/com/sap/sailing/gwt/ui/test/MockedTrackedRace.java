@@ -485,6 +485,22 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     boolean useMarkPassingCalculator) {
                 return null;
             }
+
+            @Override
+            public void lockTrackedRacesForRead() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterRead() {
+            }
+
+            @Override
+            public void lockTrackedRacesForWrite() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterWrite() {
+            }
         };
     }
 

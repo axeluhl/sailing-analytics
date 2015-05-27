@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -26,6 +27,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 public class TrackedRegattaImpl implements TrackedRegatta {
     private static final long serialVersionUID = 6480508193567014285L;
@@ -33,12 +37,24 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private static final Logger logger = Logger.getLogger(TrackedRegattaImpl.class.getName());
     
     private final Regatta regatta;
+    
+    /**
+     * Guards access to {@link #trackedRaces}. Callers of {@link #getTrackedRaces()} need to acquire the
+     * read lock before iterating.
+     */
+    private final NamedReentrantReadWriteLock trackedRacesLock;
+    
+    /**
+     * Guarded by {@link #trackedRacesLock}
+     */
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
+    
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
     private transient Set<RaceListener> raceListeners;
 
     public TrackedRegattaImpl(Regatta regatta) {
         super();
+        trackedRacesLock = new NamedReentrantReadWriteLock("trackeRaces lock for tracked regatta "+regatta.getName(), /* fair */ false);
         this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
@@ -49,10 +65,33 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         ois.defaultReadObject();
         this.raceListeners = new HashSet<RaceListener>();
     }
+    
+    @Override
+    public void lockTrackedRacesForRead() {
+        LockUtil.lockForRead(trackedRacesLock);
+    }
+
+    @Override
+    public void unlockTrackedRacesAfterRead() {
+        LockUtil.unlockAfterRead(trackedRacesLock);
+    }
+
+    @Override
+    public void lockTrackedRacesForWrite() {
+        LockUtil.lockForWrite(trackedRacesLock);
+    }
+
+    @Override
+    public void unlockTrackedRacesAfterWrite() {
+        LockUtil.unlockAfterWrite(trackedRacesLock);
+    }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        synchronized (trackedRaces) {
+        lockTrackedRacesForRead();
+        try {
             oos.defaultWriteObject();
+        } finally {
+            unlockTrackedRacesAfterRead();
         }
     }
     /**
@@ -68,10 +107,12 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
-        synchronized (trackedRaces) {
+        final TrackedRace oldTrackedRace;
+        LockUtil.lockForWrite(trackedRacesLock);
+        try {
             logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
                     " with regatta hash code "+getRegatta().hashCode());
-            TrackedRace oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
+            oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
             if (oldTrackedRace != trackedRace) {
                 Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
                 if (coll == null) {
@@ -79,24 +120,31 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                     trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
                 }
                 coll.add(trackedRace);
-                for (RaceListener listener : raceListeners) {
-                    listener.raceAdded(trackedRace);
-                }
-                trackedRaces.notifyAll();
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(trackedRacesLock);
+        }
+        if (oldTrackedRace != trackedRace) {
+            for (RaceListener listener : raceListeners) {
+                listener.raceAdded(trackedRace);
             }
         }
     }
     
     @Override
     public void removeTrackedRace(RaceDefinition raceDefinition) {
-        synchronized (trackedRaces) {
+        LockUtil.lockForWrite(trackedRacesLock);
+        try {
             trackedRaces.remove(raceDefinition);
+        } finally {
+            LockUtil.unlockAfterWrite(trackedRacesLock);
         }
     }
     
     @Override
     public void removeTrackedRace(TrackedRace trackedRace) {
-        synchronized (trackedRaces) {
+        LockUtil.lockForWrite(trackedRacesLock);
+        try {
             trackedRaces.remove(trackedRace.getRace());
             Collection<TrackedRace> trbbc = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
             if (trbbc != null) {
@@ -108,7 +156,8 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             for (RaceListener listener : raceListeners) {
                 listener.raceRemoved(trackedRace);
             }
-            trackedRaces.notifyAll();
+        } finally {
+            LockUtil.unlockAfterWrite(trackedRacesLock);
         }
     }
 
@@ -119,6 +168,9 @@ public class TrackedRegattaImpl implements TrackedRegatta {
 
     @Override
     public Iterable<? extends TrackedRace> getTrackedRaces() {
+        if (trackedRacesLock.getReadHoldCount() <= 0) {
+            throw new IllegalStateException("Callers of TrackedRegatta.getTrackedRaces() must hold the read lock; see TrackedRegatta.lockTrackedRacesForRead()");
+        }
         return trackedRaces.values();
     }
 
@@ -130,7 +182,8 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     @Override
     public TrackedRace getTrackedRace(RaceDefinition race) {
         boolean interrupted = false;
-        synchronized (trackedRaces) {
+        lockTrackedRacesForRead();
+        try {
             TrackedRace result = trackedRaces.get(race);
             while (!interrupted && result == null) {
                 try {
@@ -141,31 +194,48 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                 }
             }
             return result;
+        } finally {
+            unlockTrackedRacesAfterRead();
         }
     }
     
     @Override
     public TrackedRace getExistingTrackedRace(RaceDefinition race) {
-        return trackedRaces.get(race);
+        lockTrackedRacesForRead();
+        try {
+            return trackedRaces.get(race);
+        } finally {
+            unlockTrackedRacesAfterRead();
+        }
     }
 
     @Override
     public void addRaceListener(RaceListener listener) {
-        raceListeners.add(listener);
-        synchronized (trackedRaces) {
-            for (TrackedRace trackedRace : getTrackedRaces()) {
-                listener.raceAdded(trackedRace);
-            }
+        final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
+        lockTrackedRacesForRead();
+        try {
+            raceListeners.add(listener);
+            Util.addAll(getTrackedRaces(), trackedRacesCopy);
+        } finally {
+            unlockTrackedRacesAfterRead();
+        }
+        for (TrackedRace trackedRace : trackedRacesCopy) {
+            listener.raceAdded(trackedRace);
         }
     }
 
     @Override
     public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = 0;
-        for (TrackedRace trackedRace : getTrackedRaces()) {
-            result += trackedRace.getRank(competitor, timePoint);
+        lockTrackedRacesForRead();
+        try {
+            for (TrackedRace trackedRace : getTrackedRaces()) {
+                result += trackedRace.getRank(competitor, timePoint);
+            }
+            return result;
+        } finally {
+            unlockTrackedRacesAfterRead();
         }
-        return result;
     }
 
     @Override

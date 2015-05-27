@@ -1891,11 +1891,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.setEndDate(endDate);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
-            if (getTrackedRegatta(regatta) != null) {
-                for (DynamicTrackedRace trackedRace : getTrackedRegatta(regatta).getTrackedRaces()) {
-                    // the start times of the regatta's tracked races now have to be re-evaluated the next time they are
-                    // queried
-                    trackedRace.invalidateStartTime();
+            final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
+                    for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                        // the start times of the regatta's tracked races now have to be re-evaluated the next time they
+                        // are queried
+                        trackedRace.invalidateStartTime();
+                    }
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
                 }
             }
         }
@@ -1921,10 +1927,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
         if (trackedRace != null) {
             TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            final boolean isTrackedRacesEmpty;
             if (trackedRegatta != null) {
-                trackedRegatta.removeTrackedRace(trackedRace);
+                trackedRegatta.lockTrackedRacesForWrite();
+                try {
+                    trackedRegatta.removeTrackedRace(trackedRace);
+                    isTrackedRacesEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterWrite();
+                }
+            } else {
+                isTrackedRacesEmpty = false;
             }
-            if (Util.isEmpty(trackedRegatta.getTrackedRaces())) {
+            if (isTrackedRacesEmpty) {
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
@@ -3142,10 +3157,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Regatta regatta : allRegattas) {
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
-                Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-                for (TrackedRace trackedRace : trackedRaces) {
-                    trackedRace.setPolarDataService(service);
-                    service.insertExistingFixes(trackedRace);
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
+                    Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                    for (TrackedRace trackedRace : trackedRaces) {
+                        trackedRace.setPolarDataService(service);
+                        service.insertExistingFixes(trackedRace);
+                    }
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
                 }
             }
         }
