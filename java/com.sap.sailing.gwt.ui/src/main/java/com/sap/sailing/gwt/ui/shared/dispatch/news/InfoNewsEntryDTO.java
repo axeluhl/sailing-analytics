@@ -23,7 +23,7 @@ public class InfoNewsEntryDTO extends NewsEntryDTO {
     }
 
     @Override
-    public String getSubtitle() {
+    public String getMessage() {
         return subtitle;
     }
 

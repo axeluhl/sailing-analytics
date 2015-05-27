@@ -2,19 +2,26 @@ package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
 import java.util.Date;
 
-public abstract class AbstractLeaderboardNewsEntryDTO extends NewsEntryDTO {
+public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
+    
+    public enum Type {
+        NEW_RESULTS
+    }
 
     private String leaderboardName;
     private String leaderboardDisplayName;
     private String boatClassName;
     private String externalURL;
+    private Type type;
 
     @SuppressWarnings("unused")
-    private AbstractLeaderboardNewsEntryDTO() {
+    private LeaderboardNewsEntryDTO() {
     }
 
-    public AbstractLeaderboardNewsEntryDTO(String leaderboardName, String leaderboardDisplayName, String boatClassName, Date timestamp) {
+    public LeaderboardNewsEntryDTO(String leaderboardName, String leaderboardDisplayName, String boatClassName, Date timestamp, Type type) {
         super(timestamp);
+        this.boatClassName = boatClassName;
+        this.type = type;
         this.setLeaderboardName(leaderboardName);
         this.leaderboardDisplayName = leaderboardDisplayName;
     }
@@ -27,6 +34,15 @@ public abstract class AbstractLeaderboardNewsEntryDTO extends NewsEntryDTO {
     @Override
     public String getBoatClass() {
         return boatClassName;
+    }
+    
+    @Override
+    public String getMessage() {
+        switch (type) {
+        case NEW_RESULTS:
+            return "New results are available";
+        }
+        return "";
     }
 
     public String getExternalURL() {

@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractLeaderboardNewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 
@@ -40,7 +40,7 @@ public class UpdatesBoxItem extends Widget {
         setElement(uiBinder.createAndBindUi(this));
         
         titleUi.setInnerText(entry.getTitle());
-        messageUi.setInnerText(entry.getSubtitle());
+        messageUi.setInnerText(entry.getMessage());
         
         String boatClass = entry.getBoatClass();
         if(boatClass != null && !boatClass.isEmpty()) {
@@ -62,9 +62,9 @@ public class UpdatesBoxItem extends Widget {
         
         String directLink = null;
         PlaceNavigation<?> placeNavigation = null;
-        if(entry instanceof AbstractLeaderboardNewsEntryDTO) {
-            directLink = ((AbstractLeaderboardNewsEntryDTO) entry).getExternalURL();
-            placeNavigation = presenter.getRegattaNavigation(((AbstractLeaderboardNewsEntryDTO) entry).getLeaderboardName());
+        if(entry instanceof LeaderboardNewsEntryDTO) {
+            directLink = ((LeaderboardNewsEntryDTO) entry).getExternalURL();
+            placeNavigation = presenter.getRegattaNavigation(((LeaderboardNewsEntryDTO) entry).getLeaderboardName());
         } else if(entry instanceof AbstractRaceNewsEntryDTO) {
             AbstractRaceNewsEntryDTO raceEntry = (AbstractRaceNewsEntryDTO) entry;
             if(raceEntry.getTrackedRaceName() != null) {

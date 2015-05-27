@@ -17,7 +17,7 @@ public abstract class NewsEntryDTO implements DTO {
 
     public abstract String getTitle();
 
-    public abstract String getSubtitle();
+    public abstract String getMessage();
     
     public abstract String getBoatClass();
     

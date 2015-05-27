@@ -6,11 +6,15 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.InfoNewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.RaceCompetitorNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sse.common.Util;
@@ -128,5 +132,14 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     @GwtIncompatible
     private void addNews(EventOverviewStageDTO stage) {
         stage.addNews(new InfoNewsEntryDTO("Abendbespaßung", "Es gibt Freibier und Wurst!!!", new Date()));
+        stage.addNews(new LeaderboardNewsEntryDTO("Test LB", "505 m", BoatClassMasterdata._5O5.getDisplayName(), new Date(new Date().getTime() - 120000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS));
+        
+        LeaderboardNewsEntryDTO lbEntryWithExternalLink = new LeaderboardNewsEntryDTO("Test LB", "Some Regatta", BoatClassMasterdata.LASER_RADIAL.getDisplayName(), new Date(new Date().getTime() - 270000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS);
+        lbEntryWithExternalLink.setExternalURL("http://www.sap.com/");
+        stage.addNews(lbEntryWithExternalLink);
+        
+        CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null);
+        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R7", "R7 - Gold", BoatClassMasterdata.PIRAT.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
+        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R6", "R6 - Gold", BoatClassMasterdata.PIRAT.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
     }
 }
