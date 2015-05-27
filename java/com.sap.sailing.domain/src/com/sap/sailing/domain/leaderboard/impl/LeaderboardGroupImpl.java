@@ -13,12 +13,25 @@ import com.sap.sailing.domain.base.impl.LeaderboardGroupBaseImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements LeaderboardGroup {
     
     private static final long serialVersionUID = 2035927369446736934L;
     private boolean displayGroupsInReverseOrder;
+    
+    /**
+     * The lock that guards access to the {@link #leaderboards} list.
+     */
+    private final NamedReentrantReadWriteLock leaderboardsLock;
+    
+    /**
+     * The list of leaderboards grouped in this leaderboard group. Access to this list is guarded by
+     * {@link #leaderboardsLock}. All access has to acquire the corresponding read or write lock.
+     */
     private final List<Leaderboard> leaderboards;
+    
     private final Set<LeaderboardGroupListener> listeners;
     
     /**
@@ -36,8 +49,13 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
         this(UUID.randomUUID(), name, description, displayName, displayGroupsInReverseOrder, leaderboards);
     }
     
-    private synchronized void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.defaultWriteObject();
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        LockUtil.lockForRead(leaderboardsLock);
+        try {
+            oos.defaultWriteObject();
+        } finally {
+            LockUtil.unlockAfterRead(leaderboardsLock);
+        }
     }
 
     /**
@@ -46,9 +64,10 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     public LeaderboardGroupImpl(UUID id, String name, String description, String displayName,
             boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
         super(id, name, description, displayName);
+        this.leaderboardsLock = new NamedReentrantReadWriteLock("leaderboards lock fo rleaderboard group "+name, /* fair */ false);
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
-        this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
-        this.listeners = new HashSet<LeaderboardGroupListener>();
+        this.leaderboards = new ArrayList<>(leaderboards);
+        this.listeners = new HashSet<>();
     }
     
     @Override
@@ -99,24 +118,42 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     }
 
     @Override
-    public synchronized Iterable<Leaderboard> getLeaderboards() {
-        return new ArrayList<Leaderboard>(leaderboards);
+    public Iterable<Leaderboard> getLeaderboards() {
+        LockUtil.lockForRead(leaderboardsLock);
+        try {
+            return new ArrayList<Leaderboard>(leaderboards);
+        } finally {
+            LockUtil.unlockAfterRead(leaderboardsLock);
+        }
     }
 
     @Override
-    public synchronized int getIndexOf(Leaderboard leaderboard) {
-        return leaderboards.indexOf(leaderboard);
+    public int getIndexOf(Leaderboard leaderboard) {
+        LockUtil.lockForRead(leaderboardsLock);
+        try {
+            return leaderboards.indexOf(leaderboard);
+        } finally {
+            LockUtil.unlockAfterRead(leaderboardsLock);
+        }
     }
 
     @Override
     public void addLeaderboard(Leaderboard leaderboard) {
-        addLeaderboardAt(leaderboard, leaderboards.size());
+        LockUtil.lockForWrite(leaderboardsLock);
+        try {
+            addLeaderboardAt(leaderboard, leaderboards.size());
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsLock);
+        }
     }
     
     @Override
     public void addLeaderboardAt(Leaderboard leaderboard, int index) {
-        synchronized (this) {
+        LockUtil.lockForWrite(leaderboardsLock);
+        try {
             leaderboards.add(index, leaderboard);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsLock);
         }
         notifyLeaderboardGroupListenersAboutLeaderboardAdded(leaderboard);
     }
@@ -130,8 +167,11 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
 
     @Override
     public void removeLeaderboard(Leaderboard leaderboard) {
-        synchronized (this) {
+        LockUtil.lockForWrite(leaderboardsLock);
+        try {
             leaderboards.remove(leaderboard);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsLock);
         }
         notifyLeaderboardGroupListenersAboutLeaderboardRemoved(leaderboard);
     }
