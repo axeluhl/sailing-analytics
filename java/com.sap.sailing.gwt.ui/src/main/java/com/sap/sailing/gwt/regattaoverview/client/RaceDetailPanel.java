@@ -102,9 +102,9 @@ public class RaceDetailPanel extends SimplePanel {
 
         Grid managementGrid = new Grid(3, 3);
         managementGrid.setCellSpacing(cellSpacing);
-        managementGrid.setWidget(0, 0, new Label("Last update at"));
-        managementGrid.setWidget(1, 0, new Label("Vessel position"));
-        managementGrid.setWidget(2, 0, new Label("Last wind"));
+        managementGrid.setWidget(0, 0, new Label(stringMessages.lastUpdate()));
+        managementGrid.setWidget(1, 0, new Label(stringMessages.position()));
+        managementGrid.setWidget(2, 0, new Label(stringMessages.wind()));
         managementGrid.setWidget(0, 1, updateTimeLabel);
         managementGrid.setWidget(1, 1, vesselPositionLabel);
         managementGrid.setWidget(2, 1, windLabel);
@@ -193,7 +193,7 @@ public class RaceDetailPanel extends SimplePanel {
                                 + getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.getLngDeg()) + " ")
                         .getHTML();
             }
-            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindBearingDeg) + "&deg; "
+            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindFromDeg) + "&deg; "
                     + decimalFormat.format(data.raceInfo.lastWind.trueWindSpeedInKnots) + "knts").getHTML();
         }
         vesselPositionLabel.setText(vesselPositionText);
