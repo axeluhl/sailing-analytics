@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -9,6 +10,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.InfoNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sse.common.Util;
@@ -40,7 +42,9 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         }
         
         // TODO get correct message
-        return new ResultWithTTL<>(ttl, new EventOverviewStageDTO(null, getStageContent(context, event, state, now)));
+        EventOverviewStageDTO stage = new EventOverviewStageDTO("foo", getStageContent(context, event, state, now));
+        addNews(stage);
+        return new ResultWithTTL<>(ttl, stage);
     }
 
     @GwtIncompatible
@@ -119,5 +123,10 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //        }
 //        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
+    }
+
+    @GwtIncompatible
+    private void addNews(EventOverviewStageDTO stage) {
+        stage.addNews(new InfoNewsEntryDTO("Abendbespaßung", "Es gibt Freibier und Wurst!!!", new Date()));
     }
 }

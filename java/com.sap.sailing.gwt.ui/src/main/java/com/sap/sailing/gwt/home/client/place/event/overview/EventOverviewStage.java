@@ -1,20 +1,28 @@
 package com.sap.sailing.gwt.home.client.place.event.overview;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.client.place.event.partials.message.Message;
+import com.sap.sailing.gwt.home.client.place.event.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.client.place.event.partials.video.Video;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class EventOverviewStage extends Composite implements RefreshableWidget<EventOverviewStageDTO> {
     
@@ -23,8 +31,12 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     interface StageUiBinder extends UiBinder<Widget, EventOverviewStage> {
     }
     
+    private final MediaCss mediaCss = SharedResources.INSTANCE.mediaCss();
+    
     @UiField SimplePanel stage;
     @UiField Message message;
+    @UiField DivElement updatesWrapperUi;
+    @UiField(provided = true) UpdatesBox updatesUi;
     
     private Widget lastContent;
 
@@ -32,7 +44,11 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     
     public EventOverviewStage(EventView.Presenter presenter) {
         this.presenter = presenter;
+        
+        updatesUi = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
+        
+        updatesWrapperUi.getStyle().setDisplay(Display.NONE);
     }
 
     @Override
@@ -54,6 +70,18 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
             lastContent = null;
         }
         stage.setWidget(lastContent);
+        
+        List<NewsEntryDTO> news = stageData.getNews();
+        if(news.isEmpty()) {
+            updatesWrapperUi.getStyle().setDisplay(Display.NONE);
+            stage.removeStyleName(mediaCss.medium7());
+            stage.removeStyleName(mediaCss.large8());
+        } else {
+            updatesWrapperUi.getStyle().clearDisplay();
+            updatesUi.setData(news);
+            stage.addStyleName(mediaCss.medium7());
+            stage.addStyleName(mediaCss.large8());
+        }
     }
 
 }

@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class EventOverviewStageDTO implements DTO {
 
     private String eventMessage;
     private EventOverviewStageContentDTO stageContent;
 
-    // TODO news
+    private List<NewsEntryDTO> news = new ArrayList<>();
 
     @SuppressWarnings("unused")
     private EventOverviewStageDTO() {
@@ -25,5 +29,13 @@ public class EventOverviewStageDTO implements DTO {
     
     public EventOverviewStageContentDTO getStageContent() {
         return stageContent;
+    }
+    
+    public List<NewsEntryDTO> getNews() {
+        return news;
+    }
+    
+    public void addNews(NewsEntryDTO newsEntry) {
+        news.add(newsEntry);
     }
 }
