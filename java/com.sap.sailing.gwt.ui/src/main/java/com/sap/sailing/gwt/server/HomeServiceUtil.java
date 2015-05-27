@@ -315,6 +315,9 @@ public final class HomeServiceUtil {
         boolean first = true;
         for (Iterator<URL> iter = imageURLs.iterator(); iter.hasNext();  ) {
             URL imageUrl = iter.next();
+            if(imageUrl.toString().toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+                continue;
+            }
             if ((first && !iter.hasNext()) || !Util.equalsWithNull(imageUrl, stageImageURL)) {
                 result.add(imageUrl);
             }
