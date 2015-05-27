@@ -17,6 +17,39 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.11 ***************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features. 
+These features add methods to the API, but they keep the backward compatibility. 
+This version provides a new JavaDoc version.
+
+Release date: 27/05/2015
+Build number: 10715
+
+ 1) Features 
+ 
+ - Adding the method IRace.setInitialized(boolean) that allows to load control point positions despite of
+ the race is not initialized (Requested by Jorge Piera, 17/05/2015)
+ 
+ 1) Bugs 
+ 
+  - The subscription library sends (per each control point) an "ControlPointPosition" event with the positions 
+ of the parameters with a time stamp equals to the tracking start time. If the control  point is static (it 
+ doesn't have a tracker), it means that this control won't exist until the tracking start time arrives: it is 
+ not possible to open a subscription connection before the tracking start time and see the control point. But 
+ if the control is static,  it has to exist during all the event. Now when a control is static, the subscription 
+ library sends a "ControlPointPosition" event with the event start time and then it sends other "ControlPointPosition"
+ event with the tracking start time. It allows to connect with future races and see the static controls (Requested 
+ by Jakob Odum, 25/02/2015)
+   
+ - It is possible to add two or more subscriptions for the same subscriber (Reported by Jorge Piera, 02/05/2015)
+ 
+ - If a race is in a not initialized state and it is loaded using the parameters file, the library assumes that 
+ the consumer application wants to load the race and it changes its initialized attribute to true. This assumption 
+ is  wrong. Now, if a race is not initialized it will continue being uninitialized until the event administrator 
+ changes its state to initialized (Reported by Axel Uhl, 17/05/2015)
+ 
+********************************************
 ************* TracAPI 3.0.10 ***************
 ******************************************** 
 This is a final version. Only fixes bugs in the implementation
