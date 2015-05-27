@@ -46,7 +46,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         }
         
         // TODO get correct message
-        EventOverviewStageDTO stage = new EventOverviewStageDTO("foo", getStageContent(context, event, state, now));
+        EventOverviewStageDTO stage = new EventOverviewStageDTO(null, getStageContent(context, event, state, now));
         addNews(stage);
         return new ResultWithTTL<>(ttl, stage);
     }
