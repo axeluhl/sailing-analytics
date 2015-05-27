@@ -1,36 +1,38 @@
 package com.sap.sse.common.media;
 
-import java.net.URL;
-
-import com.google.gwt.core.shared.GwtIncompatible;
+import java.util.Date;
 
 public class VideoMetadataDTO extends AbstractMediaDTO {
     
     private static final long serialVersionUID = 1L;
 
-    private int length;
+    /**
+     * TODO: Do we really need video length? Should it be mandatory?
+     */
+    private int lengthInSeconds;
+
+    /**
+     * URL Reference to thumbnail image. This information works as override for youtube videos or as missing thumbnail
+     * information for other formats. It can be either a link to thumbnail or even be a data/url contaning the base64
+     * encoded image.
+     */
     private String thumbnailRef;
 
 
     protected VideoMetadataDTO() {
     }
 
-    @GwtIncompatible
-    public VideoMetadataDTO(URL url, MimeType mimeType, String title) {
-        this(url.toString(), mimeType, title);
-    }
     
-    @GwtIncompatible
-    public VideoMetadataDTO(String url, MimeType mimeType, String title) {
-        super(url, mimeType, title);
+    public VideoMetadataDTO(String url, MimeType mimeType, Date createdAtDate) {
+        super(url, mimeType, createdAtDate);
     }
 
-    public void setLength(int length) {
-        this.length = length;
+    public int getLengthInSeconds() {
+        return lengthInSeconds;
     }
 
-    public int getLength() {
-        return length;
+    public void setLengthInSeconds(int lengthInSeconds) {
+        this.lengthInSeconds = lengthInSeconds;
     }
 
     public void setThumbnailRef(String thumbnailRef) {

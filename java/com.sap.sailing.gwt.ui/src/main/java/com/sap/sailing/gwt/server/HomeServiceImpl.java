@@ -189,8 +189,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
 
                 MimeType type = MediaUtils.detectMimeTypeFromUrl(youTubeRandomUrl.toString());
                 if (type.mediaType == MediaType.video) {
-                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl, type,
-                            holder.event.getName());
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.toString(), type, //
+                            holder.event.getEndDate().asDate() // FIXME: using event enddate for now
+                            );
+                    candidate.setTitle(holder.event.getName());
                     result.addVideo(candidate);
                 }
             }
@@ -229,7 +231,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 
                 MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl.toString());
                 if (type.mediaType == MediaType.video) {
-                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl, type, holder.event.getName());
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl.toString(), type, //
+                            holder.event.getEndDate().asDate() // FIXME: using event enddate for now
+                    );
+                    candidate.setTitle(holder.event.getName());
                     videoCandidates.add(candidate);
                 }
             }
@@ -429,13 +434,16 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
             }
-            SailingImageDTO entry = new SailingImageDTO(eventRef, url.toString(), imageSize, eventName);
+            SailingImageDTO entry = new SailingImageDTO(eventRef, url.toString(), imageSize, //
+                    event.getEndDate().asDate() // FIXME: using the event end date for now, we need a better solution for migration
+                    );
+            entry.setTitle(eventName);
             media.addPhoto(entry);
         }
         for(URL url : event.getVideoURLs()) {
             MimeType type = MediaUtils.detectMimeTypeFromUrl(url.toString());
             if (type.mediaType == MediaType.video) {
-                SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url, type, null);
+                SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url.toString(), type, null);
                 media.addVideo(candidate);
             }
         }

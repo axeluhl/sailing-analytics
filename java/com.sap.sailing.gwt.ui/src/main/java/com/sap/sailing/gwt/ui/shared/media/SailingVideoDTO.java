@@ -1,8 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.media;
 
-import java.net.URL;
+import java.util.Date;
 
-import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoMetadataDTO;
@@ -17,17 +16,11 @@ public class SailingVideoDTO extends VideoMetadataDTO {
     private SailingVideoDTO() {
     }
 
-    @GwtIncompatible
-    public SailingVideoDTO(EventReferenceDTO eventRef, URL url, MimeType mimeType, String title) {
-        this(eventRef, url.toString(), mimeType, title);
+    public SailingVideoDTO(EventReferenceDTO eventRef, String srcReference, MimeType mimeType, Date createdAtDate) {
+        super(srcReference, mimeType, createdAtDate);
         this.eventRef = eventRef;
     }
     
-    @GwtIncompatible
-    public SailingVideoDTO(EventReferenceDTO eventRef, String url, MimeType mimeType, String title) {
-        super(url, mimeType, title);
-        this.eventRef = eventRef;
-    }
 
     public EventReferenceDTO getEventRef() {
         return eventRef;

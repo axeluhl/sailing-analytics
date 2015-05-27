@@ -10,47 +10,17 @@ public class SailingImageDTO extends ImageMetadataDTO {
     
     private static final long serialVersionUID = 1L;
 
-    private String subtitle;
-    private Date createdAtDate;
-    private String author;
-
     private EventReferenceDTO eventRef;
 
-    protected SailingImageDTO() {
+    @SuppressWarnings("unused")
+    private SailingImageDTO() {
     }
 
-
-    public SailingImageDTO(EventReferenceDTO eventRef, String imageURL, ImageSize size, String title) {
-        super(imageURL, size, title);
+    public SailingImageDTO(EventReferenceDTO eventRef, String imageURL, ImageSize size, Date createdAtDate) {
+        super(imageURL, size, createdAtDate);
         this.eventRef = eventRef;
 
     }
-
-    public String getSubtitle() {
-        return subtitle;
-    }
-
-    public void setSubtitle(String subtitle) {
-        this.subtitle = subtitle;
-    }
-
-    public Date getCreatedAtDate() {
-        return createdAtDate;
-    }
-
-    public void setCreatedAtDate(Date createdAtDate) {
-        this.createdAtDate = createdAtDate;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-
 
     public EventReferenceDTO getEventRef() {
         return eventRef;
