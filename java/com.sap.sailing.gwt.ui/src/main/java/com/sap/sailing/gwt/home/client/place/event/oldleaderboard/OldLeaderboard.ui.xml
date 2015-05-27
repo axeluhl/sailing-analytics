@@ -6,7 +6,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboardResources" />
-		<g:HTMLPanel >
+		<g:HTMLPanel styleName=" {local_res.css.marginFix}">
 			<div class="{res.mediaCss.grid}" >
 			  <div class="{res.mediaCss.small7} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 			    <p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
@@ -22,8 +22,8 @@
 			  </div>
 			</div>
 			  
-			<div class="{res.mediaCss.grid} {local_res.css.marginFix}" >
-			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+			<div class="{res.mediaCss.grid}" >
+			  <div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.letItScroll}">
 			        <table class="{local_res.css.regattaleaderboard_table}">
       				  <tr>
       					<td>

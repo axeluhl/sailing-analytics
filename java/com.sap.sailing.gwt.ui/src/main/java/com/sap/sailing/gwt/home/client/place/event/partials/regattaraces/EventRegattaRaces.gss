@@ -189,15 +189,15 @@
 }
 .eventregattarace_action {
   float: right;
-  width: 13%;
   text-align: center;
   text-transform: uppercase;
   cursor: pointer;
 }
 .eventregattarace_action_watch,
 .eventregattarace_action_analyze {
-  width: 9.666666666666666em;
-  max-width: 100%;
+  width: 10em;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 .eventregattarace_action_watch {
   background-color: #f00;

@@ -94,11 +94,19 @@
   background-position: center center;
 }
 .regattaleaderboard_meta_reload {
-  background-color: #8ab54e;
+  background-color: #9f9f9f;
   background-image: url("images/home/reload.png");
 }
+.regattaleaderboard_meta_reload_live {
+  background-color: red;
+}
+.regattaleaderboard_meta_reload_playing {
+  background-color: #f0ab00;
+}
+
+
 .regattaleaderboard_meta_reload:hover {
-  background-color: #7ca445;
+  background-color: #909090;
 }
 .regattaleaderboard_meta_settings {
   display: inline-block;
@@ -108,12 +116,12 @@
   width: 2.666666666666667em;
   height: 2.666666666666667em;
   margin: 0 0 0 0.666666666666667em;
-  background-color: #f0ab00;
+  background-color: #9f9f9f;
   background-image: url("images/home/settings.png");
-  background-size: 50%;
+  background-size: 40%;
 }
 .regattaleaderboard_table {
-  margin-top: 0.666666666666667em;
+  	margin-bottom: 20px;
 }
 .regattaleaderboard_header {
   background: #f2f2f2;
@@ -209,12 +217,9 @@
   table-layout: fixed;
 }
 .marginFix {
-  margin:2rem auto;
-  width: 100%;
+  margin-top:2rem;
 }
-@media (min-width: 84em) {
-  .marginFix {
-    margin:2rem 5rem;
-    width: auto;
-  }
+.letItScroll {
+  overflow-x: auto;
+  margin: 10px 0px;
 }

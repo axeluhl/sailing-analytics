@@ -43,6 +43,7 @@ public enum BoatClassMasterdata {
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17", "Nacra-17"),
     OK ("OK Dinghy", true, 5.25, 2.59, BoatHullType.MONOHULL, false, "OK-Dinghy", "OK-Jolle", "OK"),
     OPTIMIST ("Optimist", true, 2.34, 1.07, BoatHullType.MONOHULL, false, "Opti", "Optimist Dinghy"),
+    PIRAT ("Pirat", true, 5.00, 1.61, BoatHullType.MONOHULL, false, "Pirate", "Piraten"),
     PLATU_25 ("Platu 25", true, 7.53, 2.62, BoatHullType.MONOHULL, true, "Platu", "Platu-25", "PLA", "B25"),
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X"),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),

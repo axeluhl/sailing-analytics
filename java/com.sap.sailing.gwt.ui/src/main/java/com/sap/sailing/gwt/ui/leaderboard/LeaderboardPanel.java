@@ -1799,6 +1799,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
 
         contentPanel = new VerticalPanel();
+        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
@@ -1821,7 +1822,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             this.competitorFilterPanel = competitorSearchTextBox;
         }
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
-        leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
+        // leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
         filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
         contentPanel.add(leaderboardTable);

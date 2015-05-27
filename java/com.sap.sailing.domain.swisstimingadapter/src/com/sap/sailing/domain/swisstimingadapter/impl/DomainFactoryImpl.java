@@ -319,7 +319,7 @@ public class DomainFactoryImpl implements DomainFactory {
         for (Mark mark : marks) {
             // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
-            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(domainControlPoint, null));
+            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }

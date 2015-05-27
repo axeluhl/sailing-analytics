@@ -47,7 +47,10 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
     }
     
     public boolean isSameBaseDirection(BoatDirection direction1, BoatDirection direction2) {
-        return (isBaseDirectionLeft(direction1)&&isBaseDirectionLeft(direction2))||(isBaseDirectionRight(direction1)&&isBaseDirectionRight(direction2));
+        boolean result = isBaseDirectionLeft(direction1)&&isBaseDirectionLeft(direction2);
+        result |= isBaseDirectionRight(direction1)&&isBaseDirectionRight(direction2);
+        result |= (direction1 == BoatDirection.NONE) || (direction2 == BoatDirection.NONE);
+        return result;
     }
     
     public boolean isBaseDirectionLeft(BoatDirection direction) {
@@ -339,11 +342,11 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
             }
 
             long finishTimeStep = Math.max(500, timeStep / 10);
-            int finishStepsLeft = (int) Math.round(1.5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
+            int finishStepsLeft = (int) Math.round(5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
             generator1Turner.setEvaluationParameters(true, currentPosition, endPos, leftTurningTime, finishTimeStep, finishStepsLeft, 0.2, this.upwindLeg);
             Path leftPath = generator1Turner.getPath();
 
-            int finishStepsRight = (int) Math.round(1.5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
+            int finishStepsRight = (int) Math.round(5*(path.get(path.size()-1).getTimePoint().asMillis() - path.get(0).getTimePoint().asMillis()) / (1-fracFinishPhase) * fracFinishPhase / finishTimeStep);
             generator1Turner.setEvaluationParameters(false, currentPosition, endPos, rightTurningTime, finishTimeStep, finishStepsRight, 0.2, this.upwindLeg);
             Path rightPath = generator1Turner.getPath();
 

@@ -6,6 +6,12 @@ import java.util.Map;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 
+/**
+ * All images are expected to be 140x140px with transparent background.
+ * 
+ * @author Steffen Tobias Wagner, Axel Uhl (D043530)
+ *
+ */
 public class BoatClassImageResolver {
     private static Map<String, ImageResource> boatClassIconsMap;
     private static BoatClassImageResources imageResources = BoatClassImageResources.INSTANCE;
@@ -52,6 +58,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());
         boatClassIconsMap.put(BoatClassMasterdata.OK.getDisplayName(), imageResources.OKIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPTIMIST.getDisplayName(), imageResources.OptimistIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.PIRAT.getDisplayName(), imageResources.PiratIcon());
         boatClassIconsMap.put(BoatClassMasterdata.PLATU_25.getDisplayName(), imageResources.Platu25Icon());
         boatClassIconsMap.put(BoatClassMasterdata.RS_X.getDisplayName(), imageResources.RSXIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SONAR.getDisplayName(), imageResources.SonarIcon());

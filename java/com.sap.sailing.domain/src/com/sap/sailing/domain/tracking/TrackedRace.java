@@ -35,10 +35,12 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -770,6 +772,15 @@ public interface TrackedRace extends Serializable {
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
     boolean isUsingMarkPassingCalculator();
+    
+    /**
+     * @param timepoint Used for positions of marks and wind information
+     * @return estimated time it takes to complete the race
+     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
+     * is not available
+     * @throws NoWindException 
+     */
+    Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
 

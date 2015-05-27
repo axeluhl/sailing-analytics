@@ -72,12 +72,7 @@ figcaption {
   font-size: 1rem;
   position: relative;
   min-height: 100%;
-  padding-bottom: 12em;
-}
-@media (min-width: 720px) {
-  .wrapper {
-    padding-bottom: 5em;
-  }
+  padding-bottom: 5em;
 }
 .navbar {
   font-size: 1rem;
@@ -95,6 +90,8 @@ figcaption {
           transition: background-color 0.2s, border-color 0.2s;
   text-decoration: none;
   margin-right: 0.555555555555556em;
+  border-top-left-radius: 0.277777777777778em;
+  border-top-right-radius: 0.277777777777778em;
 }
 .navbar_buttonhidden {
   display: block;
@@ -139,6 +136,7 @@ figcaption {
   font-size: 0.933333333333333rem;
   font-weight: 700;
   text-transform: uppercase;
+  border-radius: 0.214285714285714em;
   padding: 0.714285714285714em 1.071428571428571em;
 }
 .buttoninactive {

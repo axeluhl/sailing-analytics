@@ -179,10 +179,14 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right) {
-        if (controlPointWithTwoMarksCache.containsKey(id)) {
-            return controlPointWithTwoMarksCache.get(id);
+        final ControlPointWithTwoMarks result;
+        final ControlPointWithTwoMarks fromCache = controlPointWithTwoMarksCache.get(id);
+        if (fromCache != null) {
+            result = fromCache;
+        } else {
+            result = createControlPointWithTwoMarks(id, left, right, name);
         }
-        return createControlPointWithTwoMarks(id, left, right, name);
+        return result;
     }
 
     @Override

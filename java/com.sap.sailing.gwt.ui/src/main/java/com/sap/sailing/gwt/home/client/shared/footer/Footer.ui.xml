@@ -5,9 +5,8 @@
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.footer.FooterResources" />
   <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.client.app.PlaceNavigation" />
-  <g:HTMLPanel>
+  <g:HTMLPanel tag="footer" addStyleNames="{local_res.css.sitefooter}">
     <!-- Website footer-->
-    <footer class="{local_res.css.sitefooter}">
       <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.medium9} {res.mediaCss.columns}">
           <div class="{local_res.css.sitefooter_copyright}">
@@ -36,6 +35,5 @@
             <g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" />
         </div>
       </div>
-    </footer>
   </g:HTMLPanel>
 </ui:UiBinder>
