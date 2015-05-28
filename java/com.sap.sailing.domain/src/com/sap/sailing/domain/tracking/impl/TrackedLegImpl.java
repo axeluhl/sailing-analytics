@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -57,7 +58,7 @@ public class TrackedLegImpl implements TrackedLeg {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private transient Map<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private transient ConcurrentHashMap<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -68,12 +69,12 @@ public class TrackedLegImpl implements TrackedLeg {
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
         trackedRace.addListener(new CacheClearingRaceChangeListener());
-        competitorTracksOrderedByRank = new HashMap<>();
+        competitorTracksOrderedByRank = new ConcurrentHashMap<>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        competitorTracksOrderedByRank = new HashMap<>();
+        competitorTracksOrderedByRank = new ConcurrentHashMap<>();
     }
     
     @Override
@@ -124,11 +125,9 @@ public class TrackedLegImpl implements TrackedLeg {
     
     List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         List<TrackedLegOfCompetitor> rankedCompetitorList;
-        synchronized (competitorTracksOrderedByRank) {
-            rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
-            if (rankedCompetitorList != null) {
-                rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>(rankedCompetitorList);
-            }
+        rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
+        if (rankedCompetitorList != null) {
+            rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>(rankedCompetitorList);
         }
         if (rankedCompetitorList == null) {
             rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
@@ -140,9 +139,7 @@ public class TrackedLegImpl implements TrackedLeg {
             // an the asynchronous nature of how the data is being received
             Collections.sort(rankedCompetitorList, getTrackedRace().getRankingMetric().getLegRankingComparator(this, timePoint, cache));
             rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
-            synchronized (competitorTracksOrderedByRank) {
-                competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
-            }
+            competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
             if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
                 logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
                         + ") differs from number of competitors in race ("
@@ -302,9 +299,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     private void clearCaches() {
-        synchronized (competitorTracksOrderedByRank) {
-            competitorTracksOrderedByRank.clear();
-        }
+        competitorTracksOrderedByRank.clear();
     }
 
     @Override
