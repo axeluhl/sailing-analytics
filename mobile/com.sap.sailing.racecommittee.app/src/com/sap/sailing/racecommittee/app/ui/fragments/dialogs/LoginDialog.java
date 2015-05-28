@@ -16,7 +16,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
 
     private static final LoginType DefaultLoginType = LoginType.NONE;
     public enum LoginType {
-        OFFICER, VIEWER, NONE;
+        OFFICER, VIEWER, NONE
     }
 
     private CharSequence[] loginTypeDescriptions;
