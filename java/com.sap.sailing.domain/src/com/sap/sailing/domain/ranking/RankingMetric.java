@@ -122,7 +122,11 @@ public interface RankingMetric extends Serializable {
          * is normalized to the {@link TrackedLeg#getWindwardDistance() windward distance of the leg} at the
          * {@link TrackedLeg#getReferenceTimePoint() reference time point}.
          */
-        Competitor getLeaderInLegByCalculatedTime(Leg leg);
+        Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache);
+        
+        Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+        Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingCache cache);
     }
     
     public interface LegRankingInfo extends Timed, Serializable {

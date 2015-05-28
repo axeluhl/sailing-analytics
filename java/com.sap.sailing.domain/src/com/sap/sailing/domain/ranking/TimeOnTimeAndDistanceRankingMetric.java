@@ -2,7 +2,6 @@ package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -158,63 +156,6 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         return (tloc1, tloc2) -> fastestCompetitorInLeg==null ? 0 :
             correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc1.getCompetitor()).
                 compareTo(correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc2.getCompetitor()));
-    }
-
-    /**
-     * @return <code>null</code> if no competitor has started the leg yet; the first competitor to finish the leg if any
-     *         has already finished the leg at <code>timePoint</code>; or the competitor with the greatest windward
-     *         distance traveled in the leg at <code>timePoint</code> otherwise
-     */
-    private Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        Competitor firstAroundMark = getFirstLegFinisherBefore(trackedLeg, timePoint);
-        final Competitor result;
-        if (firstAroundMark != null) {
-            result = firstAroundMark;
-        } else {
-            Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
-            Distance maxWindwardDistanceTraveled = new MeterDistance(Double.MIN_VALUE);
-            Competitor competitorFarthestAlong = null;
-            getTrackedRace().lockForRead(markPassingsForLegStart);
-            try {
-                for (MarkPassing mp : markPassingsForLegStart) {
-                    if (mp.getTimePoint().after(timePoint)) {
-                        break;
-                    }
-                    final Distance windwardDistanceTraveled = getWindwardDistanceTraveled(mp.getCompetitor(), mp.getWaypoint(),
-                            timePoint, cache);
-                    if (windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
-                        maxWindwardDistanceTraveled = windwardDistanceTraveled;
-                        competitorFarthestAlong = mp.getCompetitor();
-                    }
-                }
-            } finally {
-                getTrackedRace().unlockAfterRead(markPassingsForLegStart);
-            }
-            result = competitorFarthestAlong;
-        }
-        return result;
-    }
-
-    /**
-     * Determines the first competitor finishing the leg identified by <code>trackedLeg</code> at or before <code>timePoint</code>. If
-     * no such competitor exists, <code>null</code> is returned.
-     */
-    private Competitor getFirstLegFinisherBefore(TrackedLeg trackedLeg, TimePoint timePoint) {
-        Iterable<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getTo());
-        Competitor firstAroundMark = null;
-        getTrackedRace().lockForRead(markPassingsForLegEnd);
-        try {
-            final Iterator<MarkPassing> i = markPassingsForLegEnd.iterator();
-            if (i.hasNext()) {
-                MarkPassing markPassing = i.next();
-                if (!markPassing.getTimePoint().after(timePoint)) {
-                    firstAroundMark = markPassing.getCompetitor();
-                }
-            }
-        } finally {
-            getTrackedRace().unlockAfterRead(markPassingsForLegEnd);
-        }
-        return firstAroundMark;
     }
 
     @Override
@@ -379,47 +320,23 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
             RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         final Duration result;
+        final Leg leg = trackedLegOfCompetitor.getLeg();
         if (getTrackedRace().getStartOfRace() == null || !trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
             result = null;
         } else {
-            final Duration raceDurationAtTimePoint = getTrackedRace().getStartOfRace().until(timePoint);
             final Competitor farthestAheadOrEarliestLegFinisher = getCompetitorFarthestAheadInLeg(trackedLegOfCompetitor.getTrackedLeg(), timePoint, cache);
             final TrackedLegOfCompetitor tlocOfFarthestAhead = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(farthestAheadOrEarliestLegFinisher);
             final boolean farthestAheadAlreadyFinishedLeg = tlocOfFarthestAhead.hasFinishedLeg(timePoint);
             final Distance windwardDistanceFarthestTraveledUntilFinishingLeg = getWindwardDistanceTraveled(farthestAheadOrEarliestLegFinisher,
                         farthestAheadAlreadyFinishedLeg ? tlocOfFarthestAhead.getFinishTime() : timePoint, cache);
-            final Map<Competitor, Duration> correctedTimeToReachFarthestAheadInLeg = new HashMap<>();
-            final Map<Competitor, Duration> actualTimeFromRaceStartToReachFarthestAheadInLeg = new HashMap<>();
             // Consider all competitors, regardless of whether they have started the leg or not; a competitor in a previous
             // leg may well be the race leader. However, if a competitor has finished the leg already, use the finishing time
             // point for that competitor.
-            // FIXME need to calculate the ranking stuff only once for requests for all competitors to this method, or else we'll end up with n^2 effort
-            // FIXME The competitor iteration is only necessary here because we need to know the "leader"; other than that, computing things for the leader and the trackedLegOfCompetitor's competitor is sufficient here
-            // FIXME Grab the leader information from RankingInfo; CAUTION: leg leader is not necessarily identical to race leader! RankingInfo may need another field for each leg leader
-            for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
-                final TrackedLegOfCompetitor tloc = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(c);
-                if (tloc.hasStartedLeg(timePoint)) {
-                    final Duration predictedDurationFromTimePointToReachFarthestAheadInLeg = getPredictedDurationToReachWindwardPositionOf(tloc, tlocOfFarthestAhead, timePoint, cache);
-                    final Duration cDurationFromRaceStartToReachFarthestInLeg = raceDurationAtTimePoint.plus(predictedDurationFromTimePointToReachFarthestAheadInLeg);
-                    actualTimeFromRaceStartToReachFarthestAheadInLeg.put(c, cDurationFromRaceStartToReachFarthestInLeg);
-                    final Duration correctedTimeWhenReachingFarthestAheadInLeg = getCorrectedTime(c, ()->tloc.getTrackedLeg().getLeg(),
-                            ()->farthestAheadAlreadyFinishedLeg?getTrackedRace().getApproximatePosition(tlocOfFarthestAhead.getTrackedLeg().getLeg().getTo(), tlocOfFarthestAhead.getFinishTime()):
-                                getTrackedRace().getTrack(farthestAheadOrEarliestLegFinisher).getEstimatedPosition(timePoint, /* extrapolate */ true),
-                                cDurationFromRaceStartToReachFarthestInLeg, windwardDistanceFarthestTraveledUntilFinishingLeg);
-                    correctedTimeToReachFarthestAheadInLeg.put(c, correctedTimeWhenReachingFarthestAheadInLeg);
-                } else {
-                    actualTimeFromRaceStartToReachFarthestAheadInLeg.put(c, null);
-                    correctedTimeToReachFarthestAheadInLeg.put(c, null);
-                }
-            }
             // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
-            Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
-            final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg());
-            final Competitor legLeader = correctedTimeToReachFarthestAheadInLeg.entrySet().stream()
-                    .sorted((e1, e2) -> durationComparatorNullsLast.compare(e1.getValue(), e2.getValue())).findFirst().get().getKey();
+            final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
             result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), legLeader,
-                    actualTimeFromRaceStartToReachFarthestAheadInLeg.get(trackedLegOfCompetitor.getCompetitor()),
-                    actualTimeFromRaceStartToReachFarthestAheadInLeg.get(legLeader),
+                    rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
+                    rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
                     windwardDistanceFarthestTraveledUntilFinishingLeg);
         }
         return result;

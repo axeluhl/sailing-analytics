@@ -2,7 +2,9 @@ package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
@@ -10,9 +12,11 @@ import java.util.stream.StreamSupport;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -121,14 +125,77 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
     }
 
-    public class RankingInfoImpl implements RankingMetric.RankingInfo {
-        private static final long serialVersionUID = -2390284312153324336L;
-
+    /**
+     * Helper instance used to encode <code>null</code> values in {@link ConcurrentHashMap} instances which do not accept
+     * <code>null</code> as key nor value.
+     */
+    private final static Competitor NULL_COMPETITOR = new CompetitorImpl(null, null, null, null, null, null, null, null, null);
+    
+    public abstract class AbstractRankingInfo implements RankingMetric.RankingInfo {
+        private static final long serialVersionUID = 6845168655725234325L;
+        
         /**
          * The time point for which this ranking information is valid
          */
         private final TimePoint timePoint;
         
+        /**
+         * Caches, on demand, the results of calls to {@link #getCompetitorFarthestAheadInLeg(Leg, TimePoint, WindLegTypeAndLegBearingCache)}.
+         * <code>null</code> values are encoded as the {@link #NULL_COMPETITOR} and must be translated back to <code>null</code> before returning
+         * to a caller outside of this class.
+         */
+        private final ConcurrentHashMap<Leg, Competitor> competitorFarthestAheadInLeg;
+        
+        public AbstractRankingInfo(final TimePoint timePoint) {
+            this.timePoint = timePoint;
+            this.competitorFarthestAheadInLeg = new ConcurrentHashMap<>();
+        }
+
+        @Override
+        public TimePoint getTimePoint() {
+            return timePoint;
+        }
+
+        @Override
+        public Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingCache cache) {
+            final Duration result;
+            final TrackedLegOfCompetitor tloc = getTrackedRace().getTrackedLeg(competitor, getTimePoint());
+            final Duration raceDurationAtTimePoint = getTrackedRace().getStartOfRace().until(getTimePoint());
+            if (tloc.hasStartedLeg(getTimePoint())) {
+                final Competitor competitorFarthestAheadInLeg = getCompetitorFarthestAheadInLeg(leg, getTimePoint(), cache);
+                final TrackedLegOfCompetitor tlocOfCompetitorFarthestAheadInLeg = tloc.getTrackedLeg().getTrackedLeg(competitorFarthestAheadInLeg);
+                final Duration predictedDurationFromTimePointToReachFarthestAheadInLeg = getPredictedDurationToReachWindwardPositionOf(
+                        tloc, tlocOfCompetitorFarthestAheadInLeg, getTimePoint(), cache);
+                final Duration cDurationFromRaceStartToReachFarthestInLeg = raceDurationAtTimePoint.plus(predictedDurationFromTimePointToReachFarthestAheadInLeg);
+                result = cDurationFromRaceStartToReachFarthestInLeg;
+            } else {
+                result = null;
+            }
+            return result;
+        }
+
+        @Override
+        public Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+            Competitor result = competitorFarthestAheadInLeg.get(leg);
+            if (result == NULL_COMPETITOR) {
+                result = null;
+            } else if (result == null) {
+                result = AbstractRankingMetric.this.getCompetitorFarthestAheadInLeg(getTrackedRace().getTrackedLeg(leg), timePoint, cache);
+                competitorFarthestAheadInLeg.put(leg, result);
+            }
+            return result;
+        }
+
+        @Override
+        public Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache) {
+            final TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(leg);
+            return trackedLeg.getLeader(getTimePoint(), cache);
+        }
+    }
+    
+    public class RankingInfoImpl extends AbstractRankingInfo {
+        private static final long serialVersionUID = -2390284312153324336L;
+
         /**
          * The basic information for each competitor, telling about actual and corrected times as well as information
          * about actual and corrected times needed to reach the position of the competitor farthest ahead at
@@ -145,8 +212,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         private final Competitor leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead;
         
         public RankingInfoImpl(TimePoint timePoint, Map<Competitor, RankingMetric.CompetitorRankingInfo> competitorRankingInfo, Competitor competitorFarthestAhead) {
+            super(timePoint);
             final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
-            this.timePoint = timePoint;
             this.competitorRankingInfo = c->competitorRankingInfo.get(c); 
             this.competitorFarthestAhead = competitorFarthestAhead;
             leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead = competitorRankingInfo.keySet().stream().sorted(
@@ -154,11 +221,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                             competitorRankingInfo.get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead(),
                             competitorRankingInfo.get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead())).
                       findFirst().get();
-        }
-
-        @Override
-        public TimePoint getTimePoint() {
-            return timePoint;
         }
 
         @Override
@@ -552,5 +614,62 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             result = d;
         }
         return result;
+    }
+
+    /**
+     * @return <code>null</code> if no competitor has started the leg yet; the first competitor to finish the leg if any
+     *         has already finished the leg at <code>timePoint</code>; or the competitor with the greatest windward
+     *         distance traveled in the leg at <code>timePoint</code> otherwise
+     */
+    protected Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        Competitor firstAroundMark = getFirstLegFinisherBefore(trackedLeg, timePoint);
+        final Competitor result;
+        if (firstAroundMark != null) {
+            result = firstAroundMark;
+        } else {
+            Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
+            Distance maxWindwardDistanceTraveled = new MeterDistance(Double.MIN_VALUE);
+            Competitor competitorFarthestAlong = null;
+            getTrackedRace().lockForRead(markPassingsForLegStart);
+            try {
+                for (MarkPassing mp : markPassingsForLegStart) {
+                    if (mp.getTimePoint().after(timePoint)) {
+                        break;
+                    }
+                    final Distance windwardDistanceTraveled = getWindwardDistanceTraveled(mp.getCompetitor(), mp.getWaypoint(),
+                            timePoint, cache);
+                    if (windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
+                        maxWindwardDistanceTraveled = windwardDistanceTraveled;
+                        competitorFarthestAlong = mp.getCompetitor();
+                    }
+                }
+            } finally {
+                getTrackedRace().unlockAfterRead(markPassingsForLegStart);
+            }
+            result = competitorFarthestAlong;
+        }
+        return result;
+    }
+
+    /**
+     * Determines the first competitor finishing the leg identified by <code>trackedLeg</code> at or before <code>timePoint</code>. If
+     * no such competitor exists, <code>null</code> is returned.
+     */
+    private Competitor getFirstLegFinisherBefore(TrackedLeg trackedLeg, TimePoint timePoint) {
+        Iterable<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getTo());
+        Competitor firstAroundMark = null;
+        getTrackedRace().lockForRead(markPassingsForLegEnd);
+        try {
+            final Iterator<MarkPassing> i = markPassingsForLegEnd.iterator();
+            if (i.hasNext()) {
+                MarkPassing markPassing = i.next();
+                if (!markPassing.getTimePoint().after(timePoint)) {
+                    firstAroundMark = markPassing.getCompetitor();
+                }
+            }
+        } finally {
+            getTrackedRace().unlockAfterRead(markPassingsForLegEnd);
+        }
+        return firstAroundMark;
     }
 }

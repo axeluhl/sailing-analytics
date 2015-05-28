@@ -75,13 +75,8 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
-        return new RankingInfo() {
+        return new AbstractRankingInfo(timePoint) {
             private static final long serialVersionUID = 25689357311324825L;
-
-            @Override
-            public TimePoint getTimePoint() {
-                return timePoint;
-            }
 
             @Override
             public Function<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo() {
