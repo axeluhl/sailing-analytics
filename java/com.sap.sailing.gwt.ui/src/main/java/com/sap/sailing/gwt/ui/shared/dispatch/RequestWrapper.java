@@ -8,15 +8,18 @@ public class RequestWrapper<R extends Result, A extends Action<R>> implements Is
     
     private Date currentClientTime = new Date();
     
+    private String clientLocaleName;
+    
     private A action;
     
     @SuppressWarnings("unused")
     private RequestWrapper() {
     }
     
-    public RequestWrapper(A action) {
+    public RequestWrapper(A action, String clientLocaleName) {
         super();
         this.action = action;
+        this.clientLocaleName = clientLocaleName;
     }
 
     public A getAction() {
@@ -25,5 +28,9 @@ public class RequestWrapper<R extends Result, A extends Action<R>> implements Is
     
     public Date getCurrentClientTime() {
         return currentClientTime;
+    }
+    
+    public String getClientLocaleName() {
+        return clientLocaleName;
     }
 }

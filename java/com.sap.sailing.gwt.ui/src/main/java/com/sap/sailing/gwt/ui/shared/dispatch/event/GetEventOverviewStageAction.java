@@ -52,6 +52,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         
         Iterable<URL> videoURLs = event.getVideoURLs();
         for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
+            // TODO fmittag/pgt: implement locale specific live stream using context.getClientLocaleName() or context.getClientLocale()
             String videoUrl = Util.get(videoURLs, i).toString();
             MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl);
             if (type == MimeType.youtube || type == MimeType.vimeo || type == MimeType.mp4) {
