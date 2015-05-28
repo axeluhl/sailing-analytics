@@ -96,13 +96,11 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     @Override
     public Set<TrackedRace> getPreviousRaceInExecutionOrder(TrackedRace race) {
-        final Set<TrackedRace> result;
+        Set<TrackedRace> result = Collections.emptySet();
         final Map<TrackedRace, Set<TrackedRace>> predecessorMap = getPredecessorsMap();
         if (predecessorMap != null) {
             result = predecessorMap.get(race);
-        } else {
-            result = null;
-        }
+        } 
         return result;
     }
 }
