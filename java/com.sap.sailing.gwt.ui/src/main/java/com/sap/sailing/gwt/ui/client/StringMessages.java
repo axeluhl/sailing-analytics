@@ -509,7 +509,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String penaltyCircleTooltip();
     String raceAverageSpeedInKnotsTooltip();
     String currentSpeedOverGroundInKnotsTooltip();
-    String windwardDistanceToLeaderInMetersTooltip();
+    String windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
     String raceDistanceTraveledTooltip();
     String rankTooltip();
     String rankGainTooltip();

@@ -132,6 +132,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
@@ -3160,5 +3161,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             polarDataService = null;
             setPolarDataService(null);
         }
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
+        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+        final List<Competitor> result = new ArrayList<>();
+        Util.addAll(trackedRace.getRace().getCompetitors(), result);
+        result.sort((c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c2).getWindwardDistanceSailed().compareTo(
+                rankingInfo.getCompetitorRankingInfo().apply(c1).getWindwardDistanceSailed()));
+        return result;
     }
 }

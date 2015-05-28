@@ -305,9 +305,9 @@ public class DetailTypeFormatter {
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
         case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
-            return stringMessages.windwardDistanceToLeaderInMetersTooltip();
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
         case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
-            return stringMessages.windwardDistanceToLeaderInMetersTooltip();
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStartTooltip();
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
