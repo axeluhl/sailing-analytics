@@ -121,7 +121,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 mCurrentCourse
-                    .addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z1)));
+                    .addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z1)));
             }
 
             mGuardManager.attachRecyclerView(mCurrentCourse);
