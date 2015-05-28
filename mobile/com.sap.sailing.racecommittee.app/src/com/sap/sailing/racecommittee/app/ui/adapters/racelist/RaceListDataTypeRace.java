@@ -45,7 +45,7 @@ public class RaceListDataTypeRace implements RaceListDataType {
     public void onStatusChanged(RaceLogRaceStatus status, boolean allowUpdateIndicator) {
         if (!currentStatus.equals(status)) {
             currentStatus = status;
-            setUpdateIndicatorVisible(true && allowUpdateIndicator);
+            setUpdateIndicatorVisible(allowUpdateIndicator);
         }
     }
 
