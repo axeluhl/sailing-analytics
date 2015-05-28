@@ -322,6 +322,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         public void render(Context context, SimpleWindDTO value, SafeHtmlBuilder sb) {
             if (value != null) {
                 SafeStylesBuilder safeStyles = new SafeStylesBuilder();
+                safeStyles.trustedNameAndValue("-webkit-transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
                 safeStyles.trustedNameAndValue("transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
                 safeStyles.width(2.75, Unit.EM).height(2.75, Unit.EM);
                 sb.append(TEMPLATE.windDirection(safeStyles.toSafeStyles()));
