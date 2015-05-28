@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -112,6 +113,16 @@ public interface RankingMetric extends Serializable {
          * position at {@link #timePoint}.
          */
         Competitor getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
+
+        /**
+         * Similar to {@link #getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}, but relative to a
+         * {@link Leg}. This will not consider any progress or position beyond the finishing of that <code>leg</code>.
+         * Instead, for those competitors who have already finished the leg, their
+         * {@link TrackedLegOfCompetitor#getFinishTime() finishing time} for the leg is used, and the distance traveled
+         * is normalized to the {@link TrackedLeg#getWindwardDistance() windward distance of the leg} at the
+         * {@link TrackedLeg#getReferenceTimePoint() reference time point}.
+         */
+        Competitor getLeaderInLegByCalculatedTime(Leg leg);
     }
     
     public interface LegRankingInfo extends Timed, Serializable {

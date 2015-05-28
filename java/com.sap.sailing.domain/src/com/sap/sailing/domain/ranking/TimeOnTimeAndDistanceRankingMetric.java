@@ -414,11 +414,12 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             }
             // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
             Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
-            final Competitor leader = correctedTimeToReachFarthestAheadInLeg.entrySet().stream()
+            final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg());
+            final Competitor legLeader = correctedTimeToReachFarthestAheadInLeg.entrySet().stream()
                     .sorted((e1, e2) -> durationComparatorNullsLast.compare(e1.getValue(), e2.getValue())).findFirst().get().getKey();
-            result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), leader,
+            result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), legLeader,
                     actualTimeFromRaceStartToReachFarthestAheadInLeg.get(trackedLegOfCompetitor.getCompetitor()),
-                    actualTimeFromRaceStartToReachFarthestAheadInLeg.get(leader),
+                    actualTimeFromRaceStartToReachFarthestAheadInLeg.get(legLeader),
                     windwardDistanceFarthestTraveledUntilFinishingLeg);
         }
         return result;
