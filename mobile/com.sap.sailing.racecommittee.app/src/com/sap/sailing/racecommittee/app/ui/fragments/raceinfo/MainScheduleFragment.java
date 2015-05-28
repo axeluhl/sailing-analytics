@@ -1,8 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -105,7 +103,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         return layout;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onResume() {
         super.onResume();

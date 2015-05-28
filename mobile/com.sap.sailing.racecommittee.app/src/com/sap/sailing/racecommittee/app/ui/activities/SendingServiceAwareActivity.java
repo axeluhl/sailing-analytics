@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -23,6 +21,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import java.util.Date;
@@ -147,14 +146,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
                 R.string.preference_server_url_default), sendingServiceStatus);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private Drawable getTintedDrawable(Resources res, @DrawableRes int drawableResId, @ColorRes int color) {
-        Drawable drawable;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            drawable = getDrawable(drawableResId);
-        } else {
-            drawable = res.getDrawable(drawableResId);
-        }
+        Drawable drawable = BitmapHelper.getDrawable(this, drawableResId);
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         return drawable;
     }
