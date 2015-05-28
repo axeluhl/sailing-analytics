@@ -212,7 +212,7 @@ public class StartTimeFragment extends BaseFragment
         String timeLeft;
         String timeRight;
         if (mStartTime == null) {
-            mStartTime = getPickerTime(true);
+            mStartTime = getPickerTime();
         }
         if (mStartTime.after(now)) {
             resId = R.string.race_start_time_in;
@@ -329,7 +329,7 @@ public class StartTimeFragment extends BaseFragment
     @Override
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
         if (!mListenerIgnore) {
-            mStartTime = new MillisecondsTimePoint(getPickerTime(true).asMillis());
+            mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
         }
         mListenerIgnore = false;
     }
@@ -337,7 +337,7 @@ public class StartTimeFragment extends BaseFragment
     @Override
     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
         if (!mListenerIgnore) {
-            mStartTime = new MillisecondsTimePoint(getPickerTime(true).asMillis());
+            mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
         }
         mListenerIgnore = false;
     }
@@ -354,15 +354,13 @@ public class StartTimeFragment extends BaseFragment
         mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
     }
 
-    private TimePoint getPickerTime(boolean zeroSeconds) {
+    private TimePoint getPickerTime() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-        if (zeroSeconds) {
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-        }
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         return new MillisecondsTimePoint(calendar.getTime());
     }
 

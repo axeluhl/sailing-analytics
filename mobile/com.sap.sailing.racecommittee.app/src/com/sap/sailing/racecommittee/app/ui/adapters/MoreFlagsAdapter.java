@@ -22,8 +22,8 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
 
     public class MoreFlag extends FlagItem {
 
-        public MoreFlag(String line1, String line2, String fileName, Boolean more, Flags flag) {
-            super(line1, line2, fileName, more, flag);
+        public MoreFlag(String line1, String line2, Flags flag) {
+            super(line1, line2, null, true, flag);
         }
     }
 
@@ -36,7 +36,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
         mListener = listener;
 
         mFlags = new ArrayList<>();
-        mFlags.add(new MoreFlag(context.getString(R.string.flag_blue), context.getString(R.string.flag_blue_desc), null, true, Flags.BLUE));
+        mFlags.add(new MoreFlag(context.getString(R.string.flag_blue), context.getString(R.string.flag_blue_desc), Flags.BLUE));
     }
 
     @Override

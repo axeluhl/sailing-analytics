@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
@@ -96,7 +95,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
-            menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
+            menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             String statusText = getString(R.string.events_waiting_to_be_sent);
             sendingServiceStatus = String.format(statusText,
@@ -144,11 +143,5 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     private String getLiveIconText() {
         return String.format(getString(R.string.connected_to_wp), PrefUtils.getString(this, R.string.preference_server_url_key,
                 R.string.preference_server_url_default), sendingServiceStatus);
-    }
-
-    private Drawable getTintedDrawable(Resources res, @DrawableRes int drawableResId, @ColorRes int color) {
-        Drawable drawable = BitmapHelper.getDrawable(this, drawableResId);
-        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        return drawable;
     }
 }

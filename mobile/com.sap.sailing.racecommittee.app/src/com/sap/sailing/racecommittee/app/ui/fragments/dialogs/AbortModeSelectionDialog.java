@@ -17,11 +17,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbortModeSelectionDialog extends RaceDialogFragment {
-    Flags abortFlag;
+    private Flags abortFlag;
 
-    ImageButton abortFlagOnly;
-    ImageButton abortFlagOverHotel;
-    ImageButton abortFlagOverAlpha;
+    private ImageButton abortFlagOnly;
+    private ImageButton abortFlagOverHotel;
+    private ImageButton abortFlagOverAlpha;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

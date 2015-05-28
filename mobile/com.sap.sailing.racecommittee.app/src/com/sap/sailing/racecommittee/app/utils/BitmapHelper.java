@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
+import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.util.TypedValue;
 import android.view.View;
@@ -42,7 +44,7 @@ public class BitmapHelper {
         return BitmapFactory.decodeFile(fileName, options);
     }
 
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -108,6 +110,12 @@ public class BitmapHelper {
         } else {
             drawable = context.getResources().getDrawable(id);
         }
+        return drawable;
+    }
+
+    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, @ColorRes int color) {
+        Drawable drawable = BitmapHelper.getDrawable(context, drawableResId);
+        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         return drawable;
     }
 }
