@@ -26,7 +26,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class SpeedRegressionPerAngleClusterProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>{
     
-private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
+    private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, IncrementalLeastSquares> regressions = new HashMap<>();
 

@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
@@ -39,6 +40,7 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     private final BearingWithConfidence<Integer> trueWindAngle;
     private final WindWithConfidence<Pair<Position, TimePoint>> wind;
     private final SpeedWithBearingWithConfidence<TimePoint> boatSpeed;
+    private LegType legType;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
             ClusterGroup<Speed> windSpeedClusterGroup, ClusterGroup<Bearing> angleClusterGroup) {
@@ -144,13 +146,23 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
 
     @Override
     public LegType getLegType() {
-        TimePoint timePoint = fix.getTimePoint();
-        try {
-            final TrackedLeg currentLeg = race.getCurrentLeg(timePoint);
-            return currentLeg==null?null:currentLeg.getLegType(timePoint);
-        } catch (NoWindException e) {
-            return null;
+        LegType result = null;
+        if (legType == null) {
+            TimePoint timePoint = fix.getTimePoint();
+            try {
+                TrackedLegOfCompetitor currentLegOfCompetitor = race.getCurrentLeg(getCompetitor(), timePoint);
+                if (currentLegOfCompetitor != null) {
+                    final TrackedLeg currentLeg = currentLegOfCompetitor.getTrackedLeg();
+                    legType = currentLeg == null ? null : currentLeg.getLegType(timePoint);
+                }
+            } catch (NoWindException e) {
+                legType = null;
+            }
+            result = legType;
+        } else {
+            result = legType;
         }
+        return result;
     }
 
     @Override
