@@ -1581,7 +1581,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            WindLegTypeAndLegBearingCache cache, RankingInfo rankingInfo) throws NoWindException {
+            WindLegTypeAndLegBearingCache cache, final RankingInfo rankingInfo) throws NoWindException {
         final List<LegEntryDTO> legDetails = new ArrayList<LegEntryDTO>();
         final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // hold back any course re-configurations while looping over the legs
@@ -1600,7 +1600,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 legDetails.add(legEntry);
             }
             final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace
-                    .getWindwardDistanceToOverallLeader(competitor, timePoint, WindPositionMode.LEG_MIDDLE, cache);
+                    .getWindwardDistanceToOverallLeader(competitor, timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
             Distance averageAbsoluteCrossTrackError;
             try {
                 averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(

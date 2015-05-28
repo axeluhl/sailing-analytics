@@ -238,6 +238,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
@@ -2720,13 +2721,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(competitor, timePoint, cache);
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+                    final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
                 if (trackedLeg != null) {
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;

@@ -233,14 +233,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * distance between this leg's competitor and the leader is returned. Note that this can lead to a situation where
      * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode) distance to go} which is
      * used for ranking.
+     * 
+     * @param rankingInfo materialized ranking information that is pre-calculated to avoid expensive redundant work
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode);
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo);
 
     /**
-     * Same as {@link #getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}, only that a cache for leg type
+     * Same as {@link #getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode, RankingInfo)}, only that a cache for leg type
      * calculation is passed.
+     * @param rankingInfo TODO
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a

@@ -107,6 +107,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -2871,13 +2872,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
         final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
-        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode,
+                getRankingMetric().getRankingInfo(timePoint));
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
-        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode, cache);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode, rankingInfo, cache);
     }
 
     @Override
@@ -3583,12 +3586,5 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
-    }
-
-    @Override
-    public Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode) throws NoWindException {
-        // TODO bug 1018, see comment #17: implement the calculation for corrected windward distance
-        return getWindwardDistanceToOverallLeader(competitor, timePoint, windPositionMode);
     }
 }

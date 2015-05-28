@@ -1288,10 +1288,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String timeOnTimeAndDistanceRankingMetricDescription();
     String timeOnTimeFactor();
     String timeOnDistanceAllowanceInSecondsPerNauticalMile();
-    String correctedTimeTraveled();
-    String correctedTimeTraveledTooltip();
+    String calculatedTimeTraveled();
+    String calculatedTimeTraveledTooltip();
     String timeOnTimeFactorTooltip();
     String timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
-    String raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
-    String raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
+    String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
+    String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
 }

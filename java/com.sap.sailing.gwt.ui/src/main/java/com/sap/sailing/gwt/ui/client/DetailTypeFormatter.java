@@ -45,7 +45,7 @@ public class DetailTypeFormatter {
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
         case CORRECTED_TIME_TRAVELED:
-            return stringMessages.correctedTimeTraveled();
+            return stringMessages.calculatedTimeTraveled();
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
             return stringMessages.gapChangeSinceLegStartInSeconds();
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
@@ -129,9 +129,9 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED:
             return stringMessages.time();
         case RACE_CORRECTED_TIME_TRAVELED:
-            return stringMessages.correctedTimeTraveled();
+            return stringMessages.calculatedTimeTraveled();
         case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
-            return stringMessages.raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
+            return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
         case RACE_TIME_TRAVELED_DOWNWIND:
             return stringMessages.timeDownwind();
         case RACE_TIME_TRAVELED_REACHING:
@@ -289,7 +289,7 @@ public class DetailTypeFormatter {
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
         case CORRECTED_TIME_TRAVELED:
-            return stringMessages.correctedTimeTraveledTooltip();
+            return stringMessages.calculatedTimeTraveledTooltip();
         case JIBE:
             return stringMessages.jibeTooltip();
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
@@ -327,9 +327,9 @@ public class DetailTypeFormatter {
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
         case RACE_CORRECTED_TIME_TRAVELED:
-            return stringMessages.correctedTimeTraveledTooltip();
+            return stringMessages.calculatedTimeTraveledTooltip();
         case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
-            return stringMessages.raceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
+            return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
         case RACE_RANK:
             return stringMessages.rankTooltip();
         case REGATTA_RANK:

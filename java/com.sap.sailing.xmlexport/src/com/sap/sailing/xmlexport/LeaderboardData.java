@@ -655,7 +655,7 @@ public class LeaderboardData extends ExportAction {
             }
             addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", timeSpentInThisLeg != null ? timeSpentInThisLeg.asMillis() : new MillisecondsDurationImpl(0).asMillis());
             addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeader(legFinishTime, rankingMetricAtLegFinishTime, WindPositionMode.LEG_MIDDLE).asSeconds());
-            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE);
+            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE, rankingMetricAtLegFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());

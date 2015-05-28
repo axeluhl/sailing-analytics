@@ -997,7 +997,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         }
 
                         Distance windwardDistanceToOverallLeader = currentLegOfCompetitor
-                                .getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
+                                .getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
                         if (windwardDistanceToOverallLeader != null) {
                             jsonCompetitorInLeg.put("gapToLeader-m",
                                     roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
