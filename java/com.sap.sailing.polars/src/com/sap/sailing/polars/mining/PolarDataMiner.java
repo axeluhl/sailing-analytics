@@ -326,8 +326,14 @@ public class PolarDataMiner {
                 SpeedWithConfidence<Void> speedWithConfidence;
                 try {
                     int convertedAngle = convertAngleIfNecessary(angle);
-                    speedWithConfidence = speedRegressionPerAngleClusterProcessor.estimateBoatSpeed(boatClass,
+                    SpeedWithConfidence<Void> regressionResult = speedRegressionPerAngleClusterProcessor.estimateBoatSpeed(boatClass,
                             new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
+                    if (regressionResult.getConfidence() > 0.1) {
+                        speedWithConfidence = regressionResult;
+                    } else {
+                        // Low confidence. So put in 0 speed for chart
+                        speedWithConfidence = new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(0), regressionResult.getConfidence(), null);
+                    }
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     // No data so put in a 0 speed with 0 confidence
                     speedWithConfidence = new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(0), 0, null);
