@@ -141,10 +141,15 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      */
     @Override
     public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
+        return addRaceColumn(raceColumns.size(), raceColumnName, trackedRegattaRegistry);
+    }
+    
+    @Override
+    public RaceColumnInSeries addRaceColumn(int insertIndex, String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
         if (raceColumnListeners.canAddRaceColumnToContainer(result)) {
             result.addRaceColumnListener(this);
-            raceColumns.add(result);
+            raceColumns.add(insertIndex, result);
             raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(result);
         } else {
             result = null;
