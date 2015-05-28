@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?sap_gray">
@@ -34,9 +35,12 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/icon_event"
+            android:layout_toRightOf="@+id/label_event"
+            android:gravity="right"
             android:paddingRight="@dimen/default_padding"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22"/>
+            android:textSize="@dimen/textSize_22"
+            tools:text="Test-Event"/>
     </RelativeLayout>
 
     <View
@@ -84,9 +88,12 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/icon_area"
+            android:layout_toRightOf="@id/label_area"
+            android:gravity="right"
             android:paddingRight="@dimen/default_padding"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22"/>
+            android:textSize="@dimen/textSize_22"
+            tools:text="Selected Area"/>
     </RelativeLayout>
 
     <View
@@ -133,9 +140,12 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/icon_position"
+            android:layout_toRightOf="@id/label_position"
+            android:gravity="right"
             android:paddingRight="@dimen/default_padding"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22"/>
+            android:textSize="@dimen/textSize_22"
+            tools:text="Viewer"/>
     </RelativeLayout>
 
     <View

@@ -396,7 +396,7 @@
     <string name="no_text">No text.</string>
     <string name="error_picture_callback">Error writing image file.</string>
     <string name="competitor_load_error">Competitors: %s</string>
-    <string name="error_announced_finish_time">The given finish time is earlier than than the first finisher time. Please recheck the time.</string>
+    <string name="error_announced_finish_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
     <string name="error_time_before_finish">The selected time is before the race start.</string>
     <string name="error_set_wind">Set the wind information, please!</string>
     <string name="use_previous_course_dialog_title">Use previous course design</string>
