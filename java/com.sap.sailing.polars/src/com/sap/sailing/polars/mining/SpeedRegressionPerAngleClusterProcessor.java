@@ -67,7 +67,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
         double speedSum = 0;
         double numberOfSpeeds = 0;
         for (int i = -5; i <= 5; i++) {
-            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle.getDegrees() + i));
+            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
             if (regressions.containsKey(key)) {
                 speedSum += regressions.get(key).getOrCreatePolynomialFunction().value(windSpeed.getKnots());
                 numberOfSpeeds++;

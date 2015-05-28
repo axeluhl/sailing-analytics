@@ -72,10 +72,13 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
 
     private BearingWithConfidence<Void> computeTrueWindAngleAbsolute() {
         BearingWithConfidenceImpl<Void> result = null;
-        Bearing bearing;
+        Bearing bearing = null;
         try {
-            Bearing realBearing = race.getCurrentLeg(competitor, fix.getTimePoint()).getBeatAngle(fix.getTimePoint());
-            bearing = new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
+            TrackedLegOfCompetitor currentLeg = race.getCurrentLeg(competitor, fix.getTimePoint());
+            if (currentLeg != null) {
+                Bearing realBearing = currentLeg.getBeatAngle(fix.getTimePoint());
+                bearing = new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
+            }
         } catch (NoWindException e) {
             bearing = null;
         }
