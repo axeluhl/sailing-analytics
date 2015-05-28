@@ -407,17 +407,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo) {
-        return getWindwardDistanceToOverallLeader(timePoint, windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo) {
+        return getWindwardDistanceToCompetitorFarthestAhead(timePoint, windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
-    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
-        Competitor leader = getTrackedRace().getOverallLeader(timePoint, cache);
-        TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
+        Competitor competitorFarthestAhead = rankingInfo.getCompetitorFarthestAhead();
+        TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(competitorFarthestAhead, timePoint);
         Distance result = null;
-        Position leaderPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false);
+        Position leaderPosition = getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(timePoint, /* extrapolate */ false);
         Position currentPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false);
         if (leaderPosition != null && currentPosition != null) {
             result = Distance.NULL;

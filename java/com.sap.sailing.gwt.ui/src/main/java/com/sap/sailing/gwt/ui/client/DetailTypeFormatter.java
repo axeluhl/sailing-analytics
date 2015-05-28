@@ -60,16 +60,16 @@ public class DetailTypeFormatter {
             return stringMessages.averageSpeedInKnots();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
-        case RACE_DISTANCE_TO_LEADER_IN_METERS:
-            return stringMessages.windwardDistanceToLeaderInMeters();
+        case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMeters();
         case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
         case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageSignedCrossTrackErrorInMeters();
         case START_TACK:
             return stringMessages.startTack();
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            return stringMessages.windwardDistanceToLeaderInMeters();
+        case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMeters();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStart();
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
@@ -170,11 +170,11 @@ public class DetailTypeFormatter {
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
             return stringMessages.knotsUnit();
 
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+        case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case DISTANCE_TRAVELED:
         case DISTANCE_TRAVELED_INCLUDING_GATE_START:
-        case RACE_DISTANCE_TO_LEADER_IN_METERS:
+        case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
         case RACE_DISTANCE_TRAVELED:
         case RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START:
         case AVERAGE_TACK_LOSS_IN_METERS:
@@ -304,9 +304,9 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
-        case RACE_DISTANCE_TO_LEADER_IN_METERS:
+        case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
             return stringMessages.windwardDistanceToLeaderInMetersTooltip();
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+        case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.windwardDistanceToLeaderInMetersTooltip();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStartTooltip();

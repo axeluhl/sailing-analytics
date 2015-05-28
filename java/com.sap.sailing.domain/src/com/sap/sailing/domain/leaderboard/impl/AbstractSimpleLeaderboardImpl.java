@@ -1392,8 +1392,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses,
                         legRanksCache, rankingInfo, cache);
                 entryDTO.legDetails = raceDetails.getLegDetails();
-                entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader() == null ? null
-                        : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
+                entryDTO.windwardDistanceToCompetitorFarthestAheadInMeters = raceDetails.getWindwardDistanceToCompetitorFarthestAhead() == null ? null
+                        : raceDetails.getWindwardDistanceToCompetitorFarthestAhead().getMeters();
                 entryDTO.gapToLeaderInOwnTime = trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                 entryDTO.averageAbsoluteCrossTrackErrorInMeters = raceDetails.getAverageAbsoluteCrossTrackError() == null ? null
                         : raceDetails.getAverageAbsoluteCrossTrackError().getMeters();
@@ -1481,20 +1481,20 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private static class RaceDetails {
         private final List<LegEntryDTO> legDetails;
-        private final Distance windwardDistanceToOverallLeader;
+        private final Distance windwardDistanceToCompetitorFarthestAhead;
         private final Distance averageAbsoluteCrossTrackError;
         private final Distance averageSignedCrossTrackError;
         private final Duration gapToLeaderInOwnTime;
         private final Duration correctedTime;
         private final Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
 
-        public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToOverallLeader,
+        public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToCompetitorFarthestAhead,
                 Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError,
                 Duration gapToLeaderInOwnTime, Duration correctedTime,
                 Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
             super();
             this.legDetails = legDetails;
-            this.windwardDistanceToOverallLeader = windwardDistanceToOverallLeader;
+            this.windwardDistanceToCompetitorFarthestAhead = windwardDistanceToCompetitorFarthestAhead;
             this.averageAbsoluteCrossTrackError = averageAbsoluteCrossTrackError;
             this.averageSignedCrossTrackError = averageSignedCrossTrackError;
             this.gapToLeaderInOwnTime = gapToLeaderInOwnTime;
@@ -1504,8 +1504,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         public List<LegEntryDTO> getLegDetails() {
             return legDetails;
         }
-        public Distance getWindwardDistanceToOverallLeader() {
-            return windwardDistanceToOverallLeader;
+        public Distance getWindwardDistanceToCompetitorFarthestAhead() {
+            return windwardDistanceToCompetitorFarthestAhead;
         }
         public Distance getAverageAbsoluteCrossTrackError() {
             return averageAbsoluteCrossTrackError;
@@ -1599,8 +1599,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 }
                 legDetails.add(legEntry);
             }
-            final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace
-                    .getWindwardDistanceToOverallLeader(competitor, timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
+            final Distance windwardDistanceToCompetitorFarthestAhead = trackedRace == null ? null : trackedRace
+                    .getWindwardDistanceToCompetitorFarthestAhead(competitor, timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
             Distance averageAbsoluteCrossTrackError;
             try {
                 averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
@@ -1617,7 +1617,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 // without wind information, use null meaning "unknown"
                 averageSignedCrossTrackError = null;
             }
-            return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
+            return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
                     trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint),
                     rankingInfo.getCompetitorRankingInfo().apply(competitor).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());

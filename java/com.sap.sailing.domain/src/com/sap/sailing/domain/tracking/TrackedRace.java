@@ -516,20 +516,21 @@ public interface TrackedRace extends Serializable {
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
     /**
-     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode, RankingInfo)}
+     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
      */
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
-     * Same as {@link #getWindwardDistanceToOverallLeader(Competitor, TimePoint, WindPositionMode)}, only with an
+     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(Competitor, TimePoint, WindPositionMode)}, only with an
      * additional cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups
      * for the same time point.
      * 
      * @param rankingInfo
      *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
      */
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
-    
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
      * {@link #getWindSourcesToExclude}.

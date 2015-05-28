@@ -194,8 +194,8 @@ public class ReachingLegTest extends TrackBasedTest {
         assertEquals(0.,
                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
                         .getDistance(windwardMarkPos).getMeters(), 0.00001);
-        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointInReaching, WindPositionMode.LEG_MIDDLE);
-        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointInReaching, WindPositionMode.LEG_MIDDLE);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(hunger, timePointInReaching, WindPositionMode.LEG_MIDDLE);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointInReaching, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
         assertEquals(distanceOfReachingLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.001);
     }
@@ -224,8 +224,8 @@ public class ReachingLegTest extends TrackBasedTest {
         assertEquals(0.,
                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
                         .getDistance(windwardMarkPos).getMeters(), 0.00001);
-        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointInReaching, WindPositionMode.LEG_MIDDLE);
-        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointInReaching, WindPositionMode.LEG_MIDDLE);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(hunger, timePointInReaching, WindPositionMode.LEG_MIDDLE);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointInReaching, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
         assertEquals(distanceOfReachingLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.001);
     }
@@ -254,8 +254,8 @@ public class ReachingLegTest extends TrackBasedTest {
         assertEquals(0.,
                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
                         .getDistance(windwardMarkPos).getMeters(), 0.00001);
-        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointInReaching, WindPositionMode.LEG_MIDDLE);
-        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointInReaching, WindPositionMode.LEG_MIDDLE);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(hunger, timePointInReaching, WindPositionMode.LEG_MIDDLE);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointInReaching, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
         assertEquals(distanceOfReachingLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.001);
     }
@@ -289,8 +289,8 @@ public class ReachingLegTest extends TrackBasedTest {
         assertEquals(0.,
                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointToConsider, /* extrapolate */false)
                         .getDistance(leewardPos).getMeters(), 0.00001);
-        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointToConsider, WindPositionMode.LEG_MIDDLE);
-        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(hunger, timePointToConsider, WindPositionMode.LEG_MIDDLE);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
         assertEquals(distanceOfReachingLeg.getMeters()+windwardDistanceOfUpwindLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.001);
     }
@@ -333,8 +333,8 @@ public class ReachingLegTest extends TrackBasedTest {
         assertEquals(0.,
                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointToConsider, /* extrapolate */false)
                         .getDistance(leewardPos).getMeters(), 0.00001);
-        Distance schomaekersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(schomaeker, timePointToConsider, WindPositionMode.LEG_MIDDLE);
-        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
+        Distance schomaekersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(schomaeker, timePointToConsider, WindPositionMode.LEG_MIDDLE);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., schomaekersDistanceToLeader.getMeters(), 0.00001);
         // distance to leading Schomaeker expected to be the entire upwind distance plus the offset distance plus half the downwind
         assertEquals(distanceOfReachingLeg.getMeters()+windwardDistanceOfUpwindLeg.getMeters()*1.5, plattnersDistanceToLeader.getMeters(), 0.001);
@@ -374,7 +374,7 @@ public class ReachingLegTest extends TrackBasedTest {
                                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointToConsider, /* extrapolate */
                                         false)).getMeters(), 0.00001);
         // however, projected onto the leg their distance should be 0
-        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., plattnersDistanceToLeader.getMeters(), 0.00001);
     }
 }

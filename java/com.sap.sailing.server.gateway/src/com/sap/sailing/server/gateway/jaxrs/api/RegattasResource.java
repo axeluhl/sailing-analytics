@@ -996,11 +996,11 @@ public class RegattasResource extends AbstractSailingServerResource {
                             jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
                         }
 
-                        Distance windwardDistanceToOverallLeader = currentLegOfCompetitor
-                                .getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
-                        if (windwardDistanceToOverallLeader != null) {
+                        Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
+                                .getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                        if (windwardDistanceToCompetitorFarthestAhead != null) {
                             jsonCompetitorInLeg.put("gapToLeader-m",
-                                    roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
+                                    roundDouble(windwardDistanceToCompetitorFarthestAhead.getMeters(), 2));
                         }
                         jsonCompetitorInLeg.put("finished", false);
                     } else {

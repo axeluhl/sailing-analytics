@@ -655,8 +655,9 @@ public class LeaderboardData extends ExportAction {
             }
             addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", timeSpentInThisLeg != null ? timeSpentInThisLeg.asMillis() : new MillisecondsDurationImpl(0).asMillis());
             addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeader(legFinishTime, rankingMetricAtLegFinishTime, WindPositionMode.LEG_MIDDLE).asSeconds());
-            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE, rankingMetricAtLegFinishTime);
-            addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);
+            Distance windwardDistanceToCompetitorFarthestAhead = competitorLeg.getWindwardDistanceToCompetitorFarthestAhead(legFinishTime, WindPositionMode.LEG_MIDDLE, rankingMetricAtLegFinishTime);
+            // TODO bug1018 decide whether the following field should be renamed to express that it's not the distance to the "leader" but the competitor farthest ahead; discussed with Simon on 2015-05-28; Simon says we leave it like this for now
+            addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToCompetitorFarthestAhead != null ? windwardDistanceToCompetitorFarthestAhead.getMeters() : 0);
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());
 

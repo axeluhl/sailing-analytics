@@ -93,7 +93,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String gapToLeaderInSeconds();
     String velocityMadeGoodInKnots();
     String windwardDistanceToGoInMeters();
-    String windwardDistanceToLeaderInMeters();
+    String windwardDistanceToCompetitorFarthestAheadInMeters();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();

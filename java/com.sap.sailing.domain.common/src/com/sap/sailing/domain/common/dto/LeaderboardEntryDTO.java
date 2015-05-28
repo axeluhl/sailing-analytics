@@ -42,7 +42,7 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public boolean discarded;
     
-    public Double windwardDistanceToOverallLeaderInMeters;
+    public Double windwardDistanceToCompetitorFarthestAheadInMeters;
     
     public Double averageAbsoluteCrossTrackErrorInMeters;
     
@@ -179,7 +179,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
-                + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters
+                + ((windwardDistanceToCompetitorFarthestAheadInMeters == null) ? 0 : windwardDistanceToCompetitorFarthestAheadInMeters
                         .hashCode());
         return result;
     }
@@ -297,10 +297,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!totalPoints.equals(other.totalPoints))
             return false;
-        if (windwardDistanceToOverallLeaderInMeters == null) {
-            if (other.windwardDistanceToOverallLeaderInMeters != null)
+        if (windwardDistanceToCompetitorFarthestAheadInMeters == null) {
+            if (other.windwardDistanceToCompetitorFarthestAheadInMeters != null)
                 return false;
-        } else if (!windwardDistanceToOverallLeaderInMeters.equals(other.windwardDistanceToOverallLeaderInMeters))
+        } else if (!windwardDistanceToCompetitorFarthestAheadInMeters.equals(other.windwardDistanceToCompetitorFarthestAheadInMeters))
             return false;
         return true;
     }

@@ -2726,10 +2726,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
-            case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+            case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
                 if (trackedLeg != null) {
                     final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;
