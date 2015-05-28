@@ -11,13 +11,12 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -37,7 +36,7 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForSpeed;
     private final ClusterGroup<Bearing> angleClusterGroup;
-    private final BearingWithConfidence<Integer> trueWindAngle;
+    private final BearingWithConfidence<Void> absTrueWindAngle;
     private final WindWithConfidence<Pair<Position, TimePoint>> wind;
     private final SpeedWithBearingWithConfidence<TimePoint> boatSpeed;
     private LegType legType;
@@ -50,7 +49,7 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
         this.windSpeedClusterGroup = windSpeedClusterGroup;
         this.angleClusterGroup = angleClusterGroup;
         this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
-        this.trueWindAngle = computeTrueWindAngle();
+        this.absTrueWindAngle = computeTrueWindAngleAbsolute();
         this.wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForSpeed);
         this.boatSpeed = computeBoatSpeed();
     }
@@ -67,19 +66,22 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
         return competitor;
     }
 
-    public BearingWithConfidence<Integer> getAngleToTheWind() {
-        return trueWindAngle;
+    public BearingWithConfidence<Void> getAbsoluteAngleToTheWind() {
+        return absTrueWindAngle;
     }
 
-    private BearingWithConfidence<Integer> computeTrueWindAngle() {
-        SpeedWithBearing boatSpeed = race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
+    private BearingWithConfidence<Void> computeTrueWindAngleAbsolute() {
+        BearingWithConfidenceImpl<Void> result = null;
+        Bearing bearing;
+        try {
+            Bearing realBearing = race.getCurrentLeg(competitor, fix.getTimePoint()).getBeatAngle(fix.getTimePoint());
+            bearing = new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
+        } catch (NoWindException e) {
+            bearing = null;
+        }
         WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint());
-        
-        BearingWithConfidenceImpl<Integer> result = null;
-        if (wind != null && boatSpeed != null) {
-            Bearing bearing = boatSpeed.getBearing();
-            Bearing difference = wind.getObject().getFrom().getDifferenceTo(bearing);
-            result = new BearingWithConfidenceImpl<Integer>(difference, wind.getConfidence(), 0);
+        if (bearing != null && wind != null) {
+            result = new BearingWithConfidenceImpl<Void>(bearing, wind.getConfidence(), null);
         }
         return result;
     }
@@ -136,15 +138,6 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     }
 
     @Override
-    public Tack getTack() {
-        return getTack(getAngleToTheWind().getObject());
-    }
-
-    public static Tack getTack(Bearing angleDifferenceWindToBoat) {
-        return angleDifferenceWindToBoat.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
-    }
-
-    @Override
     public LegType getLegType() {
         LegType result = null;
         if (legType == null) {
@@ -167,7 +160,7 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
 
     @Override
     public Cluster<Bearing> getAngleCluster() {
-        return angleClusterGroup.getClusterFor(getAngleToTheWind().getObject());
+        return angleClusterGroup.getClusterFor(getAbsoluteAngleToTheWind().getObject());
     }
 
 }

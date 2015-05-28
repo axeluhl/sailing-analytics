@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -60,9 +62,19 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
-        return polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack, useRegressionForSpeed);
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
+        SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround = polarDataMiner
+                .getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, useRegressionForSpeed);
+        if ((tack == Tack.PORT && legType == LegType.UPWIND) || (tack == Tack.STARBOARD && legType == LegType.DOWNWIND)) {
+            DegreeBearingImpl bearing = new DegreeBearingImpl(-averageSpeedAndCourseOverGround.getObject().getBearing()
+                    .getDegrees());
+            KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(averageSpeedAndCourseOverGround.getObject()
+                    .getKnots(), bearing);
+            averageSpeedAndCourseOverGround = new SpeedWithBearingWithConfidenceImpl<Void>(speed,
+                    averageSpeedAndCourseOverGround.getConfidence(), null);
+        }
+        return averageSpeedAndCourseOverGround;
     }
 
 
@@ -139,15 +151,15 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
-        return polarDataMiner.getSpeedRegressionFunction(boatClass, legType, tack);
+        return polarDataMiner.getSpeedRegressionFunction(boatClass, legType);
     }
     
     @Override
-    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
-        return polarDataMiner.getAngleRegressionFunction(boatClass, legType, tack);
+        return polarDataMiner.getAngleRegressionFunction(boatClass, legType);
     }
     
     @Override
@@ -171,14 +183,9 @@ public class PolarDataServiceImpl implements PolarDataService {
         if (boatClass == null || windSpeed == null) {
             throw new IllegalArgumentException("Boatclass and windspeed cannot be null.");
         }
-        SpeedWithBearingWithConfidence<Void> port = getAverageSpeedWithBearing(boatClass, windSpeed, legType, Tack.PORT);
-        SpeedWithBearingWithConfidence<Void> starboard = getAverageSpeedWithBearing(boatClass, windSpeed, legType,
-                Tack.STARBOARD);
-        double angleSumInDeg = Math.abs(port.getObject().getBearing().getDegrees())
-                + Math.abs(starboard.getObject().getBearing().getDegrees());
-        Bearing bearing = new DegreeBearingImpl(angleSumInDeg);
-        double confidence = (port.getConfidence() + starboard.getConfidence()) / 2;
-        BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing, confidence,
+        SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, true);
+        Bearing bearing = new DegreeBearingImpl(speed.getObject().getBearing().getDegrees() * 2);
+        BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing, speed.getConfidence(),
                 null);
         return bearingWithConfidence;
     }

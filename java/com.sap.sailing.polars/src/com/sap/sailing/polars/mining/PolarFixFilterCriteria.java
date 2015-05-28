@@ -69,7 +69,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     }
 
     private void checkForAbnormalFixesAndLog(GPSFixMovingWithPolarContext element) {
-        double twa = element.getAngleToTheWind().getObject().getDegrees();
+        double twa = element.getAbsoluteAngleToTheWind().getObject().getDegrees();
         if (element.getLegType() == LegType.DOWNWIND) {
             if (Math.abs(twa) < 100) {
                 logger.warning(String.format(
@@ -93,7 +93,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     }
 
     private boolean importantDataIsNotNull(GPSFixMovingWithPolarContext element) {
-        BearingWithConfidence<Integer> angleToTheWind = element.getAngleToTheWind();
+        BearingWithConfidence<Void> angleToTheWind = element.getAbsoluteAngleToTheWind();
         WindWithConfidence<Pair<Position, TimePoint>> windSpeed = element.getWind();
         SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = element.getBoatSpeed();
         boolean result = false;

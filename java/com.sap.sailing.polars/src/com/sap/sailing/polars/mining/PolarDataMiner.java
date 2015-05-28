@@ -38,8 +38,8 @@ import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -212,7 +212,7 @@ public class PolarDataMiner {
 
 
     private ClusterGroup<Bearing> createAngleClusterGroup() {
-        return new BearingClusterGroup(-180, 180, 5);
+        return new BearingClusterGroup(0, 180, 5);
     }
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
@@ -392,24 +392,24 @@ public class PolarDataMiner {
     }
 
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {  
+            Speed windSpeed, LegType legType, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {  
         SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround  = null;
         if (useRegressionForSpeed) {
-            averageSpeedAndCourseOverGround  = cubicRegressionPerCourseProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
+            averageSpeedAndCourseOverGround  = cubicRegressionPerCourseProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType);
         } else {
-            averageSpeedAndCourseOverGround  = movingAverageProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
+            averageSpeedAndCourseOverGround  = movingAverageProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType);
         }
         return averageSpeedAndCourseOverGround;
     }
 
-    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
-        return cubicRegressionPerCourseProcessor.getSpeedRegressionFunction(boatClass, legType, tack);
+        return cubicRegressionPerCourseProcessor.getSpeedRegressionFunction(boatClass, legType);
     }
 
-    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
-        return cubicRegressionPerCourseProcessor.getAngleRegressionFunction(boatClass, legType, tack);
+        return cubicRegressionPerCourseProcessor.getAngleRegressionFunction(boatClass, legType);
     }
     
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
