@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -293,14 +294,16 @@ public class RegattaDetailsComposite extends Composite {
         final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
-        final List<String> raceColumnsToAdd = new ArrayList<String>();
-        final List<String> raceColumnsToRemove = new ArrayList<String>();
+        final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
+        final List<String> raceColumnsToRemove = new ArrayList<>();
         
         // TODO see bug 1447: the resulting order currently doesn't necessarily match the order of races in this dialog!
+        int insertIndex = 0;
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
             if (!existingRaceColumns.contains(newRaceColumn)) {
-                raceColumnsToAdd.add(newRaceColumn.getName());
+                raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), insertIndex));
             }
+            insertIndex++;
         }
         for (RaceColumnDTO existingRaceColumn : existingRaceColumns) {
             if (!newRaceColumns.contains(existingRaceColumn)) {
@@ -318,32 +321,32 @@ public class RegattaDetailsComposite extends Composite {
             racesToRemove.append(raceColumnToRemove);
         }
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
-            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnsToAdd,
-                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to add race columns " + raceColumnsToAdd
-                                    + " to series " + series.getName() + ": " + caught.getMessage());
-
-                        }
-
-                        @Override
-                        public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    });
-
+            // first remove:
             sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove race columns " + raceColumnsToAdd
+                            errorReporter.reportError("Error trying to remove race columns " + raceColumnNamesToAddWithInsertIndex
                                     + " from series " + series.getName() + ": " + caught.getMessage());
                         }
 
                         @Override
                         public void onSuccess(Void v) {
-                            regattaRefresher.fillRegattas();
+                            // when successfully removed, insert:
+                            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
+                                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
+                                                    + " to series " + series.getName() + ": " + caught.getMessage());
+
+                                        }
+
+                                        @Override
+                                        public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
+                                            regattaRefresher.fillRegattas();
+                                        }
+                                    });
                         }
                     });
             if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged

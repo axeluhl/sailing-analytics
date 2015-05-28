@@ -9,8 +9,18 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColumnInSeries> {
     private static final long serialVersionUID = 8987540636040301063L;
     
+    /**
+     * -1 means append
+     */
+    private final int insertIndex;
+    
     public AddColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        this(/* insertIndex==-1 means append */ -1, regattaIdentifier, seriesName, columnName);
+    }
+    
+    public AddColumnToSeries(int insertIndex, RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         super(regattaIdentifier, seriesName, columnName);
+        this.insertIndex = insertIndex;
     }
 
     @Override
@@ -18,7 +28,11 @@ public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColum
         RaceColumnInSeries result = null;
         Series series = getSeries(toState);
         if (series != null) {
-            result = series.addRaceColumn(getColumnName(), toState);
+            if (insertIndex == -1) {
+                result = series.addRaceColumn(getColumnName(), toState);
+            } else {
+                result = series.addRaceColumn(insertIndex, getColumnName(), toState);
+            }
             if (result != null && series.getRegatta().isPersistent()) {
                 toState.updateStoredRegatta(series.getRegatta());
             }

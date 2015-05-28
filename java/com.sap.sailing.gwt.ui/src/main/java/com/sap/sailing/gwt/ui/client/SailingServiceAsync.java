@@ -398,7 +398,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
             RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
 
-    void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
+    void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<Pair<String, Integer>> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
     
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
