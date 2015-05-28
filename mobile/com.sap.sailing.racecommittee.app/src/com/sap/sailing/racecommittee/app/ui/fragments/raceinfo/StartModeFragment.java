@@ -106,11 +106,17 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
 
     @Override
     public void onClick(StartMode startMode) {
+        boolean sameFlag = false;
+        if (startMode.getFlag() == mProcedure.getStartModeFlag()) {
+            sameFlag = true;
+        }
         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
         if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
             openMainScheduleFragment();
-//        } else {
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        } else {
+            if (sameFlag) {
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            }
         }
     }
 

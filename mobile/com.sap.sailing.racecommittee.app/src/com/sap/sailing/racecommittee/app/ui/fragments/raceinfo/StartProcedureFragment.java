@@ -104,12 +104,20 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
 
     @Override
     public void onClick(RacingProcedureType procedureType, String className) {
+        boolean sameProcedure = false;
+        if (getRaceState().getRacingProcedure().getType() == procedureType) {
+            sameProcedure = true;
+        }
         getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         if (TextUtils.isEmpty(className)) {
             if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                 openMainScheduleFragment();
             } else {
-                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
+                if (sameProcedure) {
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                } else {
+                    getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
+                }
             }
         } else {
             if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {

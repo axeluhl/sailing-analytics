@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.widget.TextView;
@@ -32,17 +33,17 @@ import java.util.List;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
-    private final RaceStateChangedListener raceStateChangedListener;
-    private final ProcedureChangedListener procedureListener;
+    private final RaceStateChangedListener mRaceStateChangedListener;
+    private final ProcedureChangedListener mProcedureListener;
 
-    protected RaceInfoListener infoListener;
-    private FlagPoleCache flagPoleCache;
+    protected RaceInfoListener mInfoListener;
+    private FlagPoleCache mFlagPoleCache;
 
     public BaseRaceInfoRaceFragment() {
-        raceStateChangedListener = new RaceStateChangedListener();
-        procedureListener = new ProcedureChangedListener();
+        mRaceStateChangedListener = new RaceStateChangedListener();
+        mProcedureListener = new ProcedureChangedListener();
 
-        flagPoleCache = null;
+        mFlagPoleCache = null;
     }
 
     @Override
@@ -59,7 +60,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         super.onAttach(activity);
 
         if (activity instanceof RaceInfoListener) {
-            this.infoListener = (RaceInfoListener) activity;
+            this.mInfoListener = (RaceInfoListener) activity;
         } else {
             throw new UnsupportedOperationException(String.format("%s must implement %s", activity, RaceInfoListener.class.getName()));
         }
@@ -71,16 +72,16 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
         setupUi();
 
-        getRaceState().addChangedListener(raceStateChangedListener);
-        getRacingProcedure().addChangedListener(procedureListener);
+        getRaceState().addChangedListener(mRaceStateChangedListener);
+        getRacingProcedure().addChangedListener(mProcedureListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        getRaceState().removeChangedListener(raceStateChangedListener);
-        getRacingProcedure().removeChangedListener(procedureListener);
+        getRaceState().removeChangedListener(mRaceStateChangedListener);
+        getRacingProcedure().removeChangedListener(mProcedureListener);
     }
 
     protected ProcedureType getRacingProcedure() {
@@ -96,7 +97,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     protected abstract void setupUi();
 
     protected boolean updateFlagChangesCountdown(TextView targetView) {
-        if (flagPoleCache == null) {
+        if (mFlagPoleCache == null) {
             ExLog.i(getActivity(), BaseRaceInfoRaceFragment.class.getSimpleName(), "Refilling next-flag cache.");
             TimePoint now = MillisecondsTimePoint.now();
             TimePoint startTime = getRaceState().getStartTime();
@@ -107,15 +108,15 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
                 renderFlagChangesCountdown(targetView, changeAt, changePole);
-                flagPoleCache = new FlagPoleCache(changePole, changeAt);
+                mFlagPoleCache = new FlagPoleCache(changePole, changeAt);
                 return true;
             } else {
-                flagPoleCache = new FlagPoleCache();
+                mFlagPoleCache = new FlagPoleCache();
             }
             return false;
-        } else if (flagPoleCache.hasNextFlag) {
-            TimePoint changeAt = flagPoleCache.timePoint;
-            FlagPole changePole = flagPoleCache.flagPole;
+        } else if (mFlagPoleCache.hasNextFlag) {
+            TimePoint changeAt = mFlagPoleCache.timePoint;
+            FlagPole changePole = mFlagPoleCache.flagPole;
 
             renderFlagChangesCountdown(targetView, changeAt, changePole);
             return true;
@@ -158,6 +159,12 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         }
     }
 
+    private void showMainContent() {
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        RacingActivity activity = (RacingActivity) getActivity();
+        activity.processIntent(intent);
+    }
+
     private class FlagPoleCache {
         public final FlagPole flagPole;
         public final TimePoint timePoint;
@@ -185,14 +192,16 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             super.onStatusChanged(state);
 
             switch (state.getStatus()) {
-            case RUNNING:
+            case UNSCHEDULED:
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (activity != null) {
+                    activity.onRaceItemClicked(getRace(), true);
+                }
                 break;
 
             default:
-                RacingActivity activity = (RacingActivity) getActivity();
-                if (activity != null) {
-                    activity.onRaceItemClicked(getRace());
-                }
+                showMainContent();
+                break;
             }
         }
 
@@ -200,14 +209,21 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         public void onCourseDesignChanged(ReadonlyRaceState state) {
             super.onCourseDesignChanged(state);
 
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            showMainContent();
         }
 
         @Override
         public void onWindFixChanged(ReadonlyRaceState state) {
             super.onWindFixChanged(state);
 
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            showMainContent();
+        }
+
+        @Override
+        public void onRacingProcedureChanged(ReadonlyRaceState state) {
+            super.onRacingProcedureChanged(state);
+
+            showMainContent();
         }
     }
 
@@ -215,27 +231,33 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
         @Override
         public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
+            super.onActiveFlagsChanged(racingProcedure);
+
             setupUi();
-            flagPoleCache = null;
+            mFlagPoleCache = null;
 
             if (getRaceState().getStatus() == RaceLogRaceStatus.SCHEDULED) {
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                showMainContent();
             }
         }
 
         @Override
         public void onIndividualRecallDisplayed(ReadonlyRacingProcedure racingProcedure) {
+            super.onIndividualRecallDisplayed(racingProcedure);
+
             onIndividualRecallChanged(true);
 
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            showMainContent();
             sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         }
 
         @Override
         public void onIndividualRecallRemoved(ReadonlyRacingProcedure racingProcedure) {
+            super.onIndividualRecallRemoved(racingProcedure);
+
             onIndividualRecallChanged(false);
 
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            showMainContent();
             sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         }
     }
