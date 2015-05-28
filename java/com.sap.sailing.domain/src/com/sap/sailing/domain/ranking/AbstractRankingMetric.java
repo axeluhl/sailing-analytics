@@ -454,9 +454,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     private Duration getDurationToReach(final Position windwardPositionToReachInWhosCurrentLeg, TimePoint timePoint,
             final TrackedLegOfCompetitor whosLeg, WindLegTypeAndLegBearingCache cache) {
         final Duration toEndOfLegOrTo;
-        final Speed currentVMG = whosLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
         final Speed averageVMG = whosLeg.getAverageVelocityMadeGood(timePoint, cache);
-        final Speed vmg = Double.isNaN(averageVMG.getKnots()) ? currentVMG : averageVMG;
+        final Speed vmg = Double.isNaN(averageVMG.getKnots()) ? /* default to current VMG */ whosLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache) : averageVMG;
         toEndOfLegOrTo = vmg.getDuration(
                 whosLeg.getTrackedLeg().getWindwardDistance(
                         getTrackedRace().getTrack(whosLeg.getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */true),
