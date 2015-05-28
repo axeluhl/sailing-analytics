@@ -69,8 +69,8 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
-        return trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, cache);
+            final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        return trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
     }
 
     @Override

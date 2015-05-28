@@ -178,7 +178,7 @@ public interface RankingMetric extends Serializable {
      * @param competitor
      *            the competitor for which to tell the gap to the leader in <code>competitor</code>'s own time
      *            
-     * @see #getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor, TimePoint, WindLegTypeAndLegBearingCache)
+     * @see #getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor, TimePoint, com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo.RankingInfo, WindLegTypeAndLegBearingCache)
      */
     default Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor) {
         return getGapToLeaderInOwnTime(rankingInfo, competitor, new LeaderboardDTOCalculationReuseCache(rankingInfo.getTimePoint()));
@@ -205,6 +205,10 @@ public interface RankingMetric extends Serializable {
      * handicap ranking is in effect) of the leg that the <code>competitor</code> is in at <code>timePoint</code> (or
      * the last leg if <code>timePoint</code> is after <code>competitor</code> has finished the race). Returns
      * <code>null</code> if <code>timePoint</code> is before <code>competitor</code> has started.
+     * 
+     * @param rankingInfo
+     *            tells about leader (by calculated time) and boat farthest ahead
      */
-    Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 }

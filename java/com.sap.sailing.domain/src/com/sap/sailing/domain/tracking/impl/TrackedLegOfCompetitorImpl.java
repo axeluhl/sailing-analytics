@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -486,15 +487,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode)
-            throws NoWindException {
-        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+    public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
+            final RankingInfo rankingInfo, WindPositionMode windPositionMode) throws NoWindException {
+        return getGapToLeader(timePoint, leaderInLegAtTimePoint, windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
     public Duration getGapToLeader(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        return getGapToLeader(timePoint, ()->leaderInLegAtTimePoint, windPositionMode, cache);
+            WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        return getGapToLeader(timePoint, ()->leaderInLegAtTimePoint, windPositionMode, rankingInfo, cache);
     }
 
     @FunctionalInterface
@@ -503,17 +504,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode) {
-        return getGapToLeader(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+    public Duration getGapToLeader(final TimePoint timePoint, final RankingInfo rankingInfo, WindPositionMode windPositionMode) {
+        return getGapToLeader(timePoint, windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
-    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeader(final TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         return getGapToLeader(timePoint, ()->getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint),
-                windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+                windPositionMode, rankingInfo, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
-    private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    private Duration getGapToLeader(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         // If a competitor already completed this leg, compute the estimated arrival time at the
         // end of this leg and compare to the first mark passing for the end of this leg; if this leg's competitor also already
         // finished the leg, return the difference between this competitor's leg completion time point and the leader's completion

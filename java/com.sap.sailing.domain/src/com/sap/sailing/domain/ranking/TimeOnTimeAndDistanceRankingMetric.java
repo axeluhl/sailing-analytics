@@ -376,12 +376,12 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         final Duration result;
         if (getTrackedRace().getStartOfRace() == null || !trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
             result = null;
         } else {
-            // FIXME need to calculate the ranking stuff only once for requests for all competitors to this method, or else we'll end up with n^2 effort
             final Duration raceDurationAtTimePoint = getTrackedRace().getStartOfRace().until(timePoint);
             final Competitor farthestAheadOrEarliestLegFinisher = getCompetitorFarthestAheadInLeg(trackedLegOfCompetitor.getTrackedLeg(), timePoint, cache);
             final TrackedLegOfCompetitor tlocOfFarthestAhead = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(farthestAheadOrEarliestLegFinisher);
@@ -393,6 +393,9 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             // Consider all competitors, regardless of whether they have started the leg or not; a competitor in a previous
             // leg may well be the race leader. However, if a competitor has finished the leg already, use the finishing time
             // point for that competitor.
+            // FIXME need to calculate the ranking stuff only once for requests for all competitors to this method, or else we'll end up with n^2 effort
+            // FIXME The competitor iteration is only necessary here because we need to know the "leader"; other than that, computing things for the leader and the trackedLegOfCompetitor's competitor is sufficient here
+            // FIXME Grab the leader information from RankingInfo; CAUTION: leg leader is not necessarily identical to race leader! RankingInfo may need another field for each leg leader
             for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
                 final TrackedLegOfCompetitor tloc = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(c);
                 if (tloc.hasStartedLeg(timePoint)) {
@@ -410,9 +413,9 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 }
             }
             // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
-            Comparator<Duration> durationComparatorNUllsLast = Comparator.nullsLast(Comparator.naturalOrder());
+            Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
             final Competitor leader = correctedTimeToReachFarthestAheadInLeg.entrySet().stream()
-                    .sorted((e1, e2) -> durationComparatorNUllsLast.compare(e1.getValue(), e2.getValue())).findFirst().get().getKey();
+                    .sorted((e1, e2) -> durationComparatorNullsLast.compare(e1.getValue(), e2.getValue())).findFirst().get().getKey();
             result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), leader,
                     actualTimeFromRaceStartToReachFarthestAheadInLeg.get(trackedLegOfCompetitor.getCompetitor()),
                     actualTimeFromRaceStartToReachFarthestAheadInLeg.get(leader),
