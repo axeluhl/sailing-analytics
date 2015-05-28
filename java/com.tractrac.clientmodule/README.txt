@@ -17,6 +17,66 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.11 ***************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features. 
+These features add methods to the API, but they keep the backward compatibility. 
+This version provides a new JavaDoc version.
+
+Release date: 27/05/2015
+Build number: 10715
+
+ 1) Features 
+ 
+ - Adding the method IRace.setInitialized(boolean) that allows to load control point positions despite of
+ the race is not initialized (Requested by Jorge Piera, 17/05/2015)
+ 
+ 1) Bugs 
+ 
+  - The subscription library sends (per each control point) an "ControlPointPosition" event with the positions 
+ of the parameters with a time stamp equals to the tracking start time. If the control  point is static (it 
+ doesn't have a tracker), it means that this control won't exist until the tracking start time arrives: it is 
+ not possible to open a subscription connection before the tracking start time and see the control point. But 
+ if the control is static,  it has to exist during all the event. Now when a control is static, the subscription 
+ library sends a "ControlPointPosition" event with the event start time and then it sends other "ControlPointPosition"
+ event with the tracking start time. It allows to connect with future races and see the static controls (Requested 
+ by Jakob Odum, 25/02/2015)
+   
+ - It is possible to add two or more subscriptions for the same subscriber (Reported by Jorge Piera, 02/05/2015)
+ 
+ - An initialized race is a race where the tracking is on. A not 
+initialized race is a race where the tracking is off. If a race is in a 
+not initialized state and it is loaded using the parameters file, the 
+library assumes that the consumer application wants to load the race and 
+it changes its initialized  attribute to true (the tracking is on). This 
+assumption is wrong. Now, if a race is not initialized it will continue 
+being uninitialized until the event administrator changes its state to 
+initialized.
+    When a race changes its state from not initialized to initialized, 
+some events are thrown in the system:
+       1. 
+IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, 
+IStartStopData): where the IStartStopData object contains the new 
+tracking interval.
+       2. IRacesListener.startTracking(UUID): the UUID is the race 
+identifier
+       3. IRacesListener.updateRace(IRace): IRace is the new updated 
+race where the IRace.isInitialized is true and it has values for both 
+the getTrackingStartTime and the getTrackingEndTime methods.
+    When a race changes its state from initialized to not initialized, 
+the following events are thrown in the system:
+       1. 
+IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, 
+IStartStopData): where the IStartStopData object contains the null 
+interval ([0, 0])
+       2. IRacesListener.abandonRace(UUID): the UUID is the race identifier
+       3. IRacesListener.updateRace(IRace): IRace is the new updated 
+race where the IRace.isInitialized is false and it has null values for 
+both the getTrackingStartTime and the getTrackingEndTime methods.
+   (Reported by Axel Uhl, 17/05/2015)
+
+ 
+********************************************
 ************* TracAPI 3.0.10 ***************
 ******************************************** 
 This is a final version. Only fixes bugs in the implementation
