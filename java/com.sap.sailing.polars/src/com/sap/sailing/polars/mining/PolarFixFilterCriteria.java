@@ -229,7 +229,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         TimePoint raceStartTime = race.getStartOfRace();
         TimePoint startTime;
         TimePoint passedStartTimePoint = startPassing.getTimePoint();
-        if (passedStartTimePoint.after(raceStartTime)) {
+        if (raceStartTime == null || passedStartTimePoint.after(raceStartTime)) {
             startTime = passedStartTimePoint;
         } else {
             startTime = raceStartTime;
