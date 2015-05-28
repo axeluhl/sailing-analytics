@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public abstract class NewsEntryDTO implements DTO {
+public abstract class NewsEntryDTO implements IsSerializable {
     
     private Date timestamp;
 

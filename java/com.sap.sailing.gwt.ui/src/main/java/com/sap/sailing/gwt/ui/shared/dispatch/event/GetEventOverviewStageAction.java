@@ -131,6 +131,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 
     @GwtIncompatible
     private void addNews(EventOverviewStageDTO stage) {
+        stage.addNews(new InfoNewsEntryDTO("Sturm", "Heute keine Rennen mehr", new Date(new Date().getTime() - 125000)));
         stage.addNews(new InfoNewsEntryDTO("Abendbespaßung", "Es gibt Freibier und Wurst!!!", new Date()));
         stage.addNews(new LeaderboardNewsEntryDTO("Test LB", "505 m", BoatClassMasterdata._5O5.getDisplayName(), new Date(new Date().getTime() - 120000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS));
         
@@ -139,7 +140,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         stage.addNews(lbEntryWithExternalLink);
         
         CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null);
-        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R7", "R7 - Gold", BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
         stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R6", "R6 - Gold", BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
+        stage.addNews(new RaceCompetitorNewsEntryDTO("Some regatta", "R7", "R7 - Gold", BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
     }
 }

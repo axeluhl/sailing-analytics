@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
@@ -36,6 +37,15 @@ public class EventOverviewStageDTO implements DTO {
     }
     
     public void addNews(NewsEntryDTO newsEntry) {
+        for(int i = 0; i < news.size(); i++) {
+            NewsEntryDTO foundEntry = news.get(i);
+            Date foundTimestamp = foundEntry.getTimestamp();
+            Date timestamp = newsEntry.getTimestamp();
+            if(timestamp == null || (foundTimestamp != null && timestamp.compareTo(foundTimestamp)>0)) {
+                news.add(i, newsEntry);
+                return;
+            }
+        }
         news.add(newsEntry);
     }
 }
