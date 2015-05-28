@@ -36,7 +36,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     protected ArrayList<T> namedList;
     private ItemSelectedListener<T> listener;
     private NamedArrayAdapter<T> listAdapter;
-    private View lastSelected;
     private int mSelectedIndex = -1;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
@@ -136,36 +135,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         outState.putInt("position", mSelectedIndex);
 
         super.onSaveInstanceState(outState);
-    }
-
-    private void setStyleClicked(View view) {
-        TextView textView;
-        ImageView imageView;
-
-        // reset last styles:
-        if (lastSelected != null) {
-            textView = (TextView) lastSelected.findViewById(R.id.list_item_subtitle);
-            if (textView != null) {
-                textView.setTextColor(ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray));
-            }
-
-            imageView = (ImageView) lastSelected.findViewById(R.id.checked);
-            if (imageView != null) {
-                imageView.setVisibility(View.INVISIBLE);
-            }
-        }
-
-        // set new styles
-        textView = (TextView) view.findViewById(R.id.list_item_subtitle);
-        if (textView != null) {
-            textView.setTextColor(ThemeHelper.getColor(getActivity(), R.attr.white));
-        }
-        imageView = (ImageView) view.findViewById(R.id.checked);
-        if (imageView != null) {
-            imageView.setVisibility(View.VISIBLE);
-        }
-
-        lastSelected = view;
     }
 
     public void setupLoader() {
