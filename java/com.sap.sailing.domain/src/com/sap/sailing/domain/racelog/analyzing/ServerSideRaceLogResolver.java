@@ -20,7 +20,7 @@ public class ServerSideRaceLogResolver implements RaceLogResolver {
             return null;
         }
         
-        return regattaLike.getRacelog(identifier);
+        return regattaLike.getRacelog(identifier.getRaceColumnName(), identifier.getFleetName());
     }
 
 }

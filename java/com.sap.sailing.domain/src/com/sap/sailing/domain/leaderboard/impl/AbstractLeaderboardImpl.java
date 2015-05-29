@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 
@@ -26,7 +28,7 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl {
+public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl implements HasRegattaLike{
     private static final long serialVersionUID = -328091952760083438L;
 
     /**
@@ -173,5 +175,12 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         }
         return delayToLiveInMillisForLatestRace;
     }
-
+    
+    @Override
+    public RaceLog getRacelog(String raceColumnName, String fleetName){
+        RaceColumn raceColumn = getRaceColumnByName(raceColumnName);
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        
+        return raceColumn.getRaceLog(fleet);
+    }
 }
