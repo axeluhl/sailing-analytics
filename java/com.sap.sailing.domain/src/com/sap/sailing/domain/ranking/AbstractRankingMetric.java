@@ -224,7 +224,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                     (c1, c2) -> durationComparatorNullsLast.compare(
                             competitorRankingInfo.get(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead(),
                             competitorRankingInfo.get(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead())).
-                      findFirst().get();
+                      findFirst().orElse(null);
         }
 
         @Override

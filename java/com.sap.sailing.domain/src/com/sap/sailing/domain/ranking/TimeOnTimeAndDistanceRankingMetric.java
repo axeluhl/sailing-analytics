@@ -252,13 +252,19 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      */
     @Override
     public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+        final Duration result;
         // actual times and common distance:
         final Competitor leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead = rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
-        final Duration t_k = rankingInfo.getCompetitorRankingInfo().apply(leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead).
-                                             getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
-        final Duration t_i = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
-        final Distance d   = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
-        return getGapToCompetitorInOwnTime(competitor, leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead, t_i, t_k, d);
+        if (leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead == null) {
+            result = null;
+        } else {
+            final Duration t_k = rankingInfo.getCompetitorRankingInfo().apply(leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead).
+                                                 getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+            final Duration t_i = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
+            final Distance d   = rankingInfo.getCompetitorRankingInfo().apply(rankingInfo.getCompetitorFarthestAhead()).getWindwardDistanceSailed();
+            result = getGapToCompetitorInOwnTime(competitor, leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead, t_i, t_k, d);
+        }
+        return result;
     }
 
     /**
