@@ -1,11 +1,8 @@
 package com.sap.sailing.domain.racelog.analyzing.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,23 +10,13 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifierImpl;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.domain.abstractlog.race.state.RaceState;
-import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
-import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -41,8 +28,6 @@ public class DependentStartTimeFinderTest {
     private RaceLog raceLogC;
 
     private AbstractLogEventAuthor author;
-    private RaceLogEventFactory factory;
-    private ConfigurationLoader<RegattaConfiguration> configuration;
 
     private TimePoint nowMock;
     
@@ -51,9 +36,7 @@ public class DependentStartTimeFinderTest {
     @Before
     public void setUp() {
         author = new LogEventAuthorImpl("Test", 1);
-        factory = RaceLogEventFactory.INSTANCE;
-        configuration = new EmptyRegattaConfiguration();
-
+        
         raceLogA = new RaceLogImpl("raceLogA");
         raceLogB = new RaceLogImpl("raceLogB");
         raceLogC = new RaceLogImpl("raceLogC");
