@@ -48,6 +48,17 @@ public interface SharedResources extends ClientBundle {
         String spacermedium();
         String spacermediumbig();
         String spacerbig();
+        String spacermargin();
+        String spacermargintopsmall();
+        String spacermargintopmediumsmall();
+        String spacermargintopmedium();
+        String spacermargintopmediumbig();
+        String spacermargintopbig();
+        String spacermarginbottomsmall();
+        String spacermarginbottommediumsmall();
+        String spacermarginbottommedium();
+        String spacermarginbottommediumbig();
+        String spacermarginbottombig();
         String stickyheader();
         String slideto();
         String slidetonav();
