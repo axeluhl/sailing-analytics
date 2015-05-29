@@ -493,8 +493,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             WindLegTypeAndLegBearingCache cache) {
         assert legWho.hasStartedLeg(timePoint);
         assert legTo.hasStartedLeg(timePoint);
-        assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
-                getWindwardDistanceTraveled(legWho.getCompetitor(), legWho.hasFinishedLeg(timePoint)?legWho.getFinishTime():timePoint, cache)) >= 0;
         final Duration toEndOfLegOrTo;
         if (legTo.hasFinishedLeg(timePoint)) {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
@@ -503,6 +501,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 // who's leg finishing time is known; we don't need to extrapolate
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
+                assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
+                        getWindwardDistanceTraveled(legWho.getCompetitor(), legWho.hasFinishedLeg(timePoint)?legWho.getFinishTime():timePoint, cache)) >= 0;
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
                 // (if no average VMG can currently be computed, e.g., because the time point is exactly at the leg start)
                 final Position windwardPositionToReachInWhosCurrentLeg =
