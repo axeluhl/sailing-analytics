@@ -16,7 +16,6 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -77,7 +76,7 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
                     averageAngleContainers.put(key, averageAngleContainer);
                 }
             }
-            BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
+            BearingWithConfidence<Void> angleToTheWind = fix.getAbsoluteAngleToTheWind();
             WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWind();
             SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
             availableBoatClasses.add(element.getDataEntry().getBoatClass());
@@ -177,21 +176,20 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        SpeedWithBearingWithConfidence<Void> result = estimateSpeedAndAngle(boatClass, windSpeed, legType, tack);
+            Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
+        SpeedWithBearingWithConfidence<Void> result = estimateSpeedAndAngle(boatClass, windSpeed, legType);
         return result;
     }
 
-    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        GroupKey key = createGroupKey(boatClass, windSpeed, legType, tack);
+    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, windSpeed, legType);
         Bearing angleDiffTrueWindToBoat = estimateAngle(key);
         SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(key).getSpeedWithConfidence();
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(), angleDiffTrueWindToBoat);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
     }
     
-    private GroupKey createGroupKey(final BoatClass boatClass, final Speed windSpeed, final LegType legType,
-            final Tack tack) {
+    private GroupKey createGroupKey(final BoatClass boatClass, final Speed windSpeed, final LegType legType) {
         MovingAveragePolarClusterKey key = new MovingAveragePolarClusterKey() {
 
             @Override
@@ -202,11 +200,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
             @Override
             public Cluster<Speed> getWindSpeedCluster() {
                 return speedClusterGroup.getClusterFor(windSpeed);
-            }
-
-            @Override
-            public Tack getTack() {
-                return tack;
             }
 
             @Override
