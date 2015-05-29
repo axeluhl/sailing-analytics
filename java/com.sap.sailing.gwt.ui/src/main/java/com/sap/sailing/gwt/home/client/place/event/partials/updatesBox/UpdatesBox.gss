@@ -55,8 +55,8 @@
   text-decoration: none;
 }
 .updatesbox_item_icon {
-  max-width: 4em;
-  height: auto;
+  width: 3.333333333333333em;
+  height: 3.333333333333333em;
   position: absolute;
   top: 50%;
   left: 2.666666666666667em;
@@ -64,6 +64,11 @@
      -moz-transform: translate(-50%, -50%);
       -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-filter: grayscale(100%);
+          filter: grayscale(100%);
 }
 @media (max-width: 1190px) {
   .updatesbox_item_icon {

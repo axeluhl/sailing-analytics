@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -20,9 +19,9 @@ import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 
 public class UpdatesBoxItem extends Widget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -31,7 +30,7 @@ public class UpdatesBoxItem extends Widget {
     }
     
     @UiField AnchorElement link;
-    @UiField ImageElement icon;
+    @UiField DivElement icon;
     @UiField SpanElement titleUi;
     @UiField SpanElement boatClassUi;
     @UiField DivElement messageUi;
@@ -45,7 +44,7 @@ public class UpdatesBoxItem extends Widget {
         
         String boatClass = entry.getBoatClass();
         if(boatClass != null && !boatClass.isEmpty()) {
-            icon.setSrc(BoatClassImageResolver.getBoatClassIconResource(boatClass).getSafeUri().asString());
+            icon.getStyle().setBackgroundImage("url(\"" + BoatClassImageResolver.getBoatClassIconResource(boatClass).getSafeUri().asString() + "\")");
             boatClassUi.setInnerText(boatClass);
         } else {
             boatClassUi.removeFromParent();

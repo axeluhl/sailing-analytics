@@ -5,7 +5,7 @@
   <li class="{local_res.css.box_content_item}">
       <a ui:field="link" class="{local_res.css.updatesbox_item} {local_res.css.updatesbox_itemlink}">
         <!-- IF update.icon -->
-    <img ui:field="icon" src="images/home/news-i.png" class="{local_res.css.updatesbox_item_icon}" />
+    <div ui:field="icon" style="background-image: url('images/home/news-i.png')" class="{local_res.css.updatesbox_item_icon}" ></div>
     <div class="{local_res.css.updatesbox_item_content}">
       <b class="{local_res.css.updatesbox_item_content_text}">
         <span ui:field="titleUi"></span>
