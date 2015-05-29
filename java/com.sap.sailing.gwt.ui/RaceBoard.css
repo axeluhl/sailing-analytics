@@ -73,8 +73,8 @@ table {
 
 .MapSimulationLegendParentDiv {
 	padding-bottom: 10px;
-	padding-left: 10px;
-		pointer-events: none;
+	padding-right: 10px;
+	pointer-events: none;
 }
 
 .MapSimulationLegend {
