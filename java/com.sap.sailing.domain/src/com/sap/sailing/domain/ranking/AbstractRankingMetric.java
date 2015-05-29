@@ -285,7 +285,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      */
     private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
         final Map<Competitor, Distance> windwardDistanceTraveledPerCompetitor = new HashMap<>();
-        for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+        for (final Competitor competitor : getCompetitors()) {
             windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
         }
         final Comparator<Distance> nullsFirstDistanceComparator = Comparator.nullsFirst(Comparator.naturalOrder());
@@ -293,12 +293,19 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 windwardDistanceTraveledPerCompetitor.get(c2),
                 windwardDistanceTraveledPerCompetitor.get(c1));
     }
+
+    /**
+     * Fetches the competitors to consider for this ranking
+     */
+    protected Iterable<Competitor> getCompetitors() {
+        return getTrackedRace().getRace().getCompetitors();
+    }
     
     public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Map<Competitor, RankingMetric.CompetitorRankingInfo> result = new HashMap<>();
         Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
         Competitor competitorFarthestAhead = StreamSupport
-                .stream(getTrackedRace().getRace().getCompetitors().spliterator(), /* parallel */true).
+                .stream(getCompetitors().spliterator(), /* parallel */true).
                 sorted(oneDesignComparator).findFirst().get();
         final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
@@ -307,12 +314,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             actualRaceDuration = null;
         } else {
             actualRaceDuration = startOfRace.until(timePoint);
-            for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            for (Competitor competitor : getCompetitors()) {
                 final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
                         competitor, competitorFarthestAhead, timePoint, cache);
                 final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
                         : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
-                final Duration correctedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
+                final Duration calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
                         : getCalculatedTime(
                                 competitor,
                                 () -> getTrackedRace().getTrackedLeg(competitorFarthestAhead, timePoint).getLeg(),
@@ -320,14 +327,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                                         timePoint, /* extrapolate */true),
                                 totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead,
                                 totalWindwardDistanceTraveled);
-                final Duration correctedTime = getCalculatedTime(competitor,
+                final Duration calculatedTime = getCalculatedTime(competitor,
                         () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
                                 .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
                         actualRaceDuration, totalWindwardDistanceTraveled);
                 RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
-                        getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, correctedTime,
+                        getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, calculatedTime,
                         predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
-                        correctedEstimatedTimeWhenReachingCompetitorFarthestAhead);
+                        calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead);
                 result.put(competitor, rankingInfo);
             }
         }

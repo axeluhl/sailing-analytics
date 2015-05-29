@@ -137,7 +137,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd = getWindwardDistanceTraveled(
                         fastestCompetitorInLeg, timePoint, cache);
             }
-            for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            for (Competitor competitor : getCompetitors()) {
                 final TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
                 final Duration correctedTime;
                 if (competitorLeg != null && competitorLeg.hasStartedLeg(timePoint)) {
