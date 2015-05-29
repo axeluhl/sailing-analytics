@@ -982,7 +982,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD, new FormattedDoubleDetailTypeColumn(
                     DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                    new RaceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
+                    new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                     LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
         }
@@ -1291,7 +1291,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         }
 
-        private class RaceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds implements LegDetailField<Double> {
+        private class RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
