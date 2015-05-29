@@ -307,8 +307,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         }
         
         if (event instanceof RaceLogStartTimeEvent){
-            raceStateToObserve.removeChangedListener(raceStateToObserveListener);
-            raceStateToObserve = null;
+            if (raceStateToObserve != null){
+                raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+                raceStateToObserve = null;   
+            }
         }
     }
 

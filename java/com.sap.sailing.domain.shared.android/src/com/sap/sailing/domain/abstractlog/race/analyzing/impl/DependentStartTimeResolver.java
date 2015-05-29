@@ -21,6 +21,10 @@ public class DependentStartTimeResolver {
         RaceLog raceLog = raceLogResolver.resolve(identifier);
         StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
         TimePoint startTimeOfDependentRace = dependentStartTimeFinder.analyze();
+        
+        if (startTimeOfDependentRace == null){
+            return null;
+        }
 
         return startTimeOfDependentRace.plus(startTimeDifference);
     }
