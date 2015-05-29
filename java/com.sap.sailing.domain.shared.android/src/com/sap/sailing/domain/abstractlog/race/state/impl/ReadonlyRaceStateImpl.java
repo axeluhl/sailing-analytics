@@ -5,9 +5,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -118,6 +118,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
     private RaceLogResolver raceLogResolver;
+    
+    //For dependentStartTime
+    private ReadonlyRaceState raceStateToObserve;
+    private RaceStateChangedListener raceStateToObserveListener;
 
     private ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, RacingProcedureFactory procedureFactory) {
         this(raceLogResolver, raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */ true);
@@ -146,6 +150,13 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
+        
+        this.raceStateToObserveListener = new BaseRaceStateChangedListener() {
+            @Override
+            public void onStartTimeChanged(ReadonlyRaceState state) {
+                update();
+            }
+        };
 
         this.cachedRacingProcedureTypeNoFallback = determineInitialProcedureType();
         if (this.cachedRacingProcedureTypeNoFallback == null || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
@@ -285,6 +296,33 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     @Override
     public void eventAdded(RaceLogEvent event) {
         update();
+        
+        if (event instanceof RaceLogDependentStartTimeEvent){
+            setupListenersOnDependentRace(event);
+                            
+            // Register RaceStateListener
+            //set boolean listeningToDependentRace = true
+            //if is true and RaceLogDependentStartTimeEvent / RaceLogStartTimeEvent --> change listener/set false
+            //maybe send probe?
+        }
+        
+        if (event instanceof RaceLogStartTimeEvent){
+            raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+            raceStateToObserve = null;
+        }
+    }
+
+    private void setupListenersOnDependentRace(RaceLogEvent event) {
+        if (raceStateToObserve != null){
+            //Remove previous listeners
+            raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+        }
+        
+        RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) event;
+        RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentStartTimeEvent.getDependentOnRaceIdentifier());
+        
+        raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog);
+        raceStateToObserve.addChangedListener(raceStateToObserveListener);
     }
 
     @Override
