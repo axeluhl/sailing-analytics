@@ -861,8 +861,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
-                DetailType.RACE_TIME_TRAVELED, DetailType.RACE_CORRECTED_TIME_TRAVELED,
-                DetailType.RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
+                DetailType.RACE_TIME_TRAVELED, DetailType.RACE_CALCULATED_TIME_TRAVELED,
+                DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
@@ -977,11 +977,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             result.put(DetailType.RACE_TIME_TRAVELED, new TimeTraveledRaceColumn(getLeaderboardPanel(), this,
                     stringMessages, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE,
                     LEG_DETAIL_COLUMN_STYLE));
-            result.put(DetailType.RACE_CORRECTED_TIME_TRAVELED,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CORRECTED_TIME_TRAVELED, new RaceCorrectedTimeTraveledInSeconds(),
+            result.put(DetailType.RACE_CALCULATED_TIME_TRAVELED,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED, new RaceCorrectedTimeTraveledInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.RACE_CORRECTED_TIME_TRAVELED, new FormattedDoubleDetailTypeColumn(
-                    DetailType.RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
+            result.put(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD, new FormattedDoubleDetailTypeColumn(
+                    DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                     new RaceCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                     LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
@@ -1285,7 +1285,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
-                    result = fieldsForRace.correctedTime == null ? null : fieldsForRace.correctedTime.asSeconds();
+                    result = fieldsForRace.calculatedTime == null ? null : fieldsForRace.calculatedTime.asSeconds();
                 }
                 return result;
             }
@@ -1297,8 +1297,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
-                    result = fieldsForRace.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null ? null
-                            : fieldsForRace.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.asSeconds();
+                    result = fieldsForRace.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null ? null
+                            : fieldsForRace.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.asSeconds();
                 }
                 return result;
             }

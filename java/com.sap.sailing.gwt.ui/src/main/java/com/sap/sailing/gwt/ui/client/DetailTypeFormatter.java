@@ -128,9 +128,9 @@ public class DetailTypeFormatter {
             return stringMessages.speedOverGroundFiveSecondsBeforeStart();
         case RACE_TIME_TRAVELED:
             return stringMessages.time();
-        case RACE_CORRECTED_TIME_TRAVELED:
+        case RACE_CALCULATED_TIME_TRAVELED:
             return stringMessages.calculatedTimeTraveled();
-        case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
         case RACE_TIME_TRAVELED_DOWNWIND:
             return stringMessages.timeDownwind();
@@ -200,13 +200,13 @@ public class DetailTypeFormatter {
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case TIME_TRAVELED:
         case CORRECTED_TIME_TRAVELED:
-        case RACE_CORRECTED_TIME_TRAVELED:
+        case RACE_CALCULATED_TIME_TRAVELED:
         case RACE_TIME_TRAVELED:
         case RACE_TIME_TRAVELED_DOWNWIND:
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
-        case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.secondsUnit();
 
         case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
@@ -326,9 +326,9 @@ public class DetailTypeFormatter {
             return stringMessages.raceDistanceTraveledIncludingGateStartTooltip();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
-        case RACE_CORRECTED_TIME_TRAVELED:
+        case RACE_CALCULATED_TIME_TRAVELED:
             return stringMessages.calculatedTimeTraveledTooltip();
-        case RACE_CORRECTED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
         case RACE_RANK:
             return stringMessages.rankTooltip();
