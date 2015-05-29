@@ -86,7 +86,7 @@ public class WindFragment extends BaseFragment
     private EditText mAddressInput;
     private TextView mWindSensor;
 
-    private WindMap windMap;
+    private WindMap mWindMap;
 
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
@@ -279,21 +279,23 @@ public class WindFragment extends BaseFragment
         } else {
             fragmentManager = getFragmentManager();
         }
-        windMap = (WindMap) fragmentManager.findFragmentById(R.id.windMap);
+        mWindMap = (WindMap) fragmentManager.findFragmentById(R.id.windMap);
 
-        windMap.getMap().setOnMapClickListener(this);
-        windMap.getMap().setOnMarkerDragListener(this);
-        UiSettings uiSettings = windMap.getMap().getUiSettings();
-        uiSettings.setAllGesturesEnabled(false);
-        uiSettings.setCompassEnabled(false);
-        uiSettings.setMapToolbarEnabled(false);
-        // windMap.setData(mapItems);
+        if (mWindMap != null) {
+            mWindMap.getMap().setOnMapClickListener(this);
+            mWindMap.getMap().setOnMarkerDragListener(this);
+            UiSettings uiSettings = mWindMap.getMap().getUiSettings();
+            uiSettings.setAllGesturesEnabled(false);
+            uiSettings.setCompassEnabled(false);
+            uiSettings.setMapToolbarEnabled(false);
+            // mWindMap.setData(mapItems);
 
-        // center the map
-        LatLng enteredWindLocation = preferences.getWindPosition();
-        if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
-            windMap.movePositionMarker(enteredWindLocation);
-            windMap.centerMap(enteredWindLocation);
+            // center the map
+            LatLng enteredWindLocation = preferences.getWindPosition();
+            if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
+                mWindMap.movePositionMarker(enteredWindLocation);
+                mWindMap.centerMap(enteredWindLocation);
+            }
         }
     }
 
@@ -310,10 +312,10 @@ public class WindFragment extends BaseFragment
 
             if (bigMap) {
                 showBigMap();
-                if (savedInstanceState.getDouble("lat", -1) != -1) {
-                    windMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"), savedInstanceState.getFloat("zoom"));
+                if (mWindMap != null && savedInstanceState.getDouble("lat", -1) != -1) {
+                    mWindMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"), savedInstanceState.getFloat("zoom"));
                     if (markerLat != -1) {
-                        windMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
+                        mWindMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
                     }
                 }
             }
@@ -361,15 +363,15 @@ public class WindFragment extends BaseFragment
         super.onSaveInstanceState(outState);
 
         outState.putBoolean("bigMap", bigMap);
-        if (windMap != null) {
-            if (windMap.getMap() != null) {
-                outState.putDouble("lat", windMap.getMap().getCameraPosition().target.latitude);
-                outState.putDouble("lng", windMap.getMap().getCameraPosition().target.longitude);
-                outState.putFloat("zoom", windMap.getMap().getCameraPosition().zoom);
+        if (mWindMap != null) {
+            if (mWindMap.getMap() != null) {
+                outState.putDouble("lat", mWindMap.getMap().getCameraPosition().target.latitude);
+                outState.putDouble("lng", mWindMap.getMap().getCameraPosition().target.longitude);
+                outState.putFloat("zoom", mWindMap.getMap().getCameraPosition().zoom);
             }
-            if (windMap.windMarker != null) {
-                outState.putDouble("markerLat", windMap.windMarker.getPosition().latitude);
-                outState.putDouble("markerLng", windMap.windMarker.getPosition().longitude);
+            if (mWindMap.windMarker != null) {
+                outState.putDouble("markerLat", mWindMap.windMarker.getPosition().latitude);
+                outState.putDouble("markerLng", mWindMap.windMarker.getPosition().longitude);
             }
         }
     }
@@ -434,15 +436,15 @@ public class WindFragment extends BaseFragment
     private void onPositionSetClick() {
         bigMap = false;
 
-        if (windMap.windMarker != null) {
-            windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+        if (mWindMap != null && mWindMap.windMarker != null) {
+            mWindMap.getMap().getUiSettings().setAllGesturesEnabled(false);
             mCurrentLocation = new Location("manual");
-            mCurrentLocation.setLatitude(windMap.windMarker.getPosition().latitude);
-            mCurrentLocation.setLongitude(windMap.windMarker.getPosition().longitude);
-            preferences.setWindPosition(windMap.windMarker.getPosition());
-            windMap.windMarker.setDraggable(false);
-            windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
-            windMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+            mCurrentLocation.setLatitude(mWindMap.windMarker.getPosition().latitude);
+            mCurrentLocation.setLongitude(mWindMap.windMarker.getPosition().longitude);
+            preferences.setWindPosition(mWindMap.windMarker.getPosition());
+            mWindMap.windMarker.setDraggable(false);
+            mWindMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+            mWindMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         }
         showElements(true);
     }
@@ -452,9 +454,11 @@ public class WindFragment extends BaseFragment
      */
     private void showBigMap() {
         showElements(false);
-        windMap.getMap().getUiSettings().setAllGesturesEnabled(true);
-        if (windMap.windMarker != null) {
-            windMap.windMarker.setDraggable(true);
+        if (mWindMap != null) {
+            mWindMap.getMap().getUiSettings().setAllGesturesEnabled(true);
+            if (mWindMap.windMarker != null) {
+                mWindMap.windMarker.setDraggable(true);
+            }
         }
         bigMap = true;
     }
@@ -463,7 +467,7 @@ public class WindFragment extends BaseFragment
         if (mSetData != null) {
             mSetData.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
             mSetData
-                .setEnabled(windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null && mCurrentLocation != null);
+                .setEnabled(mWindMap != null && mWindMap.windMarker != null && mWindMap.windMarker.getPosition() != null && mCurrentLocation != null);
         }
         if (mSetPosition != null) {
             mSetPosition.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
@@ -497,19 +501,21 @@ public class WindFragment extends BaseFragment
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        windMap.centerMap(location.getLatitude(), location.getLongitude());
+        if (mWindMap != null) {
+            mWindMap.centerMap(location.getLatitude(), location.getLongitude());
 
-        GoogleMap map = windMap.getMap();
-        if (map != null) {
-            UiSettings uiSettings = map.getUiSettings();
-            if (uiSettings != null) {
-                uiSettings.setAllGesturesEnabled(false);
+            GoogleMap map = mWindMap.getMap();
+            if (map != null) {
+                UiSettings uiSettings = map.getUiSettings();
+                if (uiSettings != null) {
+                    uiSettings.setAllGesturesEnabled(false);
+                }
             }
-        }
 
-        windMap.addAccuracyCircle(location);
-        if (windMap.windMarker != null) {
-            windMap.windMarker.setDraggable(false);
+            mWindMap.addAccuracyCircle(location);
+            if (mWindMap.windMarker != null) {
+                mWindMap.windMarker.setDraggable(false);
+            }
         }
 
         if (mDarkLayer != null) {
@@ -558,8 +564,8 @@ public class WindFragment extends BaseFragment
 
     @Override
     public void onMapClick(LatLng arg0) {
-        if (bigMap) {
-            windMap.movePositionMarker(arg0);
+        if (bigMap && mWindMap != null) {
+            mWindMap.movePositionMarker(arg0);
         }
     }
 
@@ -605,7 +611,9 @@ public class WindFragment extends BaseFragment
 
     @Override
     public void OnRaceUpdated(ManagedRace race) {
-        windMap.onMapDataUpdated(race.getMapMarkers());
+        if (mWindMap != null) {
+            mWindMap.onMapDataUpdated(race.getMapMarkers());
+        }
     }
 
     /**
@@ -650,7 +658,9 @@ public class WindFragment extends BaseFragment
             }
             try {
                 ExLog.i(getActivity(), TAG, "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng"));
-                windMap.centerMap(locJSON.getDouble("lat"), locJSON.getDouble("lng"));
+                if (mWindMap != null) {
+                    mWindMap.centerMap(locJSON.getDouble("lat"), locJSON.getDouble("lng"));
+                }
             } catch (JSONException e) {
                 ExLog.ex(WindFragment.this.getActivity(), TAG, e);
             }
