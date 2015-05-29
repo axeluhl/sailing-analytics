@@ -5,7 +5,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
@@ -82,7 +82,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private RaceStatusAnalyzer statusAnalyzer;
     private final RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
 
-    private final DependentStartTimeFinder startTimeAnalyzer;
+    private final StartTimeFinder startTimeAnalyzer;
     private final FinishingTimeFinder finishingTimeAnalyzer;
     private final FinishedTimeFinder finishedTimeAnalyzer;
     private final ProtestStartTimeFinder protestTimeAnalyzer;
@@ -136,7 +136,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         this.statusAnalyzerClock = analyzersClock;
         // status analyzer will get initialized when racing procedure is ready
-        this.startTimeAnalyzer = new DependentStartTimeFinder(raceLogResolver, raceLog);
+        this.startTimeAnalyzer = new StartTimeFinder(raceLogResolver, raceLog);
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
         this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
         this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);

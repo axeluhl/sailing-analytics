@@ -8,12 +8,12 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sse.common.TimePoint;
 
-public class DependentStartTimeFinder extends RaceLogAnalyzer<TimePoint> {
+public class StartTimeFinder extends RaceLogAnalyzer<TimePoint> {
 
-    private static final Logger logger = Logger.getLogger(DependentStartTimeFinder.class.getName());
+    private static final Logger logger = Logger.getLogger(StartTimeFinder.class.getName());
     private final RaceLogResolver resolver;
     
-    public DependentStartTimeFinder(RaceLogResolver resolver, RaceLog raceLog) {
+    public StartTimeFinder(RaceLogResolver resolver, RaceLog raceLog) {
         super(raceLog);
         this.resolver = resolver;
     }

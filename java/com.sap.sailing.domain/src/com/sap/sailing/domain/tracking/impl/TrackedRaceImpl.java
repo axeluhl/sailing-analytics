@@ -37,7 +37,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -676,7 +676,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             for (RaceLog raceLog : attachedRaceLogs.values()) {
                 
                 //FIXME: how to get the HasRegattaLike?
-                startTime = new DependentStartTimeFinder(new ServerSideRaceLogResolver(null), raceLog).analyze();
+                startTime = new StartTimeFinder(new ServerSideRaceLogResolver(null), raceLog).analyze();
                 if (startTime != null) {
                     break;
                 }

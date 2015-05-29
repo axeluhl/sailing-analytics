@@ -13,16 +13,16 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sse.common.TimePoint;
 
-public class DependentStartTimeFinderTest extends
-        PassAwareRaceLogAnalyzerTest<DependentStartTimeFinder, TimePoint> {
+public class StartTimeFinderTest extends
+        PassAwareRaceLogAnalyzerTest<StartTimeFinder, TimePoint> {
 
     @Override
-    protected DependentStartTimeFinder createAnalyzer(RaceLog raceLog) {
-        return new DependentStartTimeFinder(mock(RaceLogResolver.class), raceLog);
+    protected StartTimeFinder createAnalyzer(RaceLog raceLog) {
+        return new StartTimeFinder(mock(RaceLogResolver.class), raceLog);
     }
 
     @Override

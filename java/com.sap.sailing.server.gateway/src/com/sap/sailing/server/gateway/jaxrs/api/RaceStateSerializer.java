@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -89,7 +89,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new DependentStartTimeFinder(new ServerSideRaceLogResolver(regattaLike), raceLog).analyze();
+            TimePoint startTime = new StartTimeFinder(new ServerSideRaceLogResolver(regattaLike), raceLog).analyze();
             
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
             RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();

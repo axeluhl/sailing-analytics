@@ -16,7 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
@@ -49,7 +49,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     private final WindSource raceCommitteeWindSource;
 
     private LastPublishedCourseDesignFinder courseDesignFinder;
-    private DependentStartTimeFinder startTimeFinder;
+    private StartTimeFinder startTimeFinder;
     private AbortingFlagFinder abortingFlagFinder;
 
     private MarkPassingDataFinder markPassingDataFinder;
@@ -70,7 +70,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             trackedRace.invalidateEndTime();
             courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             //FIXME: how to get the HasRegattaLike?
-            startTimeFinder = new DependentStartTimeFinder(new ServerSideRaceLogResolver(null), raceLog);
+            startTimeFinder = new StartTimeFinder(new ServerSideRaceLogResolver(null), raceLog);
             abortingFlagFinder = new AbortingFlagFinder(raceLog);
             initializeWindTrack(raceLog);
             analyze();

@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
@@ -33,7 +33,7 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
 
     private void setAndAnnounceFinishedTime() {
         TimePoint finishingTime = getFinishingTime();
-        DependentStartTimeFinder dependentStartTimeFinder = new DependentStartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
+        StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
         TimePoint startTime = dependentStartTimeFinder.analyze();
         
         if (getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
