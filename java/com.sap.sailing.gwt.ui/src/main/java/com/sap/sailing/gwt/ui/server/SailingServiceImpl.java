@@ -3622,11 +3622,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
-            List<String> columnNames) {
+            List<Pair<String, Integer>> columnNamesWithInsertIndex) {
         List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
-        for (String columnName : columnNames) {
+        for (Pair<String, Integer> columnNameAndInsertIndex : columnNamesWithInsertIndex) {
             RaceColumnInSeries raceColumnInSeries = getService().apply(
-                    new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+                    new AddColumnToSeries(columnNameAndInsertIndex.getB(), regattaIdentifier, seriesName, columnNameAndInsertIndex.getA()));
             if (raceColumnInSeries != null) {
                 result.add(convertToRaceColumnInSeriesDTO(raceColumnInSeries));
             }
@@ -3997,11 +3997,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private void addRaceColumnsToRegattaSeries(RegattaDTO regatta, String eventName) {
         for (SeriesDTO series : regatta.series) {
-            List<String> raceNames = new ArrayList<String>();
+            List<Pair<String, Integer>> raceNamesAndInsertIndex = new ArrayList<>();
+            int insertIndex = 0;
             for (RaceColumnDTO raceColumnInSeries : series.getRaceColumns()) {
-                raceNames.add(raceColumnInSeries.getName());
+                raceNamesAndInsertIndex.add(new Pair<>(raceColumnInSeries.getName(), insertIndex));
+                insertIndex++;
             }
-            addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getName(), raceNames);
+            addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getName(), raceNamesAndInsertIndex);
         }
     }
 
