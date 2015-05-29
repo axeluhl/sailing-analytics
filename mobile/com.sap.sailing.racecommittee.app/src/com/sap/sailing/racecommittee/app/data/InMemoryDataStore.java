@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -15,12 +17,13 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
     private HashMap<Serializable, EventBase> eventsById;
-    private HashMap<Serializable, ManagedRace> managedRaceById;
+    private HashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
     private SharedDomainFactory domainFactory;
@@ -32,7 +35,7 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void reset() {
         this.eventsById = new HashMap<Serializable, EventBase>();
-        this.managedRaceById = new HashMap<Serializable, ManagedRace>();
+        this.managedRaceById = new HashMap<SimpleRaceLogIdentifier, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();
         this.courseData = null;
         this.domainFactory = new SharedDomainFactoryImpl();
@@ -130,14 +133,51 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     public void addRace(ManagedRace race) {
-        managedRaceById.put(race.getId(), race);
+        managedRaceById.put(convertManagedRaceIdentiferToSimpleRaceLogIdentifier(race.getIdentifier()), race);
     }
 
+    private SimpleRaceLogIdentifier convertManagedRaceIdentiferToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
+        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceName(), id.getFleet().getName());
+    }
+
+    @Override
     public ManagedRace getRace(Serializable id) {
+        return managedRaceById.get(parseManagedRaceLogIdentifier(id));
+    }
+
+    @Override
+    public ManagedRace getRace(SimpleRaceLogIdentifier id) {
         return managedRaceById.get(id);
     }
 
+    @Override
     public boolean hasRace(Serializable id) {
+        return managedRaceById.containsKey(parseManagedRaceLogIdentifier(id));
+    }
+
+    /**
+     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier
+     * this is needed as the serialized version is passed around in the bundle context, but the 
+     * InMemoryDataStore now has to use SimpleRaceLogIdentifier as key in the managedRaces HashMap in 
+     * order to allow for retrieving a managed race with exclusively the information provided by a 
+     * SimpleRaceLogIdentifier (which is less than the information provided by a ManagedRaceIdentifier)
+     *  
+     * @param id
+     *          serialized version of a ManagedRaceIdentifier 
+     * @return
+     *          corresponding SimpleRaceLogIdentifier
+     */
+    private SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(Serializable id) {
+        String string = id.toString();
+        String[] split = string.split("\\.");
+        String leaderboardName = split[0];
+        String raceColumnName = split[3];
+        String fleetName = split[2];
+        return new SimpleRaceLogIdentifierImpl(leaderboardName, raceColumnName, fleetName);
+    }
+
+    @Override
+    public boolean hasRace(SimpleRaceLogIdentifier id) {
         return managedRaceById.containsKey(id);
     }
 

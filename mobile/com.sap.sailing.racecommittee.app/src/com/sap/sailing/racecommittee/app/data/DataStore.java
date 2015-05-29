@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -31,7 +32,9 @@ public interface DataStore {
     public Collection<ManagedRace> getRaces();
     public void addRace(ManagedRace race);
     public ManagedRace getRace(Serializable id);
+    public ManagedRace getRace(SimpleRaceLogIdentifier id);
     public boolean hasRace(Serializable id);
+    public boolean hasRace(SimpleRaceLogIdentifier id);
 
     public Collection<Mark> getMarks();
     public Mark getMark(Serializable id);
