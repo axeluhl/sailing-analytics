@@ -17,7 +17,7 @@
 	vertical-align: bottom;
 	background-color: #f2f2f2;
 	background-color: #fff;
-	padding: 20px 5px;
+	padding: 15px 5px;
 	text-align: left;
 	border-bottom: 1px solid black;
 	text-shadow: none;
@@ -48,7 +48,7 @@
 .cellTableEvenRowCell {
 	border: none;
 	border-bottom: 1px solid #dedede;
-	padding: 20px 5px 20px 10px;
+	padding: 15px 5px 15px 10px;
 	vertical-align: top;
 	
 }
@@ -60,7 +60,7 @@
 .cellTableOddRowCell {
 	border: none;
 	border-bottom: 1px solid #dedede;
-	padding: 20px 5px 20px 10px;
+	padding: 15px 5px 15px 10px;
 	vertical-align: top;
 
 }
