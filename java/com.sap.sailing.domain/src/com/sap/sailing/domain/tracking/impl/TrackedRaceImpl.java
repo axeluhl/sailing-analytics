@@ -1322,12 +1322,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
-        final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        final Iterable<MarkPassing> markPassings = getMarkPassingsInOrder(waypoint);
         if (markPassings != null) {
             lockForRead(markPassings);
             try {
                 for (MarkPassing markPassing : markPassings) {
-                    if (markPassing.getWaypoint() == waypoint) {
+                    if (markPassing.getCompetitor() == competitor) {
                         return markPassing;
                     }
                 }
