@@ -39,6 +39,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
             this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
         this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : Util.size(quickRanks.getQuickRanks()));
+        this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber = new LinkedHashMap<>();
         Map<String, Integer> competitorIdAsStringToOneBasedLegNumber = new HashMap<>();
         if (quickRanks != null) {
             for (QuickRankDTO quickRank : quickRanks.getQuickRanks()) {
@@ -46,12 +47,11 @@ public class CompactRaceMapDataDTO implements IsSerializable {
                         quickRank.legNumberOneBased));
                 competitorIdAsStringToOneBasedLegNumber.put(quickRank.competitor.getIdAsString(), quickRank.legNumberOneBased);
             }
-        }
-        this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber = new LinkedHashMap<>();
-        for (CompetitorDTO competitorInOrderOfWindwardDistanceTraveled : quickRanks.getCompetitorsInOrderOfWindwardDistanceTraveledFarthestFirst()) {
-            this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber.put(
-                    competitorInOrderOfWindwardDistanceTraveled.getIdAsString(),
-                    competitorIdAsStringToOneBasedLegNumber.get(competitorInOrderOfWindwardDistanceTraveled.getIdAsString()));
+            for (CompetitorDTO competitorInOrderOfWindwardDistanceTraveled : quickRanks.getCompetitorsInOrderOfWindwardDistanceTraveledFarthestFirst()) {
+                this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber.put(
+                        competitorInOrderOfWindwardDistanceTraveled.getIdAsString(),
+                        competitorIdAsStringToOneBasedLegNumber.get(competitorInOrderOfWindwardDistanceTraveled.getIdAsString()));
+            }
         }
         this.courseSidelines = courseSidelines;
         this.coursePositions = coursePositions;

@@ -325,19 +325,23 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
             result = null;
         } else {
             final Competitor farthestAheadOrEarliestLegFinisher = getCompetitorFarthestAheadInLeg(trackedLegOfCompetitor.getTrackedLeg(), timePoint, cache);
-            final TrackedLegOfCompetitor tlocOfFarthestAhead = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(farthestAheadOrEarliestLegFinisher);
-            final boolean farthestAheadAlreadyFinishedLeg = tlocOfFarthestAhead.hasFinishedLeg(timePoint);
-            final Distance windwardDistanceFarthestTraveledUntilFinishingLeg = getWindwardDistanceTraveled(farthestAheadOrEarliestLegFinisher,
-                        farthestAheadAlreadyFinishedLeg ? tlocOfFarthestAhead.getFinishTime() : timePoint, cache);
-            // Consider all competitors, regardless of whether they have started the leg or not; a competitor in a previous
-            // leg may well be the race leader. However, if a competitor has finished the leg already, use the finishing time
-            // point for that competitor.
-            // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
-            final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
-            result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), legLeader,
-                    rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
-                    rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
-                    windwardDistanceFarthestTraveledUntilFinishingLeg);
+            if (farthestAheadOrEarliestLegFinisher == null) {
+                result = null;
+            } else {
+                final TrackedLegOfCompetitor tlocOfFarthestAhead = trackedLegOfCompetitor.getTrackedLeg().getTrackedLeg(farthestAheadOrEarliestLegFinisher);
+                final boolean farthestAheadAlreadyFinishedLeg = tlocOfFarthestAhead.hasFinishedLeg(timePoint);
+                final Distance windwardDistanceFarthestTraveledUntilFinishingLeg = getWindwardDistanceTraveled(farthestAheadOrEarliestLegFinisher,
+                            farthestAheadAlreadyFinishedLeg ? tlocOfFarthestAhead.getFinishTime() : timePoint, cache);
+                // Consider all competitors, regardless of whether they have started the leg or not; a competitor in a previous
+                // leg may well be the race leader. However, if a competitor has finished the leg already, use the finishing time
+                // point for that competitor.
+                // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
+                final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
+                result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), legLeader,
+                        rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
+                        rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
+                        windwardDistanceFarthestTraveledUntilFinishingLeg);
+            }
         }
         return result;
     }

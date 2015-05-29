@@ -2055,7 +2055,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 rank++;
             }
-            final Iterable<Competitor> competitorsInOrderOfWindwardDistanceTraveledFarthestFirst = getService().getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(trackedRace, timePoint);
+            final Iterable<Competitor> competitorsInOrderOfWindwardDistanceTraveledFarthestFirst = getService()
+                    .getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(trackedRace, actualTimePoint);
             competitorDTOsInOrderOfWindwardDistanceTraveledFarthestFirst = convertToCompetitorDTOs(competitorsInOrderOfWindwardDistanceTraveledFarthestFirst);
         } else {
             competitorDTOsInOrderOfWindwardDistanceTraveledFarthestFirst = Collections.emptyList();

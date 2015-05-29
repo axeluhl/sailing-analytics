@@ -161,13 +161,17 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             final Duration result;
             final TrackedLegOfCompetitor tloc = getTrackedRace().getTrackedLeg(competitor, getTimePoint());
             final Duration raceDurationAtTimePoint = getTrackedRace().getStartOfRace().until(getTimePoint());
-            if (tloc.hasStartedLeg(getTimePoint())) {
+            if (tloc != null && tloc.hasStartedLeg(getTimePoint())) {
                 final Competitor competitorFarthestAheadInLeg = getCompetitorFarthestAheadInLeg(leg, getTimePoint(), cache);
                 final TrackedLegOfCompetitor tlocOfCompetitorFarthestAheadInLeg = tloc.getTrackedLeg().getTrackedLeg(competitorFarthestAheadInLeg);
                 final Duration predictedDurationFromTimePointToReachFarthestAheadInLeg = getPredictedDurationToReachWindwardPositionOf(
                         tloc, tlocOfCompetitorFarthestAheadInLeg, getTimePoint(), cache);
-                final Duration cDurationFromRaceStartToReachFarthestInLeg = raceDurationAtTimePoint.plus(predictedDurationFromTimePointToReachFarthestAheadInLeg);
-                result = cDurationFromRaceStartToReachFarthestInLeg;
+                if (predictedDurationFromTimePointToReachFarthestAheadInLeg == null) {
+                    result = null;
+                } else {
+                    final Duration cDurationFromRaceStartToReachFarthestInLeg = raceDurationAtTimePoint.plus(predictedDurationFromTimePointToReachFarthestAheadInLeg);
+                    result = cDurationFromRaceStartToReachFarthestInLeg;
+                }
             } else {
                 result = null;
             }
