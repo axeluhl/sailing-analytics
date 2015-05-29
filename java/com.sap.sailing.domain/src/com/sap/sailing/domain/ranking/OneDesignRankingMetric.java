@@ -62,7 +62,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
+    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
         return totalDurationSinceRaceStart;
     }

@@ -144,7 +144,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                     final Duration timeToReachFastest = getPredictedDurationToEndOfLegOrTo(timePoint,
                             competitorLeg, trackedLegOfFastestCompetitorInLeg, cache);
                     final Duration totalDurationSinceRaceStart = startOfRace.until(timePoint).plus(timeToReachFastest);
-                    correctedTime = getCorrectedTime(competitor, () -> trackedLeg.getLeg(),
+                    correctedTime = getCalculatedTime(competitor, () -> trackedLeg.getLeg(),
                             () -> positionOfFastestBoatInLegAtTimePointOrLegEnd, totalDurationSinceRaceStart,
                             totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd);
                 } else { // competitor hasn't started the leg yet; they all get MAX_VALUE as the corrected duration,
@@ -166,7 +166,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final Duration timeActuallySpent = getActualTimeSinceStartOfRace(competitor, timePoint);
         final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint, cache);
-        return getCorrectedTime(competitor, ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
+        return getCalculatedTime(competitor, ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
                 ()->getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */true),
                 timeActuallySpent, windwardDistanceSailed);
     }
@@ -180,7 +180,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
+    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
         final Duration timeOnDistanceFactorInSecondsPerNauticalMile = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
         return totalDurationSinceRaceStart == null ? null :

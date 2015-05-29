@@ -313,14 +313,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
                         : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
                 final Duration correctedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
-                        : getCorrectedTime(
+                        : getCalculatedTime(
                                 competitor,
                                 () -> getTrackedRace().getTrackedLeg(competitorFarthestAhead, timePoint).getLeg(),
                                 () -> getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(
                                         timePoint, /* extrapolate */true),
                                 totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead,
                                 totalWindwardDistanceTraveled);
-                final Duration correctedTime = getCorrectedTime(competitor,
+                final Duration correctedTime = getCalculatedTime(competitor,
                         () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
                                 .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
                         actualRaceDuration, totalWindwardDistanceTraveled);
@@ -356,7 +356,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      *            competitor has sailed. As others may not need it at all, the parameter is declared as a
      *            {@link Supplier} which delays evaluation until it is needed or avoids it altogether.
      */
-    protected abstract Duration getCorrectedTime(Competitor who, Supplier<Leg> leg,
+    protected abstract Duration getCalculatedTime(Competitor who, Supplier<Leg> leg,
             Supplier<Position> estimatedPosition, Duration totalDurationSinceRaceStart,
             Distance totalWindwardDistanceTraveled);
 
