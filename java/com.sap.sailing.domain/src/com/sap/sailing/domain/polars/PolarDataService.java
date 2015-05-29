@@ -173,12 +173,11 @@ public interface PolarDataService {
      * 
      * @param boatClass
      * @param legType
-     * @param tack
      * @return The estimating function for the tack and legtype combination estimating boatspeed over windspeed for the
      *         given boat class. All values in kn.
      * @throws NotEnoughDataHasBeenAddedException 
      */
-    PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+    PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType) throws NotEnoughDataHasBeenAddedException;
     
     /**
      * This method is not intended to be used directly apart from debugging purposes. If you intend to use the polar service please 
@@ -186,12 +185,11 @@ public interface PolarDataService {
      * 
      * @param boatClass
      * @param legType
-     * @param tack
      * @return The estimating function for the tack and legtype combination estimating true wind angle over windspeed for the
      *         given boat class. TWA in degrees and windspeeds in knots.
      * @throws NotEnoughDataHasBeenAddedException 
      */
-    PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+    PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType) throws NotEnoughDataHasBeenAddedException;
 
     /**
      * This method is not intended to be used directly apart from debugging purposes. If you intend to use the polar service please 
