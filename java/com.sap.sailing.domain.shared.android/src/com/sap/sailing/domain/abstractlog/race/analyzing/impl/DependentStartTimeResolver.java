@@ -14,7 +14,7 @@ public class DependentStartTimeResolver {
         this.raceLogResolver = raceLogResolver;
     }
 
-    TimePoint resolve(RaceLogDependentStartTimeEvent event) throws RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException {
+    public TimePoint resolve(RaceLogDependentStartTimeEvent event) throws RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException {
         SimpleRaceLogIdentifier identifier = event.getDependentOnRaceIdentifier();
         Duration startTimeDifference = event.getStartTimeDifference();
 

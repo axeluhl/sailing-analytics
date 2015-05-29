@@ -4,15 +4,19 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.Resolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -74,6 +78,20 @@ public interface RaceState extends ReadonlyRaceState {
      *            logical {@link TimePoint} the start time event should be attached to.
      */
     void forceNewStartTime(TimePoint now, TimePoint startTime);
+    
+    /**
+     * Forces a new dependent start time without checking for any prerequisites to be fulfilled. Although there is no technical
+     * reason for the prerequisites to be fulfilled before setting a start time event, there might be clients of this
+     * {@link RaceState} that expect them to be. Therefore use this method with caution.
+     * 
+     * @param now
+     *            logical {@link TimePoint} the start time event should be attached to.
+     * @param startTimeDifference
+     *            difference in startTime to dependentRace
+     * @param dependentRace
+     *            Identifier of the race the startTime requested to set depends on
+     */
+    void forceNewDependentStartTime(TimePoint now, Duration startTimeDifference, SimpleRaceLogIdentifier dependentRace);
 
     /**
      * Starts a request to set a new start time. Before the start time is set the
@@ -90,6 +108,28 @@ public interface RaceState extends ReadonlyRaceState {
      *            defaults pass a {@link RacingProcedurePrerequisiteAutoResolver}.
      */
     void requestNewStartTime(TimePoint now, TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver);
+    
+    /**
+     * Starts a request to set a new dependent start time. Before the start time is set the
+     * {@link RacingProcedurePrerequisite.Resolver} must fulfill all prerequisites set by the currently active
+     * {@link RacingProcedure}.
+     * 
+     * @param now
+     *            logical {@link TimePoint} the start time event (and all events created due to fulfilled prerequisites)
+     *            should be attached to.
+     * @param startTimeDifference
+     *            difference in startTime to dependentRace
+     * @param dependentRace
+     *            Identifier of the race the startTime requested to set depends on
+     * @param raceLogResolver
+     *            Needed in order to fetch the RaceLog of the dependentRace
+     * @param resolver
+     *            Object used to fulfill all {@link RacingProcedurePrerequisite}s. If you just want to use reasonable
+     *            defaults pass a {@link RacingProcedurePrerequisiteAutoResolver}.
+     */
+    void requestNewDependentStartTime(TimePoint now, Duration startTimeDifference, SimpleRaceLogIdentifier dependentRace, RaceLogResolver raceLogResolver,
+            Resolver resolver);
+
 
     /**
      * Sets the finishing time.
@@ -148,5 +188,4 @@ public interface RaceState extends ReadonlyRaceState {
     void setAdditionalScoringInformationEnabled(TimePoint creationTimePoint, boolean enable, AdditionalScoringInformationType informationType);
 
     boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType);
-
 }

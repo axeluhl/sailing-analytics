@@ -7,10 +7,14 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -27,6 +31,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -113,6 +118,34 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void forceNewStartTime(TimePoint now, TimePoint startTime) {
         raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
+    }
+    
+    @Override
+    public void requestNewDependentStartTime(final TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentRace, RaceLogResolver raceLogResolver, RacingProcedurePrerequisite.Resolver resolver) {
+        final RaceLogDependentStartTimeEvent dependentStartTimeEvent = factory.createDependentStartTimeEvent(now, author, raceLog.getCurrentPassId(), dependentRace, startTimeDifference);
+        
+        RacingProcedurePrerequisite.FulfillmentFunction function = new RacingProcedurePrerequisite.FulfillmentFunction() {
+            @Override
+            public void execute() {
+                raceLog.add(dependentStartTimeEvent);
+            }
+        };
+        
+        TimePoint startTime = null;
+        try {
+            DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(raceLogResolver);
+            startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent);
+        } catch (RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException e) {
+            logger.warning("Regata Like Name of identifier doesn't match actual RegattaLikeName");
+            startTime = null;
+        }
+        
+        getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
+    }
+    
+    @Override
+    public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace) {
+        raceLog.add(factory.createDependentStartTimeEvent(now, author, raceLog.getCurrentPassId(), dependentOnRace, startTimeDifference));
     }
 
     @Override
