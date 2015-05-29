@@ -569,6 +569,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         tooltip);
             }
         };
+        flagColumn.setCellStyleNames(tableRes.cellTableStyle().flagColumn());
         boatClass = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {

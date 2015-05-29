@@ -88,3 +88,12 @@
 .cellTableRaceNameColumn {
 	background-color: #e0e0e0 !important;
 }
+
+.flagColumn {
+	padding-top: 0;
+	padding-bottom: 0;
+	vertical-align: middle;
+}
+.flagColumn>div {
+	display: inline-block;
+}
