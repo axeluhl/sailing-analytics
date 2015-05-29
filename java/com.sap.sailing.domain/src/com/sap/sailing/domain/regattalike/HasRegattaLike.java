@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.regattalike;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 
@@ -15,5 +14,5 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 public interface HasRegattaLike {
     IsRegattaLike getRegattaLike();
     
-    RaceLog getRacelog(String raceColumnName, String fleetName) throws RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException;
+    RaceLog getRacelog(String raceColumnName, String fleetName);
 }

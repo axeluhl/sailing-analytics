@@ -14,7 +14,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringI
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -132,13 +131,9 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         };
         
         TimePoint startTime = null;
-        try {
-            DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(raceLogResolver);
-            startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent);
-        } catch (RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException e) {
-            logger.warning("Regata Like Name of identifier doesn't match actual RegattaLikeName");
-            startTime = null;
-        }
+            
+        DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(raceLogResolver);
+        startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent);
         
         getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
     }

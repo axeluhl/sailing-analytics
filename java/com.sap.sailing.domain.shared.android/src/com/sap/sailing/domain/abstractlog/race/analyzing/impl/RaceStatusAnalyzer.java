@@ -96,12 +96,8 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
         @Override
         public void visit(RaceLogDependentStartTimeEvent event) {
             DependentStartTimeResolver startTimeResolver = new DependentStartTimeResolver(resolver);
-            try {
-                TimePoint startTime = startTimeResolver.resolve(event);
-                setRaceLogStatusBasedOnStartTime(startTime);
-            } catch (RegataLikeNameOfIdentifierDoesntMatchActualRegattaLikeNameException e) {
-                nextStatus = RaceLogRaceStatus.UNKNOWN;
-            }
+            TimePoint startTime = startTimeResolver.resolve(event);
+            setRaceLogStatusBasedOnStartTime(startTime);
         };
     };
 }
