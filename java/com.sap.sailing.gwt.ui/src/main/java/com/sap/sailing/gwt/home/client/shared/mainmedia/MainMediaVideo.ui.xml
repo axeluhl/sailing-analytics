@@ -1,21 +1,23 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-  xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaResources" />
-    <g:HTMLPanel>
-
-<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-  <figure class="{local_res.css.videopreview}">
-    <div class="{local_res.css.videopreview_videocontainer}">
-      <iframe ui:field="youtubeEmbed" frameborder="0" class="{local_res.css.videopreview_videocontainer_video} allowfullscreen"></iframe>
-    </div>
-    <figcaption ui:field="videoTitleWrapper">
-        <span ui:field="videoTitle" class="{local_res.css.videopreview_title}" />
-    </figcaption>
-  </figure>
-</div>
-    </g:HTMLPanel>
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+	<ui:with field="i18n"
+		type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="res"
+		type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res"
+		type="com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaResources" />
+	<g:HTMLPanel>
+		<div
+			class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
+			<figure class="{local_res.css.videopreview}">
+				<g:HTMLPanel styleName="{local_res.css.videopreview_videocontainer}" ui:field="videoHolderUi">
+					
+				</g:HTMLPanel>
+				<figcaption ui:field="videoTitleWrapper">
+					<span ui:field="videoTitle" class="{local_res.css.videopreview_title}" />
+				</figcaption>
+			</figure>
+		</div>
+	</g:HTMLPanel>
 </ui:UiBinder>
