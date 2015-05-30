@@ -92,7 +92,7 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
                     return;
                 }
                 Element element = eventTarget.cast();
-                if (stageTeaserBandsPanel.getElement().isOrHasChild(element)) {
+                if (bandCount.isOrHasChild(element)) {
                     return;
                 }
                 handleUserAction();

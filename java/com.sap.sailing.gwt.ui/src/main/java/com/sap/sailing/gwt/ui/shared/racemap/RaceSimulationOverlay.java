@@ -41,7 +41,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
-    private final String textFont = "10pt OpenSansRegular";
+    private final String textFont = "10pt 'Open Sans'";
     private String algorithmTimedOutText = "out-of-bounds";
     private String mixedLegText = "ambiguous wind";
     private int xOffset = 0;
