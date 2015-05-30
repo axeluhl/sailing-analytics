@@ -77,7 +77,7 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
             TrackedLegOfCompetitor currentLeg = race.getCurrentLeg(competitor, fix.getTimePoint());
             if (currentLeg != null) {
                 Bearing realBearing = currentLeg.getBeatAngle(fix.getTimePoint());
-                bearing = new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
+                bearing = realBearing == null ? null : new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
             }
         } catch (NoWindException e) {
             bearing = null;
