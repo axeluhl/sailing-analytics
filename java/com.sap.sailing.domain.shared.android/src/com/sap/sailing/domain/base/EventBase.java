@@ -3,11 +3,11 @@ package com.sap.sailing.domain.base;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.media.ImageSize;
 
 /**
  * Base interface for an Event consisting of all static information, which might be shared

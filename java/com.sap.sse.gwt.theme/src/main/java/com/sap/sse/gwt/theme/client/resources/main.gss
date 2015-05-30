@@ -129,6 +129,14 @@ figcaption {
   outline: none;
   text-decoration: none;
 }
+.buttontextonly {
+  color: #333;
+  background: none;
+  -webkit-transition: none;
+     -moz-transition: none;
+          transition: none;
+  font-weight: normal;
+}
 .buttonsmall {
   visibility: inherit;
 }
@@ -338,8 +346,7 @@ figcaption {
           transform: translate(-50%, -50%);
 }
 .mainsection {
-  padding-top: 5.333333333333333em;
-  padding-bottom: 5.333333333333333em;
+  padding: 5.333333333333333em 0;
 }
 .mainsection_header {
   text-align: center;
@@ -399,6 +406,61 @@ figcaption {
   right: 1.333333333333333em;
   cursor: pointer;
   z-index: 2;
+}
+.spacer {
+  width: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+.spacersmall {
+  height: 1em;
+}
+.spacermediumsmall {
+  height: 1.333333333333333em;
+}
+.spacermedium {
+  height: 2em;
+}
+.spacermediumbig {
+  height: 4em;
+}
+.spacerbig {
+  height: 5.333333333333333em;
+}
+.spacermargin {
+  font-size: inherit;
+}
+.spacermargintopsmall {
+  margin-top: 1em;
+}
+.spacermargintopmediumsmall {
+  margin-top: 1.333333333333333em;
+}
+.spacermargintopmedium {
+  margin-top: 2em;
+}
+.spacermargintopmediumbig {
+  margin-top: 4em;
+}
+.spacermargintopbig {
+  margin-top: 5.333333333333333em;
+}
+.spacermarginbottomsmall {
+  margin-bottom: 1em;
+}
+.spacermarginbottommediumsmall {
+  margin-bottom: 1.333333333333333em;
+}
+.spacermarginbottommedium {
+  margin-bottom: 2em;
+}
+.spacermarginbottommediumbig {
+  margin-bottom: 4em;
+}
+.spacermarginbottombig {
+  margin-bottom: 5.333333333333333em;
 }
 .stickyheader {
   background: inherit;

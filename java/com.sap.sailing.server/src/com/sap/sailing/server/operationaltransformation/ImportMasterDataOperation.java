@@ -406,8 +406,13 @@ public class ImportMasterDataOperation extends
                             TrackedRegatta trackedRegatta = toState.getTrackedRegatta(existingRegatta);
                             List<TrackedRace> toRemove = new ArrayList<TrackedRace>();
                             if (trackedRegatta != null) {
-                                for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
-                                    toRemove.add(race);
+                                trackedRegatta.lockTrackedRacesForRead();
+                                try {
+                                    for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
+                                        toRemove.add(race);
+                                    }
+                                } finally {
+                                    trackedRegatta.unlockTrackedRacesAfterRead();
                                 }
                                 for (TrackedRace raceToRemove : toRemove) {
                                     trackedRegatta.removeTrackedRace(raceToRemove);
