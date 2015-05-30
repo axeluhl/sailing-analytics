@@ -19,8 +19,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.impl.ImageSizeImpl;
+import com.sap.sse.common.media.ImageSize;
 
 public class CalculateImageSizeFromUrlTest {
 
