@@ -70,6 +70,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.INTERNATIONAL_14.getDisplayName(), imageResources.International14Icon());
         boatClassIconsMap.put(BoatClassMasterdata.DYAS.getDisplayName(), imageResources.DyasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPEN_BIC.getDisplayName(), imageResources.OpenBicIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ROWING_BOAT.getDisplayName(), imageResources.RowingBoatIcon());
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {
