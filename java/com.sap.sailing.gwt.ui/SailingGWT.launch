@@ -12,7 +12,7 @@
 <listEntry value="com.sap.sailing.gwt.ui.LeaderboardEditing"/>
 <listEntry value="com.sap.sailing.gwt.ui.AdminConsole"/>
 <listEntry value="com.sap.sailing.gwt.ui.Spectator"/>
-<listEntry value="com.sap.sailing.gwt.regattaoverview.RegattaOverview"/>
+<listEntry value="com.sap.sailing.gwt.ui.RegattaOverview"/>
 <listEntry value="com.sap.sailing.gwt.AutoPlay"/>
 <listEntry value="com.sap.sailing.gwt.ui.VideoPopup"/>
 <listEntry value="com.sap.sailing.gwt.ui.PolarSheets"/>

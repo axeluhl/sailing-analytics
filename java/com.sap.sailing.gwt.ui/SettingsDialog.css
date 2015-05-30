@@ -5,14 +5,16 @@
 
 .dialogInnerHeadline {
     border-bottom: 1px solid #CCCCCC;
-    font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
+    font-family: 'Open Sans',Arial,Verdana,sans-serif;
+    font-weight: 600;
     height: 21px;
     padding: 2px 0 0 2px;
     margin-bottom: 4px;
 }
 
 .dialogInnerHeadlineOther {
-  font-family: OpenSansSemiBold, Arial, Verdana, sans-serif;
+  font-family: 'Open Sans', Arial, Verdana, sans-serif;
+  font-weight: 600;
   color: #e84a1a;
   padding-left: 9px;
 }

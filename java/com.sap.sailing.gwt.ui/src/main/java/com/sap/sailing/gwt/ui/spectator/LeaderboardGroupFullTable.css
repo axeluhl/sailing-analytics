@@ -11,7 +11,8 @@
 .cellTableHeader {
 	background: url(images/spectator-table-bg.png) 0 0 repeat-x !important;
 
-	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: 600;
 	padding: 10px 15px;
 	border: 1px solid #aeaeaf !important;
 	border-left: none !important;

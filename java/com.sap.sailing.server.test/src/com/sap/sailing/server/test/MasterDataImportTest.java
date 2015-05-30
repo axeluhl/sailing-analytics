@@ -127,6 +127,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
@@ -1694,7 +1695,7 @@ public class MasterDataImportTest {
         assignedRaces.add(new RegattaNameAndRaceName(regattaName2, raceName5));
         assignedRaces.add(new RegattaNameAndRaceName(missingRegattaName, missingRaceName));
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0), MillisecondsDurationImpl.ONE_HOUR,
-                MediaTrack.MimeType.mp4, assignedRaces);
+ MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
         
         Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);
