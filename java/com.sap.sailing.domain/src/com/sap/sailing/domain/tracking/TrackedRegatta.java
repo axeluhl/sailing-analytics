@@ -29,7 +29,30 @@ import com.sap.sse.common.TimePoint;
 public interface TrackedRegatta extends Serializable {
     Regatta getRegatta();
 
+    /**
+     * Callers must {@link #lockTrackedRacesForRead() acquire the read lock} before calling this method and hold on to the lock
+     * while iterating over the data structure returned. Example:
+     * <pre>
+     *     trackedRegatta.lockTrackedRacesForRead();
+     *     try {
+     *         for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+     *             // do something
+     *         }
+     *     } finally {
+     *         trackedRegatta.unlockTrackedRacesAfterRead();
+     *     }
+     * </pre>
+     * The method will throw an {@link IllegalArgumentException} if the caller fails to do so.
+     */
     Iterable<? extends TrackedRace> getTrackedRaces();
+
+    void lockTrackedRacesForRead();
+    
+    void unlockTrackedRacesAfterRead();
+    
+    void lockTrackedRacesForWrite();
+
+    void unlockTrackedRacesAfterWrite();
 
     Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
 
@@ -72,5 +95,5 @@ public interface TrackedRegatta extends Serializable {
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     void removeTrackedRace(RaceDefinition raceDefinition);
-    
+
 }
