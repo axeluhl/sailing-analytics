@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -31,7 +29,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
         return raceGroup;
     }
 
-    public Serializable getId() {
+    public String getId() {
         return String.format("%s.%s.%s", 
                 escapeIdentifierFragment(getRaceGroup().getName()), 
                 escapeIdentifierFragment(getSeries().getName()), 
