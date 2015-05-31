@@ -38,7 +38,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public Serializable getId() {
+    public String getId() {
         return identifier.getId();
     }
 

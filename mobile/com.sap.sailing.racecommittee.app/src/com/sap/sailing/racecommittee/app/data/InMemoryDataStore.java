@@ -141,7 +141,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public ManagedRace getRace(Serializable id) {
+    public ManagedRace getRace(String id) {
         return managedRaceById.get(parseManagedRaceLogIdentifier(id));
     }
 
@@ -151,7 +151,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public boolean hasRace(Serializable id) {
+    public boolean hasRace(String id) {
         return managedRaceById.containsKey(parseManagedRaceLogIdentifier(id));
     }
 
@@ -167,9 +167,8 @@ public enum InMemoryDataStore implements DataStore {
      * @return
      *          corresponding SimpleRaceLogIdentifier
      */
-    private SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(Serializable id) {
-        String string = id.toString();
-        String[] split = string.split("\\.");
+    private SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(String id) {
+        String[] split = id.split("\\.");
         String leaderboardName = split[0];
         String raceColumnName = split[3];
         String fleetName = split[2];

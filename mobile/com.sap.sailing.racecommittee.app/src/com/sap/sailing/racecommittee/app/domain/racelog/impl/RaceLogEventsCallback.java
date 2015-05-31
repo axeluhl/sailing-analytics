@@ -76,7 +76,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         return eventsToAdd;
     }
 
-    private void addEvents(Context context, Serializable raceId, ReadonlyDataManager dataManager,
+    private void addEvents(Context context, String raceId, ReadonlyDataManager dataManager,
             List<RaceLogEvent> eventsToAdd) {
         if (eventsToAdd.isEmpty()) {
             ExLog.i(context, TAG, "No server-side events to add for race " + raceId);
