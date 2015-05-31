@@ -444,14 +444,18 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <= getTrackedRace()
                         .getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
                 final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
-                final Duration durationForSubsequentLegsToReachAtEqualPerformance;
-                if (legWho.getLeg() == legTo.getLeg()) {
-                    durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
+                if (toEndOfLegOrTo == null) {
+                    result = null;
                 } else {
-                    durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
-                            legWho.getLeg().getTo(), timePoint, cache);
+                    final Duration durationForSubsequentLegsToReachAtEqualPerformance;
+                    if (legWho.getLeg() == legTo.getLeg()) {
+                        durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
+                    } else {
+                        durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
+                                legWho.getLeg().getTo(), timePoint, cache);
+                    }
+                    result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
                 }
-                result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
             }
         }
         return result;
@@ -528,8 +532,9 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             final TrackedLegOfCompetitor whosLeg, WindLegTypeAndLegBearingCache cache) {
         final Duration toEndOfLegOrTo;
         final Speed averageVMG = whosLeg.getAverageVelocityMadeGood(timePoint, cache);
-        final Speed vmg = Double.isNaN(averageVMG.getKnots()) ? /* default to current VMG */ whosLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache) : averageVMG;
-        toEndOfLegOrTo = vmg.getDuration(
+        final Speed vmg = averageVMG == null || Double.isNaN(averageVMG.getKnots()) ?
+                /* default to current VMG */ whosLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache) : averageVMG;
+        toEndOfLegOrTo = vmg == null || vmg.getKnots() == 0.0 ? null : vmg.getDuration(
                 whosLeg.getTrackedLeg().getWindwardDistance(
                         getTrackedRace().getTrack(whosLeg.getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */true),
                         windwardPositionToReachInWhosCurrentLeg, timePoint, WindPositionMode.LEG_MIDDLE));
@@ -603,16 +608,18 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                     if (trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
                         if (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)) {
                             // partial distance sailed:
-                            final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(
-                                    getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true), cache);
-                            final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
-                            if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
-                                d = d.add(legWindwardDistance);
-                            } else {
-                                // if the competitor is currently at the mark rounding, the windward distance within the leg may
-                                // be negative; don't reduce the distance in this case
-                                if (windwardDistanceFromLegStart.getMeters() > 0) {
-                                    d = d.add(windwardDistanceFromLegStart);
+                            final Position estimatedPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
+                            if (estimatedPosition != null) {
+                                final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(estimatedPosition, cache);
+                                final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
+                                if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
+                                    d = d.add(legWindwardDistance);
+                                } else {
+                                    // if the competitor is currently at the mark rounding, the windward distance within the leg may
+                                    // be negative; don't reduce the distance in this case
+                                    if (windwardDistanceFromLegStart.getMeters() > 0) {
+                                        d = d.add(windwardDistanceFromLegStart);
+                                    }
                                 }
                             }
                             break;
