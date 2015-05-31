@@ -834,27 +834,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-            
             raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
-            
-            HasRegattaLike regattaLike = null;
-            if (leaderboard instanceof HasRegattaLike){
+            final HasRegattaLike regattaLike;
+            if (leaderboard instanceof HasRegattaLike) {
                 regattaLike = (HasRegattaLike) leaderboard;
+            } else {
+                regattaLike = null;
             }
-            
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver(regattaLike), raceLog);
-            
             TimePoint startTime = state.getStartTime();
             if (startTime != null) {
                 raceInfoDTO.startTime = startTime.asDate();
             }
-
             raceInfoDTO.lastStatus = state.getStatus();
-            
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
-            
             TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
