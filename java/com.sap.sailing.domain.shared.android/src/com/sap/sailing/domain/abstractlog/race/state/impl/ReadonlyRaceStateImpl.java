@@ -296,33 +296,27 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     @Override
     public void eventAdded(RaceLogEvent event) {
         update();
-        
-        if (event instanceof RaceLogDependentStartTimeEvent){
+        if (event instanceof RaceLogDependentStartTimeEvent) {
             setupListenersOnDependentRace(event);
-                            
             // Register RaceStateListener
-            //set boolean listeningToDependentRace = true
-            //if is true and RaceLogDependentStartTimeEvent / RaceLogStartTimeEvent --> change listener/set false
-            //maybe send probe?
-        }
-        
-        if (event instanceof RaceLogStartTimeEvent){
-            if (raceStateToObserve != null){
+            // set boolean listeningToDependentRace = true
+            // if is true and RaceLogDependentStartTimeEvent / RaceLogStartTimeEvent --> change listener/set false
+            // maybe send probe?
+        } else if (event instanceof RaceLogStartTimeEvent) {
+            if (raceStateToObserve != null) {
                 raceStateToObserve.removeChangedListener(raceStateToObserveListener);
-                raceStateToObserve = null;   
+                raceStateToObserve = null;
             }
         }
     }
 
     private void setupListenersOnDependentRace(RaceLogEvent event) {
-        if (raceStateToObserve != null){
-            //Remove previous listeners
+        if (raceStateToObserve != null) {
+            // Remove previous listeners
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
         }
-        
         RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) event;
         RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentStartTimeEvent.getDependentOnRaceIdentifier());
-        
         raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog);
         raceStateToObserve.addChangedListener(raceStateToObserveListener);
     }

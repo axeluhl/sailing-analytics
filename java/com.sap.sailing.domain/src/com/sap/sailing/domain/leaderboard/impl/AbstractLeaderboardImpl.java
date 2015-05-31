@@ -180,7 +180,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public RaceLog getRacelog(String raceColumnName, String fleetName){
         RaceColumn raceColumn = getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        
         return raceColumn.getRaceLog(fleet);
     }
 }

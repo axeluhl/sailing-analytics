@@ -1403,9 +1403,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDependentStartTimeEvent event) {
-            BasicDBObject result = new BasicDBObject();
-            storeRaceLogIdentifier(raceLogIdentifier, result);
-            result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDependentStartTimeEvent(event));
-            return result;
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDependentStartTimeEvent(event));
+        return result;
     }
 }

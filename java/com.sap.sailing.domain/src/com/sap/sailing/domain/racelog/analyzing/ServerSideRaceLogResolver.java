@@ -12,13 +12,12 @@ public class ServerSideRaceLogResolver implements RaceLogResolver {
     public ServerSideRaceLogResolver(HasRegattaLike regattaLike) {
         this.regattaLike = regattaLike;
     }
-    
+
     @Override
     public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
-        if (regattaLike == null){
+        if (regattaLike == null) {
             return null;
         }
-        
         return regattaLike.getRacelog(identifier.getRaceColumnName(), identifier.getFleetName());
     }
 

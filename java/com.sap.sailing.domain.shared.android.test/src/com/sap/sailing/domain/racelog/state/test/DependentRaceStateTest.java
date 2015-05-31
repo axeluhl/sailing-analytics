@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.state.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,13 +13,15 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
@@ -106,7 +109,26 @@ public class DependentRaceStateTest {
        verify(listenerB, times(1)).onStartTimeChanged(stateB);
        verify(listenerA, times(1)).onStartTimeChanged(stateA);
     }
-    
+
+    @Test
+    public void testInitialRegistrationOfRaceState() {
+        final MillisecondsDurationImpl delta = new MillisecondsDurationImpl(5000);
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), delta));
+        final RaceState stateB2 = new RaceStateImpl(raceLogResolver, raceLogB, author, factory,
+                new RacingProcedureFactoryImpl(author, factory, configuration));
+        final TimePoint[] bTime = new TimePoint[1];
+        stateB2.addChangedListener(new BaseRaceStateChangedListener() {
+            @Override
+            public void onStartTimeChanged(ReadonlyRaceState state) {
+                bTime[0] = state.getStartTime();
+            }
+        });
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, now));
+        assertEquals(now.plus(delta), bTime[0]);
+    }    
+
     @Test
     public void testCorrectAmountOfStartTimeChanges2() {
        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,

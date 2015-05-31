@@ -12,6 +12,5 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
  * <p>
  */
 public interface RaceLogIdentifier extends Serializable, SimpleRaceLogIdentifier {
-    
     RegattaLikeIdentifier getRegattaLikeParent();
 }

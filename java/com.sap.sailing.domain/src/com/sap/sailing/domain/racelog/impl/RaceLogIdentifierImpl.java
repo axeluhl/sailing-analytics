@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.impl;
 
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;

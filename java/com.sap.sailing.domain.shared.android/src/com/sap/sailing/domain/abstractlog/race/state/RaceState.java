@@ -130,7 +130,6 @@ public interface RaceState extends ReadonlyRaceState {
     void requestNewDependentStartTime(TimePoint now, Duration startTimeDifference, SimpleRaceLogIdentifier dependentRace, RaceLogResolver raceLogResolver,
             Resolver resolver);
 
-
     /**
      * Sets the finishing time.
      */

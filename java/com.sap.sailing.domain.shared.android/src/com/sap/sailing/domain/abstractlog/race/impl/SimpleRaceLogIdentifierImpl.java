@@ -1,4 +1,6 @@
-package com.sap.sailing.domain.abstractlog.race;
+package com.sap.sailing.domain.abstractlog.race.impl;
+
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 
 
 

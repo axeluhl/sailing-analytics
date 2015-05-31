@@ -78,11 +78,10 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
         }
 
         private void setRaceLogStatusBasedOnStartTime(TimePoint startTime) {
-            if (startTime == null){
+            if (startTime == null) {
                 nextStatus = RaceLogRaceStatus.UNKNOWN;
                 return;
             }
-            
             TimePoint now = clock.now();
             if (racingProcedure.isStartphaseActive(startTime, now)) {
                 nextStatus = RaceLogRaceStatus.STARTPHASE;
@@ -91,8 +90,8 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
             } else {
                 nextStatus = RaceLogRaceStatus.RUNNING;
             }
-        };
-        
+        }
+
         @Override
         public void visit(RaceLogRaceStatusEvent event) {
             nextStatus = event.getNextStatus();
