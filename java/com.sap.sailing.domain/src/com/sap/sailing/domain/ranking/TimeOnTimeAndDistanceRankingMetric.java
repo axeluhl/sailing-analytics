@@ -143,7 +143,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 if (competitorLeg != null && competitorLeg.hasStartedLeg(timePoint)) {
                     final Duration timeToReachFastest = getPredictedDurationToEndOfLegOrTo(timePoint,
                             competitorLeg, trackedLegOfFastestCompetitorInLeg, cache);
-                    final Duration totalDurationSinceRaceStart = startOfRace.until(timePoint).plus(timeToReachFastest);
+                    final Duration totalDurationSinceRaceStart = timeToReachFastest == null ? null :
+                        startOfRace.until(timePoint).plus(timeToReachFastest);
                     correctedTime = getCalculatedTime(competitor, () -> trackedLeg.getLeg(),
                             () -> positionOfFastestBoatInLegAtTimePointOrLegEnd, totalDurationSinceRaceStart,
                             totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd);
@@ -157,9 +158,12 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         } else {
             fastestCompetitorHasStartedLeg = false;
         }
+        final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
         return (tloc1, tloc2) -> fastestCompetitorHasStartedLeg ?
-            correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc1.getCompetitor()).
-                compareTo(correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc2.getCompetitor())) : 0;
+                durationComparatorNullsLast.compare(
+                        correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc1.getCompetitor()),
+                        correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace.get(tloc2.getCompetitor()))
+                        : 0;
     }
 
     @Override
