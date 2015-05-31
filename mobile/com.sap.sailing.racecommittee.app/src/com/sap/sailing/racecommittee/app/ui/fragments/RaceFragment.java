@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.Serializable;
-
 import android.app.Activity;
 import android.os.Bundle;
 

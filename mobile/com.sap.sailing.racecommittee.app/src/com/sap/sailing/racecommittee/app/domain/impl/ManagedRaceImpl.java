@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
