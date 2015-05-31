@@ -168,6 +168,7 @@ public enum InMemoryDataStore implements DataStore {
      *          corresponding SimpleRaceLogIdentifier
      */
     private SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(String id) {
+        // See re-opened bug 1524: need to unescape what FleetIdentifierImpl.escape... does regarding the "." separator (escaping it with a backslash)
         String[] split = id.split("\\.");
         String leaderboardName = split[0];
         String raceColumnName = split[3];
