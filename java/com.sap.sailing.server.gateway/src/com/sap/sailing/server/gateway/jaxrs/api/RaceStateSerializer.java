@@ -26,11 +26,13 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Fleet>> {
-    private HasRegattaLike regattaLike = null;
+    private final HasRegattaLike regattaLike;
 
     public RaceStateSerializer(Leaderboard leaderboard) {
-        if (leaderboard instanceof HasRegattaLike){
-            regattaLike  = (HasRegattaLike) leaderboard;
+        if (leaderboard instanceof HasRegattaLike) {
+            regattaLike = (HasRegattaLike) leaderboard;
+        } else {
+            regattaLike = null;
         }
     }
 
