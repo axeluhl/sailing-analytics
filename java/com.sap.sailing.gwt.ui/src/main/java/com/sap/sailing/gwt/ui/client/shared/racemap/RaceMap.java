@@ -511,7 +511,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
               combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
               map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
-              trueNorthIndicatorPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
+              trueNorthIndicatorPanel.getParent().addStyleName("TrueNorthIndicatorPanelParentDiv");
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
