@@ -142,8 +142,8 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
                 new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
-        assertNotNull(masterColumn.getTrackedRace(defaultFleet)); // ensure the re-assignment worked on the master
         Thread.sleep(1000);
+        assertNotNull(masterColumn.getTrackedRace(defaultFleet)); // ensure the re-assignment worked on the master
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
         assertNotSame(masterTrackedRace, replicaTrackedRace);

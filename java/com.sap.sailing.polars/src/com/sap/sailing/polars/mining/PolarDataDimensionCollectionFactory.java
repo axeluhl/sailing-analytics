@@ -6,7 +6,6 @@ import java.util.Collection;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -30,13 +29,9 @@ public class PolarDataDimensionCollectionFactory {
 
     private static void addTackAndLegTypeDimensions(Collection<Function<?>> dimensions, FunctionFactory functionFactory)
             throws NoSuchMethodException {
-        Function<Tack> tackFunction = functionFactory
-                .createMethodWrappingFunction(MovingAveragePolarClusterKey.class.getMethod("getTack",
-                        new Class<?>[0]));
         Function<LegType> legTypeFunction = functionFactory
                 .createMethodWrappingFunction(MovingAveragePolarClusterKey.class.getMethod("getLegType",
                         new Class<?>[0]));
-        dimensions.add(tackFunction);
         dimensions.add(legTypeFunction);
     }
 

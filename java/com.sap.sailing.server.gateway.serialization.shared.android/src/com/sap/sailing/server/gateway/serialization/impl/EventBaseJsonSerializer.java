@@ -11,8 +11,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.media.ImageSize;
 
 public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     private static final Logger logger = Logger.getLogger(EventBaseJsonSerializer.class.getName());

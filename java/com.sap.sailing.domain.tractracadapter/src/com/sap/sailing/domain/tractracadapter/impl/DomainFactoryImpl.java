@@ -489,9 +489,17 @@ public class DomainFactoryImpl implements DomainFactory {
                     TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(regatta);
                     if (trackedRegatta != null) {
                         // see above; only remove tracked regatta if it *became* empty because of the tracked race removal here
-                        int oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
-                        trackedRegatta.removeTrackedRace(raceDefinition);
-                        if (oldSizeOfTrackedRaces > 0 && Util.size(trackedRegatta.getTrackedRaces()) == 0) {
+                        final int oldSizeOfTrackedRaces;
+                        final int newSizeOfTrackedRaces;
+                        trackedRegatta.lockTrackedRacesForWrite();
+                        try {
+                            oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                            trackedRegatta.removeTrackedRace(raceDefinition);
+                            newSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                        } finally {
+                            trackedRegatta.unlockTrackedRacesAfterWrite();
+                        }
+                        if (oldSizeOfTrackedRaces > 0 && newSizeOfTrackedRaces == 0) {
                             trackedRegattaRegistry.removeTrackedRegatta(regatta);
                         }
                     }

@@ -58,7 +58,8 @@
 .gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
   font-size: 12px;
   cursor: default;
-  font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
+  font-family: 'Open Sans',Arial,Verdana,sans-serif;
+  font-weight: 600;
   top: 0;
 }
 
@@ -67,7 +68,8 @@
   font-size: 12px;
   color: #333;
   cursor: default;
-  font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
+  font-family: 'Open Sans',Arial,Verdana,sans-serif;
+  font-weight: 600;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel-tooClose {
@@ -75,7 +77,8 @@
   font-size: 8px;
   color: #333;
   cursor: default;
-  font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
+  font-family: 'Open Sans',Arial,Verdana,sans-serif;
+  font-weight: 600;
 }
 
 .gwt-SliderBar-shell-focused {
