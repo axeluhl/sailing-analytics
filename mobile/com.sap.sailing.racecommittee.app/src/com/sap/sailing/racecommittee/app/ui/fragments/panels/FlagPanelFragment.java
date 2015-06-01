@@ -76,7 +76,7 @@ public class FlagPanelFragment extends BasePanelFragment {
 
     @Override
     public void onResume() {
-        super.onStart();
+        super.onResume();
 
         checkStatus();
 
@@ -94,7 +94,7 @@ public class FlagPanelFragment extends BasePanelFragment {
 
     @Override
     public void onPause() {
-        super.onStop();
+        super.onPause();
 
         getRaceState().removeChangedListener(mStateListener);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);

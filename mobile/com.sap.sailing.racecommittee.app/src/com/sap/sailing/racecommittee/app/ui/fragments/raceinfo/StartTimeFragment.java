@@ -101,7 +101,7 @@ public class StartTimeFragment extends BaseFragment
 
     @Override
     public void onPause() {
-        super.onDetach();
+        super.onPause();
 
         getRaceState().removeChangedListener(raceStateChangedListener);
     }

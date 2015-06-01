@@ -77,7 +77,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
     @Override
     public void onResume() {
-        super.onStart();
+        super.onResume();
 
         TickSingleton.INSTANCE.registerListener(this);
         notifyTick(MillisecondsTimePoint.now());
@@ -95,7 +95,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
     @Override
     public void onPause() {
-        super.onStop();
+        super.onPause();
 
         getRaceState().removeChangedListener(mStateListener);
 
