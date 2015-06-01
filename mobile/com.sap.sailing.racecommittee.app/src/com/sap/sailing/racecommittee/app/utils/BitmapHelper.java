@@ -66,6 +66,8 @@ public class BitmapHelper {
         return inSampleSize;
     }
 
+    // @SuppressWarnings, but it is handled correctly
+    @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static Drawable getAttrDrawable(Context context, @AttrRes int attrRes) {
         Drawable drawable = null;
@@ -92,6 +94,8 @@ public class BitmapHelper {
         return null;
     }
 
+    // @SuppressWarnings, but it is handled correctly
+    @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setBackground(View view, Drawable drawable) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -102,6 +106,8 @@ public class BitmapHelper {
         }
     }
 
+    // @SuppressWarnings, but it is handled correctly
+    @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static Drawable getDrawable(Context context, @DrawableRes int id) {
         Drawable drawable;
