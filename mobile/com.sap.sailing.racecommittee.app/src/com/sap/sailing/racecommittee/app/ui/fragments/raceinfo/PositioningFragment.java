@@ -53,7 +53,7 @@ public class PositioningFragment extends BaseFragment
     private RecyclerView mCompetitorView;
     private Button mConfirm;
 
-    private RecyclerView.Adapter mFinishedAdapter;
+    private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private FinishListAdapter mAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private ArrayList<CompetitorsWithIdImpl> mFinishedData;
@@ -339,7 +339,7 @@ public class PositioningFragment extends BaseFragment
     private CompetitorResults getCompetitorResults() {
         CompetitorResults result = new CompetitorResultsImpl();
         for (CompetitorsWithIdImpl item : mFinishedData) {
-            result.add(new Util.Triple<>(item.getKey(), item.getText(), item.getReason()));
+            result.add(new Util.Triple<Serializable, String, MaxPointsReason>(item.getKey(), item.getText(), item.getReason()));
         }
         return result;
     }

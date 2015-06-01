@@ -243,7 +243,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
         void onItemRemoved(int position);
     }
 
-    protected class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
+    public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
 
         public ViewGroup container;
         public ImageView dragHandle;

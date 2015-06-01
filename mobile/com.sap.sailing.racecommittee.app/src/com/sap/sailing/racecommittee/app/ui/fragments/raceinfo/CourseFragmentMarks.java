@@ -61,7 +61,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     private RecyclerView mCurrentCourse;
     private RecyclerView mMarkGrid;
     private CourseElementAdapter mHistoryAdapter;
-    private RecyclerView.Adapter mCourseAdapter;
+    private RecyclerView.Adapter<CourseElementAdapter.ViewHolder> mCourseAdapter;
     private CourseMarkAdapter mMarkAdapter;
     private int mId;
 
