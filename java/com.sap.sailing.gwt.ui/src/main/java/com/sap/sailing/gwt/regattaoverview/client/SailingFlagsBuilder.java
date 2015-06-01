@@ -20,13 +20,6 @@ public class SailingFlagsBuilder {
     private final static FlagImageResolver flagImageResolver = new FlagImageResolver();
     
     interface SailingFlagsTemplates extends SafeHtmlTemplates {
-        /**
-         * @param title
-         *            the tool-tip to display for the image on mouse-over
-         * @param upperFlag
-         *            how to render the image; this needs to be an &lt;img&gt; tag, not enclosed by any other element,
-         *            as returned by {@link ImagesBarCell#makeImagePrototype(ImageResource)}
-         */
         @SafeHtmlTemplates.Template("<div title=\"{0}\">{1}</div>")
         SafeHtml cell(String title, SafeHtml content);
 

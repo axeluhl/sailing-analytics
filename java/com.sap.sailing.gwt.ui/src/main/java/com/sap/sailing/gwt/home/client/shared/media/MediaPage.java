@@ -17,9 +17,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
-import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
-import com.sap.sailing.gwt.ui.shared.media.VideoMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 
 public class MediaPage extends Composite {
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
@@ -85,7 +85,7 @@ public class MediaPage extends Composite {
                 break;
             }
 
-            for (final ImageMetadataDTO holder : media.getPhotos()) {
+            for (final SailingImageDTO holder : media.getPhotos()) {
                 if (holder.getSourceRef() != null) {
 
                     GalleryImageHolder gih = new GalleryImageHolder(holder);
@@ -96,7 +96,7 @@ public class MediaPage extends Composite {
                     gih.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            new FullscreenViewer(holder, media.getPhotos());
+                            new SailingFullscreenViewer().show(holder, media.getPhotos());
                         }
                     });
                 }
@@ -113,7 +113,7 @@ public class MediaPage extends Composite {
                 videoListOuterBoxUi.addClassName(res.mediaCss().large3());
             }
             boolean first = true;
-            for (final VideoMetadataDTO videoCandidateInfo : media.getVideos()) {
+            for (final SailingVideoDTO videoCandidateInfo : media.getVideos()) {
                 if (first) {
                     putVideoOnDisplay(videoCandidateInfo, false);
                     first = false;
@@ -137,7 +137,7 @@ public class MediaPage extends Composite {
         }
     }
 
-    private void putVideoOnDisplay(final VideoMetadataDTO videoCandidateInfo, boolean autoplay) {
+    private void putVideoOnDisplay(final SailingVideoDTO videoCandidateInfo, boolean autoplay) {
         videoDisplayUi = new VideoJSPlayer(true, autoplay);
         videoDisplayUi.setSource(videoCandidateInfo.getSourceRef(), videoCandidateInfo.getMimeType());
         videoDisplayHolderUi.setWidget(videoDisplayUi);

@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -607,7 +608,10 @@ public class LeaderboardData extends ExportAction {
     /**
      * Create xml elements related to a leg.
      */
-    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter,
+            Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages,
+            Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException,
+            ServletException {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
@@ -633,8 +637,8 @@ public class LeaderboardData extends ExportAction {
                 legElement.addContent(competitorElement);
                 continue;
             }
-            
             TimePoint legFinishTime = competitorLeg.getFinishTime();
+            final RankingInfo rankingMetricAtLegFinishTime = trackedLeg.getTrackedRace().getRankingMetric().getRankingInfo(legFinishTime);
             competitorLegDataElement.addContent(createTimedXML("leg_started_time_", competitorLeg.getStartTime()));
             Util.Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "maximum_speed_over_ground_in_knots", maximumSpeed != null ? maximumSpeed.getB().getKnots() : -1);
@@ -650,9 +654,10 @@ public class LeaderboardData extends ExportAction {
                 legConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " seems to not have finished this leg before end of tracking time.", 0.1, legConfidenceAndErrorMessages);
             }
             addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", timeSpentInThisLeg != null ? timeSpentInThisLeg.asMillis() : new MillisecondsDurationImpl(0).asMillis());
-            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeader(legFinishTime, WindPositionMode.LEG_MIDDLE).asSeconds());
-            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE);
-            addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);
+            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeader(legFinishTime, rankingMetricAtLegFinishTime, WindPositionMode.LEG_MIDDLE).asSeconds());
+            Distance windwardDistanceToCompetitorFarthestAhead = competitorLeg.getWindwardDistanceToCompetitorFarthestAhead(legFinishTime, WindPositionMode.LEG_MIDDLE, rankingMetricAtLegFinishTime);
+            // TODO bug1018 decide whether the following field should be renamed to express that it's not the distance to the "leader" but the competitor farthest ahead; discussed with Simon on 2015-05-28; Simon says we leave it like this for now
+            addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToCompetitorFarthestAhead != null ? windwardDistanceToCompetitorFarthestAhead.getMeters() : 0);
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());
 

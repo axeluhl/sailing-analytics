@@ -15,9 +15,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
-public class FullscreenViewer {
+public class SailingFullscreenViewer implements FullscreenViewer<SailingImageDTO> {
     private PopupPanel popup = new PopupPanel(true) {
         protected void onPreviewNativeEvent(NativePreviewEvent event) {
             if (event.getTypeInt() == Event.ONKEYDOWN && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
@@ -26,8 +27,8 @@ public class FullscreenViewer {
         };
     };
 
-    public FullscreenViewer(ImageMetadataDTO selected, List<ImageMetadataDTO> images) {
-        final GalleryPlayer viewer = new GalleryPlayer(selected, images);
+    public void show(SailingImageDTO selected, List<SailingImageDTO> images) {
+        final SailingGalleryPlayer viewer = new SailingGalleryPlayer(selected, images);
 
         Window.addResizeHandler(new ResizeHandler() {
             @Override
@@ -63,4 +64,5 @@ public class FullscreenViewer {
             }
         });
     }
+
 }

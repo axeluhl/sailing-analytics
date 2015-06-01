@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -65,7 +66,7 @@ public class DirectGapCalculationVersusOneDesignRankingMetricTest extends Abstra
     
     /**
      * Asserts that Philipp Buhl is having equal gap value, regardless whether calculated using the traditional
-     * {@link TrackedLegOfCompetitor#getGapToLeader(TimePoint, WindPositionMode)} method or the
+     * {@link TrackedLegOfCompetitor#getGapToLeader(TimePoint, RankingInfo, WindPositionMode)} method or the
      * {@link OneDesignRankingMetric#getGapToLeaderInOwnTime(Competitor, TimePoint)} method.
      */
     @Test
@@ -74,7 +75,8 @@ public class DirectGapCalculationVersusOneDesignRankingMetricTest extends Abstra
         TimePoint timePoint = getTrackedRace().getStartOfRace();
         for (int i=1; i<10; i++) {
             timePoint = timePoint.plus(Duration.ONE_MINUTE);
-            Duration classicGap = getTrackedRace().getTrackedLeg(buhli, timePoint).getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE);
+            Duration classicGap = getTrackedRace().getTrackedLeg(buhli, timePoint).getGapToLeader(timePoint,
+                    getTrackedRace().getRankingMetric().getRankingInfo(timePoint), WindPositionMode.LEG_MIDDLE);
             Duration rankingMetricGap = getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(buhli, timePoint);
             assertEquals("At "+i+" minutes into the race ("+timePoint+"): ", classicGap.asSeconds(), rankingMetricGap.asSeconds(), 0.000001);
         }

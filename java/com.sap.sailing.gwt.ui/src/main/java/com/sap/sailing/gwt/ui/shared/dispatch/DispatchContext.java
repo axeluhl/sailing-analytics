@@ -1,9 +1,18 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
-import com.google.gwt.core.shared.GwtIncompatible;
+import java.util.Date;
+import java.util.Locale;
+
 import com.sap.sailing.server.RacingEventService;
 
-@GwtIncompatible
+
 public interface DispatchContext {
+
     RacingEventService getRacingEventService();
+
+    String getClientLocaleName();
+
+    Locale getClientLocale();
+
+    Date getCurrentClientTime();
 }

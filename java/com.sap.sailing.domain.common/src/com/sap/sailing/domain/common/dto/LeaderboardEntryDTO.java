@@ -42,7 +42,7 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public boolean discarded;
     
-    public Double windwardDistanceToOverallLeaderInMeters;
+    public Double windwardDistanceToCompetitorFarthestAheadInMeters;
     
     public Double averageAbsoluteCrossTrackErrorInMeters;
     
@@ -104,14 +104,14 @@ public class LeaderboardEntryDTO implements Serializable {
      * The corrected time spent in the race; usually based on the current time and distance, calculated by the {@link RankingMetric}.
      * For one-design classes this equals the time spent in the race.
      */
-    public Duration correctedTime;
+    public Duration calculatedTime;
     
     /**
      * The corrections applied to the time and distance sailed when the competitor would have reached the
      * competitor farthest ahead, based on average VMG on the current leg and equal performance to the boat
      * farthest ahead for all subsequent legs.
      */
-    public Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
+    public Duration calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -142,9 +142,9 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((gapToLeaderInOwnTime == null) ? 0 : gapToLeaderInOwnTime.hashCode());
         result = prime * result
-                + ((correctedTime == null) ? 0 : correctedTime.hashCode());
+                + ((calculatedTime == null) ? 0 : calculatedTime.hashCode());
         result = prime * result
-                + ((correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) ? 0 : correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.hashCode());
+                + ((calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) ? 0 : calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.hashCode());
         result = prime * result
                 + ((averageSignedCrossTrackErrorInMeters == null) ? 0 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
@@ -179,7 +179,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
-                + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters
+                + ((windwardDistanceToCompetitorFarthestAheadInMeters == null) ? 0 : windwardDistanceToCompetitorFarthestAheadInMeters
                         .hashCode());
         return result;
     }
@@ -198,15 +198,15 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!gapToLeaderInOwnTime.equals(other.gapToLeaderInOwnTime))
             return false;
-        if (correctedTime == null) {
-            if (other.correctedTime != null)
+        if (calculatedTime == null) {
+            if (other.calculatedTime != null)
                 return false;
-        } else if (!correctedTime.equals(other.correctedTime))
+        } else if (!calculatedTime.equals(other.calculatedTime))
             return false;
-        if (correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) {
-            if (other.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead != null)
+        if (calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) {
+            if (other.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead != null)
                 return false;
-        } else if (!correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.equals(other.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead))
+        } else if (!calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.equals(other.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead))
             return false;
         if (averageAbsoluteCrossTrackErrorInMeters == null) {
             if (other.averageAbsoluteCrossTrackErrorInMeters != null)
@@ -297,10 +297,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!totalPoints.equals(other.totalPoints))
             return false;
-        if (windwardDistanceToOverallLeaderInMeters == null) {
-            if (other.windwardDistanceToOverallLeaderInMeters != null)
+        if (windwardDistanceToCompetitorFarthestAheadInMeters == null) {
+            if (other.windwardDistanceToCompetitorFarthestAheadInMeters != null)
                 return false;
-        } else if (!windwardDistanceToOverallLeaderInMeters.equals(other.windwardDistanceToOverallLeaderInMeters))
+        } else if (!windwardDistanceToCompetitorFarthestAheadInMeters.equals(other.windwardDistanceToCompetitorFarthestAheadInMeters))
             return false;
         return true;
     }

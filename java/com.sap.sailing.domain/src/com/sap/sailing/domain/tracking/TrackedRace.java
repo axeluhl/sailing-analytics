@@ -41,6 +41,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -515,17 +516,21 @@ public interface TrackedRace extends Serializable {
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
     /**
-     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}
+     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
      */
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
-     * Same as {@link #getWindwardDistanceToOverallLeader(Competitor, TimePoint, WindPositionMode)}, only with an additional
-     * cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups for the same
-     * time point.
+     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(Competitor, TimePoint, WindPositionMode)}, only with an
+     * additional cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups
+     * for the same time point.
+     * 
+     * @param rankingInfo
+     *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
      */
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
-    
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
      * {@link #getWindSourcesToExclude}.
@@ -818,13 +823,4 @@ public interface TrackedRace extends Serializable {
     Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
-    
-    /**
-     * With a handicap system in place, computes the windward distance to the race's overall leader based on the correction factors
-     * introduced by the handicap's ranking and scoring system. For one-design classes, this method returns the same result as
-     * {@link #getWindwardDistanceToOverallLeader(Competitor, TimePoint, WindPositionMode)}.
-     */
-    Distance getCorrectedWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode) throws NoWindException;
-
 }

@@ -132,6 +132,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
@@ -1893,11 +1894,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.setEndDate(endDate);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
-            if (getTrackedRegatta(regatta) != null) {
-                for (DynamicTrackedRace trackedRace : getTrackedRegatta(regatta).getTrackedRaces()) {
-                    // the start times of the regatta's tracked races now have to be re-evaluated the next time they are
-                    // queried
-                    trackedRace.invalidateStartTime();
+            final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
+                    for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                        // the start times of the regatta's tracked races now have to be re-evaluated the next time they
+                        // are queried
+                        trackedRace.invalidateStartTime();
+                    }
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
                 }
             }
         }
@@ -1923,10 +1930,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
         if (trackedRace != null) {
             TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            final boolean isTrackedRacesEmpty;
             if (trackedRegatta != null) {
-                trackedRegatta.removeTrackedRace(trackedRace);
+                trackedRegatta.lockTrackedRacesForWrite();
+                try {
+                    trackedRegatta.removeTrackedRace(trackedRace);
+                    isTrackedRacesEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterWrite();
+                }
+            } else {
+                isTrackedRacesEmpty = false;
             }
-            if (Util.isEmpty(trackedRegatta.getTrackedRaces())) {
+            if (isTrackedRacesEmpty) {
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
@@ -3146,10 +3162,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Regatta regatta : allRegattas) {
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
-                Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-                for (TrackedRace trackedRace : trackedRaces) {
-                    trackedRace.setPolarDataService(service);
-                    service.insertExistingFixes(trackedRace);
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
+                    Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                    for (TrackedRace trackedRace : trackedRaces) {
+                        trackedRace.setPolarDataService(service);
+                        service.insertExistingFixes(trackedRace);
+                    }
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
                 }
             }
         }
@@ -3160,5 +3181,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             polarDataService = null;
             setPolarDataService(null);
         }
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
+        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+        final List<Competitor> result = new ArrayList<>();
+        Util.addAll(trackedRace.getRace().getCompetitors(), result);
+        result.sort((c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c2).getWindwardDistanceSailed().compareTo(
+                rankingInfo.getCompetitorRankingInfo().apply(c1).getWindwardDistanceSailed()));
+        return result;
     }
 }

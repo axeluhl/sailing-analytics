@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.common.media.MimeType;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
@@ -14,6 +13,7 @@ import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.MimeType;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
     private UUID eventId;
@@ -52,6 +52,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         
         Iterable<URL> videoURLs = event.getVideoURLs();
         for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
+            // TODO fmittag/pgt: implement locale specific live stream using context.getClientLocaleName() or context.getClientLocale()
             String videoUrl = Util.get(videoURLs, i).toString();
             MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl);
             if (type == MimeType.youtube || type == MimeType.vimeo || type == MimeType.mp4) {

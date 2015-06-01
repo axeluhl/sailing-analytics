@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -783,7 +784,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                         : trackedRace.getTimePointOfNewestEvent();
-
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                 JSONObject jsonRaceResults = new JSONObject();
                 jsonRaceResults.put("name", trackedRace.getRace().getName());
                 jsonRaceResults.put("regatta", regatta.getName());
@@ -889,7 +890,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                     }
                                 }
                                 jsonCompetitorInLeg.put("gapToLeader-s",
-                                        trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE));
+                                        trackedLegOfCompetitor.getGapToLeader(timePoint, rankingInfo, WindPositionMode.LEG_MIDDLE));
                                 jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
                                 jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
                                 jsonCompetitors.add(jsonCompetitorInLeg);
@@ -935,7 +936,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                         : trackedRace.getTimePointOfNewestEvent();
                 // if(trackedRace.isLive(timePoint)) {
-
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                 JSONObject jsonLiveData = new JSONObject();
                 jsonLiveData.put("name", trackedRace.getRace().getName());
                 jsonLiveData.put("regatta", regatta.getName());
@@ -990,16 +991,16 @@ public class RegattasResource extends AbstractSailingServerResource {
                         }
 
                         Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
-                                WindPositionMode.LEG_MIDDLE);
+                                rankingInfo, WindPositionMode.LEG_MIDDLE);
                         if (gapToLeader != null) {
                             jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
                         }
 
-                        Distance windwardDistanceToOverallLeader = currentLegOfCompetitor
-                                .getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
-                        if (windwardDistanceToOverallLeader != null) {
+                        Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
+                                .getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                        if (windwardDistanceToCompetitorFarthestAhead != null) {
                             jsonCompetitorInLeg.put("gapToLeader-m",
-                                    roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
+                                    roundDouble(windwardDistanceToCompetitorFarthestAhead.getMeters(), 2));
                         }
                         jsonCompetitorInLeg.put("finished", false);
                     } else {

@@ -62,26 +62,21 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
+    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
         return totalDurationSinceRaceStart;
     }
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
-        return trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, cache);
+            final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        return trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
     }
 
     @Override
     public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
-        return new RankingInfo() {
+        return new AbstractRankingInfo(timePoint) {
             private static final long serialVersionUID = 25689357311324825L;
-
-            @Override
-            public TimePoint getTimePoint() {
-                return timePoint;
-            }
 
             @Override
             public Function<Competitor, CompetitorRankingInfo> getCompetitorRankingInfo() {

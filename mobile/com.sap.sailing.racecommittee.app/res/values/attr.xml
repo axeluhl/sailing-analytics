@@ -42,6 +42,7 @@
     <attr name="chevron_left_24dp" format="reference"/>
     <attr name="chevron_left_36dp" format="reference"/>
     <attr name="chevron_right_36dp" format="reference"/>
+    <attr name="create_36dp" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>
     <attr name="course_triangle_48dp" format="reference"/>
