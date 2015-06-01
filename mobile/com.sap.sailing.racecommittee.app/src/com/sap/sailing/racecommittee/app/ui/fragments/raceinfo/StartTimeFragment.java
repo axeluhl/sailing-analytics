@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,11 +24,17 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
 
     private static final String START_MODE = "startMode";
-    private static final int MAX_DAYS = 30;
+    private static final int FUTURE_DAYS = 25;
+    private static final int PAST_DAYS = -3;
 
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
@@ -176,7 +177,7 @@ public class StartTimeFragment extends BaseFragment
             if (mDatePicker != null) {
                 ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mDatePicker.setOnValueChangedListener(this);
-                initDatePicker();
+                initDatePicker(time);
             }
             mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
@@ -185,7 +186,8 @@ public class StartTimeFragment extends BaseFragment
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);
                 int minutes = time.get(Calendar.MINUTE);
-                if (getArguments() != null && getArguments().getInt(START_MODE, 0) != 2 && getArguments().getSerializable(MainScheduleFragment.START_TIME) == null) {
+                if (getArguments() != null && getArguments().getInt(START_MODE, 0) != 2
+                    && getArguments().getSerializable(MainScheduleFragment.START_TIME) == null) {
                     // In 10 minutes from now, but always a 5-minute-mark.
                     time.add(Calendar.MINUTE, 10);
                     hours = time.get(Calendar.HOUR_OF_DAY);
@@ -347,7 +349,7 @@ public class StartTimeFragment extends BaseFragment
         Calendar newTime = (Calendar) today.clone();
         newTime.setTime(mStartTime.asDate());
 
-        int days = TimeUtils.daysBetween(today, newTime);
+        int days = TimeUtils.daysBetween(today, newTime) + Math.abs(PAST_DAYS);
 
         mDatePicker.setValue(days);
         mTimePicker.setCurrentHour(newTime.get(Calendar.HOUR_OF_DAY));
@@ -356,7 +358,7 @@ public class StartTimeFragment extends BaseFragment
 
     private TimePoint getPickerTime() {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
+        calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
         calendar.set(Calendar.SECOND, 0);
@@ -364,14 +366,22 @@ public class StartTimeFragment extends BaseFragment
         return new MillisecondsTimePoint(calendar.getTime());
     }
 
-    private void initDatePicker() {
+    private void initDatePicker(Calendar time) {
         DateFormat dateFormat = DateFormat.getDateInstance();
         ArrayList<String> dates = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        // Past
+        calendar.add(Calendar.DAY_OF_MONTH, PAST_DAYS);
+        for (int i = PAST_DAYS; i < -1; i++) {
+            dates.add(dateFormat.format(calendar.getTime()));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        dates.add(getString(R.string.yesterday));
         dates.add(getString(R.string.today));
         dates.add(getString(R.string.tomorrow));
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
-        for (int i = 3; i <= MAX_DAYS; i++) {
+        // Future
+        calendar.add(Calendar.DAY_OF_MONTH, 2);
+        for (int i = 3; i <= FUTURE_DAYS + 1; i++) {
             calendar.add(Calendar.DAY_OF_MONTH, 1);
             dates.add(dateFormat.format(calendar.getTime()));
         }
@@ -379,6 +389,7 @@ public class StartTimeFragment extends BaseFragment
         mDatePicker.setMinValue(0);
         mDatePicker.setMaxValue(dates.size() - 1);
         mDatePicker.setWrapSelectorWheel(false);
+        mDatePicker.setValue(TimeUtils.daysBetween(time, Calendar.getInstance()) + Math.abs(PAST_DAYS));
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
             TextView date = new TextView(getActivity());
             date.setText(dateFormat.format(calendar.getTime()));
@@ -410,7 +421,6 @@ public class StartTimeFragment extends BaseFragment
         }
         fragment.setArguments(args);
         getFragmentManager().beginTransaction().replace(viewId, fragment).commit();
-        LocalBroadcastManager.getInstance(getActivity())
-            .sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
     }
 }

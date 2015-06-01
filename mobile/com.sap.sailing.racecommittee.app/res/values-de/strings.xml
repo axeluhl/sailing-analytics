@@ -406,5 +406,6 @@
     <string name="author_type_officer_finish">Zielschiff-Wettfahrtleiter</string>
     <string name="author_type_shore_control">Regattaleitung an Land</string>
     <string name="author_viewer">Demo-Modus</string>
+    <string name="yesterday">Gestern</string>
 
 </resources>
