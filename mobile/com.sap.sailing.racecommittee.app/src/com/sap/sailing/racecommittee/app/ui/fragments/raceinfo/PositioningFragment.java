@@ -53,7 +53,7 @@ public class PositioningFragment extends BaseFragment
     private RecyclerView mCompetitorView;
     private Button mConfirm;
 
-    private RecyclerView.Adapter<?> mFinishedAdapter;
+    private RecyclerView.Adapter mFinishedAdapter;
     private FinishListAdapter mAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private ArrayList<CompetitorsWithIdImpl> mFinishedData;

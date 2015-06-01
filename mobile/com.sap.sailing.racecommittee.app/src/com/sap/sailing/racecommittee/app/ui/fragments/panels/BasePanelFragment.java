@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
@@ -62,7 +62,7 @@ public abstract class BasePanelFragment extends RaceFragment {
         }
     }
 
-    protected void resetFragment(View lockIcon, @IdRes int idRes, Class<?> cls) {
+    protected void resetFragment(View lockIcon, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
             if (getFragmentManager() != null) {
                 Fragment fragment = getFragmentManager().findFragmentById(idRes);
@@ -73,6 +73,7 @@ public abstract class BasePanelFragment extends RaceFragment {
                 }
             }
         }
+
     }
 
     protected void replaceFragment(RaceFragment fragment) {
@@ -85,9 +86,6 @@ public abstract class BasePanelFragment extends RaceFragment {
             args.putAll(fragment.getArguments());
         }
         fragment.setArguments(args);
-        getFragmentManager()
-                .beginTransaction()
-                .replace(idRes, fragment)
-                .commit();
+        getFragmentManager().beginTransaction().replace(idRes, fragment).commit();
     }
 }
