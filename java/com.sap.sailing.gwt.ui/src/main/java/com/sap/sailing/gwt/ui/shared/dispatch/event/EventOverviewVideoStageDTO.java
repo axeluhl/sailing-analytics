@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import com.sap.sailing.domain.common.media.MimeType;
+import com.sap.sse.common.media.MimeType;
 
 public class EventOverviewVideoStageDTO implements EventOverviewStageContentDTO {
     public enum Type {

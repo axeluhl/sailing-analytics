@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.shared.dispatch;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -32,7 +33,7 @@ public class SimpleDispatch implements DispatchAsync {
 
     @Override
     public <R extends Result, A extends Action<R>> void execute(A action, final AsyncCallback<R> callback) {
-        dispatchRPC.execute(new RequestWrapper<R, A>(action), new AsyncCallback<ResultWrapper<R>>() {
+        dispatchRPC.execute(new RequestWrapper<R, A>(action, LocaleInfo.getCurrentLocale().getLocaleName()), new AsyncCallback<ResultWrapper<R>>() {
 
             @Override
             public void onFailure(Throwable caught) {

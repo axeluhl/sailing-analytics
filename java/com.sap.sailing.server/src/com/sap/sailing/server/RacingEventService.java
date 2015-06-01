@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -605,5 +606,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     FileStorageManagementService getFileStorageManagementService();
 
     ClassLoader getCombinedMasterDataClassLoader();
+
+    Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
 
 }

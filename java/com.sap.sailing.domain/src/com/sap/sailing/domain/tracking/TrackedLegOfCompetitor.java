@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -151,27 +152,31 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
+     * @param rankingInfo TODO
      */
-    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode);
+    Duration getGapToLeader(TimePoint timePoint, RankingInfo rankingInfo, WindPositionMode windPositionMode);
     
     /**
-     * Same as {@link #getGapToLeader(TimePoint, WindPositionMode)}, only that a cache for wind and leg type data is used.
+     * Same as {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}, only that a cache for wind and leg type data is used.
+     * @param rankingInfo TODO
      */
-    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
-     * can share this knowledge to speed up computation as compared to {@link #getGapToLeader(TimePoint, WindPositionMode)}.
+     * can share this knowledge to speed up computation as compared to {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}.
+     * @param rankingInfo TODO
      */
-    Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint, RankingInfo rankingInfo, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
-     * Same as {@link #getGapToLeader(TimePoint, Competitor, WindPositionMode)}, only that an additional cache is used
+     * Same as {@link #getGapToLeader(TimePoint, Competitor, RankingInfo, WindPositionMode)}, only that an additional cache is used
      * to avoid redundant evaluations of leg types and wind field information across various calculations that
      * all can use the same basic information.
+     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     boolean hasStartedLeg(TimePoint timePoint);
     
@@ -228,14 +233,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * distance between this leg's competitor and the leader is returned. Note that this can lead to a situation where
      * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode) distance to go} which is
      * used for ranking.
+     * 
+     * @param rankingInfo materialized ranking information that is pre-calculated to avoid expensive redundant work
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode);
+    Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo);
 
     /**
-     * Same as {@link #getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}, only that a cache for leg type
+     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}, only that a cache for leg type
      * calculation is passed.
+     * @param rankingInfo TODO
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a

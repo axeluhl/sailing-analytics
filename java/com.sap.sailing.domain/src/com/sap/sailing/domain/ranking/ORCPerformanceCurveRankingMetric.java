@@ -51,7 +51,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    protected Duration getCorrectedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
+    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
             Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
         // TODO Auto-generated method stub
         return null;
@@ -66,7 +66,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            WindLegTypeAndLegBearingCache cache) {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -117,6 +117,12 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, trackedRace.getRace().getCourse()
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(45))));
+        trackedRace.getTrack(c2).add(
+                new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(315))));
+        trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(45))));
         trackedRace.getTrack(c2).add(

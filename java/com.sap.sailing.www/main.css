@@ -57,7 +57,7 @@ body {
   height: 100%;
   color: #222222;
   font-size: 14px;
-  font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+  font-family: 'Open Sans', Arial, Verdana, sans-serif;
   font-weight: normal;
   background-image: url(../images/bg-image.jpg);
   background-attachment: fixed;
@@ -100,7 +100,8 @@ a {
       margin: 25px 0 0 0;
       padding: 0; }
       #yield_content .headNavigation a {
-        font-family: 'OpenSansBold', Arial, Verdana, sans-serif;
+        font-family: 'Open Sans', Arial, Verdana, sans-serif;
+        font-weight: bold;
         color: #fff; }
   /* line 47, site.css.sass */
   #yield_content #pageHeadline {
@@ -131,7 +132,7 @@ a {
 				background: #fcb913; 
 				color: white; 
 				font-size: 18px; 
-				font-family: OpenSansRegular, Arial, Verdana, sans-serif; 
+				font-family: 'Open Sans', Arial, Verdana, sans-serif; 
 				padding: 6px 12px 6px 12px; }
 				
   /* line 72, site.css.sass */
@@ -154,7 +155,7 @@ a {
           visibility: hidden; }
         /* line 85, site.css.sass */
         #yield_content #mainContent .innerContent .timeBar .raceSection .date {
-          font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+          font-family: 'Open Sans', Arial, Verdana, sans-serif;
           font-size: 12px;
           margin-left: 35px; }
         /* line 91, site.css.sass */
@@ -175,25 +176,27 @@ a {
           /* line 104, site.css.sass */
           #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel .raceName {
             font-size: 12px;
-            font-family: OpenSansBold, Arial, Verdana, sans-serif;
+            font-family: 'Open Sans', Arial, Verdana, sans-serif;
+            font-weight: bold;
             color: white; }
           /* line 109, site.css.sass */
           #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel .raceLocation {
             font-size: 12px;
-            font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+            font-family: 'Open Sans', Arial, Verdana, sans-serif;
             color: white; }
           #yield_content #mainContent .innerContent .timeBar .raceSection a:hover {
             text-decoration: none; }
       /* line 114, site.css.sass */
       #yield_content #mainContent .innerContent .timeBar .raceDescription {
         padding: 4px;
-        font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+        font-family: 'Open Sans', Arial, Verdana, sans-serif;
         font-size: 12px;
         font-color: #222222; }
     /* line 121, site.css.sass */
     #yield_content #mainContent .articleHeadline {
       font-size: 18px;
-      font-family: OpenSansBold, Arial, Verdana, sans-serif;
+      font-family: 'Open Sans', Arial, Verdana, sans-serif;
+      font-weight: bold;
       color: #222222;
       border-bottom: 2px solid #222222;
       clear: both;
@@ -202,14 +205,16 @@ a {
     /* line 131, site.css.sass */
     #yield_content #mainContent .articleSubheadline {
       font-size: 14px;
-      font-family: OpenSansBold, Arial, Verdana, sans-serif;
+      font-family: 'Open Sans', Arial, Verdana, sans-serif;
+      font-weight: bold;
       color: #222222;
       margin: 0 0 6px 0; }
     /* line 138, site.css.sass */
     #yield_content #mainContent h4 {
       margin: 0 0 10px;
       font-size: 12px;
-      font-family: OpenSansBold, Arial, Verdana, sans-serif; }
+      font-family: 'Open Sans', Arial, Verdana, sans-serif;
+      font-weight: bold; }
   /* line 144, site.css.sass */
   #yield_content #spaceBar {
     height: 80px; }

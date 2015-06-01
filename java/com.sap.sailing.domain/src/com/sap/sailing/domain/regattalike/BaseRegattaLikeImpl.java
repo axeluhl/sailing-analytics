@@ -64,7 +64,12 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
         final Double timeOnTimeFactorFromRegattaLog = getTimeOnTimeFactorFromRegattaLog(competitor);
         final Double result;
         if (timeOnTimeFactorFromRegattaLog == null) {
-            result = competitor.getTimeOnTimeFactor();
+            final Double competitorTimeOnTimeFactorDefault = competitor.getTimeOnTimeFactor();
+            if (competitorTimeOnTimeFactorDefault == null) {
+                result = 1.0;
+            } else {
+                result = competitorTimeOnTimeFactorDefault;
+            }
         } else {
             result = timeOnTimeFactorFromRegattaLog;
         }
@@ -76,7 +81,12 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
         final Duration timeOnDistanceAllowancePerNauticalMileFromRegattaLog = getTimeOnDistanceAllowancePerNauticalMileFromRegattaLog(competitor);
         final Duration result;
         if (timeOnDistanceAllowancePerNauticalMileFromRegattaLog == null) {
-            result = competitor.getTimeOnDistanceAllowancePerNauticalMile();
+            final Duration competitorAllowanceDefault = competitor.getTimeOnDistanceAllowancePerNauticalMile();
+            if (competitorAllowanceDefault == null) {
+                result = Duration.NULL;
+            } else {
+                result = competitorAllowanceDefault;
+            }
         } else {
             result = timeOnDistanceAllowancePerNauticalMileFromRegattaLog;
         }

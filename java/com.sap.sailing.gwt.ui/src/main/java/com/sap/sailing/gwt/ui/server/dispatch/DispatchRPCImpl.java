@@ -28,7 +28,7 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
 
     @Override
     public <R extends Result, A extends Action<R>> ResultWrapper<R> execute(RequestWrapper<R, A> request) throws DispatchException {
-        R executionResult = request.getAction().execute(new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService()));
+        R executionResult = request.getAction().execute(new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(), request.getClientLocaleName()));
         return new ResultWrapper<R>(executionResult);
     }
 

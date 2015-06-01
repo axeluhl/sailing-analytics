@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared.media;
 import java.util.regex.Pattern;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.common.media.MimeType;
+import com.sap.sse.common.media.MimeType;
 
 /**
  * Temporary solution for mimetype detection for current videos.

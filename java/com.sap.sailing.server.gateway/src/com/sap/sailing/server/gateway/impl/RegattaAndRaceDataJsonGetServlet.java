@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -208,6 +209,7 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                     System.out.println("Blocking at "+trackedRace.getUpdateCount()+" waiting for "+sinceUpdate);
                     trackedRace.waitForNextUpdate(sinceUpdate);
                 }
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
@@ -316,7 +318,7 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                                 }
                             }
                             jsonCompetitorInLeg.put("gapToLeaderInSeconds",
-                                    trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE));
+                                    trackedLegOfCompetitor.getGapToLeader(timePoint, rankingInfo, WindPositionMode.LEG_MIDDLE));
                             final Duration estimatedTimeToNextMarkInSeconds = trackedLegOfCompetitor
                                     .getEstimatedTimeToNextMark(timePoint, WindPositionMode.EXACT);
                             jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds",

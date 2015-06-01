@@ -15,14 +15,14 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.media.ImageMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
-public class GalleryPlayer extends ResizeComposite {
-    private static GalleryPlayerUiBinder uiBinder = GWT.create(GalleryPlayerUiBinder.class);
+public class SailingGalleryPlayer extends ResizeComposite {
+    private static MyBinder uiBinder = GWT.create(MyBinder.class);
     private Command closeCommand;
 
-    interface GalleryPlayerUiBinder extends UiBinder<Widget, GalleryPlayer> {
+    interface MyBinder extends UiBinder<Widget, SailingGalleryPlayer> {
     }
 
     @UiField
@@ -30,19 +30,19 @@ public class GalleryPlayer extends ResizeComposite {
     @UiField
     DivElement subSliderUi;
 
-    ImageCarousel carousel = new ImageCarousel();
+    ImageCarousel<SailingImageDTO> carousel = new ImageCarousel<>();
     private int selectedIdx;
 
-    public GalleryPlayer(ImageMetadataDTO selected, List<ImageMetadataDTO> images) {
+    public SailingGalleryPlayer(SailingImageDTO selected, List<SailingImageDTO> images) {
         initWidget(uiBinder.createAndBindUi(this));
         selectedIdx = Math.max(selectedIdx, images.indexOf(selected));
-        for (ImageMetadataDTO i : images) {
+        for (SailingImageDTO i : images) {
             mainSliderUi.appendChild(createMainImgElement(i));
             subSliderUi.appendChild(createThumbImgElement(i));
         }
     }
 
-    private ImageElement createThumbImgElement(ImageMetadataDTO i ) {
+    private ImageElement createThumbImgElement(SailingImageDTO i ) {
         ImageElement img = Document.get().createImageElement();
         img.setAttribute("src", i.getSourceRef());
         img.setHeight(100);
@@ -50,7 +50,7 @@ public class GalleryPlayer extends ResizeComposite {
         return img;
     }
     
-    private DivElement createMainImgElement(ImageMetadataDTO i) {
+    private DivElement createMainImgElement(SailingImageDTO i) {
         DivElement img = Document.get().createDivElement();
         img.getStyle().setBackgroundImage("url(\"" + i.getSourceRef() + "\")");
         img.getStyle().setProperty("backgroundSize", "contain");

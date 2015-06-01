@@ -389,6 +389,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return result;
     }
 
+
     private void createColumns() {
         regattaOverviewListHandler = new ListHandler<RegattaOverviewEntryDTO>(regattaOverviewDataProvider.getList());
         courseAreaColumn = new TextColumn<RegattaOverviewEntryDTO>() {
@@ -568,6 +569,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         tooltip);
             }
         };
+        flagColumn.setCellStyleNames(tableRes.cellTableStyle().flagColumn());
         boatClass = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
