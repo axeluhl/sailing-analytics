@@ -103,7 +103,7 @@ public class SetupPanelFragment extends BasePanelFragment {
 
     @Override
     public void onResume() {
-        super.onStart();
+        super.onResume();
 
         refreshPanel();
         checkStatus();
@@ -121,7 +121,7 @@ public class SetupPanelFragment extends BasePanelFragment {
 
     @Override
     public void onPause() {
-        super.onStop();
+        super.onPause();
 
         getRaceState().removeChangedListener(mStateListener);
         getRaceState().getRacingProcedure().removeChangedListener(mProcedureListener);
