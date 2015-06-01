@@ -66,7 +66,8 @@ public class PolarDataServiceImpl implements PolarDataService {
             LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
         SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround = polarDataMiner
                 .getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, useRegressionForSpeed);
-        if ((tack == Tack.PORT && legType == LegType.UPWIND) || (tack == Tack.STARBOARD && legType == LegType.DOWNWIND)) {
+        if (tack == Tack.PORT) {
+            //Negative twa
             DegreeBearingImpl bearing = new DegreeBearingImpl(-averageSpeedAndCourseOverGround.getObject().getBearing()
                     .getDegrees());
             KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(averageSpeedAndCourseOverGround.getObject()
