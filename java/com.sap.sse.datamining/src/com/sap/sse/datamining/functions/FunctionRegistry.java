@@ -2,9 +2,9 @@ package com.sap.sse.datamining.functions;
 
 public interface FunctionRegistry {
 
-    public void registerAllClasses(Iterable<Class<?>> classesToScan);
-    public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan);
+    public boolean registerAllClasses(Iterable<Class<?>> classesToScan);
+    public boolean registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan);
 
-    public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister);
+    public boolean unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister);
 
 }

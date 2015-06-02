@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.basic.impl.BasicRacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.impl.ESSRacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateStartRacingProcedureImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.impl.LeagueRacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.RRS26RacingProcedureImpl;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -48,6 +49,8 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
             return new RRS26RacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getRRS26Configuration());
         case BASIC:
             return new BasicRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getBasicConfiguration());
+        case LEAGUE:
+            return new LeagueRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getLeagueConfiguration());
         default:
             throw new UnsupportedOperationException("Unknown racing procedure " + type.toString());
         }

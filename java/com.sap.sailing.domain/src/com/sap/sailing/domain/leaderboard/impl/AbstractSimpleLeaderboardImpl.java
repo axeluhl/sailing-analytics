@@ -377,7 +377,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void setCarriedPoints(Competitor competitor, double carriedPoints) {
         Double oldCarriedPoints = this.carriedPoints.put(competitor, carriedPoints);
-        getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, carriedPoints);
+        if (!Util.equalsWithNull(oldCarriedPoints, carriedPoints)) {
+            getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, carriedPoints);
+        }
     }
 
     @Override
@@ -394,7 +396,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void unsetCarriedPoints(Competitor competitor) {
         Double oldCarriedPoints = carriedPoints.remove(competitor);
-        getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, null);
+        if (oldCarriedPoints != null) {
+            getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, null);
+        }
     }
 
     @Override
@@ -411,7 +415,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public void setDisplayName(Competitor competitor, String displayName) {
         String oldDisplayName = displayNames.get(competitor);
         displayNames.put(competitor, displayName);
-        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+        if (!Util.equalsWithNull(oldDisplayName, displayName)) {
+            getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+        }
     }
 
     @Override

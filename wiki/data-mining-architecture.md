@@ -172,8 +172,6 @@ Abstract processors have the following abstract methods:
 
 An useful method for concrete processors is the protected method `createInvalidResult`, that returns an instruction, that won't be passed to the `ExecutorService`. This can be used to stop the processing of a specific input element (for example to filter the data).
 
-**TODO:** *Describe the usage of prioritized instructions, with the `DataMiningExecutorService`*
-
 There are useful implementations of the abstract processors, that are more specialized. These special processors implement the creation of instructions and the setting of the additional data for their special case.
 
 #### Retrieval Processor

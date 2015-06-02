@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -30,10 +30,10 @@ public abstract class StageTeaserBand extends Composite {
     @UiField DivElement isLiveDiv;
 
     private final HomePlacesNavigator placeNavigator;
-    private final EventBaseDTO event;
-    private final PlaceNavigation<EventPlace> eventNavigation;
+    private final EventStageDTO event;
+    private final PlaceNavigation<EventDefaultPlace> eventNavigation;
     
-    public StageTeaserBand(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
+    public StageTeaserBand(EventStageDTO event, HomePlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         
@@ -42,7 +42,7 @@ public abstract class StageTeaserBand extends Composite {
         
         isLiveDiv.getStyle().setDisplay(Display.NONE);
 
-        eventNavigation = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }
 
     @UiHandler("actionLink")
@@ -54,11 +54,11 @@ public abstract class StageTeaserBand extends Composite {
         return placeNavigator;
     }
 
-    public EventBaseDTO getEvent() {
+    public EventStageDTO getEvent() {
         return event;
     }
 
-    public PlaceNavigation<EventPlace> getEventNavigation() {
+    public PlaceNavigation<EventDefaultPlace> getEventNavigation() {
         return eventNavigation;
     }
 

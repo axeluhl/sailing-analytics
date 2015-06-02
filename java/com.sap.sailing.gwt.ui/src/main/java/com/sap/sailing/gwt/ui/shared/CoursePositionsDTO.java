@@ -13,6 +13,9 @@ public class CoursePositionsDTO implements IsSerializable {
     public List<Position> finishMarkPositions;
     public Set<MarkDTO> marks;
     
+    public int totalLegsCount;
+    public int currentLegNumber;
+    
     /**
      * <code>null</code> if the start waypoint does not have exactly two marks with valid positions; in this case,
      * {@link #startLineAdvantageousSide}, {@link #startLineAdvantageInMeters} and {@link #startLineLengthInMeters} are

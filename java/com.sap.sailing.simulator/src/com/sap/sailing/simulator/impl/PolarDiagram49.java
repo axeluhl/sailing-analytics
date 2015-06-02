@@ -3,6 +3,7 @@ package com.sap.sailing.simulator.impl;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -14,6 +15,7 @@ public class PolarDiagram49 extends PolarDiagramBase {
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagram49() {
 
+        boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true);
         speedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Bearing, Speed> tableRow;
 

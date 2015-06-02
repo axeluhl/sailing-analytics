@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class ExtractionFunctionSet {
     

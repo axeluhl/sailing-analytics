@@ -10,29 +10,39 @@ import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     private static final long serialVersionUID = 7760879536339600827L;
-
+    
+    private final String displayName;
     private final BoatClass boatClass;
     private final CourseArea courseArea;
     private final Iterable<SeriesWithRows> series;
     private final RegattaConfiguration regattaConfiguration;
 
-    public RaceGroupImpl(String name, BoatClass boatClass, CourseArea courseArea, Iterable<SeriesWithRows> series,
-            RegattaConfiguration regattaConfiguration) {
+    public RaceGroupImpl(String name, String displayName, BoatClass boatClass, CourseArea courseArea,
+            Iterable<SeriesWithRows> series, RegattaConfiguration regattaConfiguration) {
         super(name);
+        this.displayName = displayName;
         this.boatClass = boatClass;
         this.courseArea = courseArea;
         this.series = series;
         this.regattaConfiguration = regattaConfiguration;
     }
 
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
     public CourseArea getDefaultCourseArea() {
         return courseArea;
     }
 
+    @Override
     public Iterable<SeriesWithRows> getSeries() {
         return series;
     }
 
+    @Override
     public BoatClass getBoatClass() {
         return boatClass;
     }

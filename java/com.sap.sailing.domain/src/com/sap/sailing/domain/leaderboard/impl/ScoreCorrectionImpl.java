@@ -125,6 +125,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
+    public void notifyListenersAboutLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
+            TimePoint newTimePointOfLastCorrectionsValidity) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.timePointOfLastCorrectionsValidityChanged(oldTimePointOfLastCorrectionsValidity, newTimePointOfLastCorrectionsValidity);
+        }
+    }
+
+    @Override
+    public void notifyListenersAboutCommentChanged(String oldComment, String newComment) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.commentChanged(oldComment, newComment);
+        }
+    }
+
+    @Override
     public void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason) {
         com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         MaxPointsReason oldMaxPointsReason;
@@ -483,12 +498,20 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity) {
+        final TimePoint oldTimePointOfLastCorrectionsValidity = this.timePointOfLastCorrectionsValidity;
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
+        if (!Util.equalsWithNull(oldTimePointOfLastCorrectionsValidity, timePointOfLastCorrectionsValidity)) {
+            notifyListenersAboutLastCorrectionsValidityChanged(oldTimePointOfLastCorrectionsValidity, timePointOfLastCorrectionsValidity);
+        }
     }
 
     @Override
     public void setComment(String scoreCorrectionComment) {
+        final String oldComment = this.comment;
         this.comment = scoreCorrectionComment;
+        if (!Util.equalsWithNull(oldComment, scoreCorrectionComment)) {
+            notifyListenersAboutCommentChanged(oldComment, scoreCorrectionComment);
+        }
     }
 
     protected Leaderboard getLeaderboard() {

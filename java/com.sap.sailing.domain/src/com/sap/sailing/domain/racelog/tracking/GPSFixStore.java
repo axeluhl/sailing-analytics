@@ -13,6 +13,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.WithID;
 
 
 public interface GPSFixStore {
@@ -39,6 +40,12 @@ public interface GPSFixStore {
      */
     void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
+    
+    /**
+     * Load all fixes for both marks and competitors according to the {@code mapping}.
+     */
+    void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
+            throws NoCorrespondingServiceRegisteredException, TransformationException;
 
     void storeFix(DeviceIdentifier device, GPSFix fix) throws TransformationException, NoCorrespondingServiceRegisteredException;
 

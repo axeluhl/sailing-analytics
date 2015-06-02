@@ -105,7 +105,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                         public void cancel() {}
                     }).show();
                 } else if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    sailingService.revokeRaceLogEvents(leaderboardName, raceColumnName, fleetName, dto.originalRaceLogEventIds,
+                    sailingService.revokeRaceAndRegattaLogEvents(leaderboardName, raceColumnName, fleetName, dto.originalRaceLogEventIds,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {

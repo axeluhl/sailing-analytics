@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -47,6 +49,7 @@ import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
@@ -164,6 +167,35 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         List<Waypoint> deletedWaypoints = original.getLines();
         assertEquals(1, deletedWaypoints.size());
         assertEquals(wp2, deletedWaypoints.iterator().next());
+    }
+
+    /**
+     * A test failing before bug 2858 was fixed: updating only the {@link PassingInstructions} of a {@link Waypoint#getPassingInstructions() waypoint}
+     * would have left the waypoint in place, not updating the course properly.
+     */
+    @Test
+    public void testWaypointListDiffWithDifferentPassingInstructionsOnly() throws PatchFailedException {
+        Waypoint wp1 = new WaypointImpl(new MarkImpl("b1"), PassingInstruction.Port);
+        Waypoint wp2 = new WaypointImpl(new MarkImpl("b2"), PassingInstruction.Port);
+        Waypoint wp3 = new WaypointImpl(new MarkImpl("b3"), PassingInstruction.Port);
+        Waypoint wp4 = new WaypointImpl(new MarkImpl("b4"), PassingInstruction.Port);
+        List<Waypoint> waypoints = new ArrayList<Waypoint>(4);
+        waypoints.add(wp1);
+        waypoints.add(wp2);
+        waypoints.add(wp3);
+        waypoints.add(wp4);
+        Course course = new CourseImpl("Test Course", waypoints);
+        List<Pair<ControlPoint, PassingInstruction>> changedControlPoints = new ArrayList<>();
+        changedControlPoints.add(new Pair<>(wp1.getControlPoint(), PassingInstruction.Starboard));
+        changedControlPoints.add(new Pair<>(wp2.getControlPoint(), wp2.getPassingInstructions()));
+        changedControlPoints.add(new Pair<>(wp3.getControlPoint(), wp3.getPassingInstructions()));
+        changedControlPoints.add(new Pair<>(wp4.getControlPoint(), wp4.getPassingInstructions()));
+        course.update(changedControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+        
+        assertNotSame(wp1, Util.get(course.getWaypoints(), 0));
+        assertSame(wp2, Util.get(course.getWaypoints(), 1));
+        assertSame(wp3, Util.get(course.getWaypoints(), 2));
+        assertSame(wp4, Util.get(course.getWaypoints(), 3));
     }
 
     @Test

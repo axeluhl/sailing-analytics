@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sap.sailing</groupId>
+        <artifactId>mobile</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.sap.sailing</groupId>
+    <artifactId>com.sap.sailing.android.buoy.positioning.app</artifactId>
+    <packaging>apk</packaging>
+
+    <properties>
+        <!-- If you change this name, change in app too! -->
+        <additional-deployment-version-file>com.sap.sailing.android.buoy.positioning.app.version
+        </additional-deployment-version-file>
+        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+        <app-version>${buoy.positioning-app-version}</app-version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>android</groupId>
+            <artifactId>android</artifactId>
+        </dependency>
+
+        <!--
+                <dependency>
+                    <groupId>com.android.support</groupId>
+                    <artifactId>support-annotations</artifactId>
+                    <version>21.0.3</version>
+                    <type>aar</type>
+                </dependency>
+        -->
+
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-v4</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>appcompat-v7</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services</artifactId>
+            <version>6.5.87</version>
+            <type>aar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sap.sailing</groupId>
+            <artifactId>com.sap.sailing.android.shared</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>apklib</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
+                    <extractDuplicates>true</extractDuplicates>
+                    <sdk>
+                        <platform>21</platform>
+                    </sdk>
+                    <release>true</release>
+                    <proguard>
+                        <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
+                        <skip>true</skip>
+                        <config>proguard-project.txt</config>
+                        <configs>
+                            <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+                        </configs>
+                    </proguard>
+                    <zipalign>
+                        <skip>false</skip>
+                    </zipalign>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>apk</goal>
+                        </goals>
+                        <configuration>
+                            <excludeJarResources>
+                                <!-- Prevents *-sources.jar to be distributed with the APK -->
+                                <excludeJarResource>^com\.sap\..*.jar$</excludeJarResource>
+                            </excludeJarResources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- plugins for generating version file and copying .apk -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

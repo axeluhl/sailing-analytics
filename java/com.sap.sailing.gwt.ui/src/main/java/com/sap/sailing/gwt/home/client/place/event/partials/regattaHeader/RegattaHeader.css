@@ -1,0 +1,79 @@
+/**
+ * The header of a regatta of an event
+ */
+.regattaheader {
+  font-size: 1rem;
+  margin-top: 2em;
+  padding: 0.666666666666667em;
+  overflow: hidden;
+  border-radius: 0.333333333333333em;
+  border: 1px solid #dedede;
+  background-color: #f2f2f2;
+}
+.regattaheaderlink {
+  display: block;
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+  color: #0a0a0a;
+}
+.regattaheader_logo {
+  float: left;
+  width: 4em;
+  height: 3.333333333333333em;
+  margin-right: 0.666666666666667em;
+  text-align: center;
+  line-height: 3.333333333333333em;
+  border-right: 1px solid #ccc;
+  padding-right: 0.666666666666667em;
+}
+.regattaheader_logo img {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+}
+.regattaheader_content {
+  float: left;
+  width: 80%;
+  overflow: hidden;
+}
+.regattaheader_content_title {
+  font-size: 1.466666666666667em;
+  font-weight: 700;
+  height: 1.363636363636364em;
+  line-height: 1.363636363636364em;
+}
+.regattaheader_content_details {
+  height: 1.333333333333333em;
+}
+.regattaheader_content_details_item {
+  float: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  padding: 0 0.666666666666667em;
+  border-right: 1px solid #ccc;
+}
+.regattaheader_content_details_item:first-of-type {
+  padding-left: 0;
+}
+.regattaheader_content_details_item:last-of-type {
+  border: none;
+  padding-right: 0;
+}
+.regattaheader_arrow {
+  float: right;
+  width: 5%;
+  line-height: 3.333333333333333em;
+  text-align: right;
+}
+.regattaheader_arrow:before {
+  content: '';
+  display: inline-block;
+  margin-left: 0.333333333333333em;
+  width: 0.8em;
+  height: 1.333333333333333em;
+  background-image: url("../images/home/breadcrumb-arrow.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+}

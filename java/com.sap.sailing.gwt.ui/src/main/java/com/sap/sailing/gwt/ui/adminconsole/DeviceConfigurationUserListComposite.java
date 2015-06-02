@@ -34,7 +34,7 @@ public class DeviceConfigurationUserListComposite extends DeviceConfigurationLis
                 new TextColumn<DeviceConfigurationMatcherDTO>() {
             @Override
             public String getValue(DeviceConfigurationMatcherDTO identifier) {
-                return DeviceConfigurationPanel.renderIdentifiers(identifier.clients);
+                return DeviceConfigurationPanel.renderIdentifiers(identifier.clients, stringMessages);
             }
         };
         identifierNameColumn.setSortable(true);
@@ -45,7 +45,7 @@ public class DeviceConfigurationUserListComposite extends DeviceConfigurationLis
             }
         });
 
-        table.addColumn(identifierNameColumn, "Device");
+        table.addColumn(identifierNameColumn, stringMessages.device());
         return table;
     }
 

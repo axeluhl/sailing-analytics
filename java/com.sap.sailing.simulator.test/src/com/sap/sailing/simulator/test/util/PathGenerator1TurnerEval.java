@@ -41,11 +41,12 @@ public class PathGenerator1TurnerEval {
     public static void main(String[] args) throws IOException {
         System.out.println("Collection of test methods for evaluating path segments.");
     }
-    
+
     public void initialize() throws IOException, ClassNotFoundException {
 
         this._polarDiagram = new PolarDiagramCSV(POLAR_DIAGRAM_49_STG_CSV_FILE_PATH);
-        this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, SailingSimulatorConstants.ModeMeasured, true, true);
+        this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, null,
+                SailingSimulatorConstants.ModeMeasured, true, true);
         this._pathGenerator = new PathGenerator1Turner(this._simulationParameters);
 
         this._windField = readWindFieldGeneratorFromExternalFile("windField.dat");
@@ -60,8 +61,8 @@ public class PathGenerator1TurnerEval {
         int stepMax = 300;
         long timeStep = 6666;
 
-        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, start, end, startTime, leftSide,
-                stepMax, timeStep);
+        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, start, end,
+                startTime, leftSide, stepMax, timeStep);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getPosition());
@@ -85,8 +86,8 @@ public class PathGenerator1TurnerEval {
         int stepMax = 300;
         long timeStep = 1000;
 
-        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, start, end, startTime, leftSide,
-                stepMax, timeStep);
+        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, start, end,
+                startTime, leftSide, stepMax, timeStep);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getPosition());
@@ -112,7 +113,8 @@ public class PathGenerator1TurnerEval {
         int stepMax = 300;
         long timeStep = 1000;
 
-        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, end, start, startTime, leftSide, stepMax, timeStep);
+        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, end, start,
+                startTime, leftSide, stepMax, timeStep);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getPosition());
@@ -143,7 +145,8 @@ public class PathGenerator1TurnerEval {
                 file.close();
             }
         } catch (final ClassNotFoundException ex) {
-            System.err.println("[ERROR][PathGenerator1Turner][readFromExternalFile][ClassNotFoundException] " + ex.getMessage());
+            System.err.println("[ERROR][PathGenerator1Turner][readFromExternalFile][ClassNotFoundException] "
+                    + ex.getMessage());
             result = null;
         } catch (final IOException ex) {
             System.err.println("[ERROR][PathGenerator1Turner][readFromExternalFile][IOException]  " + ex.getMessage());
@@ -152,7 +155,7 @@ public class PathGenerator1TurnerEval {
 
         return result;
     }
-    
+
     private File getFile(String fileName) {
         return new File(RESOURCES + fileName);
     }

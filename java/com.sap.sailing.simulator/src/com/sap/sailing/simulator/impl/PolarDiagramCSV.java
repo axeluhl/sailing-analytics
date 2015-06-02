@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -35,13 +36,19 @@ public class PolarDiagramCSV extends PolarDiagramBase {
         List<Bearing> jibeAngles = new ArrayList<Bearing>();
 
         String line = "";
+        line = bfr.readLine();
+        if (line != null) {
+            this.boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass(line, /* typicallyStartsUpwind */true);
+        }
+        
         String[] elements = null;
-        while (true) {
+        while (line != null) {
 
             line = bfr.readLine();
             if (line == null) {
                 break;
             }
+            
             elements = line.split(",");
             elements[0] = elements[0].replace(" ", "");
             elements[0] = elements[0].toLowerCase();

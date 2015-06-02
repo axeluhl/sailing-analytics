@@ -177,7 +177,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
-        leaderboardPanel.getElement().getStyle().setMarginTop(4, Unit.PX);
+        leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         createOneScreenView(leaderboardName, leaderboardGroupName, event, mainPanel, showMapControls, raceMap, userService); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it

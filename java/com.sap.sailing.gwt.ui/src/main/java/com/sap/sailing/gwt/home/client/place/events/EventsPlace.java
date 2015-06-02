@@ -12,7 +12,7 @@ public class EventsPlace extends Place {
     public static class Tokenizer implements PlaceTokenizer<EventsPlace> {
         @Override
         public String getToken(EventsPlace place) {
-            return null;
+            return "";
         }
 
         @Override

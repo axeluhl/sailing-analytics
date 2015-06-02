@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Statistic;
+import com.sap.sse.datamining.shared.data.Unit;
 
 /**
  * A speed, convertible in various units of measure. Can be negative.

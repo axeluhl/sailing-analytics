@@ -75,13 +75,3 @@
 	transition: margin-top ease-in-out 500ms;
 	margin-top: -600pt;
 }
-
-.blurred {
-	-webkit-filter: blur(10pt) brightness(0.92);
-	filter: blur(10pt) brightness(0.92);
-}
-
-.not_blurred {
-	-webkit-filter: blur(0pt) brightness(1);
-	filter: blur(0pt) brightness(1);
-}

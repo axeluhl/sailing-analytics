@@ -8,25 +8,30 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Header extends Composite {
     @UiField Anchor startPageLink;
@@ -51,6 +56,18 @@ public class Header extends Composite {
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
+    public Header(final HomePlacesNavigator navigator, EventBus eventBus) {
+        this(navigator);
+        
+        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
+
+            @Override
+            public void onPlaceChanged(PlaceChangedEvent event) {
+                updateActiveLink(event.getNewPlace());
+            }
+        });
+    }
+    
     public Header(final HomePlacesNavigator navigator) {
         this.navigator = navigator;
 
@@ -100,12 +117,23 @@ public class Header extends Composite {
 
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
-        if(searchText.getText().isEmpty()) {
-            Window.alert(TextMessages.INSTANCE.pleaseEnterASearchTerm());
-        } else {
-            PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText.getText());
-            navigator.goToPlace(searchResultNavigation);
+        PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
+                .getText());
+        navigator.goToPlace(searchResultNavigation);
+    }
+    
+    private void updateActiveLink(Place place) {
+        if(place instanceof EventsPlace
+                || place instanceof AbstractEventPlace
+                || place instanceof EventPlace
+                || place instanceof RegattaPlace) {
+            setActiveLink(eventsPageLink);
+        } else if(place instanceof StartPlace) {
+            setActiveLink(startPageLink);
+        } else if(place instanceof SolutionsPlace) {
+            setActiveLink(solutionsPageLink);
         }
+        // TODO add more rules
     }
     
     private void setActiveLink(Anchor link) {

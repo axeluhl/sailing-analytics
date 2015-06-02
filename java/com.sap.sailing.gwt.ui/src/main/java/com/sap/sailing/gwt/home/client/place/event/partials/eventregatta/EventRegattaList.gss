@@ -1,0 +1,35 @@
+.eventregattalist {
+  font-size: 15px;
+ /* @alternate */ font-size: 1rem;
+}
+
+.eventregattalist_navigation {
+  padding: 1.333333333333333em 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.item:before {
+	display: inline-block;
+	width: 15px;
+	content: " ";
+	text-align: left;
+}
+
+.selectedItem:before {
+	content: "\2713";
+}
+
+
+.item, .item:hover, .item:active, .item:focus {
+	font-weight: 700;
+	color: #aaa;
+	text-decoration: none;
+	margin-left: 10px;
+}
+.selectedItem, .selectedItem:focus {
+	color: #666;
+}
+
+.regattaGroupsNavigationPanel {
+	text-align: right;
+}

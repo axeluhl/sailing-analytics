@@ -479,7 +479,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     }
                 }
                 List<Distance> wayPointXTEs = xtes.get(w);
-                int size = wayPointXTEs.size();
+                int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
                 if (size > 0) {
                     Double xte = wayPointXTEs.get(0).getMeters();
                     if (xte == 0) {
@@ -710,11 +710,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         boolean singleMark = false;
         switch (instruction) {
         case Port:
-            singleMark = true;
-            break;
         case Starboard:
-            singleMark = true;
-            break;
         case FixedBearing:
             singleMark = true;
             break;

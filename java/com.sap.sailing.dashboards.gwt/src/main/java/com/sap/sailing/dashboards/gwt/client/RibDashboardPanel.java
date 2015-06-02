@@ -17,6 +17,12 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetriever;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetrieverListener;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
+import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
+import com.sap.sailing.dashboards.gwt.client.notifications.WrongDeviceOrientationNotification;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComponent;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
@@ -89,9 +95,10 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
-        windloadinghintleft.setInnerText(stringConstants.dashboardWindBotLoading());
-        windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
-        loadAndDisplayEventLogo(sailingServiceAsync);
+        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+        loadAndAddEventLogo(sailingServiceAsync);
+        initAndAddWrongOrientationNotification();
     }
 
     private void initLogos() {
@@ -101,7 +108,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         Document.get().getBody().appendChild(logo.getElement());
     }
     
-    private void loadAndDisplayEventLogo(SailingServiceAsync sailingServiceAsync){
+    private void loadAndAddEventLogo(SailingServiceAsync sailingServiceAsync){
         String eventId = Window.Location.getParameter(EVENT_ID_PARAMETER);
         if (eventId != null) {
             EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
@@ -109,6 +116,11 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
                 Document.get().getBody().appendChild(eventLogo.getElement());
             }
         }
+    }
+    
+    private void initAndAddWrongOrientationNotification(){
+        WrongDeviceOrientationNotification wrongDeviceOrientationNotification = new WrongDeviceOrientationNotification();
+        Document.get().getBody().appendChild(wrongDeviceOrientationNotification.getElement());
     }
 
     private void initWindBotComponents(List<String> windBotIDs,
