@@ -90,17 +90,10 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     public void onResume() {
         super.onResume();
 
-        if (event_selected != null) {
-            event_selected.setText(null);
-        }
-
-        if (area_selected != null) {
-            area_selected.setText(null);
-        }
-
-        if (position_selected != null) {
-            position_selected.setText(null);
-        }
+        // reset selections
+        if (event_selected != null) event_selected.setText(null);
+        if (area_selected != null) area_selected.setText(null);
+        if (position_selected != null) position_selected.setText(null);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
@@ -116,57 +109,24 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
     @Override
     public void onClick(View view) {
-        final int[] pos = new int[2];
+
         switch (view.getId()) {
         case R.id.event_header:
-            if (event_selected != null) {
-                event_selected.setText(null);
-            }
-            if (event_listView != null && event_listView.getLayoutParams() != null) {
-                if (event_listView.getLayoutParams().height == 0) {
-                    event_listView.getLocationOnScreen(pos);
-                    event_listView.getLayoutParams().height = getScreenHeight() - pos[1];
-                } else {
-                    closeEvent();
-                }
-                event_listView.requestLayout();
-            }
+            toggleContainer(event_listView, event_selected);
             closeArea();
             closePosition();
             break;
 
         case R.id.area_header:
             closeEvent();
-            if (area_selected != null) {
-                area_selected.setText(null);
-            }
-            if (area_listView != null && area_listView.getLayoutParams() != null) {
-                if (area_listView.getLayoutParams().height == 0) {
-                    area_listView.getLocationOnScreen(pos);
-                    area_listView.getLayoutParams().height = getScreenHeight() - pos[1];
-                } else {
-                    closeArea();
-                }
-                area_listView.requestLayout();
-            }
+            toggleContainer(area_listView, area_selected);
             closePosition();
             break;
 
         case R.id.position_header:
             closeEvent();
             closeArea();
-            if (position_selected != null) {
-                position_selected.setText(null);
-            }
-            if (position_listView != null && position_listView.getLayoutParams() != null) {
-                if (position_listView.getLayoutParams().height == 0) {
-                    position_listView.getLocationOnScreen(pos);
-                    position_listView.getLayoutParams().height = getScreenHeight() - pos[1];
-                } else {
-                    closePosition();
-                }
-                position_listView.requestLayout();
-            }
+            toggleContainer(position_listView, position_selected);
             break;
 
         default:
@@ -174,6 +134,27 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         }
 
         showButton();
+    }
+
+
+    private void toggleContainer(FrameLayout frame, TextView header) {
+        final int[] pos = new int[2];
+
+        // reset the header text
+        if (header != null) {
+            header.setText(null);
+        }
+
+        if (frame != null && frame.getLayoutParams() != null) {
+            // open the frame
+            if (frame.getLayoutParams().height == 0) {
+                frame.getLocationOnScreen(pos);
+                frame.getLayoutParams().height = getScreenHeight() - pos[1];
+            } else {
+                closeContainer(frame, header);
+            }
+            frame.requestLayout();
+        }
     }
 
     public void closeAll() {
@@ -184,32 +165,36 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     }
 
     private void closeEvent() {
-        if (event_listView != null && event_listView.getLayoutParams() != null) {
-            event_listView.getLayoutParams().height = 0;
-            event_listView.requestLayout();
-            if (activity != null) {
-                event_selected.setText(activity.getEventName());
-            }
-        }
+        closeContainer(event_listView, event_selected);
     }
 
     private void closeArea() {
-        if (area_listView != null && area_listView.getLayoutParams() != null) {
-            area_listView.getLayoutParams().height = 0;
-            area_listView.requestLayout();
-            if (activity != null) {
-                area_selected.setText(activity.getCourseName());
-            }
-        }
+        closeContainer(area_listView, area_selected);
     }
 
     private void closePosition() {
-        if (position_listView != null && position_listView.getLayoutParams() != null) {
-            position_listView.getLayoutParams().height = 0;
-            position_listView.requestLayout();
-            if (activity != null) {
+        closeContainer(position_listView, position_selected);
+    }
+
+    private void closeContainer(FrameLayout frame, TextView header) {
+        if (frame != null && frame.getLayoutParams() != null) {
+            frame.getLayoutParams().height = 0;
+            frame.requestLayout();
+            setHeaderText(header);
+        }
+    }
+
+    private void setHeaderText(TextView header){
+        if (activity != null) {
+            if (header == position_selected) {
                 position_selected.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
+            } else if (header == area_selected) {
+                area_selected.setText(activity.getCourseName());
+            } else if (header == event_selected) {
+                event_selected.setText(activity.getEventName());
             }
+        } else {
+            // TODO how to handle this exception properly?
         }
     }
 
