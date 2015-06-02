@@ -1,16 +1,5 @@
 package com.sap.sailing.android.shared.services.sending;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,13 +11,18 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -439,7 +433,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     public static String getRacePositionsUrl(Context context, final String regattaName, final String raceName)
             throws UnsupportedEncodingException {
         String url = String
-                .format("%ssailingserver/api/v1/regattas/%s/races/%s/marks/positions",// +
+                .format("%s/sailingserver/api/v1/regattas/%s/races/%s/marks/positions",
                         PrefUtils.getString(context, R.string.preference_server_url_key,
                                 R.string.preference_server_url_default), URLEncoder.encode(regattaName, charsetName)
                                 .replace("+", "%20"), URLEncoder.encode(raceName, charsetName.replace("+", "%20")));// ,

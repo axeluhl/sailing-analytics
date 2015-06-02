@@ -194,9 +194,8 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/position_header">
 
-                    <fragment
+                    <FrameLayout
                         android:id="@+id/windMap"
-                        android:name="com.sap.sailing.racecommittee.app.ui.fragments.maps.WindMap"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         tools:layout="@layout/welcome"/>

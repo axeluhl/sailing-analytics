@@ -1,12 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.Serializable;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
@@ -15,11 +12,14 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.Serializable;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
@@ -70,8 +70,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         if (getArguments() != null) {
             Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
-            if (managedRace == null) {
-                throw new IllegalStateException(String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
+            if (managedRace == null && !(getClass() == RaceFlagViewerFragment.class)) {
+                throw new IllegalStateException("Unable to obtain ManagedRace from datastore on start of " + getClass().getName());
             }
         } else {
             ExLog.i(getActivity(), TAG, "no arguments!?");

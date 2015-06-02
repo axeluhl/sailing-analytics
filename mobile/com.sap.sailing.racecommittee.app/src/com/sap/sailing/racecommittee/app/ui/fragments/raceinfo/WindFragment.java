@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -23,6 +24,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -59,7 +61,7 @@ import java.util.ArrayList;
 
 public class WindFragment extends BaseFragment
     implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
-    OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener {
+    OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener, OnMapReadyCallback {
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
@@ -67,6 +69,8 @@ public class WindFragment extends BaseFragment
     private final static int EVERY_POSITION_CHANGE = 0;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
+
+    private Context mContext;
 
     private View mHeader;
     private View mLayoutDirection;
@@ -87,6 +91,7 @@ public class WindFragment extends BaseFragment
     private TextView mWindSensor;
 
     private WindMap mWindMap;
+    private GoogleMap mGoogleMap;
 
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
@@ -130,13 +135,18 @@ public class WindFragment extends BaseFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this).build();
+        apiClient = new GoogleApiClient.Builder(getActivity())
+            .addApi(LocationServices.API)
+            .addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this)
+            .build();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.wind_view, container, false);
+
+        mContext = inflater.getContext();
 
         mHeader = layout.findViewById(R.id.header_text);
         mDarkLayer = layout.findViewById(R.id.dark_layer);
@@ -159,6 +169,13 @@ public class WindFragment extends BaseFragment
         mEnterPosition = (Button) layout.findViewById(R.id.enter_position);
 
         return layout;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        initialMapFragment();
     }
 
     @Override
@@ -191,7 +208,6 @@ public class WindFragment extends BaseFragment
         setupButtons();
         setupWindSpeedPicker();
         setupPositionPoller();
-        setupMap();
         showElements(true);
 
         setInstanceState(savedInstanceState);
@@ -269,43 +285,11 @@ public class WindFragment extends BaseFragment
     }
 
     /**
-     * configures the WindMap-View, including the input field for the position of ones own boat
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public void setupMap() {
-        FragmentManager fragmentManager;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            fragmentManager = getChildFragmentManager();
-        } else {
-            fragmentManager = getFragmentManager();
-        }
-        mWindMap = (WindMap) fragmentManager.findFragmentById(R.id.windMap);
-
-        if (mWindMap != null) {
-            mWindMap.getMap().setOnMapClickListener(this);
-            mWindMap.getMap().setOnMarkerDragListener(this);
-            UiSettings uiSettings = mWindMap.getMap().getUiSettings();
-            uiSettings.setAllGesturesEnabled(false);
-            uiSettings.setCompassEnabled(false);
-            uiSettings.setMapToolbarEnabled(false);
-            // mWindMap.setData(mapItems);
-
-            // center the map
-            LatLng enteredWindLocation = preferences.getWindPosition();
-            if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
-                mWindMap.movePositionMarker(enteredWindLocation);
-                mWindMap.centerMap(enteredWindLocation);
-            }
-        }
-    }
-
-    /**
      * function to restore the instanceState via savedInstanceState bundle
      *
      * @param savedInstanceState said bundle
      */
     public void setInstanceState(Bundle savedInstanceState) {
-
         if (savedInstanceState != null) {
             bigMap = savedInstanceState.getBoolean("bigMap", false);
             double markerLat = savedInstanceState.getDouble("markerLat", -1);
@@ -354,7 +338,7 @@ public class WindFragment extends BaseFragment
     public void onResume() {
         super.onResume();
 
-        setupLocationClient();
+        initialMapFragment();
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
@@ -364,10 +348,10 @@ public class WindFragment extends BaseFragment
 
         outState.putBoolean("bigMap", bigMap);
         if (mWindMap != null) {
-            if (mWindMap.getMap() != null) {
-                outState.putDouble("lat", mWindMap.getMap().getCameraPosition().target.latitude);
-                outState.putDouble("lng", mWindMap.getMap().getCameraPosition().target.longitude);
-                outState.putFloat("zoom", mWindMap.getMap().getCameraPosition().zoom);
+            if (mGoogleMap != null) {
+                outState.putDouble("lat", mGoogleMap.getCameraPosition().target.latitude);
+                outState.putDouble("lng", mGoogleMap.getCameraPosition().target.longitude);
+                outState.putFloat("zoom", mGoogleMap.getCameraPosition().zoom);
             }
             if (mWindMap.windMarker != null) {
                 outState.putDouble("markerLat", mWindMap.windMarker.getPosition().latitude);
@@ -436,17 +420,32 @@ public class WindFragment extends BaseFragment
     private void onPositionSetClick() {
         bigMap = false;
 
-        if (mWindMap != null && mWindMap.windMarker != null) {
-            mWindMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+        if (mWindMap != null && mWindMap.windMarker != null && mGoogleMap != null) {
+            mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
             mCurrentLocation = new Location("manual");
             mCurrentLocation.setLatitude(mWindMap.windMarker.getPosition().latitude);
             mCurrentLocation.setLongitude(mWindMap.windMarker.getPosition().longitude);
             preferences.setWindPosition(mWindMap.windMarker.getPosition());
             mWindMap.windMarker.setDraggable(false);
-            mWindMap.getMap().getUiSettings().setAllGesturesEnabled(false);
             mWindMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         }
         showElements(true);
+    }
+
+    private void initialMapFragment() {
+        mWindMap = WindMap.newInstance(mContext);
+        FragmentManager manager;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            manager = getChildFragmentManager();
+        } else {
+            manager = getFragmentManager();
+        }
+        if (manager.findFragmentByTag("custom_map") == null) {
+            FragmentTransaction ft = manager.beginTransaction();
+            ft.replace(R.id.windMap, mWindMap, "custom_map").commit();
+            manager.executePendingTransactions();
+        }
+        mWindMap.getMapAsync(this);
     }
 
     /**
@@ -454,8 +453,8 @@ public class WindFragment extends BaseFragment
      */
     private void showBigMap() {
         showElements(false);
-        if (mWindMap != null) {
-            mWindMap.getMap().getUiSettings().setAllGesturesEnabled(true);
+        if (mWindMap != null && mGoogleMap != null) {
+            mGoogleMap.getUiSettings().setAllGesturesEnabled(true);
             if (mWindMap.windMarker != null) {
                 mWindMap.windMarker.setDraggable(true);
             }
@@ -504,9 +503,8 @@ public class WindFragment extends BaseFragment
         if (mWindMap != null) {
             mWindMap.centerMap(location.getLatitude(), location.getLongitude());
 
-            GoogleMap map = mWindMap.getMap();
-            if (map != null) {
-                UiSettings uiSettings = map.getUiSettings();
+            if (mGoogleMap != null) {
+                UiSettings uiSettings = mGoogleMap.getUiSettings();
                 if (uiSettings != null) {
                     uiSettings.setAllGesturesEnabled(false);
                 }
@@ -613,6 +611,32 @@ public class WindFragment extends BaseFragment
     public void OnRaceUpdated(ManagedRace race) {
         if (mWindMap != null) {
             mWindMap.onMapDataUpdated(race.getMapMarkers());
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mGoogleMap = map;
+
+        if (mWindMap != null && mGoogleMap != null) {
+            mWindMap.setMap(mGoogleMap);
+            mGoogleMap.setOnMapClickListener(this);
+            mGoogleMap.setOnMarkerDragListener(this);
+            UiSettings uiSettings = mGoogleMap.getUiSettings();
+            uiSettings.setAllGesturesEnabled(false);
+            uiSettings.setCompassEnabled(false);
+            uiSettings.setMapToolbarEnabled(false);
+            // mWindMap.setData(mapItems);
+
+            // center the map
+            LatLng enteredWindLocation = preferences.getWindPosition();
+            if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
+                mWindMap.movePositionMarker(enteredWindLocation);
+                mWindMap.centerMap(enteredWindLocation);
+            }
+
+            setupLocationClient();
         }
     }
 
