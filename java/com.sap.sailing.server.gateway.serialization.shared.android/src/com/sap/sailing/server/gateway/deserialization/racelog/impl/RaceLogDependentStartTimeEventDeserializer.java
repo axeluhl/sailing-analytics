@@ -36,6 +36,6 @@ public class RaceLogDependentStartTimeEventDeserializer extends RaceLogRaceStatu
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
         SimpleRaceLogIdentifier dependentOnRace = new SimpleRaceLogIdentifierImpl(regattaLikeParentName, raceColumnName, fleetName);
         return factory.createDependentStartTimeEvent(event.getCreatedAt(), author, event.getLogicalTimePoint(), event.getId(), event.getInvolvedBoats(), 
-                event.getPassId(), dependentOnRace, startTimeDifference);
+                event.getPassId(), dependentOnRace, startTimeDifference, event.getNextStatus());
     }
 }

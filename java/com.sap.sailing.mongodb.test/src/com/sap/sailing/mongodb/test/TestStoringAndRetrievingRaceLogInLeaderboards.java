@@ -25,6 +25,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -38,8 +39,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -61,6 +64,8 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoUtils;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -498,11 +503,8 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogWindFixEvent() {
         Wind wind = createWindFix();
         RaceLogWindFixEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, wind);
-
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
-
         RaceLog loadedRaceLog = retrieveRaceLog();
-
         loadedRaceLog.lockForRead();
         try {
             RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
@@ -517,4 +519,29 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         }
     }
 
+    @Test
+    public void storeDependentStartTimeEvent() throws UnknownHostException, MongoException, InterruptedException {
+        TimePoint now = MillisecondsTimePoint.now();
+        final String PARENT = "parent";
+        final String COLUMN = "column";
+        final String FLEET = "fleet";
+        final SimpleRaceLogIdentifier srli = new SimpleRaceLogIdentifierImpl(PARENT, COLUMN, FLEET);
+        RaceLogDependentStartTimeEvent event = RaceLogEventFactory.INSTANCE.createDependentStartTimeEvent(
+                now, author, 0, srli, Duration.ONE_MINUTE);
+        addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
+        RaceLog loadedRaceLog = retrieveRaceLog();
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) loadedEvent;
+            assertEquals(event.getLogicalTimePoint(), dependentStartTimeEvent.getLogicalTimePoint());
+            assertEquals(event.getPassId(), dependentStartTimeEvent.getPassId());
+            assertEquals(event.getId(), dependentStartTimeEvent.getId());
+            assertEquals(event.getStartTimeDifference(), dependentStartTimeEvent.getStartTimeDifference());
+            assertEquals(event.getDependentOnRaceIdentifier(), dependentStartTimeEvent.getDependentOnRaceIdentifier());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
 }

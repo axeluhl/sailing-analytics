@@ -2,10 +2,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 
-
-
 public class SimpleRaceLogIdentifierImpl implements SimpleRaceLogIdentifier {
-
     protected final String regattaLikeParentName;
     protected final String raceColumnName;
     protected final String fleetName;
@@ -49,5 +46,43 @@ public class SimpleRaceLogIdentifierImpl implements SimpleRaceLogIdentifier {
                 regattaLikeParentName,
                 raceColumnName,
                 fleetName);
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fleetName == null) ? 0 : fleetName.hashCode());
+        result = prime * result + ((raceColumnName == null) ? 0 : raceColumnName.hashCode());
+        result = prime * result + ((regattaLikeParentName == null) ? 0 : regattaLikeParentName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SimpleRaceLogIdentifierImpl other = (SimpleRaceLogIdentifierImpl) obj;
+        if (fleetName == null) {
+            if (other.fleetName != null)
+                return false;
+        } else if (!fleetName.equals(other.fleetName))
+            return false;
+        if (raceColumnName == null) {
+            if (other.raceColumnName != null)
+                return false;
+        } else if (!raceColumnName.equals(other.raceColumnName))
+            return false;
+        if (regattaLikeParentName == null) {
+            if (other.regattaLikeParentName != null)
+                return false;
+        } else if (!regattaLikeParentName.equals(other.regattaLikeParentName))
+            return false;
+        return true;
     }
 }

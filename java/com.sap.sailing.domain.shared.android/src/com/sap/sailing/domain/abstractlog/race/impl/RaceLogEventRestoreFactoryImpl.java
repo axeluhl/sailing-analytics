@@ -61,7 +61,7 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogStartTimeEvent createStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime) {
+            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime, RaceLogRaceStatus nextStatue) {
         return new RaceLogStartTimeEventImpl(createdAt, author, logicalTimePoint, id, involvedBoats, passId, startTime);
     }
 
@@ -194,7 +194,7 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
     @Override
     public RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> involvedBoats,
-            int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference) {
+            int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference, RaceLogRaceStatus nextStatus) {
         return new RaceLogDependentStartTimeEventImpl(createdAt, author, logicalTimePoint, id, involvedBoats, passId,
                 dependentOnRace, startTimeDifference);
     }
