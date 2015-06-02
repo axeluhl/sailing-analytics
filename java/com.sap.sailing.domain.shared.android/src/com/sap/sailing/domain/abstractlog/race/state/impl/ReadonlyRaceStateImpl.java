@@ -187,6 +187,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
                     break;
                 } else if (event instanceof RaceLogDependentStartTimeEvent) {
                     setupListenersOnDependentRace(event);
+                    break;
                 }
             }
         } finally {
