@@ -28,7 +28,7 @@ public class CalculateImageSizeFromUrlTest {
     public void calculateImageSizeFromUrl() throws IOException {
         int width = 350;
         int height = 150;
-        ImageSize size = calculate("http://placehold.it/" + width + "x" + height);
+        ImageSize size = calculate("http://placekitten.com/" + width + "/" + height);
         assertTrue(size.getWidth() == width);
         assertTrue(size.getHeight() == height);
     }
@@ -62,7 +62,7 @@ public class CalculateImageSizeFromUrlTest {
         Event e = new EventImpl("Event Name", /* startDate */ null, /* endDate */ null, "Kiel", /* isPublic */ true, UUID.randomUUID());
         int width = Math.max(10, (int) (200. * Math.random()));
         int height = Math.max(10, (int) (100. * Math.random()));
-        URL imageURL = new URL("http://placehold.it/" + width + "x" + height);
+        URL imageURL = new URL("http://placekitten.com/" + width + "/" + height);
         e.addImageURL(imageURL);
         ImageSize expectedSize = new ImageSizeImpl(width, height);
         assertEquals(expectedSize, e.getImageSize(imageURL));
