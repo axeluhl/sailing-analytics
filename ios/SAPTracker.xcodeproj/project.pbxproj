@@ -1725,7 +1725,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "b69fb7aa-cf0e-4b86-8907-ea643ed64cba";
+				PROVISIONING_PROFILE = "73c63f8a-9009-480c-8d34-e03bd8034f0d";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
