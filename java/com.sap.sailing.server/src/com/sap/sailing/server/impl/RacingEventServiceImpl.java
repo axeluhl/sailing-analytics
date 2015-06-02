@@ -2902,23 +2902,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
-        if (!(leaderboard instanceof HasRegattaLike)){
-            return null;
+        final TimePoint result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            RaceState state = RaceStateImpl.create(new ServerSideRaceLogResolver((HasRegattaLike) leaderboard), raceLog,
+                    new LogEventAuthorImpl(authorName, authorPriority));
+            if (passId > raceLog.getCurrentPassId()) {
+                state.setAdvancePass(logicalTimePoint);
+            }
+            state.setRacingProcedure(logicalTimePoint, racingProcedure);
+            state.forceNewStartTime(logicalTimePoint, startTime);
+            result = state.getStartTime();
+        } else {
+            result = null;
         }
-        
-        if (raceLog == null) {
-            return null;
-        }
-
-        RaceState state = RaceStateImpl.create(new ServerSideRaceLogResolver((HasRegattaLike) leaderboard), raceLog,
-                new LogEventAuthorImpl(authorName, authorPriority));
-        if (passId > raceLog.getCurrentPassId()) {
-            state.setAdvancePass(logicalTimePoint);
-        }
-        state.setRacingProcedure(logicalTimePoint, racingProcedure);
-        state.forceNewStartTime(logicalTimePoint, startTime);
-        return state.getStartTime();
+        return result;
     }
 
     public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {

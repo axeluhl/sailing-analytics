@@ -25,22 +25,17 @@ public class RaceLogDependentStartTimeEventDeserializer extends RaceLogRaceStatu
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-
         String raceColumnName = (String) object.get(RaceLogDependentStartTimeEventSerializer.FIELD_DEPDENDENT_ON_RACECOLUMN);
         String regattaLikeParentName = (String) object.get(RaceLogDependentStartTimeEventSerializer.FIELD_DEPDENDENT_ON_REGATTALIKE);
         String fleetName = (String) object.get(RaceLogDependentStartTimeEventSerializer.FIELD_DEPDENDENT_ON_FLEET);
-        
         long startTimeDifferenceInMs = (long) object.get(RaceLogDependentStartTimeEventSerializer.FIELD_START_TIME_DIFFERENCE);
         Duration startTimeDifference = new MillisecondsDurationImpl(startTimeDifferenceInMs);
-
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
-
         SimpleRaceLogIdentifier dependentOnRace = new SimpleRaceLogIdentifierImpl(regattaLikeParentName, raceColumnName, fleetName);
-        
         return factory.createDependentStartTimeEvent(event.getCreatedAt(), author, event.getLogicalTimePoint(), event.getId(), event.getInvolvedBoats(), 
                 event.getPassId(), dependentOnRace, startTimeDifference);
     }
-
 }

@@ -31,9 +31,9 @@ public interface DataStore {
 
     public Collection<ManagedRace> getRaces();
     public void addRace(ManagedRace race);
-    public ManagedRace getRace(Serializable id);
+    public ManagedRace getRace(String id);
     public ManagedRace getRace(SimpleRaceLogIdentifier id);
-    public boolean hasRace(Serializable id);
+    public boolean hasRace(String id);
     public boolean hasRace(SimpleRaceLogIdentifier id);
 
     public Collection<Mark> getMarks();

@@ -176,7 +176,7 @@ public class RaceStateService extends Service {
             return;
         }
         
-        Serializable id = intent.getSerializableExtra(AppConstants.RACE_ID_KEY);
+        String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
         ManagedRace race = dataManager.getDataStore().getRace(id);
         if (race == null) {
             ExLog.w(this, TAG, "No race for id " + id);
@@ -224,8 +224,7 @@ public class RaceStateService extends Service {
         if (intent.getExtras() == null || !intent.getExtras().containsKey(AppConstants.RACE_ID_KEY)) {
             return null;
         }
-
-        Serializable raceId = intent.getExtras().getSerializable(AppConstants.RACE_ID_KEY);
+        String raceId = intent.getExtras().getString(AppConstants.RACE_ID_KEY);
         return dataManager.getDataStore().getRace(raceId);
     }
 

@@ -33,14 +33,13 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
 
     private void setAndAnnounceFinishedTime() {
         TimePoint finishingTime = getFinishingTime();
-        StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
-        TimePoint startTime = dependentStartTimeFinder.analyze();
-        
+        StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
+        TimePoint startTime = stf.analyze();
         if (getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
             if (startTime.before(finishingTime)) {
                 getRace().getState().setFinishingTime(finishingTime);
                 dismiss();
-            }else{
+            } else {
                 Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
             }
         }
