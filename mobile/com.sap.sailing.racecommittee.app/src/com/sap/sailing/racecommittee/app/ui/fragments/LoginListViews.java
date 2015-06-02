@@ -27,17 +27,13 @@ import com.sap.sailing.racecommittee.app.utils.StringHelper;
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
     private LoginActivity activity;
-    private RelativeLayout event_header;
-    private RelativeLayout area_header;
-    private RelativeLayout position_header;
-    private FrameLayout event_listView;
-    private FrameLayout area_listView;
-    private FrameLayout position_listView;
-    private TextView event_selected;
-    private TextView area_selected;
-    private TextView position_selected;
+
     private Button sign_up;
     private IntentListener listener;
+
+    private EventToggleContainer event_container;
+    private AreaToggleContainer area_container;
+    private PositionToggleContainer position_container;
 
     public LoginListViews() {
         listener = new IntentListener();
@@ -53,33 +49,36 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_listviews, container, false);
 
-        // all click areas
-        event_header = (RelativeLayout) view.findViewById(R.id.event_header);
-        if (event_header != null) {
-            event_header.setOnClickListener(this);
-        }
-        area_header = (RelativeLayout) view.findViewById(R.id.area_header);
-        if (area_header != null) {
-            area_header.setOnClickListener(this);
-        }
-        position_header = (RelativeLayout) view.findViewById(R.id.position_header);
-        if (position_header != null) {
-            position_header.setOnClickListener(this);
-        }
+        RelativeLayout event_header = (RelativeLayout) view.findViewById(R.id.event_header);
+        RelativeLayout area_header = (RelativeLayout) view.findViewById(R.id.area_header);
+        RelativeLayout position_header = (RelativeLayout) view.findViewById(R.id.position_header);
+
+        // create the toggle container instances
+        this.event_container = new EventToggleContainer(
+                (FrameLayout) view.findViewById(R.id.event_fragment),
+                event_header,
+                (TextView) view.findViewById(R.id.selected_event)
+        );
+        this.area_container = new AreaToggleContainer(
+                (FrameLayout) view.findViewById(R.id.area_fragment),
+                area_header,
+                (TextView) view.findViewById(R.id.selected_area)
+        );
+        this.position_container = new PositionToggleContainer(
+                (FrameLayout) view.findViewById(R.id.position_fragment),
+                position_header,
+                (TextView) view.findViewById(R.id.selected_position)
+        );
+
+        // add listeners to the click areas
+        if (event_header != null) event_header.setOnClickListener(this);
+        if (area_header != null) area_header.setOnClickListener(this);
+        if (position_header != null) position_header.setOnClickListener(this);
+
         sign_up = (Button) view.findViewById(R.id.login_submit);
         if (sign_up != null) {
             sign_up.setOnClickListener(this);
         }
-
-        // all listViews
-        event_listView = (FrameLayout) view.findViewById(R.id.event_fragment);
-        area_listView = (FrameLayout) view.findViewById(R.id.area_fragment);
-        position_listView = (FrameLayout) view.findViewById(R.id.position_fragment);
-
-        // all selected textViews
-        event_selected = (TextView) view.findViewById(R.id.selected_event);
-        area_selected = (TextView) view.findViewById(R.id.selected_area);
-        position_selected = (TextView) view.findViewById(R.id.selected_position);
 
         onClick(event_header);
 
@@ -90,10 +89,10 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     public void onResume() {
         super.onResume();
 
-        // reset selections
-        if (event_selected != null) event_selected.setText(null);
-        if (area_selected != null) area_selected.setText(null);
-        if (position_selected != null) position_selected.setText(null);
+        // reset all texts
+        event_container.resetHeaderText();
+        area_container.resetHeaderText();
+        position_container.resetHeaderText();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
@@ -112,21 +111,21 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         switch (view.getId()) {
         case R.id.event_header:
-            toggleContainer(event_listView, event_selected);
-            closeArea();
-            closePosition();
+            event_container.toggle();
+            area_container.close();
+            position_container.close();
             break;
 
         case R.id.area_header:
-            closeEvent();
-            toggleContainer(area_listView, area_selected);
-            closePosition();
+            event_container.close();
+            area_container.toggle();
+            position_container.close();
             break;
 
         case R.id.position_header:
-            closeEvent();
-            closeArea();
-            toggleContainer(position_listView, position_selected);
+            event_container.close();
+            area_container.close();
+            position_container.toggle();
             break;
 
         default:
@@ -137,108 +136,137 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     }
 
 
-    private void toggleContainer(FrameLayout frame, TextView header) {
-        final int[] pos = new int[2];
-
-        // reset the header text
-        if (header != null) {
-            header.setText(null);
-        }
-
-        if (frame != null && frame.getLayoutParams() != null) {
-            // open the frame
-            if (frame.getLayoutParams().height == 0) {
-                frame.getLocationOnScreen(pos);
-                frame.getLayoutParams().height = getScreenHeight() - pos[1];
-            } else {
-                closeContainer(frame, header);
-            }
-            frame.requestLayout();
-        }
-    }
-
     public void closeAll() {
-        closeEvent();
-        closeArea();
-        closePosition();
+        event_container.close();
+        area_container.close();
+        position_container.close();
         showButton();
-    }
-
-    private void closeEvent() {
-        closeContainer(event_listView, event_selected);
-    }
-
-    private void closeArea() {
-        closeContainer(area_listView, area_selected);
-    }
-
-    private void closePosition() {
-        closeContainer(position_listView, position_selected);
-    }
-
-    private void closeContainer(FrameLayout frame, TextView header) {
-        if (frame != null && frame.getLayoutParams() != null) {
-            frame.getLayoutParams().height = 0;
-            frame.requestLayout();
-            setHeaderText(header);
-        }
-    }
-
-    private void setHeaderText(TextView header){
-        if (activity != null) {
-            if (header == position_selected) {
-                position_selected.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
-            } else if (header == area_selected) {
-                area_selected.setText(activity.getCourseName());
-            } else if (header == event_selected) {
-                event_selected.setText(activity.getEventName());
-            }
-        } else {
-            // TODO how to handle this exception properly?
-        }
     }
 
     private void showButton() {
         sign_up.setVisibility(View.GONE);
-        if (event_listView != null && event_listView.getLayoutParams() != null && event_listView.getLayoutParams().height == 0) {
-            if (area_listView != null && area_listView.getLayoutParams() != null && area_listView.getLayoutParams().height == 0) {
-                if (position_listView != null && position_listView.getLayoutParams() != null && position_listView.getLayoutParams().height == 0) {
-                    sign_up.setVisibility(View.VISIBLE);
-                }
-            }
+        if (event_container.isClosed() && area_container.isClosed() && position_container.isClosed()){
+            sign_up.setVisibility(View.VISIBLE);
         }
     }
 
-    private int getScreenHeight() {
-        WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point point = new Point();
-        display.getSize(point);
-        return point.y;
-    }
+        private abstract class ToggleContainer {
+            private FrameLayout frame;
+            private TextView text;
+            private RelativeLayout header;
 
-    private class IntentListener extends BroadcastReceiver {
+            public ToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+                this.frame = frame;
+                this.text = text;
+                this.header = header;
+            }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            switch (action) {
-            case AppConstants.INTENT_ACTION_TOGGLE:
-                String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
-                    onClick(event_header);
-                }
-                if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
-                    onClick(area_header);
-                }
-                if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
-                    onClick(position_header);
-                }
-                break;
+            public void toggle(){
+                final int[] pos = new int[2];
 
-            default:
-                break;
+                // reset the header text
+                if (text != null) {
+                    text.setText(null);
+                }
+
+                if (frame != null && frame.getLayoutParams() != null) {
+                    // open the frame
+                    if (frame.getLayoutParams().height == 0) {
+                        frame.getLocationOnScreen(pos);
+                        frame.getLayoutParams().height = getScreenHeight() - pos[1];
+                    } else {
+                        close();
+                    }
+                    frame.requestLayout();
+                }
+            }
+
+            public void close(){
+                if (frame != null && frame.getLayoutParams() != null) {
+                    frame.getLayoutParams().height = 0;
+                    frame.requestLayout();
+                    setHeaderText();
+                }
+            }
+
+            public void resetHeaderText(){
+                if (text != null) text.setText(null);
+            }
+
+            public boolean isClosed(){
+                if (frame != null && frame.getLayoutParams() != null && frame.getLayoutParams().height == 0) {
+                    return true;
+                }else {
+                    return false;
+                }
+            }
+
+            public RelativeLayout getHeader(){
+                return this.header;
+            }
+
+            private int getScreenHeight() {
+                WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+                Display display = wm.getDefaultDisplay();
+                Point point = new Point();
+                display.getSize(point);
+                return point.y;
+            }
+
+            public void setHeaderText(){}
+
+        }
+
+        private class EventToggleContainer extends ToggleContainer {
+            public EventToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+                super(frame, header, text);
+            }
+
+            public void setHeaderText(){
+                super.text.setText(activity.getEventName());
             }
         }
+
+        private class AreaToggleContainer extends ToggleContainer {
+            public AreaToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+                super(frame, header, text);
+            }
+            public void setHeaderText(){
+                super.text.setText(activity.getCourseName());
+            }
+        }
+
+        private class PositionToggleContainer extends ToggleContainer {
+            public PositionToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+                super(frame, header, text);
+            }
+            public void setHeaderText(){
+                super.text.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
+            }
+        }
+
+        private class IntentListener extends BroadcastReceiver {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                switch (action) {
+                case AppConstants.INTENT_ACTION_TOGGLE:
+                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                    if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
+                        onClick(event_container.getHeader());
+                    }
+                    if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
+                        onClick(area_container.getHeader());
+                    }
+                    if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
+                        onClick(position_container.getHeader());
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }
     }
 }
