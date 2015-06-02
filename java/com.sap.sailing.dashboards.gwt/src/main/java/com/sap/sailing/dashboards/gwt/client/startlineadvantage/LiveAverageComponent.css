@@ -55,11 +55,19 @@
 }
 
 .liveAverageCompoment_panel_value_number {
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	font-size: 27pt;
 }
 
 .liveAverageCompoment_panel_value_unit {
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	font-size: 12pt;
+}
+
+.liveAverageCompoment_panel_value_unit_degrees {
+	position: absolute;
+	font-size: 20pt;
+	font-weight: lighter;
 }
 
 .liveAverageCompoment_value_panel {
