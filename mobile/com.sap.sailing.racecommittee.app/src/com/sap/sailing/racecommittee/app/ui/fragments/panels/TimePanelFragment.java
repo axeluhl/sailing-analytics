@@ -1,18 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import java.text.SimpleDateFormat;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -25,6 +19,8 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
 
 public class TimePanelFragment extends BasePanelFragment implements TickListener {
 
@@ -127,10 +123,10 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                 String time;
                 int resId;
                 if (startTime.after(now)) {
-                    resId =  R.string.race_start_time_in;
+                    resId = R.string.race_start_time_in;
                     time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
                 } else {
-                    resId =  R.string.race_start_time_ago;
+                    resId = R.string.race_start_time_ago;
                     time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
                 }
                 mHeaderTime.setText(getString(resId).replace("#TIME#", time));
@@ -149,56 +145,71 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
     private void checkStatus() {
         switch (getRace().getStatus()) {
-            case UNSCHEDULED:
-                changeVisibility(mTimeLock, View.GONE);
-                break;
+        case UNSCHEDULED:
+            changeVisibility(mTimeLock, View.GONE);
+            break;
 
-            case SCHEDULED:
-                changeVisibility(mTimeLock, View.GONE);
-                break;
+        case SCHEDULED:
+            changeVisibility(mTimeLock, View.GONE);
+            break;
 
-            case STARTPHASE:
-                changeVisibility(mTimeLock, View.GONE);
-                break;
+        case STARTPHASE:
+            changeVisibility(mTimeLock, View.GONE);
+            break;
 
-            case RUNNING:
-                changeVisibility(mTimeLock, View.VISIBLE);
-                break;
+        case RUNNING:
+            changeVisibility(mTimeLock, View.VISIBLE);
+            break;
 
-            case FINISHING:
-                changeVisibility(mTimeLock, View.VISIBLE);
-                break;
+        case FINISHING:
+            changeVisibility(mTimeLock, View.VISIBLE);
+            break;
 
-            case FINISHED:
-                changeVisibility(mTimeLock, View.VISIBLE);
-                break;
+        case FINISHED:
+            changeVisibility(mTimeLock, View.VISIBLE);
+            break;
 
-            default:
-                changeVisibility(mTimeLock, View.VISIBLE);
-                break;
+        default:
+            changeVisibility(mTimeLock, View.VISIBLE);
+            break;
         }
     }
 
-    private class RaceHeaderClick implements View.OnClickListener {
+    private class RaceHeaderClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = RaceHeaderClick.class.getName();
+        private final View container = mRaceHeader;
+        private final int markerId = R.id.time_marker;
 
         public void onClick(View v) {
-            if (mTimeLock == null || mTimeLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
-                switch (toggleMarker(v, R.id.time_marker)) {
-                    case 0:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                        break;
-
-                    case 1:
-                        replaceFragment(StartTimeFragment.newInstance(2));
-                        break;
-
-                    default:
-                        ExLog.i(getActivity(), TAG, "Unknown return value");
-                        break;
+            if (mTimeLock != null) {
+                if (mTimeLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
                 }
+            }
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
+
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
+            switch (toggleMarker(container, markerId)) {
+            case 0:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
+
+            case 1:
+                replaceFragment(StartTimeFragment.newInstance(2));
+                break;
+
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
+                break;
             }
         }
     }

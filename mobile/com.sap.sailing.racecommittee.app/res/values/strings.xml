@@ -429,5 +429,9 @@
     <string name="author_type_shore_control">Shore Control</string>
     <string name="author_viewer">Viewer</string>
     <string name="yesterday">Yesterday</string>
+    <string name="change_proceed">Proceed anyway</string>
+    <string name="change_cancel">Cancel</string>
+    <string name="change_message">According to the racing rules this data is not changeable in the current\nrace state. You may proceed nevertheless to correct wrong inputs.</string>
+    <string name="change_title">Warning</string>
 
 </resources>

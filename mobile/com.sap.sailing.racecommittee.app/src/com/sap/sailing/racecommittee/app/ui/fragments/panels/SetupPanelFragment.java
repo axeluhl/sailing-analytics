@@ -1,9 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -147,8 +144,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     mStartMode.setVisibility(View.VISIBLE);
                 }
                 RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
-                mStartModeFlag.setImageDrawable(
-                    FlagsResources.getFlagDrawable(getActivity(), procedure.getStartModeFlag().name(), 48));
+                mStartModeFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), procedure.getStartModeFlag().name(), 48));
             } catch (Exception ex) {
                 if (mStartMode != null) {
                     mStartMode.setVisibility(View.GONE);
@@ -309,103 +305,157 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
     }
 
-    private class StartProcedureClick implements View.OnClickListener {
+    private class StartProcedureClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = StartProcedureClick.class.getName();
+        private final View container = mStartProcedure;
+        private final int markerId = R.id.start_procedure_marker;
+
+        public void onClick(View v) {
+            if (mStartProcedureLock != null) {
+                if (mStartProcedureLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
+                }
+            }
+        }
 
         @Override
-        public void onClick(View v) {
-            if (mStartProcedureLock == null || mStartProcedureLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
-                switch (toggleMarker(v, R.id.start_procedure_marker)) {
-                case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
 
-                case 1:
-                    replaceFragment(StartProcedureFragment.newInstance(1));
-                    break;
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
+            switch (toggleMarker(container, markerId)) {
+            case 0:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
-                }
+            case 1:
+                replaceFragment(StartProcedureFragment.newInstance(1));
+                break;
+
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
+                break;
             }
         }
     }
 
-    private class StartModeClick implements View.OnClickListener {
+    private class StartModeClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = StartModeClick.class.getName();
+        private final View container = mStartMode;
+        private final int markerId = R.id.start_mode_marker;
+
+        public void onClick(View v) {
+            if (mStartModeLock != null) {
+                if (mStartModeLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
+                }
+            }
+        }
 
         @Override
-        public void onClick(View v) {
-            if (mStartModeLock == null || mStartModeLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_MODE);
-                switch (toggleMarker(v, R.id.start_mode_marker)) {
-                case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
 
-                case 1:
-                    replaceFragment(StartModeFragment.newInstance(1));
-                    break;
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MODE);
+            switch (toggleMarker(container, markerId)) {
+            case 0:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                }
+            case 1:
+                replaceFragment(StartModeFragment.newInstance(1));
+                break;
+
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
         }
     }
 
-    private class CourseClick implements View.OnClickListener {
+    private class CourseClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = CourseClick.class.getName();
+        private final View container = mCourseLock;
+        private final int markerId = R.id.course_marker;
 
         @Override
         public void onClick(View v) {
-            if (mCourseLock == null || mCourseLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_COURSE);
-                switch (toggleMarker(v, R.id.course_marker)) {
-                case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
-
-                case 1:
-                    replaceFragment(CourseFragment.newInstance(1, getRace()));
-                    break;
-
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            if (mCourseLock != null) {
+                if (mCourseLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
                 }
+            }
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
+
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
+            switch (toggleMarker(container, markerId)) {
+            case 0:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
+
+            case 1:
+                replaceFragment(CourseFragment.newInstance(1, getRace()));
+                break;
+
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
         }
     }
 
-    private class WindClick implements View.OnClickListener {
+    private class WindClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = WindClick.class.getName();
+        private final View container = mWind;
+        private final int markerId = R.id.wind_marker;
 
         @Override
         public void onClick(View v) {
-            if (mWindLock == null || mWindLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
-                    AppConstants.INTENT_ACTION_TOGGLE_WIND);
-                switch (toggleMarker(v, R.id.wind_marker)) {
-                case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
-
-                case 1:
-                    replaceFragment(WindFragment.newInstance(1));
-                    break;
-
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            if (mWindLock != null) {
+                if (mWindLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
                 }
+            }
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
+
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_WIND);
+            switch (toggleMarker(container, markerId)) {
+            case 0:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
+
+            case 1:
+                replaceFragment(WindFragment.newInstance(1));
+                break;
+
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
         }
     }

@@ -408,5 +408,9 @@
     <string name="author_type_shore_control">Regattaleitung an Land</string>
     <string name="author_viewer">Demo-Modus</string>
     <string name="yesterday">Gestern</string>
+    <string name="change_proceed">Trotzdem fortfahren</string>
+    <string name="change_cancel">Abbrechen</string>
+    <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
+    <string name="change_title">Warnung</string>
 
 </resources>

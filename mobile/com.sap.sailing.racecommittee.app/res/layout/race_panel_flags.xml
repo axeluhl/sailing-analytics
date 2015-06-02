@@ -39,11 +39,28 @@
                     android:layout_gravity="center_horizontal"
                     android:src="?flags_postpone"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/flags_postpone"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/flags_postpone"
+                        android:textAppearance="?textPanelCaption"/>
+
+                    <ImageView
+                        android:id="@+id/postpone_flags_lock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="@dimen/lock_margin"
+                        android:src="?lock_outline"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 
@@ -69,15 +86,33 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center_horizontal"
                     android:src="?flags_abandon"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/flags_abandon"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/flags_abandon"
+                        android:textAppearance="?textPanelCaption"/>
+
+                    <ImageView
+                        android:id="@+id/abandon_flags_lock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="@dimen/lock_margin"
+                        android:src="?lock_outline"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 
@@ -103,15 +138,33 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center_horizontal"
                     android:src="?flags_recall"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/flags_recall"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/flags_recall"
+                        android:textAppearance="?textPanelCaption"/>
+
+                    <ImageView
+                        android:id="@+id/recall_flags_lock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="@dimen/lock_margin"
+                        android:src="?lock_outline"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 
@@ -120,7 +173,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
                 android:id="@+id/course_flags_marker"
@@ -141,12 +195,29 @@
                     android:layout_gravity="center_horizontal"
                     android:src="?flags_course"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/flags_course"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/flags_course"
+                        android:textAppearance="?textPanelCaption"/>
+
+                    <ImageView
+                        android:id="@+id/course_flags_lock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="@dimen/lock_margin"
+                        android:src="?lock_outline"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 
@@ -172,15 +243,33 @@
                 <ImageView
                     android:layout_width="@dimen/side_button_imageSize"
                     android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center_horizontal"
                     android:src="?flags_more"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/flags_more"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/flags_more"
+                        android:textAppearance="?textPanelCaption"/>
+
+                    <ImageView
+                        android:id="@+id/more_flags_lock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="@dimen/lock_margin"
+                        android:src="?lock_outline"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 
@@ -189,7 +278,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
                 android:id="@+id/voice_marker"
@@ -210,11 +300,30 @@
                     android:layout_gravity="center_horizontal"
                     android:src="?mic_48dp"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/record_voice"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center_horizontal"
+                        android:text="@string/record_voice"
+                        android:textAppearance="?textPanelCaption"/>
+
+                    <ImageView
+                        android:id="@+id/voice_lock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="@dimen/lock_margin"
+                        android:src="?lock_outline"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>

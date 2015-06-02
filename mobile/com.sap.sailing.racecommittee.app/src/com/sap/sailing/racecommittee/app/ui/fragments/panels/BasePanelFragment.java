@@ -1,9 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -14,6 +16,11 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
+    /**
+     * @param view  container view
+     * @param resId resource if of the marker drawable
+     * @return new level (0 - normal / 1 - toggled)
+     */
     protected int toggleMarker(View view, @IdRes int resId) {
         int retValue = -1;
 
@@ -29,19 +36,54 @@ public abstract class BasePanelFragment extends RaceFragment {
         return retValue;
     }
 
-    protected int setMarkerLevel(View view, @IdRes int resId, int level) {
+    /**
+     * @param view  container view
+     * @param resId resource id of the marker drawable
+     * @return 0 - normal / 1 - toggled
+     */
+    protected int getMarkerLevel(View view, @IdRes int resId) {
         int retValue = -1;
 
         if (isAdded()) {
-            int offset = 0;
             ImageView image = (ImageView) view.findViewById(resId);
             if (image != null) {
                 Drawable drawable = image.getDrawable();
                 if (drawable != null) {
-                    drawable.setLevel(level + offset);
-                    retValue = drawable.getLevel() - offset;
+                    retValue = drawable.getLevel();
+                }
+            }
+        }
+
+        return retValue;
+    }
+
+    /**
+     * @param view  container view
+     * @param resId resource id of the marker drawable
+     * @return is view marked as normal (level == 0)
+     */
+    protected boolean isNormal(View view, @IdRes int resId) {
+        return (getMarkerLevel(view, resId) == 0);
+    }
+
+    /**
+     * @param view  container view
+     * @param resId resource id of the marker drawable
+     * @param level 0 - normal / 1 - toggled
+     * @return new level, which should be the input level, if everything is correct
+     */
+    protected int setMarkerLevel(View view, @IdRes int resId, int level) {
+        int retValue = -1;
+
+        if (isAdded()) {
+            ImageView image = (ImageView) view.findViewById(resId);
+            if (image != null) {
+                Drawable drawable = image.getDrawable();
+                if (drawable != null) {
+                    drawable.setLevel(level);
+                    retValue = drawable.getLevel();
                     switch (retValue) {
-                    case 1:
+                    case 1: // clicked
                         view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
                         break;
 
@@ -87,5 +129,19 @@ public abstract class BasePanelFragment extends RaceFragment {
         }
         fragment.setArguments(args);
         getFragmentManager().beginTransaction().replace(idRes, fragment).commit();
+    }
+
+    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton) {
+        showChangeDialog(positiveButton, null);
+    }
+
+    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton, DialogInterface.OnClickListener negativeButton) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(getString(R.string.change_title));
+        builder.setMessage(getString(R.string.change_message));
+        builder.setPositiveButton(getString(R.string.change_proceed), positiveButton);
+        builder.setNegativeButton(getString(R.string.change_cancel), negativeButton);
+        builder.setCancelable(true);
+        builder.create().show();
     }
 }
