@@ -347,8 +347,17 @@ public class RaceContext {
             raceState = RaceViewState.SCHEDULED;
         } else if (finishTime != null && now.after(finishTime)) {
             raceState = RaceViewState.FINISHED;
-        } else {
-            // TODO: Resolve ABORTED and POSTPONED states
+        } else if(raceLog != null) {
+            AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+            if (abortingFlagEvent != null) {
+                Flags upperFlag = abortingFlagEvent.getUpperFlag();
+                if(upperFlag.equals(Flags.AP)) {
+                    raceState = RaceViewState.POSTPONED;
+                } else if(upperFlag.equals(Flags.NOVEMBER)) {
+                    raceState = RaceViewState.CANCELED;
+                }
+            }
         }
         return raceState;
     }
