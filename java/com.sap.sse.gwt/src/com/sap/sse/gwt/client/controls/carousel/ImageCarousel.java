@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
@@ -11,6 +14,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.media.ImageMetadataDTO;
 
 /**
  * Image carousel that uses the open source "slick carousel".
@@ -48,10 +52,11 @@ import com.google.gwt.user.client.ui.Widget;
  *
  *      Created by pgtaboada on 10.11.14.
  */
-public class ImageCarousel extends Widget {
+public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
 
+    private LinkedList<TYPE> currentImages = new LinkedList<>();
     /**
      * slick slider property: dots
      */
@@ -81,8 +86,11 @@ public class ImageCarousel extends Widget {
      * The height of the images
      */
     private int imagesHeight = 300;
+    private int currentSlideIndex = 0;
 
     private final String uniqueId;
+
+    private FullscreenViewer<TYPE> fsViewer;
 
     /**
      * Widget constructor
@@ -95,12 +103,38 @@ public class ImageCarousel extends Widget {
         init();
     }
 
+    public void onClick() {
+        GWT.log("Current slide: " + currentSlideIndex);
+        if (fsViewer != null) {
+            fsViewer.show(currentImages.get(currentSlideIndex), currentImages);
+        }
+    }
+
     /**
      * JSNI wrapper that does setup the slider
      *
      * @param uniqueId
      */
-    native void setupSlider(ImageCarousel sliderReference) /*-{
+    native void setupSlider(ImageCarousel<?> sliderReference) /*-{
+
+	var slider = $wnd
+		.$('.'
+			+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId));
+
+	slider
+		.on(
+			'click',
+			'.slick-slide',
+			function() {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::onClick()();
+			});
+
+	slider
+		.on(
+			'afterChange',
+			function(event, index) {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::currentSlideIndex = index.currentSlide;
+			});
 
 	$wnd
 		.$(
@@ -136,8 +170,12 @@ public class ImageCarousel extends Widget {
      *
      * @param url
      */
-    public void addImage(String url, int height, int width) {
-
+    public void addImage(TYPE image) {
+        currentImages.add(image);
+        String url = image.getSourceRef();
+        int height = image.getHeightInPx();
+        int width = image.getWidthInPx();
+        
         DivElement imageHolder = Document.get().createDivElement();
         ImageElement imageElement = Document.get().createImageElement();
         imageElement.setAttribute("data-lazy", UriUtils.fromString(url).asString());
@@ -209,7 +247,7 @@ public class ImageCarousel extends Widget {
     /**
      * UiBinder interface
      */
-    interface SlickSliderUiBinder extends UiBinder<DivElement, ImageCarousel> {
+    interface SlickSliderUiBinder extends UiBinder<DivElement, ImageCarousel<?>> {
     }
 
     /**
@@ -242,7 +280,7 @@ public class ImageCarousel extends Widget {
      * Apply slick js to constructed dom tree.
      */
     private void init() {
-        final ImageCarousel reference = this;
+        final ImageCarousel<TYPE> reference = this;
 
         Scheduler.get().scheduleDeferred(new Command() {
 
@@ -265,4 +303,13 @@ public class ImageCarousel extends Widget {
         });
     }
 
+    public void registerFullscreenViewer(FullscreenViewer<TYPE> fsViewer) {
+        this.fsViewer = fsViewer;
+    }
+
+    public interface FullscreenViewer<TYPE> {
+        
+        public void show(TYPE selectedImage, List<TYPE> imageList);
+    }
+    
 }

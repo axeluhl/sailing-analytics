@@ -18,9 +18,13 @@ import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystemImpl;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements ApplicationClientFactory {
+    private final DispatchSystem dispatch = new DispatchSystemImpl();
+    
     public TabletAndDesktopApplicationClientFactory() {
         this(new SimpleEventBus());
     }
@@ -66,5 +70,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public WhatsNewView createWhatsNewView(WhatsNewNavigationTabs navigationTab) {
         return new TabletAndDesktopWhatsNewView(navigationTab, getHomePlacesNavigator());
+    }
+
+    @Override
+    public DispatchSystem getDispatch() {
+        return dispatch;
     }
 }

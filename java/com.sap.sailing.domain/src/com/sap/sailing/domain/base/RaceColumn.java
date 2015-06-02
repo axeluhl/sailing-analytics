@@ -180,8 +180,6 @@ public interface RaceColumn extends Named {
 
     /**
      * Returns the race log identifier associated with this fleet and race log
-     * @param fleet
-     * @return
      */
     RaceLogIdentifier getRaceLogIdentifier(Fleet fleet);
 

@@ -11,9 +11,9 @@
   <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.regatta_intro}">
-          <div>
+          <a ui:field="boatClassLinkUi" style="display:block;">
 	          <g:Image ui:field="boatClassImage" height="140" width="140" styleName="{local_res.css.regatta_intro_image}"></g:Image>
-          </div>
+          </a>
         <div class="{local_res.css.regatta_intro_header}">
           <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.small4} {res.mediaCss.columns}">

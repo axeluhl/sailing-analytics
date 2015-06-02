@@ -47,6 +47,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -86,7 +87,7 @@ public class LeaderboardCourseChangeTest {
         ScoringScheme scoringScheme = new LowPoint();
         Regatta mockedRegatta = new RegattaImpl(RegattaImpl.getDefaultName("TestRegatta", boatClass.getName()), boatClass, 
                 /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
-                UUID.randomUUID(), mock(CourseArea.class));
+                UUID.randomUUID(), mock(CourseArea.class), OneDesignRankingMetric::new);
         ControlPoint start = new MarkImpl("Start");
         ControlPoint m1 = new MarkImpl("M1");
         ControlPoint m2 = new MarkImpl("M2");
@@ -137,7 +138,7 @@ public class LeaderboardCourseChangeTest {
         TrackedRegatta mockedTrackedRegatta = createMockedTrackedRegatta(regatta);
         RaceDefinition mockedRace = createMockedRace(course, boatClass);
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
-                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false));
+                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new));
 
         return spyedTrackedRace;
     }
@@ -158,7 +159,7 @@ public class LeaderboardCourseChangeTest {
         DynamicBoat mockedBoat = mock(DynamicBoat.class);
         when(mockedBoat.getBoatClass()).thenReturn(boatClass);
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null, null,
-                mock(DynamicTeam.class), mockedBoat));
+                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
         return competitors;
     }
 

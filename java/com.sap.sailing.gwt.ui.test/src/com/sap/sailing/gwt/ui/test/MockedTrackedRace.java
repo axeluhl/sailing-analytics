@@ -41,6 +41,9 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -437,6 +440,21 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public Double getTimeOnTimeFactor(Competitor competitor) {
+                        return null;
+                    }
+
+                    @Override
+                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+                        return null;
+                    }
+
+                    @Override
+                    public RankingMetricConstructor getRankingMetricConstructor() {
+                        return null;
+                    }
+
+                    @Override
                     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
                         return null;
                     }
@@ -490,6 +508,22 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
                     boolean useMarkPassingCalculator) {
                 return null;
+            }
+
+            @Override
+            public void lockTrackedRacesForRead() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterRead() {
+            }
+
+            @Override
+            public void lockTrackedRacesForWrite() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterWrite() {
             }
         };
     }
@@ -549,8 +583,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
-            throws NoWindException {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
         return null;
     }
 
@@ -652,7 +685,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
+    public Competitor getOverallLeader(TimePoint timePoint) {
         return null;
     }
 
@@ -902,13 +935,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public long getGateStartGolfDownTime() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int getLastLegStarted(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -919,7 +950,27 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
-        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public RankingMetric getRankingMetric() {
         return null;
     }
 

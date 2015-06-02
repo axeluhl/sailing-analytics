@@ -40,6 +40,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -67,6 +69,16 @@ public interface TrackedRace extends Serializable {
     RaceDefinition getRace();
 
     RegattaAndRaceIdentifier getRaceIdentifier();
+    
+    /**
+     * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
+     * this will usually happen by projecting the competitors to the wind direction for upwind and downwind legs or to
+     * the leg's rhumb line for reaching legs, then comparing positions. For handicap races using a time-on-time,
+     * time-on-distance, combination thereof or a more complicated scheme such as ORC Performance Curve, the ranking
+     * process needs to take into account the competitor-specific correction factors defined in the measurement
+     * certificate.
+     */
+    RankingMetric getRankingMetric();
 
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time
@@ -503,7 +515,21 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    /**
+     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
+     */
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
+
+    /**
+     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(Competitor, TimePoint, WindPositionMode)}, only with an
+     * additional cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups
+     * for the same time point.
+     * 
+     * @param rankingInfo
+     *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
+     */
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -574,13 +600,21 @@ public interface TrackedRace extends Serializable {
 
     WindStore getWindStore();
 
-    Competitor getOverallLeader(TimePoint timePoint) throws NoWindException;
+    Competitor getOverallLeader(TimePoint timePoint);
+    
+    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+
+    /**
+     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
+     * bearing values.
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will
@@ -802,4 +836,5 @@ public interface TrackedRace extends Serializable {
     void setPolarDataService(PolarDataService polarDataService);
 
     Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders();
+
 }
