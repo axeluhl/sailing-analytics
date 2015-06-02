@@ -53,14 +53,16 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      */
     public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog,
             ConfigurationLoader<RegattaConfiguration> configurationLoader) {
-        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(configurationLoader));
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(
+                configurationLoader));
     }
 
     /**
      * Creates a {@link ReadonlyRaceState} with an empty configuration ( {@link EmptyRegattaConfiguration} ).
      */
     public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
-        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(new EmptyRegattaConfiguration()));
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(
+                new EmptyRegattaConfiguration()));
     }
 
     /**
@@ -100,13 +102,13 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * a default is taken from {@link #fallbackInitialProcedureType}.
      */
     private RacingProcedureType cachedRacingProcedureType;
-    
+
     /**
      * The result of {@link #determineInitialProcedureType()}; may be {@link RacingProcedureType#UNKNOWN} in case no
      * specification is found in the underlying race log.
      */
     private RacingProcedureType cachedRacingProcedureTypeNoFallback;
-    
+
     private RaceLogRaceStatus cachedRaceStatus;
     private int cachedPassId;
     private TimePoint cachedStartTime;
@@ -118,22 +120,24 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
     private RaceLogResolver raceLogResolver;
-    
-    //For dependentStartTime
+
+    // For dependentStartTime
     private ReadonlyRaceState raceStateToObserve;
     private RaceStateChangedListener raceStateToObserveListener;
 
-    private ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, RacingProcedureFactory procedureFactory) {
-        this(raceLogResolver, raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */ true);
+    private ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            RacingProcedureFactory procedureFactory) {
+        this(raceLogResolver, raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */true);
     }
 
     /**
-     * @param raceLogResolver 
+     * @param raceLogResolver
      * @param update
      *            if <code>true</code>, the race state will be updated whenever the underlying <code>raceLog</code>
      *            changes.
      */
-    protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory, boolean update) {
+    protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, Clock analyzersClock,
+            RacingProcedureFactory procedureFactory, boolean update) {
         this.raceLog = raceLog;
         this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
@@ -150,7 +154,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
-        
+
         this.raceStateToObserveListener = new BaseRaceStateChangedListener() {
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
@@ -159,7 +163,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         };
 
         this.cachedRacingProcedureTypeNoFallback = determineInitialProcedureType();
-        if (this.cachedRacingProcedureTypeNoFallback == null || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
+        if (this.cachedRacingProcedureTypeNoFallback == null
+                || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
             this.cachedRacingProcedureType = fallbackInitialProcedureType;
         } else {
             cachedRacingProcedureType = cachedRacingProcedureTypeNoFallback;
@@ -172,6 +177,18 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
         recreateRacingProcedure();
+
+        // Check wether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
+        // dependent startTime setup listeners
+        this.raceLog.lockForRead();
+        for (RaceLogEvent event : this.raceLog.getFixesDescending()) {
+            if (event instanceof RaceLogStartTimeEvent) {
+                break;
+            } else if (event instanceof RaceLogDependentStartTimeEvent) {
+                setupListenersOnDependentRace(event);
+            }
+        }
+        this.raceLog.unlockAfterRead();
     }
 
     protected RacingProcedureType determineInitialProcedureType() {
@@ -195,11 +212,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     public ReadonlyRacingProcedure getRacingProcedure() {
         return racingProcedure;
     }
-    
+
     @Override
     public ReadonlyRacingProcedure getRacingProcedureNoFallback() {
         final ReadonlyRacingProcedure result;
-        if (cachedRacingProcedureTypeNoFallback == null || cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
+        if (cachedRacingProcedureTypeNoFallback == null
+                || cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
             result = null;
         } else {
             result = getRacingProcedure();
@@ -298,10 +316,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         update();
         if (event instanceof RaceLogDependentStartTimeEvent) {
             setupListenersOnDependentRace(event);
-            // Register RaceStateListener
-            // set boolean listeningToDependentRace = true
-            // if is true and RaceLogDependentStartTimeEvent / RaceLogStartTimeEvent --> change listener/set false
-            // maybe send probe?
         } else if (event instanceof RaceLogStartTimeEvent) {
             if (raceStateToObserve != null) {
                 raceStateToObserve.removeChangedListener(raceStateToObserveListener);
