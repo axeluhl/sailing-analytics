@@ -181,14 +181,17 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         // Check wether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
         // dependent startTime setup listeners
         this.raceLog.lockForRead();
-        for (RaceLogEvent event : this.raceLog.getFixesDescending()) {
-            if (event instanceof RaceLogStartTimeEvent) {
-                break;
-            } else if (event instanceof RaceLogDependentStartTimeEvent) {
-                setupListenersOnDependentRace(event);
+        try {
+            for (RaceLogEvent event : this.raceLog.getFixesDescending()) {
+                if (event instanceof RaceLogStartTimeEvent) {
+                    break;
+                } else if (event instanceof RaceLogDependentStartTimeEvent) {
+                    setupListenersOnDependentRace(event);
+                }
             }
+        } finally {
+            this.raceLog.unlockAfterRead();
         }
-        this.raceLog.unlockAfterRead();
     }
 
     protected RacingProcedureType determineInitialProcedureType() {
