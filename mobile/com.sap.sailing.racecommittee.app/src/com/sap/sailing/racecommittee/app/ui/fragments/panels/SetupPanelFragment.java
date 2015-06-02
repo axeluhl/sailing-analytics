@@ -171,9 +171,15 @@ public class SetupPanelFragment extends BasePanelFragment {
             break;
 
         case SCHEDULED:
-        case STARTPHASE:
             changeVisibility(mStartProcedureLock, View.GONE);
             changeVisibility(mStartModeLock, View.GONE);
+            changeVisibility(mCourseLock, View.GONE);
+            changeVisibility(mWindLock, View.GONE);
+            break;
+
+        case STARTPHASE:
+            changeVisibility(mStartProcedureLock, View.VISIBLE);
+            changeVisibility(mStartModeLock, View.VISIBLE);
             changeVisibility(mCourseLock, View.GONE);
             changeVisibility(mWindLock, View.GONE);
             break;
