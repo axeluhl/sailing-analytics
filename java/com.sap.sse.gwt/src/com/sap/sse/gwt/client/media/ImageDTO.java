@@ -1,0 +1,36 @@
+package com.sap.sse.gwt.client.media;
+
+import java.util.Date;
+
+import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MimeType;
+
+public class ImageDTO extends AbstractMediaDTO {
+
+    /** for GWT */
+    protected ImageDTO() {
+    }
+    
+    private int widthInPx;
+    private int heightInPx;
+
+    public ImageDTO(String imageRef, ImageSize size, Date createdAtDate) {
+        super(imageRef, MimeType.image, createdAtDate);
+        this.widthInPx = size.getWidth();
+        this.heightInPx = size.getHeight();
+    }
+
+    public ImageDTO(String imageRef, int heightInPx, int widthInPx, Date createdAtDate) {
+        super(imageRef, MimeType.image, createdAtDate);
+        this.widthInPx = widthInPx;
+        this.heightInPx = heightInPx;
+    }
+
+    public int getWidthInPx() {
+        return widthInPx;
+    }
+
+    public int getHeightInPx() {
+        return heightInPx;
+    }
+}

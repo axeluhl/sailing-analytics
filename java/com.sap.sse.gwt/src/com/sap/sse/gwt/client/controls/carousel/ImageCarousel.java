@@ -14,7 +14,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.media.ImageMetadataDTO;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
  * Image carousel that uses the open source "slick carousel".
@@ -52,7 +52,7 @@ import com.sap.sse.common.media.ImageMetadataDTO;
  *
  *      Created by pgtaboada on 10.11.14.
  */
-public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
+public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
 
