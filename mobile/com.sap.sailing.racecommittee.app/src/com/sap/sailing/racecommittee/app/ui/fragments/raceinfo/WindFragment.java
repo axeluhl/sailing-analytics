@@ -98,6 +98,8 @@ public class WindFragment extends BaseFragment
     private LocationRequest locationRequest;
     private Location mCurrentLocation;
 
+    private RacePositionsPoller positionPoller;
+
     // stuff to save during rotation/ ect
     private boolean bigMap = false;
 
@@ -205,7 +207,6 @@ public class WindFragment extends BaseFragment
         }
         setupButtons();
         setupWindSpeedPicker();
-        setupPositionPoller();
         showElements(true);
 
         setInstanceState(savedInstanceState);
@@ -277,7 +278,7 @@ public class WindFragment extends BaseFragment
      * adds the polling for buoy data to the polled races, also registers a callback
      */
     public void setupPositionPoller() {
-        RacePositionsPoller positionPoller = new RacePositionsPoller(getActivity());
+        positionPoller = new RacePositionsPoller(getActivity());
         positionPoller.register(getRace(), this);
         ExLog.i(getActivity(), TAG, "registering race " + getRace().getRaceName());
     }
@@ -321,6 +322,8 @@ public class WindFragment extends BaseFragment
         }
         apiClient.disconnect();
 
+        positionPoller.unregisterAllAndStop();
+
         Fragment fragment = getFragmentManager().findFragmentById(R.id.windMap);
 
         if (fragment != null) {
@@ -336,6 +339,7 @@ public class WindFragment extends BaseFragment
     public void onResume() {
         super.onResume();
 
+        setupPositionPoller();
         setupLocationClient();
         initialMapFragment();
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
