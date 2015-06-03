@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.UUID;
-
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -23,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -56,8 +51,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
-        PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.UUID;
+
+public class LoginActivity extends BaseActivity
+    implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
@@ -72,6 +71,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private String positionName = null;
     private View backdrop;
     private IntentReceiver mReceiver;
+    private Serializable mSelectedEvent;
+    private UUID mSelectedCourseAreaUUID;
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
@@ -119,8 +120,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
-    private Serializable mSelectedEvent;
-    private UUID mSelectedCourseAreaUUID;
     private ProgressDialog progressDialog;
 
     public LoginActivity() {
@@ -295,51 +294,49 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         progressDialog.show();
 
         ReadonlyDataManager dataManager = DataManager.create(this);
-        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
+        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
+            .getDeviceIdentifier());
 
-        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier,
-                new LoadClient<DeviceConfiguration>() {
+        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
 
-                    @Override
-                    public void onLoadFailed(Exception reason) {
-                        progressDialog.dismiss();
+                @Override
+                public void onLoadFailed(Exception reason) {
+                    progressDialog.dismiss();
 
-                        if (reason instanceof FileNotFoundException) {
-                            Toast.makeText(getApplicationContext(),
-                                    getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                            ExLog.w(LoginActivity.this, TAG,
-                                    String.format("There seems to be no configuration for this device: %s", reason.toString()));
-                        } else {
-                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
-                            ExLog.ex(LoginActivity.this, TAG, reason);
+                    if (reason instanceof FileNotFoundException) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
+                        ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
+                    } else {
+                        Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
+                        ExLog.ex(LoginActivity.this, TAG, reason);
+                    }
+                    showLogin();
+                }
+
+                @Override
+                public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
+                    progressDialog.dismiss();
+
+                    // this is our 'global' configuration, let's store it in app preferences
+                    PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
+
+                    Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
+                    // showCourseAreaListFragment(eventId);
+                    showLogin();
+
+                }
+
+                private void showLogin() {
+                    Handler handler = new Handler();
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            backdrop.performClick();
                         }
-                        showLogin();
-                    }
-
-                    @Override
-                    public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                        progressDialog.dismiss();
-
-                        // this is our 'global' configuration, let's store it in app preferences
-                        PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
-
-                        Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
-                        // showCourseAreaListFragment(eventId);
-                        showLogin();
-
-                    }
-
-                    private void showLogin() {
-                        Handler handler = new Handler();
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                backdrop.performClick();
-                            }
-                        };
-                        handler.postDelayed(runnable, 1000);
-                    }
-                });
+                    };
+                    handler.postDelayed(runnable, 1000);
+                }
+            });
 
         if (!AppPreferences.on(this).isOfflineMode()) {
             // always reload the configuration...
@@ -388,12 +385,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 final View bottomView = findViewById(R.id.login_listview);
                 View title = findViewById(R.id.backdrop_title);
                 View subTitle = findViewById(R.id.backdrop_subtitle);
+                View info = findViewById(R.id.technical_info);
                 View settings = findViewById(R.id.settings_button);
                 subTitle.setAlpha(0f);
 
                 ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
                 ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
                 ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
+                ObjectAnimator infoAnimation = ObjectAnimator.ofFloat(info, "alpha", 0f, 1f);
                 ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
 
                 ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
@@ -408,7 +407,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 });
 
                 AnimatorSet animatorSet = new AnimatorSet();
-                animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, settingsAnimation);
+                animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, infoAnimation, settingsAnimation);
                 animatorSet.setDuration(aniTime);
                 animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
                 animatorSet.start();
