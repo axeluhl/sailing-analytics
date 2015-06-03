@@ -15,6 +15,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
@@ -111,7 +112,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     private RaceLogRaceStatus cachedRaceStatus;
     private int cachedPassId;
-    private TimePoint cachedStartTime;
+    private StartTimeFinderResult cachedStartTimeFinderResult;
     private TimePoint cachedFinishingTime;
     private TimePoint cachedFinishedTime;
     private TimePoint cachedProtestTime;
@@ -262,7 +263,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public TimePoint getStartTime() {
-        return cachedStartTime;
+        return cachedStartTimeFinderResult.getStartTime();
     }
 
     @Override
@@ -317,7 +318,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public void eventAdded(RaceLogEvent event) {
-        update();
         if (event instanceof RaceLogDependentStartTimeEvent) {
             setupListenersOnDependentRace(event);
         } else if (event instanceof RaceLogStartTimeEvent) {
@@ -326,6 +326,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
                 raceStateToObserve = null;
             }
         }
+        update();
     }
 
     private void setupListenersOnDependentRace(RaceLogEvent event) {
@@ -371,9 +372,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
         }
 
-        TimePoint startTime = startTimeAnalyzer.analyze().getStartTime();
-        if (!Util.equalsWithNull(cachedStartTime, startTime)) {
-            cachedStartTime = startTime;
+        StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedStartTimeFinderResult, startTimeFinderResult)) {
+            cachedStartTimeFinderResult = startTimeFinderResult;
             changedListeners.onStartTimeChanged(this);
         }
 

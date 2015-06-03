@@ -23,6 +23,7 @@ public class StartTimeFinderResult {
     
     public StartTimeFinderResult(List<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime) {
         this.racesDependingOn = racesDependingOn;
+        this.startTime = startTime;
     }
 
     public List<SimpleRaceLogIdentifier> getRacesDependingOn() {
@@ -42,7 +43,7 @@ public class StartTimeFinderResult {
             return;
         }
         
-        startTime.plus(toAdd);
+        startTime = startTime.plus(toAdd);
     }
     
     void addToDependencyList(SimpleRaceLogIdentifier race){

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -12,31 +13,33 @@ import com.sap.sse.common.TimePoint;
 public class StartTimeFinder extends RaceLogAnalyzer<StartTimeFinderResult> {
 
     private final RaceLogResolver resolver;
-    private List<SimpleRaceLogIdentifier> dependingOnRaces;
-    
+
     public StartTimeFinder(RaceLogResolver resolver, RaceLog raceLog) {
         super(raceLog);
         this.resolver = resolver;
     }
 
-    public StartTimeFinder(RaceLogResolver raceLogResolver, RaceLog raceLog,
-            List<SimpleRaceLogIdentifier> dependingOnRaces) {
-        super(raceLog);
-        this.resolver = raceLogResolver;
-        this.dependingOnRaces = dependingOnRaces;
-    }
-
     @Override
     protected StartTimeFinderResult performAnalysis() {
-        for (RaceLogEvent event : getPassEventsDescending()) {
-            if (event instanceof RaceLogStartTimeEvent) {
-                TimePoint startTime = ((RaceLogStartTimeEvent) event).getStartTime();
-                return new StartTimeFinderResult(startTime);
-            } else if (event instanceof RaceLogDependentStartTimeEvent) {
-                DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(resolver);
-                return dependentStartTimeResolver.internal_resolve((RaceLogDependentStartTimeEvent) event, dependingOnRaces);
+        return analyze(new ArrayList<SimpleRaceLogIdentifier>());
+    }
+
+    public StartTimeFinderResult analyze(List<SimpleRaceLogIdentifier> dependingOnRaces) {
+        log.lockForRead();
+        try {
+            for (RaceLogEvent event : getPassEventsDescending()) {
+                if (event instanceof RaceLogStartTimeEvent) {
+                    TimePoint startTime = ((RaceLogStartTimeEvent) event).getStartTime();
+                    return new StartTimeFinderResult(dependingOnRaces, startTime);
+                } else if (event instanceof RaceLogDependentStartTimeEvent) {
+                    DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(resolver);
+                    return dependentStartTimeResolver.internal_resolve((RaceLogDependentStartTimeEvent) event,
+                            dependingOnRaces);
+                }
             }
+            return new StartTimeFinderResult(null);
+        } finally {
+            log.unlockAfterRead();
         }
-        return null;
     }
 }

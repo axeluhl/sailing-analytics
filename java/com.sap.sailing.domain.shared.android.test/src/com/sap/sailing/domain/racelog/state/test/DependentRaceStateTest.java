@@ -105,8 +105,8 @@ public class DependentRaceStateTest {
        MillisecondsTimePoint now = MillisecondsTimePoint.now();
        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
        
-       verify(listenerC, times(1)).onStartTimeChanged(stateC);
-       verify(listenerB, times(1)).onStartTimeChanged(stateB);
+       verify(listenerC, times(3)).onStartTimeChanged(stateC);
+       verify(listenerB, times(2)).onStartTimeChanged(stateB);
        verify(listenerA, times(1)).onStartTimeChanged(stateA);
     }
 
@@ -143,7 +143,7 @@ public class DependentRaceStateTest {
        raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(20000)));
        
        verify(listenerA, times(1)).onStartTimeChanged(stateA);
-       verify(listenerB, times(2)).onStartTimeChanged(stateB);
-       verify(listenerC, times(2)).onStartTimeChanged(stateC);
+       verify(listenerB, times(3)).onStartTimeChanged(stateB);
+       verify(listenerC, times(4)).onStartTimeChanged(stateC);
     }
 }
