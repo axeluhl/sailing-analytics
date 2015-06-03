@@ -1,16 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -18,18 +12,21 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 public class RaceSummaryFragment extends BaseFragment {
 
     private RaceStateListener mRaceStateListener;
-    SimpleDateFormat mDateFormat;
-    TextView mStartTime;
-    TextView mFinishStartTime;
-    TextView mFinishStartDuration;
-    TextView mFinishEndTime;
-    TextView mFinishEndDuration;
-    TextView mFinishDuration;
-    View mRegionWind;
-    View mRegionRecall;
+    private SimpleDateFormat mDateFormat;
+    private TextView mStartTime;
+    private TextView mFinishStartTime;
+    private TextView mFinishStartDuration;
+    private TextView mFinishEndTime;
+    private TextView mFinishEndDuration;
+    private TextView mFinishDuration;
+    private View mRegionWind;
+    private View mRegionRecall;
 
     public static RaceSummaryFragment newInstance(Bundle args) {
         RaceSummaryFragment fragment = new RaceSummaryFragment();
@@ -43,16 +40,6 @@ public class RaceSummaryFragment extends BaseFragment {
 
         mRaceStateListener = new RaceStateListener();
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
-
-        final ImageView button = ViewHolder.get(layout, R.id.edit_summary);
-        if (button != null) {
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(getActivity(), "Function not yet implemented.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
 
         mStartTime = ViewHolder.get(layout, R.id.race_start_time);
         mFinishStartTime = ViewHolder.get(layout, R.id.race_finish_begin_time);

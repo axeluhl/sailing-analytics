@@ -193,6 +193,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
             switch (state.getStatus()) {
             case UNSCHEDULED:
+            case FINISHED:
                 RacingActivity activity = (RacingActivity) getActivity();
                 if (activity != null) {
                     activity.onRaceItemClicked(getRace(), true);
