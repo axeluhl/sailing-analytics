@@ -347,6 +347,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                 ExLog.i(getActivity(), TAG, "Unknown return value");
                 break;
             }
+            disableToggle(container, markerId);
         }
     }
 
@@ -385,13 +386,14 @@ public class SetupPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 
     private class CourseClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
         private final String TAG = CourseClick.class.getName();
-        private final View container = mCourseLock;
+        private final View container = mCourse;
         private final int markerId = R.id.course_marker;
 
         @Override
@@ -424,6 +426,7 @@ public class SetupPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 
@@ -463,6 +466,7 @@ public class SetupPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 

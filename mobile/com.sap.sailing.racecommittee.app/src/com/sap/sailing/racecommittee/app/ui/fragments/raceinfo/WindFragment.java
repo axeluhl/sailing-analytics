@@ -61,7 +61,8 @@ import java.util.ArrayList;
 
 public class WindFragment extends BaseFragment
     implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
-    OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener, OnMapReadyCallback {
+    OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener, TextView.OnEditorActionListener, OnMapReadyCallback,
+    WindMap.OnResumeCallback {
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
@@ -135,11 +136,8 @@ public class WindFragment extends BaseFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        apiClient = new GoogleApiClient.Builder(getActivity())
-            .addApi(LocationServices.API)
-            .addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this)
-            .build();
+        apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this).build();
     }
 
     @Override
@@ -338,6 +336,7 @@ public class WindFragment extends BaseFragment
     public void onResume() {
         super.onResume();
 
+        setupLocationClient();
         initialMapFragment();
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
@@ -433,19 +432,21 @@ public class WindFragment extends BaseFragment
     }
 
     private void initialMapFragment() {
-        mWindMap = WindMap.newInstance(mContext);
+        mWindMap = WindMap.newInstance(mContext, this);
         FragmentManager manager;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             manager = getChildFragmentManager();
         } else {
             manager = getFragmentManager();
         }
-        if (manager.findFragmentByTag("custom_map") == null) {
+        if (manager.findFragmentByTag("googleMap") == null) {
             FragmentTransaction ft = manager.beginTransaction();
-            ft.replace(R.id.windMap, mWindMap, "custom_map").commit();
-            manager.executePendingTransactions();
+            ft.replace(R.id.windMap, mWindMap, "googleMap").commit();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                manager.executePendingTransactions();
+                mWindMap.getMapAsync(this);
+            }
         }
-        mWindMap.getMapAsync(this);
     }
 
     /**
@@ -635,9 +636,12 @@ public class WindFragment extends BaseFragment
                 mWindMap.movePositionMarker(enteredWindLocation);
                 mWindMap.centerMap(enteredWindLocation);
             }
-
-            setupLocationClient();
         }
+    }
+
+    @Override
+    public void afterResumed() {
+        mWindMap.getMapAsync(this);
     }
 
     /**

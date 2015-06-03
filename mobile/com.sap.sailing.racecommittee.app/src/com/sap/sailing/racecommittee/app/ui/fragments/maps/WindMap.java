@@ -30,12 +30,14 @@ public class WindMap extends MapFragment {
     public Circle windCircle;
 
     private Context mContext;
+    private OnResumeCallback mListener;
     private GoogleMap mMap;
     private List<MapMarker> mapItems;
 
-    public static WindMap newInstance(Context context) {
+    public static WindMap newInstance(Context context, OnResumeCallback listener) {
         WindMap map = new WindMap();
         map.mContext = context;
+        map.mListener = listener;
         return map;
     }
 
@@ -48,22 +50,33 @@ public class WindMap extends MapFragment {
         mMap = map;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mListener != null) {
+            mListener.afterResumed();
+        }
+    }
+
     /**
      * adds a cirlce below the map pin displaying the uncertainty radius of the GPS location
      *
      * @param location Location: given by the gps service
      */
     public void addAccuracyCircle(Location location) {
-        if (windCircle != null) {
-            windCircle.remove();
+        if (mMap != null) {
+            if (windCircle != null) {
+                windCircle.remove();
+            }
+            CircleOptions co = new CircleOptions()
+                .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                .radius(location.getAccuracy())
+                .fillColor(Color.parseColor("#33ff0000"))
+                .strokeWidth(1)
+                .strokeColor(Color.RED);
+            windCircle = mMap.addCircle(co);
         }
-        CircleOptions co = new CircleOptions()
-            .center(new LatLng(location.getLatitude(), location.getLongitude()))
-            .radius(location.getAccuracy())
-            .fillColor(Color.parseColor("#33ff0000"))
-            .strokeWidth(1)
-            .strokeColor(Color.RED);
-        windCircle = mMap.addCircle(co);
     }
 
     /**
@@ -188,5 +201,9 @@ public class WindMap extends MapFragment {
                     "Showing marker for " + item.getName() + " at (" + pos.latitude + ", " + pos.longitude + ")");
             }
         }
+    }
+
+    public interface OnResumeCallback {
+        void afterResumed();
     }
 }

@@ -211,6 +211,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                 ExLog.i(getActivity(), TAG, "Unknown return value");
                 break;
             }
+            disableToggle(container, markerId);
         }
     }
 

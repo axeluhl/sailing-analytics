@@ -289,6 +289,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 
@@ -327,6 +328,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 
@@ -365,6 +367,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 
@@ -403,6 +406,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 
@@ -442,6 +446,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             default:
                 ExLog.i(getActivity(), TAG, "Unknown return value");
             }
+            disableToggle(container, markerId);
         }
     }
 

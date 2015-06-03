@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -143,5 +144,22 @@ public abstract class BasePanelFragment extends RaceFragment {
         builder.setNegativeButton(getString(R.string.change_cancel), negativeButton);
         builder.setCancelable(true);
         builder.create().show();
+    }
+
+    protected void disableToggle(View container, @IdRes int resId) {
+        disableToggle(container, resId, 200);
+    }
+
+    protected void disableToggle(final View container, @IdRes final int resId, int delay) {
+        container.setClickable(false);
+        container.setBackgroundColor(getResources().getColor(R.color.constant_sap_yellow_1));
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                container.setClickable(true);
+                setMarkerLevel(container, resId, getMarkerLevel(container, resId));
+            }
+        }, delay);
     }
 }
