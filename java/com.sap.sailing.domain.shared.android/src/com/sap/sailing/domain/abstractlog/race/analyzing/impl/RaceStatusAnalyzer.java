@@ -100,7 +100,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
         @Override
         public void visit(RaceLogDependentStartTimeEvent event) {
             DependentStartTimeResolver startTimeResolver = new DependentStartTimeResolver(resolver);
-            TimePoint startTime = startTimeResolver.resolve(event);
+            TimePoint startTime = startTimeResolver.resolve(event).getStartTime();
             setRaceLogStatusBasedOnStartTime(startTime);
         };
     };

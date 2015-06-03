@@ -91,7 +91,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new StartTimeFinder(new ServerSideRaceLogResolver(regattaLike), raceLog).analyze();
+            TimePoint startTime = new StartTimeFinder(new ServerSideRaceLogResolver(regattaLike), raceLog).analyze().getStartTime();
             
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
             RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
