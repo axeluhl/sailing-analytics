@@ -133,7 +133,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         TimePoint startTime = null;
             
         DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(raceLogResolver);
-        startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent);
+        startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent).getStartTime();
         
         getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
     }

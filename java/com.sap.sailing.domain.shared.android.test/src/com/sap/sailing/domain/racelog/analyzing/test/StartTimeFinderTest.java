@@ -15,10 +15,11 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sse.common.TimePoint;
 
 public class StartTimeFinderTest extends
-        PassAwareRaceLogAnalyzerTest<StartTimeFinder, TimePoint> {
+        PassAwareRaceLogAnalyzerTest<StartTimeFinder, StartTimeFinderResult> {
 
     @Override
     protected StartTimeFinder createAnalyzer(RaceLog raceLog) {
@@ -29,7 +30,7 @@ public class StartTimeFinderTest extends
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1, passId, author);
         when(event.getStartTime()).thenReturn(mock(TimePoint.class));
-        return new TargetPair(Arrays.asList(event), event.getStartTime());
+        return new TargetPair(Arrays.asList(event), new StartTimeFinderResult(event.getStartTime()));
     }
 
     @Test

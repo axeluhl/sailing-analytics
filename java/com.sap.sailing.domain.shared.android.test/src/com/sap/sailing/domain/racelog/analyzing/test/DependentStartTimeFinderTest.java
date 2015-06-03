@@ -80,17 +80,17 @@ public class DependentStartTimeFinderTest {
        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
        
        finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       assertEquals(10000, finder.analyze().asMillis());
+       assertEquals(10000, finder.analyze().getStartTime().asMillis());
        finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       assertEquals(15000, finder.analyze().asMillis());
+       assertEquals(15000, finder.analyze().getStartTime().asMillis());
        
        //Test correct behaviour, when middle element changes
        raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(15000)));
        finder = new StartTimeFinder(raceLogResolver, raceLogA);
-       assertEquals(5000, finder.analyze().asMillis());
+       assertEquals(5000, finder.analyze().getStartTime().asMillis());
        finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       assertEquals(15000, finder.analyze().asMillis());
+       assertEquals(15000, finder.analyze().getStartTime().asMillis());
        finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       assertEquals(20000, finder.analyze().asMillis());
+       assertEquals(20000, finder.analyze().getStartTime().asMillis());
     }
 }

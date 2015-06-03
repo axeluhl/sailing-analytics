@@ -371,7 +371,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
         }
 
-        TimePoint startTime = startTimeAnalyzer.analyze();
+        TimePoint startTime = startTimeAnalyzer.analyze().getStartTime();
         if (!Util.equalsWithNull(cachedStartTime, startTime)) {
             cachedStartTime = startTime;
             changedListeners.onStartTimeChanged(this);

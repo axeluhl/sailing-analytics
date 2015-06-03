@@ -34,7 +34,7 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
     private void setAndAnnounceFinishedTime() {
         TimePoint finishingTime = getFinishingTime();
         StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
-        TimePoint startTime = stf.analyze();
+        TimePoint startTime = stf.analyze().getStartTime();
         if (getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
             if (startTime.before(finishingTime)) {
                 getRace().getState().setFinishingTime(finishingTime);
