@@ -15,6 +15,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 public interface TrackedLeg extends Serializable {
     Leg getLeg();
@@ -88,7 +89,7 @@ public interface TrackedLeg extends Serializable {
      * @param at
      *            the wind estimation is performed for this point in time
      */
-    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException;
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode);
 
     /**
      * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, only that a cache
@@ -103,6 +104,32 @@ public interface TrackedLeg extends Serializable {
      * leg's direction, or a positive distance otherwise.
      */
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode);
+    
+    /**
+     * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
+     * that competitors need to travel in this leg. Due to the dynamics of the wind direction and the mark positions,
+     * the result is time dependent. The wind direction is determined at the leg's middle at the time point <code>at</code>.
+     */
+    Distance getWindwardDistance(TimePoint at, WindLegTypeAndLegBearingCache cache);
+
+    Distance getAbsoluteWindwardDistance(TimePoint at, WindLegTypeAndLegBearingCache cache);
+
+    /**
+     * Computes the windward distance for upwind/downwind legs or the great circle distance between this leg's waypoints
+     * that competitors need to travel in this leg. Due to the dynamics of the wind direction and the mark positions,
+     * the result is time dependent. As time point, the middle of the interval defined by the first mark passing starting the
+     * leg and the last mark passing finishing the leg is used, where both time points default to "now."
+     * 
+     * @see #getWindwardDistance(TimePoint, WindLegTypeAndLegBearingCache)
+     */
+    Distance getWindwardDistance();
+
+    /**
+     * Same as {@link #getWindwardDistance()}, but offering the client to use a cache
+     */
+    Distance getWindwardDistance(WindLegTypeAndLegBearingCache cache);
+
+    Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingCache cache);
 
     /**
      * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start
@@ -119,4 +146,40 @@ public interface TrackedLeg extends Serializable {
      */
     Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
+    /**
+     * Computes the windward distance (for upwind/downwind legs) or the along-course distance (for reaching legs) at a reference time point
+     * between the leg's start waypoint position and <code>pos</code>. The reference time point is chosen as the middle between the first
+     * leg entry and the last leg exit, both defaulting to "now" if no such time point exists.
+     */
+    Distance getAbsoluteWindwardDistanceFromLegStart(Position pos);
+
+    /**
+     * Same as {@link #getAbsoluteWindwardDistanceFromLegStart(Position)}, offering the caller to pass in a cache
+     */
+    Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
+
+    Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache);
+
+    /**
+     * Determines an average true wind direction for this leg; it does so by querying the tracked race for
+     * wind data at the leg's middle around a reference time point which is defined by the mark passings
+     * of the competitors entering and finishing this leg.
+     */
+    WindWithConfidence<Pair<Position, TimePoint>> getAverageTrueWindDirection();
+
+    /**
+     * Computes a reference time point for this leg that is the same for all competitors and that is the middle between
+     * the time points of first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
+     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
+     * "now" is used.
+     */
+    TimePoint getReferenceTimePoint();
+
+    /**
+     * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}
+     * installed for the race.
+     */
+    Competitor getLeader(TimePoint timePoint);
+
+    Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 }

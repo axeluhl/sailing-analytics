@@ -24,12 +24,12 @@ public class WaypointImpl implements Waypoint {
     }
     
     public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions, Bearing fixedBearing) {
-        if (passingInstructions == null){
+        if (passingInstructions == null) {
             throw new IllegalArgumentException("PassingInstructions cannot be null");
         }
         this.controlPoint = controlPoint;
         this.passingInstructions = passingInstructions;
-        this.fixedBearing=fixedBearing;
+        this.fixedBearing = fixedBearing;
         id = idCounter++;
     }
     
