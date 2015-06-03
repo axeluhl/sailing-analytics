@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * A common media interface for all kinds of media like images or videos. 
  */
-public interface MediaMetadata {
+public interface MediaDescriptor {
     public MimeType getMimeType();
 
     public URL getURL();

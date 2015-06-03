@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.Date;
 
 
-public class ImageMetadataImpl extends AbstractMediaMetadata {
+public class ImageDescriptorImpl extends AbstractMediaDescriptor implements ImageDescriptor {
     private static final long serialVersionUID = -702731462768602331L;
 
     private int widthInPx;
@@ -14,13 +14,13 @@ public class ImageMetadataImpl extends AbstractMediaMetadata {
      * @param imageURL
      * @param size
      */
-    public ImageMetadataImpl(URL imageURL, ImageSize size, Date createdAtDate) {
+    public ImageDescriptorImpl(URL imageURL, ImageSize size, Date createdAtDate) {
         super(imageURL, MimeType.image, createdAtDate);
         this.widthInPx = size.getWidth();
         this.heightInPx = size.getHeight();
     }
 
-    public ImageMetadataImpl(URL imageURL, int heightInPx, int widthInPx, Date createdAtDate) {
+    public ImageDescriptorImpl(URL imageURL, int heightInPx, int widthInPx, Date createdAtDate) {
         super(imageURL, MimeType.image, createdAtDate);
         this.widthInPx = widthInPx;
         this.heightInPx = heightInPx;

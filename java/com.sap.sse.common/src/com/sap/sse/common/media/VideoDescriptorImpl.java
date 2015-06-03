@@ -3,7 +3,7 @@ package com.sap.sse.common.media;
 import java.net.URL;
 import java.util.Date;
 
-public class VideoMetadataImpl extends AbstractMediaMetadata {
+public class VideoDescriptorImpl extends AbstractMediaDescriptor implements VideoDescriptor {
     private static final long serialVersionUID = 2651747912466590862L;
 
     private int lengthInSeconds;
@@ -15,10 +15,11 @@ public class VideoMetadataImpl extends AbstractMediaMetadata {
      */
     private URL thumbnailURL;
     
-    public VideoMetadataImpl(URL url, MimeType mimeType, Date createdAtDate) {
+    public VideoDescriptorImpl(URL url, MimeType mimeType, Date createdAtDate) {
         super(url, mimeType, createdAtDate);
     }
 
+    @Override
     public int getLengthInSeconds() {
         return lengthInSeconds;
     }
@@ -27,6 +28,7 @@ public class VideoMetadataImpl extends AbstractMediaMetadata {
         this.lengthInSeconds = lengthInSeconds;
     }
 
+    @Override
     public URL getThumbnailURL() {
         return thumbnailURL;
     }

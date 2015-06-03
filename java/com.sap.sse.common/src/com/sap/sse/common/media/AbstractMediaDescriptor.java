@@ -11,7 +11,7 @@ import java.util.HashSet;
  * @author pgtaboada
  *
  */
-public abstract class AbstractMediaMetadata implements MediaMetadata, Serializable {
+public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serializable {
     private static final long serialVersionUID = -6671425870632517274L;
 
     protected String title;
@@ -33,7 +33,7 @@ public abstract class AbstractMediaMetadata implements MediaMetadata, Serializab
      * @param url
      * @param mimeType
      */
-    public AbstractMediaMetadata(URL url, MimeType mimeType, Date createdAtDate) {
+    public AbstractMediaDescriptor(URL url, MimeType mimeType, Date createdAtDate) {
         this.mimeType = mimeType;
         this.url = url;
         this.createdAtDate = createdAtDate;
