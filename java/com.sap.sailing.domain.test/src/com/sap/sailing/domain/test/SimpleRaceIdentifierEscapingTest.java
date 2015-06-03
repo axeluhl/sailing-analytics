@@ -20,6 +20,10 @@ public class SimpleRaceIdentifierEscapingTest {
         test("Leaderboard\\.with\\.two dots", "raceColumn", "fleet"); 
         test("Leaderboard with double backslash\\\\", "raceColumn", "fleet"); 
         test("Leaderboard with double backslash and dot\\\\.", "raceColumn", "fleet"); 
+        test("\\Leaderboard with leading backslash", "raceColumn", "fleet"); 
+        test("\\.Leaderboard with leading backslash and dot", "raceColumn", "fleet"); 
+        test("\\\\.Leaderboard with leading double backslash and dot", "raceColumn", "fleet"); 
+        test("\\\\.Leaderboard with leading double backslash and two dots", "raceColumn", "fleet"); 
     }
     
     private void test(String leaderboardName, String raceColumnName, String fleetName) {
@@ -31,11 +35,29 @@ public class SimpleRaceIdentifierEscapingTest {
     }
 
     private Triple<String, String, String> parse(String s) {
-        final String id = s.replace("\\\\", "\\").replace("\\.", ".");
-        String[] split = id.split("\\.");
-        String leaderboardName = split[0];
-        String raceColumnName = split[3];
-        String fleetName = split[2];
+        int arrayIndex = 0;
+        StringBuilder[] split = new StringBuilder[3];
+        for (int i=0; i<split.length; i++) {
+            split[i] = new StringBuilder();
+        }
+        boolean escaped = false;
+        for (int i=0; i<s.length(); i++) {
+            if (escaped) {
+                split[arrayIndex].append(s.charAt(i));
+                escaped = false;
+            } else if (s.charAt(i) == '\\') {
+                escaped = true; // next character is escaped
+            } else if (s.charAt(i) == '.') {
+                // an unescaped dot
+                arrayIndex++;
+            } else {
+                // unescaped non-escape, non-dot character
+                split[arrayIndex].append(s.charAt(i));
+            }
+        }
+        String leaderboardName = split[0].toString();
+        String raceColumnName = split[1].toString();
+        String fleetName = split[2].toString();
         return new Triple<>(leaderboardName, raceColumnName, fleetName);
     }
     

@@ -18,6 +18,8 @@ import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sse.common.Util.Triple;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
@@ -167,14 +169,10 @@ public enum InMemoryDataStore implements DataStore {
      * @return
      *          corresponding SimpleRaceLogIdentifier
      */
-    public SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(String id) {
+    public SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(final String escapedId) {
         //Undo escaping
-        id = id.replace("\\\\", "\\").replace("\\.", ".");        
-        String[] split = id.split("\\.");
-        String leaderboardName = split[0];
-        String raceColumnName = split[3];
-        String fleetName = split[2];
-        return new SimpleRaceLogIdentifierImpl(leaderboardName, raceColumnName, fleetName);
+        final Triple<String, String, String> id = FleetIdentifierImpl.unescape(escapedId);        
+        return new SimpleRaceLogIdentifierImpl(id.getA(), id.getB(), id.getC());
     }
 
     @Override
