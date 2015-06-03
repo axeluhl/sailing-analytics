@@ -2,8 +2,11 @@ package com.sap.sse.common.media;
 
 import java.io.Serializable;
 import java.net.URL;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Common media data for media items
@@ -18,13 +21,13 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
 
     protected String subtitle;
 
-    protected Date createdAtDate;
+    protected TimePoint createdAtDate;
 
     protected String copyright;
 
     protected MimeType mimeType;
 
-    protected HashSet<String> tags = new HashSet<String>();
+    protected Set<String> tags = new LinkedHashSet<String>();
 
     protected URL url;
 
@@ -33,7 +36,7 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
      * @param url
      * @param mimeType
      */
-    public AbstractMediaDescriptor(URL url, MimeType mimeType, Date createdAtDate) {
+    public AbstractMediaDescriptor(URL url, MimeType mimeType, TimePoint createdAtDate) {
         this.mimeType = mimeType;
         this.url = url;
         this.createdAtDate = createdAtDate;
@@ -54,13 +57,33 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
         return title;
     }
 
+    @Override
     public void setTitle(String title) {
         this.title = title;
     }
 
     @Override
-    public HashSet<String> getTags() {
+    public Set<String> getTags() {
         return tags;
+    }
+
+    @Override
+    public void setTags(Iterable<String> tags) {
+        this.tags.clear();
+        if (tags != null) {
+            Util.addAll(tags, this.tags);
+        }
+    }
+
+
+    @Override
+    public boolean addTag(String tagName) {
+        return tags.add(tagName);
+    }
+
+    @Override
+    public boolean removeTag(String tagName) {
+        return tags.remove(tagName);
     }
 
     @Override
@@ -68,16 +91,18 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
         return subtitle;
     }
 
+    @Override
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
     }
 
     @Override
-    public Date getCreatedAtDate() {
+    public TimePoint getCreatedAtDate() {
         return createdAtDate;
     }
 
-    public void setCreatedAtDate(Date createdAtDate) {
+    @Override
+    public void setCreatedAtDate(TimePoint createdAtDate) {
         this.createdAtDate = createdAtDate;
     }
 
@@ -86,6 +111,7 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
         return copyright;
     }
 
+    @Override
     public void setCopyright(String copyright) {
         this.copyright = copyright;
     }

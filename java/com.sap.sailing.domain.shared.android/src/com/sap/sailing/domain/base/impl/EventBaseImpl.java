@@ -11,6 +11,8 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public abstract class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;
@@ -27,6 +29,8 @@ public abstract class EventBaseImpl implements EventBase {
     private ConcurrentLinkedQueue<URL> sponsorImageURLs;
     private URL logoImageURL;
     private URL officialWebsiteURL;
+    private ConcurrentLinkedQueue<ImageDescriptor> images;
+    private ConcurrentLinkedQueue<VideoDescriptor> videos;
 
     protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -46,6 +50,8 @@ public abstract class EventBaseImpl implements EventBase {
         this.imageURLs = new ConcurrentLinkedQueue<URL>();
         this.videoURLs = new ConcurrentLinkedQueue<URL>();
         this.sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
+        this.images = new ConcurrentLinkedQueue<ImageDescriptor>();
+        this.videos = new ConcurrentLinkedQueue<VideoDescriptor>();
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -58,6 +64,12 @@ public abstract class EventBaseImpl implements EventBase {
         }
         if (sponsorImageURLs == null) {
             sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
+        }
+        if (images == null) {
+            images = new ConcurrentLinkedQueue<ImageDescriptor>();
+        }
+        if (videos == null) {
+            videos = new ConcurrentLinkedQueue<VideoDescriptor>();
         }
     }
 
@@ -221,4 +233,53 @@ public abstract class EventBaseImpl implements EventBase {
         this.officialWebsiteURL = officialWebsiteURL;
     }
 
+    @Override
+    public Iterable<ImageDescriptor> getImages() {
+        return Collections.unmodifiableCollection(images);
+    }
+    
+    @Override
+    public void addImage(ImageDescriptor image) {
+        if (!images.contains(image)) {
+            images.add(image);
+        }
+    }
+
+    @Override
+    public void removeImage(ImageDescriptor image) {
+        images.remove(image);
+    }
+
+    @Override
+    public void setImages(Iterable<ImageDescriptor> images) {
+        this.images.clear();
+        if (images != null) {
+            Util.addAll(images, this.images);
+        }
+    }
+    
+    @Override
+    public Iterable<VideoDescriptor> getVideos() {
+        return Collections.unmodifiableCollection(videos);
+    }
+    
+    @Override
+    public void addVideo(VideoDescriptor video) {
+        if (!videos.contains(video)) {
+            videos.add(video);
+        }
+    }
+
+    @Override
+    public void removeVideo(VideoDescriptor video) {
+        videos.remove(video);
+    }
+
+    @Override
+    public void setVideos(Iterable<VideoDescriptor> videos) {
+        this.videos.clear();
+        if (videos != null) {
+            Util.addAll(videos, this.videos);
+        }
+    }
 }

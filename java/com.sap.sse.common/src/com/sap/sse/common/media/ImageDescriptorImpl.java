@@ -1,37 +1,48 @@
 package com.sap.sse.common.media;
 
 import java.net.URL;
-import java.util.Date;
+
+import com.sap.sse.common.TimePoint;
 
 
 public class ImageDescriptorImpl extends AbstractMediaDescriptor implements ImageDescriptor {
     private static final long serialVersionUID = -702731462768602331L;
 
-    private int widthInPx;
-    private int heightInPx;
+    private Integer widthInPx;
+    private Integer heightInPx;
 
     /**
      * @param imageURL
      * @param size
      */
-    public ImageDescriptorImpl(URL imageURL, ImageSize size, Date createdAtDate) {
+    public ImageDescriptorImpl(URL imageURL, TimePoint createdAtDate) {
         super(imageURL, MimeType.image, createdAtDate);
-        this.widthInPx = size.getWidth();
-        this.heightInPx = size.getHeight();
     }
 
-    public ImageDescriptorImpl(URL imageURL, int heightInPx, int widthInPx, Date createdAtDate) {
-        super(imageURL, MimeType.image, createdAtDate);
-        this.widthInPx = widthInPx;
-        this.heightInPx = heightInPx;
-    }
-
-    public int getWidthInPx() {
+    @Override
+    public Integer getWidthInPx() {
         return widthInPx;
     }
 
-    public int getHeightInPx() {
+    @Override
+    public Integer getHeightInPx() {
         return heightInPx;
     }
 
+    @Override
+    public void setSize(ImageSize size) {
+        if (size != null) {
+            this.widthInPx = size.getWidth();
+            this.heightInPx = size.getHeight();
+        } else {
+            this.widthInPx = null;
+            this.heightInPx = null;
+        }
+    }
+
+    @Override
+    public void setSize(int widthInPx, int heightInPx) {
+        this.widthInPx = widthInPx;
+        this.heightInPx = heightInPx;
+    }
 }

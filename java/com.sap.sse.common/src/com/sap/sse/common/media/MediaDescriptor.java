@@ -1,23 +1,31 @@
 package com.sap.sse.common.media;
 
+import java.io.Serializable;
 import java.net.URL;
-import java.util.Date;
+
+import com.sap.sse.common.TimePoint;
 
 /**
  * A common media interface for all kinds of media like images or videos. 
  */
-public interface MediaDescriptor {
-    public MimeType getMimeType();
+public interface MediaDescriptor extends Serializable {
+    MimeType getMimeType();
+    URL getURL();
 
-    public URL getURL();
+    String getTitle();
+    void setTitle(String title);
 
-    public String getTitle();
+    Iterable<String> getTags();
+    void setTags(Iterable<String> tags);
+    boolean addTag(String tagName); 
+    boolean removeTag(String tagName); 
 
-    public Iterable<String> getTags();
+    String getSubtitle();
+    void setSubtitle(String subtitle);
 
-    public String getSubtitle();
+    TimePoint getCreatedAtDate();
+    void setCreatedAtDate(TimePoint createdAtDate);
 
-    public Date getCreatedAtDate();
-
-    public String getCopyright();
+    String getCopyright();
+    void setCopyright(String copyright);
 }

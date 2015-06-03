@@ -189,6 +189,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.common.media.VideoDescriptorImpl;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -1069,6 +1074,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     result.addSponsorImageURL(new URL((String) sponsorImageURL));
                 } catch (MalformedURLException e) {
                     logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+name+". Ignoring this sponsor image URL.");
+                }
+            }
+        }
+        BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
+        if (images != null) {
+            for (Object imageObject : images) {
+                ImageDescriptor image = loadImage((DBObject) imageObject);
+                if (image != null) {
+                    result.addImage(image);
+                }
+            }
+        }
+        BasicDBList videos = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEOS.name());
+        if (videos != null) {
+            for (Object videoObject : videos) {
+                VideoDescriptor video = loadVideo((DBObject) videoObject);
+                if (video != null) {
+                    result.addVideo(video);
                 }
             }
         }
@@ -2061,5 +2084,83 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             set.add(url);
         }
         return resultUrls;
+    }
+    
+    private ImageDescriptor loadImage(DBObject dbObject) {
+        ImageDescriptor image = null;
+        URL imageURL = loadURL(dbObject, FieldNames.IMAGE_URL);
+        if (imageURL != null) {
+            String title = (String) dbObject.get(FieldNames.IMAGE_TITLE.name());
+            String subtitle = (String) dbObject.get(FieldNames.IMAGE_SUBTITLE.name());
+            String copyright = (String) dbObject.get(FieldNames.IMAGE_COPYRIGHT.name());
+            //Object mimeTypeRaw = dbObject.get(FieldNames.IMAGE_MIMETYPE.name());
+            //MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
+            Integer imageWidth = (Integer) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
+            Integer imageHeight = (Integer) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
+            TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.IMAGE_CREATEDATDATE);
+            BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.IMAGE_TAGS.name());
+            List<String> imageTags = new ArrayList<String>();
+            if (tags != null) {
+                for (Object tagObject : tags) {
+                    imageTags.add((String) tagObject);
+                }
+            }
+            image = new ImageDescriptorImpl(imageURL, createdAtDate);
+            image.setCopyright(copyright);
+            image.setTitle(title);
+            image.setSubtitle(subtitle);
+            image.setTags(imageTags);
+            if (imageWidth != null && imageHeight != null) {
+                image.setSize(imageWidth, imageHeight);
+            }
+        }
+        return image;
+    }
+    
+    private VideoDescriptor loadVideo(DBObject dbObject) {
+        VideoDescriptor video = null;
+        URL videoURL = loadURL(dbObject, FieldNames.VIDEO_URL);
+        if(videoURL != null) {
+            String title = (String) dbObject.get(FieldNames.VIDEO_TITLE.name());
+            String subtitle = (String) dbObject.get(FieldNames.VIDEO_SUBTITLE.name());
+            String copyright = (String) dbObject.get(FieldNames.VIDEO_COPYRIGHT.name());
+            Object mimeTypeRaw = dbObject.get(FieldNames.VIDEO_MIMETYPE.name());
+            MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
+            TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.VIDEO_CREATEDATDATE);
+            BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.VIDEO_TAGS.name());
+            Integer lengthInSeconds = (Integer) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
+            URL thumbnailURL = loadURL(dbObject, FieldNames.VIDEO_THUMBNAIL_URL);
+            List<String> videoTags = new ArrayList<String>();
+            if (tags != null) {
+                for (Object tagObject : tags) {
+                    videoTags.add((String) tagObject);
+                }
+            }
+            video = new VideoDescriptorImpl(videoURL, mimeType, createdAtDate);
+            video.setCopyright(copyright);
+            video.setTitle(title);
+            video.setSubtitle(subtitle);
+            video.setTags(videoTags);
+            video.setLengthInSeconds(lengthInSeconds);
+            video.setThumbnailURL(thumbnailURL);
+        }
+        return video;
+    }
+
+    private URL loadURL(DBObject dbObject, FieldNames field) {
+        URL result = null;
+        String urlAsString = (String) dbObject.get(field.name());
+        if(urlAsString != null) {
+            try {
+                result = new URL(urlAsString);
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing URL '"+urlAsString+"' in field "+field.name()+".");
+            }
+        }
+        return result; 
+    }
+    
+    private void migrateImageAndVideoURLsOfEvent(Event event) {
+        // TODO: convert imageURLs, sponsorImageURLs and videoURLs collections of event to new image and video descriptor classes
     }
 }

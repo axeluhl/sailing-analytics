@@ -1,12 +1,13 @@
 package com.sap.sse.common.media;
 
 import java.net.URL;
-import java.util.Date;
+
+import com.sap.sse.common.TimePoint;
 
 public class VideoDescriptorImpl extends AbstractMediaDescriptor implements VideoDescriptor {
     private static final long serialVersionUID = 2651747912466590862L;
 
-    private int lengthInSeconds;
+    private Integer lengthInSeconds;
 
     /**
      * URL to thumbnail image. This information works as override for youtube videos or as missing thumbnail
@@ -15,16 +16,16 @@ public class VideoDescriptorImpl extends AbstractMediaDescriptor implements Vide
      */
     private URL thumbnailURL;
     
-    public VideoDescriptorImpl(URL url, MimeType mimeType, Date createdAtDate) {
+    public VideoDescriptorImpl(URL url, MimeType mimeType, TimePoint createdAtDate) {
         super(url, mimeType, createdAtDate);
     }
 
     @Override
-    public int getLengthInSeconds() {
+    public Integer getLengthInSeconds() {
         return lengthInSeconds;
     }
 
-    public void setLengthInSeconds(int lengthInSeconds) {
+    public void setLengthInSeconds(Integer lengthInSeconds) {
         this.lengthInSeconds = lengthInSeconds;
     }
 

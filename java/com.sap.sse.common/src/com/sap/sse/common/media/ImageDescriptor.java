@@ -1,7 +1,9 @@
 package com.sap.sse.common.media;
 
 public interface ImageDescriptor extends MediaDescriptor {
-    public int getWidthInPx();
+    void setSize(ImageSize size);
+    void setSize(int widthInPx, int heightInPx);
 
-    public int getHeightInPx();
+    Integer getWidthInPx();
+    Integer getHeightInPx();
 }
