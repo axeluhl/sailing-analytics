@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -9,6 +10,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class EventEditDialog extends EventDialog {
     public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
@@ -54,5 +56,6 @@ public class EventEditDialog extends EventDialog {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
         }
         leaderboardGroupList.setValue(leaderboardGroupNames);
+        imagesListComposite.fillImages(event.getImages());
     }
 }

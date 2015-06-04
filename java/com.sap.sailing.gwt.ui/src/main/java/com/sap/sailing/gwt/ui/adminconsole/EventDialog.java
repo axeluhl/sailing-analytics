@@ -48,7 +48,8 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected StringListInlineEditorComposite sponsorImageURLList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
     protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
-    
+    protected ImagesListComposite imagesListComposite; 
+
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -156,6 +157,8 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, "Select a leaderboard group..."));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
+        
+        imagesListComposite = new ImagesListComposite(stringMessages);
     }
 
     @Override
@@ -232,6 +235,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         tabPanel.add(new ScrollPanel(imageURLList), stringMessages.imageURLs());
         tabPanel.add(new ScrollPanel(videoURLList), stringMessages.videoURLs());
         tabPanel.add(new ScrollPanel(sponsorImageURLList), stringMessages.sponsorImageURLs());
+        tabPanel.add(new ScrollPanel(imagesListComposite), "Images");
         return panel;
     }
 

@@ -151,7 +151,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         images.add(image);
     }
 
-    public List<ImageDTO> getImage() {
+    public List<ImageDTO> getImages() {
         return images;
     }
 
