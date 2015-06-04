@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -28,6 +26,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
@@ -42,7 +41,6 @@ public class ImagesListComposite extends Composite {
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
     private ListDataProvider<ImageDTO> imageListDataProvider;
-    private List<ImageDTO> allImages;
     private final Label noImagesLabel;
 
     private final SimplePanel mainPanel;
@@ -55,18 +53,10 @@ public class ImagesListComposite extends Composite {
         }
     }
 
-    interface AnchorTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
-    }
-
-    private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public ImagesListComposite(final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        allImages = new ArrayList<ImageDTO>();
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
@@ -132,7 +122,7 @@ public class ImagesListComposite extends Composite {
         TextColumn<ImageDTO> createdAtDateColumn = new TextColumn<ImageDTO>() {
             @Override
             public String getValue(ImageDTO image) {
-                return image.getCreatedAtDate().toString();
+                return DateAndTimeFormatterUtil.formatDateAndTime(image.getCreatedAtDate());
             }
         };
 
@@ -224,7 +214,6 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO newImage) {
-                allImages.add(newImage);
                 imageListDataProvider.getList().add(newImage);
                 updateTableVisisbilty();
             }
@@ -240,8 +229,6 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO updatedImage) {
-                allImages.remove(selectedImage);
-                allImages.add(updatedImage);
                 imageListDataProvider.getList().remove(selectedImage);
                 imageListDataProvider.getList().add(updatedImage);
                 updateTableVisisbilty();
@@ -251,7 +238,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void updateTableVisisbilty() {
-        if (allImages.isEmpty()) {
+        if (imageListDataProvider.getList().isEmpty()) {
             imageTable.setVisible(false);
             noImagesLabel.setVisible(true);
         } else {
@@ -262,13 +249,13 @@ public class ImagesListComposite extends Composite {
     
     public void fillImages(List<ImageDTO> images) {
         imageSelectionModel.clear();
-        allImages.clear();
-        allImages.addAll(images);
+        imageListDataProvider.getList().clear();
+        imageListDataProvider.getList().addAll(images);
         
         updateTableVisisbilty();
     }
 
     public List<ImageDTO> getAllImages() {
-        return allImages;
+        return imageListDataProvider.getList();
     }
 }
