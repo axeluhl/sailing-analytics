@@ -102,6 +102,17 @@ public class ImagesListComposite extends Composite {
         imageListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
+        TextColumn<ImageDTO> shortImageNameColumn = new TextColumn<ImageDTO>() {
+            @Override
+            public String getValue(ImageDTO image) {
+                String result = "";
+                int index = image.getSourceRef().lastIndexOf("/");
+                if(index > 0) {
+                    result =  image.getSourceRef().substring(index+1, image.getSourceRef().length());
+                }
+                return result;
+            }
+        };
         TextColumn<ImageDTO> titleColumn = new TextColumn<ImageDTO>() {
             @Override
             public String getValue(ImageDTO image) {
@@ -154,7 +165,8 @@ public class ImagesListComposite extends Composite {
             @Override
             public void update(int index, ImageDTO image, String value) {
                 if (ImageConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    removeImage(image);
+                    imageListDataProvider.getList().remove(image);
+                    updateTableVisisbilty();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditImageDialog(image);
                 }
@@ -164,6 +176,7 @@ public class ImagesListComposite extends Composite {
         titleColumn.setSortable(true);
         createdAtDateColumn.setSortable(true);
 
+        table.addColumn(shortImageNameColumn, "Short name:");
         table.addColumn(titleColumn, stringMessages.title());
         table.addColumn(createdAtDateColumn, "Created At");
         table.addColumn(sizeColumn, "Size");
@@ -201,9 +214,6 @@ public class ImagesListComposite extends Composite {
             }
         });
         return result;
-    }
-
-    private void removeImage(ImageDTO event) {
     }
 
     private void openCreateImageDialog() {
