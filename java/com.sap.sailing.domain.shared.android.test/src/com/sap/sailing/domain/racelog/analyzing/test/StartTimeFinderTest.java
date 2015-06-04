@@ -37,7 +37,7 @@ public class StartTimeFinderTest extends
     public void testNullForNone() {
         RaceLogEvent event1 = createEvent(RaceLogEvent.class, 1);
         raceLog.add(event1);
-        assertNull(analyzer.analyze());
+        assertNull(analyzer.analyze().getStartTime());
     }
 
     @Test
@@ -46,10 +46,8 @@ public class StartTimeFinderTest extends
         when(event1.getStartTime()).thenReturn(mock(TimePoint.class));
         RaceLogStartTimeEvent event2 = createEvent(RaceLogStartTimeEvent.class, 2);
         when(event2.getStartTime()).thenReturn(mock(TimePoint.class));
-
         raceLog.add(event1);
         raceLog.add(event2);
-
-        assertEquals(event2.getStartTime(), analyzer.analyze());
+        assertEquals(event2.getStartTime(), analyzer.analyze().getStartTime());
     }
 }
