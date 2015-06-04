@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
- * /** A composite showing the list of all images
+ * /** A composite showing the list of media images
  * 
  * @author Frank Mittag (C5163974)
  */
@@ -71,27 +71,24 @@ public class ImagesListComposite extends Composite {
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
 
-        HorizontalPanel eventControlsPanel = new HorizontalPanel();
-        eventControlsPanel.setSpacing(5);
-        panel.add(eventControlsPanel);
+        HorizontalPanel imagesControlsPanel = new HorizontalPanel();
+        imagesControlsPanel.setSpacing(5);
+        panel.add(imagesControlsPanel);
 
-        Button createEventBtn = new Button(stringMessages.actionAddEvent());
-        createEventBtn.addClickHandler(new ClickHandler() {
+        Button createImageBtn = new Button("Add image");
+        createImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateEventDialog();
+                openCreateImageDialog();
             }
         });
-        eventControlsPanel.add(createEventBtn);
+        imagesControlsPanel.add(createImageBtn);
 
+        imageSelectionModel = new SingleSelectionModel<ImageDTO>();
         imageListDataProvider = new ListDataProvider<ImageDTO>();
-        imageTable = createEventTable();
+        imageTable = createImagesTable();
         imageTable.ensureDebugId("ImagesCellTable");
         imageTable.setVisible(false);
-
-        @SuppressWarnings("unchecked")
-        SingleSelectionModel<ImageDTO> multiSelectionModel = (SingleSelectionModel<ImageDTO>) imageTable.getSelectionModel();
-        imageSelectionModel = multiSelectionModel;
 
         imageSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -109,7 +106,7 @@ public class ImagesListComposite extends Composite {
         initWidget(mainPanel);
     }
 
-    private CellTable<ImageDTO> createEventTable() {
+    private CellTable<ImageDTO> createImagesTable() {
         CellTable<ImageDTO> table = new CellTable<ImageDTO>(/* pageSize */10000, tableRes);
         imageListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -118,6 +115,16 @@ public class ImagesListComposite extends Composite {
             @Override
             public String getValue(ImageDTO image) {
                 return image.getTitle() != null ? image.getTitle() : "";
+            }
+        };
+        TextColumn<ImageDTO> sizeColumn = new TextColumn<ImageDTO>() {
+            @Override
+            public String getValue(ImageDTO image) {
+                String imageSize = "";
+                if (image.getWidthInPx() != null && image.getHeightInPx() != null) {
+                    imageSize = image.getWidthInPx() + " x " + image.getHeightInPx(); 
+                }
+                return imageSize;
             }
         };
 
@@ -168,11 +175,9 @@ public class ImagesListComposite extends Composite {
 
         table.addColumn(titleColumn, stringMessages.title());
         table.addColumn(createdAtDateColumn, "Created At");
-        table.addColumn(tagsColumn, "tags");
+        table.addColumn(sizeColumn, "Size");
+        table.addColumn(tagsColumn, "Tags");
         table.addColumn(imageActionColumn, stringMessages.actions());
-//        table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(),
-//                eventSelectionCheckboxColumn.getSelectionManager());
-
         table.addColumnSortHandler(getEventTableColumnSortHandler(imageListDataProvider.getList(), titleColumn, createdAtDateColumn));
         table.getColumnSortList().push(createdAtDateColumn);
 
@@ -210,7 +215,7 @@ public class ImagesListComposite extends Composite {
     private void removeImage(ImageDTO event) {
     }
 
-    private void openCreateEventDialog() {
+    private void openCreateImageDialog() {
 //        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents),
 //                existingLeaderboardGroups, stringMessages, new DialogCallback<ImageDTO>() {
 //                    @Override
@@ -258,7 +263,7 @@ public class ImagesListComposite extends Composite {
         allImages.addAll(images);
     }
 
-    public List<ImageDTO> getAllEvents() {
+    public List<ImageDTO> getAllImages() {
         return allImages;
     }
 }
