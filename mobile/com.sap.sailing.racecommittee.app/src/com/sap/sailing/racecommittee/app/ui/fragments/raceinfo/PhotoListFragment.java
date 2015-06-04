@@ -1,11 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,9 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -33,16 +25,25 @@ import com.sap.sailing.racecommittee.app.ui.adapters.finishing.FinishListPhotoAd
 import com.sap.sailing.racecommittee.app.ui.views.DividerItemDecoration;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class PhotoListFragment extends BaseFragment {
 
     private final static String TAG = PhotoListFragment.class.getName();
-    private final static int PHOTOSHOOTING = 9000;
+    private final static int PHOTO_SHOOTING = 9000;
 
     private ArrayList<Uri> mPhotos;
     private FinishListPhotoAdapter mAdapter;
     private RecyclerView mPhotoList;
     private Button mSubmit;
+    private SimpleDateFormat mDateFormat;
 
     public PhotoListFragment() {
         mPhotos = new ArrayList<>();
@@ -58,20 +59,21 @@ public class PhotoListFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.photo_list, container, false);
 
+        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
+
         ImageView button = ViewHolder.get(layout, R.id.photo_button);
         if (button != null) {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     CameraHelper cameraHelper = CameraHelper.on(getActivity());
-                    Uri photoUri = cameraHelper
-                        .getOutputMediaFileUri(CameraHelper.MEDIA_TYPE_IMAGE, cameraHelper.getSubFolder(getRace()));
+                    Uri photoUri = cameraHelper.getOutputMediaFileUri(CameraHelper.MEDIA_TYPE_IMAGE, cameraHelper.getSubFolder(getRace()));
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     PackageManager manager = getActivity().getPackageManager();
                     List<ResolveInfo> activities = manager.queryIntentActivities(intent, 0);
                     if (activities.size() > 0) {
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                        startActivityForResult(intent, PHOTOSHOOTING);
+                        startActivityForResult(intent, PHOTO_SHOOTING);
                     } else {
                         Toast.makeText(getActivity(), getString(R.string.no_camera), Toast.LENGTH_LONG).show();
                     }
@@ -118,7 +120,7 @@ public class PhotoListFragment extends BaseFragment {
         }
 
         switch (requestCode) {
-        case PHOTOSHOOTING:
+        case PHOTO_SHOOTING:
             refreshPhotoList();
             ExLog.i(getActivity(), TAG, "Returned from Photo");
             break;
@@ -134,7 +136,7 @@ public class PhotoListFragment extends BaseFragment {
         File folder = cameraHelper.getOutputMediaFolder(cameraHelper.getSubFolder(getRace()));
         File[] files = folder.listFiles();
         for (File file : files) {
-            if (file.getName().endsWith(".jpg") || file.getName().endsWith(".mp4")) {
+            if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT) || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
                 mPhotos.add(Uri.fromFile(file));
             }
         }
@@ -156,7 +158,7 @@ public class PhotoListFragment extends BaseFragment {
         File folder = cameraHelper.getOutputMediaFolder(cameraHelper.getSubFolder(getRace()));
         File[] files = folder.listFiles();
         for (File file : files) {
-            if (file.getName().endsWith(".jpg") || file.getName().endsWith(".mp4")) {
+            if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT) || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
                 retValue.add(Uri.fromFile(file));
             }
         }
@@ -170,11 +172,18 @@ public class PhotoListFragment extends BaseFragment {
     }
 
     private String getSubject() {
-        return String.format(getString(R.string.results_mail_subject), getRaceName());
+        String author = StringHelper.on(getActivity()).getAuthor(preferences.getAuthor().getName());
+        return getString(R.string.results_mail_subject, author, getRaceName());
     }
 
     private String getBody() {
-        return String.format(getString(R.string.results_mail_body), getRaceName()) + "\n\nSend from my RCApp - " + AppUtils.getBuildInfo(getActivity());
+        StringBuilder builder = new StringBuilder();
+        builder.append(getString(R.string.results_mail_body, getRaceName()));
+        builder.append(getString(R.string.results_mail_body_race_group, getRace().getRaceGroup().getName()));
+        builder.append(getString(R.string.results_mail_body_boat_class, getRace().getRaceGroup().getBoatClass().getName()));
+        builder.append(getString(R.string.results_mail_body_start, mDateFormat.format(getRaceState().getStartTime().asDate())));
+        builder.append(getString(R.string.results_mail_body_finish, mDateFormat.format(getRaceState().getFinishedTime().asDate())));
+        return builder.toString();
     }
 
     private String getRaceName() {

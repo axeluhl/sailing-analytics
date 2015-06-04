@@ -110,8 +110,12 @@
     <string name="results_capturing_view_add_photo">Foto hinzufügen</string>
     <string name="results_capturing_view_list_header">Angehängte Fotos</string>
     <string name="results_capturing_view_list_empty">Bisher keine Fotos</string>
-    <string name="results_mail_subject">[Race Committee] %s</string>
-    <string name="results_mail_body">Ergebnislisten für Rennen %s sind angehängt.</string>
+    <string name="results_mail_subject">[Race Committee - %1$s] %2$s</string>
+    <string name="results_mail_body">Ergebnislisten für Rennen \'%s\' sind angehängt.</string>
+    <string name="results_mail_body_boat_class">Bootsklasse: %s\n</string>
+    <string name="results_mail_body_race_group">Renngruppe: %s\n</string>
+    <string name="results_mail_body_start">Startzeit: %s\n</string>
+    <string name="results_mail_body_finish">Zielzeit: %s\n</string>
 
     <!-- WIND FRAGMENT -->
     <string name="wind_direction_degrees">Windrichtung (Grad)</string>
@@ -412,5 +416,6 @@
     <string name="change_cancel">Abbrechen</string>
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>
+    <string name="send_mail">Sende Email...</string>
 
 </resources>

@@ -119,8 +119,12 @@
     <string name="results_capturing_view_add_photo">Add photo</string>
     <string name="results_capturing_view_list_header">Attached photos</string>
     <string name="results_capturing_view_list_empty">No photos yet</string>
-    <string name="results_mail_subject">[Race Committee] %s</string>
-    <string name="results_mail_body">Results for race %s are attached.</string>
+    <string name="results_mail_subject">[Race Committee - %1$s] %2$s</string>
+    <string name="results_mail_body">Results for race \'%s\' are attached.\n\n</string>
+    <string name="results_mail_body_boat_class">Boat Class: %s\n</string>
+    <string name="results_mail_body_race_group">Race Group: %s\n</string>
+    <string name="results_mail_body_start">Start Time: %s\n</string>
+    <string name="results_mail_body_finish">Finish Time: %s\n</string>
 
     <!-- WIND FRAGMENT -->
     <string name="wind_direction_degrees">Wind direction from (degrees)</string>
@@ -433,5 +437,6 @@
     <string name="change_cancel">Cancel</string>
     <string name="change_message">According to the racing rules this data is not changeable in the current\nrace state. You may proceed nevertheless to correct wrong inputs.</string>
     <string name="change_title">Warning</string>
+    <string name="send_mail">Send mail...</string>
 
 </resources>

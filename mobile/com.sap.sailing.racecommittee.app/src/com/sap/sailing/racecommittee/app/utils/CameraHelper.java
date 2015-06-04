@@ -1,22 +1,25 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import android.content.Context;
+import android.net.Uri;
+import android.support.annotation.Nullable;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import android.content.Context;
-import android.net.Uri;
-import android.support.annotation.Nullable;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import java.util.Locale;
 
 public class CameraHelper {
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
+
+    public static final String MEDIA_TYPE_IMAGE_EXT = ".jpg";
+    public static final String MEDIA_TYPE_VIDEO_EXT = ".mp4";
 
     private static final String MAIN_SUB_FOLDER = "pictures";
     private static final String TAG = CameraHelper.class.getName();
@@ -55,10 +58,10 @@ public class CameraHelper {
         String sha1 = "";
         try {
             sha1 = HashHelper.SHA1(path);
-        } catch (NoSuchAlgorithmException e) {
-            ExLog.ex(mContext, TAG, e);
-        } catch (UnsupportedEncodingException e) {
-            ExLog.ex(mContext, TAG, e);
+        } catch (NoSuchAlgorithmException ex) {
+            ExLog.ex(mContext, TAG, ex);
+        } catch (UnsupportedEncodingException ex) {
+            ExLog.ex(mContext, TAG, ex);
         }
 
         return sha1;
@@ -108,12 +111,12 @@ public class CameraHelper {
         File mediaStorageDir = getOutputMediaFolder(subFolder);
 
         // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", mContext.getResources().getConfiguration().locale).format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + MEDIA_TYPE_IMAGE_EXT);
         } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + MEDIA_TYPE_VIDEO_EXT);
         } else {
             return null;
         }
