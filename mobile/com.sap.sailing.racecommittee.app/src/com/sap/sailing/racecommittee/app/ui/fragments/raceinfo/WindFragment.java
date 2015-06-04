@@ -435,6 +435,7 @@ public class WindFragment extends BaseFragment
         showElements(true);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void initialMapFragment() {
         mWindMap = WindMap.newInstance(mContext, this);
         FragmentManager manager;
