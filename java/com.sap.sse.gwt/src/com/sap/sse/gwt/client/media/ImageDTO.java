@@ -11,8 +11,9 @@ public class ImageDTO extends AbstractMediaDTO {
     protected ImageDTO() {
     }
     
-    private int widthInPx;
-    private int heightInPx;
+    /** can be null if not known */
+    private Integer widthInPx;
+    private Integer heightInPx;
 
     public ImageDTO(String imageRef, ImageSize size, Date createdAtDate) {
         super(imageRef, MimeType.image, createdAtDate);
@@ -20,17 +21,17 @@ public class ImageDTO extends AbstractMediaDTO {
         this.heightInPx = size.getHeight();
     }
 
-    public ImageDTO(String imageRef, int heightInPx, int widthInPx, Date createdAtDate) {
+    public ImageDTO(String imageRef, Integer widthInPx, Integer heightInPx, Date createdAtDate) {
         super(imageRef, MimeType.image, createdAtDate);
         this.widthInPx = widthInPx;
         this.heightInPx = heightInPx;
     }
 
-    public int getWidthInPx() {
+    public Integer getWidthInPx() {
         return widthInPx;
     }
 
-    public int getHeightInPx() {
+    public Integer getHeightInPx() {
         return heightInPx;
     }
 }

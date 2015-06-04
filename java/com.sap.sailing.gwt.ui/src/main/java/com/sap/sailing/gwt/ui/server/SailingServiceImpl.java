@@ -431,10 +431,14 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
@@ -3429,6 +3433,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for(URL url: event.getVideoURLs()) {
             eventDTO.addVideoURL(url.toString());
         }
+        for(ImageDescriptor image: event.getImages()) {
+            eventDTO.addImage(convertToImageDTO(image));
+        }
+        for(VideoDescriptor video: event.getVideos()) {
+            eventDTO.addVideo(convertToVideoDTO(video));
+        }
     }
 
     private void setImageSize(EventBase event, EventBaseDTO eventDTO, URL imageURL) {
@@ -3438,7 +3448,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
         }
     }
-    
+
+    private ImageDTO convertToImageDTO(ImageDescriptor image) {
+        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getWidthInPx(), image.getHeightInPx(), 
+                image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
+        result.setCopyright(image.getCopyright());
+        result.setTitle(image.getTitle());
+        result.setSubtitle(image.getSubtitle());
+        result.setMimeType(image.getMimeType());
+        List<String> tags = new ArrayList<String>();
+        for(String tag: image.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
+    }
+
+    private VideoDTO convertToVideoDTO(VideoDescriptor video) {
+        VideoDTO result = new VideoDTO(video.getURL().toString(), video.getMimeType(), 
+                video.getCreatedAtDate() != null ? video.getCreatedAtDate().asDate() : null);
+        result.setCopyright(video.getCopyright());
+        result.setTitle(video.getTitle());
+        result.setSubtitle(video.getSubtitle());
+        result.setThumbnailRef(video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
+        result.setLengthInSeconds(video.getLengthInSeconds());
+        List<String> tags = new ArrayList<String>();
+        for(String tag: video.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
+    }
+
     private EventDTO convertToEventDTO(Event event, boolean withStatisticalData) {
         EventDTO eventDTO = new EventDTO(event.getName());
         copyEventBaseFieldsToDTO(event, eventDTO);

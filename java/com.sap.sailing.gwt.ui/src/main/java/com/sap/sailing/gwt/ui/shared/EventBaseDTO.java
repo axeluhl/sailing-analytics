@@ -10,6 +10,8 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
@@ -27,9 +29,8 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private List<String> sponsorImageURLs = new ArrayList<>();
     private String logoImageURL;
     private String officialWebsiteURL;
-    /** placeholder for social media URL's -> attributes will be implemented later on */
-    private String facebookURL;
-    private String twitterURL;
+    private List<ImageDTO> images = new ArrayList<>();
+    private List<VideoDTO> videos = new ArrayList<>();
 
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it
@@ -146,20 +147,20 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.isOnRemoteServer = isOnRemoteServer;
     }
 
-    public String getFacebookURL() {
-        return facebookURL;
+    public void addImage(ImageDTO image) {
+        images.add(image);
     }
 
-    public void setFacebookURL(String facebookURL) {
-        this.facebookURL = facebookURL;
+    public List<ImageDTO> getImage() {
+        return images;
     }
 
-    public String getTwitterURL() {
-        return twitterURL;
+    public void addVideo(VideoDTO video) {
+        videos.add(video);
     }
 
-    public void setTwitterURL(String twitterURL) {
-        this.twitterURL = twitterURL;
+    public List<VideoDTO> getVideos() {
+        return videos;
     }
 
     public void setImageSize(String imageURL, ImageSize imageSize) {
