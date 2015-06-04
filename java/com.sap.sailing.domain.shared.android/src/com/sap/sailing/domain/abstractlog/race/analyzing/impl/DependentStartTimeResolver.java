@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 
 public class DependentStartTimeResolver {
 
@@ -20,39 +21,37 @@ public class DependentStartTimeResolver {
 
     public StartTimeFinderResult resolve(RaceLogDependentStartTimeEvent event) {
         List<SimpleRaceLogIdentifier> dependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-
-        return internal_resolve(event, dependingOnRaces);
+        return internalResolve(event, dependingOnRaces);
     }
 
-    StartTimeFinderResult internal_resolve(RaceLogDependentStartTimeEvent event,
-            List<SimpleRaceLogIdentifier> dependingOnRaces) {
-        
+    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event, Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
         SimpleRaceLogIdentifier identifier = event.getDependentOnRaceIdentifier();
         Duration startTimeDifference = event.getStartTimeDifference();
-
         RaceLog raceLog = raceLogResolver.resolve(identifier);
-
-        dependingOnRaces.add(identifier);
-
-        if (containsCycle(dependingOnRaces)) {
-            return new StartTimeFinderResult(dependingOnRaces, null);
+        List<SimpleRaceLogIdentifier> extendedDependingOnRaces = new ArrayList<>();
+        Util.addAll(dependingOnRaces, extendedDependingOnRaces);
+        extendedDependingOnRaces.add(identifier);
+        final StartTimeFinderResult result;
+        if (containsCycle(extendedDependingOnRaces)) {
+            result = new StartTimeFinderResult(extendedDependingOnRaces, null);
+        } else {
+            StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
+            StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
+            if (resultOfDependentRace.getStartTime() == null) {
+                result = resultOfDependentRace;
+            } else {
+                result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(),
+                        resultOfDependentRace.getStartTime() == null ? null : resultOfDependentRace.getStartTime()
+                                .plus(startTimeDifference));
+            }
         }
-
-        StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
-        StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(dependingOnRaces);
-
-        if (resultOfDependentRace.getStartTime() == null) {
-            return new StartTimeFinderResult(dependingOnRaces, null);
-        }
-
-        resultOfDependentRace.addToStartTime(startTimeDifference);
-        return resultOfDependentRace;
+        return result;
     }
 
-    private boolean containsCycle(List<SimpleRaceLogIdentifier> dependingOnRaces) {
-        HashSet<SimpleRaceLogIdentifier> dependingOnRacesHashSet = new HashSet<SimpleRaceLogIdentifier>(
-                dependingOnRaces);
-        return (dependingOnRacesHashSet.size() < dependingOnRaces.size());
+    private boolean containsCycle(Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
+        HashSet<SimpleRaceLogIdentifier> dependingOnRacesHashSet = new HashSet<>();
+        Util.addAll(dependingOnRaces, dependingOnRacesHashSet);
+        return (dependingOnRacesHashSet.size() < Util.size(dependingOnRaces));
     }
 
 }

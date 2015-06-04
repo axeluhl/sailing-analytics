@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -24,7 +23,7 @@ public class StartTimeFinder extends RaceLogAnalyzer<StartTimeFinderResult> {
         return analyze(new ArrayList<SimpleRaceLogIdentifier>());
     }
 
-    public StartTimeFinderResult analyze(List<SimpleRaceLogIdentifier> dependingOnRaces) {
+    public StartTimeFinderResult analyze(Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
         log.lockForRead();
         try {
             for (RaceLogEvent event : getPassEventsDescending()) {
@@ -33,11 +32,10 @@ public class StartTimeFinder extends RaceLogAnalyzer<StartTimeFinderResult> {
                     return new StartTimeFinderResult(dependingOnRaces, startTime);
                 } else if (event instanceof RaceLogDependentStartTimeEvent) {
                     DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(resolver);
-                    return dependentStartTimeResolver.internal_resolve((RaceLogDependentStartTimeEvent) event,
-                            dependingOnRaces);
+                    return dependentStartTimeResolver.internalResolve((RaceLogDependentStartTimeEvent) event, dependingOnRaces);
                 }
             }
-            return new StartTimeFinderResult(null);
+            return new StartTimeFinderResult(dependingOnRaces, null);
         } finally {
             log.unlockAfterRead();
         }
