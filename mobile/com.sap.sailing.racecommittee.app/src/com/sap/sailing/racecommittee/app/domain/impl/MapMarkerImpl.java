@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.UUID;
 
 import android.content.Context;
@@ -62,7 +63,7 @@ public class MapMarkerImpl implements MapMarker {
 
     @Override
     public Color getColor(Context context) {
-        String name = this.name.toLowerCase(context.getResources().getConfiguration().locale);
+        String name = this.name.toLowerCase(Locale.US);
         if (name.startsWith("white")) {
             return Color.WHITE;
         } else if (name.startsWith("gray")) {
@@ -99,7 +100,7 @@ public class MapMarkerImpl implements MapMarker {
 
     @Override
     public BitmapDescriptor getMarkerIcon(Context context) {
-        String name = this.name.toLowerCase(context.getResources().getConfiguration().locale);
+        String name = this.name.toLowerCase(Locale.US);
         // buoys
         if (name.startsWith("white")) {
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_white_grey);

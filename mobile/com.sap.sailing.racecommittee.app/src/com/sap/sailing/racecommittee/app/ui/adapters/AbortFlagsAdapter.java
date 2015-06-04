@@ -16,6 +16,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
@@ -35,9 +36,9 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         mListener = listener;
 
         mFlags = new ArrayList<>();
-        addFlag(flags.name().toLowerCase(), Flags.NONE);
-        addFlag(flags.name().toLowerCase(), Flags.HOTEL);
-        addFlag(flags.name().toLowerCase(), Flags.ALPHA);
+        addFlag(flags.name().toLowerCase(Locale.US), Flags.NONE);
+        addFlag(flags.name().toLowerCase(Locale.US), Flags.HOTEL);
+        addFlag(flags.name().toLowerCase(Locale.US), Flags.ALPHA);
     }
 
     private void addFlag(String primaryFlag, Flags otherFlag) {
@@ -48,7 +49,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         String secondFlag = "";
 
         if (otherFlag != Flags.NONE) {
-            secondFlag = "_" + otherFlag.name().toLowerCase();
+            secondFlag = "_" + otherFlag.name().toLowerCase(Locale.US);
         }
 
         flagNameId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag, null, mContext.getPackageName());

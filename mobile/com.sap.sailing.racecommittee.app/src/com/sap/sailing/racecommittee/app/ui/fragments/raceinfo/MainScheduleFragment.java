@@ -26,6 +26,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
@@ -125,7 +126,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             mCourseTextView.setText(courseName);
             if (mCourseImageView != null && !TextUtils.isEmpty(courseName)) {
 
-                int resId = (courseName.toLowerCase().startsWith("i")) ? R.attr.course_updown_48dp : R.attr.course_triangle_48dp;
+                int resId = (courseName.toLowerCase(Locale.US).startsWith("i")) ? R.attr.course_updown_48dp : R.attr.course_triangle_48dp;
                 Drawable drawable = BitmapHelper.getAttrDrawable(getActivity(), resId);
                 if (drawable != null) {
                     mCourseImageView.setImageDrawable(drawable);

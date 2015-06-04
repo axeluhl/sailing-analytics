@@ -16,6 +16,7 @@ import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class CourseNameAdapter extends BaseAdapter implements View.OnClickListener {
 
@@ -67,7 +68,7 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
         ImageView flag = ViewHolder.get(convertView, R.id.flag);
         if (flag != null) {
             int resId;
-            if (courseName.toLowerCase().startsWith("i")) {
+            if (courseName.toLowerCase(Locale.US).startsWith("i")) {
                 resId = R.attr.course_updown_48dp;
             } else {
                 resId = R.attr.course_triangle_48dp;
