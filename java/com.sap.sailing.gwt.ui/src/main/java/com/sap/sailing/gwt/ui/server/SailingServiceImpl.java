@@ -3450,8 +3450,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private ImageDTO convertToImageDTO(ImageDescriptor image) {
-        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getWidthInPx(), image.getHeightInPx(), 
-                image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
+        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
         result.setCopyright(image.getCopyright());
         result.setTitle(image.getTitle());
         result.setSubtitle(image.getSubtitle());

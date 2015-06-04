@@ -28,6 +28,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
@@ -216,51 +217,55 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog() {
-//        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents),
-//                existingLeaderboardGroups, stringMessages, new DialogCallback<ImageDTO>() {
-//                    @Override
-//                    public void cancel() {
-//                    }
-//
-//                    @Override
-//                    public void ok(ImageDTO newEvent) {
-//                        createNewEvent(newEvent);
-//                    }
-//                });
-//        dialog.show();
+        ImageCreateDialog dialog = new ImageCreateDialog(stringMessages, new DialogCallback<ImageDTO>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(ImageDTO newImage) {
+                allImages.add(newImage);
+                imageListDataProvider.getList().add(newImage);
+                updateTableVisisbilty();
+            }
+        });
+        dialog.show();
     }
 
-    private void openEditImageDialog(final ImageDTO selectedEvent) {
-//        List<ImageDTO> existingEvents = new ArrayList<ImageDTO>(eventListDataProvider.getList());
-//        existingEvents.remove(selectedEvent);
-//        List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
-//        Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
-//        EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),
-//                existingLeaderboardGroups, stringMessages, new DialogCallback<ImageDTO>() {
-//                    @Override
-//                    public void cancel() {
-//                    }
-//
-//                    @Override
-//                    public void ok(ImageDTO updatedEvent) {
-//                        updateEvent(selectedEvent, updatedEvent);
-//                    }
-//                });
-//        dialog.show();
+    private void openEditImageDialog(final ImageDTO selectedImage) {
+        ImageEditDialog dialog = new ImageEditDialog(selectedImage, stringMessages, new DialogCallback<ImageDTO>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(ImageDTO updatedImage) {
+                allImages.remove(selectedImage);
+                allImages.add(updatedImage);
+                imageListDataProvider.getList().remove(selectedImage);
+                imageListDataProvider.getList().add(updatedImage);
+                updateTableVisisbilty();
+            }
+        });
+        dialog.show();
     }
 
-    public void fillImages(List<ImageDTO> images) {
-        if (images.isEmpty()) {
+    private void updateTableVisisbilty() {
+        if (allImages.isEmpty()) {
             imageTable.setVisible(false);
             noImagesLabel.setVisible(true);
         } else {
             imageTable.setVisible(true);
             noImagesLabel.setVisible(false);
         }
-
+    }
+    
+    public void fillImages(List<ImageDTO> images) {
         imageSelectionModel.clear();
         allImages.clear();
         allImages.addAll(images);
+        
+        updateTableVisisbilty();
     }
 
     public List<ImageDTO> getAllImages() {

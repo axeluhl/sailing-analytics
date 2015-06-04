@@ -221,8 +221,11 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 try {
                     ImageSize imageSize = event.getImageSize(url);
                     if(imageSize != null) {
-                        // TODO: do we habe a title?
-                        photoGalleryUrls.add(new SailingImageDTO(eventRef, url.toString(), imageSize, null));
+                        SailingImageDTO sailingImageDTO = new SailingImageDTO(eventRef, url.toString(), null);
+                        if (imageSize != null) {
+                            sailingImageDTO.setSizeInPx(imageSize.getWidth(), imageSize.getHeight());
+                            photoGalleryUrls.add(sailingImageDTO);
+                        }
                     }
                 } catch (Exception e) {
                 }
@@ -434,9 +437,11 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
             }
-            SailingImageDTO entry = new SailingImageDTO(eventRef, url.toString(), imageSize, //
-                    event.getEndDate().asDate() // FIXME: using the event end date for now, we need a better solution for migration
-                    );
+            // FIXME: using the event end date for 'createdAtDate' for now, we need a better solution for migration
+            SailingImageDTO entry = new SailingImageDTO(eventRef, url.toString(), event.getEndDate().asDate());
+            if (imageSize != null) {
+                entry.setSizeInPx(imageSize.getWidth(), imageSize.getHeight());
+            }
             entry.setTitle(eventName);
             media.addPhoto(entry);
         }

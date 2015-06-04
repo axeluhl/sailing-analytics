@@ -139,4 +139,8 @@ public class URLFieldWithFileUpload extends Composite {
             removeButton.setEnabled(true);
         }
     }
+    
+    public void setFocus(boolean focused) {
+        urlTextBox.setFocus(focused);
+    }
 }
