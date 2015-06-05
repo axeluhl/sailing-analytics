@@ -2159,8 +2159,4 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result; 
     }
-    
-    private void migrateImageAndVideoURLsOfEvent(Event event) {
-        // TODO: convert imageURLs, sponsorImageURLs and videoURLs collections of event to new image and video descriptor classes
-    }
 }

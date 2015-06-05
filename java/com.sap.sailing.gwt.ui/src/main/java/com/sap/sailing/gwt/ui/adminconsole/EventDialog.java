@@ -50,6 +50,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected StringConstantsListEditorComposite leaderboardGroupList;
     protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
     protected ImagesListComposite imagesListComposite; 
+    protected VideosListComposite videosListComposite; 
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -160,6 +161,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
         
         imagesListComposite = new ImagesListComposite(stringMessages);
+        videosListComposite = new VideosListComposite(stringMessages);
     }
 
     @Override
@@ -240,6 +242,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         tabPanel.add(new ScrollPanel(videoURLList), stringMessages.videoURLs());
         tabPanel.add(new ScrollPanel(sponsorImageURLList), stringMessages.sponsorImageURLs());
         tabPanel.add(new ScrollPanel(imagesListComposite), "Images");
+        tabPanel.add(new ScrollPanel(videosListComposite), "Videos");
         return panel;
     }
 

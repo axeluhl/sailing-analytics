@@ -5,7 +5,7 @@ import java.util.Date;
 import com.sap.sse.common.media.MimeType;
 
 public class VideoDTO extends AbstractMediaDTO {
-    private int lengthInSeconds;
+    private Integer lengthInSeconds;
     private String thumbnailRef;
     
     /** for GWT */
@@ -16,11 +16,11 @@ public class VideoDTO extends AbstractMediaDTO {
         super(videoRef, mimeType, createdAtDate);
     }
 
-    public int getLengthInSeconds() {
+    public Integer getLengthInSeconds() {
         return lengthInSeconds;
     }
 
-    public void setLengthInSeconds(int lengthInSeconds) {
+    public void setLengthInSeconds(Integer lengthInSeconds) {
         this.lengthInSeconds = lengthInSeconds;
     }
 

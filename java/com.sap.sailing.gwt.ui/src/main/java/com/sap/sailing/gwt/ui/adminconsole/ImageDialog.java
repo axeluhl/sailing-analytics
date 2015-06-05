@@ -41,8 +41,12 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         }
 
         @Override
-        public String getErrorMessage(ImageDTO eventToValidate) {
+        public String getErrorMessage(ImageDTO imageToValidate) {
             String errorMessage = null;
+            
+            if(imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
+                errorMessage = "You must provide a valid URL for the image";
+            }
             return errorMessage;
         }
     }
@@ -70,7 +74,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
     @Override
     protected ImageDTO getResult() {
-        ImageDTO result = new ImageDTO(imageURLAndUploadComposite.getURL(), new Date());
+        ImageDTO result = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
         result.setCopyright(copyrightTextBox.getValue());

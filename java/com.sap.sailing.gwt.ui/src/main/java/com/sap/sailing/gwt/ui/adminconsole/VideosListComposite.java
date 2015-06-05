@@ -29,20 +29,20 @@ import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 /**
- * /** A composite showing the list of media images
+ * /** A composite showing the list of media videos
  * 
  * @author Frank Mittag (C5163974)
  */
-public class ImagesListComposite extends Composite {
+public class VideosListComposite extends Composite {
     private final StringMessages stringMessages;
 
-    private CellTable<ImageDTO> imageTable;
-    private SingleSelectionModel<ImageDTO> imageSelectionModel;
-    private ListDataProvider<ImageDTO> imageListDataProvider;
-    private final Label noImagesLabel;
+    private CellTable<VideoDTO> videoTable;
+    private SingleSelectionModel<VideoDTO> videoSelectionModel;
+    private ListDataProvider<VideoDTO> videoListDataProvider;
+    private final Label noVideosLabel;
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -63,94 +63,84 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(final StringMessages stringMessages) {
+    public VideosListComposite(final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
 
-        HorizontalPanel imagesControlsPanel = new HorizontalPanel();
-        imagesControlsPanel.setSpacing(5);
-        panel.add(imagesControlsPanel);
+        HorizontalPanel videosControlsPanel = new HorizontalPanel();
+        videosControlsPanel.setSpacing(5);
+        panel.add(videosControlsPanel);
 
-        Button createImageBtn = new Button("Add image");
-        createImageBtn.addClickHandler(new ClickHandler() {
+        Button createVideoBtn = new Button("Add video");
+        createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog();
+                openCreateVideoDialog();
             }
         });
-        imagesControlsPanel.add(createImageBtn);
+        videosControlsPanel.add(createVideoBtn);
 
-        imageSelectionModel = new SingleSelectionModel<ImageDTO>();
-        imageListDataProvider = new ListDataProvider<ImageDTO>();
-        imageTable = createImagesTable();
-        imageTable.ensureDebugId("ImagesCellTable");
-        imageTable.setVisible(false);
+        videoSelectionModel = new SingleSelectionModel<VideoDTO>();
+        videoListDataProvider = new ListDataProvider<VideoDTO>();
+        videoTable = createImagesTable();
+        videoTable.ensureDebugId("ImagesCellTable");
+        videoTable.setVisible(false);
 
-        imageSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        videoSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
             }
         });
 
-        panel.add(imageTable);
+        panel.add(videoTable);
 
-        noImagesLabel = new Label("No images defined yet.");
-        noImagesLabel.ensureDebugId("NoImagesLabel");
-        noImagesLabel.setWordWrap(false);
-        panel.add(noImagesLabel);
+        noVideosLabel = new Label("No videos defined yet.");
+        noVideosLabel.ensureDebugId("NoVideosLabel");
+        noVideosLabel.setWordWrap(false);
+        panel.add(noVideosLabel);
 
         initWidget(mainPanel);
     }
 
-    private CellTable<ImageDTO> createImagesTable() {
-        CellTable<ImageDTO> table = new CellTable<ImageDTO>(/* pageSize */10000, tableRes);
-        imageListDataProvider.addDataDisplay(table);
+    private CellTable<VideoDTO> createImagesTable() {
+        CellTable<VideoDTO> table = new CellTable<VideoDTO>(/* pageSize */10000, tableRes);
+        videoListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
         AnchorCell anchorCell = new AnchorCell();
-        Column<ImageDTO, SafeHtml> shortImageNameColumn = new Column<ImageDTO, SafeHtml>(anchorCell) {
+        Column<VideoDTO, SafeHtml> shortVideoNameColumn = new Column<VideoDTO, SafeHtml>(anchorCell) {
             @Override
-            public SafeHtml getValue(ImageDTO image) {
+            public SafeHtml getValue(VideoDTO video) {
                 String linkName = "";
-                int index = image.getSourceRef().lastIndexOf("/");
+                int index = video.getSourceRef().lastIndexOf("/");
                 if(index > 0) {
-                    linkName =  image.getSourceRef().substring(index+1, image.getSourceRef().length());
+                    linkName =  video.getSourceRef().substring(index+1, video.getSourceRef().length());
                 }
-                return ANCHORTEMPLATE.cell(image.getSourceRef(), linkName);
+                return ANCHORTEMPLATE.cell(video.getSourceRef(), linkName);
             }
         };
 
-        TextColumn<ImageDTO> titleColumn = new TextColumn<ImageDTO>() {
+        TextColumn<VideoDTO> titleColumn = new TextColumn<VideoDTO>() {
             @Override
-            public String getValue(ImageDTO image) {
+            public String getValue(VideoDTO image) {
                 return image.getTitle() != null ? image.getTitle() : "";
             }
         };
-        TextColumn<ImageDTO> sizeColumn = new TextColumn<ImageDTO>() {
-            @Override
-            public String getValue(ImageDTO image) {
-                String imageSize = "";
-                if (image.getWidthInPx() != null && image.getHeightInPx() != null) {
-                    imageSize = image.getWidthInPx() + " x " + image.getHeightInPx(); 
-                }
-                return imageSize;
-            }
-        };
 
-        TextColumn<ImageDTO> createdAtDateColumn = new TextColumn<ImageDTO>() {
+        TextColumn<VideoDTO> createdAtDateColumn = new TextColumn<VideoDTO>() {
             @Override
-            public String getValue(ImageDTO image) {
+            public String getValue(VideoDTO image) {
                 return DateAndTimeFormatterUtil.formatDateAndTime(image.getCreatedAtDate());
             }
         };
 
         SafeHtmlCell tagsCell = new SafeHtmlCell();
-        Column<ImageDTO, SafeHtml> tagsColumn = new Column<ImageDTO, SafeHtml>(tagsCell) {
+        Column<VideoDTO, SafeHtml> tagsColumn = new Column<VideoDTO, SafeHtml>(tagsCell) {
             @Override
-            public SafeHtml getValue(ImageDTO image) {
+            public SafeHtml getValue(VideoDTO image) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 int tagsCount = image.getTags().size();
                 int i = 1;
@@ -169,16 +159,16 @@ public class ImagesListComposite extends Composite {
             }
         };
 
-        ImagesBarColumn<ImageDTO, ImageConfigImagesBarCell> imageActionColumn = new ImagesBarColumn<ImageDTO, ImageConfigImagesBarCell>(
-                new ImageConfigImagesBarCell(stringMessages));
-        imageActionColumn.setFieldUpdater(new FieldUpdater<ImageDTO, String>() {
+        ImagesBarColumn<VideoDTO, VideoConfigImagesBarCell> videoActionColumn = new ImagesBarColumn<VideoDTO, VideoConfigImagesBarCell>(
+                new VideoConfigImagesBarCell(stringMessages));
+        videoActionColumn.setFieldUpdater(new FieldUpdater<VideoDTO, String>() {
             @Override
-            public void update(int index, ImageDTO image, String value) {
+            public void update(int index, VideoDTO image, String value) {
                 if (ImageConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    imageListDataProvider.getList().remove(image);
+                    videoListDataProvider.getList().remove(image);
                     updateTableVisisbilty();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditImageDialog(image);
+                    openEditVideoDialog(image);
                 }
             }
         });
@@ -186,30 +176,29 @@ public class ImagesListComposite extends Composite {
         titleColumn.setSortable(true);
         createdAtDateColumn.setSortable(true);
 
-        table.addColumn(shortImageNameColumn, "Short name:");
+        table.addColumn(shortVideoNameColumn, "Short name");
         table.addColumn(titleColumn, stringMessages.title());
         table.addColumn(createdAtDateColumn, "Created At");
-        table.addColumn(sizeColumn, "Size");
         table.addColumn(tagsColumn, "Tags");
-        table.addColumn(imageActionColumn, stringMessages.actions());
-        table.addColumnSortHandler(getImageTableColumnSortHandler(imageListDataProvider.getList(), titleColumn, createdAtDateColumn));
+        table.addColumn(videoActionColumn, stringMessages.actions());
+        table.addColumnSortHandler(getVideoTableColumnSortHandler(videoListDataProvider.getList(), titleColumn, createdAtDateColumn));
         table.getColumnSortList().push(createdAtDateColumn);
 
         return table;
     }
 
-    private ListHandler<ImageDTO> getImageTableColumnSortHandler(List<ImageDTO> imageRecords,
-            TextColumn<ImageDTO> titleColumn, TextColumn<ImageDTO> createdAtDateColumn) {
-        ListHandler<ImageDTO> result = new ListHandler<ImageDTO>(imageRecords);
-        result.setComparator(titleColumn, new Comparator<ImageDTO>() {
+    private ListHandler<VideoDTO> getVideoTableColumnSortHandler(List<VideoDTO> videoRecords,
+            TextColumn<VideoDTO> titleColumn, TextColumn<VideoDTO> createdAtDateColumn) {
+        ListHandler<VideoDTO> result = new ListHandler<VideoDTO>(videoRecords);
+        result.setComparator(titleColumn, new Comparator<VideoDTO>() {
             @Override
-            public int compare(ImageDTO i1, ImageDTO i2) {
+            public int compare(VideoDTO i1, VideoDTO i2) {
                 return new NaturalComparator().compare(i1.getTitle(), i2.getTitle());
             }
         });
-        result.setComparator(createdAtDateColumn, new Comparator<ImageDTO>() {
+        result.setComparator(createdAtDateColumn, new Comparator<VideoDTO>() {
             @Override
-            public int compare(ImageDTO e1, ImageDTO e2) {
+            public int compare(VideoDTO e1, VideoDTO e2) {
                 int result;
                 if (e1.getCreatedAtDate() != null && e2.getCreatedAtDate() != null) {
                     result = e2.getCreatedAtDate().compareTo(e1.getCreatedAtDate());
@@ -226,31 +215,31 @@ public class ImagesListComposite extends Composite {
         return result;
     }
 
-    private void openCreateImageDialog() {
-        ImageCreateDialog dialog = new ImageCreateDialog(stringMessages, new DialogCallback<ImageDTO>() {
+    private void openCreateVideoDialog() {
+        VideoCreateDialog dialog = new VideoCreateDialog(stringMessages, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
             }
 
             @Override
-            public void ok(ImageDTO newImage) {
-                imageListDataProvider.getList().add(newImage);
+            public void ok(VideoDTO newVideo) {
+                videoListDataProvider.getList().add(newVideo);
                 updateTableVisisbilty();
             }
         });
         dialog.show();
     }
 
-    private void openEditImageDialog(final ImageDTO selectedImage) {
-        ImageEditDialog dialog = new ImageEditDialog(selectedImage, stringMessages, new DialogCallback<ImageDTO>() {
+    private void openEditVideoDialog(final VideoDTO selectedVideo) {
+        VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
             }
 
             @Override
-            public void ok(ImageDTO updatedImage) {
-                imageListDataProvider.getList().remove(selectedImage);
-                imageListDataProvider.getList().add(updatedImage);
+            public void ok(VideoDTO updatedImage) {
+                videoListDataProvider.getList().remove(selectedVideo);
+                videoListDataProvider.getList().add(updatedImage);
                 updateTableVisisbilty();
             }
         });
@@ -258,24 +247,24 @@ public class ImagesListComposite extends Composite {
     }
 
     private void updateTableVisisbilty() {
-        if (imageListDataProvider.getList().isEmpty()) {
-            imageTable.setVisible(false);
-            noImagesLabel.setVisible(true);
+        if (videoListDataProvider.getList().isEmpty()) {
+            videoTable.setVisible(false);
+            noVideosLabel.setVisible(true);
         } else {
-            imageTable.setVisible(true);
-            noImagesLabel.setVisible(false);
+            videoTable.setVisible(true);
+            noVideosLabel.setVisible(false);
         }
     }
     
-    public void fillImages(List<ImageDTO> images) {
-        imageSelectionModel.clear();
-        imageListDataProvider.getList().clear();
-        imageListDataProvider.getList().addAll(images);
+    public void fillVideos(List<VideoDTO> videos) {
+        videoSelectionModel.clear();
+        videoListDataProvider.getList().clear();
+        videoListDataProvider.getList().addAll(videos);
         
         updateTableVisisbilty();
     }
 
-    public List<ImageDTO> getAllImages() {
-        return imageListDataProvider.getList();
+    public List<VideoDTO> getAllVideos() {
+        return videoListDataProvider.getList();
     }
 }
