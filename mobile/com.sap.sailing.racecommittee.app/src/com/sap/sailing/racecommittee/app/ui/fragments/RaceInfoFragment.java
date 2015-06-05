@@ -42,6 +42,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         this.infoFragment = null; // will be set later by switchToInfoFragment()
     }
 
+    //TODO: Why is this needed if only used without arguments and even never called?
     public static RaceInfoFragment newInstance() {
         RaceInfoFragment fragment = new RaceInfoFragment();
         return fragment;
@@ -60,6 +61,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
         TextView fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         TextView raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
+
         courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
 
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet().getName()));
@@ -75,6 +77,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
         // Initial fragment selection...
 
+        //TODO: why at all is the fragment managing other fragments. Shouldn't this be done by the containing activity?
         switchToInfoFragment();
         updateCourseDesignLabel();
         updateWindLabel();
@@ -88,6 +91,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     @Override
     public void onStop() {
+        //TODO: If the listener is added on resume it maybe should be removed onPause?!
         getRace().getState().removeChangedListener(stateChangedListener);
         super.onStop();
     }
@@ -124,7 +128,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                     public void onClick(DialogInterface dialog, int id) {
                         ExLog.i(getActivity(), LogEvent.RACE_RESET_YES, getRace().getId().toString());
                         ExLog.w(getActivity(), TAG, String.format("Race %s is selected for reset.", getRace().getId()));
-
+                        //FIXME: Isn't this be done on the race setup properly? Maybe we set the advance pass twice?
                         getRace().getState().setAdvancePass(MillisecondsTimePoint.now());
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
