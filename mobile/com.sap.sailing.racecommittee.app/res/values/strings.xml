@@ -444,5 +444,8 @@
     <string name="send_mail">Send mail...</string>
     <string name="data_reload_title">Data has changed externally</string>
     <string name="data_reload_message">Data have to be reloaded. Possible data loss is possible.</string>
+    <string name="error_finished_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
+    <string name="error_finishing_time">The selected time is before the race start.</string>
+    <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
 
 </resources>

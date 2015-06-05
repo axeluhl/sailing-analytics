@@ -421,6 +421,11 @@
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>
     <string name="send_mail">Sende Email...</string>
+
     <string name="data_reload_title">Daten wurden extern verändert</string>
     <string name="data_reload_message">Daten müssen neu geladen werden. Eventueller Datenverlust ist möglich.</string>
+    <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
+    <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
+    <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
+
 </resources>
