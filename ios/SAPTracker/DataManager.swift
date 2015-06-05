@@ -38,18 +38,21 @@ public class DataManager: NSObject {
     
     // MARK: - notification callbacks
     
-    /* New location detected, store to database. */
+    /* New location detected, store to database if location is valid. */
     func newLocation(notification: NSNotification) {
         if notification == NSNull() {
             return
         }
-        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as! GPSFix
-        gpsFix.initWithDictionary(notification.userInfo!)
-        if selectedCheckIn == nil {
-            abort();
+        var dict = notification.userInfo!;
+        if dict["isValid"] as! Bool {
+            let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as! GPSFix
+            gpsFix.initWithDictionary(dict)
+            if selectedCheckIn == nil {
+                abort();
+            }
+            gpsFix.checkIn = selectedCheckIn!
+            saveContext()
         }
-        gpsFix.checkIn = selectedCheckIn!
-        saveContext()
     }
     
     /* Tracking stopped, save data to disk. */

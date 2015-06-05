@@ -83,6 +83,23 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             "speed": location.speed,
             "course": location.course,
             "horizontalAccuracy": location.horizontalAccuracy,
+            "isValid": isLocationValid(location)
         ]
     }
+    
+    static let REQ_ACCURACY : CLLocationAccuracy = 10
+    static let REQ_TIME : NSTimeInterval = 10
+    class func isLocationValid(location: CLLocation) -> Bool {
+        let accuracy = location.horizontalAccuracy
+        let time = location.timestamp
+        let elapsed = time.timeIntervalSinceDate(NSDate())
+        if elapsed > REQ_TIME {
+            return false
+        }
+        if accuracy < 0 || accuracy > REQ_ACCURACY {
+            return false
+        }
+        return true;
+    }
+    
 }
