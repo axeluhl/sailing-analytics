@@ -56,7 +56,7 @@ public class RaceFinishingFragment extends BaseFragment {
             TextView first_vessel = ViewHolder.get(getView(), R.id.first_vessel);
             if (first_vessel != null && getRaceState() != null && getRaceState().getFinishingTime() != null) {
                 String vessel_time = getString(R.string.finishing_started);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
                 vessel_time = vessel_time.replace("#TIME#", dateFormat.format(getRaceState().getFinishingTime().asDate()));
                 first_vessel.setText(vessel_time);
             }
