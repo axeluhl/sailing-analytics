@@ -73,6 +73,8 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
@@ -120,8 +122,9 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
         pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
                 "Kiel", true, UUID.randomUUID(), Collections.<URL>emptySet(),
-                Collections.<URL>emptySet(),
-                /* sponsorImageURLs */ Collections.<URL>emptySet(), /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
+                Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -156,6 +159,7 @@ public class SearchServiceTest {
         aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
                 "Flensburg", true, UUID.randomUUID(), Collections.<URL>emptySet(),
                 Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
                 /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());

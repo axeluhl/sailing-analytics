@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
     protected StringMessages stringMessages;
@@ -193,6 +194,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         for (String sponsorImageURL : sponsorImageURLList.getValue()) {
             result.addSponsorImageURL(sponsorImageURL);
+        }
+        for(ImageDTO image: imagesListComposite.getAllImages()) {
+            result.addImage(image);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
         return result;

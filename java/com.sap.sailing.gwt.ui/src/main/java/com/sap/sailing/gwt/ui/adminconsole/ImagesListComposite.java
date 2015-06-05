@@ -9,6 +9,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -52,6 +53,13 @@ public class ImagesListComposite extends Composite {
             sb.append(safeHtml);
         }
     }
+
+    interface AnchorTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
+        SafeHtml cell(String url, String displayName);
+    }
+
+    private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -102,17 +110,19 @@ public class ImagesListComposite extends Composite {
         imageListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
-        TextColumn<ImageDTO> shortImageNameColumn = new TextColumn<ImageDTO>() {
+        AnchorCell anchorCell = new AnchorCell();
+        Column<ImageDTO, SafeHtml> shortImageNameColumn = new Column<ImageDTO, SafeHtml>(anchorCell) {
             @Override
-            public String getValue(ImageDTO image) {
-                String result = "";
+            public SafeHtml getValue(ImageDTO image) {
+                String linkName = "";
                 int index = image.getSourceRef().lastIndexOf("/");
                 if(index > 0) {
-                    result =  image.getSourceRef().substring(index+1, image.getSourceRef().length());
+                    linkName =  image.getSourceRef().substring(index+1, image.getSourceRef().length());
                 }
-                return result;
+                return ANCHORTEMPLATE.cell(image.getSourceRef(), linkName);
             }
         };
+
         TextColumn<ImageDTO> titleColumn = new TextColumn<ImageDTO>() {
             @Override
             public String getValue(ImageDTO image) {

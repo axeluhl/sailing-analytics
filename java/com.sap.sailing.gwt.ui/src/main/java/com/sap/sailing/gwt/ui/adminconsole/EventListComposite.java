@@ -509,6 +509,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
                 updatedEvent.getOfficialWebsiteURL(), updatedEvent.getLogoImageURL(),
                 updatedEvent.getImageURLs(), updatedEvent.getVideoURLs(), updatedEvent.getSponsorImageURLs(),
+                updatedEvent.getImages(), updatedEvent.getVideos(),
                 new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
@@ -580,8 +581,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
                 newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
-                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
+                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getImages(), newEvent.getVideos(), 
+                newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());

@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public class UpdateEvent extends AbstractEventOperation<Void> {
     private static final long serialVersionUID = -8271559266421161532L;
@@ -21,10 +23,13 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final Iterable<URL> imageURLs;
     private final Iterable<URL> videoURLs;
     private final Iterable<URL> sponsorImageURLs;
+    private final Iterable<ImageDescriptor> images;
+    private final Iterable<VideoDescriptor> videos;
 
     public UpdateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL logoImageURL,
-            URL officialWebsiteURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
+            URL officialWebsiteURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs,
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -38,6 +43,8 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
         this.imageURLs = imageURLs;
         this.videoURLs = videoURLs;
         this.sponsorImageURLs = sponsorImageURLs;
+        this.images = images;
+        this.videos = videos;
     }
 
     @Override
@@ -55,7 +62,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.updateEvent(getId(), eventName, eventDescription, startDate, endDate, venueName, isPublic,
-                leaderboardGroupIds, officialWebsiteURL, logoImageURL, imageURLs, videoURLs, sponsorImageURLs);
+                leaderboardGroupIds, officialWebsiteURL, logoImageURL, imageURLs, videoURLs, sponsorImageURLs, images, videos);
         return null;
     }
 }

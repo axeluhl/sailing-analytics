@@ -7,6 +7,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 
 /**
  * Creates an {@link Event} in the server, with a new venue and an empty course area list.
@@ -26,11 +28,14 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final Iterable<URL> videoURLs;
     private final Iterable<URL> imageURLs;
     private final Iterable<URL> sponsorImageURLs;
+    private final Iterable<ImageDescriptor> images;
+    private final Iterable<VideoDescriptor> videos;
     private final URL logoImageURL;
     private final URL officialWebsiteURL;
     
     public CreateEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs,
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, URL logoImageURL, URL officialWebsiteURL) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -41,6 +46,8 @@ public class CreateEvent extends AbstractEventOperation<Event> {
         this.imageURLs = imageURLs;
         this.videoURLs = videoURLs;
         this.sponsorImageURLs = sponsorImageURLs;
+        this.images = images;
+        this.videos = videos;
         this.logoImageURL = logoImageURL;
         this.officialWebsiteURL = officialWebsiteURL;
     }
@@ -64,7 +71,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     @Override
     public Event internalApplyTo(RacingEventService toState) {
         return toState.createEventWithoutReplication(getEventName(), eventDescription, startDate, endDate, venue, isPublic,
-                getId(), imageURLs, videoURLs, sponsorImageURLs, logoImageURL, officialWebsiteURL);
+                getId(), imageURLs, videoURLs, sponsorImageURLs, images, videos, logoImageURL, officialWebsiteURL);
     }
 
 }

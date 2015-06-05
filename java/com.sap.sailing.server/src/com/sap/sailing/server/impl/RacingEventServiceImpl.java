@@ -208,6 +208,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
@@ -2573,11 +2575,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
                 id, /* imageURLs */Collections.<URL> emptyList(),
-                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(), /* logoImageURL */
-                null, /* officialWebsiteURL */null);
+                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(),
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                /* logoImageURL */ null, /* officialWebsiteURL */null);
         replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, /* imageURLs */
         id, Collections.<URL> emptyList(),
         /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(),
+        /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
         /* logoimageURL */null, /* officialWebsiteURLAsString */null));
         return result;
     }
@@ -2590,7 +2594,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
             TimePoint endDate, String venue, boolean isPublic, UUID id, Iterable<URL> imageURLs,
-            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
+            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            URL logoImageURL, URL officialWebsiteURL) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
@@ -2599,6 +2604,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         result.setSponsorImageURLs(sponsorImageURLs);
         result.setLogoImageURL(logoImageURL);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setImages(images);
+        result.setVideos(videos);
         return result;
     }
 
@@ -2614,7 +2621,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
-            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
+            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs,
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2641,6 +2649,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         event.setImageURLs(imageURLs);
         event.setVideoURLs(videoURLs);
         event.setSponsorImageURLs(sponsorImageURLs);
+        event.setImages(images);
+        event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         // to keep changes minimial
         mongoObjectFactory.storeEvent(event);

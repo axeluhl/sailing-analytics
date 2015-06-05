@@ -127,7 +127,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
@@ -1331,7 +1333,9 @@ public class MasterDataImportTest {
         Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
-                videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
+                videoURLs, sponsorImageURLs, 
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
         Regatta regatta = sourceService.createRegatta(
@@ -1398,7 +1402,9 @@ public class MasterDataImportTest {
         Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
-                videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
+                videoURLs, sponsorImageURLs, 
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
         List<String> raceColumnNames = new ArrayList<String>();

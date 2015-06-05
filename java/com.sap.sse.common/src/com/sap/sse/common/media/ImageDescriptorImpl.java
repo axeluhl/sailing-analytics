@@ -41,7 +41,7 @@ public class ImageDescriptorImpl extends AbstractMediaDescriptor implements Imag
     }
 
     @Override
-    public void setSize(int widthInPx, int heightInPx) {
+    public void setSize(Integer widthInPx, Integer heightInPx) {
         this.widthInPx = widthInPx;
         this.heightInPx = heightInPx;
     }
