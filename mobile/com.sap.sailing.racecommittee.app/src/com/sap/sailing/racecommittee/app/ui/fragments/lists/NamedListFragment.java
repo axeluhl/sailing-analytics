@@ -60,9 +60,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
             }
         }
-        this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        this.setListAdapter(listAdapter);
-        getListView().setDivider(null);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        setListAdapter(listAdapter);
 
         showProgressBar(true);
         loadItems();

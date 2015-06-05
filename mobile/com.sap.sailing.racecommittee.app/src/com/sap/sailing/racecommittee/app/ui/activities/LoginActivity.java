@@ -131,9 +131,11 @@ public class LoginActivity extends BaseActivity
         if (sign_in != null) {
             sign_in.setEnabled(false);
         }
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
-        transaction.commitAllowingStateLoss();
+        if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
+            transaction.commitAllowingStateLoss();
+        }
         ExLog.i(this, "LoginActivity", "PositionFragment created.");
     }
 

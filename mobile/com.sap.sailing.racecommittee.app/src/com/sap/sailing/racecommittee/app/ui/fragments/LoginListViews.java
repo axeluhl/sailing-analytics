@@ -8,16 +8,11 @@ import android.content.IntentFilter;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.Display;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.*;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
@@ -54,26 +49,23 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         RelativeLayout position_header = (RelativeLayout) view.findViewById(R.id.position_header);
 
         // create the toggle container instances
-        this.event_container = new EventToggleContainer(
-                (FrameLayout) view.findViewById(R.id.event_fragment),
-                event_header,
-                (TextView) view.findViewById(R.id.selected_event)
-        );
-        this.area_container = new AreaToggleContainer(
-                (FrameLayout) view.findViewById(R.id.area_fragment),
-                area_header,
-                (TextView) view.findViewById(R.id.selected_area)
-        );
-        this.position_container = new PositionToggleContainer(
-                (FrameLayout) view.findViewById(R.id.position_fragment),
-                position_header,
-                (TextView) view.findViewById(R.id.selected_position)
-        );
+        this.event_container = new EventToggleContainer((FrameLayout) view.findViewById(R.id.event_fragment), event_header, (TextView) view
+            .findViewById(R.id.selected_event));
+        this.area_container = new AreaToggleContainer((FrameLayout) view.findViewById(R.id.area_fragment), area_header, (TextView) view
+            .findViewById(R.id.selected_area));
+        this.position_container = new PositionToggleContainer((FrameLayout) view
+            .findViewById(R.id.position_fragment), position_header, (TextView) view.findViewById(R.id.selected_position));
 
         // add listeners to the click areas
-        if (event_header != null) event_header.setOnClickListener(this);
-        if (area_header != null) area_header.setOnClickListener(this);
-        if (position_header != null) position_header.setOnClickListener(this);
+        if (event_header != null) {
+            event_header.setOnClickListener(this);
+        }
+        if (area_header != null) {
+            area_header.setOnClickListener(this);
+        }
+        if (position_header != null) {
+            position_header.setOnClickListener(this);
+        }
 
         sign_up = (Button) view.findViewById(R.id.login_submit);
         if (sign_up != null) {
@@ -135,7 +127,6 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         showButton();
     }
 
-
     public void closeAll() {
         event_container.close();
         area_container.close();
@@ -145,128 +136,127 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
     private void showButton() {
         sign_up.setVisibility(View.GONE);
-        if (event_container.isClosed() && area_container.isClosed() && position_container.isClosed()){
+        if (event_container.isClosed() && area_container.isClosed() && position_container.isClosed()) {
             sign_up.setVisibility(View.VISIBLE);
         }
     }
 
-        private abstract class ToggleContainer {
-            private FrameLayout frame;
-            private TextView text;
-            private RelativeLayout header;
+    private abstract class ToggleContainer {
+        private FrameLayout frame;
+        private TextView text;
+        private RelativeLayout header;
 
-            public ToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-                this.frame = frame;
-                this.text = text;
-                this.header = header;
-            }
-
-            public void toggle(){
-                final int[] pos = new int[2];
-
-                // reset the header text
-                if (text != null) {
-                    text.setText(null);
-                }
-
-                if (frame != null && frame.getLayoutParams() != null) {
-                    // open the frame
-                    if (frame.getLayoutParams().height == 0) {
-                        frame.getLocationOnScreen(pos);
-                        frame.getLayoutParams().height = getScreenHeight() - pos[1];
-                    } else {
-                        close();
-                    }
-                    frame.requestLayout();
-                }
-            }
-
-            public void close(){
-                if (frame != null && frame.getLayoutParams() != null) {
-                    frame.getLayoutParams().height = 0;
-                    frame.requestLayout();
-                    setHeaderText();
-                }
-            }
-
-            public void resetHeaderText(){
-                if (text != null) text.setText(null);
-            }
-
-            public boolean isClosed(){
-                if (frame != null && frame.getLayoutParams() != null && frame.getLayoutParams().height == 0) {
-                    return true;
-                }else {
-                    return false;
-                }
-            }
-
-            public RelativeLayout getHeader(){
-                return this.header;
-            }
-
-            private int getScreenHeight() {
-                WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-                Display display = wm.getDefaultDisplay();
-                Point point = new Point();
-                display.getSize(point);
-                return point.y;
-            }
-
-            public void setHeaderText(){}
-
+        public ToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+            this.frame = frame;
+            this.text = text;
+            this.header = header;
         }
 
-        private class EventToggleContainer extends ToggleContainer {
-            public EventToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-                super(frame, header, text);
+        public void toggle() {
+            final int[] pos = new int[2];
+
+            // reset the header text
+            if (text != null) {
+                text.setText(null);
             }
 
-            public void setHeaderText(){
-                super.text.setText(activity.getEventName());
+            if (frame != null && frame.getLayoutParams() != null) {
+                // open the frame
+                if (frame.getLayoutParams().height == 0) {
+                    frame.getLocationOnScreen(pos);
+                    frame.getLayoutParams().height = getScreenHeight() - pos[1];
+                } else {
+                    close();
+                }
+                frame.requestLayout();
             }
         }
 
-        private class AreaToggleContainer extends ToggleContainer {
-            public AreaToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-                super(frame, header, text);
-            }
-            public void setHeaderText(){
-                super.text.setText(activity.getCourseName());
-            }
-        }
-
-        private class PositionToggleContainer extends ToggleContainer {
-            public PositionToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-                super(frame, header, text);
-            }
-            public void setHeaderText(){
-                super.text.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
+        public void close() {
+            if (frame != null && frame.getLayoutParams() != null) {
+                frame.getLayoutParams().height = 0;
+                frame.requestLayout();
+                setHeaderText();
             }
         }
 
-        private class IntentListener extends BroadcastReceiver {
+        public void resetHeaderText() {
+            if (text != null) {
+                text.setText(null);
+            }
+        }
 
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                switch (action) {
-                case AppConstants.INTENT_ACTION_TOGGLE:
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
-                        onClick(event_container.getHeader());
-                    }
-                    if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
-                        onClick(area_container.getHeader());
-                    }
-                    if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
-                        onClick(position_container.getHeader());
-                    }
-                    break;
+        public boolean isClosed() {
+            return (frame != null && frame.getLayoutParams() != null && frame.getLayoutParams().height == 0);
+        }
 
-                default:
-                    break;
+        public RelativeLayout getHeader() {
+            return this.header;
+        }
+
+        private int getScreenHeight() {
+            WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+            Display display = wm.getDefaultDisplay();
+            Point point = new Point();
+            display.getSize(point);
+            return point.y;
+        }
+
+        public abstract void setHeaderText();
+    }
+
+    private class EventToggleContainer extends ToggleContainer {
+        public EventToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+            super(frame, header, text);
+        }
+
+        public void setHeaderText() {
+            super.text.setText(activity.getEventName());
+        }
+    }
+
+    private class AreaToggleContainer extends ToggleContainer {
+        public AreaToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+            super(frame, header, text);
+        }
+
+        public void setHeaderText() {
+            super.text.setText(activity.getCourseName());
+        }
+    }
+
+    private class PositionToggleContainer extends ToggleContainer {
+        public PositionToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
+            super(frame, header, text);
+        }
+
+        public void setHeaderText() {
+            super.text.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
+        }
+    }
+
+    private class IntentListener extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action) {
+            case AppConstants.INTENT_ACTION_TOGGLE:
+                String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
+                    onClick(event_container.getHeader());
                 }
+                if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
+                    onClick(area_container.getHeader());
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
+                    onClick(position_container.getHeader());
+                }
+                break;
+
+            default:
+                break;
             }
+        }
     }
 }

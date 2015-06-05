@@ -30,31 +30,26 @@ public class PositionListFragment extends LoggableListFragment {
     }
 
     @Override
-    public void onResume() {
-        final ArrayList<String> values = new ArrayList<>();
-        values.add(getString(R.string.login_type_officer_on_start_vessel));
-        values.add(getString(R.string.login_type_officer_on_finish_vessel));
-        values.add(getString(R.string.login_type_shore_control));
-        values.add(getString(R.string.login_type_viewer));
-
-        this.preferences = AppPreferences.on(getActivity().getApplicationContext());
-
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getBaseContext(), R.layout.login_list_item, R.id.list_item, values);
-        setListAdapter(adapter);
-        getListView().setDivider(null);
-
-        host = (PositionSelectedListenerHost) getActivity();
-
-        super.onResume();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
         if (view != null) {
             parent.addView(view, 1);
         }
+
+        final ArrayList<String> values = new ArrayList<>();
+        values.add(getString(R.string.login_type_officer_on_start_vessel));
+        values.add(getString(R.string.login_type_officer_on_finish_vessel));
+        values.add(getString(R.string.login_type_shore_control));
+        values.add(getString(R.string.login_type_viewer));
+
+        preferences = AppPreferences.on(getActivity());
+
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getBaseContext(), R.layout.login_list_item, R.id.list_item, values);
+        setListAdapter(adapter);
+
+        host = (PositionSelectedListenerHost) getActivity();
+
         return parent;
     }
 
@@ -98,5 +93,4 @@ public class PositionListFragment extends LoggableListFragment {
     public LogEventAuthorImpl getAuthor() {
         return author;
     }
-
 }
