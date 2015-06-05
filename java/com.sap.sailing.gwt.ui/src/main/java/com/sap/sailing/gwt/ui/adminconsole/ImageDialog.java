@@ -57,19 +57,19 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         this.stringMessages = stringMessages;
         this.creationDate = new Date();
         getDialogBox().getWidget().setWidth("730px");
-        final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
-            }
-        };
 
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                validate();
+            }
+        });
+
         final List<String> tagSuggestions = Arrays.asList(new String[] { "Stage", "Eventteaser", "Sponsor", "Logo" });
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         tagSuggestions, "Enter tags for the image", 50));
-        tagsListEditor.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override

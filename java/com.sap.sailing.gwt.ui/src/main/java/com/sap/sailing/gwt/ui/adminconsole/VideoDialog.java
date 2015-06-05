@@ -62,12 +62,6 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         this.stringMessages = stringMessages;
         this.creationDate = new Date();
         getDialogBox().getWidget().setWidth("730px");
-        final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
-            }
-        };
 
         mimeTypeListBox = createListBox(false);
         mimeTypeListBox.addItem("Select a mime type");
@@ -78,12 +72,17 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.qt.name());
         
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                validate();
+            }
+        });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         final List<String> tagSuggestions = Arrays.asList(new String[] { "Highlight", "Featured" });
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         tagSuggestions, "Enter tags for the video", 50));
-        tagsListEditor.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override
