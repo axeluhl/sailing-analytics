@@ -283,43 +283,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return builder.toSafeHtml();
             }
         };
-/*
-        TextColumn<EventDTO> imageURLsColumn = new TextColumn<EventDTO>() {
-            @Override
-            public String getValue(EventDTO event) {
-                String result = "";
-                int imageCount = Util.size(event.getImageURLs());
-                if(imageCount > 0) {
-                    result = imageCount + " image(s)";
-                }
-                return result;
-            }
-        };
-
-        TextColumn<EventDTO> videoURLsColumn = new TextColumn<EventDTO>() {
-            @Override
-            public String getValue(EventDTO event) {
-                String result = "";
-                int videoCount = Util.size(event.getVideoURLs());
-                if(videoCount > 0) {
-                    result = videoCount + " video(s)";
-                }
-                return result;
-            }
-        };
-
-        TextColumn<EventDTO> sponsorImageURLsColumn = new TextColumn<EventDTO>() {
-            @Override
-            public String getValue(EventDTO event) {
-                String result = "";
-                int sponsorImageCount = Util.size(event.getSponsorImageURLs());
-                if(sponsorImageCount > 0) {
-                    result = sponsorImageCount + " sponsor image(s)";
-                }
-                return result;
-            }
-        };
-*/
+        
         TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
@@ -391,9 +355,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(isPublicColumn, stringMessages.isPublic());
         table.addColumn(courseAreasColumn, stringMessages.courseAreas());
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
-//        table.addColumn(imageURLsColumn, stringMessages.imageURLs());
-//        table.addColumn(videoURLsColumn, stringMessages.videoURLs());
-//        table.addColumn(sponsorImageURLsColumn, stringMessages.sponsorImageURLs());
         table.addColumn(imagesColumn, stringMessages.images());
         table.addColumn(videosColumn, stringMessages.videos());
         table.addColumn(associatedRegattasColumn, stringMessages.regattas());
