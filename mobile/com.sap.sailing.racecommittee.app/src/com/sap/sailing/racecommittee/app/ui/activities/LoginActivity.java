@@ -123,7 +123,7 @@ public class LoginActivity extends BaseActivity
 
             selectCourseArea(courseArea);
 
-            showAreaPositionListFragment();
+            addAreaPositionListFragment();
 
             if (loginListViews != null) {
                 loginListViews.closeAll();
@@ -362,10 +362,6 @@ public class LoginActivity extends BaseActivity
         } else {
             progressDialog.dismiss();
         }
-    }
-
-    private void showAreaPositionListFragment() {
-        addAreaPositionListFragment();
     }
 
     public String getEventName() {
