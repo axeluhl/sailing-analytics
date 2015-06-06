@@ -76,19 +76,7 @@ public class LoginActivity extends BaseActivity
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
-            sign_in = (Button) findViewById(R.id.login_submit);
-            if (sign_in != null) {
-                sign_in.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        preferences.isSetUp(true);
-                        Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-                        intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-                        intent.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-                        startActivity(intent);
-                    }
-                });
-            }
+            setupSignInButton();
 
             final Serializable eventId = event.getId();
             eventName = event.getName();
@@ -104,6 +92,23 @@ public class LoginActivity extends BaseActivity
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
+
+    private void setupSignInButton() {
+        sign_in = (Button) findViewById(R.id.login_submit);
+        if (sign_in != null) {
+            sign_in.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    preferences.isSetUp(true);
+                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
+                    intent.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
         public void itemSelected(Fragment sender, CourseArea courseArea) {
