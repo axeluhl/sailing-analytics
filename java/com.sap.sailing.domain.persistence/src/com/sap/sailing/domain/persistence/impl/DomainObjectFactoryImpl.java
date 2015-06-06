@@ -975,8 +975,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
 
         try {
-            for (DBObject o : eventCollection.find()) {
-                result.add(loadEvent(o));
+            for (DBObject object : eventCollection.find()) {
+                Event event = loadEvent(object);
+                migrateImagesAndVideosOfEvent(event);
+                result.add(event);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
@@ -2158,5 +2160,37 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         return result; 
+    }
+    
+    /**
+     * Migrates images and videos stored as pure URLs to the new richer format once 
+     * @param event the event to migrate
+     */
+    private void migrateImagesAndVideosOfEvent(Event event) {
+        int amountOfURLbasedImagesAndVideos = Util.size(event.getImageURLs()) + Util.size(event.getSponsorImageURLs()) + Util.size(event.getVideoURLs());  
+        int amountOfImagesAndVideos = Util.size(event.getImages()) + Util.size(event.getVideos());
+        boolean migrationRequired = amountOfURLbasedImagesAndVideos > 0 && amountOfImagesAndVideos == 0; 
+        if(migrationRequired) {
+            for(URL url: event.getImageURLs()) {
+                String urlAsString = url.toString();
+                ImageDescriptor image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
+                if(urlAsString.indexOf("stage") > 0) {
+                    image.addTag("Stage");
+                } else if(urlAsString.indexOf("eventteaser") > 0) {
+                    image.addTag("Teaser");
+                }
+                event.addImage(image);
+            }
+            for(URL url: event.getSponsorImageURLs()) {
+                ImageDescriptor image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
+                image.addTag("Sponsor");
+                event.addImage(image);
+            }
+            for(URL url: event.getVideoURLs()) {
+                VideoDescriptor video = new VideoDescriptorImpl(url, MimeType.unknown, MillisecondsTimePoint.now());
+                event.addVideo(video);
+            }
+            new MongoObjectFactoryImpl(database).storeEvent(event);
+        }
     }
 }
