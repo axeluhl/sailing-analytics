@@ -80,11 +80,14 @@ public class LoginActivity extends BaseActivity
 
             final Serializable eventId = selectEvent(event);
 
+            //prepare views after the event selection
+
+            //close all currently open list views
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
-
             addCourseAreaListFragment(eventId);
+            //send intent to open the course area selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
@@ -123,12 +126,14 @@ public class LoginActivity extends BaseActivity
 
             selectCourseArea(courseArea);
 
+            // prepare views after area selection
 
+            // close all currently open list views
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
-
             addAreaPositionListFragment();
+            //send intent to open the position selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
@@ -205,10 +210,12 @@ public class LoginActivity extends BaseActivity
 
         mReceiver = new IntentReceiver();
 
+        // setup the login list views fragment
         loginListViews = new LoginListViews();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
 
+        // default the selected course area from
         UUID courseUUID = preferences.getCourseUUID();
         if (courseUUID != new UUID(0, 0)) {
             mSelectedCourseAreaUUID = courseUUID;
