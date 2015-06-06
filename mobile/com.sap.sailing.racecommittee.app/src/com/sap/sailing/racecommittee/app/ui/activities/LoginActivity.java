@@ -78,10 +78,8 @@ public class LoginActivity extends BaseActivity
         public void itemSelected(Fragment sender, EventBase event) {
             setupSignInButton();
 
-            final Serializable eventId = event.getId();
-            eventName = event.getName();
-            ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
-            preferences.setEventID(eventId);
+            final Serializable eventId = selectEvent(event);
+
             showCourseAreaListFragment(eventId);
             if (loginListViews != null) {
                 loginListViews.closeAll();
@@ -92,6 +90,14 @@ public class LoginActivity extends BaseActivity
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
+
+    private Serializable selectEvent(EventBase event) {
+        final Serializable eventId = event.getId();
+        eventName = event.getName();
+        ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
+        preferences.setEventID(eventId);
+        return eventId;
+    }
 
     private void setupSignInButton() {
         sign_in = (Button) findViewById(R.id.login_submit);
