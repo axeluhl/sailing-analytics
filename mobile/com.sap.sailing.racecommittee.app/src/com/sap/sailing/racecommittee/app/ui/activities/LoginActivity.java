@@ -80,11 +80,11 @@ public class LoginActivity extends BaseActivity
 
             final Serializable eventId = selectEvent(event);
 
-            addCourseAreaListFragment(eventId);
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
 
+            addCourseAreaListFragment(eventId);
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
@@ -123,12 +123,12 @@ public class LoginActivity extends BaseActivity
 
             selectCourseArea(courseArea);
 
-            addAreaPositionListFragment();
 
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
 
+            addAreaPositionListFragment();
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
