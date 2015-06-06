@@ -283,7 +283,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return builder.toSafeHtml();
             }
         };
-
+/*
         TextColumn<EventDTO> imageURLsColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
@@ -315,6 +315,30 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 int sponsorImageCount = Util.size(event.getSponsorImageURLs());
                 if(sponsorImageCount > 0) {
                     result = sponsorImageCount + " sponsor image(s)";
+                }
+                return result;
+            }
+        };
+*/
+        TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {
+            @Override
+            public String getValue(EventDTO event) {
+                String result = "";
+                int imageCount = Util.size(event.getImages());
+                if(imageCount > 0) {
+                    result = imageCount + " image(s)";
+                }
+                return result;
+            }
+        };
+
+        TextColumn<EventDTO> videosColumn = new TextColumn<EventDTO>() {
+            @Override
+            public String getValue(EventDTO event) {
+                String result = "";
+                int videoCount = Util.size(event.getVideos());
+                if(videoCount > 0) {
+                    result = videoCount + " video(s)";
                 }
                 return result;
             }
@@ -358,9 +382,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         isPublicColumn.setSortable(true);
         startEndDateColumn.setSortable(true);
         courseAreasColumn.setSortable(true);
-        imageURLsColumn.setSortable(true);
-        videoURLsColumn.setSortable(true);
-        sponsorImageURLsColumn.setSortable(true);
         leaderboardGroupsColumn.setSortable(true);
 
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
@@ -370,9 +391,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(isPublicColumn, stringMessages.isPublic());
         table.addColumn(courseAreasColumn, stringMessages.courseAreas());
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
-        table.addColumn(imageURLsColumn, stringMessages.imageURLs());
-        table.addColumn(videoURLsColumn, stringMessages.videoURLs());
-        table.addColumn(sponsorImageURLsColumn, stringMessages.sponsorImageURLs());
+//        table.addColumn(imageURLsColumn, stringMessages.imageURLs());
+//        table.addColumn(videoURLsColumn, stringMessages.videoURLs());
+//        table.addColumn(sponsorImageURLsColumn, stringMessages.sponsorImageURLs());
+        table.addColumn(imagesColumn, stringMessages.images());
+        table.addColumn(videosColumn, stringMessages.videos());
         table.addColumn(associatedRegattasColumn, stringMessages.regattas());
         table.addColumn(eventActionColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
