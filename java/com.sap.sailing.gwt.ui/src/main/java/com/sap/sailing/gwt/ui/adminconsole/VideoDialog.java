@@ -79,7 +79,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             }
         });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        final List<String> tagSuggestions = Arrays.asList(new String[] { "Highlight", "Featured", "Locale_de, Locale_en" });
+        final List<String> tagSuggestions = Arrays.asList(new String[] { "Highlight", "Featured", "Locale_de, Locale_en", "Locale_ru", "Locale_cn" });
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         tagSuggestions, "Enter tags for the video", 50));
