@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoCreateDialog extends VideoDialog {
@@ -19,5 +20,6 @@ public class VideoCreateDialog extends VideoDialog {
         copyrightTextBox.setVisibleLength(50);
         lengthIntegerBox = createIntegerBox(null, 10);
         tagsListEditor.setValue(Collections.<String>emptyList());
+        setSelectedMimeType(MimeType.unknown);
     }
 }

@@ -22,5 +22,6 @@ public class VideoEditDialog extends VideoDialog {
         List<String> tags = new ArrayList<String>();
         tags.addAll(video.getTags());
         tagsListEditor.setValue(tags);
+        setSelectedMimeType(video.getMimeType());
     }
 }

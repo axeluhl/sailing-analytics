@@ -70,7 +70,6 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.ogg.name());
         mimeTypeListBox.addItem(MimeType.ogv.name());
         mimeTypeListBox.addItem(MimeType.qt.name());
-        mimeTypeListBox.setSelectedIndex(0);
         
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -98,6 +97,15 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         }
         result.setTags(tags);
         return result;
+    }
+
+    protected void setSelectedMimeType(MimeType mimeType) {
+        for(int i = 0; i < mimeTypeListBox.getVisibleItemCount(); i++) {
+            if(mimeTypeListBox.getItemText(0).equals(mimeType.name())) {
+                mimeTypeListBox.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     private MimeType getSelectedMimeType() {

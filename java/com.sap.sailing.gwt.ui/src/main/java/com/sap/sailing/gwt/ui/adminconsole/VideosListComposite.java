@@ -85,8 +85,8 @@ public class VideosListComposite extends Composite {
 
         videoSelectionModel = new SingleSelectionModel<VideoDTO>();
         videoListDataProvider = new ListDataProvider<VideoDTO>();
-        videoTable = createImagesTable();
-        videoTable.ensureDebugId("ImagesCellTable");
+        videoTable = createVideosTable();
+        videoTable.ensureDebugId("VideosCellTable");
         videoTable.setVisible(false);
 
         videoSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -105,7 +105,7 @@ public class VideosListComposite extends Composite {
         initWidget(mainPanel);
     }
 
-    private CellTable<VideoDTO> createImagesTable() {
+    private CellTable<VideoDTO> createVideosTable() {
         CellTable<VideoDTO> table = new CellTable<VideoDTO>(/* pageSize */10000, tableRes);
         videoListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -132,19 +132,26 @@ public class VideosListComposite extends Composite {
 
         TextColumn<VideoDTO> createdAtDateColumn = new TextColumn<VideoDTO>() {
             @Override
-            public String getValue(VideoDTO image) {
-                return DateAndTimeFormatterUtil.formatDateAndTime(image.getCreatedAtDate());
+            public String getValue(VideoDTO video) {
+                return DateAndTimeFormatterUtil.formatDateAndTime(video.getCreatedAtDate());
+            }
+        };
+
+        TextColumn<VideoDTO> mimeTypeColumn = new TextColumn<VideoDTO>() {
+            @Override
+            public String getValue(VideoDTO video) {
+                return video.getMimeType() != null ? video.getMimeType().name() : "";
             }
         };
 
         SafeHtmlCell tagsCell = new SafeHtmlCell();
         Column<VideoDTO, SafeHtml> tagsColumn = new Column<VideoDTO, SafeHtml>(tagsCell) {
             @Override
-            public SafeHtml getValue(VideoDTO image) {
+            public SafeHtml getValue(VideoDTO video) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                int tagsCount = image.getTags().size();
+                int tagsCount = video.getTags().size();
                 int i = 1;
-                for (String tag : image.getTags()) {
+                for (String tag : video.getTags()) {
                     builder.appendEscaped(tag);
                     if (i < tagsCount) {
                         builder.appendHtmlConstant(",&nbsp;");
@@ -163,12 +170,12 @@ public class VideosListComposite extends Composite {
                 new VideoConfigImagesBarCell(stringMessages));
         videoActionColumn.setFieldUpdater(new FieldUpdater<VideoDTO, String>() {
             @Override
-            public void update(int index, VideoDTO image, String value) {
+            public void update(int index, VideoDTO video, String value) {
                 if (ImageConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    videoListDataProvider.getList().remove(image);
+                    videoListDataProvider.getList().remove(video);
                     updateTableVisisbilty();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditVideoDialog(image);
+                    openEditVideoDialog(video);
                 }
             }
         });
@@ -179,6 +186,7 @@ public class VideosListComposite extends Composite {
         table.addColumn(shortVideoNameColumn, "Short name");
         table.addColumn(titleColumn, stringMessages.title());
         table.addColumn(createdAtDateColumn, "Created At");
+        table.addColumn(mimeTypeColumn, stringMessages.mimeType());
         table.addColumn(tagsColumn, "Tags");
         table.addColumn(videoActionColumn, stringMessages.actions());
         table.addColumnSortHandler(getVideoTableColumnSortHandler(videoListDataProvider.getList(), titleColumn, createdAtDateColumn));
@@ -237,9 +245,9 @@ public class VideosListComposite extends Composite {
             }
 
             @Override
-            public void ok(VideoDTO updatedImage) {
+            public void ok(VideoDTO updatedVideo) {
                 videoListDataProvider.getList().remove(selectedVideo);
-                videoListDataProvider.getList().add(updatedImage);
+                videoListDataProvider.getList().add(updatedVideo);
                 updateTableVisisbilty();
             }
         });
