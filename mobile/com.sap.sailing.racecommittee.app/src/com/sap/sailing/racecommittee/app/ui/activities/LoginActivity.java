@@ -215,12 +215,13 @@ public class LoginActivity extends BaseActivity
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
 
-        // default the selected course area from
+        // default the selected course area from preferences
         UUID courseUUID = preferences.getCourseUUID();
         if (courseUUID != new UUID(0, 0)) {
             mSelectedCourseAreaUUID = courseUUID;
         }
 
+        // default the selected id from the preferences
         Serializable eventId = preferences.getEventID();
         if (eventId != null) {
             mSelectedEvent = eventId;
@@ -228,6 +229,7 @@ public class LoginActivity extends BaseActivity
 
         new AutoUpdater(this).notifyAfterUpdate();
 
+        //setup the backdrop click listener
         backdrop = findViewById(R.id.login_view_backdrop);
         if (backdrop != null) {
             backdrop.setOnClickListener(new BackdropClick());
@@ -236,6 +238,8 @@ public class LoginActivity extends BaseActivity
 
     @Override
     public void onPositionSelected(LoginType type) {
+
+        //FIXME: this is some kind of exception handling
         if (mSelectedCourseAreaUUID == null) {
             String toastText = getString(R.string.selected_course_area_lost);
             Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show();
@@ -243,13 +247,15 @@ public class LoginActivity extends BaseActivity
             return;
         }
 
+        // selectPosition
         preferences.setLoginType(type);
-
         positionName = positionFragment.getAuthor().getName();
+
+        // prepare views after position selected
+
         if (loginListViews != null) {
             loginListViews.closeAll();
         }
-
         if (sign_in != null) {
             sign_in.setEnabled(true);
         }
