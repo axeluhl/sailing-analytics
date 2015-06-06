@@ -31,6 +31,7 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
     protected StringMessages stringMessages;
@@ -199,6 +200,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         for(ImageDTO image: imagesListComposite.getAllImages()) {
             result.addImage(image);
+        }
+        for(VideoDTO video: videosListComposite.getAllVideos()) {
+            result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
         return result;
