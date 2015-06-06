@@ -45,7 +45,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             String errorMessage = null;
             
             if(imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
-                errorMessage = "You must provide a valid URL for the image";
+                errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             }
             return errorMessage;
         }
@@ -66,7 +66,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
 
-        final List<String> tagSuggestions = Arrays.asList(new String[] { "Stage", "Eventteaser", "Sponsor", "Logo" });
+        final List<String> tagSuggestions = Arrays.asList(new String[] { "Stage", "Teaser", "Sponsor", "Logo" });
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         tagSuggestions, "Enter tags for the image", 50));

@@ -48,7 +48,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             String errorMessage = null;
             
             if(videoToValidate.getSourceRef() == null || videoToValidate.getSourceRef().isEmpty()) {
-                errorMessage = "You must provide a valid URL for the video.";
+                errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (videoToValidate.getMimeType() == null) {
                 errorMessage = "You must select the mime type for the video.";
             }
@@ -64,12 +64,13 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         getDialogBox().getWidget().setWidth("730px");
 
         mimeTypeListBox = createListBox(false);
-        mimeTypeListBox.addItem("Select a mime type");
+        mimeTypeListBox.addItem(MimeType.unknown.name());
         mimeTypeListBox.addItem(MimeType.aac.name());
         mimeTypeListBox.addItem(MimeType.mp4.name());
         mimeTypeListBox.addItem(MimeType.ogg.name());
         mimeTypeListBox.addItem(MimeType.ogv.name());
         mimeTypeListBox.addItem(MimeType.qt.name());
+        mimeTypeListBox.setSelectedIndex(0);
         
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -79,7 +80,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             }
         });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        final List<String> tagSuggestions = Arrays.asList(new String[] { "Highlight", "Featured" });
+        final List<String> tagSuggestions = Arrays.asList(new String[] { "Highlight", "Featured", "Locale_de, Locale_en" });
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         tagSuggestions, "Enter tags for the video", 50));
@@ -102,7 +103,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     private MimeType getSelectedMimeType() {
         MimeType result = null;
         int selectedIndex = mimeTypeListBox.getSelectedIndex();
-        if(selectedIndex > 0) {
+        if(selectedIndex >= 0) {
             result = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
         }
         return result;
