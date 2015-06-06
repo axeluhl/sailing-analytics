@@ -80,7 +80,7 @@ public class LoginActivity extends BaseActivity
 
             final Serializable eventId = selectEvent(event);
 
-            showCourseAreaListFragment(eventId);
+            addCourseAreaListFragment(eventId);
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
@@ -279,7 +279,7 @@ public class LoginActivity extends BaseActivity
         }
 
         if (mSelectedEvent != null && preferences.isSetUp()) {
-            showCourseAreaListFragment(mSelectedEvent);
+            addCourseAreaListFragment(mSelectedEvent);
 
             Intent message = new Intent(this, RacingActivity.class);
             message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
@@ -366,10 +366,6 @@ public class LoginActivity extends BaseActivity
 
     private void showAreaPositionListFragment() {
         addAreaPositionListFragment();
-    }
-
-    private void showCourseAreaListFragment(Serializable eventId) {
-        addCourseAreaListFragment(eventId);
     }
 
     public String getEventName() {
