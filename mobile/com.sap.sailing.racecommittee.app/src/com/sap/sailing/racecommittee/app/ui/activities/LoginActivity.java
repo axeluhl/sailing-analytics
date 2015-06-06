@@ -112,10 +112,13 @@ public class LoginActivity extends BaseActivity
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
         public void itemSelected(Fragment sender, CourseArea courseArea) {
-            courseName = courseArea.getName();
             ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
             ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
-            selectCourseArea(courseArea.getId());
+
+            selectCourseArea(courseArea);
+
+            showAreaPositionListFragment();
+
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
@@ -125,6 +128,15 @@ public class LoginActivity extends BaseActivity
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
+
+    private void selectCourseArea(CourseArea courseArea) {
+
+        courseName = courseArea.getName();
+        // mSelectedCourseArea = courseArea;
+        mSelectedCourseAreaUUID = courseArea.getId();
+        preferences.setCourseUUID(mSelectedCourseAreaUUID);
+    }
+
     private ProgressDialog progressDialog;
 
     public LoginActivity() {
@@ -284,13 +296,6 @@ public class LoginActivity extends BaseActivity
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
-    }
-
-    private void selectCourseArea(UUID courseAreaUUID) {
-        // mSelectedCourseArea = courseArea;
-        mSelectedCourseAreaUUID = courseAreaUUID;
-        preferences.setCourseUUID(mSelectedCourseAreaUUID);
-        showAreaPositionListFragment();
     }
 
     private void setupDataManager() {
