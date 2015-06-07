@@ -17,7 +17,6 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.StringHelper;
 
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
@@ -26,13 +25,17 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     private Button sign_up;
     private IntentListener listener;
 
-    private EventToggleContainer event_container;
-    private AreaToggleContainer area_container;
-    private PositionToggleContainer position_container;
+    private ToggleContainer event_container;
+    private ToggleContainer area_container;
+    private ToggleContainer position_container;
 
     public LoginListViews() {
         listener = new IntentListener();
     }
+
+    public ToggleContainer getEventContainer(){ return event_container; }
+    public ToggleContainer getAreaContainer(){ return area_container; }
+    public ToggleContainer getPositionContainer(){ return position_container; }
 
     @Override
     public void onAttach(Activity activity) {
@@ -49,11 +52,11 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         RelativeLayout position_header = (RelativeLayout) view.findViewById(R.id.position_header);
 
         // create the toggle container instances
-        this.event_container = new EventToggleContainer((FrameLayout) view.findViewById(R.id.event_fragment), event_header, (TextView) view
+        this.event_container = new ToggleContainer((FrameLayout) view.findViewById(R.id.event_fragment), event_header, (TextView) view
             .findViewById(R.id.selected_event));
-        this.area_container = new AreaToggleContainer((FrameLayout) view.findViewById(R.id.area_fragment), area_header, (TextView) view
+        this.area_container = new ToggleContainer((FrameLayout) view.findViewById(R.id.area_fragment), area_header, (TextView) view
             .findViewById(R.id.selected_area));
-        this.position_container = new PositionToggleContainer((FrameLayout) view
+        this.position_container = new ToggleContainer((FrameLayout) view
             .findViewById(R.id.position_fragment), position_header, (TextView) view.findViewById(R.id.selected_position));
 
         // add listeners to the click areas
@@ -80,11 +83,6 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     @Override
     public void onResume() {
         super.onResume();
-
-        // reset all texts
-        event_container.resetHeaderText();
-        area_container.resetHeaderText();
-        position_container.resetHeaderText();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
@@ -141,7 +139,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         }
     }
 
-    private abstract class ToggleContainer {
+    public class ToggleContainer {
         private FrameLayout frame;
         private TextView text;
         private RelativeLayout header;
@@ -155,16 +153,12 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         public void toggle() {
             final int[] pos = new int[2];
 
-            // reset the header text
-            if (text != null) {
-                text.setText(null);
-            }
-
             if (frame != null && frame.getLayoutParams() != null) {
                 // open the frame
                 if (frame.getLayoutParams().height == 0) {
                     frame.getLocationOnScreen(pos);
                     frame.getLayoutParams().height = getScreenHeight() - pos[1];
+                    text.setVisibility(View.GONE);
                 } else {
                     close();
                 }
@@ -176,15 +170,10 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             if (frame != null && frame.getLayoutParams() != null) {
                 frame.getLayoutParams().height = 0;
                 frame.requestLayout();
-                setHeaderText();
+                text.setVisibility(View.VISIBLE);
             }
         }
 
-        public void resetHeaderText() {
-            if (text != null) {
-                text.setText(null);
-            }
-        }
 
         public boolean isClosed() {
             return (frame != null && frame.getLayoutParams() != null && frame.getLayoutParams().height == 0);
@@ -202,38 +191,11 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             return point.y;
         }
 
-        public abstract void setHeaderText();
-    }
-
-    private class EventToggleContainer extends ToggleContainer {
-        public EventToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-            super(frame, header, text);
-        }
-
-        public void setHeaderText() {
-            super.text.setText(activity.getEventName());
+        public void setHeaderText(String header) {
+            text.setText(header);
         }
     }
 
-    private class AreaToggleContainer extends ToggleContainer {
-        public AreaToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-            super(frame, header, text);
-        }
-
-        public void setHeaderText() {
-            super.text.setText(activity.getCourseName());
-        }
-    }
-
-    private class PositionToggleContainer extends ToggleContainer {
-        public PositionToggleContainer(FrameLayout frame, RelativeLayout header, TextView text) {
-            super(frame, header, text);
-        }
-
-        public void setHeaderText() {
-            super.text.setText(StringHelper.on(activity).getAuthor(activity.getPositionName()));
-        }
-    }
 
     private class IntentListener extends BroadcastReceiver {
 
