@@ -318,10 +318,7 @@ public class LoginActivity extends BaseActivity
     }
 
     private void setupDataManager() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.loading_configuration));
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
+        setupProgressDialog();
         progressDialog.show();
 
         ReadonlyDataManager dataManager = DataManager.create(this);
@@ -375,6 +372,13 @@ public class LoginActivity extends BaseActivity
         } else {
             progressDialog.dismiss();
         }
+    }
+
+    private void setupProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.loading_configuration));
+        progressDialog.setCancelable(false);
+        progressDialog.setIndeterminate(true);
     }
 
     public String getEventName() {
