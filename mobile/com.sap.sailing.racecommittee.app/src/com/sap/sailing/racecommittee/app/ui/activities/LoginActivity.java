@@ -62,17 +62,24 @@ public class LoginActivity extends BaseActivity
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
+
     private final int RQS_GooglePlayServices = 1;
+
     private final PositionListFragment positionFragment;
+    private View backdrop;
     private LoginListViews loginListViews = null;
+
     private Button sign_in;
+
     private String eventName = null;
     private String courseName = null;
     private String positionName = null;
-    private View backdrop;
-    private IntentReceiver mReceiver;
+
     private Serializable mSelectedEvent;
     private UUID mSelectedCourseAreaUUID;
+
+    private IntentReceiver mReceiver;
+
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
