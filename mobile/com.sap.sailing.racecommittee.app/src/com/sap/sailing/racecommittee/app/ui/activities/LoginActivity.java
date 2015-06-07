@@ -80,6 +80,8 @@ public class LoginActivity extends BaseActivity
 
     private IntentReceiver mReceiver;
 
+    private ProgressDialog progressDialog;
+
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
@@ -154,8 +156,6 @@ public class LoginActivity extends BaseActivity
         mSelectedCourseAreaUUID = courseArea.getId();
         preferences.setCourseUUID(mSelectedCourseAreaUUID);
     }
-
-    private ProgressDialog progressDialog;
 
     public LoginActivity() {
         positionFragment = PositionListFragment.newInstance();
@@ -318,16 +318,11 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onStop() {
         super.onStop();
-
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
+        dismissProgressDialog();
     }
 
     private void setupDataManager() {
-        setupProgressDialog();
-
-        progressDialog.show();
+        showProgressDialog();
 
         ReadonlyDataManager dataManager = DataManager.create(this);
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
@@ -337,8 +332,7 @@ public class LoginActivity extends BaseActivity
 
                 @Override
                 public void onLoadFailed(Exception reason) {
-                    progressDialog.dismiss();
-
+                    dismissProgressDialog();
                     if (reason instanceof FileNotFoundException) {
                         Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
                         ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
@@ -350,7 +344,7 @@ public class LoginActivity extends BaseActivity
 
                 @Override
                 public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                    progressDialog.dismiss();
+                    dismissProgressDialog();
 
                     // this is our 'global' configuration, let's store it in app preferences
                     PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
@@ -366,15 +360,24 @@ public class LoginActivity extends BaseActivity
             // always reload the configuration...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
-            progressDialog.dismiss();
+            dismissProgressDialog();
         }
     }
 
-    private void setupProgressDialog() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.loading_configuration));
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
+    private void showProgressDialog() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage(getString(R.string.loading_configuration));
+            progressDialog.setCancelable(false);
+            progressDialog.setIndeterminate(true);
+        }
+        progressDialog.show();
+    }
+
+    private void dismissProgressDialog(){
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     public String getEventName() {
