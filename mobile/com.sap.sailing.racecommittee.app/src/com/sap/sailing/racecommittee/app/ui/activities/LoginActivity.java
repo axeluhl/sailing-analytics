@@ -345,7 +345,6 @@ public class LoginActivity extends BaseActivity
                         Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                         ExLog.ex(LoginActivity.this, TAG, reason);
                     }
-                    showLogin();
                 }
 
                 @Override
