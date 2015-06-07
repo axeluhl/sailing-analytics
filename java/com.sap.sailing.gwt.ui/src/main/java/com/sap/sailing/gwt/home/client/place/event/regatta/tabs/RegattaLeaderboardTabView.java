@@ -69,6 +69,9 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             }
             regattaAnalyticsManager.hideCompetitorChart();
             contentArea.setWidget(this);
+            if(leaderboardPanel.getLeaderboard() != null) {
+                leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
+            }
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
             new com.google.gwt.user.client.Timer() {
@@ -82,7 +85,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard.updatedLeaderboard(leaderboard, true);
+        this.leaderboard.updatedLeaderboard(leaderboard);
     }
 
     @Override

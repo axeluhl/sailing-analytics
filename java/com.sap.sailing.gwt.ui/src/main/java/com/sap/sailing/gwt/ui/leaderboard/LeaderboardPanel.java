@@ -129,7 +129,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final SailingServiceAsync sailingService;
 
-    private static String IS_LIVE_TEXT_COLOR = "#1876B3";
+    private static String IS_LIVE_TEXT_COLOR = "#FF0000";
     private static String DEFAULT_TEXT_COLOR = "#000000";
     
     private static final String STYLE_LEADERBOARD_CONTENT = "leaderboardContent";
@@ -2400,6 +2400,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 
                 List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
                 boolean hasLiveRace = !liveRaces.isEmpty();
+                liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
                 if (hasLiveRace) {
                     String liveRaceText = "";
                     if(liveRaces.size() == 1) {
@@ -3247,6 +3248,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
+    public boolean hasLiveRace() {
+        return getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis());        
+    }
+
+    public String getLiveRacesText() {
+        String result = "";
+        List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+        if (!liveRaces.isEmpty()) {
+            if(liveRaces.size() == 1) {
+                com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                result = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+            } else {
+                String raceNames = "";
+                for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                    raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                }
+                // remove last ", "
+                raceNames = raceNames.substring(0, raceNames.length() - 2);
+                result = stringMessages.racesAreLive(raceNames);
+            }
+        }
+        return result;
+    }
+    
     @Override
     public String getDependentCssClassName() {
         return "leaderboard";
