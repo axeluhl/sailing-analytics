@@ -60,26 +60,13 @@ public class EventSeriesLeaderboardTabView extends SharedLeaderboardEventSeriesT
             if(leaderboardPanel == null) {
                 leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager);
             }
-//
-//            boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
-//                    LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-//            final LeaderboardSettings leaderboardSettings = EventParamUtils
-//                    .createLeaderboardSettingsFromURLParameters(Window.Location
-//                    .getParameterMap());
-//            final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
-//                    .getPreselectedRace(Window.Location.getParameterMap());
-//            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createOverallLeaderboardPanel(
-//                    leaderboardSettings,
-//                    preselectedRace,
-//                    "leaderboardGroupName", // TODO: keep using magic string? ask frank!
-//                    leaderboardName,
-//                    true, // this information came from place, now hard coded. check with frank
-//                    autoExpandLastRaceColumn);
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-//            leaderboardPanel.addLeaderboardUpdateListener(this);
             eventSeriesAnalyticsManager.hideCompetitorChart();
             contentArea.setWidget(this);
+            if(leaderboardPanel.getLeaderboard() != null) {
+                leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
+            }
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
             new com.google.gwt.user.client.Timer() {
@@ -93,7 +80,7 @@ public class EventSeriesLeaderboardTabView extends SharedLeaderboardEventSeriesT
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard.updatedLeaderboard(leaderboard, true);
+        this.leaderboard.updatedLeaderboard(leaderboard);
     }
 
     @Override
