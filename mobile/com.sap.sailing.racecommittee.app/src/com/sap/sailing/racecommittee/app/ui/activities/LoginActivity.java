@@ -326,6 +326,7 @@ public class LoginActivity extends BaseActivity
 
     private void setupDataManager() {
         setupProgressDialog();
+
         progressDialog.show();
 
         ReadonlyDataManager dataManager = DataManager.create(this);
@@ -356,19 +357,8 @@ public class LoginActivity extends BaseActivity
 
                     Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                     // showCourseAreaListFragment(eventId);
-                    showLogin();
+                    slideUpBackdropDelayed();
 
-                }
-
-                private void showLogin() {
-                    Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            backdrop.performClick();
-                        }
-                    };
-                    handler.postDelayed(runnable, 1000);
                 }
             });
 
@@ -410,42 +400,60 @@ public class LoginActivity extends BaseActivity
     }
 
     private class BackdropClick implements View.OnClickListener {
-
         @Override
         public void onClick(View view) {
             if (view.getY() == 0) {
-                long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
-                final View bottomView = findViewById(R.id.login_listview);
-                View title = findViewById(R.id.backdrop_title);
-                View subTitle = findViewById(R.id.backdrop_subtitle);
-                View info = findViewById(R.id.technical_info);
-                View settings = findViewById(R.id.settings_button);
-                subTitle.setAlpha(0f);
-
-                ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
-                ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
-                ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
-                ObjectAnimator infoAnimation = ObjectAnimator.ofFloat(info, "alpha", 0f, 1f);
-                ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
-
-                ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
-                heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        int val = (Integer) valueAnimator.getAnimatedValue();
-                        ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
-                        layoutParams.height = val;
-                        bottomView.setLayoutParams(layoutParams);
-                    }
-                });
-
-                AnimatorSet animatorSet = new AnimatorSet();
-                animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, infoAnimation, settingsAnimation);
-                animatorSet.setDuration(aniTime);
-                animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-                animatorSet.start();
+                slideUpBackdrop();
             }
         }
+    }
+
+    // TODO: put this into the backdrop fragment
+    private void slideUpBackdropDelayed() {
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                slideUpBackdrop();
+            }
+        };
+        handler.postDelayed(runnable, 1000);
+    }
+
+    // TODO: put this into the backdrop fragment
+    private void slideUpBackdrop() {
+        long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
+        final View bottomView = findViewById(R.id.login_listview);
+
+        View title = findViewById(R.id.backdrop_title);
+        View subTitle = findViewById(R.id.backdrop_subtitle);
+        View info = findViewById(R.id.technical_info);
+        View settings = findViewById(R.id.settings_button);
+
+        subTitle.setAlpha(0f);
+
+        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -backdrop.getHeight() + (backdrop.getHeight() / 5));
+        ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
+        ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
+        ObjectAnimator infoAnimation = ObjectAnimator.ofFloat(info, "alpha", 0f, 1f);
+        ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
+
+        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, backdrop.getHeight() - (backdrop.getHeight() / 5));
+        heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                int val = (Integer) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
+                layoutParams.height = val;
+                bottomView.setLayoutParams(layoutParams);
+            }
+        });
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, infoAnimation, settingsAnimation);
+        animatorSet.setDuration(aniTime);
+        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatorSet.start();
     }
 
     private class IntentReceiver extends BroadcastReceiver {
