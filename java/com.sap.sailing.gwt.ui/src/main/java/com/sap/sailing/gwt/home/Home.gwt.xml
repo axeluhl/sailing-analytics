@@ -36,6 +36,17 @@
   	<!--  Bootstrap API -->
   	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
   	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+
+	<!-- Entry point replacement for form factor -->
+
+	<replace-with class="com.sap.sailing.gwt.home.entrypoint.DesktopDelegatingEntryPoint">
+		<when-type-is class="com.sap.sailing.gwt.home.entrypoint.DelegatingEntryPoint" />
+	</replace-with>
+
+	<replace-with class="com.sap.sailing.gwt.home.entrypoint.MobileDelegatingEntryPoint">
+		<when-type-is class="com.sap.sailing.gwt.home.entrypoint.DelegatingEntryPoint" />
+		<when-property-is name="formfactor" value="mobile" />
+	</replace-with>
   	
 	<!-- Default is Tablet/Desktop -->
 	<replace-with
@@ -80,22 +91,22 @@
     <set-configuration-property name="CssResource.enableGss" value="true" />
     <set-configuration-property name="CssResource.legacy" value="true" />
 	
-	<source path='home' />
-	<source path='common' />
-	<source path='idangerous' />
+	<source path='client' />
+	<source path='mobile' />
+	<source path='entrypoint' />
 		
-	<source path='ui/common' />
-	<source path='ui/client' />
-	<source path='ui/shared' />
-	<source path='ui/actions' />
-	<source path='ui/simulator' />
-	<source path='ui/adminconsole' />
-	<source path='ui/usermanagement' />
-	<source path='ui/masterdataimport' />
-	<source path='regattaoverview' />
-	<source path='ui/leaderboard'/>
+	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
+	
+	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceActions'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
+	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
+	<inherits name="com.sap.sailing.gwt.regattaoverview.SourceRegattaOverview"/>
+	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
 	
 	
-		<entry-point class='com.sap.sailing.gwt.home.client.HomeEntryPoint' />
+	<entry-point class="com.sap.sailing.gwt.home.entrypoint.MainEntryPoint" />
 	
 </module>
