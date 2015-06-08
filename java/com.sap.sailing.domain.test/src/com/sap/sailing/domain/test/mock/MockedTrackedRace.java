@@ -790,10 +790,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachAllRaceLogs() {
-    }
-
-    @Override
     public void invalidateStartTime() {
     }
 
@@ -904,7 +900,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public boolean isUsingMarkPassingCalculator() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -953,7 +948,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -963,11 +957,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-    }
-
-    @Override
-    public Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
-        return null;
     }
 
     @Override

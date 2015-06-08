@@ -657,11 +657,6 @@ public interface TrackedRace extends Serializable {
     void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
-     * Detaches all {@link RaceLog} instances from this race
-     */
-    void detachAllRaceLogs();
-    
-    /**
      * Attaches the passed race log with this {@link TrackedRace}.
      * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link DeviceMappingEvent}s
      * that are present in the raceLog. This loading is offloaded into a separate thread, that blocks
@@ -834,7 +829,5 @@ public interface TrackedRace extends Serializable {
     Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
-
-    Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders();
 
 }

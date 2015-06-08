@@ -99,6 +99,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         if (previouslyLinkedRace != null && regattaLikeParent != null) {
             RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
+            previouslyLinkedRace.detachRaceExecutionOrderProvider(getRaceExecutionOrderProvider());
             getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
         }
     }

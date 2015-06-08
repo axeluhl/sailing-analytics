@@ -181,11 +181,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
+        final Iterable<RaceColumn> result;
         if (races != null) {
-            return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+            result = Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace) {

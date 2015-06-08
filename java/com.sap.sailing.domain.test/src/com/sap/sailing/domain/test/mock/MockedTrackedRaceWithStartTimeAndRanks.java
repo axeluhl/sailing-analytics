@@ -472,10 +472,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void detachAllRaceLogs() {
-    }
-
-    @Override
     public boolean isLive(TimePoint at) {
         return false;
     }
@@ -651,10 +647,4 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
     }
-
-    @Override
-    public Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
-        return null;
-    }
-
 }

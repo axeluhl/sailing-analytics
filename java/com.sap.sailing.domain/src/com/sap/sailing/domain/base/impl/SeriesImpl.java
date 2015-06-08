@@ -109,11 +109,14 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setRegatta(Regatta regatta) {
+        if (this.regatta != null) {
+            detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns();
+        }
         this.regatta = regatta;
         if (this.regatta != null) {
-            attachRaceExecutionOrderProviderToTrackedRacesInRaceCollumns();
+            attachRaceExecutionOrderProviderToTrackedRacesInRaceColumns();
         } else {
-            detachRaceExecutionOrderProviderFromTrackedRacesInRaceCollumns();
+            detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns();
         }
     }
 
@@ -172,7 +175,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
                 trackedRegattaRegistry);
     }
     
-    private void attachRaceExecutionOrderProviderToTrackedRacesInRaceCollumns(){
+    private void attachRaceExecutionOrderProviderToTrackedRacesInRaceColumns() {
         for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
             for (Fleet fleet : raceColumnInSeries.getFleets()) {
                 TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);
@@ -183,7 +186,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         }
     }
     
-    private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceCollumns() {
+    private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns() {
         for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
             for (Fleet fleet : raceColumnInSeries.getFleets()) {
                 TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);

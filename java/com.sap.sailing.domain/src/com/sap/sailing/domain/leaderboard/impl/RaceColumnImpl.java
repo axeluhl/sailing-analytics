@@ -12,7 +12,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private String name;
 
     private boolean medalRace;
-    private RaceExecutionOrderProvider raceExecutionOrderProvider;
+    private final RaceExecutionOrderProvider raceExecutionOrderProvider;
 
     public RaceColumnImpl(String name, boolean medalRace, RaceExecutionOrderProvider raceExecutionOrderProvider) {
         super();

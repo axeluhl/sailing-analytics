@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +44,6 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
-import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -667,7 +665,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        final Duration conditionalTimeBeforeStartToTrackWind = getConditionalTimeBeforeStartToTrackWind();
+        final Duration conditionalTimeBeforeStartToTrackWind = getConditionalTimeBeforeStartToTrackWind(wind.getTimePoint());
         if ((startOfTracking == null || !startOfTracking.minus(conditionalTimeBeforeStartToTrackWind).after(wind.getTimePoint()) ||
                 (startOfRace != null && !startOfRace.minus(conditionalTimeBeforeStartToTrackWind).after(wind.getTimePoint())))
             &&
@@ -684,9 +682,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return result;
     }
     
-    private Duration getConditionalTimeBeforeStartToTrackWind(){
-        Set<TrackedRace> previosRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
-        if (previosRacesInExecutionOrder == null || !previosRacesInExecutionOrder.stream().filter(tr->tr.getEndOfTracking() != null).findAny().isPresent()) {
+    private Duration getConditionalTimeBeforeStartToTrackWind(TimePoint timePointOfWindFix) {
+        Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
+        if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr->tr.getEndOfTracking() != null).findAny().isPresent()) {
             return EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
         } else {
             return TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
@@ -775,20 +773,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        if (raceExecutionOrderProvider != null && !super.attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider)) {
-            super.attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider, raceExecutionOrderProvider);
-        }
-    }
-
-    @Override
-    public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        if (raceExecutionOrderProvider != null) {
-            super.attachedRaceExecutionOrderProvider.remove(raceExecutionOrderProvider);
-        }
-    }
-
-    @Override
     public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
         this.courseDesignChangedListeners.add(listener);
     }
@@ -847,15 +831,4 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
 
-    @Override
-    public Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
-        final Set<TrackedRace> result;
-        if (attachedRaceExecutionOrderProvider != null) {
-            result = attachedRaceExecutionOrderProvider.values().stream().map(reop->reop.getPreviousRaceInExecutionOrder(this)).collect(HashSet::new, (r, e)->r.addAll(e), (r, e)->r.addAll(e));
-        } else {
-            result = Collections.emptySet();
-        }
-        return result;
-    }
-    
 }

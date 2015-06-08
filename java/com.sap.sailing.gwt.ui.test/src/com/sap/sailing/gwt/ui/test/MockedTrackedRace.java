@@ -592,10 +592,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachAllRaceLogs() {
-    }
-
-    @Override
     public void invalidateStartTime() {
     }
 
@@ -787,10 +783,5 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-    }
-
-    @Override
-    public Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
-        return null;
     }
 }

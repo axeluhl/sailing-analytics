@@ -51,7 +51,7 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
         return raceIdListInExecutionOrder;
     }
 
-    protected void addPredecessors(final Map<TrackedRace, Set<TrackedRace>> raceIdListInExecutionOrder, Fleet fleet,
+    private void addPredecessors(final Map<TrackedRace, Set<TrackedRace>> raceIdListInExecutionOrder, Fleet fleet,
             final Iterable<? extends RaceColumn> raceColumns) {
         TrackedRace predecessor = null;
         for (RaceColumn currentRaceColumn : raceColumns) {

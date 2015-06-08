@@ -123,10 +123,12 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
     @Override
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        final RaceExecutionOrderProvider result;
         if (getRegatta() != null) {
-            return getRegatta().getRaceExecutionOrderProvider();
+            result = getRegatta().getRaceExecutionOrderProvider();
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 }

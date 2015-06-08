@@ -286,7 +286,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
     
-    protected transient ConcurrentHashMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProvider;
+    private transient ConcurrentHashMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProvider;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -3051,7 +3051,31 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public void attachRaceLog(final RaceLog raceLog) {
         loadFixesForLog(raceLog, attachedRaceLogs);
     }
+
+    @Override
+    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+        if (raceExecutionOrderProvider != null && !attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider)) {
+            attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider, raceExecutionOrderProvider);
+        }
+    }
+
+    protected Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
+        final Set<TrackedRace> result;
+        if (attachedRaceExecutionOrderProvider != null) {
+            result = attachedRaceExecutionOrderProvider.values().stream().map(reop->reop.getPreviousRaceInExecutionOrder(this)).collect(HashSet::new, (r, e)->r.addAll(e), (r, e)->r.addAll(e));
+        } else {
+            result = Collections.emptySet();
+        }
+        return result;
+    }
     
+    @Override
+    public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+        if (raceExecutionOrderProvider != null) {
+            attachedRaceExecutionOrderProvider.remove(raceExecutionOrderProvider);
+        }
+    }
+
     private ReadonlyRaceState getRaceState(RaceLog raceLog) {
         ReadonlyRaceState result;
         synchronized (raceStates) {
@@ -3072,11 +3096,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void detachRaceLog(Serializable identifier) {
         this.attachedRaceLogs.remove(identifier);
-    }
-    
-    @Override
-    public void detachAllRaceLogs() {
-        this.attachedRaceLogs.clear();
     }
 
     @Override
