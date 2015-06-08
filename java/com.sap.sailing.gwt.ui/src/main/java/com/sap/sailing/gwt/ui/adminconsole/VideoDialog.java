@@ -70,6 +70,8 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.ogg.name());
         mimeTypeListBox.addItem(MimeType.ogv.name());
         mimeTypeListBox.addItem(MimeType.qt.name());
+        mimeTypeListBox.addItem(MimeType.youtube.name());
+        mimeTypeListBox.addItem(MimeType.vimeo.name());
         
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
