@@ -1,11 +1,17 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import java.util.Calendar;
-
+import android.content.Context;
+import android.os.Build;
 import android.text.format.DateFormat;
-
+import android.view.View;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.ArrayList;
+import java.util.Calendar;
 
 public class TimeUtils {
 
@@ -108,5 +114,39 @@ public class TimeUtils {
         String minutesString = minutes < 10 ? "0" + Math.abs(minutes) : "" + Math.abs(minutes);
         String hoursString = hours < 10 ? "0" + Math.abs(hours) : "" + Math.abs(hours);
         return String.format(timePattern, hoursString, minutesString, secondsString);
+    }
+
+    public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays, int futureDays) {
+        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance();
+        ArrayList<String> dates = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        // Past
+        calendar.add(Calendar.DAY_OF_MONTH, pastDays);
+        for (int i = pastDays; i < -1; i++) {
+            dates.add(dateFormat.format(calendar.getTime()));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        dates.add(context.getString(R.string.yesterday));
+        dates.add(context.getString(R.string.today));
+        dates.add(context.getString(R.string.tomorrow));
+        // Future
+        calendar.add(Calendar.DAY_OF_MONTH, 2);
+        for (int i = 3; i <= futureDays + 1; i++) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            dates.add(dateFormat.format(calendar.getTime()));
+        }
+        datePicker.setDisplayedValues(dates.toArray(new String[dates.size()]));
+        datePicker.setMinValue(0);
+        datePicker.setMaxValue(dates.size() - 1);
+        datePicker.setWrapSelectorWheel(false);
+        datePicker.setValue(TimeUtils.daysBetween(time, Calendar.getInstance()) + Math.abs(pastDays));
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            TextView date = new TextView(context);
+            date.setText(dateFormat.format(calendar.getTime()));
+            int padding = context.getResources().getDimensionPixelSize(R.dimen.default_padding_half);
+            date.setPadding(padding, padding, padding, padding);
+            date.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            datePicker.getLayoutParams().width = date.getMeasuredWidth();
+        }
     }
 }

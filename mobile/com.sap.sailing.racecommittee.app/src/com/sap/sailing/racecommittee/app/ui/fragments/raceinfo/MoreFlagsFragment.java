@@ -210,22 +210,26 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         private void setFinishTime(TimePoint finishTime) {
-            Result result = null;
+            Result result = new Result();
             switch (getArguments().getInt(START_MODE, 0)) {
             case 1: // Race-State: Finishing -> End Finishing
                 if (RaceLogRaceStatus.FINISHING.equals(getRace().getStatus())) {
                     result = getRace().setFinishedTime(finishTime);
+                } else {
+                    result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.FINISHING.name(), getRace().getStatus().name());
                 }
                 break;
 
             default: // Race-State: Running -> Start Finishing
                 if (RaceLogRaceStatus.RUNNING.equals(getRace().getStatus())) {
                     result = getRace().setFinishingTime(finishTime);
+                } else {
+                    result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.RUNNING.name(), getRace().getStatus().name());
                 }
                 break;
             }
 
-            if (result != null && result.hasError()) {
+            if (result.hasError()) {
                 Toast.makeText(getActivity(), result.getMessageId(), Toast.LENGTH_LONG).show();
             }
         }

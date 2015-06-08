@@ -323,7 +323,7 @@
     <string name="race_reset_confirm">Rennen zurücksetzen</string>
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden!</string>
-    <string name="race_set_start">Startzeit setzen</string>
+    <string name="race_set_time">Zeit setzen</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
@@ -427,5 +427,6 @@
     <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
+    <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
 
 </resources>

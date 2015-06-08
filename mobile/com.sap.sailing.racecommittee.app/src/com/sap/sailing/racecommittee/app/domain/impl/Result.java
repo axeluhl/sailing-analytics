@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 public class Result {
@@ -8,6 +9,7 @@ public class Result {
     public final static int OK = 0;
 
     private int mErrorString;
+    private Object[] mObjects;
 
     public Result() {
         this(OK);
@@ -19,6 +21,7 @@ public class Result {
 
     public void resetError() {
         mErrorString = OK;
+        mObjects = null;
     }
 
     public void setError(@StringRes int stringRes) {
@@ -27,6 +30,11 @@ public class Result {
         if (stringRes != 0) {
             mErrorString = stringRes;
         }
+    }
+
+    public void setError(@StringRes int stringRes, @Nullable Object... objects) {
+        setError(stringRes);
+        mObjects = objects;
     }
 
     public boolean isOk() {
@@ -42,6 +50,6 @@ public class Result {
     }
 
     public String getMessage(Context context) {
-        return context.getString(getMessageId());
+        return context.getString(getMessageId(), mObjects);
     }
 }

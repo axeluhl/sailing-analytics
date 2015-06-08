@@ -57,7 +57,7 @@
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
         <item name="chevron_left_36dp">@drawable/ic_chevron_left_white_36dp</item>
         <item name="chevron_right_36dp">@drawable/ic_chevron_right_white_36dp</item>
-        <item name="create_36dp">@drawable/ic_create_white_36dp</item>
+        <item name="create">@drawable/ic_create_dark</item>
         <item name="compass_back">@drawable/compass_back_dark</item>
         <item name="compass_needle">@drawable/compass_needle_dark</item>
         <item name="course_triangle_48dp">@drawable/course_triangle_48dp_dark</item>
