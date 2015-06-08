@@ -115,7 +115,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
             }
         });*/
-        map.setControls(ControlPosition.LEFT_TOP, simulationLegend);
+        map.setControls(ControlPosition.RIGHT_BOTTOM, simulationLegend);
         simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
     }
     

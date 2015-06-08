@@ -13,6 +13,8 @@ public interface RegattaRaceStatesTableResources extends CellTable.Resources {
          * Applied to the totals columns
          */
         String cellTableRaceNameColumn();
+        
+        String flagColumn();
 
     }
 

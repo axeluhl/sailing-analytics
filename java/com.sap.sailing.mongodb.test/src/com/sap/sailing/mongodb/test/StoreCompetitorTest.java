@@ -11,7 +11,9 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
@@ -30,7 +32,9 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
 
     private void dropCompetitorCollection() {
         DB db = getMongoService().getDB();
-        db.getCollection(CollectionNames.COMPETITORS.name()).drop();
+        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
+        competitorCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
+        competitorCollection.drop();
     }
     
     @Test

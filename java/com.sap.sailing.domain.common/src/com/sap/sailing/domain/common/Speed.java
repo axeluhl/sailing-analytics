@@ -79,5 +79,4 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * line" on a sphere) with this speed.
      */
     Duration getDuration(Distance distance);
-    
 }

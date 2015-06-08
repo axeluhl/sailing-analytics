@@ -45,12 +45,13 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
                     regressions.put(key, regression);
                 }
             }
-            regression.addData(fix.getWind(), fix.getAngleToTheWind(), fix.getBoatSpeed());
+            regression.addData(fix.getWind(), fix.getAbsoluteAngleToTheWind(), fix.getBoatSpeed());
         }
     }
     
-    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        GroupKey key = createGroupKey(boatClass, legType, tack);
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
+            Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, legType);
         SpeedWithBearingWithConfidence<Void> estimatedSpeedAndAngle = null;
         if (regressions.containsKey(key)) {
             estimatedSpeedAndAngle = regressions.get(key).estimateSpeedAndAngle(windSpeed);
@@ -62,11 +63,11 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
-        GroupKey key = createGroupKey(boatClass, legType, tack);
+        GroupKey key = createGroupKey(boatClass, legType);
         Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
         if (regressions.containsKey(key)) {
             try {
-                result = regressions.get(key).estimateTrueWindSpeedAndAngleCandidates(speedOverGround);
+                result = regressions.get(key).estimateTrueWindSpeedAndAngleCandidates(speedOverGround, legType, tack);
             } catch (NotEnoughDataHasBeenAddedException e) {
                 // Return empty result
             }
@@ -76,18 +77,12 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         return result;
     }
     
-    private GroupKey createGroupKey(final BoatClass boatClass, final LegType legType,
-            final Tack tack) {
-        TackAndLegTypePolarClusterKey key = new TackAndLegTypePolarClusterKey() {
+    private GroupKey createGroupKey(final BoatClass boatClass, final LegType legType) {
+        LegTypePolarClusterKey key = new LegTypePolarClusterKey() {
 
             @Override
             public BoatClass getBoatClass() {
                 return boatClass;
-            }
-
-            @Override
-            public Tack getTack() {
-                return tack;
             }
 
             @Override
@@ -106,9 +101,9 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         return compoundKey;
     }
     
-    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
-        GroupKey key = createGroupKey(boatClass, legType, tack);
+        GroupKey key = createGroupKey(boatClass, legType);
         PolynomialFunction polynomialFunction;
         if (regressions.containsKey(key)) {
             polynomialFunction = regressions.get(key).getSpeedRegressionFunction();
@@ -118,9 +113,9 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         return polynomialFunction;
     }
     
-    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
-        GroupKey key = createGroupKey(boatClass, legType, tack);
+        GroupKey key = createGroupKey(boatClass, legType);
         PolynomialFunction polynomialFunction;
         if (regressions.containsKey(key)) {
             polynomialFunction = regressions.get(key).getAngleRegressionFunction();

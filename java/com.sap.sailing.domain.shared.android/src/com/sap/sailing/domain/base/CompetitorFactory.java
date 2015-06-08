@@ -6,6 +6,7 @@ import java.net.URI;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 
 /**
  * Base interface for classes managing a set of {@link Competitor} objects.
@@ -27,5 +28,6 @@ public interface CompetitorFactory {
      */
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImageURI, DynamicTeam team, DynamicBoat boat);
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
+            URI flagImageURI, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile);
 }
