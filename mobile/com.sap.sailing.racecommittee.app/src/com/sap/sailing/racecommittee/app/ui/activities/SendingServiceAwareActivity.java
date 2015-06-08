@@ -97,7 +97,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
             sendingServiceStatus = String.format(statusText,
                     errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
         } else {
-            menuItemLive.setIcon(R.drawable.ic_share_white_36dp);
+            menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, getResources().getColor(android.R.color.white)));
             sendingServiceStatus = getString(R.string.no_event_to_be_sent);
         }
     }
