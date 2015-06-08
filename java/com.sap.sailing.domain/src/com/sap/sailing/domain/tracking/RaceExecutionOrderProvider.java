@@ -5,6 +5,11 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Regatta;
 
 /**
+ * Sometimes {@link TrackedRace}s want to know which {@link TrackedRace} is in front of them in the execution order
+ * of a {@link Regatta}. This is i.e interesting to know in the {@link DynamicTrackedRace #recordWind(com.sap.sailing.domain.common.Wind, com.sap.sailing.domain.common.WindSource)} 
+ * method, when the race has to decide whether to record the wind. If a previous {@link TrackedRace} 
+ * is <code>null</code>, the current {@link TrackedRace} would save the wind fixes earlier.
+ * 
  * @author Alexander Ries (D062114)
  *
  */
