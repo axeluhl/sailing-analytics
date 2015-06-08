@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +13,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -66,10 +66,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
 
-        final List<String> tagSuggestions = Arrays.asList(new String[] { "Stage", "Teaser", "Sponsor", "Logo" });
+        
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        tagSuggestions, "Enter tags for the image", 50));
+                        MediaConstants.imageTagSuggestions, "Enter tags for the image", 50));
     }
 
     @Override

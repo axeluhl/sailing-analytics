@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
@@ -81,10 +81,10 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             }
         });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        final List<String> tagSuggestions = Arrays.asList(new String[] { "Highlight", "Featured", "Locale_de, Locale_en", "Locale_ru", "Locale_cn" });
+        
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        tagSuggestions, "Enter tags for the video", 50));
+                        MediaConstants.videoTagSuggestions, "Enter tags for the video", 50));
     }
 
     @Override
