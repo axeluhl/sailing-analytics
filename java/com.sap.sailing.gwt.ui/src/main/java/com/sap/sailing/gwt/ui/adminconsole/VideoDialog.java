@@ -102,8 +102,8 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     }
 
     protected void setSelectedMimeType(MimeType mimeType) {
-        for(int i = 0; i < mimeTypeListBox.getVisibleItemCount(); i++) {
-            if(mimeTypeListBox.getItemText(0).equals(mimeType.name())) {
+        for(int i = 0; i < mimeTypeListBox.getItemCount(); i++) {
+            if(mimeTypeListBox.getItemText(i).equals(mimeType.name())) {
                 mimeTypeListBox.setSelectedIndex(i);
                 break;
             }
