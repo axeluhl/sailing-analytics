@@ -259,6 +259,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             });
         }
 
+        view.setClickable(true);
+
         return view;
     }
 
