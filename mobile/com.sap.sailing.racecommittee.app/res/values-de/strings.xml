@@ -417,5 +417,7 @@
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>
     <string name="send_mail">Sende Email...</string>
+    <string name="data_reload_title">Daten wurden extern verändert</string>
+    <string name="data_reload_message">Daten müssen neu geladen werden. Eventueller Datenverlust ist möglich.</string>
 
 </resources>

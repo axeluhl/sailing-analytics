@@ -31,7 +31,9 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -471,6 +473,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
+    private void showRefreshDialog() {
+        DataHelper.logout(getActivity());
+    }
+
     public interface RaceListCallbacks {
         void onRaceListItemSelected(RaceListDataType selectedItem);
     }
@@ -485,6 +491,13 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                     for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
                         if (extra.equals(raceGroupSeriesFleet.getDisplayName())) {
                             List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
+                            ReadonlyDataManager manager = DataManager.create(getActivity());
+                            for (ManagedRace race : races) {
+                                if (manager.getDataStore().getRace(race.getId()) != null) {
+                                    showRefreshDialog();
+                                    return;
+                                }
+                            }
                             ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
                             fragment.show(getFragmentManager(), null);
                         }
