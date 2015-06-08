@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.server;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -25,8 +27,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
     private HomeServiceUtil() {
@@ -412,5 +417,92 @@ public final class HomeServiceUtil {
         }
         int size = Util.size(urls);
         return Util.get(urls, new Random(size).nextInt(size));
+    }
+    
+    public static VideoDescriptor getStageVideo(Event event, String localeName, Set<MimeType> acceptedTypes, Collection<String> rankedTags, boolean acceptOtherTags) {
+        VideoDescriptor bestMatch = null;
+        
+        for (VideoDescriptor videoCandidate : event.getVideos()) {
+            if(!acceptedTypes.contains(videoCandidate.getMimeType())) {
+                continue;
+            }
+            
+            if(!acceptOtherTags && !hasOneTag(videoCandidate, rankedTags)) {
+                continue;
+            }
+            
+            LocaleMatch localeMatch = matchLocale(videoCandidate, localeName);
+            if(localeMatch == LocaleMatch.NO_MATCH) {
+                continue;
+            }
+            
+            if(bestMatch == null) {
+                bestMatch = videoCandidate;
+                continue;
+            }
+            
+            int compareByTag = compareByTag(videoCandidate, bestMatch, rankedTags);
+            if(compareByTag > 0 || (compareByTag == 0 && isBetter(videoCandidate, bestMatch, localeName))) {
+                bestMatch = videoCandidate;
+                continue;
+            }
+        }
+        return bestMatch;
+    }
+    
+    private static int compareByTag(VideoDescriptor videoCandidate, VideoDescriptor bestMatch,
+            Collection<String> rankedTags) {
+        for(String rankedTag : rankedTags) {
+            boolean hasTag = Util.contains(videoCandidate.getTags(), rankedTag);
+            boolean hasTagBestMatch = Util.contains(bestMatch.getTags(), rankedTag);
+            if(hasTag != hasTagBestMatch) {
+                return hasTag ? 1 : -1;
+            }
+        }
+        return 0;
+    }
+
+    private static boolean isBetter(VideoDescriptor candidate, VideoDescriptor reference, String localeName) {
+        LocaleMatch localeMatch = matchLocale(candidate, localeName);
+        LocaleMatch localeMatchRef = matchLocale(reference, localeName);
+        if(localeMatch != localeMatchRef) {
+            return localeMatch.compareTo(localeMatchRef) < 0 ? true : false;
+        }
+        
+        // TODO filter by length
+        
+        return candidate.getCreatedAtDate().compareTo(reference.getCreatedAtDate()) > 0;
+    }
+
+    private static boolean hasOneTag(VideoDescriptor videoCandidate, Collection<String> acceptedTags) {
+        for(String tag : videoCandidate.getTags()) {
+            if(acceptedTags.contains(tag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private enum LocaleMatch {
+        PERFECT, NOT_TAGGED, EN_FALLBACK, NO_MATCH
+    }
+
+    private static LocaleMatch matchLocale(VideoDescriptor videoCandidate, String localeName) {
+        boolean hasLocaleTag = false;
+        boolean hasEn = false;
+        for(String tag : videoCandidate.getTags()) {
+            if(tag.equals(MediaConstants.LOCALE_PREFIX + localeName)) {
+                return LocaleMatch.PERFECT;
+            }
+            hasLocaleTag |= tag.startsWith(MediaConstants.LOCALE_PREFIX);
+            hasEn |= tag.equals(MediaConstants.LOCALE_EN);
+        }
+        if(!hasLocaleTag) {
+            return LocaleMatch.NOT_TAGGED;
+        }
+        if(hasEn) {
+            return LocaleMatch.EN_FALLBACK;
+        }
+        return LocaleMatch.NO_MATCH;
     }
 }

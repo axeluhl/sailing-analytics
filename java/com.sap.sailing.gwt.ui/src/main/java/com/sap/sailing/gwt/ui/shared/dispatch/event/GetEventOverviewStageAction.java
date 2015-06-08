@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -10,12 +13,16 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
-import com.sap.sse.common.Util;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
+    private static final Set<MimeType> mimeTypes = new HashSet<>(Arrays.asList(MimeType.youtube, MimeType.vimeo, MimeType.mp4));
+    private static final Collection<String> rankedTags = Arrays.asList(MediaConstants.LIVESTREAM, MediaConstants.FEATURED, MediaConstants.HIGHLIGHT);
+    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaConstants.FEATURED, MediaConstants.HIGHLIGHT);
+    
     private UUID eventId;
     
     public GetEventOverviewStageAction() {
@@ -46,18 +53,14 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, MillisecondsTimePoint now) {
         // Simple solution:
-        // P1: Show the last video if available
+        // P1: Show the best matching video if available
         // P2: Show Countdown for upcoming events
         // P3: Show Stage image without Countdown
         
-        Iterable<URL> videoURLs = event.getVideoURLs();
-        for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
-            // TODO fmittag/pgt: implement locale specific live stream using context.getClientLocaleName() or context.getClientLocale()
-            String videoUrl = Util.get(videoURLs, i).toString();
-            MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl);
-            if (type == MimeType.youtube || type == MimeType.vimeo || type == MimeType.mp4) {
-                return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, type, videoUrl);
-            }
+        Collection<String> tags = state == EventState.FINISHED ? rankedTagsFinished : rankedTags;
+        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocaleName(), mimeTypes, tags, true);
+        if(stageVideo != null) {
+            return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, stageVideo.getMimeType(), stageVideo.getURL().toString());
         }
         String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
