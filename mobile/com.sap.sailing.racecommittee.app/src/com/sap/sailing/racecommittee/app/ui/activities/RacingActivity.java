@@ -105,10 +105,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
-    public void logout() {
-        logoutSession();
-    }
-
     @Override
     public void onBackPressed() {
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_container);

@@ -51,7 +51,7 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
     public void onClick(View v) {
         RacingActivity activity = (RacingActivity) getActivity();
         if (activity != null) {
-            activity.logout();
+            activity.logoutSession();
         }
     }
 

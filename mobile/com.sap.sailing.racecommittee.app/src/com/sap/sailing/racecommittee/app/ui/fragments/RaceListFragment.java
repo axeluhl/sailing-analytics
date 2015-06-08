@@ -255,8 +255,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
                 @Override
                 public void onClick(View v) {
-                    InMemoryDataStore.INSTANCE.reset();
-                    ((RacingActivity) getActivity()).logout();
+                    ((RacingActivity) getActivity()).logoutSession();
                 }
             });
         }

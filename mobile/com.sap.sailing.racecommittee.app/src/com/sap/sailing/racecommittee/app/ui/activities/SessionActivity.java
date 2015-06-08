@@ -40,7 +40,7 @@ public abstract class SessionActivity extends BaseActivity {
         return logoutSession();
     }
 
-    protected boolean logoutSession() {
+    public boolean logoutSession() {
         ExLog.i(this, TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
             .setTitle(getString(R.string.logout_dialog_title))
