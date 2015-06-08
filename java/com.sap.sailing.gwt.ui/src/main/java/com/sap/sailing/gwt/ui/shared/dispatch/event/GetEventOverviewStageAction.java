@@ -143,7 +143,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         lbEntryWithExternalLink.setExternalURL("http://www.sap.com/");
         stage.addNews(lbEntryWithExternalLink);
         
-        CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null);
+        CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null, null, null);
         String regattaName = "470 Men";
         String race6 = constructRaceName(regattaName, "R6", "Gold", singleRegatta);
         stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R6", race6, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
