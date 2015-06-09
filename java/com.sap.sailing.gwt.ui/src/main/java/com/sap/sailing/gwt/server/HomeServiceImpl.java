@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesSt
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
@@ -54,7 +55,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -184,7 +184,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 VideoDescriptor youTubeRandomUrl = HomeServiceUtil.getRandomVideo(videosOfEvent);
 
                 MimeType type = youTubeRandomUrl.getMimeType();
-                if (type.mediaType == MediaType.video) {
+                if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                     SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.getURL().toString(), type, //
                             youTubeRandomUrl.getCreatedAtDate().asDate()
                             );
@@ -221,8 +221,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 }
             }
             for (VideoDescriptor videoUrl : event.getVideos()) {
-                MimeType type =videoUrl.getMimeType();
-                if (type.mediaType == MediaType.video) {
+                MimeType type = videoUrl.getMimeType();
+                if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                     SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl.getURL().toString(), type, //
                             videoUrl.getCreatedAtDate().asDate()
                     );
@@ -429,7 +429,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         }
         for(VideoDescriptor url : event.getVideos()) {
             MimeType type = url.getMimeType();
-            if (type.mediaType == MediaType.video) {
+            if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                 SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url.getURL().toString(), type, null);
                 media.addVideo(candidate);
             }

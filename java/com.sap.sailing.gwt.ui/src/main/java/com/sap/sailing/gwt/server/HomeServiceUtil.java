@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -27,7 +26,6 @@ import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
-import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
@@ -390,11 +388,11 @@ public final class HomeServiceUtil {
         return Util.get(urls, new Random(size).nextInt(size));
     }
     
-    public static VideoDescriptor getStageVideo(Event event, String localeName, Set<MimeType> acceptedTypes, Collection<String> rankedTags, boolean acceptOtherTags) {
+    public static VideoDescriptor getStageVideo(Event event, String localeName, Collection<String> rankedTags, boolean acceptOtherTags) {
         VideoDescriptor bestMatch = null;
         
         for (VideoDescriptor videoCandidate : event.getVideos()) {
-            if(!acceptedTypes.contains(videoCandidate.getMimeType())) {
+            if(!MediaConstants.SUPPORTED_VIDEO_TYPES.contains(videoCandidate.getMimeType())) {
                 continue;
             }
             

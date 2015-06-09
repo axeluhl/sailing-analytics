@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -15,11 +13,9 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
-    private static final Set<MimeType> mimeTypes = new HashSet<>(Arrays.asList(MimeType.youtube, MimeType.vimeo, MimeType.mp4));
     private static final Collection<String> rankedTags = Arrays.asList(MediaConstants.LIVESTREAM, MediaConstants.FEATURED, MediaConstants.HIGHLIGHT);
     private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaConstants.FEATURED, MediaConstants.HIGHLIGHT);
     
@@ -58,7 +54,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         // P3: Show Stage image without Countdown
         
         Collection<String> tags = state == EventState.FINISHED ? rankedTagsFinished : rankedTags;
-        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocaleName(), mimeTypes, tags, true);
+        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocaleName(), tags, true);
         if(stageVideo != null) {
             return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, stageVideo.getMimeType(), stageVideo.getURL().toString());
         }
