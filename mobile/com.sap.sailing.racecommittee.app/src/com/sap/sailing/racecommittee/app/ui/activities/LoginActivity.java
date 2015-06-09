@@ -107,25 +107,6 @@ public class LoginActivity extends BaseActivity
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
-
-    private void setupSignInButton() {
-        ExLog.i(this, "LoginActivity", "=== setupSignInButton");
-        sign_in = (Button) findViewById(R.id.login_submit);
-        if (sign_in != null) {
-            ExLog.i(this, "LoginActivity", "=== sign in button found");
-            sign_in.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    preferences.isSetUp(true);
-                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-                    intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
-                    startActivity(intent);
-                }
-            });
-        }
-    }
-
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
         public void itemSelected(Fragment sender, CourseArea courseArea) {
@@ -148,6 +129,28 @@ public class LoginActivity extends BaseActivity
         }
     };
 
+    public LoginActivity() {
+        positionFragment = PositionListFragment.newInstance();
+    }
+
+    private void setupSignInButton() {
+        ExLog.i(this, "LoginActivity", "=== setupSignInButton");
+        sign_in = (Button) findViewById(R.id.login_submit);
+        if (sign_in != null) {
+            ExLog.i(this, "LoginActivity", "=== sign in button found");
+            sign_in.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    preferences.isSetUp(true);
+                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
+                    intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
     private Serializable selectEvent(EventBase event) {
         final Serializable eventId = event.getId();
         eventName = event.getName();
@@ -165,14 +168,14 @@ public class LoginActivity extends BaseActivity
         ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
     }
 
-    private void resetEvent(){
+    private void resetEvent() {
         mSelectedEventId = null;
         eventName = null;
         loginListViews.getEventContainer().setHeaderText("");
         resetCourseArea();
     }
 
-    private boolean isEventSelected(){
+    private boolean isEventSelected() {
         return (eventName != null && mSelectedEventId != null);
     }
 
@@ -183,11 +186,11 @@ public class LoginActivity extends BaseActivity
         loginListViews.getAreaContainer().setHeaderText(courseName);
     }
 
-    private boolean isCourseAreaSelected(){
-        return ( courseName != null  && mSelectedCourseAreaUUID != null );
+    private boolean isCourseAreaSelected() {
+        return (courseName != null && mSelectedCourseAreaUUID != null);
     }
 
-    private void resetCourseArea(){
+    private void resetCourseArea() {
         courseName = null;
         mSelectedCourseAreaUUID = null;
         loginListViews.getAreaContainer().setHeaderText("");
@@ -201,17 +204,13 @@ public class LoginActivity extends BaseActivity
         loginListViews.getPositionContainer().setHeaderText(header);
     }
 
-    private boolean isPositionSelected(){
-        return (positionName!= null);
+    private boolean isPositionSelected() {
+        return (positionName != null);
     }
 
-    private void resetPosition(){
+    private void resetPosition() {
         positionName = null;
         loginListViews.getPositionContainer().setHeaderText("");
-    }
-
-    public LoginActivity() {
-        positionFragment = PositionListFragment.newInstance();
     }
 
     private void addAreaPositionListFragment() {
@@ -251,22 +250,20 @@ public class LoginActivity extends BaseActivity
         return eventSelectionListener;
     }
 
-    private void updateSignInButtonState(){
-        ExLog.i(this, "LoginActivity", "updateSignInButtonState"+sign_in);
+    private void updateSignInButtonState() {
+        ExLog.i(this, "LoginActivity", "updateSignInButtonState" + sign_in);
 
-        if (sign_in == null){
+        if (sign_in == null) {
             return;
         }
-        if (isValidForSignIn()){
+        if (isValidForSignIn()) {
             sign_in.setEnabled(true);
         } else {
             sign_in.setEnabled(false);
         }
     }
 
-    private boolean isValidForSignIn(){
-        Toast.makeText(LoginActivity.this, "Sign in Valid? Event:" + isEventSelected() + " Course:" + isCourseAreaSelected() + "Position" + isPositionSelected(), Toast.LENGTH_LONG).show();
-
+    private boolean isValidForSignIn() {
         return isEventSelected() && isCourseAreaSelected() && isPositionSelected();
     }
 
@@ -326,7 +323,6 @@ public class LoginActivity extends BaseActivity
         updateSignInButtonState();
     }
 
-
     @Override
     protected boolean onReset() {
         Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
@@ -357,9 +353,9 @@ public class LoginActivity extends BaseActivity
             }
         }
 
-        if (mSelectedEventId != null && preferences.isSetUp()) {
+        if (preferences.isSetUp() && mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
             // FIXME: this should call selectEvent
-            addCourseAreaListFragment(mSelectedEventId);
+//            addCourseAreaListFragment(mSelectedEventId);
 
             Intent message = new Intent(this, RacingActivity.class);
             message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
@@ -390,31 +386,31 @@ public class LoginActivity extends BaseActivity
 
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
 
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    dismissProgressDialog();
-                    if (reason instanceof FileNotFoundException) {
-                        Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                        ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
-                    } else {
-                        Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
-                        ExLog.ex(LoginActivity.this, TAG, reason);
-                    }
+            @Override
+            public void onLoadFailed(Exception reason) {
+                dismissProgressDialog();
+                if (reason instanceof FileNotFoundException) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
+                    ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
+                    ExLog.ex(LoginActivity.this, TAG, reason);
                 }
+            }
 
-                @Override
-                public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                    dismissProgressDialog();
+            @Override
+            public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
+                dismissProgressDialog();
 
-                    // this is our 'global' configuration, let's store it in app preferences
-                    PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
+                // this is our 'global' configuration, let's store it in app preferences
+                PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
 
-                    Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
-                    // showCourseAreaListFragment(eventId);
-                    slideUpBackdropDelayed();
+                Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
+                // showCourseAreaListFragment(eventId);
+                slideUpBackdropDelayed();
 
-                }
-            });
+            }
+        });
 
         if (!AppPreferences.on(this).isOfflineMode()) {
             // always reload the configuration...
@@ -434,7 +430,7 @@ public class LoginActivity extends BaseActivity
         progressDialog.show();
     }
 
-    private void dismissProgressDialog(){
+    private void dismissProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
@@ -448,13 +444,6 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onDialogPositiveButton(AttachedDialogFragment dialog) {
 
-    }
-
-    private class BackdropClick implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            slideUpBackdrop();
-        }
     }
 
     private void slideUpBackdropDelayed() {
@@ -505,6 +494,13 @@ public class LoginActivity extends BaseActivity
         animatorSet.setDuration(aniTime);
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
         animatorSet.start();
+    }
+
+    private class BackdropClick implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            slideUpBackdrop();
+        }
     }
 
     private class IntentReceiver extends BroadcastReceiver {
