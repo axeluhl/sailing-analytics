@@ -214,7 +214,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
             for (ImageDescriptor url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
-                if(url.getWidthInPx() != null && url.getHeightInPx() != null) {
+                if(url.hasSize()) {
                     SailingImageDTO sailingImageDTO = new SailingImageDTO(eventRef, url.getURL().toString(), null);
                     sailingImageDTO.setSizeInPx(url.getWidthInPx(), url.getHeightInPx());
                     photoGalleryUrls.add(sailingImageDTO);

@@ -267,19 +267,12 @@ public final class HomeServiceUtil {
             return !teaser;
         }
         
-        int size = imageSize(candidate);
-        int sizeRef = imageSize(reference);
+        int size = candidate.getArea();
+        int sizeRef = candidate.getArea();
         if(size != sizeRef) {
             return size > sizeRef;
         }
         return candidate.getCreatedAtDate().compareTo(reference.getCreatedAtDate()) > 0;
-    }
-
-    private static int imageSize(ImageDescriptor candidate) {
-        int width = candidate.getWidthInPx() == null ? 0 : candidate.getWidthInPx();
-        int height = candidate.getHeightInPx() == null ? 0 : candidate.getHeightInPx();
-        // TODO fallback to event.getImageSize() if size is 0/null?
-        return width * height;
     }
 
     public static List<String> getPhotoGalleryImageURLsAsString(EventBase event) {
@@ -313,7 +306,7 @@ public final class HomeServiceUtil {
     public static List<ImageDescriptor> getSailingLovesPhotographyImages(EventBase event) {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
-            if (candidateImageUrl.getWidthInPx() != null && candidateImageUrl.getHeightInPx() != null && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
+            if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
                 acceptedImages.add(candidateImageUrl);
             }
         }

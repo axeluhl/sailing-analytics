@@ -8,4 +8,7 @@ public interface ImageDescriptor extends MediaDescriptor {
 
     Integer getWidthInPx();
     Integer getHeightInPx();
+    
+    boolean hasSize();
+    int getArea();
 }

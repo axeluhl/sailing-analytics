@@ -46,4 +46,17 @@ public class ImageDescriptorImpl extends AbstractMediaDescriptor implements Imag
         this.widthInPx = widthInPx;
         this.heightInPx = heightInPx;
     }
+    
+    @Override
+    public boolean hasSize() {
+        return widthInPx != null && heightInPx != null;
+    }
+    
+    @Override
+    public int getArea() {
+        if(hasSize()) {
+            return widthInPx * heightInPx;
+        }
+        return 0;
+    }
 }
