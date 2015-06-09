@@ -71,7 +71,10 @@
 	<string name="preference_racing_procedure_basic_classflag_key" translatable="false">basicClassFlag</string>
     <string name="preference_racing_procedure_basic_hasxray_key" translatable="false">basicIndividualRecall</string>
     <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
-    
+	<string name="preference_racing_procedure_league_classflag_key" translatable="false">leagueClassFlag</string>
+    <string name="preference_racing_procedure_league_hasxray_key" translatable="false">leagueIndividualRecall</string>
+    <bool name="preference_racing_procedure_league_hasxray_default">false</bool>
+
     <string name="preference_regatta_specific_save_key" translatable="false">basicIndividualRecall</string>
     
     <!-- override android.shared default value -->
