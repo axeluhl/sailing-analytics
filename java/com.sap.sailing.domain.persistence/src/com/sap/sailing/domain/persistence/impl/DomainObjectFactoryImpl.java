@@ -193,6 +193,7 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -2170,39 +2171,61 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      * @param event the event to migrate
      */
     private void migrateImagesAndVideosOfEvent(Event event) {
-        int amountOfURLbasedImagesAndVideos = Util.size(event.getImageURLs()) + Util.size(event.getSponsorImageURLs()) + Util.size(event.getVideoURLs());  
-        int amountOfImagesAndVideos = Util.size(event.getImages()) + Util.size(event.getVideos());
-        boolean migrationRequired = amountOfURLbasedImagesAndVideos > 0 && amountOfImagesAndVideos == 0; 
-        if(migrationRequired) {
-            for(URL url: event.getImageURLs()) {
-                String urlAsString = url.toString();
-                ImageDescriptor image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
-                Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
-                if(imageDimensions != null) {
-                    image.setSize(imageDimensions);
-                }
+        boolean changedAnything = false;
+        
+        changedAnything |= migrateImagesOfEvent(event, event.getImageURLs(), false);
+        changedAnything |= migrateImagesOfEvent(event, event.getSponsorImageURLs(), true);
+        
+        for(URL url: event.getVideoURLs()) {
+            if(hasMedia(event.getVideos(), url)) {
+                continue;
+            }
+            changedAnything = true;
+            MimeType mimeType = MediaUtils.detectMimeTypeFromUrl(url.toString());
+            VideoDescriptor video = new VideoDescriptorImpl(url, mimeType, MillisecondsTimePoint.now());
+            event.addVideo(video);
+        }
+        
+        if(changedAnything) {
+            new MongoObjectFactoryImpl(database).storeEvent(event);
+        }
+    }
+    
+    private boolean migrateImagesOfEvent(Event event, Iterable<URL> images, boolean sponsor) {
+        boolean changedAnything = false;
+        for(URL url: event.getImageURLs()) {
+            String urlAsString = url.toString();
+            if(hasMedia(event.getImages(), url)) {
+                continue;
+            }
+            changedAnything = true;
+            ImageDescriptorImpl image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
+            
+            Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
+            if(imageDimensions != null) {
+                image.setSize(imageDimensions);
+            }
+            
+            if(sponsor) {
+                image.addTag("Sponsor");
+            } else {
                 if(urlAsString.toLowerCase().indexOf("stage") > 0) {
                     image.addTag("Stage");
                 } else if(urlAsString.toLowerCase().indexOf("eventteaser") > 0) {
                     image.addTag("Teaser");
                 }
-                event.addImage(image);
             }
-            for(URL url: event.getSponsorImageURLs()) {
-                ImageDescriptor image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
-                Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
-                if(imageDimensions != null) {
-                    image.setSize(imageDimensions);
-                }
-                image.addTag("Sponsor");
-                event.addImage(image);
-            }
-            for(URL url: event.getVideoURLs()) {
-                MimeType mimeType = MediaUtils.detectMimeTypeFromUrl(url.toString());
-                VideoDescriptor video = new VideoDescriptorImpl(url, mimeType, MillisecondsTimePoint.now());
-                event.addVideo(video);
-            }
-            new MongoObjectFactoryImpl(database).storeEvent(event);
+            event.addImage(image);
         }
+        return changedAnything;
+    }
+    
+    private boolean hasMedia(Iterable<? extends MediaDescriptor> media, URL url) {
+        for(MediaDescriptor mediaEntry : media) {
+            if(url.equals(mediaEntry.getURL())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
