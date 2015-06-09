@@ -433,6 +433,8 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaUtils;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
 import com.sap.sse.common.search.KeywordQuery;
@@ -3484,7 +3486,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private VideoDescriptor convertToVideo(VideoDTO video) throws MalformedURLException {
-        VideoDescriptor result = new VideoDescriptorImpl(new URL(video.getSourceRef()), video.getMimeType(), new MillisecondsTimePoint(video.getCreatedAtDate()));
+        MimeType mimeType = video.getMimeType();
+        if(mimeType == null || mimeType == MimeType.unknown) {
+            mimeType = MediaUtils.detectMimeTypeFromUrl(video.getSourceRef());
+        }
+        VideoDescriptor result = new VideoDescriptorImpl(new URL(video.getSourceRef()), mimeType, new MillisecondsTimePoint(video.getCreatedAtDate()));
         result.setCopyright(video.getCopyright());
         result.setTitle(video.getTitle());
         result.setSubtitle(video.getSubtitle());
