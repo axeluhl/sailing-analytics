@@ -3,15 +3,12 @@ package com.sap.sailing.gwt.server;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -29,7 +26,9 @@ import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 
@@ -228,11 +227,11 @@ public final class HomeServiceUtil {
     }
     
     /**
-     * The stage image is determined from the {@link #imageURLs} collection by a series of heuristics and fall-back
+     * The stage image is determined from the {@link #images} collection by a series of heuristics and fall-back
      * rules:
      * <ol>
-     * <li>If one or more image URLs has "stage" (ignoring case) in its name, only they are considered candidates.</li>
-     * <li>If no image URL has "stage" (ignoring case) in its name, all images from {@link #imageURLs} are considered
+     * <li>If one or more image has {@link MediaConstants#STAGE} tag, only they are considered candidates.</li>
+     * <li>If no image has {@link MediaConstants#STAGE} tag, all images are considered
      * candidates.</li>
      * <li>From all candidates, the one with the biggest known size (determined by the product of width and height) is
      * chosen.</li>
@@ -240,69 +239,62 @@ public final class HomeServiceUtil {
      * </ol>
      */
     public static String getStageImageURLAsString(final EventBase event) {
-        URL url = getStageImageURL(event);
-        return url == null ? null : url.toString();
+        ImageDescriptor image = getStageImage(event);
+        return image == null ? null : image.getURL().toString();
     }
     
     /**
-     * The stage image is determined from the {@link #imageURLs} collection by a series of heuristics and fall-back
+     * The stage image is determined from the {@link #images} collection by a series of heuristics and fall-back
      * rules:
      * <ol>
-     * <li>If one or more image URLs has "stage" (ignoring case) in its name, only they are considered candidates.</li>
-     * <li>If no image URL has "stage" (ignoring case) in its name, all images from {@link #imageURLs} are considered
+     * <li>If one or more image has {@link MediaConstants#STAGE} tag, only they are considered candidates.</li>
+     * <li>If no image has {@link MediaConstants#STAGE} tag, all images are considered
      * candidates.</li>
      * <li>From all candidates, the one with the biggest known size (determined by the product of width and height) is
      * chosen.</li>
      * <li>If the size isn't known for any candidate, the first candidate in {@link #imageURLs} is picked.</li>
      * </ol>
      */
-    public static URL getStageImageURL(final EventBase event) {
-        final URL result;
-        if (Util.isEmpty(event.getImageURLs())) {
-            result = null;
-        } else {
-            Comparator<URL> stageImageComparator = new Comparator<URL>() {
-                @Override
-                public int compare(URL url1, URL url2) {
-                    String o1 = url1.toString();
-                    String o2 = url2.toString();
-                    int result;
-                    int o1NameHack = o1.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? 1 :
-                           o1.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? -1 : 0;
-                    int o2NameHack = o2.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? 1 :
-                        o2.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? -1 : 0;
-                    final int preResultBasedOnNameHack = o1NameHack - o2NameHack;
-                    if (preResultBasedOnNameHack == 0) {
-                        try {
-                            result = compareBySize(url1, url2);
-                        } catch (Exception e) {
-                            result = 0;
-                        }
-                    } else {
-                        result = preResultBasedOnNameHack;
-                    }
-                    return result;
-                }
-
-                private int compareBySize(URL o1, URL o2) throws InterruptedException, ExecutionException {
-                    final int result;
-                    final ImageSize o1Size = event.getImageSize(o1);
-                    final ImageSize o2Size = event.getImageSize(o2);
-                    result = (o1Size == null ? 0 : (o1Size.getWidth() * o1Size.getHeight()))
-                            - (o2Size == null ? 0 : (o2Size.getWidth() * o2Size.getHeight()));
-                    return result;
-                }
-            };
-            List<URL> sortedImageURLs = new ArrayList<>();
-            for (URL url : event.getImageURLs()) {
-                sortedImageURLs.add(url);
+    public static ImageDescriptor getStageImage(final EventBase event) {
+        ImageDescriptor bestMatch = null;
+        
+        for(ImageDescriptor candidate : event.getImages()) {
+            if(bestMatch == null || isBetterStageImage(candidate, bestMatch)) {
+                bestMatch = candidate;
+                continue;
             }
-            Collections.sort(sortedImageURLs, stageImageComparator);
-            result = sortedImageURLs.get(sortedImageURLs.size() - 1);
         }
-        return result;
+        
+        return bestMatch;
     }
     
+    private static boolean isBetterStageImage(ImageDescriptor candidate, ImageDescriptor reference) {
+        boolean stage = hasTag(candidate, MediaConstants.STAGE);
+        boolean stageRef = hasTag(reference, MediaConstants.STAGE);
+        if(stage != stageRef) {
+            return stage;
+        }
+        boolean teaser = hasTag(candidate, MediaConstants.TEASER);
+        boolean teaserRef = hasTag(reference, MediaConstants.TEASER);
+        if(teaser != teaserRef) {
+            return !teaser;
+        }
+        
+        int size = imageSize(candidate);
+        int sizeRef = imageSize(reference);
+        if(size != sizeRef) {
+            return size > sizeRef;
+        }
+        return candidate.getCreatedAtDate().compareTo(reference.getCreatedAtDate()) > 0;
+    }
+
+    private static int imageSize(ImageDescriptor candidate) {
+        int width = candidate.getWidthInPx() == null ? 0 : candidate.getWidthInPx();
+        int height = candidate.getHeightInPx() == null ? 0 : candidate.getHeightInPx();
+        // TODO fallback to event.getImageSize() if size is 0/null?
+        return width * height;
+    }
+
     public static List<String> getPhotoGalleryImageURLsAsString(EventBase event) {
         List<URL> urls = getPhotoGalleryImageURLs(event);
         List<String> result = new ArrayList<String>(urls.size());
@@ -313,7 +305,8 @@ public final class HomeServiceUtil {
     }
 
     public static List<URL> getPhotoGalleryImageURLs(EventBase event) {
-        URL stageImageURL = getStageImageURL(event); // if set, exclude stage image from photo gallery
+        ImageDescriptor stageImage = getStageImage(event); // if set, exclude stage image from photo gallery
+        URL stageImageURL = stageImage == null ? null : stageImage.getURL();
         List<URL> result = new ArrayList<>();
         Iterable<URL> imageURLs = event.getImageURLs();
         
@@ -394,8 +387,12 @@ public final class HomeServiceUtil {
     }
     
     public static boolean hasPhotos(Event event) {
-        // FIXME filter teaser images
-        return Util.size(event.getImageURLs()) > 1;
+        for(ImageDescriptor image : event.getImages()) {
+            if(!hasTag(image, MediaConstants.TEASER)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public static boolean hasVideos(Event event) {
@@ -453,8 +450,8 @@ public final class HomeServiceUtil {
     private static int compareByTag(VideoDescriptor videoCandidate, VideoDescriptor bestMatch,
             Collection<String> rankedTags) {
         for(String rankedTag : rankedTags) {
-            boolean hasTag = Util.contains(videoCandidate.getTags(), rankedTag);
-            boolean hasTagBestMatch = Util.contains(bestMatch.getTags(), rankedTag);
+            boolean hasTag = hasTag(videoCandidate, rankedTag);
+            boolean hasTagBestMatch = hasTag(bestMatch, rankedTag);
             if(hasTag != hasTagBestMatch) {
                 return hasTag ? 1 : -1;
             }
@@ -473,8 +470,12 @@ public final class HomeServiceUtil {
         
         return candidate.getCreatedAtDate().compareTo(reference.getCreatedAtDate()) > 0;
     }
+    
+    private static boolean hasTag(MediaDescriptor videoCandidate, String tag) {
+        return Util.contains(videoCandidate.getTags(), tag);
+    }
 
-    private static boolean hasOneTag(VideoDescriptor videoCandidate, Collection<String> acceptedTags) {
+    private static boolean hasOneTag(MediaDescriptor videoCandidate, Collection<String> acceptedTags) {
         for(String tag : videoCandidate.getTags()) {
             if(acceptedTags.contains(tag)) {
                 return true;
