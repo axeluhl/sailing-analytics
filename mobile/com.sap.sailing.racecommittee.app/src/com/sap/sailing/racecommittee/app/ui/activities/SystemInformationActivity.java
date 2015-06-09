@@ -28,6 +28,11 @@ public class SystemInformationActivity extends BaseActivity {
     }
 
     @Override
+    protected int getOptionsMenuResId() {
+        return 0;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case android.R.id.home:
