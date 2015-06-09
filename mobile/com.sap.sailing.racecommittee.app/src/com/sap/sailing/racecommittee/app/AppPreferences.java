@@ -364,8 +364,9 @@ public class AppPreferences {
     }
 
 	public void setLoginType(LoginType type) {
-		
-		Editor setEdit = preferences.edit();
+        ExLog.i(getContext(), this.getClass().toString(), "setLoginType: "+ type);
+
+        Editor setEdit = preferences.edit();
 		
 		switch( type ){
 			case NONE:{
@@ -423,6 +424,7 @@ public class AppPreferences {
     }
 
     public void setSendingActive(boolean activate) {
+        ExLog.i(getContext(), this.getClass().toString(), "setSendingActive: "+ activate);
         preferences.edit()
                 .putBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), activate)
                 .commit();
