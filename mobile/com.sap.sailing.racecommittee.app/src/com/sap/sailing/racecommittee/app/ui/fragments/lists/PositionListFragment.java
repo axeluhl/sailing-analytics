@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -85,6 +86,7 @@ public class PositionListFragment extends LoggableListFragment {
             break;
         }
         preferences.setAuthor(author);
+        ExLog.i(getActivity(), PositionListFragment.class.getName(),"Logging in as: "+selectedLoginType+"->"+author);
         if (host != null) {
             host.onPositionSelected(selectedLoginType);
         }
