@@ -48,6 +48,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
@@ -62,106 +63,184 @@ public class LoginActivity extends BaseActivity
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
+
     private final int RQS_GooglePlayServices = 1;
+
     private final PositionListFragment positionFragment;
+    private View backdrop;
     private LoginListViews loginListViews = null;
+
     private Button sign_in;
+
+    // FIXME weird data redundancy by using different field for setting values makes everything so complex and buggy
     private String eventName = null;
     private String courseName = null;
     private String positionName = null;
-    private View backdrop;
-    private IntentReceiver mReceiver;
-    private Serializable mSelectedEvent;
+
+    private Serializable mSelectedEventId;
     private UUID mSelectedCourseAreaUUID;
+
+    private IntentReceiver mReceiver;
+
+    private ProgressDialog progressDialog;
+
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
-            sign_in = (Button) findViewById(R.id.login_submit);
-            if (sign_in != null) {
-                sign_in.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        preferences.isSetUp(true);
-                        Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-                        intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-                        intent.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-                        startActivity(intent);
-                    }
-                });
-            }
 
-            final Serializable eventId = event.getId();
-            eventName = event.getName();
-            ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
-            preferences.setEventID(eventId);
-            showCourseAreaListFragment(eventId);
+            final Serializable eventId = selectEvent(event);
+
+            //FIXME: its weird to have this button setup in here
+            setupSignInButton();
+
+            //prepare views after the event selection
+
+            //close all currently open list views
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
+            addCourseAreaListFragment(eventId);
 
+            //send intent to open the course area selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
+
+    private void setupSignInButton() {
+        ExLog.i(this, "LoginActivity", "=== setupSignInButton");
+        sign_in = (Button) findViewById(R.id.login_submit);
+        if (sign_in != null) {
+            ExLog.i(this, "LoginActivity", "=== sign in button found");
+            sign_in.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    preferences.isSetUp(true);
+                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
+                    intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
         public void itemSelected(Fragment sender, CourseArea courseArea) {
-            courseName = courseArea.getName();
             ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
             ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
-            selectCourseArea(courseArea.getId());
+
+            selectCourseArea(courseArea);
+
+            // prepare views after area selection
+
+            // close all currently open list views
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
-
+            addAreaPositionListFragment();
+            //send intent to open the position selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
             LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
         }
     };
-    private ProgressDialog progressDialog;
+
+    private Serializable selectEvent(EventBase event) {
+        final Serializable eventId = event.getId();
+        eventName = event.getName();
+        //TODO: explicitly set the header text of the fragment to this name
+        selectEvent(eventId);
+        loginListViews.getEventContainer().setHeaderText(eventName);
+        return eventId;
+    }
+
+    // FIXME / DEPRECATED: only use the above setter for the whole event object
+    @Deprecated
+    private void selectEvent(Serializable eventId) {
+        mSelectedEventId = eventId;
+        preferences.setEventID(eventId);
+        ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
+    }
+
+    private void resetEvent(){
+        mSelectedEventId = null;
+        eventName = null;
+        loginListViews.getEventContainer().setHeaderText("");
+        resetCourseArea();
+    }
+
+    private boolean isEventSelected(){
+        return (eventName != null && mSelectedEventId != null);
+    }
+
+    private void selectCourseArea(CourseArea courseArea) {
+        courseName = courseArea.getName();
+        mSelectedCourseAreaUUID = courseArea.getId();
+        preferences.setCourseUUID(mSelectedCourseAreaUUID);
+        loginListViews.getAreaContainer().setHeaderText(courseName);
+    }
+
+    private boolean isCourseAreaSelected(){
+        return ( courseName != null  && mSelectedCourseAreaUUID != null );
+    }
+
+    private void resetCourseArea(){
+        courseName = null;
+        mSelectedCourseAreaUUID = null;
+        loginListViews.getAreaContainer().setHeaderText("");
+        resetPosition();
+    }
+
+    private void selectPosition(LoginType type) {
+        preferences.setLoginType(type);
+        positionName = positionFragment.getAuthor().getName();
+        String header = StringHelper.on(this).getAuthor(positionName);
+        loginListViews.getPositionContainer().setHeaderText(header);
+    }
+
+    private boolean isPositionSelected(){
+        return (positionName!= null);
+    }
+
+    private void resetPosition(){
+        positionName = null;
+        loginListViews.getPositionContainer().setHeaderText("");
+    }
 
     public LoginActivity() {
         positionFragment = PositionListFragment.newInstance();
     }
 
     private void addAreaPositionListFragment() {
-        positionName = null;
-        if (sign_in != null) {
-            sign_in.setEnabled(false);
-        }
+        resetPosition();
+        updateSignInButtonState();
         if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
             transaction.commitAllowingStateLoss();
         }
-        ExLog.i(this, "LoginActivity", "PositionFragment created.");
+        ExLog.i(this, "LoginActivity", "==PositionFragment created.");
     }
 
     private void addCourseAreaListFragment(Serializable eventId) {
-        courseName = null;
-        positionName = null;
-        if (sign_in != null) {
-            sign_in.setEnabled(false);
-        }
-        mSelectedEvent = eventId;
+        resetCourseArea();
+        updateSignInButtonState();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
-        ExLog.i(this, "LoginActivity", "CourseFragment created.");
+        ExLog.i(this, "LoginActivity", "==CourseFragment created.");
     }
 
     private void addEventListFragment() {
-        eventName = null;
-        courseName = null;
-        positionName = null;
-        if (sign_in != null) {
-            sign_in.setEnabled(false);
-        }
+        resetEvent();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
+        ExLog.i(this, "LoginActivity", "==EventFragment created.");
+
     }
 
     public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
@@ -170,6 +249,25 @@ public class LoginActivity extends BaseActivity
 
     public ItemSelectedListener<EventBase> getEventSelectionListener() {
         return eventSelectionListener;
+    }
+
+    private void updateSignInButtonState(){
+        ExLog.i(this, "LoginActivity", "updateSignInButtonState"+sign_in);
+
+        if (sign_in == null){
+            return;
+        }
+        if (isValidForSignIn()){
+            sign_in.setEnabled(true);
+        } else {
+            sign_in.setEnabled(false);
+        }
+    }
+
+    private boolean isValidForSignIn(){
+        Toast.makeText(LoginActivity.this, "Sign in Valid? Event:" + isEventSelected() + " Course:" + isCourseAreaSelected() + "Position" + isPositionSelected(), Toast.LENGTH_LONG).show();
+
+        return isEventSelected() && isCourseAreaSelected() && isPositionSelected();
     }
 
     @Override
@@ -181,48 +279,53 @@ public class LoginActivity extends BaseActivity
 
         mReceiver = new IntentReceiver();
 
+        // setup the login list views fragment
         loginListViews = new LoginListViews();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
 
+        // default the selected course area from preferences
         UUID courseUUID = preferences.getCourseUUID();
         if (courseUUID != new UUID(0, 0)) {
             mSelectedCourseAreaUUID = courseUUID;
         }
 
+        // default the selected id from the preferences
         Serializable eventId = preferences.getEventID();
         if (eventId != null) {
-            mSelectedEvent = eventId;
+            selectEvent(eventId);
         }
 
         new AutoUpdater(this).notifyAfterUpdate();
 
+        //setup the backdrop click listener
         backdrop = findViewById(R.id.login_view_backdrop);
         if (backdrop != null) {
             backdrop.setOnClickListener(new BackdropClick());
         }
+
     }
 
     @Override
     public void onPositionSelected(LoginType type) {
-        if (mSelectedCourseAreaUUID == null) {
+
+        //FIXME: this is some kind of exception handling
+        /*if (mSelectedCourseAreaUUID == null) {
             String toastText = getString(R.string.selected_course_area_lost);
             Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show();
             ExLog.e(LoginActivity.this, TAG, "Course area reference was not set - cannot start racing activity.");
             return;
-        }
+        }*/
 
-        preferences.setLoginType(type);
+        selectPosition(type);
+        // prepare views after position selected
 
-        positionName = positionFragment.getAuthor().getName();
         if (loginListViews != null) {
             loginListViews.closeAll();
         }
-
-        if (sign_in != null) {
-            sign_in.setEnabled(true);
-        }
+        updateSignInButtonState();
     }
+
 
     @Override
     protected boolean onReset() {
@@ -254,12 +357,13 @@ public class LoginActivity extends BaseActivity
             }
         }
 
-        if (mSelectedEvent != null && preferences.isSetUp()) {
-            showCourseAreaListFragment(mSelectedEvent);
+        if (mSelectedEventId != null && preferences.isSetUp()) {
+            // FIXME: this should call selectEvent
+            addCourseAreaListFragment(mSelectedEventId);
 
             Intent message = new Intent(this, RacingActivity.class);
             message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-            message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+            message.putExtra(AppConstants.EventIdTag, mSelectedEventId);
             fadeActivity(message);
         }
     }
@@ -274,25 +378,11 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onStop() {
         super.onStop();
-
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
-    }
-
-    private void selectCourseArea(UUID courseAreaUUID) {
-        // mSelectedCourseArea = courseArea;
-        mSelectedCourseAreaUUID = courseAreaUUID;
-        preferences.setCourseUUID(mSelectedCourseAreaUUID);
-        showAreaPositionListFragment();
+        dismissProgressDialog();
     }
 
     private void setupDataManager() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.loading_configuration));
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.show();
+        showProgressDialog();
 
         ReadonlyDataManager dataManager = DataManager.create(this);
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
@@ -302,8 +392,7 @@ public class LoginActivity extends BaseActivity
 
                 @Override
                 public void onLoadFailed(Exception reason) {
-                    progressDialog.dismiss();
-
+                    dismissProgressDialog();
                     if (reason instanceof FileNotFoundException) {
                         Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
                         ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
@@ -311,31 +400,19 @@ public class LoginActivity extends BaseActivity
                         Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                         ExLog.ex(LoginActivity.this, TAG, reason);
                     }
-                    showLogin();
                 }
 
                 @Override
                 public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                    progressDialog.dismiss();
+                    dismissProgressDialog();
 
                     // this is our 'global' configuration, let's store it in app preferences
                     PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
 
                     Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                     // showCourseAreaListFragment(eventId);
-                    showLogin();
+                    slideUpBackdropDelayed();
 
-                }
-
-                private void showLogin() {
-                    Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            backdrop.performClick();
-                        }
-                    };
-                    handler.postDelayed(runnable, 1000);
                 }
             });
 
@@ -343,28 +420,24 @@ public class LoginActivity extends BaseActivity
             // always reload the configuration...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
-            progressDialog.dismiss();
+            dismissProgressDialog();
         }
     }
 
-    private void showAreaPositionListFragment() {
-        addAreaPositionListFragment();
+    private void showProgressDialog() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage(getString(R.string.loading_configuration));
+            progressDialog.setCancelable(false);
+            progressDialog.setIndeterminate(true);
+        }
+        progressDialog.show();
     }
 
-    private void showCourseAreaListFragment(Serializable eventId) {
-        addCourseAreaListFragment(eventId);
-    }
-
-    public String getEventName() {
-        return eventName;
-    }
-
-    public String getCourseName() {
-        return courseName;
-    }
-
-    public String getPositionName() {
-        return positionName;
+    private void dismissProgressDialog(){
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
     @Override
@@ -378,42 +451,60 @@ public class LoginActivity extends BaseActivity
     }
 
     private class BackdropClick implements View.OnClickListener {
-
         @Override
         public void onClick(View view) {
-            if (view.getY() == 0) {
-                long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
-                final View bottomView = findViewById(R.id.login_listview);
-                View title = findViewById(R.id.backdrop_title);
-                View subTitle = findViewById(R.id.backdrop_subtitle);
-                View info = findViewById(R.id.technical_info);
-                View settings = findViewById(R.id.settings_button);
-                subTitle.setAlpha(0f);
-
-                ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
-                ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
-                ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
-                ObjectAnimator infoAnimation = ObjectAnimator.ofFloat(info, "alpha", 0f, 1f);
-                ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
-
-                ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
-                heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        int val = (Integer) valueAnimator.getAnimatedValue();
-                        ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
-                        layoutParams.height = val;
-                        bottomView.setLayoutParams(layoutParams);
-                    }
-                });
-
-                AnimatorSet animatorSet = new AnimatorSet();
-                animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, infoAnimation, settingsAnimation);
-                animatorSet.setDuration(aniTime);
-                animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-                animatorSet.start();
-            }
+            slideUpBackdrop();
         }
+    }
+
+    private void slideUpBackdropDelayed() {
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                slideUpBackdrop();
+            }
+        };
+        handler.postDelayed(runnable, 1000);
+    }
+
+    private void slideUpBackdrop() {
+        // don't slide up if already up
+        if (backdrop.getY() != 0) {
+            return;
+        }
+        long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
+        final View bottomView = findViewById(R.id.login_listview);
+
+        View title = findViewById(R.id.backdrop_title);
+        View subTitle = findViewById(R.id.backdrop_subtitle);
+        View info = findViewById(R.id.technical_info);
+        View settings = findViewById(R.id.settings_button);
+
+        subTitle.setAlpha(0f);
+
+        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -backdrop.getHeight() + (backdrop.getHeight() / 5));
+        ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
+        ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
+        ObjectAnimator infoAnimation = ObjectAnimator.ofFloat(info, "alpha", 0f, 1f);
+        ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
+
+        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, backdrop.getHeight() - (backdrop.getHeight() / 5));
+        heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                int val = (Integer) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
+                layoutParams.height = val;
+                bottomView.setLayoutParams(layoutParams);
+            }
+        });
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, infoAnimation, settingsAnimation);
+        animatorSet.setDuration(aniTime);
+        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatorSet.start();
     }
 
     private class IntentReceiver extends BroadcastReceiver {
