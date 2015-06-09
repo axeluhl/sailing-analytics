@@ -16,7 +16,6 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
-import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
 public class SailingGalleryPlayer extends ResizeComposite {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -30,7 +29,6 @@ public class SailingGalleryPlayer extends ResizeComposite {
     @UiField
     DivElement subSliderUi;
 
-    ImageCarousel<SailingImageDTO> carousel = new ImageCarousel<>();
     private int selectedIdx;
 
     public SailingGalleryPlayer(SailingImageDTO selected, List<SailingImageDTO> images) {
