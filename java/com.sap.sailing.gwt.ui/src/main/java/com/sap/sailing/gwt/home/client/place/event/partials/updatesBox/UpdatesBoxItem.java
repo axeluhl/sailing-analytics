@@ -45,7 +45,7 @@ public class UpdatesBoxItem extends Widget {
         String boatClass = entry.getBoatClass();
         if(boatClass != null && !boatClass.isEmpty()) {
             icon.getStyle().setBackgroundImage("url(\"" + BoatClassImageResolver.getBoatClassIconResource(boatClass).getSafeUri().asString() + "\")");
-            boatClassUi.setInnerText(boatClass);
+            boatClassUi.setInnerText(" / " + boatClass);
         } else {
             boatClassUi.removeFromParent();
         }
