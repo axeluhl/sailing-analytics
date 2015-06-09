@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.server;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -27,7 +26,6 @@ import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -37,12 +35,10 @@ public final class HomeServiceUtil {
     }
 
     private static final int MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS = 500;
-    private static final String STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "stage";
-    private static final String THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE = "eventteaser";
     
     public static String findEventThumbnailImageUrlAsString(EventBase event) {
-        URL url = findEventThumbnailImageUrl(event);
-        return url == null ? null : url.toString();
+        ImageDescriptor url = findEventThumbnailImage(event);
+        return url == null ? null : url.getURL().toString();
     }
     
     public static boolean isFakeSeries(EventBase event) {
@@ -104,47 +100,43 @@ public final class HomeServiceUtil {
         return EventState.RUNNING;
     }
     
-    private static URL findEventThumbnailImageUrl(EventBase event) {
+    private static ImageDescriptor findEventThumbnailImage(EventBase event) {
 
         final class ImageHolder {
 
             final int PERFECT_HEIGHT = 240;
             final int PERFECT_WIDTH = 370;
             final double PERFECT_RATIO = PERFECT_HEIGHT / (double) PERFECT_WIDTH;
-            final URL url;
             final int height;
             final int width;
             final int size;
             final double ratio;
+            final ImageDescriptor image;
+            final boolean stage;
 
             ImageHolder() {
-                this(null, null);
+                this(null);
             }
 
-            ImageHolder(URL url, ImageSize imageSize) {
-                this(url, imageSize == null ? -1 : imageSize.getWidth(), imageSize == null ? -1 : imageSize.getHeight());
-            }
-            
-            ImageHolder(URL url, int width, int height) {
-                this.url = url;
-                this.height = height;
-                this.width = width;
-                if(width == -1 || height == -1)  {
-                    this.size = -1;
+            ImageHolder(ImageDescriptor image) {
+                this.image = image;
+                this.stage = image == null ? false : hasTag(image, MediaConstants.STAGE);
+                this.height = image == null || image.getHeightInPx() == null ? 0 : image.getHeightInPx();
+                this.width = image == null || image.getWidthInPx() == null ? 0 : image.getWidthInPx();
+                this.size = height * width;
+                if(width == 0)  {
                     this.ratio = -1;
                 } else {
-                    this.size = height * width;
                     this.ratio = height / (double) width;
                 }
             }
 
             boolean isBetterWorstcaseThan(ImageHolder otherImageHolder) {
-
                 if (isNull()) {
                     return false;
                 }
 
-                if (this.url != null && url.toString().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+                if (stage) {
                     return false;
                 }
 
@@ -179,13 +171,13 @@ public final class HomeServiceUtil {
             }
 
             boolean isNull() {
-                return size == -1;
+                return image == null;
             }
         }
 
         // search for name pattern
-        for (URL imageUrl : event.getImageURLs()) {
-            if (imageUrl.toString().toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+        for (ImageDescriptor imageUrl : event.getImages()) {
+            if (hasTag(imageUrl, MediaConstants.TEASER)) {
                 return imageUrl;
             }
         }
@@ -193,16 +185,11 @@ public final class HomeServiceUtil {
         ImageHolder actualWorstcase = new ImageHolder();
         ImageHolder bestFit = new ImageHolder();
 
-        for (URL candidateImageUrl : getPhotoGalleryImageURLs(event)) {
-            ImageHolder candidate;
-            try {
-                candidate = new ImageHolder(candidateImageUrl, event.getImageSize(candidateImageUrl));
-            } catch (Exception e) {
-                candidate = new ImageHolder(candidateImageUrl, -1, -1);
-            }
+        for (ImageDescriptor candidateImage : getPhotoGalleryImages(event)) {
+            ImageHolder candidate = new ImageHolder(candidateImage);
 
             if (candidate.isPerfectFit()) {
-                return candidate.url;
+                return candidate.image;
             }
 
             if (candidate.fitsRatio() && candidate.isBigEnough()) {
@@ -218,10 +205,10 @@ public final class HomeServiceUtil {
         }
 
         if (!bestFit.isNull()) {
-            return bestFit.url;
+            return bestFit.image;
         }
         if (!actualWorstcase.isNull()) {
-            return actualWorstcase.url;
+            return actualWorstcase.image;
         }
         return null;
     }
@@ -296,44 +283,38 @@ public final class HomeServiceUtil {
     }
 
     public static List<String> getPhotoGalleryImageURLsAsString(EventBase event) {
-        List<URL> urls = getPhotoGalleryImageURLs(event);
+        List<ImageDescriptor> urls = getPhotoGalleryImages(event);
         List<String> result = new ArrayList<String>(urls.size());
-        for (URL url : urls) {
-            result.add(url.toString());
+        for (ImageDescriptor url : urls) {
+            result.add(url.getURL().toString());
         }
         return result;
     }
 
-    public static List<URL> getPhotoGalleryImageURLs(EventBase event) {
+    public static List<ImageDescriptor> getPhotoGalleryImages(EventBase event) {
         ImageDescriptor stageImage = getStageImage(event); // if set, exclude stage image from photo gallery
-        URL stageImageURL = stageImage == null ? null : stageImage.getURL();
-        List<URL> result = new ArrayList<>();
-        Iterable<URL> imageURLs = event.getImageURLs();
+        List<ImageDescriptor> result = new ArrayList<>();
+        Iterable<ImageDescriptor> imageURLs = event.getImages();
         
         boolean first = true;
-        for (Iterator<URL> iter = imageURLs.iterator(); iter.hasNext();  ) {
-            URL imageUrl = iter.next();
-            if(imageUrl.toString().toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+        for (Iterator<ImageDescriptor> iter = imageURLs.iterator(); iter.hasNext();  ) {
+            ImageDescriptor image = iter.next();
+            if(hasTag(image, MediaConstants.TEASER)) {
                 continue;
             }
-            if ((first && !iter.hasNext()) || !Util.equalsWithNull(imageUrl, stageImageURL)) {
-                result.add(imageUrl);
+            if ((first && !iter.hasNext()) || !Util.equalsWithNull(image, stageImage)) {
+                result.add(image);
             }
             first = false;
         }
         return result;
     }
     
-    public static List<URL> getSailingLovesPhotographyImages(EventBase event) {
-        final List<URL> acceptedImages = new LinkedList<>();
-        for (URL candidateImageUrl : event.getImageURLs()) {
-            try {
-                ImageSize imageSize = event.getImageSize(candidateImageUrl);
-                if (imageSize != null && imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                    acceptedImages.add(candidateImageUrl);
-                }
-            } catch (Exception e) {
-                // TODO what should we do here?
+    public static List<ImageDescriptor> getSailingLovesPhotographyImages(EventBase event) {
+        final List<ImageDescriptor> acceptedImages = new LinkedList<>();
+        for (ImageDescriptor candidateImageUrl : event.getImages()) {
+            if (candidateImageUrl.getWidthInPx() != null && candidateImageUrl.getHeightInPx() != null && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
+                acceptedImages.add(candidateImageUrl);
             }
         }
         return acceptedImages;
@@ -396,7 +377,7 @@ public final class HomeServiceUtil {
     }
     
     public static boolean hasVideos(Event event) {
-        return !Util.isEmpty(event.getVideoURLs());
+        return !Util.isEmpty(event.getVideos());
     }
 
     public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
@@ -408,7 +389,7 @@ public final class HomeServiceUtil {
         return false;
     }
     
-    public static URL getRandomURL(Iterable<URL> urls) {
+    public static VideoDescriptor getRandomVideo(Iterable<VideoDescriptor> urls) {
         if(Util.isEmpty(urls)) {
             return null;
         }
