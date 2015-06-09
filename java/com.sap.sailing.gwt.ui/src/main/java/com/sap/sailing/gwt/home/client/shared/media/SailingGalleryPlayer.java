@@ -74,8 +74,8 @@ public class SailingGalleryPlayer extends ResizeComposite {
     }
 
     native void gotoSlider(int index) /*-{
-	$wnd.$('.mainSlider').slick('slickGoTo', index);
-	$wnd.$('.subSlider').slick('slickGoTo', index);
+	$wnd.$('.mainSlider').slick('slickGoTo', index, true);
+	$wnd.$('.subSlider').slick('slickGoTo', index, true);
 	$wnd.$('.mainSlider').slick('setPosition');
 	$wnd.$('.subSlider').slick('setPosition');
     }-*/;
