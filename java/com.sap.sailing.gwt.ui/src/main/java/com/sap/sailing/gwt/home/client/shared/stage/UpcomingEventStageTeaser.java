@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class UpcomingEventStageTeaser extends StageTeaser {

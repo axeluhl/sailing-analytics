@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
 
 public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewView {
     private static SailingAnalyticsPageViewUiBinder uiBinder = GWT.create(SailingAnalyticsPageViewUiBinder.class);

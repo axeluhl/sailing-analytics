@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 /**

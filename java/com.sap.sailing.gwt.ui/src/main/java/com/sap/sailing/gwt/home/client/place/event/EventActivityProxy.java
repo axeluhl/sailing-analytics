@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaActivity;
@@ -17,6 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;

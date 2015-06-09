@@ -15,12 +15,12 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {

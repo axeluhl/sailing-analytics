@@ -8,11 +8,11 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
+import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
 
 public class MainSponsors extends Composite {
 

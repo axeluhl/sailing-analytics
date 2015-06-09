@@ -7,10 +7,10 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.player.Timer;
 

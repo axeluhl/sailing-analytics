@@ -20,10 +20,10 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.partials.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.desktop.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 

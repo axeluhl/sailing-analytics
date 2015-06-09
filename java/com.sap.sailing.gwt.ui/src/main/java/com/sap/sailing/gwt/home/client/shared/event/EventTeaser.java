@@ -12,10 +12,10 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
+import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
