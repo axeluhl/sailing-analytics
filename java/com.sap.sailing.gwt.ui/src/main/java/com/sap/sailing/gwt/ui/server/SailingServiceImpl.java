@@ -3309,14 +3309,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
         List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
         List<URL> sponsorimagieURLs = createURLsFromStrings(sponsorImageURLStrings);
-        List<ImageDescriptor> eventImages = new ArrayList<ImageDescriptor>();
-        for (ImageDTO image : images) {
-            eventImages.add(convertToImage(image));
-        }
-        List<VideoDescriptor> eventVideos = new ArrayList<VideoDescriptor>();
-        for (VideoDTO video : videos) {
-            eventVideos.add(convertToVideo(video));
-        }
+        List<ImageDescriptor> eventImages = convertToImages(images);
+        List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
                         isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
@@ -3346,14 +3340,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        List<ImageDescriptor> eventImages = new ArrayList<ImageDescriptor>();
-        for (ImageDTO image : images) {
-            eventImages.add(convertToImage(image));
-        }
-        List<VideoDescriptor> eventVideos = new ArrayList<VideoDescriptor>();
-        for (VideoDTO video : videos) {
-            eventVideos.add(convertToVideo(video));
-        }
+        List<ImageDescriptor> eventImages = convertToImages(images);
+        List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
@@ -3470,6 +3458,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (InterruptedException | ExecutionException e) {
             logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
         }
+    }
+
+    private List<ImageDescriptor> convertToImages(Iterable<ImageDTO> images) throws MalformedURLException {
+        List<ImageDescriptor> eventImages = new ArrayList<ImageDescriptor>();
+        for (ImageDTO image : images) {
+            try {
+                eventImages.add(convertToImage(image));
+            } catch(Exception e) {
+                // broken URLs are not being stored
+            }
+        }
+        return eventImages;
+    }
+
+    private List<VideoDescriptor> convertToVideos(Iterable<VideoDTO> videos) throws MalformedURLException {
+        List<VideoDescriptor> eventVideos = new ArrayList<VideoDescriptor>();
+        for (VideoDTO video : videos) {
+            try {
+                eventVideos.add(convertToVideo(video));
+            } catch(Exception e) {
+                // broken URLs are not being stored
+            }
+        }
+        return eventVideos;
     }
 
     private ImageDescriptor convertToImage(ImageDTO image) throws MalformedURLException {
