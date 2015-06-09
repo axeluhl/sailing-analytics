@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -184,6 +185,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -191,6 +193,7 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
@@ -2174,15 +2177,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             for(URL url: event.getImageURLs()) {
                 String urlAsString = url.toString();
                 ImageDescriptor image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
-                if(urlAsString.indexOf("stage") > 0) {
+                Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
+                if(imageDimensions != null) {
+                    image.setSize(imageDimensions);
+                }
+                if(urlAsString.toLowerCase().indexOf("stage") > 0) {
                     image.addTag("Stage");
-                } else if(urlAsString.indexOf("eventteaser") > 0) {
+                } else if(urlAsString.toLowerCase().indexOf("eventteaser") > 0) {
                     image.addTag("Teaser");
                 }
                 event.addImage(image);
             }
             for(URL url: event.getSponsorImageURLs()) {
                 ImageDescriptor image = new ImageDescriptorImpl(url, MillisecondsTimePoint.now());
+                Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
+                if(imageDimensions != null) {
+                    image.setSize(imageDimensions);
+                }
                 image.addTag("Sponsor");
                 event.addImage(image);
             }

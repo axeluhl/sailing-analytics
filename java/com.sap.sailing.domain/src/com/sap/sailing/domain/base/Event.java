@@ -5,7 +5,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MediaUtils;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
@@ -58,7 +60,10 @@ public interface Event extends EventBase {
      * 
      * Note that exceptions may result should the image be unavailable. If the image URL leads to a document that is not an image,
      * <code>null</code> will result.
+     * 
+     * @deprecated Use {@link MediaUtils#getImageDimensions(URL)} or simply use the dimensions given by {@link ImageDescriptor}
      */
+    @Deprecated
     ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
     
 }

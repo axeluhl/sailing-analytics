@@ -3,6 +3,7 @@ package com.sap.sse.common.media;
 import java.net.URL;
 
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 
 public class ImageDescriptorImpl extends AbstractMediaDescriptor implements ImageDescriptor {
@@ -30,10 +31,10 @@ public class ImageDescriptorImpl extends AbstractMediaDescriptor implements Imag
     }
 
     @Override
-    public void setSize(ImageSize size) {
+    public void setSize(Pair<Integer, Integer> size) {
         if (size != null) {
-            this.widthInPx = size.getWidth();
-            this.heightInPx = size.getHeight();
+            this.widthInPx = size.getA();
+            this.heightInPx = size.getB();
         } else {
             this.widthInPx = null;
             this.heightInPx = null;
