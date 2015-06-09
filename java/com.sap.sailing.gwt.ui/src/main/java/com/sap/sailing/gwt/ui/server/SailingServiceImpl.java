@@ -3504,6 +3504,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         result.setTitle(image.getTitle());
         result.setSubtitle(image.getSubtitle());
         result.setMimeType(image.getMimeType());
+        result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
         List<String> tags = new ArrayList<String>();
         for(String tag: image.getTags()) {
             tags.add(tag);
