@@ -134,13 +134,12 @@ public class LoginActivity extends BaseActivity
     }
 
     private void setupSignInButton() {
-        ExLog.i(this, "LoginActivity", "=== setupSignInButton");
         sign_in = (Button) findViewById(R.id.login_submit);
         if (sign_in != null) {
-            ExLog.i(this, "LoginActivity", "=== sign in button found");
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
                     preferences.isSetUp(true);
                     Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
                     intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
@@ -221,7 +220,6 @@ public class LoginActivity extends BaseActivity
             transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
             transaction.commitAllowingStateLoss();
         }
-        ExLog.i(this, "LoginActivity", "==PositionFragment created.");
     }
 
     private void addCourseAreaListFragment(Serializable eventId) {
@@ -230,7 +228,6 @@ public class LoginActivity extends BaseActivity
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
-        ExLog.i(this, "LoginActivity", "==CourseFragment created.");
     }
 
     private void addEventListFragment() {
@@ -238,7 +235,6 @@ public class LoginActivity extends BaseActivity
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
-        ExLog.i(this, "LoginActivity", "==EventFragment created.");
 
     }
 
@@ -251,8 +247,6 @@ public class LoginActivity extends BaseActivity
     }
 
     private void updateSignInButtonState() {
-        ExLog.i(this, "LoginActivity", "updateSignInButtonState" + sign_in);
-
         if (sign_in == null) {
             return;
         }
