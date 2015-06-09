@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,33 +14,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
 
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
-    private LoginActivity activity;
+    private Button mSignUp;
+    private IntentListener mListener;
 
-    private Button sign_up;
-    private IntentListener listener;
-
-    private ToggleContainer event_container;
-    private ToggleContainer area_container;
-    private ToggleContainer position_container;
+    private ToggleContainer mEventContainer;
+    private ToggleContainer mAreaContainer;
+    private ToggleContainer mPositionContainer;
 
     public LoginListViews() {
-        listener = new IntentListener();
+        mListener = new IntentListener();
     }
 
-    public ToggleContainer getEventContainer(){ return event_container; }
-    public ToggleContainer getAreaContainer(){ return area_container; }
-    public ToggleContainer getPositionContainer(){ return position_container; }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.activity = (LoginActivity) activity;
-    }
+    public ToggleContainer getEventContainer(){ return mEventContainer; }
+    public ToggleContainer getAreaContainer(){ return mAreaContainer; }
+    public ToggleContainer getPositionContainer(){ return mPositionContainer; }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,11 +42,11 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         RelativeLayout position_header = (RelativeLayout) view.findViewById(R.id.position_header);
 
         // create the toggle container instances
-        this.event_container = new ToggleContainer((FrameLayout) view.findViewById(R.id.event_fragment), event_header, (TextView) view
+        this.mEventContainer = new ToggleContainer((FrameLayout) view.findViewById(R.id.event_fragment), event_header, (TextView) view
             .findViewById(R.id.selected_event));
-        this.area_container = new ToggleContainer((FrameLayout) view.findViewById(R.id.area_fragment), area_header, (TextView) view
+        this.mAreaContainer = new ToggleContainer((FrameLayout) view.findViewById(R.id.area_fragment), area_header, (TextView) view
             .findViewById(R.id.selected_area));
-        this.position_container = new ToggleContainer((FrameLayout) view
+        this.mPositionContainer = new ToggleContainer((FrameLayout) view
             .findViewById(R.id.position_fragment), position_header, (TextView) view.findViewById(R.id.selected_position));
 
         // add listeners to the click areas
@@ -70,9 +60,9 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             position_header.setOnClickListener(this);
         }
 
-        sign_up = (Button) view.findViewById(R.id.login_submit);
-        if (sign_up != null) {
-            sign_up.setOnClickListener(this);
+        mSignUp = (Button) view.findViewById(R.id.login_submit);
+        if (mSignUp != null) {
+            mSignUp.setOnClickListener(this);
         }
 
         onClick(event_header);
@@ -86,14 +76,14 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(listener, filter);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mListener, filter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(listener);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mListener);
     }
 
     @Override
@@ -101,21 +91,21 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         switch (view.getId()) {
         case R.id.event_header:
-            event_container.toggle();
-            area_container.close();
-            position_container.close();
+            mEventContainer.toggle();
+            mAreaContainer.close();
+            mPositionContainer.close();
             break;
 
         case R.id.area_header:
-            event_container.close();
-            area_container.toggle();
-            position_container.close();
+            mEventContainer.close();
+            mAreaContainer.toggle();
+            mPositionContainer.close();
             break;
 
         case R.id.position_header:
-            event_container.close();
-            area_container.close();
-            position_container.toggle();
+            mEventContainer.close();
+            mAreaContainer.close();
+            mPositionContainer.toggle();
             break;
 
         default:
@@ -126,16 +116,16 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     }
 
     public void closeAll() {
-        event_container.close();
-        area_container.close();
-        position_container.close();
+        mEventContainer.close();
+        mAreaContainer.close();
+        mPositionContainer.close();
         showButton();
     }
 
     private void showButton() {
-        sign_up.setVisibility(View.GONE);
-        if (event_container.isClosed() && area_container.isClosed() && position_container.isClosed()) {
-            sign_up.setVisibility(View.VISIBLE);
+        mSignUp.setVisibility(View.GONE);
+        if (mEventContainer.isClosed() && mAreaContainer.isClosed() && mPositionContainer.isClosed()) {
+            mSignUp.setVisibility(View.VISIBLE);
         }
     }
 
@@ -206,13 +196,13 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             case AppConstants.INTENT_ACTION_TOGGLE:
                 String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                 if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
-                    onClick(event_container.getHeader());
+                    onClick(mEventContainer.getHeader());
                 }
                 if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
-                    onClick(area_container.getHeader());
+                    onClick(mAreaContainer.getHeader());
                 }
                 if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
-                    onClick(position_container.getHeader());
+                    onClick(mPositionContainer.getHeader());
                 }
                 break;
 

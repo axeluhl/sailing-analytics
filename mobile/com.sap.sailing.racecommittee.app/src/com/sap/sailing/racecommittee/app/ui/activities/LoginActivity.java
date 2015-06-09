@@ -267,12 +267,7 @@ public class LoginActivity extends BaseActivity
     private boolean isValidForSignIn(){
         Toast.makeText(LoginActivity.this, "Sign in Valid? Event:" + isEventSelected() + " Course:" + isCourseAreaSelected() + "Position" + isPositionSelected(), Toast.LENGTH_LONG).show();
 
-        if (isEventSelected() && isCourseAreaSelected() && isPositionSelected()){
-            return true;
-        }else{
-            return false;
-        }
-
+        return isEventSelected() && isCourseAreaSelected() && isPositionSelected();
     }
 
     @Override
@@ -364,7 +359,6 @@ public class LoginActivity extends BaseActivity
         }
 
         if (mSelectedEventId != null && preferences.isSetUp()) {
-
             // FIXME: this should call selectEvent
             addCourseAreaListFragment(mSelectedEventId);
 
@@ -464,7 +458,6 @@ public class LoginActivity extends BaseActivity
         }
     }
 
-    // TODO: put this into the backdrop fragment
     private void slideUpBackdropDelayed() {
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -476,7 +469,6 @@ public class LoginActivity extends BaseActivity
         handler.postDelayed(runnable, 1000);
     }
 
-    // TODO: put this into the backdrop fragment
     private void slideUpBackdrop() {
         // don't slide up if already up
         if (backdrop.getY() != 0) {
