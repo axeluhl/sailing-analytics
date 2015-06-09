@@ -2198,7 +2198,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 event.addImage(image);
             }
             for(URL url: event.getVideoURLs()) {
-                VideoDescriptor video = new VideoDescriptorImpl(url, MimeType.unknown, MillisecondsTimePoint.now());
+                MimeType mimeType = MediaUtils.detectMimeTypeFromUrl(url.toString());
+                VideoDescriptor video = new VideoDescriptorImpl(url, mimeType, MillisecondsTimePoint.now());
                 event.addVideo(video);
             }
             new MongoObjectFactoryImpl(database).storeEvent(event);
