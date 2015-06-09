@@ -5,9 +5,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -33,6 +38,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected IntegerBox heightInPxBox;
     protected StringListInlineEditorComposite tagsListEditor;
     
+    final Image image;
+    
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
 
@@ -57,12 +64,29 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         this.stringMessages = stringMessages;
         this.creationDate = new Date();
         getDialogBox().getWidget().setWidth("730px");
+        
+        image = new Image();
+        image.addLoadHandler(new LoadHandler() {
+            @Override
+            public void onLoad(LoadEvent event) {
+                int width = image.getOffsetWidth();
+                int height = image.getOffsetHeight();
+                
+                if(width > 0 && height > 0) {
+                    widthInPxBox.setValue(width);
+                    heightInPxBox.setValue(height);
+                }
+            }
+        });
+        image.getElement().getStyle().setPosition(Position.ABSOLUTE);
+        image.getElement().getStyle().setVisibility(Visibility.HIDDEN);
 
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 validate();
+                image.setUrl(event.getValue());
             }
         });
 
@@ -71,7 +95,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaConstants.imageTagSuggestions, "Enter tags for the image", 50));
     }
-
+    
     @Override
     protected ImageDTO getResult() {
         ImageDTO result = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
@@ -117,6 +141,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         formGrid.setWidget(6, 1, heightInPxBox);
         formGrid.setWidget(7, 0, new Label("Tags:"));
         formGrid.setWidget(7, 1, tagsListEditor);
+        
+        panel.add(image);
 
         return panel;
     }
