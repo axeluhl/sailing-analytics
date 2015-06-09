@@ -178,7 +178,6 @@ public class LoginActivity extends BaseActivity
         ThemeHelper.setTheme(this);
 
         setContentView(R.layout.login_view);
-        setSupportProgressBarIndeterminateVisibility(false);
 
         mReceiver = new IntentReceiver();
 

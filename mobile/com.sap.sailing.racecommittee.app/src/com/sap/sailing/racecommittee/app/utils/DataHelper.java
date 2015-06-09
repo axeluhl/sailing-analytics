@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.utils;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;

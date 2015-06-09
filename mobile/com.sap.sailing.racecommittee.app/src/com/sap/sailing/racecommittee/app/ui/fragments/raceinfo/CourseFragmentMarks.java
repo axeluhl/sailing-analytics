@@ -82,6 +82,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
         return fragment;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);

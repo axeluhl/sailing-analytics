@@ -76,6 +76,7 @@ public class PositioningFragment extends BaseFragment
         return layout;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

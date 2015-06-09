@@ -434,13 +434,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         });
     }
 
-    // Requires higher api to avoid deprecation
+    // @SuppressWarnings, but it is handled correctly
+    @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
-        } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+        } else {
+            v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
         }
     }
 
