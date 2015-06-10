@@ -32,7 +32,7 @@ public class ThemeHelper {
         }
     }
 
-    public static boolean setPickerTextColor(Context context, TimePicker timePicker, int color) {
+    public static boolean setPickerTextColor(Context context, TimePicker timePicker, @ColorRes int color) {
         Resources system = Resources.getSystem();
         int hourId = system.getIdentifier("hour", "id", "android");
         int minuteId = system.getIdentifier("minute", "id", "android");
@@ -46,7 +46,7 @@ public class ThemeHelper {
         return false;
     }
 
-    public static boolean setPickerTextColor(Context context, NumberPicker numberPicker, int color) {
+    public static boolean setPickerTextColor(Context context, NumberPicker numberPicker, @ColorRes int color) {
         final int count = numberPicker.getChildCount();
         for (int i = 0; i < count; i++) {
             View child = numberPicker.getChildAt(i);
