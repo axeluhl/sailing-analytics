@@ -82,7 +82,6 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
         return fragment;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
@@ -114,8 +113,14 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
             adapter.setListener(this);
             adapter.setEventListener(this);
 
-            mCourseAdapter = mDragDropManager.createWrappedAdapter(adapter);
-            mCourseAdapter = mSwipeManager.createWrappedAdapter(mCourseAdapter);
+            @SuppressWarnings("unchecked")
+            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
+            mCourseAdapter = dragAdapter;
+
+            @SuppressWarnings("unchecked")
+            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
+            mCourseAdapter = swipeManager;
+
             mCurrentCourse.setLayoutManager(layoutManager);
             mCurrentCourse.setAdapter(mCourseAdapter);
             mCurrentCourse.setItemAnimator(new SwipeDismissItemAnimator());

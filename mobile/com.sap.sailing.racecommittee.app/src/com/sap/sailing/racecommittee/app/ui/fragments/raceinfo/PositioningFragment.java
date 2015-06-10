@@ -76,7 +76,6 @@ public class PositioningFragment extends BaseFragment
         return layout;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -100,8 +99,14 @@ public class PositioningFragment extends BaseFragment
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
                 mAdapter = new FinishListAdapter(getActivity(), mFinishedData);
                 mAdapter.setListener(this);
-                mFinishedAdapter = mDragDropManager.createWrappedAdapter(mAdapter);
-                mFinishedAdapter = mSwipeManager.createWrappedAdapter(mFinishedAdapter);
+
+                @SuppressWarnings("unchecked")
+                RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager.createWrappedAdapter(mAdapter);
+                mFinishedAdapter = dragManager;
+
+                @SuppressWarnings("unchecked")
+                RecyclerView.Adapter<FinishListAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mFinishedAdapter);
+                mFinishedAdapter = swipeManager;
 
                 mFinishView.setLayoutManager(layoutManager);
                 mFinishView.setAdapter(mFinishedAdapter);
