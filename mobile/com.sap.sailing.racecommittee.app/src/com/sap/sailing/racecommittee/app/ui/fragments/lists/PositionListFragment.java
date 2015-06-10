@@ -38,13 +38,15 @@ public class PositionListFragment extends LoggableListFragment {
             parent.addView(view, 1);
         }
 
+        preferences = AppPreferences.on(getActivity());
+
         final ArrayList<String> values = new ArrayList<>();
         values.add(getString(R.string.login_type_officer_on_start_vessel));
         values.add(getString(R.string.login_type_officer_on_finish_vessel));
         values.add(getString(R.string.login_type_shore_control));
-        values.add(getString(R.string.login_type_viewer));
-
-        preferences = AppPreferences.on(getActivity());
+        if (preferences.isDemoAllowed()) {
+            values.add(getString(R.string.login_type_viewer));
+        }
 
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getBaseContext(), R.layout.login_list_item, R.id.list_item, values);
         setListAdapter(adapter);
@@ -86,7 +88,7 @@ public class PositionListFragment extends LoggableListFragment {
             break;
         }
         preferences.setAuthor(author);
-        ExLog.i(getActivity(), PositionListFragment.class.getName(),"Logging in as: "+selectedLoginType+"->"+author);
+        ExLog.i(getActivity(), PositionListFragment.class.getName(), "Logging in as: " + selectedLoginType + "->" + author);
         if (host != null) {
             host.onPositionSelected(selectedLoginType);
         }

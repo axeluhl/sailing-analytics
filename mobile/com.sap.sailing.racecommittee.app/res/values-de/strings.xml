@@ -248,6 +248,8 @@
     <string name="race_show_less">zeige weniger</string>
     <string name="preference_wakelock_summary">Lässt den Bildschirm immer an. Achtung: Verbraucht mehr Strom.</string>
     <string name="preference_wakelock_header">Behalte Bildschirm an</string>
+    <string name="preference_allow_demo_header">Login im Demo-Modus erlauben</string>
+    <string name="preference_allow_demo_summary">Wenn aktiv kann man sich im Demo-Modus anmelden. Im Demo-Modus werden keine Rennänderungen an den Server geschickt.</string>
     <string name="loading_events_succeded">Events geladen.</string>
     <string name="available_races">Verfügbare Rennen</string>
     <string name="change">ÄNDERN</string>
