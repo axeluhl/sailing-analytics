@@ -39,18 +39,18 @@ public class AppPreferences {
     private final static String HIDDEN_PREFERENCE_WIND_BEARING = "windBearingPref";
 
     private final static String HIDDEN_PREFERENCE_WIND_SPEED = "windSpeedPref";
-    
+
     private final static String HIDDEN_PREFERENCE_WIND_LAT = "windLatPref";
-    
+
     private final static String HIDDEN_PREFERENCE_WIND_LNG = "windLngPref";
-    
+
     private final static String HIDDEN_PREFERENCE_COURSE_UUID_LEAST = "courseUUIDLeast";
     private final static String HIDDEN_PREFERENCE_COURSE_UUID_MOST = "courseUUIDMost";
 
     private final static String HIDDEN_PREFERENCE_EVENT_ID = "eventId";
-    
+
     private final static String HIDDEN_PREFERENCE_IS_SET_UP = "isSetUp";
-    
+
     private final static String HIDDEN_PREFERENCE_LOGIN_TYPE = "loginType";
 
     public static AppPreferences on(Context context) {
@@ -165,13 +165,13 @@ public class AppPreferences {
 			case 2:{
 				return LoginType.OFFICER;
 			}
-			
+
 			default:{
 				return LoginType.NONE;
 			}
 		}
 	}
-    
+
     public String getMailRecipient() {
         return preferences.getString(key(R.string.preference_mail_key), "");
     }
@@ -268,7 +268,7 @@ public class AppPreferences {
         long windSpeedAsLong = preferences.getLong(HIDDEN_PREFERENCE_WIND_SPEED, 0);
         return Double.longBitsToDouble(windSpeedAsLong);
     }
-    
+
     public LatLng getWindPosition(){
     	double lat = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LAT, 0));
     	double lng = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LNG, 0));
@@ -280,7 +280,7 @@ public class AppPreferences {
     	long most  = preferences.getLong(HIDDEN_PREFERENCE_COURSE_UUID_MOST, 0);
     	return new UUID(most,least);
     }
-    
+
     public Serializable getEventID(){
     	String id = preferences.getString(HIDDEN_PREFERENCE_EVENT_ID, "");
     	if ( id != "" ){
@@ -288,15 +288,15 @@ public class AppPreferences {
     	}
     	return null;
     }
-    
+
     public boolean isSetUp(){
     	return preferences.getBoolean(HIDDEN_PREFERENCE_IS_SET_UP, false);
     }
-    
+
     public void isSetUp(boolean isIt){
     	preferences.edit().putBoolean(HIDDEN_PREFERENCE_IS_SET_UP, isIt).commit();
     }
-    
+
     public boolean isPollingActive() {
         return preferences.getBoolean(key(R.string.preference_polling_active_key), false);
     }
@@ -358,7 +358,7 @@ public class AppPreferences {
         ExLog.i(getContext(), this.getClass().toString(), "setLoginType: "+ type);
 
         Editor setEdit = preferences.edit();
-		
+
 		switch( type ){
 			case NONE:{
 				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 0);
@@ -372,15 +372,15 @@ public class AppPreferences {
 				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 2);
 				break;
 			}
-			
+
 			default:{
 				break;
 			}
 		}
-		
+
 		setEdit.commit();
 	}
-    
+
     public void setMailRecipient(String mail) {
         preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
     }
@@ -441,23 +441,23 @@ public class AppPreferences {
     }
 
     public void setCourseUUID(UUID uuid){
-    	long least = uuid.getLeastSignificantBits(); 
+    	long least = uuid.getLeastSignificantBits();
     	long most  = uuid.getMostSignificantBits();
-    	
+
     	preferences.edit()
     		.putLong(HIDDEN_PREFERENCE_COURSE_UUID_LEAST, least)
     		.putLong(HIDDEN_PREFERENCE_COURSE_UUID_MOST, most)
     	.commit();
     }
-    
+
     public void setEventID(Serializable id){
     	ExLog.i(getContext(), this.getClass().toString(), "Saving eventId: "+ id);
-    	
+
     	preferences.edit().putString(HIDDEN_PREFERENCE_EVENT_ID, id.toString()).commit();
-    	
+
     	ExLog.i(getContext(), this.getClass().toString(), "Loading eventId: "+ getEventID());
     }
-    
+
     public void unregisterPollingActiveChangedListener(PollingActiveChangedListener listener) {
         pollingActiveChangedListeners.remove(listener);
         if (pollingActiveChangedListeners.isEmpty()) {
@@ -465,9 +465,14 @@ public class AppPreferences {
         }
     }
 
+    public boolean isDemoAllowed() {
+        return preferences.getBoolean(context.getString(R.string.preference_allow_demo_key),
+            context.getResources().getBoolean(R.bool.preference_allow_demo_default));
+    }
+
     public boolean wakelockEnabled() {
-        return preferences.getBoolean(context.getResources().getString(R.string.preference_wakelock_key),
-                context.getResources().getBoolean(R.bool.preference_wakelock_default));
+        return preferences.getBoolean(context.getString(R.string.preference_wakelock_key), context.getResources()
+            .getBoolean(R.bool.preference_wakelock_default));
     }
 
     public boolean isOfflineMode() {

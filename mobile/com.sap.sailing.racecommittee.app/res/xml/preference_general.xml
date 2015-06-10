@@ -9,12 +9,10 @@
         <EditTextPreference
             android:defaultValue="@string/empty"
             android:key="@string/preference_identifier_key"
-            android:summary="@string/empty"
             android:title="@string/device_identifier"/>
         <EditTextPreference
             android:defaultValue="@string/preference_server_url_default"
             android:key="@string/preference_server_url_key"
-            android:summary="@string/empty"
             android:title="@string/settings_advanced_service_header"/>
         <Preference
             android:key="@string/preference_sync_key"
@@ -56,14 +54,18 @@
         <com.sap.sailing.android.shared.ui.views.EditSetPreference
             android:defaultValue="@array/preference_course_areas_default"
             android:key="@string/preference_course_areas_key"
-            android:summary="@string/empty"
             android:title="@string/settings_general_manageareas_header"/>
 
         <EditTextPreference
             android:defaultValue="@string/preference_mail_default"
             android:key="@string/preference_mail_key"
-            android:summary="@string/empty"
             android:title="@string/settings_advanced_mail_header"/>
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_allow_demo_default"
+            android:key="@string/preference_allow_demo_key"
+            android:summary="@string/preference_allow_demo_summary"
+            android:title="@string/preference_allow_demo_header"/>
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_wakelock_default"

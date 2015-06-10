@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string-array name="empty_array" tools:ignore="UnusedResources" />
+    <string-array name="empty_array" tools:ignore="UnusedResources"/>
     <string name="empty"></string>
 
     <string name="intent_update_ui" translatable="false">com.sap.sailing.racecommittee.intent.update-ui</string>
@@ -215,6 +215,8 @@
     <string name="preference_offline_header">Offline Mode</string>
     <string name="preference_offline_summary">Disables the connection to a server and uses static data</string>
     <string name="preference_theme_header">Theme</string>
+    <string name="preference_allow_demo_header">Allow login as Viewer</string>
+    <string name="preference_allow_demo_summary">If set, you are allowed to login as Viewer. No race changes will be send back to the server.</string>
     <string name="options_menu_info">Expert Information</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>

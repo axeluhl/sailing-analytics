@@ -80,6 +80,9 @@
     <!-- override android.shared default value -->
     <string name="app_folder" translatable="false">racecommittee</string>
     <bool name="preference_isSendingActive_default">false</bool>
+
+    <string name="preference_allow_demo_key" translatable="false">allow_demo</string>
+    <bool name="preference_allow_demo_default">false</bool>
     
     <string name="preference_wakelock_key" translatable="false">enable_wakelock</string>
     <bool name="preference_wakelock_default">false</bool>
