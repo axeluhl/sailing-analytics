@@ -224,24 +224,30 @@ public class FlagPanelFragment extends BasePanelFragment {
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
-        switch (getRaceState().getStatus()) {
-        case RUNNING:
-            TimePoint start = getRaceState().getStartTime();
-            long diff = now.minus(start.asMillis()).asMillis();
-            if (diff >= 60000) {
+        if (getRace() != null && getRaceState() != null) {
+            switch (getRaceState().getStatus()) {
+            case RUNNING:
+                TimePoint start = getRaceState().getStartTime();
+                if (start != null) {
+                    long diff = now.minus(start.asMillis()).asMillis();
+                    if (diff >= 60000) {
+                        changeVisibility(mRecallLock, View.VISIBLE);
+                    } else {
+                        changeVisibility(mRecallLock, View.GONE);
+                    }
+                } else {
+                    changeVisibility(mRecallLock, View.GONE);
+                }
+                break;
+
+            case FINISHING:
+            case FINISHED:
                 changeVisibility(mRecallLock, View.VISIBLE);
-            } else {
-                changeVisibility(mRecallLock, View.GONE);
+                break;
+
+            default:
+                // nothing
             }
-            break;
-
-        case FINISHING:
-        case FINISHED:
-            changeVisibility(mRecallLock, View.VISIBLE);
-            break;
-
-        default:
-            // nothing
         }
     }
 
