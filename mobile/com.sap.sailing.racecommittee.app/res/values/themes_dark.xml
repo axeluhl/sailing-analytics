@@ -28,6 +28,7 @@
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
         <item name="white">@color/dark_white</item>
+        <item name="white_invert">@color/constant_black</item>
 
         <!-- styles -->
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
@@ -71,6 +72,7 @@
         <item name="mic_48dp">@drawable/ic_mic_white_48dp</item>
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_white_48dp</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_white_36dp</item>
+        <item name="search_24dp_invert">@drawable/ic_search_black_24dp</item>
         <item name="swipe_idle">@drawable/swipe_idle_dark</item>
         <item name="swipe_left">@drawable/swipe_left_dark</item>
         <item name="swipe_right">@drawable/swipe_right_dark</item>

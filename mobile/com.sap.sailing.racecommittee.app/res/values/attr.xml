@@ -13,6 +13,7 @@
     <attr name="sap_red_1" format="color"/>
     <attr name="sap_yellow_1" format="color"/>
     <attr name="white" format="color"/>
+    <attr name="white_invert" format="color"/>
 
     <!-- custom references (e.g. styles) -->
     <attr name="buttonSolidSmall" format="reference"/>
@@ -57,6 +58,7 @@
     <attr name="mic_48dp" format="reference"/>
     <attr name="photo_camera_48dp" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
+    <attr name="search_24dp_invert" format="reference"/>
     <attr name="swipe_idle" format="reference"/>
     <attr name="swipe_left" format="reference"/>
     <attr name="swipe_right" format="reference"/>
