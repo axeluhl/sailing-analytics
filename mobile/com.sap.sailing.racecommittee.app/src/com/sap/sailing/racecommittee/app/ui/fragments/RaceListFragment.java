@@ -50,7 +50,9 @@ import com.sap.sse.common.TimePoint;
 import java.io.Serializable;
 import java.util.*;
 
-public class RaceListFragment extends LoggableFragment implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
+public class RaceListFragment
+    extends LoggableFragment
+    implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
@@ -68,7 +70,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
-    private boolean mUpdateList;
+    private boolean mUpdateList = true;
     private ArrayList<RaceListDataType> mViewItems;
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
         @Override
