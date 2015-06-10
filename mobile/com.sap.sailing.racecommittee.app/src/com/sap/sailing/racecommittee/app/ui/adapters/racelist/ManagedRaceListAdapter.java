@@ -356,7 +356,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (marker != null) {
             Drawable drawable = marker.getDrawable();
             if (drawable != null) {
-                drawable.setLevel(level + ThemeHelper.getThemeOffset(getContext()));
+                drawable.setLevel(level);
             }
         }
     }

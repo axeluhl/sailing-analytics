@@ -32,14 +32,6 @@ public class ThemeHelper {
         }
     }
 
-    public static int getThemeOffset(Context context) {
-        int offset = 0;
-        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(context).getTheme())) {
-            offset = 10;
-        }
-        return offset;
-    }
-
     public static boolean setPickerTextColor(Context context, TimePicker timePicker, int color) {
         Resources system = Resources.getSystem();
         int hourId = system.getIdentifier("hour", "id", "android");
