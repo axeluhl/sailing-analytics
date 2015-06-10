@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -35,7 +36,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
         return new SeriesWithFleetsDefaultListEditor(series, stringMessages, IconResources.INSTANCE.removeIcon(), /* enableFleetRemoval */ false);
     }
 
-    protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
+    protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel, Grid formGrid) {
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(getSeriesEditor(), stringMessages.series());

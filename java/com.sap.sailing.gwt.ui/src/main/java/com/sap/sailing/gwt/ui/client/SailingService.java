@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -194,7 +195,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference);
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference, RankingMetrics rankingMetricType);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
 
@@ -205,7 +206,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference);
     
-    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
+            List<Pair<String, Integer>> columnNames);
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,

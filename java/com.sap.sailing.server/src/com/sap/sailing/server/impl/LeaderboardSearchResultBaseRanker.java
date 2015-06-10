@@ -37,10 +37,15 @@ public class LeaderboardSearchResultBaseRanker<T extends LeaderboardSearchResult
     
     protected TimePoint getEarliestTrackedRace(TrackedRegatta trackedRegatta) {
         List<TimePoint> startOfTrackingTimes = new ArrayList<>();
-        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-            if (trackedRace.getStartOfTracking() != null) {
-                startOfTrackingTimes.add(trackedRace.getStartOfTracking());
+        trackedRegatta.lockTrackedRacesForRead();
+        try {
+            for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                if (trackedRace.getStartOfTracking() != null) {
+                    startOfTrackingTimes.add(trackedRace.getStartOfTracking());
+                }
             }
+        } finally {
+            trackedRegatta.unlockTrackedRacesAfterRead();
         }
         final TimePoint result;
         if (startOfTrackingTimes.isEmpty()) {

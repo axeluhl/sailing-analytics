@@ -1,6 +1,19 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  			 xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive">
+  	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  	<ui:style>
+  		.space-top {
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+  	</ui:style>
     <g:HTMLPanel>
-        <g:FlowPanel ui:field="content" />
+      <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <r:RacesListLive ui:field="racesListLive" addStyleNames="{style.space-top}" />
+        </div>
+      </div>
+      <g:SimplePanel ui:field="content" addStyleNames="{style.space-top}" />
     </g:HTMLPanel>
 </ui:UiBinder>

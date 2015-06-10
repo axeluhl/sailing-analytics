@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
 
 public class SharedDomainFactoryImpl implements SharedDomainFactory {
@@ -179,10 +180,14 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right) {
-        if (controlPointWithTwoMarksCache.containsKey(id)) {
-            return controlPointWithTwoMarksCache.get(id);
+        final ControlPointWithTwoMarks result;
+        final ControlPointWithTwoMarks fromCache = controlPointWithTwoMarksCache.get(id);
+        if (fromCache != null) {
+            result = fromCache;
+        } else {
+            result = createControlPointWithTwoMarks(id, left, right, name);
         }
-        return createControlPointWithTwoMarks(id, left, right, name);
+        return result;
     }
 
     @Override
@@ -217,7 +222,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = passingInstruction==null?new WaypointImpl(controlPoint):new WaypointImpl(controlPoint, passingInstruction);
+            Waypoint result = passingInstruction == null ?
+                    new WaypointImpl(controlPoint) : new WaypointImpl(controlPoint, passingInstruction);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
@@ -333,11 +339,14 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
+            URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, email, flagImage, team, boat);
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, email, flagImage, team,
+                boat, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
     }
 
     @Override

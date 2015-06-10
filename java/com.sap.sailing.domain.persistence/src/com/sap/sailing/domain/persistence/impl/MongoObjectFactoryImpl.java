@@ -35,8 +35,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
@@ -50,6 +50,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -617,9 +619,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
+        dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
+    private DBObject storeRankingMetric(Regatta regatta) {
+        DBObject rankingMetricJson = new BasicDBObject();
+        final String rankingMetricTypeName = regatta.getRankingMetricType().name();
+        rankingMetricJson.put(FieldNames.REGATTA_RANKING_METRIC_TYPE.name(), rankingMetricTypeName);
+        return rankingMetricJson;
+    }
+    
     @Override
     public void removeRegatta(Regatta regatta) {
         DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
@@ -1375,6 +1385,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
         storeTimePoint(event.getClosingTimePoint(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnTimeFactorEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        result.put(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name(), event.getTimeOnTimeFactor());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        result.put(FieldNames.REGATTA_LOG_TIME_ON_DISTANCE_SECONDS_ALLOWANCE_PER_NAUTICAL_MILE.name(), event.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         storeRegattaLogEvent(regattaLikeId, result);
     }
 }

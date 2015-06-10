@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.media.MediaType;
 
 public class MediaSingleSelectionControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
@@ -78,10 +79,10 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
+                    if (mediaTrack.mimeType.mediaType == MediaType.video) {
                         mediaPlayerManager.playFloatingVideo(mediaTrack);
                     }
-                    if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.audio || mediaPlayerManager.getPlayingAudioTrack() == null) {
+                    if (mediaTrack.mimeType.mediaType == MediaType.audio || mediaPlayerManager.getPlayingAudioTrack() == null) {
                         mediaPlayerManager.playAudio(mediaTrack);
                     }
                     hide();

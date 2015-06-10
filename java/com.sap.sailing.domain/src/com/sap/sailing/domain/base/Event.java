@@ -4,8 +4,8 @@ import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.common.media.ImageSize;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For

@@ -19,12 +19,12 @@ import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.MimeType;
 
 /**
  * MongoDB Java API examples: http://blog.rasc.ch/?p=1096

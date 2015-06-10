@@ -1,0 +1,80 @@
+.cellTableWidget {
+}
+
+.cellTableFirstColumn {
+}
+
+.cellTableLastColumn {
+}
+
+.cellTableFooter {
+}
+
+.cellTableHeader {
+}
+
+.cellTableCell {
+}
+
+.cellTableFirstColumnFooter {
+}
+
+.cellTableFirstColumnHeader {
+}
+
+.cellTableLastColumnFooter {
+}
+
+.cellTableLastColumnHeader {
+}
+
+.cellTableSortableHeader {
+  cursor: pointer;
+  cursor: hand;
+}
+
+.cellTableSortableHeader:hover {
+  color: #6c6b6b;
+}
+
+.cellTableSortedHeaderAscending {
+}
+
+.cellTableSortedHeaderDescending {
+}
+
+.cellTableEvenRow {
+}
+
+.cellTableEvenRowCell {
+}
+
+.cellTableOddRow {
+}
+
+.cellTableOddRowCell {
+}
+
+.cellTableHoveredRow {
+}
+
+.cellTableHoveredRowCell {
+}
+
+.cellTableKeyboardSelectedRow {
+}
+
+.cellTableKeyboardSelectedRowCell {
+}
+
+.cellTableSelectedRow {
+}
+
+.cellTableSelectedRowCell {
+}
+
+.cellTableKeyboardSelectedCell {
+}
+
+.cellTableLoading {
+}

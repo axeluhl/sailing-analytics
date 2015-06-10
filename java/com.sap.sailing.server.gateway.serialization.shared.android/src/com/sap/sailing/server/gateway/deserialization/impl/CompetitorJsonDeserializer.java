@@ -18,6 +18,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
@@ -82,8 +83,13 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonSerializer.FIELD_BOAT));
             }
-            
-            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email, flagImageURI, team, boat);
+            final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonSerializer.FIELD_TIME_ON_TIME_FACTOR);
+            final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
+                    .get(CompetitorJsonSerializer.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
+            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email,
+                    flagImageURI, team, boat, timeOnTimeFactor,
+                    timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)));
             return competitor;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

@@ -39,7 +39,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     private double rectHeight = 20;
 
     private String textColor = "Black";
-    private String textFont = "10pt OpenSansRegular";
+    private String textFont = "10pt 'Open Sans'";
     private String algorithmTimedOutText = "out-of-bounds";
     private String mixedLegText = "ambiguous wind";
 

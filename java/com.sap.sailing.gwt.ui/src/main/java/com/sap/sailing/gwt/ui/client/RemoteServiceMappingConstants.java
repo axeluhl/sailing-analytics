@@ -25,4 +25,6 @@ public interface RemoteServiceMappingConstants {
     public static final String simulatorServiceRemotePath = "service/simulator";
 
     public static final String dataMiningServiceRemotePath = "service/datamining";
+    
+    public static final String dispatchServiceRemotePath = "/gwt/service/dispatch";
 }
