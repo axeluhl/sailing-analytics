@@ -91,7 +91,9 @@ public abstract class ActivityUnitTestCase<T extends Activity>
 
     @Override
     public T getActivity() {
-        return (T) super.getActivity();
+        @SuppressWarnings("unchecked")
+        final T result = (T) super.getActivity();
+        return result;
     }
 
     @Override
@@ -144,9 +146,11 @@ public abstract class ActivityUnitTestCase<T extends Activity>
                 mMockParent = new MockParent();
                 String id = null;
                         
-                newActivity = (T) getInstrumentation().newActivity(mActivityClass, mActivityContext,
+                @SuppressWarnings("unchecked")
+                T myNewActivity = (T) getInstrumentation().newActivity(mActivityClass, mActivityContext,
                         token, mApplication, intent, info, title, mMockParent, id,
                         lastNonConfigurationInstance);
+                newActivity = myNewActivity;
             } catch (Exception e) {
                 assertNotNull(newActivity);
             }
