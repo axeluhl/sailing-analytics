@@ -108,7 +108,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         imageJson.put(FIELD_SOURCE_URL, image.getURL().toString());
         imageJson.put(FIELD_TITLE, image.getTitle());
         imageJson.put(FIELD_SUBTITLE, image.getSubtitle());
-        imageJson.put(FIELD_MIMETYPE, image.getMimeType());
+        imageJson.put(FIELD_MIMETYPE, image.getMimeType().name());
         imageJson.put(FIELD_COPYRIGHT, image.getCopyright());
         imageJson.put(FIELD_IMAGE_WIDTH_IN_PX, image.getWidthInPx());
         imageJson.put(FIELD_IMAGE_HEIGHT_IN_PX, image.getHeightInPx());
@@ -127,7 +127,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         videoJson.put(FIELD_VIDEO_THUMBNAIL_URL, video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
         videoJson.put(FIELD_TITLE, video.getTitle());
         videoJson.put(FIELD_SUBTITLE, video.getSubtitle());
-        videoJson.put(FIELD_MIMETYPE, video.getMimeType());
+        videoJson.put(FIELD_MIMETYPE, video.getMimeType().name());
         videoJson.put(FIELD_COPYRIGHT, video.getCopyright());
         videoJson.put(FIELD_VIDEO_LENGTH_IN_SECONDS, video.getLengthInSeconds());
         videoJson.put(FIELD_CREATEDATDATE, video.getCreatedAtDate().asMillis());
@@ -135,6 +135,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         for (String tag : video.getTags()) {
             tags.add(tag);
         }
+        videoJson.put(FIELD_TAGS, tags);
         videosJson.add(videoJson);
     }
 
