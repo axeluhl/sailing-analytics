@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -179,6 +180,9 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
         DivElement imageHolder = Document.get().createDivElement();
         ImageElement imageElement = Document.get().createImageElement();
         imageElement.setAttribute("data-lazy", UriUtils.fromString(url).asString());
+        if(fsViewer != null) {
+            imageElement.getStyle().setCursor(Cursor.POINTER);
+        }
 
         imageHolder.getStyle().setHeight(imagesHeight, Unit.PX);
         imageHolder.getStyle().setWidth(Math.round(width * (imagesHeight / (double) height)), Unit.PX);

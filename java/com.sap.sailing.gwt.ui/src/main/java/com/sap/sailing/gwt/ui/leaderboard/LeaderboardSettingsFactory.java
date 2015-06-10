@@ -67,7 +67,7 @@ public class LeaderboardSettingsFactory {
                 List<DetailType> raceDetails = new ArrayList<DetailType>();
                 raceDetails.add(DetailType.RACE_DISTANCE_TRAVELED);
                 raceDetails.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
-                raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
+                raceDetails.add(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 raceDetails.add(DetailType.DISPLAY_LEGS);
                 final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);

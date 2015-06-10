@@ -26,8 +26,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.operationaltransformation.OperationalTransformer;
 import com.sap.sse.operationaltransformation.Peer;
-import com.sap.sse.operationaltransformation.PeerImpl;
 import com.sap.sse.operationaltransformation.Peer.Role;
+import com.sap.sse.operationaltransformation.PeerImpl;
 
 
 public class RaceLogInRaceColumnTest {
