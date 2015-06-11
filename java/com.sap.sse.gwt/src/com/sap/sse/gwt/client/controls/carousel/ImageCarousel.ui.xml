@@ -95,7 +95,6 @@
 		position: absolute;
 		background-position: 0 0;
 		background-repeat: no-repeat;
-		z-index: 10;
 		cursor: pointer;
 		top: 50%;
 		-webkit-transform: translate(0, -50%);
@@ -117,7 +116,6 @@
 	
 	.slider .slick-prev {
 		left: 0px;
-		z-index: 1;
 		height: 60px;
 		width: 60px;
 		background-position: 0 0;
