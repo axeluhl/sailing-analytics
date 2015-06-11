@@ -41,8 +41,8 @@
 
   	
 	<!-- Specify the paths for translatable code -->
-	<extend-property name="locale" values="en,de,cn,ru" />
-    <set-property name="locale" value="en,de,cn,ru" />
+	<extend-property name="locale" values="en,de,zh,ru" />
+    <set-property name="locale" value="en,de,zh,ru" />
 	<set-property-fallback name="locale" value="en"/>
 	
 	<!-- Uncomment this to get clear-text CSS style/class names in generated output -->
