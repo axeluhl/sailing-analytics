@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -19,7 +21,6 @@ import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -48,6 +49,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private SimpleDateFormat mDateFormat;
     private Calendar mCalendar;
 
+    private RaceStateChangedListener mStateListener;
+
     public MainScheduleFragment() {
         mCalendar = Calendar.getInstance();
     }
@@ -61,6 +64,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule, container, false);
 
+        mStateListener = new RaceStateChangedListener();
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
         View startTime = ViewHolder.get(layout, R.id.start_time);
@@ -108,13 +112,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public void onResume() {
         super.onResume();
 
-        TickSingleton.INSTANCE.registerListener(this);
-
         if (getRace() != null && getRaceState() != null) {
+            getRaceState().addChangedListener(mStateListener);
+
             initStartTime();
-
             initStartMode();
-
             initCourse();
         }
     }
@@ -178,7 +180,9 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public void onPause() {
         super.onPause();
 
-        TickSingleton.INSTANCE.unregisterListener(this);
+        if (getRace() != null && getRaceState() != null) {
+            getRaceState().removeChangedListener(mStateListener);
+        }
     }
 
     @Override
@@ -227,7 +231,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         if (procedure != null) {
             procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
         }
-        openFragment(RaceInfoRaceFragment.newInstance());
     }
 
     @Override
@@ -271,5 +274,14 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             fragment.getArguments().putSerializable(START_TIME, mStartTime);
         }
         getFragmentManager().beginTransaction().replace(R.id.racing_view_container, fragment).commitAllowingStateLoss();
+    }
+
+    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            super.onStatusChanged(state);
+
+            openFragment(RaceInfoRaceFragment.newInstance());
+        }
     }
 }
