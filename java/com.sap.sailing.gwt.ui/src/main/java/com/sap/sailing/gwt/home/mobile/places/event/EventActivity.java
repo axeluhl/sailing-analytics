@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EventActivity extends AbstractActivity implements
  Presenter {
@@ -22,6 +23,9 @@ public class EventActivity extends AbstractActivity implements
         final EventView view = new EventViewImpl(this);
         panel.setWidget(view.asWidget());
 
+        
+        view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), "");
+        
     }
 
 

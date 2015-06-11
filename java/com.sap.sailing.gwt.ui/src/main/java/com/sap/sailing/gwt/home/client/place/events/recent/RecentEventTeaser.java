@@ -24,4 +24,7 @@ public class RecentEventTeaser extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
+    public void hideImage(boolean hide) {
+        eventTeaser.hideImage(hide);
+    }
 }

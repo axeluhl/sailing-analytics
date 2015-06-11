@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.home.mobile.places.events;
 
-import java.util.UUID;
+import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecent;
+import com.sap.sailing.gwt.home.mobile.partials.upcoming.EventsOverviewUpcoming;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
 public class EventsViewImpl extends Composite implements EventsView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -17,21 +19,28 @@ public class EventsViewImpl extends Composite implements EventsView {
     interface StartPageViewUiBinder extends UiBinder<Widget, EventsViewImpl> {
     }
 
-    private Presenter currentPresenter;
 
-    @UiField
-    protected Anchor theEventLinkUi;
+    @UiField(provided = true)
+    protected EventsOverviewUpcoming upcomingUi;
+    @UiField(provided = true)
+    protected EventsOverviewRecent recentsUi;
 
     public EventsViewImpl(Presenter presenter) {
-        this.currentPresenter = presenter;
+        upcomingUi = new EventsOverviewUpcoming(presenter.getNavigator());
+        recentsUi = new EventsOverviewRecent(presenter.getNavigator());
         initWidget(uiBinder.createAndBindUi(this));
 
     }
 
-    @UiHandler("theEventLinkUi")
-    public void gotoEvents(ClickEvent e) {
-        UUID eventId = null;
-        currentPresenter.gotoTheEvent(eventId);
+
+    @Override
+    public void setEvents(EventListViewDTO eventListView) {
+        ArrayList<EventListEventDTO> upcomingEvents = eventListView.getUpcomingEvents();
+
+        upcomingUi.updateEvents(upcomingEvents);
+
+        ArrayList<EventListYearDTO> recentEvents = eventListView.getRecentEvents();
+        recentsUi.updateEvents(recentEvents);
     }
     
 }

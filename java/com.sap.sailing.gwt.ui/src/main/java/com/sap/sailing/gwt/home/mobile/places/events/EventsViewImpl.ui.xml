@@ -3,15 +3,15 @@
 	xmlns:ui="urn:ui:com.google.gwt.uibinder" 
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+	
 	>
 	<ui:with 
 		field="res" 
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 		
    	<g:HTMLPanel>
-   		<p>START VIEW</p>
-   		
-   		<p>Go to <g:Anchor ui:field="theEventLinkUi">THE EVENT</g:Anchor></p>
-   		
+   		<mp:upcoming.EventsOverviewUpcoming ui:field="upcomingUi" />
+   		<mp:recents.EventsOverviewRecent ui:field="recentsUi" />
 	</g:HTMLPanel>
 </ui:UiBinder>    

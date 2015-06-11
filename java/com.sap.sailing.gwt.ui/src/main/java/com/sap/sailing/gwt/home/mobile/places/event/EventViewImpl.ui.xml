@@ -8,9 +8,18 @@
 	<ui:with 
 		field="res" 
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
-		
+	<ui:style>
+		.headerWrapper {
+			background-color: #f2f2f2;
+			padding-bottom: 10px;
+		}
+	</ui:style>		
    	<g:HTMLPanel>
-   		<mp:eventheader.EventHeader /> 
+   		<div class="{style.headerWrapper}">
+   		<mp:eventheader.EventHeader />
+   		<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
+   		<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi"/> 
+   		</div>
    		<p>THE EVENT VIEW</p>
    		
    		The event view...
