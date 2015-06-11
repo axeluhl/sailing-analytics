@@ -9,11 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.news,
  com.sap.sailing.news.impl
-Import-Package: com.sap.sailing.domain.base.impl,
- com.sap.sailing.domain.common,
- com.sap.sailing.domain.common.impl,
- com.sap.sailing.domain.persistence,
- com.sap.sailing.server,
- org.osgi.framework;version="1.5.0",
+Import-Package: org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker;version="1.5.1"
-Require-Bundle: com.sap.sse.common
+Require-Bundle: com.sap.sse.common,
+ com.sap.sailing.server,
+ com.sap.sailing.domain

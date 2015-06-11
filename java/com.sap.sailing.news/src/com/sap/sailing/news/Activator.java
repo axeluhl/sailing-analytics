@@ -5,18 +5,21 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.news.impl.NewsProviderRegistryImpl;
-import com.sap.sailing.news.impl.NewsServiceImpl;
+import com.sap.sailing.news.impl.EventNewsProviderRegistryImpl;
+import com.sap.sailing.news.impl.EventNewsServiceImpl;
+import com.sap.sailing.news.impl.SimpleDemoEventNewsProvider;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     public void start(BundleContext context) throws Exception {
-        NewsProviderRegistry providerRegistry = new NewsProviderRegistryImpl(); 
-        NewsService newsService = new NewsServiceImpl(providerRegistry);
-        context.registerService(NewsService.class, newsService, null);
-        context.registerService(NewsProviderRegistry.class, providerRegistry, null);
-        logger.info("News Service registered.");
+        EventNewsProviderRegistry providerRegistry = new EventNewsProviderRegistryImpl(); 
+        EventNewsService newsService = new EventNewsServiceImpl(providerRegistry);
+        context.registerService(EventNewsService.class, newsService, null);
+        context.registerService(EventNewsProviderRegistry.class, providerRegistry, null);
+        
+        providerRegistry.registerNewsProvider(new SimpleDemoEventNewsProvider());
+        logger.info("EventNews Service registered.");
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
