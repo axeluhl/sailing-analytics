@@ -207,7 +207,7 @@ public class RaceStateService extends Service {
     private void handleRegisterRace(Intent intent) {
         ManagedRace race = getRaceFromIntent(intent);
         if (race == null) {
-            ExLog.i(this, TAG, "Intent did not carry valid race information.");
+            ExLog.w(this, TAG, "Intent did not carry valid race information.");
             return;
         }
         registerRace(race);
