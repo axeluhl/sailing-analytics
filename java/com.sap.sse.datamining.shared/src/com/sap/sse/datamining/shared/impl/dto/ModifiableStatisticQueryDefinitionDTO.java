@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
 public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefinitionDTO {
@@ -15,7 +14,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     
     private String localeInfoName;
     private FunctionDTO statisticToCalculate;
-    private AggregatorType aggregatorType;
+    private AggregationProcessorDefinitionDTO aggregatorDefinition;
     private List<FunctionDTO> dimensionsToGroupBy;
     private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
     private Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection;
@@ -26,10 +25,10 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     @Deprecated
     ModifiableStatisticQueryDefinitionDTO() { }
 
-    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregatorType aggregatorType, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
+    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
         this.localeInfoName = localeInfoName;
         this.statisticToCalculate = statisticToCalculate;
-        this.aggregatorType = aggregatorType;
+        this.aggregatorDefinition = aggregatorDefinition;
         this.dataRetrieverChainDefinition = dataRetrieverChainDefinition;
         this.filterSelection = new HashMap<>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
@@ -69,8 +68,8 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     }
 
     @Override
-    public AggregatorType getAggregatorType() {
-        return aggregatorType;
+    public AggregationProcessorDefinitionDTO getAggregatorDefinition() {
+        return aggregatorDefinition;
     }
 
 }

@@ -188,7 +188,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         extractionFunctionListBox.setValue(new StrippedFunctionDTO(queryDefinition.getStatisticToCalculate()), false);
-        aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
+        aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition(), false);
     }
 
     private void notifyListeners() {

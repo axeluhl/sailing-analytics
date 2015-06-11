@@ -118,13 +118,13 @@ public class TestDimensionsValuesQuery {
         Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasRaceContext dimensions
-        GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
+        GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
         expectedResultData.put(dimensionRegattaNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionRaceNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionRaceName, stringMessages, locale));
+        GroupKey dimensionRaceNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionRaceName, stringMessages, locale));
         expectedResultData.put(dimensionRaceNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionBoatClassNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionBoatClassName, stringMessages, locale));
+        GroupKey dimensionBoatClassNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionBoatClassName, stringMessages, locale));
         expectedResultData.put(dimensionBoatClassNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionYearGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionYear, stringMessages, locale));
+        GroupKey dimensionYearGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionYear, stringMessages, locale));
         expectedResultData.put(dimensionYearGroupKey, new HashSet<Object>());
         
         for (Test_Regatta regatta : dataSource) {
@@ -143,11 +143,11 @@ public class TestDimensionsValuesQuery {
         Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasLegContext dimensions
-        GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));
+        GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));
         expectedResultData.put(dimensionLegNumberGroupKey, new HashSet<Object>());
-        GroupKey dimensionCompetitorNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorName, stringMessages, locale));
+        GroupKey dimensionCompetitorNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionCompetitorName, stringMessages, locale));
         expectedResultData.put(dimensionCompetitorNameGroupKey, new HashSet<Object>());
-        GroupKey dimensionCompetitorSailIDGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimensionCompetitorSailID, stringMessages, locale));
+        GroupKey dimensionCompetitorSailIDGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionCompetitorSailID, stringMessages, locale));
         expectedResultData.put(dimensionCompetitorSailIDGroupKey, new HashSet<Object>());
         
         for (Test_Regatta regatta : dataSource) {

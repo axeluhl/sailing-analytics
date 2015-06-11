@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
@@ -55,7 +55,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         
     }
     
-    private static final Logger LOGGER = Logger.getLogger(FunctionManager.class.getName());
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final FilterCriterion<Method> isValidDimension = new MethodIsValidDimensionFilterCriterion();
     private final FilterCriterion<Method> isValidStatistic = new MethodIsValidStatisticFilterCriterion();
@@ -63,7 +63,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final FilterCriterion<Method> isValidExternalFunction = new MethodIsValidExternalFunctionFilterCriterion();
 
     private final FunctionFactory functionFactory;
-    private final FunctionDTOFactory functionDTOFactory;
+    private final DataMiningDTOFactory dtoFactory;
     
     protected final Map<Class<?>, Set<Function<?>>> statistics;
     protected final Map<Class<?>, Set<Function<?>>> dimensions;
@@ -72,7 +72,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
     public FunctionManager() {
-        functionDTOFactory = new FunctionDTOFactory();
+        dtoFactory = new DataMiningDTOFactory();
         functionFactory = new FunctionFactory();
         
         statistics = new HashMap<>();
@@ -279,14 +279,14 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         
         Function<?> function = getFunctionToReturn(functionsMatchingDTO);
         if (function == null) {
-            LOGGER.log(Level.WARNING, "No function found for the DTO: " + functionDTO);
+            logger.log(Level.WARNING, "No function found for the DTO: " + functionDTO);
         }
         return function;
     }
 
     private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {
         Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
-        FilterCriterion<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriterion(functionDTOFactory, functionDTO);
+        FilterCriterion<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriterion(dtoFactory, functionDTO);
         for (Function<?> function : getAllFunctions()) {
             if (functionDTOFilterCriteria.matches(function)) {
                 functionsMatchingDTO.add(function);
@@ -308,9 +308,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
 
     private void logThatMoreThanOneFunctionMatchedDTO(FunctionDTO functionDTO, Collection<Function<?>> functionsMatchingDTO) {
-        LOGGER.log(Level.FINER, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
+        logger.log(Level.FINER, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
         for (Function<?> function : functionsMatchingDTO) {
-            LOGGER.log(Level.FINEST, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
+            logger.log(Level.FINEST, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
         }
     }
 

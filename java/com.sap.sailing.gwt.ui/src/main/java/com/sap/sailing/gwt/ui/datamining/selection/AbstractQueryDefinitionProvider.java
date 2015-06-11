@@ -152,7 +152,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
 
     private String validateStatisticAndAggregator(StatisticQueryDefinitionDTO queryDefinition) {
-        return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+        return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorDefinition() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
     private String validateDataRetrieverChain(StatisticQueryDefinitionDTO queryDefinition) {

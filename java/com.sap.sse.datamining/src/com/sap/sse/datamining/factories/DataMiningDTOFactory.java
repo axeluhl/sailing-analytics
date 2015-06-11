@@ -10,7 +10,7 @@ import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class FunctionDTOFactory {
+public class DataMiningDTOFactory {
 
     /**
      * Creates the corresponding DTO for the given function, with the functions simple name as display name.

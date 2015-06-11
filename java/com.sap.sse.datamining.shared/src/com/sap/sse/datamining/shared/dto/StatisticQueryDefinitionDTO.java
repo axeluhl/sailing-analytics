@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
@@ -15,10 +15,8 @@ public interface StatisticQueryDefinitionDTO extends Serializable {
     
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
     public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection();
-    
     public List<FunctionDTO> getDimensionsToGroupBy();
-    
     public FunctionDTO getStatisticToCalculate();
-    public AggregatorType getAggregatorType();
+    public AggregationProcessorDefinitionDTO getAggregatorDefinition();
 
 }

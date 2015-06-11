@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.data.impl.DataTypeInterface;
@@ -20,14 +20,14 @@ import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
 public class FunctionTestsUtil extends ConcurrencyTestsUtil {
 
     private static final FunctionFactory functionFactory = new FunctionFactory();
-    private static final FunctionDTOFactory functionDTOFactory = new FunctionDTOFactory();
+    private static final DataMiningDTOFactory dtoFactory = new DataMiningDTOFactory();
     
     public static FunctionFactory getFunctionFactory() {
         return functionFactory;
     }
     
-    public static FunctionDTOFactory getFunctionDTOFactory() {
-        return functionDTOFactory;
+    public static DataMiningDTOFactory getDTOFactory() {
+        return dtoFactory;
     }
 
     public static Collection<Function<?>> getMarkedMethodsOfSimpleClassWithMarkedMethod() {

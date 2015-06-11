@@ -130,7 +130,7 @@ public class TestFunctionManagerAsFunctionProvider {
         Function<?> getName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getNameMethod);
         Function<Object> getRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
         
-        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
+        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
         
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
         Function<Object> providedFunction = (Function<Object>) server.getFunctionForDTO(getRegattaNameDTO);
@@ -141,7 +141,7 @@ public class TestFunctionManagerAsFunctionProvider {
     public void testGetFunctionForUnregisteredDTO() {
         Method illegalDimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "illegalDimension");
         Function<Object> illegalDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(illegalDimensionMethod);
-        FunctionDTO illegalDimensionDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(illegalDimension, stringMessages, Locale.ENGLISH);
+        FunctionDTO illegalDimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(illegalDimension, stringMessages, Locale.ENGLISH);
         
         assertThat(server.getFunctionForDTO(illegalDimensionDTO), is(nullValue()));
     }

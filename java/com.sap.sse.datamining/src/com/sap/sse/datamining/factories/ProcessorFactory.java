@@ -1,5 +1,8 @@
 package com.sap.sse.datamining.factories;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
@@ -17,15 +21,9 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMaxAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMinAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ProcessorFactory {
@@ -36,41 +34,36 @@ public class ProcessorFactory {
         this.executor = executor;
     }
     
-    /**
-     * Creates a aggregation processor of the given aggregator type, with the given ProcessorQuery as result receiver.
-     */
-    public <ResultType> Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>> createAggregationProcessor(ProcessorQuery<ResultType, ?> query, AggregatorType aggregatorType, Class<ResultType> resultType) {
-        Collection<Processor<Map<GroupKey, ResultType>, ?>> resultReceivers = new ArrayList<>();
+    public <ExtractedType, AggregatedType> Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, AggregatedType>>
+                                           createAggregationProcessor(ProcessorQuery<AggregatedType, ?> query,
+                                                                      AggregationProcessorDefinition<ExtractedType, AggregatedType> aggregatorDefinition) {
+        Collection<Processor<Map<GroupKey, AggregatedType>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(query.getResultReceiver());
-        return createAggregationProcessor(resultReceivers, aggregatorType, resultType);
+        return createAggregationProcessor(resultReceivers, aggregatorDefinition);
     }
-
-    @SuppressWarnings("unchecked")
-    public <ResultType> Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>> createAggregationProcessor(Collection<Processor<Map<GroupKey, ResultType>, ?>> resultReceivers, AggregatorType aggregatorType, Class<ResultType> resultType) {
-        if (Double.class.equals(resultType) || double.class.equals(resultType) ||
-            Integer.class.equals(resultType) || int.class.equals(resultType)) {
-            Collection<Processor<Map<GroupKey, Double>, ?>> specificResultReceivers = (Collection<Processor<Map<GroupKey, Double>, ?>>)(Collection<?>) resultReceivers;
-
-            switch (aggregatorType) {
-            case Average:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataAverageAggregationProcessor(executor, specificResultReceivers);
-            case Median:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMedianAggregationProcessor(executor, specificResultReceivers);
-            case Sum:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataSumAggregationProcessor(executor, specificResultReceivers);
-            case Maximum:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMaxAggregationProcessor(executor, specificResultReceivers);
-            case Minimum:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMinAggregationProcessor(executor, specificResultReceivers);
-            case Count:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDataCountAggregationProcessor(executor, specificResultReceivers);
-            default:
-                throw new IllegalArgumentException("No aggregation processor implemented for the aggregation type '"
-                        + aggregatorType + "'");
-            }
+    
+    public <ExtractedType, AggregatedType> Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, AggregatedType>>
+                                           createAggregationProcessor(Collection<Processor<Map<GroupKey, AggregatedType>, ?>> resultReceivers,
+                                                                      AggregationProcessorDefinition<ExtractedType, AggregatedType> aggregatorDefinition) {
+        Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregatorType = aggregatorDefinition.getAggregationProcessor();
+        Constructor<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregatorConstructor = null;
+        try {
+            aggregatorConstructor = aggregatorType.getConstructor(ExecutorService.class, Collection.class);
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new IllegalArgumentException("Couldn't get an usable constructor from the given aggregatorDefinition '"
+                    + aggregatorDefinition + "'", e);
         }
-        throw new IllegalArgumentException("No aggregation processor implemented for the result type '"
-                + resultType + "'");
+
+        if (Modifier.isPublic(aggregatorConstructor.getModifiers())) {
+            // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
+            aggregatorConstructor.setAccessible(true);
+        }
+        try {
+            return aggregatorConstructor.newInstance(executor, resultReceivers);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new UnsupportedOperationException("Couldn't create a aggregator instance with the constructor "
+                    + aggregatorConstructor.toString(), e);
+        }
     }
     
     /**
@@ -86,16 +79,16 @@ public class ProcessorFactory {
     /**
      * Creates an extraction processor with the given aggregation processor as result receiver.
      */
-    public <ElementType, ResultType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ResultType>> createExtractionProcessor(
-            Processor<GroupedDataEntry<ResultType>, ?> aggregationProcessor, Function<ResultType> extractionFunction, ParameterProvider parameterProvider) {
-        Collection<Processor<GroupedDataEntry<ResultType>, ?>> resultReceivers = new ArrayList<>();
+    public <ElementType, ExtractedType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ExtractedType>> createExtractionProcessor(
+            Processor<GroupedDataEntry<ExtractedType>, ?> aggregationProcessor, Function<ExtractedType> extractionFunction, ParameterProvider parameterProvider) {
+        Collection<Processor<GroupedDataEntry<ExtractedType>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(aggregationProcessor);
         return createExtractionProcessor(resultReceivers, extractionFunction, parameterProvider);
     }
 
-    public <ElementType, ResultType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ResultType>> createExtractionProcessor(
-            Collection<Processor<GroupedDataEntry<ResultType>, ?>> resultReceivers, Function<ResultType> extractionFunction, ParameterProvider parameterProvider) {
-        return new ParallelGroupedElementsValueExtractionProcessor<ElementType, ResultType>(executor,
+    public <ElementType, ExtractedType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ExtractedType>> createExtractionProcessor(
+            Collection<Processor<GroupedDataEntry<ExtractedType>, ?>> resultReceivers, Function<ExtractedType> extractionFunction, ParameterProvider parameterProvider) {
+        return new ParallelGroupedElementsValueExtractionProcessor<ElementType, ExtractedType>(executor,
                 resultReceivers, extractionFunction, parameterProvider);
     }
 

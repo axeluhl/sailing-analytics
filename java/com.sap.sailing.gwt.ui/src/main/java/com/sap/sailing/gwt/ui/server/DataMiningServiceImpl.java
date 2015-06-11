@@ -20,7 +20,7 @@ import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -39,12 +39,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
 
-    private final FunctionDTOFactory functionDTOFactory;
+    private final DataMiningDTOFactory dtoFactory;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
-        functionDTOFactory = new FunctionDTOFactory();
+        dtoFactory = new DataMiningDTOFactory();
     }
 
     private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
@@ -95,7 +95,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
-            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, ServerStringMessages, locale));
+            functionDTOs.add(dtoFactory.createFunctionDTO(function, ServerStringMessages, locale));
         }
         return functionDTOs;
     }
@@ -177,7 +177,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
-        StatisticQueryDefinition<RacingEventService, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
+        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
         Query<ResultType> query = getDataMiningServer().createQuery(queryDefinition);
         QueryResult<ResultType> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, query);
         return result;

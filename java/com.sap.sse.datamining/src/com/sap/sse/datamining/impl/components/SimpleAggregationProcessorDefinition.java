@@ -20,6 +20,7 @@ public class SimpleAggregationProcessorDefinition<ExtractedType, AggregatedType>
         this.aggregatedType = aggregatedType;
         this.aggregationNameMessageKey = aggregationNameMessageKey;
         this.aggregationProcessor = aggregationProcessor;
+        //FIXME Check, that the given aggregation processor has the constructor (ExecutorService, ResultReceivers)
     }
 
     @Override

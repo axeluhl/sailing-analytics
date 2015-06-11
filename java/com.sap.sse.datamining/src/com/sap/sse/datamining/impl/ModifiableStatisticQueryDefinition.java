@@ -8,11 +8,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 
-public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, ResultType> implements StatisticQueryDefinition<DataSourceType, DataType, ResultType> {
+public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> implements StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> {
 
     private final Locale locale;
     
@@ -21,10 +21,10 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Result
     
     private final List<Function<?>> dimensionsToGroupBy;
     
-    private final Function<ResultType> statisticToCalculate;
-    private final AggregatorType aggregatorType;
+    private final Function<ExtractedType> statisticToCalculate;
+    private final AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition;
 
-    public ModifiableStatisticQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ResultType> statisticToCalculate, AggregatorType aggregatorType) {
+    public ModifiableStatisticQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ExtractedType> statisticToCalculate, AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition) {
         this.locale = locale;
         
         this.retrieverChain = retrieverChain;
@@ -33,7 +33,7 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Result
         dimensionsToGroupBy = new ArrayList<>();
         
         this.statisticToCalculate = statisticToCalculate;
-        this.aggregatorType = aggregatorType;
+        this.aggregatorDefinition = aggregatorDefinition;
     }
     
     @Override
@@ -47,8 +47,13 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Result
     }
     
     @Override
+    public Class<ExtractedType> getExtractedType() {
+        return aggregatorDefinition.getExtractedType();
+    }
+    
+    @Override
     public Class<ResultType> getResultType() {
-        return statisticToCalculate.getReturnType();
+        return aggregatorDefinition.getAggregatedType();
     }
 
     @Override
@@ -72,13 +77,13 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Result
     }
 
     @Override
-    public Function<ResultType> getStatisticToCalculate() {
+    public Function<ExtractedType> getStatisticToCalculate() {
         return statisticToCalculate;
     }
-
+    
     @Override
-    public AggregatorType getAggregatorType() {
-        return aggregatorType;
+    public AggregationProcessorDefinition<ExtractedType, ResultType> getAggregatorDefinition() {
+        return aggregatorDefinition;
     }
 
     public void setFilterSelection(Integer retrieverLevel, Function<?> dimensionToFilterBy, Collection<?> filterSelection) {
