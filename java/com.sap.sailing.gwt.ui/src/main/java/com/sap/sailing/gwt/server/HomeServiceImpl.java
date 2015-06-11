@@ -346,7 +346,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         }
         
         // TODO fmittag: put in correct event ID
-        if("adbd871b-b9b3-4e18-bd79-d560e7b87c53".equals(event.getId().toString())) {
+        if("406cffc2-b491-4f7e-b78e-a21abd97006a".equals(event.getId().toString())) {
             dto.setSailorsInfoURL("http://sailorsinfo.kieler-woche.de/");
         }
 
