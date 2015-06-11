@@ -1,19 +1,11 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -404,20 +396,39 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             uploadUrl = urls[0];
             try {
                 if (imageFile != null) {
-                    HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httppost = new HttpPost(uploadUrl);
-                    InputStreamEntity reqEntity = new InputStreamEntity(new FileInputStream(imageFile),
-                            imageFile.length());
-                    reqEntity.setContentType("image/jpeg");
-                    reqEntity.setChunked(true); // Send in multiple parts if needed
-                    httppost.setEntity(reqEntity);
-                    httpclient.execute(httppost);
-                }
+                    URL url = new URL(uploadUrl);
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) url.openConnection();
+                    httpUrlConnection.setUseCaches(false);
+                    httpUrlConnection.setDoOutput(true);
+                    httpUrlConnection.setRequestMethod("POST");
+                    httpUrlConnection.setRequestProperty("Content-Type", "image/jpeg");
+                    DataOutputStream outputStream = new DataOutputStream(httpUrlConnection.getOutputStream());
+                    
+                    int nRead;
+                    byte[] data = new byte[2048];
+                    FileInputStream imageInputStream = new FileInputStream(imageFile);
+                    while ((nRead = imageInputStream.read(data, 0, data.length)) != -1) {
+                        outputStream.write(data, 0, nRead);
+                    }
+                    imageInputStream.close();
+                    outputStream.flush();
+                    outputStream.close();
+                    Log.d(TAG, "Image upload response: " + httpUrlConnection.getResponseCode());
+                    if(httpUrlConnection.getResponseMessage().equals("OK")) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader((httpUrlConnection.getInputStream())));
+                        StringBuilder sb = new StringBuilder();
+                        String output;
+                        while ((output = br.readLine()) != null) {
+                            sb.append(output);
+                        }
+                        Log.d(TAG, "Response body: " + sb.toString());
+                    }
+                    httpUrlConnection.disconnect();
+                    }
             } catch (IOException e) {
                 ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
                 this.cancel(true);
-            }
-
+                }
             return "";
         }
 
