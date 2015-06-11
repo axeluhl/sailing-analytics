@@ -272,7 +272,7 @@ public class GateStartFragment {
                 time_launch.setMaxValue(MAX_VALUE);
                 time_launch.setWrapSelectorWheel(false);
                 int value = (int) GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
-                time_launch.setValue(value - 1);
+                time_launch.setValue(value);
                 time_launch.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -286,7 +286,7 @@ public class GateStartFragment {
                 time_golf.setMaxValue(MAX_VALUE);
                 time_golf.setWrapSelectorWheel(false);
                 int value = (int) GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
-                time_golf.setValue(value - 1);
+                time_golf.setValue(value);
                 time_golf.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -307,10 +307,10 @@ public class GateStartFragment {
                         long golf = 0;
 
                         if (time_launch != null) {
-                            launch = (time_launch.getValue() - 1) * ONE_MINUTE_MILLISECONDS;
+                            launch = (time_launch.getValue()) * ONE_MINUTE_MILLISECONDS;
                         }
                         if (time_golf != null) {
-                            golf = (time_golf.getValue() - 1) * ONE_MINUTE_MILLISECONDS;
+                            golf = (time_golf.getValue()) * ONE_MINUTE_MILLISECONDS;
                         }
 
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
