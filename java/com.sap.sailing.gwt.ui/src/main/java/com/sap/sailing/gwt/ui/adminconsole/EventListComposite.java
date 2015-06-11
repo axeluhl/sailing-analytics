@@ -492,7 +492,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
                 updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
                 updatedEvent.getOfficialWebsiteURL(), updatedEvent.getLogoImageURL(),
-                updatedEvent.getImageURLs(), updatedEvent.getVideoURLs(), updatedEvent.getSponsorImageURLs(),
                 updatedEvent.getImages(), updatedEvent.getVideos(),
                 new AsyncCallback<EventDTO>() {
             @Override
@@ -564,8 +563,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             courseAreaNames.add(courseAreaDTO.getName());
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
-                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getImages(), newEvent.getVideos(), 
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImages(), newEvent.getVideos(), 
                 newEvent.getLogoImageURL(), newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {

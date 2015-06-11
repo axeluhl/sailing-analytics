@@ -324,6 +324,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
@@ -441,6 +442,7 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
@@ -3300,21 +3302,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
-            String logoImageURLString, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings,
-            Iterable<String> sponsorImageURLStrings, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
+            String logoImageURLString, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
         URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
-        List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
-        List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
-        List<URL> sponsorimagieURLs = createURLsFromStrings(sponsorImageURLStrings);
+        List<URL> imageURLs = createURLsFromMedia(images, MediaConstants.SPONSOR, null);
+        List<URL> videoURLs = createURLsFromMedia(videos, null, null);
+        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaConstants.SPONSOR);
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
                         isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
-                        sponsorimagieURLs, eventImages, eventVideos));
+                        sponsorImageURLs, eventImages, eventVideos));
         return getEventById(eventId, false);
     }
 
@@ -3323,29 +3324,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * @return
      * @throws MalformedURLException
      */
-    private List<URL> createURLsFromStrings(Iterable<String> urlStrings) throws MalformedURLException {
-        List<URL> imageURLs = new ArrayList<>();
-        for (String imageURLString : urlStrings) {
-            imageURLs.add(new URL(imageURLString));
+    private List<URL> createURLsFromMedia(Iterable<? extends AbstractMediaDTO> media, String blacklistTag, String whilelistTag) throws MalformedURLException {
+        List<URL> result = new ArrayList<>();
+        for (AbstractMediaDTO mediaEntry : media) {
+            if(blacklistTag != null && mediaEntry.getTags().contains(blacklistTag)) {
+                continue;
+            }
+            if(whilelistTag != null && !mediaEntry.getTags().contains(whilelistTag)) {
+                continue;
+            }
+            result.add(new URL(mediaEntry.getSourceRef()));
         }
-        return imageURLs;
+        return result;
     }
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
-            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
+            boolean isPublic, List<String> courseAreaNames, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             String logoImageURLAsString, String officialWebsiteURLAsString)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        List<URL> imageURLs = createURLsFromMedia(images, MediaConstants.SPONSOR, null);
+        List<URL> videoURLs = createURLsFromMedia(videos, null, null);
+        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaConstants.SPONSOR);
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
-                        createURLsFromStrings(sponsorImageURLs),
+                        imageURLs, videoURLs, sponsorImageURLs,
                         eventImages, eventVideos,
                         logoImageURLAsString == null ? null : new URL(logoImageURLAsString), 
                         officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
@@ -4193,8 +4201,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
                 newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                newEvent.getSponsorImageURLs(), newEvent.getImages(), newEvent.getVideos());
+                newEvent.getOfficialWebsiteURL(), newEvent.getImages(), newEvent.getVideos());
     }
     
     @Override
