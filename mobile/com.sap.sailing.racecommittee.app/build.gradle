@@ -2,10 +2,10 @@ apply plugin: "com.android.application"
 apply from: "../git.gradle"
 
 def packageName = "com.sap.sailing.racecommittee.app"
-def verCode = 6
+def verCode = 7
 
 android {
-    buildToolsVersion "22.0.0"
+    buildToolsVersion "22.0.1"
     compileSdkVersion 22
 
     defaultConfig {
@@ -15,6 +15,9 @@ android {
         versionCode verCode
         versionName "$verCode - Laser"
         useJack false // not working on Windows yet
+
+        /* UI testing with espresso */
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
@@ -46,12 +49,12 @@ android {
             versionNameSuffix ".debug"
             signingConfig signingConfigs.stg_debug
 
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
         }
     }
@@ -65,18 +68,30 @@ android {
 }
 
 dependencies {
+    compile "com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.2"
+
     /* support libraries */
-    compile "com.android.support:appcompat-v7:22.0.0"
-    compile "com.android.support:recyclerview-v7:22.0.0"
+    compile "com.android.support:appcompat-v7:22.1.1"
+    compile "com.android.support:recyclerview-v7:22.1.1"
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:6.5.87"
+    compile "com.google.android.gms:play-services-location:7.3.0"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
 
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
+
+    /* UI testing with espresso */
+    androidTestCompile "com.android.support.test:runner:0.2"
+    androidTestCompile "com.android.support.test:rules:0.2"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:2.1"
+    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.1') {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
 }
 
 // Custom tasks

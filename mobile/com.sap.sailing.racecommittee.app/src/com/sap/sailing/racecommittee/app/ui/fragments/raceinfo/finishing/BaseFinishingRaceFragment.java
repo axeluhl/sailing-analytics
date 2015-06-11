@@ -19,7 +19,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishedTimeDi
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {   
     
@@ -73,22 +72,22 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
     }
     
     @Override
-    public void notifyTick() {
-        TimePoint now = MillisecondsTimePoint.now();
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
+
         TimePoint startTime = getRaceState().getStartTime();
         if (startTime != null) {
             long millisecondsSinceStart = now.minus(startTime.asMillis()).asMillis();
-            
+
             startCountUpTextView.setText(String.format(
                     getString(R.string.race_running_since_template),
                     getRace().getName(), TimeUtils.formatDurationSince(millisecondsSinceStart)));
         }
-        
+
         String info = updateAdditionalInfoText();
         if (info != null) {
             additionalInfoTextView.setText(info);
         }
-        super.notifyTick();
     }
     
     @Override

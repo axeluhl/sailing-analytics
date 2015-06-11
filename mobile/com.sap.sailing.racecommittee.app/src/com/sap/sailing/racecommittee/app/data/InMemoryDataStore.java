@@ -31,9 +31,9 @@ public enum InMemoryDataStore implements DataStore {
 
     @Override
     public void reset() {
-        this.eventsById = new HashMap<Serializable, EventBase>();
-        this.managedRaceById = new HashMap<Serializable, ManagedRace>();
-        this.marksById = new HashMap<Serializable, Mark>();
+        this.eventsById = new HashMap<>();
+        this.managedRaceById = new HashMap<>();
+        this.marksById = new HashMap<>();
         this.courseData = null;
         this.domainFactory = new SharedDomainFactoryImpl();
     }

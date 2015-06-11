@@ -19,6 +19,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 7. JDK 1.8 (Java SE 8), http://jdk8.java.net
 8. Maven 3.1.1 (or higher), http://maven.apache.org
 9. GWT SDK 2.7.0 (http://www.gwtproject.org/download.html)
+10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
 
 #### Further optional but recommended installations
 
@@ -83,7 +84,7 @@ Copy the settings.xml from the top-level git folder to your ~/.m2 directory and 
 - Install the GWT Browser Plugin (Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably) for the GWT Development mode
 
 #### Additional steps required for Android projects
-
+      
 To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
 
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
@@ -110,7 +111,7 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 3. Select your attached device in the device selection screen
 4. The app should be started after deployment
 
-####Stepps to consider for using other modules
+####Steps to consider for using other modules
 1. For Eclipse Build
    * MANIFEST.MF , add module names unter dependencies
    * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`
@@ -124,5 +125,38 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 <classifier>sources</classifier>
 </dependency>`
 
+#### Using Android Studio for Development
+
+The Android Apps can be build in Android Studio or gradle command line. Android Studio is build on top of IntelliJ IDEA, so it is possible to use IntelliJ IDEA as well.
+
+1. On the "Welcome Screen" choose "Import Project (Eclipse, ADT, Gradle, etc.)" 
+2. Navigate to the project root folder and select the "build.gradle" file (all used modules are defined in "settings.gradle")
+    * it will download all necessary gradle runtime files
+    * you will see floating messages at the top right
+        * ignore "non-managed pom.xml file..."
+        * choose "add root" from "Unregistered VCS root detected" (you can add this later, if you missed it)
+3. Setup the Android SDK
+    * in Android Studio press Tools -> Android -> SDK Manager
+    * Install from section "Tools"
+        * Android SDK Tools
+        * Android SDK Platform-tools
+        * Android SDK Build-tools 22.0.1 (latest version at the time of writing)
+    * Install everything of "Android 5.1.1 (API 22)" (latest API at the time of writing)
+        * the "System Images" are optional and only needed for the emulators, which can't be fully used because of the missing Google Play Services (needed for location detection in the wind fragment)
+    * Install from section "Extras"
+        * Android Support Repository
+        * Google Repository
+        * Google USB Driver (only on Windows)
+4. To edit all (not only Android) modules, open the left window "1: Project" and switch the view from "Android" to "Project" (folder view)
+5. At the top is a drop down, where you can switch the mobile projects (com.sap.sailing.*) and start with buttons right to it
+    * Run (starts the app on a real device or emulator)
+    * Debug (starts the app with an attached debugger)
+    * Attach Debugger (useful, if the app is currently running and you want to start debugging against the correspond sources)
+
+##### To enable missing git integration
+
+1. navigate to VCS -> Enable Version Control Integration
+2. choose git in the drop down
+3. if everything is correct, you'll see the current branch at the bottom line
 
 See [RaceCommittee App](racecommittee-app) for more information regarding the mobile app.

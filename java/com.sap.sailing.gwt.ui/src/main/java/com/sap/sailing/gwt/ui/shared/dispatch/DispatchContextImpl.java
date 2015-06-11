@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.shared.dispatch;
 import java.util.Date;
 import java.util.Locale;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.server.RacingEventService;
 
-
+@GwtIncompatible
 public class DispatchContextImpl implements DispatchContext {
     private final RacingEventService racingEventService;
     private final Date currentClientTime;
