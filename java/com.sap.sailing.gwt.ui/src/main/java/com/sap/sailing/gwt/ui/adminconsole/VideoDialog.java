@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
@@ -24,6 +26,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
+    private static final String NO_LOCALE_TEXT = "---";
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload videoURLAndUploadComposite;
     protected final Date creationDate;
@@ -32,6 +35,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     protected TextBox subtitleTextBox;
     protected TextBox copyrightTextBox;
     protected final ListBox mimeTypeListBox;
+    protected final ListBox localeListBox;
     protected IntegerBox lengthIntegerBox;
     protected final URLFieldWithFileUpload thumbnailURLAndUploadComposite;
     protected StringListInlineEditorComposite tagsListEditor;
@@ -73,6 +77,14 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.youtube.name());
         mimeTypeListBox.addItem(MimeType.vimeo.name());
         
+        GWT.debugger();
+        localeListBox = createListBox(false);
+        localeListBox.addItem(NO_LOCALE_TEXT, "");
+        localeListBox.addItem("English", "en");
+        localeListBox.addItem("German", "de");
+        localeListBox.addItem("Russian", "ru");
+        localeListBox.addItem("Chinese", "zh");
+        
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -93,6 +105,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
         result.setCopyright(copyrightTextBox.getValue());
+        result.setLocale(getSelectedLocale());
         List<String> tags = new ArrayList<String>();
         for (String tag: tagsListEditor.getValue()) {
             tags.add(tag);
@@ -119,6 +132,20 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         return result;
     }
     
+    protected void setSelectedLocale(String locale) {
+        for(int i = 0; i < localeListBox.getItemCount(); i++) {
+            if(Util.equalsWithNull(localeListBox.getValue(i), locale)) {
+                localeListBox.setSelectedIndex(i);
+                return;
+            }
+        }
+        localeListBox.setSelectedIndex(0);
+    }
+    
+    private String getSelectedLocale() {
+        return localeListBox.getSelectedValue();
+    }
+    
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
@@ -128,7 +155,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             panel.add(additionalWidget);
         }
 
-        Grid formGrid = new Grid(9, 2);
+        Grid formGrid = new Grid(10, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label("Created at:"));
@@ -145,13 +172,15 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         formGrid.setWidget(4, 1, subtitleTextBox);
         formGrid.setWidget(5, 0, new Label("Copyright:"));
         formGrid.setWidget(5, 1, copyrightTextBox);
-        formGrid.setWidget(6, 0, new Label("Tags:"));
-        formGrid.setWidget(6, 1, tagsListEditor);
+        formGrid.setWidget(6, 0, new Label("Language:"));
+        formGrid.setWidget(6, 1, localeListBox);
+        formGrid.setWidget(7, 0, new Label("Tags:"));
+        formGrid.setWidget(7, 1, tagsListEditor);
 
-        formGrid.setWidget(7, 0, new Label("Video-Length (s):"));
-        formGrid.setWidget(7, 1, lengthIntegerBox);
-        formGrid.setWidget(8, 0, new Label("Thumbnail-URL:"));
-        formGrid.setWidget(8, 1, thumbnailURLAndUploadComposite);
+        formGrid.setWidget(8, 0, new Label("Video-Length (s):"));
+        formGrid.setWidget(8, 1, lengthIntegerBox);
+        formGrid.setWidget(9, 0, new Label("Thumbnail-URL:"));
+        formGrid.setWidget(9, 1, thumbnailURLAndUploadComposite);
 
         return panel;
     }

@@ -143,6 +143,13 @@ public class VideosListComposite extends Composite {
                 return video.getMimeType() != null ? video.getMimeType().name() : "";
             }
         };
+        
+        TextColumn<VideoDTO> localeColumn = new TextColumn<VideoDTO>() {
+            @Override
+            public String getValue(VideoDTO video) {
+                return video.getLocale() != null ? video.getLocale() : "";
+            }
+        };
 
         SafeHtmlCell tagsCell = new SafeHtmlCell();
         Column<VideoDTO, SafeHtml> tagsColumn = new Column<VideoDTO, SafeHtml>(tagsCell) {
@@ -187,6 +194,7 @@ public class VideosListComposite extends Composite {
         table.addColumn(titleColumn, stringMessages.title());
         table.addColumn(createdAtDateColumn, "Created At");
         table.addColumn(mimeTypeColumn, stringMessages.mimeType());
+        table.addColumn(localeColumn, "Lang");
         table.addColumn(tagsColumn, "Tags");
         table.addColumn(videoActionColumn, stringMessages.actions());
         table.addColumnSortHandler(getVideoTableColumnSortHandler(videoListDataProvider.getList(), titleColumn, createdAtDateColumn));
