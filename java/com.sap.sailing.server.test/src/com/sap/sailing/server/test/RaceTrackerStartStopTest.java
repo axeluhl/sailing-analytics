@@ -123,10 +123,15 @@ public class RaceTrackerStartStopTest {
         // of the tracked event
         assertNotNull(regatta.getRaceByName(RACENAME2));
         boolean foundTrackedRaceForRaceDef2 = false;
-        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-            if (trackedRace.getRace().getName().equals(RACENAME2)) {
-                foundTrackedRaceForRaceDef2 = true;
+        trackedRegatta.lockTrackedRacesForRead();
+        try {
+            for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                if (trackedRace.getRace().getName().equals(RACENAME2)) {
+                    foundTrackedRaceForRaceDef2 = true;
+                }
             }
+        } finally {
+            trackedRegatta.unlockTrackedRacesAfterRead();
         }
         assertTrue(foundTrackedRaceForRaceDef2);
         // The raceTracker2 and raceTracker3 should currently not be in track mode. 
@@ -161,10 +166,15 @@ public class RaceTrackerStartStopTest {
         // from the tracked event
         assertNull(regatta.getRaceByName(RACENAME2));
         boolean foundTrackedRaceForRaceDef2 = false;
-        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-            if (trackedRace.getRace().getName().equals(RACENAME2)) {
-                foundTrackedRaceForRaceDef2 = true;
+        trackedRegatta.lockTrackedRacesForRead();
+        try {
+            for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                if (trackedRace.getRace().getName().equals(RACENAME2)) {
+                    foundTrackedRaceForRaceDef2 = true;
+                }
             }
+        } finally {
+            trackedRegatta.unlockTrackedRacesAfterRead();
         }
         assertFalse(foundTrackedRaceForRaceDef2);
         // The trackers map should still contain the raceTrackers

@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
@@ -9,25 +12,18 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.RegattaListener;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
@@ -37,11 +33,11 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
-import com.sap.sailing.domain.regattalike.RegattaLikeListener;
+import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -65,6 +61,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -265,174 +262,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public Regatta getRegatta() {
-                return new Regatta() {
-                    private static final long serialVersionUID = -4908774269425170811L;
-
-                    @Override
-                    public String getName() {
-                        return "A Mocked Test Regatta";
-                    }
-
-                    @Override
-                    public Serializable getId() {
-                        return null;
-                    }
-
-                    @Override
-                    public Iterable<RaceDefinition> getAllRaces() {
-                        return null;
-                    }
-
-                    @Override
-                    public BoatClass getBoatClass() {
-                        return null;
-                    }
-
-                    @Override
-                    public Iterable<Competitor> getAllCompetitors() {
-                        return null;
-                    }
-
-                    @Override
-                    public void addRace(RaceDefinition race) {
-                    }
-
-                    @Override
-                    public void removeRace(RaceDefinition raceDefinition) {
-                    }
-
-                    @Override
-                    public RaceDefinition getRaceByName(String raceName) {
-                        return null;
-                    }
-
-                    @Override
-                    public void addRegattaListener(RegattaListener listener) {
-                    }
-
-                    @Override
-                    public void removeRegattaListener(RegattaListener listener) {
-                    }
-
-                    @Override
-                    public RegattaIdentifier getRegattaIdentifier() {
-                        return null;
-                    }
-
-                    @Override
-                    public Iterable<? extends Series> getSeries() {
-                        return null;
-                    }
-
-                    @Override
-                    public Series getSeriesByName(String seriesName) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isPersistent() {
-                        return false;
-                    }
-
-                    @Override
-                    public void addRaceColumnListener(RaceColumnListener listener) {
-
-                    }
-
-                    @Override
-                    public void removeRaceColumnListener(RaceColumnListener listener) {
-                    }
-
-                    @Override
-                    public ScoringScheme getScoringScheme() {
-                        return null;
-                    }
-
-                    @Override
-                    public CourseArea getDefaultCourseArea() {
-                        return null;
-                    }
-
-                    @Override
-                    public void setDefaultCourseArea(CourseArea newCourseArea) {
-                    }
-
-                    @Override
-                    public boolean definesSeriesDiscardThresholds() {
-                        return false;
-                    }
-
-                    @Override
-                    public RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race) {
-                        return null;
-                    }
-
-                    @Override
-                    public RegattaConfiguration getRegattaConfiguration() {
-                        return null;
-                    }
-
-                    @Override
-                    public void setRegattaConfiguration(RegattaConfiguration configuration) {
-                    }
-
-                    @Override
-                    public void addSeries(Series series) {
-                    }
-
-                    @Override
-                    public boolean useStartTimeInference() {
-                        return false;
-                    }
-
-                    @Override
-                    public void removeSeries(Series series) {
-                    }
-
-                    @Override
-                    public void setUseStartTimeInference(boolean useStartTimeInference) {
-                    }
-
-                    @Override
-                    public RegattaLog getRegattaLog() {
-                        return null;
-                    }
-
-                    @Override
-                    public TimePoint getStartDate() {
-                        return null;
-                    }
-
-                    @Override
-                    public void setStartDate(TimePoint startDate) {
-                    }
-
-                    @Override
-                    public TimePoint getEndDate() {
-                        return null;
-                    }
-
-                    @Override
-                    public void setEndDate(TimePoint startDate) {
-                    }
-
-                    @Override
-                    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
-                        return null;
-                    }
-
-                    @Override
-                    public void addListener(RegattaLikeListener listener) {
-                    }
-
-                    @Override
-                    public void removeListener(RegattaLikeListener listener) {
-                    }
-
-                    @Override
-                    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
-                    }
-                };
+                final Regatta result = mock(Regatta.class);
+                when(result.getName()).thenReturn("A Mocked Test Regatta");
+                return result;
             }
 
             @Override
@@ -482,6 +314,22 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
                     boolean useMarkPassingCalculator) {
                 return null;
+            }
+
+            @Override
+            public void lockTrackedRacesForRead() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterRead() {
+            }
+
+            @Override
+            public void lockTrackedRacesForWrite() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterWrite() {
             }
         };
     }
@@ -541,8 +389,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
-            throws NoWindException {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
         return null;
     }
 
@@ -644,7 +491,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
+    public Competitor getOverallLeader(TimePoint timePoint) {
         return null;
     }
 
@@ -894,17 +741,42 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public long getGateStartGolfDownTime() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int getLastLegStarted(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
+    }
+
+    @Override
+    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+            NoWindException {
+        return null;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public RankingMetric getRankingMetric() {
+        return null;
     }
 }

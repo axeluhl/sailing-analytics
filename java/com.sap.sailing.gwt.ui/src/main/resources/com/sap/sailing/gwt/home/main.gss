@@ -72,12 +72,7 @@ figcaption {
   font-size: 1rem;
   position: relative;
   min-height: 100%;
-  padding-bottom: 12em;
-}
-@media (min-width: 720px) {
-  .wrapper {
-    padding-bottom: 5em;
-  }
+  padding-bottom: 5em;
 }
 .navbar {
   font-size: 1rem;
@@ -95,6 +90,8 @@ figcaption {
           transition: background-color 0.2s, border-color 0.2s;
   text-decoration: none;
   margin-right: 0.555555555555556em;
+  border-top-left-radius: 0.277777777777778em;
+  border-top-right-radius: 0.277777777777778em;
 }
 .navbar_buttonhidden {
   display: block;
@@ -132,6 +129,14 @@ figcaption {
   outline: none;
   text-decoration: none;
 }
+.buttontextonly {
+  color: #333;
+  background: none;
+  -webkit-transition: none;
+     -moz-transition: none;
+          transition: none;
+  font-weight: normal;
+}
 .buttonsmall {
   visibility: inherit;
 }
@@ -139,6 +144,7 @@ figcaption {
   font-size: 0.933333333333333rem;
   font-weight: 700;
   text-transform: uppercase;
+  border-radius: 0.214285714285714em;
   padding: 0.714285714285714em 1.071428571428571em;
 }
 .buttoninactive {
@@ -340,8 +346,7 @@ figcaption {
           transform: translate(-50%, -50%);
 }
 .mainsection {
-  padding-top: 5.333333333333333em;
-  padding-bottom: 5.333333333333333em;
+  padding: 5.333333333333333em 0;
 }
 .mainsection_header {
   text-align: center;
@@ -401,6 +406,71 @@ figcaption {
   right: 1.333333333333333em;
   cursor: pointer;
   z-index: 2;
+}
+.spacer {
+  width: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+.spacersmall {
+  height: 1em;
+}
+.spacermediumsmall {
+  height: 1.333333333333333em;
+}
+.spacermedium {
+  height: 2em;
+}
+.spacermediumbig {
+  height: 4em;
+}
+.spacerbig {
+  height: 5.333333333333333em;
+}
+.spacermargin {
+  font-size: inherit;
+}
+.spacermargintopsmall {
+  margin-top: 1em;
+}
+.spacermargintopmediumsmall {
+  margin-top: 1.333333333333333em;
+}
+.spacermargintopmedium {
+  margin-top: 2em;
+}
+.spacermargintopmediumbig {
+  margin-top: 4em;
+}
+.spacermargintopbig {
+  margin-top: 5.333333333333333em;
+}
+.spacermarginbottomsmall {
+  margin-bottom: 1em;
+}
+.spacermarginbottommediumsmall {
+  margin-bottom: 1.333333333333333em;
+}
+.spacermarginbottommedium {
+  margin-bottom: 2em;
+}
+.spacermarginbottommediumbig {
+  margin-bottom: 4em;
+}
+.spacermarginbottombig {
+  margin-bottom: 5.333333333333333em;
+}
+@media (min-width: 720px) {
+  .spacermarginonlyonsmall {
+    margin: 0;
+  }
+}
+@media (max-width: 720px) {
+  .spacermarginonlyonlarge {
+    margin: 0;
+  }
 }
 .stickyheader {
   background: inherit;

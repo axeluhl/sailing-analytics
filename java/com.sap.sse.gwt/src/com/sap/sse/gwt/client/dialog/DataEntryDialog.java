@@ -88,8 +88,11 @@ public abstract class DataEntryDialog<T> {
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
+
         dateEntryDialog.setText(title);
-        dateEntryDialog.setAnimationEnabled(animationEnabled);
+        // dateEntryDialog.setAnimationEnabled(animationEnabled);
+        dateEntryDialog.setGlassEnabled(true);
+
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
@@ -266,7 +269,7 @@ public abstract class DataEntryDialog<T> {
         return longBox;
     }
 
-    public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+    public DoubleBox createDoubleBox(Double initialValue, int visibleLength) {
         return createDoubleBoxInternal(initialValue, visibleLength);
     }
 

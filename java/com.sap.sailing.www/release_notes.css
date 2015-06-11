@@ -4,7 +4,8 @@ body{
 
 #yield_content #mainContent .releaseHeadline{
 	font-size: 24px;
-	font-family: OpenSansBold, Arial, Verdana, sans-serif;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: bold;
 	padding: 0 0 5px;
 	margin: 0 0 10px 0;
 	border-bottom: 2px solid #222222;
@@ -14,7 +15,7 @@ body{
 	border-bottom: none;
 }
 #yield_content #mainContent .articleSubheadline {
-  font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+  font-family: 'Open Sans', Arial, Verdana, sans-serif;
 }
 #yield_content #mainContent .releaseNavigation{
 	margin: 0 0 20px 0;

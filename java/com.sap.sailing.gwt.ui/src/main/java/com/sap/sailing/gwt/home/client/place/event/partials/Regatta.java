@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
@@ -13,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -68,6 +70,8 @@ public class Regatta extends Composite {
     @UiField Anchor regattaDetailsLink;
     
     @UiField Image boatClassImage;
+    @UiField
+    AnchorElement boatClassLinkUi;
 
     private Presenter presenter;
 
@@ -83,6 +87,7 @@ public class Regatta extends Composite {
         RegattaResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
+
     }
 
     public void setData(LeaderboardGroupDTO leaderboardGroup, boolean hasMultipleLeaderboardGroups, StrippedLeaderboardDTO leaderboard,
@@ -95,6 +100,17 @@ public class Regatta extends Composite {
         } else {
             regattaNavigation = presenter.getRegattaNavigation(leaderboard.regattaName != null ? leaderboard.regattaName : leaderboard.name);
             regattaDetailsLink.setHref(regattaNavigation.getTargetUrl());
+            boatClassLinkUi.setHref(regattaNavigation.getTargetUrl());
+            Event.sinkEvents(boatClassLinkUi, Event.ONCLICK);
+            Event.setEventListener(boatClassLinkUi, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    if (LinkUtil.handleLinkClick(event)) {
+                        event.preventDefault();
+                        regattaNavigation.goToPlace();
+                    }
+                }
+            });
         }
 
         boolean hasLiveRace = leaderboard.hasLiveRace(presenter.getTimerForClientServerOffset().getLiveTimePointInMillis());

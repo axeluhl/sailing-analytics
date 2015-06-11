@@ -26,9 +26,11 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class SpeedRegressionPerAngleClusterProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>{
     
-private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
+    private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, IncrementalLeastSquares> regressions = new HashMap<>();
+    
+    private final Map<BoatClass, Long> fixCountPerBoatClass = new HashMap<>();
 
     private final ClusterGroup<Bearing> angleClusterGroup;
     
@@ -46,6 +48,13 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
         GroupKey key = element.getKey();
         IncrementalLeastSquares regression;
+        BoatClass boatClass = element.getDataEntry().getBoatClass();
+        synchronized (fixCountPerBoatClass) {
+            if (!fixCountPerBoatClass.containsKey(boatClass)) {
+                fixCountPerBoatClass.put(boatClass, 0L);
+            }
+            fixCountPerBoatClass.put(boatClass, fixCountPerBoatClass.get(boatClass) + 1);
+        }
         synchronized (regressions) {
             regression = regressions.get(key);
             if (regression == null) {
@@ -66,18 +75,29 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
         double speedSum = 0;
         double numberOfSpeeds = 0;
-        for (int i = -5; i <= 5; i++) {
-            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle.getDegrees() + i));
+        long fixCount = 0;
+        for (int i = -2; i <= 2; i++) {
+            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
             if (regressions.containsKey(key)) {
-                speedSum += regressions.get(key).getOrCreatePolynomialFunction().value(windSpeed.getKnots());
-                numberOfSpeeds++;
+                IncrementalLeastSquares incrementalLeastSquares = regressions.get(key);
+                fixCount = fixCount + incrementalLeastSquares.getNumberOfAddedPoints();
+                if (fixCount > 10) {
+                    speedSum += incrementalLeastSquares.getOrCreatePolynomialFunction().value(windSpeed.getKnots());
+                    numberOfSpeeds++;
+                }
             } 
         }
-        if (numberOfSpeeds < 1) {
+        fixCount = (long) (fixCount / numberOfSpeeds);
+        long fixCountOverall = 0;
+        if (numberOfSpeeds < 2 || fixCount < 10) {
             throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
+        } else {
+            synchronized (fixCountPerBoatClass) {
+                fixCountOverall = fixCountPerBoatClass.get(boatClass);
+             }
         }
         Speed speed = new KnotSpeedImpl(speedSum / numberOfSpeeds);
-        return new SpeedWithConfidenceImpl<Void>(speed, /*FIXME*/ 0.5, null);
+        return new SpeedWithConfidenceImpl<Void>(speed, Math.min(1, 5.0 * ((double) fixCount / fixCountOverall)), null);
     }
     
     private GroupKey createGroupKey(final BoatClass boatClass, final Bearing angle) {

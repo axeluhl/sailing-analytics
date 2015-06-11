@@ -29,3 +29,24 @@
   font-weight: 300;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Open Sans Condensed';
+  src: url("fonts/open-sans-condensed-light-webfont.eot");
+  src: url("fonts/open-sans-condensed-light-webfont.eot?#iefix") format('embedded-opentype'), url("fonts/open-sans-condensed-light-webfont.woff") format('woff'), url("fonts/open-sans-condensed-light-webfont.ttf") format('truetype'), url("fonts/open-sans-condensed-light-webfont.svg#open_sanslight") format('svg');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sans Condensed';
+  src: url("fonts/open-sans-condensed-light-italic-webfont.eot");
+  src: url("fonts/open-sans-condensed-light-italic-webfont.eot?#iefix") format('embedded-opentype'), url("fonts/open-sans-condensed-light-italic-webfont.woff") format('woff'), url("fonts/open-sans-condensed-light-italic-webfont.ttf") format('truetype'), url("fonts/open-sans-condensed-light-italic-webfont.svg#open_sanslight") format('svg');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Open Sans Condensed';
+  src: url("fonts/open-sans-condensed-bold-webfont.eot");
+  src: url("fonts/open-sans-condensed-bold-webfont.eot?#iefix") format('embedded-opentype'), url("fonts/open-sans-condensed-bold-webfont.woff") format('woff'), url("fonts/open-sans-condensed-bold-webfont.ttf") format('truetype'), url("fonts/open-sans-condensed-bold-webfont.svg#open_sanslight") format('svg');
+  font-weight: 700;
+  font-style: normal;
+}

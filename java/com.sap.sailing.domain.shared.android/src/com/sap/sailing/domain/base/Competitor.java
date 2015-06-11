@@ -2,7 +2,9 @@ package com.sap.sailing.domain.base;
 
 import java.net.URI;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
@@ -39,4 +41,35 @@ public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomain
      * without effect.
      */
     void removeCompetitorChangeListener(CompetitorChangeListener listener);
+    
+    /**
+     * The default time-on-time handicap factor for this competitor. If <code>null</code>, no time-on-time handicap
+     * factor is defined for this competitor. For a simple time-on-time scheme, the factor is multiplied with the actual
+     * time sailed to obtain the corrected time. For a "performance line" system, afterwards an additional
+     * distance-based allowance may be subtracted from the resulting time.
+     * <p>
+     * 
+     * A particular regatta can make specific arrangements and override this default value for this competitor in its
+     * {@link RegattaLog}, accommodating for the fact that in between regattas competitors may get a new, different
+     * rating, resulting in different handicaps for different regattas.
+     * 
+     * @see #getTimeOnDistanceAllowancePerNauticalMile
+     */
+    Double getTimeOnTimeFactor();
+    
+    /**
+     * The default time-on-distance time allowance for this competitor, used in handicap regattas. If <code>null</code>,
+     * no time-on-distance allowance is defined for this competitor. For a simple time-on-distance scheme, the factor is
+     * multiplied with the (windward) course length and the result is subtracted from the actual time sailed to obtain
+     * the corrected time. For a "performance line" system, the actual time sailed will be multiplied with the
+     * {@link #getTimeOnTimeFactor() time-on-time factor} before subtracting the time-on-distance allowance.
+     * <p>
+     * 
+     * A particular regatta can make specific arrangements and override this default value for this competitor in its
+     * {@link RegattaLog}, accommodating for the fact that in between regattas competitors may get a new, different
+     * rating, resulting in different handicaps for different regattas.
+     * 
+     * @see #getTimeOnTimeFactor
+     */
+    Duration getTimeOnDistanceAllowancePerNauticalMile();
 }

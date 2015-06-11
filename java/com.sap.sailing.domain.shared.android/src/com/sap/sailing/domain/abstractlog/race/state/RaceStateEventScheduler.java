@@ -11,6 +11,4 @@ public interface RaceStateEventScheduler {
     void unscheduleStateEvent(RaceStateEvents stateEventName);
 
     void unscheduleAllEvents();
-    
-    
 }
