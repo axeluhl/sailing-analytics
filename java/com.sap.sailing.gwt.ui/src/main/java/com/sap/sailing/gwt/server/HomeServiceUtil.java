@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -29,6 +30,7 @@ import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
+    
     private HomeServiceUtil() {
     }
 
@@ -388,7 +390,7 @@ public final class HomeServiceUtil {
         return Util.get(urls, new Random(size).nextInt(size));
     }
     
-    public static VideoDescriptor getStageVideo(Event event, String localeName, Collection<String> rankedTags, boolean acceptOtherTags) {
+    public static VideoDescriptor getStageVideo(Event event, Locale locale, Collection<String> rankedTags, boolean acceptOtherTags) {
         VideoDescriptor bestMatch = null;
         
         for (VideoDescriptor videoCandidate : event.getVideos()) {
@@ -400,7 +402,7 @@ public final class HomeServiceUtil {
                 continue;
             }
             
-            LocaleMatch localeMatch = matchLocale(videoCandidate, localeName);
+            LocaleMatch localeMatch = matchLocale(videoCandidate, locale);
             if(localeMatch == LocaleMatch.NO_MATCH) {
                 continue;
             }
@@ -411,7 +413,7 @@ public final class HomeServiceUtil {
             }
             
             int compareByTag = compareByTag(videoCandidate, bestMatch, rankedTags);
-            if(compareByTag > 0 || (compareByTag == 0 && isBetter(videoCandidate, bestMatch, localeName))) {
+            if(compareByTag > 0 || (compareByTag == 0 && isBetter(videoCandidate, bestMatch, locale))) {
                 bestMatch = videoCandidate;
                 continue;
             }
@@ -431,9 +433,9 @@ public final class HomeServiceUtil {
         return 0;
     }
 
-    private static boolean isBetter(VideoDescriptor candidate, VideoDescriptor reference, String localeName) {
-        LocaleMatch localeMatch = matchLocale(candidate, localeName);
-        LocaleMatch localeMatchRef = matchLocale(reference, localeName);
+    private static boolean isBetter(VideoDescriptor candidate, VideoDescriptor reference, Locale locale) {
+        LocaleMatch localeMatch = matchLocale(candidate, locale);
+        LocaleMatch localeMatchRef = matchLocale(reference, locale);
         if(localeMatch != localeMatchRef) {
             return localeMatch.compareTo(localeMatchRef) < 0 ? true : false;
         }
@@ -460,20 +462,15 @@ public final class HomeServiceUtil {
         PERFECT, NOT_TAGGED, EN_FALLBACK, NO_MATCH
     }
 
-    private static LocaleMatch matchLocale(VideoDescriptor videoCandidate, String localeName) {
-        boolean hasLocaleTag = false;
-        boolean hasEn = false;
-        for(String tag : videoCandidate.getTags()) {
-            if(tag.equals(MediaConstants.LOCALE_PREFIX + localeName)) {
-                return LocaleMatch.PERFECT;
-            }
-            hasLocaleTag |= tag.startsWith(MediaConstants.LOCALE_PREFIX);
-            hasEn |= tag.equals(MediaConstants.LOCALE_EN);
-        }
-        if(!hasLocaleTag) {
+    private static LocaleMatch matchLocale(VideoDescriptor videoCandidate, Locale locale) {
+        Locale localeOfCandidate = videoCandidate.getLocale();
+        if(localeOfCandidate == null) {
             return LocaleMatch.NOT_TAGGED;
         }
-        if(hasEn) {
+        if(videoCandidate.getLocale().equals(locale)) {
+            return LocaleMatch.PERFECT;
+        }
+        if(videoCandidate.getLocale().equals(Locale.ENGLISH)) {
             return LocaleMatch.EN_FALLBACK;
         }
         return LocaleMatch.NO_MATCH;

@@ -54,7 +54,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         // P3: Show Stage image without Countdown
         
         Collection<String> tags = state == EventState.FINISHED ? rankedTagsFinished : rankedTags;
-        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocaleName(), tags, true);
+        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), tags, true);
         if(stageVideo != null) {
             return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, stageVideo.getMimeType(), stageVideo.getURL().toString());
         }
