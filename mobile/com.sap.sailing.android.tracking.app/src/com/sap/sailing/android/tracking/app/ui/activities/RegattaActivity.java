@@ -1,14 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -48,6 +38,14 @@ import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
 
 public class RegattaActivity extends AbstractRegattaActivity implements RegattaFragment.FragmentWatcher {
 
@@ -363,8 +361,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             CheckinData data = (CheckinData) checkinData;
             try {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(), data.getCompetitor(),
-                        data.getLeaderboard(), data.getCheckinUrl());
+                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(), data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
                 competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
                 event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
                 leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
@@ -397,13 +394,13 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             try {
                 if (imageFile != null) {
                     URL url = new URL(uploadUrl);
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) url.openConnection();
-                    httpUrlConnection.setUseCaches(false);
-                    httpUrlConnection.setDoOutput(true);
-                    httpUrlConnection.setRequestMethod("POST");
-                    httpUrlConnection.setRequestProperty("Content-Type", "image/jpeg");
-                    DataOutputStream outputStream = new DataOutputStream(httpUrlConnection.getOutputStream());
-                    
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setUseCaches(false);
+                    urlConnection.setDoOutput(true);
+                    urlConnection.setRequestMethod("POST");
+                    urlConnection.setRequestProperty("Content-Type", "image/jpeg");
+                    DataOutputStream outputStream = new DataOutputStream(urlConnection.getOutputStream());
+
                     int nRead;
                     byte[] data = new byte[2048];
                     FileInputStream imageInputStream = new FileInputStream(imageFile);
@@ -413,22 +410,22 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                     imageInputStream.close();
                     outputStream.flush();
                     outputStream.close();
-                    Log.d(TAG, "Image upload response: " + httpUrlConnection.getResponseCode());
-                    if(httpUrlConnection.getResponseMessage().equals("OK")) {
-                        BufferedReader br = new BufferedReader(new InputStreamReader((httpUrlConnection.getInputStream())));
-                        StringBuilder sb = new StringBuilder();
+                    Log.d(TAG, "Image upload response: " + urlConnection.getResponseCode());
+                    if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
+                        StringBuilder builder = new StringBuilder();
                         String output;
-                        while ((output = br.readLine()) != null) {
-                            sb.append(output);
+                        while ((output = reader.readLine()) != null) {
+                            builder.append(output);
                         }
-                        Log.d(TAG, "Response body: " + sb.toString());
+                        Log.d(TAG, "Response body: " + builder.toString());
                     }
-                    httpUrlConnection.disconnect();
-                    }
+                    urlConnection.disconnect();
+                }
             } catch (IOException e) {
                 ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
-                this.cancel(true);
-                }
+                cancel(true);
+            }
             return "";
         }
 
