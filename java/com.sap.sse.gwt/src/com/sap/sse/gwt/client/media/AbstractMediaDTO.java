@@ -21,6 +21,8 @@ public abstract class AbstractMediaDTO implements IsSerializable {
     protected List<String> tags = new ArrayList<String>();
 
     protected String sourceRef;
+    
+    private String locale;
 
     /** for GWT */
     protected AbstractMediaDTO() {
@@ -90,4 +92,11 @@ public abstract class AbstractMediaDTO implements IsSerializable {
         this.sourceRef = sourceRef;
     }
 
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
 }
