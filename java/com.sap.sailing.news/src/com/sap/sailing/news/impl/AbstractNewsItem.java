@@ -55,4 +55,19 @@ public class AbstractNewsItem implements NewsItem {
     public UUID getId() {
         return id;
     }
+
+    @Override
+    public int compareTo(NewsItem o) {
+        Date otherCreatedAtDate = o.getCreatedAtDate();
+        if(createdAtDate == otherCreatedAtDate) {
+            return 0;
+        }
+        if(createdAtDate == null) {
+            return 1;
+        }
+        if(otherCreatedAtDate == null) {
+            return -1;
+        }
+        return -createdAtDate.compareTo(otherCreatedAtDate);
+    }
 }

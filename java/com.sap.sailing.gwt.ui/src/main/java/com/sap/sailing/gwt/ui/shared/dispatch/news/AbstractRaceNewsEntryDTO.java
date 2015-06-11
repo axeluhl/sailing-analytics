@@ -6,28 +6,21 @@ public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
     
     private String regattaName;
     private String trackedRaceName;
-    private String raceTitle;
     private String boatClass;
 
     protected AbstractRaceNewsEntryDTO() {
     }
 
     public AbstractRaceNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp) {
-        super(timestamp);
+        super(raceTitle, timestamp);
         this.regattaName = regattaName;
         this.trackedRaceName = trackedRaceName;
         this.boatClass = boatClass;
-        this.raceTitle = raceTitle;
     }
     
     @Override
     public String getBoatClass() {
         return boatClass;
-    }
-
-    @Override
-    public String getTitle() {
-        return raceTitle;
     }
 
     public String getRegattaName() {

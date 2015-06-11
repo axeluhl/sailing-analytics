@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
-import java.util.Date;
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 
 public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
     
@@ -9,7 +10,6 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
     }
 
     private String leaderboardName;
-    private String leaderboardDisplayName;
     private String boatClassName;
     private String externalURL;
     private Type type;
@@ -18,19 +18,14 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
     private LeaderboardNewsEntryDTO() {
     }
 
-    public LeaderboardNewsEntryDTO(String leaderboardName, String leaderboardDisplayName, String boatClassName, Date timestamp, Type type) {
-        super(timestamp);
-        this.boatClassName = boatClassName;
-        this.type = type;
-        this.setLeaderboardName(leaderboardName);
-        this.leaderboardDisplayName = leaderboardDisplayName;
+    @GwtIncompatible
+    public LeaderboardNewsEntryDTO(LeaderboardUpdateNewsItem item) {
+        super(item.getTitle(), item.getCreatedAtDate());
+        this.boatClassName = item.getBoatClass();
+        this.type = Type.RESULTS_UPDATE;
+        this.leaderboardName = item.getLeaderboardName();
     }
 
-    @Override
-    public String getTitle() {
-        return leaderboardDisplayName;
-    }
-    
     @Override
     public String getBoatClass() {
         return boatClassName;
@@ -55,9 +50,5 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
 
     public String getLeaderboardName() {
         return leaderboardName;
-    }
-
-    public void setLeaderboardName(String leaderboardName) {
-        this.leaderboardName = leaderboardName;
     }
 }

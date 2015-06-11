@@ -7,15 +7,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public abstract class NewsEntryDTO implements IsSerializable {
     
     private Date timestamp;
+    
+    private String title;
 
     protected NewsEntryDTO() {
     }
     
-    public NewsEntryDTO(Date timestamp) {
+    public NewsEntryDTO(String title, Date timestamp) {
+        this.title = title;
         this.timestamp = timestamp;
     }
 
-    public abstract String getTitle();
+    public String getTitle() {
+        return title;
+    }
 
     public abstract String getMessage();
     

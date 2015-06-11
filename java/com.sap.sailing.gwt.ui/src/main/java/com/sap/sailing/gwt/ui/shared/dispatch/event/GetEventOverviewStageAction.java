@@ -11,10 +11,12 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.InfoNewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.impl.InfoEventNewsItem;
+import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -129,15 +131,17 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     
     @GwtIncompatible
     private void addNews(DispatchContext dispatchContext, Event event, EventOverviewStageDTO stage) {
-        // TODO correct date
-        List<EventNewsItem> newsItems = dispatchContext.getEventNewsService().getNews(event, event.getStartDate().asDate());
+        List<EventNewsItem> newsItems = dispatchContext.getEventNewsService().getNews(event);
 
         for(EventNewsItem newsItem: newsItems) {
             if(newsItem instanceof InfoEventNewsItem) {
                 stage.addNews(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem));
             }
+            if(newsItem instanceof LeaderboardUpdateNewsItem) {
+                stage.addNews(new LeaderboardNewsEntryDTO((LeaderboardUpdateNewsItem) newsItem));
+            }
         }
-//        TODO test contents
+//        TODO remove test contents
 //        
 //        boolean singleRegatta = HomeServiceUtil.isSingleRegatta(event);
 //        

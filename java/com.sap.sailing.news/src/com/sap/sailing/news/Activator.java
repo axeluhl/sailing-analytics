@@ -7,6 +7,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.news.impl.EventNewsProviderRegistryImpl;
 import com.sap.sailing.news.impl.EventNewsServiceImpl;
+import com.sap.sailing.news.impl.LeaderboardUpdateEventNewsProvider;
 import com.sap.sailing.news.impl.SimpleDemoEventNewsProvider;
 
 public class Activator implements BundleActivator {
@@ -19,6 +20,7 @@ public class Activator implements BundleActivator {
         context.registerService(EventNewsProviderRegistry.class, providerRegistry, null);
         
         providerRegistry.registerNewsProvider(new SimpleDemoEventNewsProvider());
+        providerRegistry.registerNewsProvider(new LeaderboardUpdateEventNewsProvider());
         logger.info("EventNews Service registered.");
     }
 

@@ -5,7 +5,6 @@ import com.sap.sailing.news.impl.InfoEventNewsItem;
 
 public class InfoNewsEntryDTO extends NewsEntryDTO {
     
-    private String title;
     private String subtitle;
     
     @SuppressWarnings("unused")
@@ -14,14 +13,8 @@ public class InfoNewsEntryDTO extends NewsEntryDTO {
 
     @GwtIncompatible
     public InfoNewsEntryDTO(InfoEventNewsItem item) {
-        super(item.getCreatedAtDate());
-        this.title = item.getTitle();
+        super(item.getTitle(), item.getCreatedAtDate());
         this.subtitle = item.getMessage();
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
     }
 
     @Override

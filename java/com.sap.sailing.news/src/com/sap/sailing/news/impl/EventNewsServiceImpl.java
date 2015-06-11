@@ -2,6 +2,7 @@ package com.sap.sailing.news.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +26,11 @@ public class EventNewsServiceImpl implements EventNewsService {
             Collection<? extends EventNewsItem> news = provider.getNews(event);
             result.addAll(news);
         }
-        return result;
+        Collections.sort(result);
+        if(result.size() <= 15) {
+            return result;
+        }
+        return result.subList(0, 16);
     }
 
     @Override
@@ -35,7 +40,11 @@ public class EventNewsServiceImpl implements EventNewsService {
             Collection<? extends EventNewsItem> news = provider.getNews(event, startingFrom);
             result.addAll(news);
         }
-        return result;
+        Collections.sort(result);
+        if(result.size() <= 15) {
+            return result;
+        }
+        return result.subList(0, 16);
     }
 
     @Override

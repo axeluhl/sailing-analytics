@@ -9,7 +9,7 @@ import java.util.UUID;
  * @author Frank
  *
  */
-public interface NewsItem {
+public interface NewsItem extends Comparable<NewsItem> {
     UUID getId();
     
     String getCategory();
