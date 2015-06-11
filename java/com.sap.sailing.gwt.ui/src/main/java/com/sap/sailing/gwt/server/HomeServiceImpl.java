@@ -344,6 +344,11 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         } else {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
+        
+        // TODO fmittag: put in correct event ID
+        if("adbd871b-b9b3-4e18-bd79-d560e7b87c53".equals(event.getId().toString())) {
+            dto.setSailorsInfoURL("http://livecenter.kieler-woche.de/");
+        }
 
         return dto;
     }
