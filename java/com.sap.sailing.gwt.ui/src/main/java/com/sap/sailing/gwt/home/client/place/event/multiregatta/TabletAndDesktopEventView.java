@@ -71,7 +71,7 @@ public class TabletAndDesktopEventView extends Composite implements EventMultire
             seriesAnchor.setHref(sailorsInfoURL);
             seriesAnchor.setTarget("_blank");
             seriesAnchor.setStyleName(SharedResources.INSTANCE.mainCss().button());
-            seriesAnchor.addStyleName(SharedResources.INSTANCE.mainCss().buttonred());
+            seriesAnchor.addStyleName(SharedResources.INSTANCE.mainCss().buttonprimary());
             Style style = seriesAnchor.getElement().getStyle();
             style.setTextTransform(TextTransform.UPPERCASE);
             style.setVerticalAlign(VerticalAlign.BOTTOM);
