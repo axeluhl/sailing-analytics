@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public class SearchResult extends Composite {
@@ -40,11 +40,11 @@ public class SearchResult extends Composite {
     @UiField DivElement searchAmountUi;
 
     private final List<SearchResultItem> searchResultItemComposites;
-    private final HomePlacesNavigator navigator;
+    private final DesktopPlacesNavigator navigator;
 
     private int resultCounter;
 
-    public SearchResult(HomePlacesNavigator navigator) {
+    public SearchResult(DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
         this.searchResultItemComposites = new ArrayList<SearchResultItem>();
         

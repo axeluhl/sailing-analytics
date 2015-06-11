@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.client.shared.stage.Stage;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 public class TabletAndDesktopStartView extends Composite implements StartView {
@@ -22,7 +22,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     @UiField(provided=true) MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;
     
-    public TabletAndDesktopStartView(HomePlacesNavigator navigator) {
+    public TabletAndDesktopStartView(DesktopPlacesNavigator navigator) {
         stage = new Stage(navigator);
 //        mainSponsors = new MainSponsors(navigator);
         mainEvents = new MainEvents(navigator);

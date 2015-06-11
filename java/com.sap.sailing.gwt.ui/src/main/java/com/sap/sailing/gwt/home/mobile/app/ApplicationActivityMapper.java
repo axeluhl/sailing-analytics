@@ -12,9 +12,9 @@ import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
 
 
 public class ApplicationActivityMapper implements ActivityMapper {
-    private final ApplicationContext clientFactory;
+    private final MobileApplicationClientFactory clientFactory;
 
-    public ApplicationActivityMapper(ApplicationContext clientFactory) {
+    public ApplicationActivityMapper(MobileApplicationClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }

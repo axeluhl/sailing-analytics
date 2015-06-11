@@ -15,5 +15,5 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewClientFactory;
 public interface ApplicationClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
     EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory, SearchResultClientFactory,
  WhatsNewClientFactory, SeriesClientFactory, ErrorClientFactory {
-    HomePlacesNavigator getHomePlacesNavigator();
+    DesktopPlacesNavigator getHomePlacesNavigator();
 }

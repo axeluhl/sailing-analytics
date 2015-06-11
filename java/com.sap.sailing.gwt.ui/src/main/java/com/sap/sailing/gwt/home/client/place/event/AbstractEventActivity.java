@@ -22,8 +22,8 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
@@ -51,11 +51,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     private final Timer timerForClientServerOffset;
 
-    protected final HomePlacesNavigator homePlacesNavigator;
+    protected final DesktopPlacesNavigator homePlacesNavigator;
 
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
-    public AbstractEventActivity(PLACE place, EventClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
+    public AbstractEventActivity(PLACE place, EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.homePlacesNavigator = homePlacesNavigator;
         this.ctx = new EventContext(place.getCtx());

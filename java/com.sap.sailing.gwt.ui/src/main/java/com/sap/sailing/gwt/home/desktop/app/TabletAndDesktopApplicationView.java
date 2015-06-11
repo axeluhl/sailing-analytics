@@ -35,7 +35,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     SimplePanel mainContentPanel;
 
-    public TabletAndDesktopApplicationView(HomePlacesNavigator navigator, EventBus eventBus) {
+    public TabletAndDesktopApplicationView(DesktopPlacesNavigator navigator, EventBus eventBus) {
         headerPanel = new Header(navigator, eventBus);
         footerPanel = new Footer(navigator);
         initWidget(uiBinder.createAndBindUi(this));

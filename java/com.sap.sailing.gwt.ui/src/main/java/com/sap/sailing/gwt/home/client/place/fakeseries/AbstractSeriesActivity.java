@@ -14,8 +14,8 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
@@ -25,11 +25,11 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
     protected final SeriesContext ctx;
     protected final SeriesClientFactory clientFactory;
 
-    protected final HomePlacesNavigator homePlacesNavigator;
+    protected final DesktopPlacesNavigator homePlacesNavigator;
     
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
-    public AbstractSeriesActivity(PLACE place, SeriesClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
+    public AbstractSeriesActivity(PLACE place, SeriesClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.ctx = new SeriesContext(place.getCtx());
         this.clientFactory = clientFactory;

@@ -13,7 +13,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.app.ApplicationActivityMapper;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationContext;
+import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.mobile.places.MainView;
 import com.sap.sailing.gwt.home.mobile.resources.SharedResources;
@@ -29,7 +29,7 @@ public class MobileEntryPoint implements EntryPoint {
         sRes.mainCss().ensureInjected();
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
-        ApplicationContext appContext = new ApplicationContext(placeController);
+        MobileApplicationClientFactory appContext = new MobileApplicationClientFactory(placeController);
         EntryPointHelper.registerASyncService((ServiceDefTarget) appContext.getHomeService(),
                 RemoteServiceMappingConstants.homeServiceRemotePath);
         

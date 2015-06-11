@@ -13,16 +13,17 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-
-public abstract class AbstractApplicationClientFactory extends SecureClientFactoryImpl implements ApplicationClientFactory {
+public abstract class AbstractApplicationClientFactory extends
+        SecureClientFactoryImpl implements ApplicationClientFactory {
     private final SailingServiceAsync sailingService;
     private final HomeServiceAsync homeService;
     private final MediaServiceAsync mediaService;
-    private final HomePlacesNavigator navigator;
+    private final DesktopPlacesNavigator navigator;
 
-    public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController) {
+    public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus,
+            PlaceController placeController) {
         super(root, eventBus, placeController);
-        navigator = new HomePlacesNavigator(placeController);
+        navigator = new DesktopPlacesNavigator(placeController);
         sailingService = GWT.create(SailingService.class);
         homeService = GWT.create(HomeService.class);
         mediaService = GWT.create(MediaService.class);
@@ -49,7 +50,7 @@ public abstract class AbstractApplicationClientFactory extends SecureClientFacto
     }
 
     @Override
-    public HomePlacesNavigator getHomePlacesNavigator() {
+    public DesktopPlacesNavigator getHomePlacesNavigator() {
         return navigator;
     }
 }

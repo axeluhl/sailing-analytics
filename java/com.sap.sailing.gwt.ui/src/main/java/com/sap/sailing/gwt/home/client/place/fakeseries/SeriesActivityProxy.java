@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
@@ -17,10 +17,10 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
     private final AbstractSeriesPlace place;
     private SeriesContext ctx;
     private SeriesClientFactory clientFactory;
-    private final HomePlacesNavigator homePlacesNavigator;
+    private final DesktopPlacesNavigator homePlacesNavigator;
 
     public SeriesActivityProxy(AbstractSeriesPlace place, SeriesClientFactory clientFactory,
-            HomePlacesNavigator homePlacesNavigator) {
+            DesktopPlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.ctx = place.getCtx();
         this.clientFactory = clientFactory;

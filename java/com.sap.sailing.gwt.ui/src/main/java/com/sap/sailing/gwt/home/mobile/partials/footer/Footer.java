@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationContext;
+import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sse.common.Util.Pair;
 
 public class Footer extends Composite {
@@ -54,11 +54,11 @@ public class Footer extends Composite {
     
     private String otherLanguage;
     private final LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
-    private ApplicationContext appContext;
+    private MobileApplicationClientFactory appContext;
 
 
 
-    public Footer(final ApplicationContext appContext) {
+    public Footer(final MobileApplicationClientFactory appContext) {
         this.appContext = appContext;
         FooterResources.INSTANCE.css().ensureInjected();
 
@@ -86,7 +86,10 @@ public class Footer extends Composite {
     
     @UiHandler("whatsNewLinkUi")
     void onWhatsNew(ClickEvent e) {
-        appContext.goToPlace(new WhatsNewPlace(WhatsNewPlace.WhatsNewNavigationTabs.SailingAnalytics));
+        appContext //
+                .getNavigator() //
+                .getWhatsNewNavigation(WhatsNewPlace.WhatsNewNavigationTabs.SailingAnalytics) //
+                .goToPlace();
     }
 
     private void updateUI() {

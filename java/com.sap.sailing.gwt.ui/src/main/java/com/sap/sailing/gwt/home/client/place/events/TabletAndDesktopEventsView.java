@@ -8,8 +8,8 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecent;
 import com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcoming;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopEventsView extends AbstractEventsView {
@@ -23,9 +23,9 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
     @UiField(provided=true) EventsOverviewUpcoming upcomingEventsWidget;
     @UiField BreadcrumbPane breadcrumbs;
     
-    private final HomePlacesNavigator navigator;
+    private final DesktopPlacesNavigator navigator;
     
-    public TabletAndDesktopEventsView(HomePlacesNavigator navigator) {
+    public TabletAndDesktopEventsView(DesktopPlacesNavigator navigator) {
         super();
         this.navigator = navigator;
         recentEventsWidget = new EventsOverviewRecent(navigator);

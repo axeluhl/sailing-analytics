@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.app;
+package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.place.shared.Place;
 

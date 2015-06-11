@@ -4,7 +4,7 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.footer.FooterResources" />
-  <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.desktop.app.PlaceNavigation" />
+  <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.shared.app.PlaceNavigation" />
   <ui:style gss="true">
     .languageSelect::-ms-expand {
       display: none;

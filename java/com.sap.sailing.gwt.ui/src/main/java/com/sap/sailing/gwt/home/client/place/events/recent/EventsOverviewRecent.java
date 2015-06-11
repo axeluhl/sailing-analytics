@@ -8,7 +8,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
 public class EventsOverviewRecent extends Composite {
@@ -18,11 +18,11 @@ public class EventsOverviewRecent extends Composite {
     
     private static EventsOverviewUiBinder uiBinder = GWT.create(EventsOverviewUiBinder.class);
 
-    private final HomePlacesNavigator navigator;
+    private final DesktopPlacesNavigator navigator;
 
     @UiField FlowPanel year;
     
-    public EventsOverviewRecent(HomePlacesNavigator navigator) {
+    public EventsOverviewRecent(DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
         
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();

@@ -1,28 +1,32 @@
-package com.sap.sailing.gwt.home.desktop.app;
+package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.mobile.app.AbstractPlaceNavigator;
 
 public class PlaceNavigation<T extends Place> {
     private final PlaceNavigator placeNavigator;
 
-    private final ApplicationHistoryMapper mapper = GWT.create(ApplicationHistoryMapper.class);
-
+    private final PlaceHistoryMapper mapper;
     private final T destinationPlace;
     private final String baseUrl;
     private final boolean isDestinationOnRemoteServer;
 
-    public PlaceNavigation(T destinationPlace, PlaceNavigator placeNavigator) {
+    public PlaceNavigation(T destinationPlace, PlaceNavigator placeNavigator, PlaceHistoryMapper mapper) {
         this.placeNavigator = placeNavigator;
         this.destinationPlace = destinationPlace;
+        this.mapper = mapper;
         String locationURL = getLocationURL();
         this.isDestinationOnRemoteServer = !(isLocationOnLocalhostOrDevServer(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL;
     }
 
     public PlaceNavigation(String baseUrl, T destinationPlace, boolean isDestinationOnRemoteServer,
-            PlaceNavigator placeNavigator) {
+            PlaceNavigator placeNavigator, PlaceHistoryMapper mapper) {
+        this.mapper = mapper;
         this.destinationPlace = destinationPlace;
         this.isDestinationOnRemoteServer = isDestinationOnRemoteServer;
         this.placeNavigator = placeNavigator;
@@ -69,12 +73,12 @@ public class PlaceNavigation<T extends Place> {
     }
 
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
-        return urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_SERVER);
+        return urlToCheck.contains(DesktopPlacesNavigator.DEFAULT_SAPSAILING_SERVER);
     }
 
     private boolean isLocationOnLocalhostOrDevServer(String urlToCheck) {
         return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1")
-                || urlToCheck.contains(HomePlacesNavigator.DEFAULT_SAPSAILING_DEV_SERVER);
+                || urlToCheck.contains(DesktopPlacesNavigator.DEFAULT_SAPSAILING_DEV_SERVER);
     }
 
     private String getLocationURL() {

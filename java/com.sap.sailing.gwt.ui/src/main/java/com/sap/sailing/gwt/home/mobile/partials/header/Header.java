@@ -6,9 +6,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationContext;
+import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 
 public class Header extends Composite {
 
@@ -21,10 +19,10 @@ public class Header extends Composite {
     }
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
-    private ApplicationContext appContext;
+    private MobileApplicationClientFactory appContext;
 
     
-    public Header(ApplicationContext appContext) {
+    public Header(MobileApplicationClientFactory appContext) {
 
 
         this.appContext = appContext;
@@ -36,12 +34,18 @@ public class Header extends Composite {
 
     @UiHandler("homeLinkUi")
     public void goToHome(ClickEvent e) {
-        appContext.goToPlace(new StartPlace());
+        appContext //
+                .getNavigator() //
+                .getHomeNavigation()//
+                .goToPlace();
     }
 
     @UiHandler("eventsLinkUi")
     public void goToEvents(ClickEvent e) {
-        appContext.goToPlace(new EventsPlace());
+        appContext //
+                .getNavigator() //
+                .getEventsNavigation()//
+                .goToPlace();
     }
 
 }

@@ -6,16 +6,15 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationContext;
+import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsView.Presenter;
 
 public class EventsActivity extends AbstractActivity implements Presenter {
-    private final ApplicationContext clientFactory;
+    private final MobileApplicationClientFactory clientFactory;
     private final EventsPlace place;
 
-    public EventsActivity(EventsPlace place, ApplicationContext clientFactory) {
+    public EventsActivity(EventsPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.place = place;
     }
@@ -29,7 +28,9 @@ public class EventsActivity extends AbstractActivity implements Presenter {
 
     @Override
     public void gotoTheEvent(UUID eventId) {
-        // TODO: load all we need
-        clientFactory.goToPlace(new EventPlace(""));
+        // clientFactory //
+        // .getNavigator() //
+        // .getEventNavigation(eventId.toString(), baseUrl, isOnRemoteServer)//
+        // .goToPlace();
     }
 }

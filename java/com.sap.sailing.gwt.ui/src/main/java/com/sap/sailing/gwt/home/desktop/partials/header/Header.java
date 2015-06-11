@@ -29,8 +29,8 @@ import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Header extends Composite {
@@ -45,7 +45,7 @@ public class Header extends Composite {
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     
     private final List<Anchor> links;
-    private final HomePlacesNavigator navigator;
+    private final DesktopPlacesNavigator navigator;
 
     private final PlaceNavigation<StartPlace> homeNavigation;
     private final PlaceNavigation<EventsPlace> eventsNavigation;
@@ -56,7 +56,7 @@ public class Header extends Composite {
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
-    public Header(final HomePlacesNavigator navigator, EventBus eventBus) {
+    public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
         this(navigator);
         
         eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
@@ -68,7 +68,7 @@ public class Header extends Composite {
         });
     }
     
-    public Header(final HomePlacesNavigator navigator) {
+    public Header(final DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
 
         HeaderResources.INSTANCE.css().ensureInjected();

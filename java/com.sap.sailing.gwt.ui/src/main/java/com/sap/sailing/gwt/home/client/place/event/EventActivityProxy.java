@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -26,10 +26,10 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private AbstractEventPlace place;
     private EventContext ctx;
     private EventClientFactory clientFactory;
-    private HomePlacesNavigator homePlacesNavigator;
+    private DesktopPlacesNavigator homePlacesNavigator;
 
     public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory,
-            HomePlacesNavigator homePlacesNavigator) {
+            DesktopPlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.homePlacesNavigator = homePlacesNavigator;
         this.ctx = this.place.getCtx();

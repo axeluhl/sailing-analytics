@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
@@ -28,7 +28,7 @@ public class EventsOverviewUpcoming extends Composite {
     
     private static EventsOverviewUiBinder uiBinder = GWT.create(EventsOverviewUiBinder.class);
 
-    private final HomePlacesNavigator navigator;
+    private final DesktopPlacesNavigator navigator;
 
     private final List<String> tickerStrings;
     
@@ -55,7 +55,7 @@ public class EventsOverviewUpcoming extends Composite {
     
     private final CollapseAnimation tickerAnimation;
 
-    public EventsOverviewUpcoming(HomePlacesNavigator navigator) {
+    public EventsOverviewUpcoming(DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
         tickerStrings = new ArrayList<>();
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();

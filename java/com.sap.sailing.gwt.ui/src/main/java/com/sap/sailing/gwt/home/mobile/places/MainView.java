@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationContext;
+import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,7 +36,7 @@ public class MainView extends Composite {
     @UiField
     SimplePanel mainContentPanel;
 
-    public MainView(ApplicationContext appContext, EventBus eventBus) {
+    public MainView(MobileApplicationClientFactory appContext, EventBus eventBus) {
         headerPanel = new Header(appContext);
         footerPanel = new Footer(appContext);
         initWidget(uiBinder.createAndBindUi(this));

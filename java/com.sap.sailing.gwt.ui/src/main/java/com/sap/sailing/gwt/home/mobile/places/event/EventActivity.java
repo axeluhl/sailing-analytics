@@ -4,15 +4,15 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationContext;
+import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 
 public class EventActivity extends AbstractActivity implements
  Presenter {
-    private final ApplicationContext clientFactory;
+    private final MobileApplicationClientFactory clientFactory;
     private final EventPlace place;
 
-    public EventActivity(EventPlace place, ApplicationContext clientFactory) {
+    public EventActivity(EventPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.place = place;
     }

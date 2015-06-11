@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.dom.client.Style.Display;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class PopularEventStageTeaser extends StageTeaser {
 
     private final PopularEventStageTeaserBand teaserBand;
-    public PopularEventStageTeaser(EventStageDTO event, HomePlacesNavigator placeNavigator) {
+    public PopularEventStageTeaser(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
         super(event);
 
         title.setInnerText(event.getDisplayName());

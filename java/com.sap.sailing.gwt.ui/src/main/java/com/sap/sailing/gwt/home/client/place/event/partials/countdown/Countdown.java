@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.CountdownResources.LocalCss;
 import com.sap.sailing.gwt.home.client.shared.stage.StageResources;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRaceTickerStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRegattaTickerStageDTO;

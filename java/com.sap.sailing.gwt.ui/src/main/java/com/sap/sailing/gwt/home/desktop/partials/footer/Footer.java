@@ -23,8 +23,8 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sse.common.Util.Pair;
 
 public class Footer extends Composite {
@@ -60,7 +60,7 @@ public class Footer extends Composite {
     @UiField(provided = true)
     final PlaceNavigation<WhatsNewPlace> releaseNotesNavigation;
 
-    public Footer(final HomePlacesNavigator navigator) {
+    public Footer(final DesktopPlacesNavigator navigator) {
         FooterResources.INSTANCE.css().ensureInjected();
         releaseNotesNavigation = navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
 

@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.media.SailingFullscreenViewer;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;

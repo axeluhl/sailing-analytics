@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
@@ -46,7 +46,7 @@ public class EventsOverviewRecentYear extends Composite {
     
     private final CollapseAnimation animation;
     
-    public EventsOverviewRecentYear(EventListYearDTO yearDTO, HomePlacesNavigator navigator, boolean showInitial) {
+    public EventsOverviewRecentYear(EventListYearDTO yearDTO, DesktopPlacesNavigator navigator, boolean showInitial) {
         List<EventListEventDTO> events = yearDTO.getEvents();
         
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();

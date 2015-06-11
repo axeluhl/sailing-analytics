@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.solutions.Solutions;
-import com.sap.sailing.gwt.home.desktop.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 
 public class TabletAndDesktopSolutionsView extends Composite implements SolutionsView {
     private static SolutionsPageViewUiBinder uiBinder = GWT.create(SolutionsPageViewUiBinder.class);
@@ -17,7 +17,7 @@ public class TabletAndDesktopSolutionsView extends Composite implements Solution
     interface SolutionsPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopSolutionsView> {
     }
 
-    public TabletAndDesktopSolutionsView(SolutionsNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {
+    public TabletAndDesktopSolutionsView(SolutionsNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         super();
         
         solutions = new Solutions(navigationTab, placesNavigator);
