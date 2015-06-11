@@ -2,6 +2,7 @@ package com.sap.sse.common.media;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Locale;
 
 import com.sap.sse.common.TimePoint;
 
@@ -28,4 +29,7 @@ public interface MediaDescriptor extends Serializable {
 
     String getCopyright();
     void setCopyright(String copyright);
+    
+    Locale getLocale();
+    void setLocale(Locale locale);
 }

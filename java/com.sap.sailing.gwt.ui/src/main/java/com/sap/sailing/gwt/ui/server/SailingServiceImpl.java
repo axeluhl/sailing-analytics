@@ -3491,6 +3491,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         result.setSubtitle(image.getSubtitle());
         result.setCopyright(image.getCopyright());
         result.setSize(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(toLocale(image.getLocale()));
         for (String tag : image.getTags()) {
             result.addTag(tag);
         }
@@ -3510,6 +3511,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         result.setLengthInSeconds(video.getLengthInSeconds());
         if(video.getThumbnailRef() != null && !video.getThumbnailRef().isEmpty())
         result.setThumbnailURL(new URL(video.getThumbnailRef()));
+        result.setLocale(toLocale(video.getLocale()));
         for (String tag : video.getTags()) {
             result.addTag(tag);
         }
@@ -3523,6 +3525,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         result.setSubtitle(image.getSubtitle());
         result.setMimeType(image.getMimeType());
         result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(toLocaleName(image.getLocale()));
         List<String> tags = new ArrayList<String>();
         for(String tag: image.getTags()) {
             tags.add(tag);
@@ -3539,12 +3542,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         result.setSubtitle(video.getSubtitle());
         result.setThumbnailRef(video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
         result.setLengthInSeconds(video.getLengthInSeconds());
+        result.setLocale(toLocaleName(video.getLocale()));
         List<String> tags = new ArrayList<String>();
         for(String tag: video.getTags()) {
             tags.add(tag);
         }
         result.setTags(tags);
         return result;
+    }
+    
+    private Locale toLocale(String localeName) {
+        if(localeName == null || localeName.isEmpty()) {
+            return null;
+        }
+        return Locale.forLanguageTag(localeName);
+    }
+    
+    private String toLocaleName(Locale locale) {
+        if(locale == null) {
+            return null;
+        }
+        return locale.toString();
     }
 
     private EventDTO convertToEventDTO(Event event, boolean withStatisticalData) {

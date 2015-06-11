@@ -3,6 +3,7 @@ package com.sap.sse.common.media;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import com.sap.sse.common.TimePoint;
@@ -30,6 +31,8 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
     protected Set<String> tags = new LinkedHashSet<String>();
 
     protected URL url;
+    
+    protected Locale locale;
 
     /**
      * Media item with minimal set of information
@@ -114,5 +117,15 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
     @Override
     public void setCopyright(String copyright) {
         this.copyright = copyright;
+    }
+    
+    @Override
+    public Locale getLocale() {
+        return locale;
+    }
+    
+    @Override
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 }
