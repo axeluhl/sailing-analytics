@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -2098,8 +2099,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String title = (String) dbObject.get(FieldNames.IMAGE_TITLE.name());
             String subtitle = (String) dbObject.get(FieldNames.IMAGE_SUBTITLE.name());
             String copyright = (String) dbObject.get(FieldNames.IMAGE_COPYRIGHT.name());
-            //Object mimeTypeRaw = dbObject.get(FieldNames.IMAGE_MIMETYPE.name());
-            //MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
+            String localeRaw = (String)  dbObject.get(FieldNames.IMAGE_LOCALE.name());
+            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
             Integer imageWidth = (Integer) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
             Integer imageHeight = (Integer) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.IMAGE_CREATEDATDATE);
@@ -2114,6 +2115,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             image.setCopyright(copyright);
             image.setTitle(title);
             image.setSubtitle(subtitle);
+            image.setLocale(locale);
             image.setTags(imageTags);
             if (imageWidth != null && imageHeight != null) {
                 image.setSize(imageWidth, imageHeight);
@@ -2131,6 +2133,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String copyright = (String) dbObject.get(FieldNames.VIDEO_COPYRIGHT.name());
             Object mimeTypeRaw = dbObject.get(FieldNames.VIDEO_MIMETYPE.name());
             MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
+            String localeRaw = (String)  dbObject.get(FieldNames.VIDEO_LOCALE.name());
+            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.VIDEO_CREATEDATDATE);
             BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.VIDEO_TAGS.name());
             Integer lengthInSeconds = (Integer) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
@@ -2145,6 +2149,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             video.setCopyright(copyright);
             video.setTitle(title);
             video.setSubtitle(subtitle);
+            video.setLocale(locale);
             video.setTags(videoTags);
             video.setLengthInSeconds(lengthInSeconds);
             video.setThumbnailURL(thumbnailURL);

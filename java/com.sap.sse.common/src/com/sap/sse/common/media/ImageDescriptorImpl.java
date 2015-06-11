@@ -19,7 +19,7 @@ public class ImageDescriptorImpl extends AbstractMediaDescriptor implements Imag
     public ImageDescriptorImpl(URL imageURL, TimePoint createdAtDate) {
         super(imageURL, MimeType.image, createdAtDate);
     }
-
+    
     @Override
     public Integer getWidthInPx() {
         return widthInPx;

@@ -43,6 +43,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_MIMETYPE = "mimetype";
     public static final String FIELD_COPYRIGHT = "copyright";
     public static final String FIELD_CREATEDATDATE = "createdAtDate";
+    public static final String FIELD_LOCALE = "locale";
     public static final String FIELD_TAGS = "tags";
     // specific image fields
     public static final String FIELD_IMAGES = "images";
@@ -106,6 +107,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     private void addImage(ImageDescriptor image, JSONArray imagesJson) {
         JSONObject imageJson = new JSONObject();
         imageJson.put(FIELD_SOURCE_URL, image.getURL().toString());
+        imageJson.put(FIELD_LOCALE, image.getLocale() != null ? image.getLocale().toLanguageTag() : null);
         imageJson.put(FIELD_TITLE, image.getTitle());
         imageJson.put(FIELD_SUBTITLE, image.getSubtitle());
         imageJson.put(FIELD_MIMETYPE, image.getMimeType().name());
@@ -124,6 +126,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     private void addVideo(VideoDescriptor video, JSONArray videosJson) {
         JSONObject videoJson = new JSONObject();
         videoJson.put(FIELD_SOURCE_URL, video.getURL().toString());
+        videoJson.put(FIELD_LOCALE, video.getLocale() != null ? video.getLocale().toLanguageTag() : null);
         videoJson.put(FIELD_VIDEO_THUMBNAIL_URL, video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
         videoJson.put(FIELD_TITLE, video.getTitle());
         videoJson.put(FIELD_SUBTITLE, video.getSubtitle());

@@ -22,7 +22,7 @@ public abstract class AbstractMediaDTO implements IsSerializable {
 
     protected String sourceRef;
     
-    private String locale;
+    protected String locale;
 
     /** for GWT */
     protected AbstractMediaDTO() {

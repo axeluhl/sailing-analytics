@@ -1421,9 +1421,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject createImageObject(ImageDescriptor image) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.IMAGE_URL.name(), image.getURL().toString());
+        result.put(FieldNames.IMAGE_LOCALE.name(), image.getLocale() != null ? image.getLocale().toLanguageTag() : null);
         result.put(FieldNames.IMAGE_TITLE.name(), image.getTitle());
         result.put(FieldNames.IMAGE_SUBTITLE.name(), image.getSubtitle());
-        //result.put(FieldNames.IMAGE_MIMETYPE.name(), image.getMimeType().name());
         result.put(FieldNames.IMAGE_COPYRIGHT.name(), image.getCopyright());
         result.put(FieldNames.IMAGE_WIDTH_IN_PX.name(), image.getWidthInPx());
         result.put(FieldNames.IMAGE_HEIGHT_IN_PX.name(), image.getHeightInPx());
@@ -1439,10 +1439,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject createVideoObject(VideoDescriptor video) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.VIDEO_URL.name(), video.getURL().toString());
+        result.put(FieldNames.VIDEO_LOCALE.name(), video.getLocale() != null ? video.getLocale().toLanguageTag() : null);
         result.put(FieldNames.VIDEO_THUMBNAIL_URL.name(), video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
         result.put(FieldNames.VIDEO_TITLE.name(), video.getTitle());
         result.put(FieldNames.VIDEO_SUBTITLE.name(), video.getSubtitle());
-        result.put(FieldNames.VIDEO_MIMETYPE.name(), video.getMimeType().name());
+        result.put(FieldNames.VIDEO_MIMETYPE.name(), video.getMimeType() != null ? video.getMimeType().name() : null);
         result.put(FieldNames.VIDEO_COPYRIGHT.name(), video.getCopyright());
         result.put(FieldNames.VIDEO_LENGTH_IN_SECONDS.name(), video.getLengthInSeconds());
         storeTimePoint(video.getCreatedAtDate(), result, FieldNames.VIDEO_CREATEDATDATE);

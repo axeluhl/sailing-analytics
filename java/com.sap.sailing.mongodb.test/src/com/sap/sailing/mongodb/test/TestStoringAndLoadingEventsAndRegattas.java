@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -278,6 +279,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreSimpleEventWithVideos() throws MalformedURLException {
         final URL videoURL = new URL("http://some.host/with/some/video.mpg");
         final URL videoThumbnailURL = new URL("http://some.host/with/some/video_thumbnail.jpg");
+        final Locale locale = Locale.GERMAN;
         final Integer videoLengthInSeconds = 2  * 60 * 60 * 1000; // 2h 
         final MimeType mimeType = MimeType.mp4;
         final String copyright = "copyright by Don";
@@ -297,6 +299,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, mimeType, createdAt);
         video1.setCopyright(copyright);
         video1.setTitle(videoTitle);
+        video1.setLocale(locale);
         video1.setSubtitle(videoSubtitle);
         video1.setThumbnailURL(videoThumbnailURL);
         video1.setLengthInSeconds(videoLengthInSeconds);
@@ -320,6 +323,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(videoThumbnailURL, loadedVideo1.getThumbnailURL());
         assertEquals(videoLengthInSeconds, loadedVideo1.getLengthInSeconds());
         assertEquals(copyright, loadedVideo1.getCopyright());
+        assertEquals(locale, loadedVideo1.getLocale());
         assertEquals(videoTitle, loadedVideo1.getTitle());
         assertEquals(videoSubtitle, loadedVideo1.getSubtitle());
         assertEquals(createdAt, loadedVideo1.getCreatedAtDate());

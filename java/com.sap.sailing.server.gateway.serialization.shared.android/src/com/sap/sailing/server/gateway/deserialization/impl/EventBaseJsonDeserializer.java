@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.json.simple.JSONArray;
@@ -138,6 +139,8 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             String title = (String) imageJson.get(EventBaseJsonSerializer.FIELD_TITLE);
             String subtitle = (String) imageJson.get(EventBaseJsonSerializer.FIELD_SUBTITLE);
             String copyright = (String) imageJson.get(EventBaseJsonSerializer.FIELD_COPYRIGHT);
+            String localeRaw = (String)  imageJson.get(EventBaseJsonSerializer.FIELD_LOCALE);
+            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
             Integer imageWidth = (Integer) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH_IN_PX);
             Integer imageHeight = (Integer) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT_IN_PX);
             Long createdAtDateInMs = (Long) imageJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
@@ -151,6 +154,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             }
             image = new ImageDescriptorImpl(imageURL, createdAtDate);
             image.setCopyright(copyright);
+            image.setLocale(locale);
             image.setTitle(title);
             image.setSubtitle(subtitle);
             image.setTags(imageTags);
@@ -168,6 +172,8 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             String title = (String) videoJson.get(EventBaseJsonSerializer.FIELD_TITLE);
             String subtitle = (String) videoJson.get(EventBaseJsonSerializer.FIELD_SUBTITLE);
             String copyright = (String) videoJson.get(EventBaseJsonSerializer.FIELD_COPYRIGHT);
+            String localeRaw = (String)  videoJson.get(EventBaseJsonSerializer.FIELD_LOCALE);
+            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
             Object mimeTypeRaw = videoJson.get(EventBaseJsonSerializer.FIELD_MIMETYPE);
             MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
             Long createdAtDateInMs = (Long) videoJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
@@ -183,6 +189,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             }
             video = new VideoDescriptorImpl(videoURL, mimeType, createdAtDate);
             video.setCopyright(copyright);
+            video.setLocale(locale);
             video.setTitle(title);
             video.setSubtitle(subtitle);
             video.setTags(videoTags);

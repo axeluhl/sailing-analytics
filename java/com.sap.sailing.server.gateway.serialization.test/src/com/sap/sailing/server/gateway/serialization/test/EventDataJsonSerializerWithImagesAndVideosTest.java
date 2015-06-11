@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.json.simple.JSONArray;
@@ -44,6 +45,7 @@ import com.sap.sse.common.media.VideoDescriptorImpl;
 public class EventDataJsonSerializerWithImagesAndVideosTest {
     private final UUID expectedId = UUID.randomUUID();
     private final String expectedName = "ab";
+    private final Locale locale = Locale.GERMAN;
     private final TimePoint expectedStartDate = new MillisecondsTimePoint(new Date());
     private final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     private final Venue expectedVenue = new VenueImpl("Expected Venue");
@@ -57,6 +59,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
     
     private final URL videoURL;
     private final URL videoThumbnailURL;
+    private final Locale locale2 = Locale.CANADA_FRENCH;
     private final Integer videoLengthInSeconds = 2  * 60 * 60 * 1000; // 2h 
     private final MimeType mimeType = MimeType.mp4;
     private final String copyright2 = "copyright by Don";
@@ -75,6 +78,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         imageURL = new URL("http://some.host/with/some/file2.jpg");
         ImageDescriptor image1 = new ImageDescriptorImpl(imageURL, createdAt);
         image1.setCopyright(copyright);
+        image1.setLocale(locale);
         image1.setSize(imageWidth, imageHeight);
         image1.setTitle(imageTitle);
         image1.setSubtitle(imageSubtitle);
@@ -88,6 +92,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         
         VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, mimeType, createdAt);
         video1.setCopyright(copyright2);
+        video1.setLocale(locale2);
         video1.setTitle(videoTitle);
         video1.setSubtitle(videoSubtitle);
         video1.setThumbnailURL(videoThumbnailURL);
@@ -161,6 +166,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         ImageDescriptor image1 = deserializedEvent.getImages().iterator().next();
         assertEquals(createdAt, image1.getCreatedAtDate());
         assertEquals(imageURL, image1.getURL());
+        assertEquals(locale, image1.getLocale());
         assertEquals(copyright, image1.getCopyright());
         assertEquals(imageTitle, image1.getTitle());
         assertEquals(imageSubtitle, image1.getSubtitle());
@@ -173,6 +179,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         assertEquals(videoURL, video1.getURL());
         assertEquals(mimeType, video1.getMimeType());
         assertEquals(copyright2, video1.getCopyright());
+        assertEquals(locale2, video1.getLocale());
         assertEquals(videoTitle, video1.getTitle());
         assertEquals(videoSubtitle, video1.getSubtitle());
         assertEquals(videoThumbnailURL, video1.getThumbnailURL());
