@@ -32,8 +32,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.InfoNewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -51,8 +49,6 @@ import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
-import com.sap.sailing.news.EventNewsItem;
-import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -78,21 +74,15 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     private static final int MAX_VIDEO_COUNT = 3;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-    private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
 
     public HomeServiceImpl() {
         BundleContext context = Activator.getDefault();
         
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-        eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
     }
 
     protected RacingEventService getService() {
         return racingEventServiceTracker.getService(); 
-    }
-
-    protected EventNewsService getEventNewsService() {
-        return eventNewsServiceTracker.getService(); 
     }
 
     private interface EventVisitor {
@@ -433,20 +423,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         dto.setHasAnalytics(oneEventStarted);
         return dto;
-    }
-
-    @Override
-    public List<NewsEntryDTO> getNewsForEvent(UUID eventId, Date lastNewsDate) {
-        List<NewsEntryDTO> result = new ArrayList<NewsEntryDTO>();
-
-        Event event = getService().getEvent(eventId);
-        List<EventNewsItem> newsItems = getEventNewsService().getNews(event, lastNewsDate);
-
-        for(EventNewsItem newsItem: newsItems) {
-            NewsEntryDTO newsDTO = new InfoNewsEntryDTO(newsItem.getTitle(), newsItem.getMessage(), newsItem.getCreatedAtDate());
-            result.add(newsDTO);
-        }
-        return result;
     }
 
     @Override

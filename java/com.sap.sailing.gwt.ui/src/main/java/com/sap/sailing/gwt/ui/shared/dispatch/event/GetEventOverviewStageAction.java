@@ -1,23 +1,20 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.net.URL;
-import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.InfoNewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.RaceCompetitorNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
+import com.sap.sailing.news.EventNewsItem;
+import com.sap.sailing.news.impl.InfoEventNewsItem;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -48,7 +45,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         
         // TODO get correct message
         EventOverviewStageDTO stage = new EventOverviewStageDTO(null, getStageContent(context, event, state, now));
-        addNews(context, stage);
+        addNews(context, event, stage);
         return new ResultWithTTL<>(ttl, stage);
     }
 
@@ -129,37 +126,46 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
     }
-
-    @GwtIncompatible
-    private void addNews(DispatchContext dispatchContext, EventOverviewStageDTO stage) {
-        Event event = dispatchContext.getRacingEventService().getEvent(eventId);
-        boolean singleRegatta = HomeServiceUtil.isSingleRegatta(event);
-        
-        stage.addNews(new InfoNewsEntryDTO("Sturm", "Heute keine Rennen mehr", new Date(new Date().getTime() - 125000)));
-        stage.addNews(new InfoNewsEntryDTO("Abendbespaﬂung", "Es gibt Freibier und Wurst!!!", new Date()));
-        stage.addNews(new LeaderboardNewsEntryDTO("Test LB", "505 m", BoatClassMasterdata._5O5.getDisplayName(), new Date(new Date().getTime() - 120000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS));
-        
-        LeaderboardNewsEntryDTO lbEntryWithExternalLink = new LeaderboardNewsEntryDTO("Test LB", "Some Regatta", BoatClassMasterdata.LASER_RADIAL.getDisplayName(), new Date(new Date().getTime() - 270000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS);
-        lbEntryWithExternalLink.setExternalURL("http://www.sap.com/");
-        stage.addNews(lbEntryWithExternalLink);
-        
-        CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null, null, null);
-        String regattaName = "470 Men";
-        String race6 = constructRaceName(regattaName, "R6", "Gold", singleRegatta);
-        stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R6", race6, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
-        String race7 = constructRaceName(regattaName, "R7", "Gold", singleRegatta);
-        stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R7", race7, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
-    }
     
-    private String constructRaceName(String regattaDisplayName, String raceName, String fleetName, boolean singleRegatta) {
-        StringBuilder sb = new StringBuilder();
-        if(!singleRegatta) {
-            sb.append(regattaDisplayName).append(" - ");
+    @GwtIncompatible
+    private void addNews(DispatchContext dispatchContext, Event event, EventOverviewStageDTO stage) {
+        // TODO correct date
+        List<EventNewsItem> newsItems = dispatchContext.getEventNewsService().getNews(event, event.getStartDate().asDate());
+
+        for(EventNewsItem newsItem: newsItems) {
+            if(newsItem instanceof InfoEventNewsItem) {
+                stage.addNews(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem));
+            }
         }
-        sb.append(raceName);
-        if(fleetName != null && !fleetName.isEmpty() && !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
-            sb.append(" - ").append(fleetName);
-        }
-        return sb.toString();
+//        TODO test contents
+//        
+//        boolean singleRegatta = HomeServiceUtil.isSingleRegatta(event);
+//        
+//        stage.addNews(new InfoNewsEntryDTO("Sturm", "Heute keine Rennen mehr", new Date(new Date().getTime() - 125000)));
+//        stage.addNews(new InfoNewsEntryDTO("Abendbespaﬂung", "Es gibt Freibier und Wurst!!!", new Date()));
+//        stage.addNews(new LeaderboardNewsEntryDTO("Test LB", "505 m", BoatClassMasterdata._5O5.getDisplayName(), new Date(new Date().getTime() - 120000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS));
+//        
+//        LeaderboardNewsEntryDTO lbEntryWithExternalLink = new LeaderboardNewsEntryDTO("Test LB", "Some Regatta", BoatClassMasterdata.LASER_RADIAL.getDisplayName(), new Date(new Date().getTime() - 270000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS);
+//        lbEntryWithExternalLink.setExternalURL("http://www.sap.com/");
+//        stage.addNews(lbEntryWithExternalLink);
+//        
+//        CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null, null, null);
+//        String regattaName = "470 Men";
+//        String race6 = constructRaceName(regattaName, "R6", "Gold", singleRegatta);
+//        stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R6", race6, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
+//        String race7 = constructRaceName(regattaName, "R7", "Gold", singleRegatta);
+//        stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R7", race7, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
     }
+//    
+//    private String constructRaceName(String regattaDisplayName, String raceName, String fleetName, boolean singleRegatta) {
+//        StringBuilder sb = new StringBuilder();
+//        if(!singleRegatta) {
+//            sb.append(regattaDisplayName).append(" - ");
+//        }
+//        sb.append(raceName);
+//        if(fleetName != null && !fleetName.isEmpty() && !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
+//            sb.append(" - ").append(fleetName);
+//        }
+//        return sb.toString();
+//    }
 }

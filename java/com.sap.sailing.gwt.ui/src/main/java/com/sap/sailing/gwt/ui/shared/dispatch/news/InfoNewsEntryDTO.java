@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
-import java.util.Date;
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.news.impl.InfoEventNewsItem;
 
 public class InfoNewsEntryDTO extends NewsEntryDTO {
     
@@ -11,10 +12,11 @@ public class InfoNewsEntryDTO extends NewsEntryDTO {
     private InfoNewsEntryDTO() {
     }
 
-    public InfoNewsEntryDTO(String title, String subtitle, Date timestamp) {
-        super(timestamp);
-        this.title = title;
-        this.subtitle = subtitle;
+    @GwtIncompatible
+    public InfoNewsEntryDTO(InfoEventNewsItem item) {
+        super(item.getCreatedAtDate());
+        this.title = item.getTitle();
+        this.subtitle = item.getMessage();
     }
 
     @Override

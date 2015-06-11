@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.RequestWrapper;
 import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWrapper;
 import com.sap.sailing.gwt.ui.shared.dispatch.rpc.DispatchRPC;
+import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -19,16 +20,18 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
     private static final long serialVersionUID = -245230476512348999L;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
 
     public DispatchRPCImpl() {
         final BundleContext context = Activator.getDefault();
 
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
     }
 
     @Override
     public <R extends Result, A extends Action<R>> ResultWrapper<R> execute(RequestWrapper<R, A> request) throws DispatchException {
-        R executionResult = request.getAction().execute(new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(), request.getClientLocaleName()));
+        R executionResult = request.getAction().execute(new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(), eventNewsServiceTracker.getService(), request.getClientLocaleName()));
         return new ResultWrapper<R>(executionResult);
     }
 

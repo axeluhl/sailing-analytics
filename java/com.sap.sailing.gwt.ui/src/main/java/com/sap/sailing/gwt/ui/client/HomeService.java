@@ -1,11 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -20,8 +17,6 @@ public interface HomeService extends RemoteService {
     MediaDTO getMediaForEvent(UUID eventId);
     
     MediaDTO getMediaForEventSeries(UUID seriesId);
-
-    List<NewsEntryDTO> getNewsForEvent(UUID eventId, Date lastNewsDate);
 
     EventListViewDTO getEventListView() throws Exception;
     

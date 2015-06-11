@@ -5,7 +5,7 @@ import java.util.Date;
 public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
     
     public enum Type {
-        NEW_RESULTS
+        RESULTS_UPDATE
     }
 
     private String leaderboardName;
@@ -39,8 +39,8 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
     @Override
     public String getMessage() {
         switch (type) {
-        case NEW_RESULTS:
-            return "New results are available";
+        case RESULTS_UPDATE:
+            return "Result update";
         }
         return "";
     }

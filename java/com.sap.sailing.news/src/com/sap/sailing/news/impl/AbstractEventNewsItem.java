@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.sap.sailing.news.EventNewsItem;
 
-public class AbstractEventNewsItem extends AbstractNewsItem implements EventNewsItem {
+public abstract class AbstractEventNewsItem extends AbstractNewsItem implements EventNewsItem {
     private UUID eventId;
     
     public AbstractEventNewsItem(UUID eventId, String title, String message, Date createdAtDate, String category, URL relatedItemLink) {
