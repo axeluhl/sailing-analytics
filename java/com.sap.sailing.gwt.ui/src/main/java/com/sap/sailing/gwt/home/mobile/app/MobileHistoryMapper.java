@@ -11,5 +11,5 @@ EventPlace.Tokenizer.class,//
         EventsPlace.Tokenizer.class,//
         StartPlace.Tokenizer.class
 })
-public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
+public interface MobileHistoryMapper extends PlaceHistoryMapper {
 }

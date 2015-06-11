@@ -37,7 +37,7 @@
 <!--             <button type="submit" class="{local_res.css.header_searchbox_form_button}"></button> -->
 <!--           </form> -->
 <!--         </div> -->
-        <div class="{local_res.css.header_title}">
+        <div class="{local_res.css.header_title}" ui:field="locationTitleUi">
 			 <ui:text from='{i18n.headerLogo}' />
         </div>
       </header>

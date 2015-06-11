@@ -12,9 +12,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationActivityMapper;
+import com.sap.sailing.gwt.home.mobile.app.MobileActivityMapper;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
-import com.sap.sailing.gwt.home.mobile.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.mobile.app.MobileHistoryMapper;
 import com.sap.sailing.gwt.home.mobile.places.MainView;
 import com.sap.sailing.gwt.home.mobile.resources.SharedResources;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -33,12 +33,12 @@ public class MobileEntryPoint implements EntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) appContext.getHomeService(),
                 RemoteServiceMappingConstants.homeServiceRemotePath);
         
-        ActivityMapper mobileActivityMapper = new ApplicationActivityMapper(appContext);
+        ActivityMapper mobileActivityMapper = new MobileActivityMapper(appContext);
         ActivityManager activityManager = new ActivityManager(mobileActivityMapper, eventBus);
         MainView panel = new MainView(appContext, eventBus);
         RootPanel.get().add(panel);
         activityManager.setDisplay(panel.getContent());
-        PlaceHistoryMapper mobileHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
+        PlaceHistoryMapper mobileHistoryMapper = GWT.create(MobileHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(mobileHistoryMapper);
         historyHandler.register(placeController, eventBus, new StartPlace());
         RootPanel.get().add(panel);

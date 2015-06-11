@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     protected final PlaceController placeController;
 
-    private final ApplicationHistoryMapper mapper = GWT.create(ApplicationHistoryMapper.class);
+    private final MobileHistoryMapper mapper = GWT.create(MobileHistoryMapper.class);
 
     public final static String DEFAULT_SAPSAILING_SERVER = "www.sapsailing.com";
     public final static String DEFAULT_SAPSAILING_DEV_SERVER = "dev.sapsailing.com";

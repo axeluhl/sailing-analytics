@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -11,6 +13,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
+import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -40,6 +43,16 @@ public class MainView extends Composite {
         headerPanel = new Header(appContext);
         footerPanel = new Footer(appContext);
         initWidget(uiBinder.createAndBindUi(this));
+        eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
+            @Override
+            public void onPlaceChange(PlaceChangeEvent event) {
+                Place newPlace = event.getNewPlace();
+                if (newPlace instanceof HasLocationTitle) {
+                    HasLocationTitle hasLocationTitle = (HasLocationTitle) newPlace;
+                    headerPanel.setLocationTitle(hasLocationTitle.getLocationTitle());
+                }
+            }
+        });
     }
 
 
