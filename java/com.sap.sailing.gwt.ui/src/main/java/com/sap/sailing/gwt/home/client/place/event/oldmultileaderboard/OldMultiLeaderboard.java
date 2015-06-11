@@ -40,7 +40,10 @@ public class OldMultiLeaderboard extends Composite {
     @UiField ParagraphElement lastScoringUpdateTimeDiv;
     @UiField ParagraphElement lastScoringUpdateTextDiv;
     @UiField ParagraphElement lastScoringCommentDiv;
-    @UiField ParagraphElement scoringSchemeDiv;
+    @UiField
+    ParagraphElement scoringSchemeDiv;
+    @UiField
+    EventRegattaLeaderboardResources local_res;
 
     private MultiLeaderboardPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
@@ -57,13 +60,18 @@ public class OldMultiLeaderboard extends Composite {
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         if(autoRefreshTimer != null) {
+            autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+            autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#f0ab00");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#f0ab00");
+                // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor(r);
+                autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
             }
         }
     }

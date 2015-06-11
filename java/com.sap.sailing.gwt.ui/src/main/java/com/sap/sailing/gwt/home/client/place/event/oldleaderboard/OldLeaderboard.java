@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.client.place.event.oldleaderboard;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -37,10 +37,12 @@ public class OldLeaderboard extends Composite {
     
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
-    @UiField ParagraphElement lastScoringUpdateTimeDiv;
-    @UiField ParagraphElement lastScoringUpdateTextDiv;
-    @UiField ParagraphElement lastScoringCommentDiv;
-    @UiField ParagraphElement scoringSchemeDiv;
+    @UiField DivElement lastScoringUpdateTimeDiv;
+    @UiField DivElement lastScoringUpdateTextDiv;
+    @UiField DivElement lastScoringCommentDiv;
+    @UiField DivElement scoringSchemeDiv;
+    @UiField DivElement hasLiveRaceDiv;
+    @UiField EventRegattaLeaderboardResources local_res;
 
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
@@ -56,14 +58,18 @@ public class OldLeaderboard extends Composite {
     
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
+        autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
         if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
+                // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
+                autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
             }
         }
     }
@@ -87,9 +93,11 @@ public class OldLeaderboard extends Composite {
         oldLeaderboardPanel.add(leaderboardPanel);
     }
 
-    public void updatedLeaderboard(LeaderboardDTO leaderboard, boolean hasLiveRace) {
+    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+        boolean hasLiveRace = leaderboardPanel.hasLiveRace();
         if (leaderboard != null) {
             lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+            hasLiveRaceDiv.setInnerText(leaderboardPanel.getLiveRacesText());
             scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
@@ -98,11 +106,15 @@ public class OldLeaderboard extends Composite {
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
             } else {
-                lastScoringUpdateTimeDiv.setInnerText("");
-                lastScoringUpdateTextDiv.setInnerText("");
+                lastScoringUpdateTimeDiv.setInnerText("&nbsp;");
+                lastScoringUpdateTextDiv.setInnerText("&nbsp;");
             }
-            lastScoringUpdateTextDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
-            lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
+            setVisible(hasLiveRaceDiv, hasLiveRace);
+
+            setVisible(lastScoringCommentDiv, !hasLiveRace);
+            setVisible(lastScoringUpdateTextDiv, !hasLiveRace);
+            setVisible(lastScoringUpdateTimeDiv, !hasLiveRace);
+            setVisible(scoringSchemeDiv, true);
         }
     }
 

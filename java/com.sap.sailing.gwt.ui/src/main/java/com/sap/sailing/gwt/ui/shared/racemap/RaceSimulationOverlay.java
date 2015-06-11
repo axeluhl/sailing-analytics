@@ -41,7 +41,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
-    private final String textFont = "10pt OpenSansRegular";
+    private final String textFont = "10pt 'Open Sans'";
     private String algorithmTimedOutText = "out-of-bounds";
     private String mixedLegText = "ambiguous wind";
     private int xOffset = 0;
@@ -115,7 +115,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
             }
         });*/
-        map.setControls(ControlPosition.LEFT_TOP, simulationLegend);
+        map.setControls(ControlPosition.RIGHT_BOTTOM, simulationLegend);
         simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
     }
     

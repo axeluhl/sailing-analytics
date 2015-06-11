@@ -87,6 +87,17 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
             getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, newIsSuppressed);
         }
+
+        @Override
+        public void timePointOfLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
+                TimePoint newTimePointOfLastCorrectionsValidity) {
+            getScoreCorrection().notifyListenersAboutLastCorrectionsValidityChanged(oldTimePointOfLastCorrectionsValidity, newTimePointOfLastCorrectionsValidity);
+        }
+
+        @Override
+        public void commentChanged(String oldComment, String newComment) {
+            getScoreCorrection().notifyListenersAboutCommentChanged(oldComment, newComment);
+        }
     }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,

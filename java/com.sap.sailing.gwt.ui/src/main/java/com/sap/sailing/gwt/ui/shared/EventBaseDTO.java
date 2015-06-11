@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.common.media.ImageSize;
 
 public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;

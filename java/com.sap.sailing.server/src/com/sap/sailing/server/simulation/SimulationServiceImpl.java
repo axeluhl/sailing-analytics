@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
@@ -323,7 +324,8 @@ public class SimulationServiceImpl implements SimulationService {
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
             int legNumber = legIdentifier.getLegNumber();
-            Leg leg = trackedRace.getRace().getCourse().getLegs().get(legNumber);
+            Course raceCourse = trackedRace.getRace().getCourse();
+            Leg leg = raceCourse.getLegs().get(legNumber);
             // get previous mark or start line as start-position
             Waypoint fromWaypoint = leg.getFrom();
             // get next mark as end-position
@@ -357,14 +359,20 @@ public class SimulationServiceImpl implements SimulationService {
             Position startPosition = null;
             List<Position> startLine = null;
             Position endPosition = null;
+            List<Position> endLine = null;
             if (startTimePoint != null) {
                 startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
-                if (legNumber == 0) {
-                    startLine = this.getLinePositions(fromWaypoint, startTimePoint, trackedRace);
+                List<Position> line = this.getLinePositions(fromWaypoint, startTimePoint, trackedRace);
+                if (line.size() == 2) {
+                    startLine = line;
                 }
             }
             if (endTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
+                List<Position> line = this.getLinePositions(toWaypoint, endTimePoint, trackedRace);
+                if ((line.size() == 2) && (toWaypoint == raceCourse.getLastWaypoint())) {
+                    endLine = line;
+                }
             } else if (startTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, startTimePoint);
             }
@@ -400,7 +408,7 @@ public class SimulationServiceImpl implements SimulationService {
                 double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
                         / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
                 Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-                SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, polarDiagram,
+                SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, endLine, polarDiagram,
                         windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
             }
@@ -424,11 +432,15 @@ public class SimulationServiceImpl implements SimulationService {
             executor.execute(taskOmniscient);
         }
 
-        // schedule 1-turner tasks
-        FutureTask<Path> task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
-        FutureTask<Path> task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
-        executor.execute(task1TurnerLeft);
-        executor.execute(task1TurnerRight);
+        FutureTask<Path> task1TurnerLeft = null;
+        FutureTask<Path> task1TurnerRight = null;
+        if (simulationParameters.getLegType() != LegType.REACHING) {
+            // schedule 1-turner tasks
+            task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
+            task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
+            executor.execute(task1TurnerLeft);
+            executor.execute(task1TurnerRight);
+        }
 
         FutureTask<Path> taskOpportunistLeft = null;
         FutureTask<Path> taskOpportunistRight = null;
@@ -440,22 +452,32 @@ public class SimulationServiceImpl implements SimulationService {
             executor.execute(taskOpportunistRight);
         }
 
-        // collect 1-turner results
-        Path path1TurnerLeft = task1TurnerLeft.get();
-        result.put(PathType.ONE_TURNER_LEFT, path1TurnerLeft);
-        Path path1TurnerRight = task1TurnerRight.get();
-        result.put(PathType.ONE_TURNER_RIGHT, path1TurnerRight);
-
+        Path path1TurnerLeft = null;
+        Path path1TurnerRight = null;
+        if (simulationParameters.getLegType() != LegType.REACHING) {
+            // collect 1-turner results
+            path1TurnerLeft = task1TurnerLeft.get();
+            result.put(PathType.ONE_TURNER_LEFT, path1TurnerLeft);
+            path1TurnerRight = task1TurnerRight.get();
+            result.put(PathType.ONE_TURNER_RIGHT, path1TurnerRight);
+        }
+        
+        Path pathOpportunistLeft = null;
+        Path pathOpportunistRight = null;
         if (simulationParameters.showOpportunist()) {
             // collect opportunist results
-            Path pathOpportunistLeft = taskOpportunistLeft.get();
-            if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOpportunistLeft.getTurnCount() == 1)) {
-                pathOpportunistLeft = path1TurnerLeft;
+            pathOpportunistLeft = taskOpportunistLeft.get();
+            if (path1TurnerLeft != null) {
+                if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOpportunistLeft.getTurnCount() == 1)) {
+                    pathOpportunistLeft = path1TurnerLeft;
+                }
             }
             result.put(PathType.OPPORTUNIST_LEFT, pathOpportunistLeft);
-            Path pathOpportunistRight = taskOpportunistRight.get();
-            if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOpportunistRight.getTurnCount() == 1)) {
-                pathOpportunistRight = path1TurnerRight;
+            pathOpportunistRight = taskOpportunistRight.get();
+            if (path1TurnerRight != null) {
+                if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOpportunistRight.getTurnCount() == 1)) {
+                    pathOpportunistRight = path1TurnerRight;
+                }
             }
             result.put(PathType.OPPORTUNIST_RIGHT, pathOpportunistRight);
         }
@@ -463,11 +485,25 @@ public class SimulationServiceImpl implements SimulationService {
         if (simulationParameters.showOmniscient()) {
             // collect omniscient result (last, since usually slowest calculation)
             Path pathOmniscient = taskOmniscient.get();
-            if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerLeft.getFinalTime()))) {
-                pathOmniscient = path1TurnerLeft;
+            if (path1TurnerLeft != null) {
+                if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerLeft.getFinalTime()))) {
+                    pathOmniscient = path1TurnerLeft;
+                }
             }
-            if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerRight.getFinalTime()))) {
-                pathOmniscient = path1TurnerRight;
+            if (path1TurnerRight != null) {
+                if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerRight.getFinalTime()))) {
+                    pathOmniscient = path1TurnerRight;
+                }
+            }
+            if (pathOpportunistLeft != null) {
+                if (!pathOpportunistLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistLeft.getFinalTime()))) {
+                    pathOmniscient = pathOpportunistLeft;
+                }
+            }
+            if (pathOpportunistRight != null) {
+                if (!pathOpportunistRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistRight.getFinalTime()))) {
+                    pathOmniscient = pathOpportunistRight;
+                }
             }
             result.put(PathType.OMNISCIENT, pathOmniscient);
         }

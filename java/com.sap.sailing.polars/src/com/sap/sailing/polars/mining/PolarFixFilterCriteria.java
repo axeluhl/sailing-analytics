@@ -3,11 +3,13 @@ package com.sap.sailing.polars.mining;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -21,6 +23,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.components.FilterCriterion;
 
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
+    
+    private static final Logger logger = Logger.getLogger(PolarFixFilterCriteria.class.getName());
     
     /**
      * 0 if every competitor should be included.
@@ -57,11 +61,39 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
             isInLeadingCompetitors = isInLeadingCompetitors(element.getRace(), element.getCompetitor(),
                     pctOfLeadingCompetitorsToInclude);
         }
-        return (importantDataIsNotNull && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
+        boolean isValid = importantDataIsNotNull && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors;
+        if (/*Remove boolean for logging of weird input into polar service*/Boolean.FALSE && isValid) {
+            checkForAbnormalFixesAndLog(element);
+        }
+        return isValid;
     }
-    
+
+    private void checkForAbnormalFixesAndLog(GPSFixMovingWithPolarContext element) {
+        double twa = element.getAbsoluteAngleToTheWind().getObject().getDegrees();
+        if (element.getLegType() == LegType.DOWNWIND) {
+            if (Math.abs(twa) < 100) {
+                logger.warning(String.format(
+                        "Very wide downwind fix input to polar data container. Race: %s, Competitor: %s, Timepoint: %s, "
+                                + "TWA: %s", element.getRace().getRace().getName(), element.getCompetitor().getName(),
+                        element.getFix().getTimePoint(), twa));
+            }
+        } else if (element.getLegType() == LegType.UPWIND) {
+            if (Math.abs(twa) > 70) {
+                logger.warning(String.format(
+                        "Very wide upwind fix input to polar data container. Race: %s, Competitor: %s, Timepoint: %s, "
+                                + "TWA: %s", element.getRace().getRace().getName(), element.getCompetitor().getName(),
+                        element.getFix().getTimePoint(), twa));
+            } else if (Math.abs(twa) < 35) {
+                logger.warning(String.format(
+                        "Very narrow upwind fix input to polar data container. Race: %s, Competitor: %s, Timepoint: %s, "
+                                + "TWA: %s", element.getRace().getRace().getName(), element.getCompetitor().getName(),
+                        element.getFix().getTimePoint(), twa));
+            }
+        }
+    }
+
     private boolean importantDataIsNotNull(GPSFixMovingWithPolarContext element) {
-        BearingWithConfidence<Integer> angleToTheWind = element.getAngleToTheWind();
+        BearingWithConfidence<Void> angleToTheWind = element.getAbsoluteAngleToTheWind();
         WindWithConfidence<Pair<Position, TimePoint>> windSpeed = element.getWind();
         SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = element.getBoatSpeed();
         boolean result = false;
@@ -197,7 +229,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         TimePoint raceStartTime = race.getStartOfRace();
         TimePoint startTime;
         TimePoint passedStartTimePoint = startPassing.getTimePoint();
-        if (passedStartTimePoint.after(raceStartTime)) {
+        if (raceStartTime == null || passedStartTimePoint.after(raceStartTime)) {
             startTime = passedStartTimePoint;
         } else {
             startTime = raceStartTime;

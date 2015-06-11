@@ -26,11 +26,11 @@ import javax.imageio.stream.ImageInputStream;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.media.ImageSize;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;

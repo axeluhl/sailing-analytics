@@ -5,9 +5,35 @@
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.footer.FooterResources" />
   <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.client.app.PlaceNavigation" />
-  <g:HTMLPanel>
+  <ui:style gss="true">
+    .languageSelect::-ms-expand {
+      display: none;
+    }
+    .languageSelect {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -ms-appearance: none;
+      appearance: none;
+      
+      margin-top: 25px;
+      color: #efaa00;
+      line-height: 1.5em;
+      height: 1.5em;
+      display: inline-block;
+      border: transparent;
+      cursor: pointer;
+      padding-right: 1.2em;
+      background: #333;
+      cursor: pointer;
+      
+      background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
+      background-position: right center;
+      background-repeat: no-repeat;
+      
+    }
+  </ui:style>
+  <g:HTMLPanel tag="footer" addStyleNames="{local_res.css.sitefooter}">
     <!-- Website footer-->
-    <footer class="{local_res.css.sitefooter}">
       <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.medium9} {res.mediaCss.columns}">
           <div class="{local_res.css.sitefooter_copyright}">
@@ -34,8 +60,8 @@
         <div ui:field="languageSelectionDiv" class="{res.mediaCss.small12} {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_language}">
           <span><ui:text from='{i18n.footerLanguage}' />:</span>
             <g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" />
+            <g:ValueListBox addStyleNames="{style.languageSelect}" ui:field="changeLanguageList" />
         </div>
       </div>
-    </footer>
   </g:HTMLPanel>
 </ui:UiBinder>

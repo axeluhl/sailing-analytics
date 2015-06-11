@@ -7,17 +7,21 @@ import com.google.gwt.resources.client.CssResource;
 public interface SocialFooterResources extends ClientBundle {
     public static final SocialFooterResources INSTANCE = GWT.create(SocialFooterResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/shared/socialfooter/SocialFooter.css")
+    @Source("SocialFooter.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
         String socialfooter();
-        String mainsection_header();
-        String mainsection_header_title();
-        String socialfooter_button();
-        String socialfooter_buttontwitter();
-        String socialfooter_buttonfacebook();
-        String socialfooter_button_text();
-        String socialfooter_button_widget();
+        String socialfooter_heading();
+        String socialfooter_item();
+        String socialfooter_item_contentwrapper();
+        String socialfooter_item_contentwrappertwitter();
+        String socialfooter_item_contentwrapperfacebook();
+        String socialfooter_itemleft();
+        String socialfooter_itemright();
+        String socialfooter_item_icon();
+        String socialfooter_item_text();
+        String socialfooter_item_text_top();
+        String socialfooter_item_text_bottom();
     }
 }

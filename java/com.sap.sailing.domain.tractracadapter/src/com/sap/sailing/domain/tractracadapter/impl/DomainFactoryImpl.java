@@ -75,6 +75,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
@@ -159,7 +160,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public void updateCourseWaypoints(Course courseToUpdate, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException {
-        List<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>>();
+        List<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<>();
         for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
@@ -211,7 +212,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Course createCourse(String name, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> controlPoint: controlPoints) {
+        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> controlPoint : controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint.getA()), controlPoint.getB());
             waypointList.add(waypoint);
         }
@@ -237,13 +238,15 @@ public class DomainFactoryImpl implements DomainFactory {
         final String nationalityAsString = competitor.getNationality();
         final String name = competitor.getName();
         final String shortName = competitor.getShortName();
-        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name, shortName);
+        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name,
+                shortName, competitor.getHandicapToT(), competitor.getHandicapToD());
         return result;
     }
 
     @Override
     public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
-            final String nationalityAsString, final String name, final String shortName) {
+            final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
+            float timeOnDistanceAllowanceInSecondsPerNauticalMile) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor result = competitorStore.getExistingCompetitorById(competitorId);
         if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
@@ -258,7 +261,9 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
-            result = competitorStore.getOrCreateCompetitor(competitorId, name, null /*displayColor*/, null /*email*/, null /*flagImag */, team, boat);
+            result = competitorStore.getOrCreateCompetitor(competitorId, name, null /* displayColor */,
+                    null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
+                    new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)));
         }
         return result;
     }
@@ -489,9 +494,17 @@ public class DomainFactoryImpl implements DomainFactory {
                     TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(regatta);
                     if (trackedRegatta != null) {
                         // see above; only remove tracked regatta if it *became* empty because of the tracked race removal here
-                        int oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
-                        trackedRegatta.removeTrackedRace(raceDefinition);
-                        if (oldSizeOfTrackedRaces > 0 && Util.size(trackedRegatta.getTrackedRaces()) == 0) {
+                        final int oldSizeOfTrackedRaces;
+                        final int newSizeOfTrackedRaces;
+                        trackedRegatta.lockTrackedRacesForWrite();
+                        try {
+                            oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                            trackedRegatta.removeTrackedRace(raceDefinition);
+                            newSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                        } finally {
+                            trackedRegatta.unlockTrackedRacesAfterWrite();
+                        }
+                        if (oldSizeOfTrackedRaces > 0 && newSizeOfTrackedRaces == 0) {
                             trackedRegattaRegistry.removeTrackedRegatta(regatta);
                         }
                     }
