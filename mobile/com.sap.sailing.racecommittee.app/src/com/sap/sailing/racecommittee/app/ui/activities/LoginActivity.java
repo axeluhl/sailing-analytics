@@ -38,6 +38,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -270,6 +271,11 @@ public class LoginActivity extends BaseActivity
         ThemeHelper.setTheme(this);
 
         setContentView(R.layout.login_view);
+
+        //BUG 2953 - clear state because of "registering races -> already registered. ignoring"
+        Intent intent = new Intent(this, RaceStateService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
+        startService(intent);
 
         mReceiver = new IntentReceiver();
 
