@@ -61,6 +61,7 @@ public abstract class SessionActivity extends BaseActivity {
     }
 
     private void doLogout() {
+        ExLog.i(this, TAG, "Do logout now!");
         preferences.isSetUp(false);
         unloadAllRaces();
         fadeActivity(LoginActivity.class, true);

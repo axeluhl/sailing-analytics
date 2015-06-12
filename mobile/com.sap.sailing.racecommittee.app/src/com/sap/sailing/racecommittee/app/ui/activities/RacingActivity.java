@@ -249,6 +249,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     @Override
     public void onResetTime() {
+        ExLog.i(this, TAG, "OnResetTime");
         infoFragment.onResetTime();
     }
 
@@ -387,7 +388,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId().toString());
                 ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
-                onRaceItemClicked(mSelectedRace);
             }
         });
         builder.setNegativeButton(getString(R.string.race_reset_cancel), new DialogInterface.OnClickListener() {

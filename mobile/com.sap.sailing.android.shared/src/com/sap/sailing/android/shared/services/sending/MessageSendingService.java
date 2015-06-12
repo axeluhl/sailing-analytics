@@ -197,15 +197,16 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (persistenceManager.areIntentsDelayed()) {
             handleDelayedMessages();
         }
+        ExLog.i(this, TAG, "Sending Service on Create.");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
-            ExLog.i(this, TAG, "Service is restarted.");
+            ExLog.i(this, TAG, "Sending Service is restarted.");
             return START_STICKY;
         }
-        ExLog.i(this, TAG, "Service is called by following intent: " + intent.getAction());
+        ExLog.i(this, TAG, "Sending Service is called by following intent: " + intent.getAction());
         handleCommand(intent, startId);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.

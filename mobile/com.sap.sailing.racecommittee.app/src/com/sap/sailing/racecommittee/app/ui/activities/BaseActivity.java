@@ -52,6 +52,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
+                //TODO: is this really save? what about all the connected races?
                 InMemoryDataStore.INSTANCE.reset();
                 return onReset();
 
