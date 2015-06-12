@@ -25,17 +25,13 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final boolean isPublic;
     private final String eventName;
     private final String eventDescription;
-    private final Iterable<URL> videoURLs;
-    private final Iterable<URL> imageURLs;
-    private final Iterable<URL> sponsorImageURLs;
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
     private final URL logoImageURL;
     private final URL officialWebsiteURL;
     
     public CreateEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs,
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, URL logoImageURL, URL officialWebsiteURL) {
+            boolean isPublic, UUID id, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, URL logoImageURL, URL officialWebsiteURL) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -43,9 +39,6 @@ public class CreateEvent extends AbstractEventOperation<Event> {
         this.endDate = endDate;
         this.venue = venue;
         this.isPublic = isPublic;
-        this.imageURLs = imageURLs;
-        this.videoURLs = videoURLs;
-        this.sponsorImageURLs = sponsorImageURLs;
         this.images = images;
         this.videos = videos;
         this.logoImageURL = logoImageURL;
@@ -71,7 +64,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     @Override
     public Event internalApplyTo(RacingEventService toState) {
         return toState.createEventWithoutReplication(getEventName(), eventDescription, startDate, endDate, venue, isPublic,
-                getId(), imageURLs, videoURLs, sponsorImageURLs, images, videos, logoImageURL, officialWebsiteURL);
+                getId(), images, videos, logoImageURL, officialWebsiteURL);
     }
 
 }

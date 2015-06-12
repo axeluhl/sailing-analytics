@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -121,9 +120,7 @@ public class SearchServiceTest {
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
         pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
-                "Kiel", true, UUID.randomUUID(), Collections.<URL>emptySet(),
-                Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                "Kiel", true, UUID.randomUUID(), /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
                 /* logoImageURLAsString */ null, /* officialWebsiteURLAsString */ null));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
@@ -157,8 +154,7 @@ public class SearchServiceTest {
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
         aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
-                "Flensburg", true, UUID.randomUUID(), Collections.<URL>emptySet(),
-                Collections.<URL>emptySet(), /* sponsorImageURLs */ Collections.<URL>emptySet(),
+                "Flensburg", true, UUID.randomUUID(), 
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
                 /* logoimageURL */ null, /* officialWebsiteURLAsString */ null));
         flensburg = aalEvent.getVenue();

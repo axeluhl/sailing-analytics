@@ -150,23 +150,11 @@ public class EventImpl extends EventBaseImpl implements Event {
         return imageSizeCalculator.get();
     }
 
-    @Override
-    public void addImageURL(URL imageURL) {
-        super.addImageURL(imageURL);
-        refreshImageSizeFetcher(imageURL);
-    }
-
     private void refreshImageSizeFetcher(URL imageURL) {
         if (imageURL != null) {
             removeImageSizeFetcher(imageURL);
             getOrCreateImageSizeCalculator(imageURL);
         }
-    }
-
-    @Override
-    public void removeImageURL(URL imageURL) {
-        super.removeImageURL(imageURL);
-        removeImageSizeFetcher(imageURL);
     }
 
     private void removeImageSizeFetcher(URL imageURL) {
@@ -175,8 +163,7 @@ public class EventImpl extends EventBaseImpl implements Event {
         }
     }
 
-    @Override
-    public void setImageURLs(Iterable<URL> imageURLs) {
+    protected void setImageURLs(Iterable<URL> imageURLs) {
         super.setImageURLs(imageURLs);
         if (imageURLs != null) {
             for (URL imageURL : imageURLs) {
@@ -185,20 +172,7 @@ public class EventImpl extends EventBaseImpl implements Event {
         }
     }
 
-    @Override
-    public void addSponsorImageURL(URL sponsorImageURL) {
-        super.addSponsorImageURL(sponsorImageURL);
-        refreshImageSizeFetcher(sponsorImageURL);
-    }
-
-    @Override
-    public void removeSponsorImageURL(URL sponsorImageURL) {
-        super.removeSponsorImageURL(sponsorImageURL);
-        removeImageSizeFetcher(sponsorImageURL);
-    }
-
-    @Override
-    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
+    protected void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         super.setSponsorImageURLs(sponsorImageURLs);
         if (sponsorImageURLs != null) {
             for (URL imageURL : sponsorImageURLs) {

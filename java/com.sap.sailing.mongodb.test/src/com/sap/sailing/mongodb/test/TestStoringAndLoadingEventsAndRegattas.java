@@ -143,12 +143,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg1);
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
-        event.addImageURL(new URL("http://some.host/with/some/file1.jpg"));
-        event.addImageURL(new URL("http://some.host/with/some/file2.jpg"));
-        event.addVideoURL(new URL("http://some.host/with/some/file1.mp4"));
-        event.addVideoURL(new URL("http://some.host/with/some/file2.mp4"));
-        event.addSponsorImageURL(new URL("http://some.host/with/some/file4.mp4"));
-        event.addSponsorImageURL(new URL("http://some.host/with/some/file5.mp4"));
         event.setOfficialWebsiteURL(new URL("http://official.website.com"));
         event.setLogoImageURL(new URL("http://official.logo.com"));
         mof.storeEvent(event);
@@ -188,9 +182,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         for (CourseArea loadedCourseArea : loadedVenue.getCourseAreas()) {
             assertEquals(courseAreaNames[i++], loadedCourseArea.getName());
         }
-        assertTrue("image URLs "+loadedEvent.getImageURLs()+" but expected "+event.getImageURLs(), Util.equals(event.getImageURLs(), loadedEvent.getImageURLs()));
-        assertTrue("video URLs "+loadedEvent.getVideoURLs()+" but expected "+event.getVideoURLs(), Util.equals(event.getVideoURLs(), loadedEvent.getVideoURLs()));
-        assertTrue("sponsor image URLs "+loadedEvent.getSponsorImageURLs()+" but expected "+event.getSponsorImageURLs(), Util.equals(event.getSponsorImageURLs(), loadedEvent.getSponsorImageURLs()));
     }
     
     @Test
@@ -330,6 +321,47 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(3, Util.size(loadedVideo1.getTags()));
     }
 
+    @Test
+    /**
+     * We expected that the migration code creates also an image URL for each image we create.
+     * Images with the 'Sponsor' tag should create a corresponding sponsor image URL 
+     * Videos should create a video URL.
+     */
+    public void testLoadStoreSimpleEventWithImageAndVideoURLMigration() throws MalformedURLException {
+        final URL imageURL = new URL("http://some.host/with/some/bla.jpg");
+        final URL sponsorImageURL = new URL("http://some.host/with/some/sponsor.jpg");
+        final URL videoURL = new URL("http://some.host/with/some/video.mpg");
+        final TimePoint createdAt = MillisecondsTimePoint.now(); 
+        final String eventName = "Event Name";
+        final Venue venue = new VenueImpl("My Venue");
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alfa");
+        venue.addCourseArea(courseArea);
+
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
+        
+        ImageDescriptor image1 = new ImageDescriptorImpl(imageURL, createdAt);
+        event.addImage(image1);
+
+        ImageDescriptor image2 = new ImageDescriptorImpl(sponsorImageURL, createdAt);
+        event.addImage(image2);
+        image2.addTag("Sponsor");
+
+        VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, MimeType.mp4, createdAt);
+        event.addVideo(video1);
+
+        mof.storeEvent(event);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        final Event loadedEvent = dof.loadEvent(eventName);
+        assertEquals(2, Util.size(loadedEvent.getImages()));
+        assertEquals(1, Util.size(loadedEvent.getImageURLs()));
+        assertEquals(1, Util.size(loadedEvent.getSponsorImageURLs()));
+        assertEquals(1, Util.size(loadedEvent.getVideos()));
+        assertEquals(1, Util.size(loadedEvent.getVideoURLs()));
+    }
+    
+    
     @Test
     public void testLoadStoreRegattaConfiguration() {
         

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1328,12 +1327,8 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         RacingEventService sourceService = new RacingEventServiceImpl();
 
-        Iterable<URL> imageURLs = new HashSet<>();
-        Iterable<URL> videoURLs = new HashSet<>();
-        Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
-                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
-                videoURLs, sponsorImageURLs, 
+                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(),
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
                 /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
@@ -1397,12 +1392,8 @@ public class MasterDataImportTest {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
 
-        Iterable<URL> imageURLs = new HashSet<>();
-        Iterable<URL> videoURLs = new HashSet<>();
-        Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
-                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
-                videoURLs, sponsorImageURLs, 
+                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), 
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
                 /* logoImageURL */ null, /* officialWebsiteURL */ null);
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());

@@ -20,16 +20,12 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final String eventDescription;
     private final URL officialWebsiteURL;
     private final URL logoImageURL;
-    private final Iterable<URL> imageURLs;
-    private final Iterable<URL> videoURLs;
-    private final Iterable<URL> sponsorImageURLs;
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
 
     public UpdateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL logoImageURL,
-            URL officialWebsiteURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs,
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            URL officialWebsiteURL, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -40,9 +36,6 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
         this.leaderboardGroupIds = leaderboardGroupIds;
         this.officialWebsiteURL = officialWebsiteURL;
         this.logoImageURL = logoImageURL;
-        this.imageURLs = imageURLs;
-        this.videoURLs = videoURLs;
-        this.sponsorImageURLs = sponsorImageURLs;
         this.images = images;
         this.videos = videos;
     }
@@ -62,7 +55,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.updateEvent(getId(), eventName, eventDescription, startDate, endDate, venueName, isPublic,
-                leaderboardGroupIds, officialWebsiteURL, logoImageURL, imageURLs, videoURLs, sponsorImageURLs, images, videos);
+                leaderboardGroupIds, officialWebsiteURL, logoImageURL, images, videos);
         return null;
     }
 }

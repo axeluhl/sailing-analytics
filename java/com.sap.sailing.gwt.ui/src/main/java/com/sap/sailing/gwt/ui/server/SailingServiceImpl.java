@@ -433,7 +433,6 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
-import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -442,7 +441,6 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
-import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
@@ -3307,35 +3305,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
         URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
-        List<URL> imageURLs = createURLsFromMedia(images, MediaTagConstants.SPONSOR, null);
-        List<URL> videoURLs = createURLsFromMedia(videos, null, null);
-        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaTagConstants.SPONSOR);
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
-                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
-                        sponsorImageURLs, eventImages, eventVideos));
+                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, eventImages, eventVideos));
         return getEventById(eventId, false);
-    }
-
-    /**
-     * @param urlStrings
-     * @return
-     * @throws MalformedURLException
-     */
-    private List<URL> createURLsFromMedia(Iterable<? extends AbstractMediaDTO> media, String blacklistTag, String whilelistTag) throws MalformedURLException {
-        List<URL> result = new ArrayList<>();
-        for (AbstractMediaDTO mediaEntry : media) {
-            if(blacklistTag != null && mediaEntry.getTags().contains(blacklistTag)) {
-                continue;
-            }
-            if(whilelistTag != null && !mediaEntry.getTags().contains(whilelistTag)) {
-                continue;
-            }
-            result.add(new URL(mediaEntry.getSourceRef()));
-        }
-        return result;
     }
 
     @Override
@@ -3346,14 +3321,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        List<URL> imageURLs = createURLsFromMedia(images, MediaTagConstants.SPONSOR, null);
-        List<URL> videoURLs = createURLsFromMedia(videos, null, null);
-        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaTagConstants.SPONSOR);
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        imageURLs, videoURLs, sponsorImageURLs,
                         eventImages, eventVideos,
                         logoImageURLAsString == null ? null : new URL(logoImageURLAsString), 
                         officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));

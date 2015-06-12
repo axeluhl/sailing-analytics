@@ -1053,36 +1053,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing logo image URL "+logoImageURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
-        BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
-        if (imageURLs != null) {
-            for (Object imageURL : imageURLs) {
-                try {
-                    result.addImageURL(new URL((String) imageURL));
-                } catch (MalformedURLException e) {
-                    logger.severe("Error parsing image URL "+imageURL+" for event "+name+". Ignoring this image URL.");
-                }
-            }
-        }
-        BasicDBList videoURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
-        if (videoURLs != null) {
-            for (Object videoURL : videoURLs) {
-                try {
-                    result.addVideoURL(new URL((String) videoURL));
-                } catch (MalformedURLException e) {
-                    logger.severe("Error parsing video URL "+videoURL+" for event "+name+". Ignoring this video URL.");
-                }
-            }
-        }
-        BasicDBList sponsorImageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
-        if (sponsorImageURLs != null) {
-            for (Object sponsorImageURL : sponsorImageURLs) {
-                try {
-                    result.addSponsorImageURL(new URL((String) sponsorImageURL));
-                } catch (MalformedURLException e) {
-                    logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+name+". Ignoring this sponsor image URL.");
-                }
-            }
-        }
         BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {

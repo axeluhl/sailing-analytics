@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
-import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
@@ -72,42 +71,6 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 result.setLogoImageURL(new URL(logoImageURLAsString));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing logo image URL for event "+name, e);
-            }
-        }
-        if (eventJson.get(EventBaseJsonSerializer.FIELD_IMAGE_URLS) != null) {
-            try {
-                result.setImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_IMAGE_URLS)));
-            } catch (MalformedURLException e) {
-                throw new JsonDeserializationException("Error deserializing image URLs for event "+name, e);
-            }
-        }
-        if (eventJson.get(EventBaseJsonSerializer.FIELD_VIDEO_URLS) != null) {
-            try {
-                result.setVideoURLs(getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_VIDEO_URLS)));
-            } catch (MalformedURLException e) {
-                throw new JsonDeserializationException("Error deserializing video URLs for event "+name, e);
-            }
-        }
-        if (eventJson.get(EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS) != null) {
-            try {
-                result.setSponsorImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS)));
-            } catch (MalformedURLException e) {
-                throw new JsonDeserializationException("Error deserializing sponsor image URLs for event "+name, e);
-            }
-        }
-        JSONArray imageSizes = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_IMAGE_SIZES);
-        if (imageSizes != null) {
-            for (Object imageURLAndSizeObject : imageSizes) {
-                JSONObject imageURLAndSizeJson = (JSONObject) imageURLAndSizeObject;
-                try {
-                    result.setImageSize(
-                            new URL((String) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_URL)),
-                            new ImageSizeImpl(
-                                    ((Number) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH)).intValue(),
-                                    ((Number) imageURLAndSizeJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT)).intValue()));
-                } catch (MalformedURLException e) {
-                    throw new JsonDeserializationException(e);
-                }
             }
         }
         JSONArray imagesJson = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_IMAGES);
@@ -197,15 +160,5 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             video.setThumbnailURL(thumbnailURL);
         }
         return video;
-    }
-
-    private Iterable<URL> getURLsFromStrings(JSONArray strings) throws MalformedURLException {
-        List<URL> result = new ArrayList<URL>();
-        if (strings != null) {
-            for (Object string : strings) {
-                result.add(new URL(string.toString()));
-            }
-        }
-        return result;
     }
 }
