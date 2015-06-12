@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
@@ -120,7 +121,7 @@ public final class HomeServiceUtil {
 
             ImageHolder(ImageDescriptor image) {
                 this.image = image;
-                this.stage = image == null ? false : hasTag(image, MediaConstants.STAGE);
+                this.stage = image == null ? false : hasTag(image, MediaTagConstants.STAGE);
                 this.height = image == null || image.getHeightInPx() == null ? 0 : image.getHeightInPx();
                 this.width = image == null || image.getWidthInPx() == null ? 0 : image.getWidthInPx();
                 this.size = height * width;
@@ -177,7 +178,7 @@ public final class HomeServiceUtil {
 
         // search for name pattern
         for (ImageDescriptor imageUrl : event.getImages()) {
-            if (hasTag(imageUrl, MediaConstants.TEASER)) {
+            if (hasTag(imageUrl, MediaTagConstants.TEASER)) {
                 return imageUrl;
             }
         }
@@ -256,13 +257,13 @@ public final class HomeServiceUtil {
     }
     
     private static boolean isBetterStageImage(ImageDescriptor candidate, ImageDescriptor reference) {
-        boolean stage = hasTag(candidate, MediaConstants.STAGE);
-        boolean stageRef = hasTag(reference, MediaConstants.STAGE);
+        boolean stage = hasTag(candidate, MediaTagConstants.STAGE);
+        boolean stageRef = hasTag(reference, MediaTagConstants.STAGE);
         if(stage != stageRef) {
             return stage;
         }
-        boolean teaser = hasTag(candidate, MediaConstants.TEASER);
-        boolean teaserRef = hasTag(reference, MediaConstants.TEASER);
+        boolean teaser = hasTag(candidate, MediaTagConstants.TEASER);
+        boolean teaserRef = hasTag(reference, MediaTagConstants.TEASER);
         if(teaser != teaserRef) {
             return !teaser;
         }
@@ -292,7 +293,7 @@ public final class HomeServiceUtil {
         boolean first = true;
         for (Iterator<ImageDescriptor> iter = imageURLs.iterator(); iter.hasNext();  ) {
             ImageDescriptor image = iter.next();
-            if(hasTag(image, MediaConstants.TEASER)) {
+            if(hasTag(image, MediaTagConstants.TEASER)) {
                 continue;
             }
             if ((first && !iter.hasNext()) || !Util.equalsWithNull(image, stageImage)) {
@@ -362,7 +363,7 @@ public final class HomeServiceUtil {
     
     public static boolean hasPhotos(Event event) {
         for(ImageDescriptor image : event.getImages()) {
-            if(!hasTag(image, MediaConstants.TEASER)) {
+            if(!hasTag(image, MediaTagConstants.TEASER)) {
                 return true;
             }
         }

@@ -324,7 +324,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
@@ -434,6 +433,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -3307,9 +3307,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
         URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
-        List<URL> imageURLs = createURLsFromMedia(images, MediaConstants.SPONSOR, null);
+        List<URL> imageURLs = createURLsFromMedia(images, MediaTagConstants.SPONSOR, null);
         List<URL> videoURLs = createURLsFromMedia(videos, null, null);
-        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaConstants.SPONSOR);
+        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaTagConstants.SPONSOR);
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
@@ -3346,9 +3346,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        List<URL> imageURLs = createURLsFromMedia(images, MediaConstants.SPONSOR, null);
+        List<URL> imageURLs = createURLsFromMedia(images, MediaTagConstants.SPONSOR, null);
         List<URL> videoURLs = createURLsFromMedia(videos, null, null);
-        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaConstants.SPONSOR);
+        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaTagConstants.SPONSOR);
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
