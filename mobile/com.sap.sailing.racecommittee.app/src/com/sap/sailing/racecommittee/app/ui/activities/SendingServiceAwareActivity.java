@@ -143,7 +143,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     private String getLiveIconText() {
-        return String.format(getString(R.string.connected_to_wp), PrefUtils.getString(this, R.string.preference_server_url_key,
+        return getString(R.string.connected_to_wp, PrefUtils.getString(this, R.string.preference_server_url_key,
                 R.string.preference_server_url_default), sendingServiceStatus, (boundSendingService ? "bound" : "unbound"));
     }
 }

@@ -399,7 +399,7 @@
     <string name="events_waiting_to_be_sent"><![CDATA[Es müssen noch %1$d Events gesendet werden.\nDie letzte erfolgreiche Übertragung war am: %2$s.]]></string>
     <string name="no_event_to_be_sent">Derzeit wartet kein Event auf die Übertragung.</string>
     <string name="never">nie</string>
-    <string name="connected_to_wp"><![CDATA[Verbunden mit: %1$s\n%2$s]]></string>
+    <string name="connected_to_wp">Verbunden mit: %1$s\n%2$s\nBoundService:%3$s</string>
     <string name="theme_changed_title">Darstellungsmodus ändern</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>

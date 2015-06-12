@@ -420,7 +420,7 @@
     <string name="events_waiting_to_be_sent"><![CDATA[Currently %1$d events waiting to be sent.\nLast successful sent was at: %2$s.]]></string>
     <string name="no_event_to_be_sent">Currently no event waiting to be sent.</string>
     <string name="never">never</string>
-    <string name="connected_to_wp"><![CDATA[Connected to: %1$s\n%2$s\nBoundService:%3$s]]></string>
+    <string name="connected_to_wp">Connected to: %1$s\n%2$s\nBoundService:%3$s</string>
     <string name="theme_changed_title">Theme Change</string>
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
