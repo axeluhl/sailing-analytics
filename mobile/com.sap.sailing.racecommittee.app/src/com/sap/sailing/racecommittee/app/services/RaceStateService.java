@@ -90,7 +90,7 @@ public class RaceStateService extends Service {
         
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         setupNotificationBuilder();
-        
+
         super.onCreate();
         ExLog.i(this, TAG, "Started.");
     }
@@ -194,14 +194,9 @@ public class RaceStateService extends Service {
 
     private void handleClearRaces(Intent intent) {
         unregisterAllRaces();
-        clearAllRaces();
-        
-        stopForeground(true);
-    }
-
-    private void clearAllRaces() {
         dataManager.getDataStore().getRaces().clear();
-        ExLog.i(this, TAG, "Cleared all races.");
+        ExLog.i(this, TAG, "handleClearRaces: Cleared all races.");
+        stopForeground(true);
     }
 
     private void handleRegisterRace(Intent intent) {
