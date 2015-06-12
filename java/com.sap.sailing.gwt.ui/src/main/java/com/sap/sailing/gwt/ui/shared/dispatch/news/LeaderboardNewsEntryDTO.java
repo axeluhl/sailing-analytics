@@ -11,7 +11,6 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
 
     private String leaderboardName;
     private String boatClassName;
-    private String externalURL;
     private Type type;
 
     @SuppressWarnings("unused")
@@ -20,7 +19,7 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
 
     @GwtIncompatible
     public LeaderboardNewsEntryDTO(LeaderboardUpdateNewsItem item) {
-        super(item.getTitle(), item.getCreatedAtDate());
+        super(item.getTitle(), item.getCreatedAtDate(), null);
         this.boatClassName = item.getBoatClass();
         this.type = Type.RESULTS_UPDATE;
         this.leaderboardName = item.getLeaderboardName();
@@ -38,14 +37,6 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
             return "Result update";
         }
         return "";
-    }
-
-    public String getExternalURL() {
-        return externalURL;
-    }
-
-    public void setExternalURL(String externalURL) {
-        this.externalURL = externalURL;
     }
 
     public String getLeaderboardName() {

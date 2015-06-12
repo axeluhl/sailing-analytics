@@ -1,0 +1,28 @@
+[
+	{
+		"event": "406cffc2-b491-4f7e-b78e-a21abd97006a",
+		"timestamp": 1434030000000,
+		"tite": "Test KW2015 1",
+		"message": "Test KW2015 1 content",
+		"url": "http://www.sapsailing.com/"
+	},
+	{
+		"event": "406cffc2-b491-4f7e-b78e-a21abd97006a",
+		"timestamp": 1434050000000,
+		"tite": "Test KW2015 2",
+		"message": "Test KW2015 2 content"
+	},
+	{
+		"event": "adbd871b-b9b3-4e18-bd79-d560e7b87c53",
+		"timestamp": 1434030000000,
+		"tite": "Test local 1",
+		"message": "Test local 1 content",
+		"url": "http://www.sapsailing.com/"
+	},
+	{
+		"event": "adbd871b-b9b3-4e18-bd79-d560e7b87c53",
+		"timestamp": 1434050000000,
+		"tite": "Test local 2",
+		"message": "Test local 2 content"
+	}
+]

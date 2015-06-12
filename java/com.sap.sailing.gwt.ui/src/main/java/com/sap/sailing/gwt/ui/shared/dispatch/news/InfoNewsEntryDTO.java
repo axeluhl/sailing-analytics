@@ -13,7 +13,7 @@ public class InfoNewsEntryDTO extends NewsEntryDTO {
 
     @GwtIncompatible
     public InfoNewsEntryDTO(InfoEventNewsItem item) {
-        super(item.getTitle(), item.getCreatedAtDate());
+        super(item.getTitle(), item.getCreatedAtDate(), item.getRelatedItemLink());
         this.subtitle = item.getMessage();
     }
 

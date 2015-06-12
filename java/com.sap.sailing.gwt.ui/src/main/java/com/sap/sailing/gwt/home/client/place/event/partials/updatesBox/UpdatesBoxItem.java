@@ -60,41 +60,43 @@ public class UpdatesBoxItem extends Widget {
             timestampUi.setInnerText(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(timestamp));
         }
         
-        String directLink = null;
-        PlaceNavigation<?> placeNavigation = null;
-        if(entry instanceof LeaderboardNewsEntryDTO) {
-            directLink = ((LeaderboardNewsEntryDTO) entry).getExternalURL();
-            placeNavigation = presenter.getRegattaNavigation(((LeaderboardNewsEntryDTO) entry).getLeaderboardName());
-        } else if(entry instanceof AbstractRaceNewsEntryDTO) {
-            AbstractRaceNewsEntryDTO raceEntry = (AbstractRaceNewsEntryDTO) entry;
-            if(raceEntry.getTrackedRaceName() != null) {
-                directLink = presenter.getRaceViewerURL(raceEntry.getRegattaName(), raceEntry.getTrackedRaceName());
-            }
-        }
+        String directLink = entry.getExternalURL();
         if(directLink != null) {
             link.setHref(directLink);
             link.setTarget("_blank");
-        } else if(placeNavigation != null) {
-            link.setHref(placeNavigation.getTargetUrl());
-            Event.sinkEvents(link, Event.ONCLICK);
-            final PlaceNavigation<?> pn = placeNavigation;
-            Event.setEventListener(link, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                    if(LinkUtil.handleLinkClick(event)) {
-                        event.preventDefault();
-                        pn.goToPlace();
-                    }
-                }
-            });
         } else {
-            link.removeFromParent();
-            while(link.hasChildNodes()) {
-                Node firstChild = link.getChild(0);
-                firstChild.removeFromParent();
-                getElement().appendChild(firstChild);
+            PlaceNavigation<?> placeNavigation = null;
+            if(entry instanceof LeaderboardNewsEntryDTO) {
+                directLink = ((LeaderboardNewsEntryDTO) entry).getExternalURL();
+                placeNavigation = presenter.getRegattaNavigation(((LeaderboardNewsEntryDTO) entry).getLeaderboardName());
+            } else if(entry instanceof AbstractRaceNewsEntryDTO) {
+                AbstractRaceNewsEntryDTO raceEntry = (AbstractRaceNewsEntryDTO) entry;
+                if(raceEntry.getTrackedRaceName() != null) {
+                    directLink = presenter.getRaceViewerURL(raceEntry.getRegattaName(), raceEntry.getTrackedRaceName());
+                }
             }
-            addStyleName(UpdatesBoxResources.INSTANCE.css().updatesbox_item());
+            if(placeNavigation != null) {
+                link.setHref(placeNavigation.getTargetUrl());
+                Event.sinkEvents(link, Event.ONCLICK);
+                final PlaceNavigation<?> pn = placeNavigation;
+                Event.setEventListener(link, new EventListener() {
+                    @Override
+                    public void onBrowserEvent(Event event) {
+                        if(LinkUtil.handleLinkClick(event)) {
+                            event.preventDefault();
+                            pn.goToPlace();
+                        }
+                    }
+                });
+            } else {
+                link.removeFromParent();
+                while(link.hasChildNodes()) {
+                    Node firstChild = link.getChild(0);
+                    firstChild.removeFromParent();
+                    getElement().appendChild(firstChild);
+                }
+                addStyleName(UpdatesBoxResources.INSTANCE.css().updatesbox_item());
+            }
         }
     }
 
