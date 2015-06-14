@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 
@@ -148,7 +147,8 @@ public abstract class EventBaseImpl implements EventBase {
         return Collections.unmodifiableCollection(imageURLs);
     }
     
-    protected void setImageURLs(Iterable<URL> imageURLs) {
+    @Override
+    public void setImageURLs(Iterable<URL> imageURLs) {
         this.imageURLs.clear();
         if (imageURLs != null) {
             Util.addAll(imageURLs, this.imageURLs);
@@ -160,7 +160,8 @@ public abstract class EventBaseImpl implements EventBase {
         return Collections.unmodifiableCollection(videoURLs);
     }
 
-    private void setVideoURLs(Iterable<URL> videoURLs) {
+    @Override
+    public void setVideoURLs(Iterable<URL> videoURLs) {
         this.videoURLs.clear();
         if (videoURLs != null) {
             Util.addAll(videoURLs, this.videoURLs);
@@ -172,7 +173,8 @@ public abstract class EventBaseImpl implements EventBase {
         return Collections.unmodifiableCollection(sponsorImageURLs);
     }
     
-    protected void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
+    @Override
+    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         this.sponsorImageURLs.clear();
         if (sponsorImageURLs != null) {
             Util.addAll(sponsorImageURLs, this.sponsorImageURLs);
@@ -256,33 +258,33 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     private void syncImageURLsFromImagesForBackwardCompatibility() {
-        List<URL> imageURLs = createURLsFromMedia(images, MediaTagConstants.SPONSOR, null);
-        List<URL> sponsorImageURLs = createURLsFromMedia(images, null, MediaTagConstants.SPONSOR);
+        List<URL> imageURLs = new ArrayList<>();
+        List<URL> sponsorImageURLs = new ArrayList<>();
+        URL logoImageURL = null;
+        for (ImageDescriptor image : images) {
+            if (image.hasTag(MediaTagConstants.SPONSOR)) {
+                sponsorImageURLs.add(image.getURL());
+            } else if (image.hasTag(MediaTagConstants.LOGO)) {
+                logoImageURL = image.getURL();
+            } else {
+                imageURLs.add(image.getURL());
+            }
+        }
         setImageURLs(imageURLs);
         setSponsorImageURLs(sponsorImageURLs);
+        setLogoImageURL(logoImageURL);
     }
     
     private void syncVideoURLsFromVideosForBackwardCompatibility() {
-        List<URL> videoURLs = createURLsFromMedia(videos, null, null);
+        List<URL> videoURLs = new ArrayList<>();
+        for (VideoDescriptor video : videos) {
+            videoURLs.add(video.getURL());
+        }
         setVideoURLs(videoURLs);
     }
 
     private void syncImageAndVideoURLsForBackwardCompatibility() {
         syncImageURLsFromImagesForBackwardCompatibility();
         syncVideoURLsFromVideosForBackwardCompatibility();
-    }
-
-    private List<URL> createURLsFromMedia(Iterable<? extends MediaDescriptor> media, String blacklistTag, String whitelistTag) {
-        List<URL> result = new ArrayList<>();
-        for (MediaDescriptor mediaEntry : media) {
-            if (blacklistTag != null && Util.contains(mediaEntry.getTags(), blacklistTag)) {
-                continue;
-            }
-            if (whitelistTag != null && !Util.contains(mediaEntry.getTags(), whitelistTag)) {
-                continue;
-            }
-            result.add(mediaEntry.getURL());
-        }
-        return result;
     }
 }

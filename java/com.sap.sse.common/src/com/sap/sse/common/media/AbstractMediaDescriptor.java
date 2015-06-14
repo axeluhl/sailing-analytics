@@ -128,4 +128,9 @@ public abstract class AbstractMediaDescriptor implements MediaDescriptor, Serial
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
+
+    @Override
+    public boolean hasTag(String tagName) {
+        return tags.contains(tagName);
+    }
 }

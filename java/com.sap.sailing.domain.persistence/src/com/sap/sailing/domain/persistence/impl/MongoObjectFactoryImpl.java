@@ -516,6 +516,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         serverCollection.remove(query);
     }
     
+    /**
+     * StoreEvent() uses some deprecated methods of event to keep backward compatibility.
+     */
+    @SuppressWarnings("deprecation")
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());

@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -24,10 +25,6 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     private String description;
     private List<? extends LeaderboardGroupBaseDTO> leaderboardGroups;
-    private List<String> imageURLs = new ArrayList<>();
-    private List<String> videoURLs = new ArrayList<>();
-    private List<String> sponsorImageURLs = new ArrayList<>();
-    private String logoImageURL;
     private String officialWebsiteURL;
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
@@ -66,6 +63,17 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.imageSizes = new HashMap<String, ImageSize>();
     }
 
+    public ImageDTO getLogoImage() {
+        ImageDTO result = null;
+        for (ImageDTO image : images) {
+            if (image.hasTag(MediaTagConstants.LOGO)) {
+                result = image;
+                break;
+            }
+        }
+        return result;
+    }
+    
     public boolean isRunning() {
         Date now = new Date();
         if (startDate != null && endDate != null && (now.after(startDate) && now.before(endDate))) {
@@ -80,14 +88,6 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getLogoImageURL() {
-        return logoImageURL;
-    }
-
-    public void setLogoImageURL(String logoImageURL) {
-        this.logoImageURL = logoImageURL;
     }
 
     public String getOfficialWebsiteURL() {
@@ -109,30 +109,6 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public void setBaseURL(String baseURL) {
         this.baseURL = baseURL;
-    }
-
-    public void addImageURL(String imageURL) {
-        imageURLs.add(imageURL);
-    }
-
-    public void addVideoURL(String videoURL) {
-        videoURLs.add(videoURL);
-    }
-
-    public void addSponsorImageURL(String sponsorImageURL) {
-        sponsorImageURLs.add(sponsorImageURL);
-    }
-
-    public List<String> getImageURLs() {
-        return imageURLs;
-    }
-
-    public List<String> getVideoURLs() {
-        return videoURLs;
-    }
-
-    public List<String> getSponsorImageURLs() {
-        return sponsorImageURLs;
     }
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {

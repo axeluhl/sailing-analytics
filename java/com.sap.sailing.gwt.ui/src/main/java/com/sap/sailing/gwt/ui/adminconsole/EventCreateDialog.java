@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class EventCreateDialog extends EventDialog {
 
@@ -30,10 +31,9 @@ public class EventCreateDialog extends EventDialog {
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         officialWebsiteURLEntryField = createTextBox(null);
         officialWebsiteURLEntryField.setVisibleLength(50);
-        logoImageURLEntryField = createTextBox(null);
-        logoImageURLEntryField.setVisibleLength(50);
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
+        videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
     }
 }

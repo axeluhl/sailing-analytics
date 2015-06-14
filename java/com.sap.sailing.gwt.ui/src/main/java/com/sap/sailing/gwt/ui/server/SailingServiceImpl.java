@@ -3300,23 +3300,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
-            String logoImageURLString, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
+            Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
-        URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
-                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, eventImages, eventVideos));
+                        isPublic, leaderboardGroupIds, officialWebsiteURL, eventImages, eventVideos));
         return getEventById(eventId, false);
     }
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
-            String logoImageURLAsString, String officialWebsiteURLAsString)
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, Iterable<ImageDTO> images, Iterable<VideoDTO> videos)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
@@ -3325,9 +3323,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        eventImages, eventVideos,
-                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString), 
-                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
+                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString), eventImages, eventVideos));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3406,36 +3402,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        if (event.getLogoImageURL() == null) {
-            eventDTO.setLogoImageURL(null);
-        } else {
-            eventDTO.setLogoImageURL(event.getLogoImageURL().toString());
-            setImageSize(event, eventDTO, event.getLogoImageURL());
-        }
-        for(URL url: event.getSponsorImageURLs()) {
-            eventDTO.addSponsorImageURL(url.toString());
-            setImageSize(event, eventDTO, url);
-        }
-        for(URL url: event.getImageURLs()) {
-            eventDTO.addImageURL(url.toString());
-            setImageSize(event, eventDTO, url);
-        }
-        for(URL url: event.getVideoURLs()) {
-            eventDTO.addVideoURL(url.toString());
-        }
         for(ImageDescriptor image: event.getImages()) {
             eventDTO.addImage(convertToImageDTO(image));
         }
         for(VideoDescriptor video: event.getVideos()) {
             eventDTO.addVideo(convertToVideoDTO(video));
-        }
-    }
-
-    private void setImageSize(EventBase event, EventBaseDTO eventDTO, URL imageURL) {
-        try {
-            eventDTO.setImageSize(imageURL.toString(), event.getImageSize(imageURL));
-        } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
         }
     }
 
@@ -4171,8 +4142,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
         updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
-                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), newEvent.getImages(), newEvent.getVideos());
+                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(),
+                newEvent.getImages(), newEvent.getVideos());
     }
     
     @Override

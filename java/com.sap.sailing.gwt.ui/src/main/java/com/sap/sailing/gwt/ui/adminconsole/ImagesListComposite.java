@@ -28,6 +28,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
@@ -74,15 +75,42 @@ public class ImagesListComposite extends Composite {
         imagesControlsPanel.setSpacing(5);
         panel.add(imagesControlsPanel);
 
-        Button createImageBtn = new Button("Add image");
-        createImageBtn.addClickHandler(new ClickHandler() {
+        Button addPhotoBtn = new Button("Add photo");
+        addPhotoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog();
+                openCreateImageDialog(null);
             }
         });
-        imagesControlsPanel.add(createImageBtn);
+        imagesControlsPanel.add(addPhotoBtn);
 
+        Button addStateImageBtn = new Button("Add stage image");
+        addStateImageBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openCreateImageDialog(MediaTagConstants.STAGE);
+            }
+        });
+        imagesControlsPanel.add(addStateImageBtn);
+
+        Button addEventTeaseImageBtn = new Button("Add teaser image");
+        addEventTeaseImageBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openCreateImageDialog(MediaTagConstants.TEASER);
+            }
+        });
+        imagesControlsPanel.add(addEventTeaseImageBtn);
+
+        Button addLogoImageBtn = new Button("Add event logo");
+        addLogoImageBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openCreateImageDialog(MediaTagConstants.LOGO);
+            }
+        });
+        imagesControlsPanel.add(addLogoImageBtn);
+ 
         imageSelectionModel = new SingleSelectionModel<ImageDTO>();
         imageListDataProvider = new ListDataProvider<ImageDTO>();
         imageTable = createImagesTable();
@@ -230,8 +258,8 @@ public class ImagesListComposite extends Composite {
         return result;
     }
 
-    private void openCreateImageDialog() {
-        ImageCreateDialog dialog = new ImageCreateDialog(stringMessages, new DialogCallback<ImageDTO>() {
+    private void openCreateImageDialog(String initialTag) {
+        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, stringMessages, new DialogCallback<ImageDTO>() {
             @Override
             public void cancel() {
             }

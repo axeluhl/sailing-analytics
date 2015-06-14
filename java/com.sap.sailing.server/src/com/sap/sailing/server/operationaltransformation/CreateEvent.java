@@ -27,11 +27,10 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final String eventDescription;
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
-    private final URL logoImageURL;
     private final URL officialWebsiteURL;
     
     public CreateEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, URL logoImageURL, URL officialWebsiteURL) {
+            boolean isPublic, UUID id, URL officialWebsiteURL, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -39,10 +38,9 @@ public class CreateEvent extends AbstractEventOperation<Event> {
         this.endDate = endDate;
         this.venue = venue;
         this.isPublic = isPublic;
+        this.officialWebsiteURL = officialWebsiteURL;
         this.images = images;
         this.videos = videos;
-        this.logoImageURL = logoImageURL;
-        this.officialWebsiteURL = officialWebsiteURL;
     }
 
     @Override
@@ -64,7 +62,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     @Override
     public Event internalApplyTo(RacingEventService toState) {
         return toState.createEventWithoutReplication(getEventName(), eventDescription, startDate, endDate, venue, isPublic,
-                getId(), images, videos, logoImageURL, officialWebsiteURL);
+                getId(), officialWebsiteURL, images, videos);
     }
 
 }

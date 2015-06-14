@@ -104,6 +104,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         videos.add(video1);
     }
     
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...

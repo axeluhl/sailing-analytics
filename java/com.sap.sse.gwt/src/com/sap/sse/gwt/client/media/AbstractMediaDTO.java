@@ -78,6 +78,10 @@ public abstract class AbstractMediaDTO implements IsSerializable {
         return tags;
     }
 
+    public boolean hasTag(String tagName) {
+        return tags.contains(tagName);
+    }
+
     public void setTags(Iterable<String> tags) {
         for(String tag: tags) {
             this.tags.add(tag);

@@ -52,6 +52,7 @@ public class EventDataJsonSerializerWithNullValuesTest {
     protected EventBase event;
 
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -83,31 +84,23 @@ public class EventDataJsonSerializerWithNullValuesTest {
     @Test
     public void testBasicAttributes() throws MalformedURLException {
         JSONObject result = serializer.serialize(event);
-        assertEquals(
-                expectedId,
+        assertEquals(expectedId,
                 UUID.fromString(result.get(EventBaseJsonSerializer.FIELD_ID).toString()));
-        assertEquals(
-                expectedName,
+        assertEquals(expectedName,
                 result.get(EventBaseJsonSerializer.FIELD_NAME));
-        assertEquals(
-                expectedDescription,
+        assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
-        assertEquals(
-                expectedOfficialWebsiteURL,
+        assertEquals(expectedOfficialWebsiteURL,
                 result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL) == null ? null :
                     new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
-        assertEquals(
-                expectedLogoImageURL,
+        assertEquals(expectedLogoImageURL,
                 result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL) == null ? null :
                     new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
-        assertEquals(
-                expectedDescription,
+        assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
-        assertEquals(
-                expectedStartDate,
+        assertEquals(expectedStartDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_START_DATE)).longValue()));
-        assertEquals(
-                expectedEndDate,
+        assertEquals(expectedEndDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_END_DATE)).longValue()));
     }
 

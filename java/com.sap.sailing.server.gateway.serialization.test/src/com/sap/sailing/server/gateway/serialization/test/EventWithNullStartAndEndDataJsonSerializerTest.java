@@ -57,6 +57,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
     }
     
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -95,6 +96,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         assertNull(result.get(EventBaseJsonSerializer.FIELD_END_DATE));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testBasicAttributesAfterDeserialization() throws JsonDeserializationException {
         final JSONObject result = serializer.serialize(event);

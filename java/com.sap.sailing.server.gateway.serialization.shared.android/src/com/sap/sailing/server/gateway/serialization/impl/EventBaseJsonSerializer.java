@@ -1,9 +1,6 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -13,12 +10,9 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
-    private static final Logger logger = Logger.getLogger(EventBaseJsonSerializer.class.getName());
-    
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -62,16 +56,17 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         this.venueSerializer = venueSerializer;
     }
 
+    @SuppressWarnings("deprecation")
     public JSONObject serialize(EventBase event) {
         JSONObject result = new JSONObject();
         result.put(FIELD_ID, event.getId().toString());
         result.put(FIELD_NAME, event.getName());
         result.put(FIELD_DESCRIPTION, event.getDescription());
         result.put(FIELD_OFFICIAL_WEBSITE_URL, event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        result.put(FIELD_LOGO_IMAGE_URL, event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
         result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
+        result.put(FIELD_LOGO_IMAGE_URL, event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
         result.put(FIELD_IMAGE_URLS, getURLsAsStringArray(event.getImageURLs()));
         result.put(FIELD_VIDEO_URLS, getURLsAsStringArray(event.getVideoURLs()));
         result.put(FIELD_SPONSOR_IMAGE_URLS, getURLsAsStringArray(event.getSponsorImageURLs()));
@@ -82,14 +77,8 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         }
         JSONArray imageSizes = new JSONArray();
         result.put(FIELD_IMAGE_SIZES, imageSizes);
-        for (URL imageURL : event.getImageURLs()) {
-            addImageSize(imageURL, imageSizes, event);
-        }
-        if (event.getLogoImageURL() != null) {
-            addImageSize(event.getLogoImageURL(), imageSizes, event);
-        }
-        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
-            addImageSize(sponsorImageURL, imageSizes, event);
+        for (ImageDescriptor image : event.getImages()) {
+            addImageSize(image, imageSizes);
         }
         JSONArray jsonImages = new JSONArray();
         for(ImageDescriptor imageDescriptor: event.getImages()) {
@@ -143,24 +132,16 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     }
 
     /**
-     * If <code>eventBase</code> knows the size of the image with URL <code>imageURL</code>, that size is serialized as
+     * For backward compatibility the size of an image is also serialized as
      * JSON object to <code>imageSizes</code>
      */
-    private void addImageSize(URL imageURL, JSONArray imageSizes, EventBase eventBase) {
-        ImageSize imageSize;
-        try {
-            imageSize = eventBase.getImageSize(imageURL);
-            if (imageSize != null) {
-                JSONObject imageSizeJson = new JSONObject();
-                imageSizes.add(imageSizeJson);
-                imageSizeJson.put(FIELD_IMAGE_URL, imageURL.toString());
-                imageSizeJson.put(FIELD_IMAGE_WIDTH, imageSize.getWidth());
-                imageSizeJson.put(FIELD_IMAGE_HEIGHT, imageSize.getHeight());
-            }
-        } catch (InterruptedException e) {
-            logger.log(Level.FINE, "Couldn't retrieve image size for URL "+imageURL, e);
-        } catch (ExecutionException e) {
-            logger.log(Level.FINE, "Couldn't retrieve image size for URL "+imageURL, e);
+    private void addImageSize(ImageDescriptor image, JSONArray imageSizes) {
+        if(image.getHeightInPx() != null && image.getWidthInPx() != null) {
+            JSONObject imageSizeJson = new JSONObject();
+            imageSizes.add(imageSizeJson);
+            imageSizeJson.put(FIELD_IMAGE_URL, image.getURL().toString());
+            imageSizeJson.put(FIELD_IMAGE_WIDTH, image.getWidthInPx());
+            imageSizeJson.put(FIELD_IMAGE_HEIGHT, image.getHeightInPx());
         }
     }
 

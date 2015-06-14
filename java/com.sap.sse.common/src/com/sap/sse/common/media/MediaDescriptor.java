@@ -19,7 +19,8 @@ public interface MediaDescriptor extends Serializable {
     Iterable<String> getTags();
     void setTags(Iterable<String> tags);
     boolean addTag(String tagName); 
-    boolean removeTag(String tagName); 
+    boolean removeTag(String tagName);
+    boolean hasTag(String tagName);
 
     String getSubtitle();
     void setSubtitle(String subtitle);

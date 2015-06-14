@@ -57,6 +57,7 @@ public class EventDataJsonSerializerTest {
     }
     
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...

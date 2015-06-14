@@ -163,7 +163,8 @@ public class EventImpl extends EventBaseImpl implements Event {
         }
     }
 
-    protected void setImageURLs(Iterable<URL> imageURLs) {
+    @Override
+    public void setImageURLs(Iterable<URL> imageURLs) {
         super.setImageURLs(imageURLs);
         if (imageURLs != null) {
             for (URL imageURL : imageURLs) {
@@ -172,7 +173,8 @@ public class EventImpl extends EventBaseImpl implements Event {
         }
     }
 
-    protected void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
+    @Override
+    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         super.setSponsorImageURLs(sponsorImageURLs);
         if (sponsorImageURLs != null) {
             for (URL imageURL : sponsorImageURLs) {
