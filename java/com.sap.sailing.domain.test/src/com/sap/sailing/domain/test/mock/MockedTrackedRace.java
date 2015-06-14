@@ -979,4 +979,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public RankingMetric getRankingMetric() {
         return null;
     }
+
+    @Override
+    public boolean takesWindFix(Wind wind) {
+        return false;
+    }
 }

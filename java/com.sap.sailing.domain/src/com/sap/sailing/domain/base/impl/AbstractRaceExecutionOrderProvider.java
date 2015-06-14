@@ -18,12 +18,12 @@ import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
 public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutionOrderProvider, RaceColumnListenerWithDefaultAction {
     private static final long serialVersionUID = 4795731834688229568L;
-    private transient SmartFutureCache<String, Map<TrackedRace, Set<TrackedRace>>, EmptyUpdateInterval> raceOrderCacheMappingRaceToItsPredecessor;
+    private transient SmartFutureCache<String, Map<TrackedRace, Set<TrackedRace>>, EmptyUpdateInterval> previousRacesByRaceCache;
     private final String RACES_ORDER_LIST_CACHE_KEY = "racesOrderCacheKey";
     private final String RACES_ORDER_LIST_LOCKS_NAME = getClass().getName();
 
     public AbstractRaceExecutionOrderProvider() {
-        raceOrderCacheMappingRaceToItsPredecessor = createRacesOrderCache();
+        previousRacesByRaceCache = createRacesOrderCache();
         triggerUpdate();
     }
 
@@ -34,38 +34,38 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     @Override
     public void triggerUpdate() {
-        raceOrderCacheMappingRaceToItsPredecessor.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, /* update interval */null);
+        previousRacesByRaceCache.triggerUpdate(RACES_ORDER_LIST_CACHE_KEY, /* update interval */null);
     }
 
-    private Map<TrackedRace, Set<TrackedRace>> getPredecessorsMap() {
-        return raceOrderCacheMappingRaceToItsPredecessor.get(RACES_ORDER_LIST_CACHE_KEY, /* waitForLatest */true);
+    private Map<TrackedRace, Set<TrackedRace>> getPreviousRacesByRace() {
+        return previousRacesByRaceCache.get(RACES_ORDER_LIST_CACHE_KEY, /* waitForLatest */true);
     }
 
     protected abstract Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries();
     
-    private Map<TrackedRace, Set<TrackedRace>> reloadRacesInExecutionOrder() {
-        final Map<TrackedRace, Set<TrackedRace>> raceIdListInExecutionOrder = new HashMap<>();
+    private Map<TrackedRace, Set<TrackedRace>> reloadAndGetPreviousRacesByRace() {
+        final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace = new HashMap<>();
         for (Entry<Fleet, Iterable<? extends RaceColumn>> raceColumnsInSeries : getRaceColumnsOfSeries().entrySet()) {
-            addPredecessors(raceIdListInExecutionOrder, raceColumnsInSeries.getKey(), raceColumnsInSeries.getValue());
+            addPreviousRaces(previousRacesByRace, raceColumnsInSeries.getKey(), raceColumnsInSeries.getValue());
         }
-        return raceIdListInExecutionOrder;
+        return previousRacesByRace;
     }
 
-    private void addPredecessors(final Map<TrackedRace, Set<TrackedRace>> raceIdListInExecutionOrder, Fleet fleet,
+    private void addPreviousRaces(final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace, Fleet fleet,
             final Iterable<? extends RaceColumn> raceColumns) {
-        TrackedRace predecessor = null;
+        TrackedRace previousRace = null;
         for (RaceColumn currentRaceColumn : raceColumns) {
             final TrackedRace trackedRaceInColumnForFleet = currentRaceColumn.getTrackedRace(fleet);
             if (trackedRaceInColumnForFleet != null) {
-                Set<TrackedRace> predecessors = raceIdListInExecutionOrder.get(trackedRaceInColumnForFleet);
-                if (predecessors == null) {
-                    predecessors = new HashSet<>();
-                    raceIdListInExecutionOrder.put(trackedRaceInColumnForFleet, predecessors);
+                Set<TrackedRace> previousRaces = previousRacesByRace.get(trackedRaceInColumnForFleet);
+                if (previousRaces == null) {
+                    previousRaces = new HashSet<>();
+                    previousRacesByRace.put(trackedRaceInColumnForFleet, previousRaces);
                 }
-                if (predecessor != null) {
-                    predecessors.add(predecessor);
+                if (previousRace != null) {
+                    previousRaces.add(previousRace);
                 }
-                predecessor = trackedRaceInColumnForFleet;
+                previousRace = trackedRaceInColumnForFleet;
             }
         }
     }
@@ -77,7 +77,7 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
                     public Map<TrackedRace, Set<TrackedRace>> computeCacheUpdate(String key,
                             EmptyUpdateInterval updateInterval) throws Exception {
                         if (key.equals(RACES_ORDER_LIST_CACHE_KEY)) {
-                            return reloadRacesInExecutionOrder();
+                            return reloadAndGetPreviousRacesByRace();
                         } else {
                             final Map<TrackedRace, Set<TrackedRace>> emptyMap = Collections.emptyMap();
                             return emptyMap;
@@ -88,18 +88,18 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        this.raceOrderCacheMappingRaceToItsPredecessor = createRacesOrderCache();
+        this.previousRacesByRaceCache = createRacesOrderCache();
         // don't call triggerUpdate() as of now because the cache's owner may not yet be fully initialized,
         // so the getRaceColumnsOfSeries() method may not yet be able to do its work. The owner must call
         // triggerUpdate when fully initialized.
     }
 
     @Override
-    public Set<TrackedRace> getPreviousRaceInExecutionOrder(TrackedRace race) {
+    public Set<TrackedRace> getPreviousRacesInExecutionOrder(TrackedRace race) {
         Set<TrackedRace> result = Collections.emptySet();
-        final Map<TrackedRace, Set<TrackedRace>> predecessorMap = getPredecessorsMap();
-        if (predecessorMap != null) {
-            result = predecessorMap.get(race);
+        final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace = getPreviousRacesByRace();
+        if (previousRacesByRace != null) {
+            result = previousRacesByRace.get(race);
         } 
         return result;
     }

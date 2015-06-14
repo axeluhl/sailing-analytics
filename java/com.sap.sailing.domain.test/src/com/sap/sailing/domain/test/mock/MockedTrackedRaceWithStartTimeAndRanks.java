@@ -636,7 +636,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -646,5 +645,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+    }
+
+    @Override
+    public boolean takesWindFix(Wind wind) {
+        return false;
     }
 }

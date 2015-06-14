@@ -286,7 +286,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
     
-    private transient ConcurrentHashMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProvider;
+    private transient ConcurrentHashMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProviders;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -380,7 +380,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRegattaLogs = new ConcurrentHashMap<>();
-        attachedRaceExecutionOrderProvider = new ConcurrentHashMap<>();
+        attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.loadingFromWindStoreLock = new NamedReentrantReadWriteLock("Loading from wind store lock for tracked race "
@@ -578,7 +578,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         ois.defaultReadObject();
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
-        attachedRaceExecutionOrderProvider = new ConcurrentHashMap<>();
+        attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
@@ -1490,6 +1490,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 if (gpsTrack.getFirstRawFix() != null) {
                     result = true;
                     break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public boolean takesWindFix(Wind wind) {
+        boolean result = false;
+        TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
+        TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getStartOfRace(), getStartOfTracking());
+        if (earliestStartTimePoint != null && latestEndTimePoint != null) {
+            TimePoint earliestStartTimePointMinusExtra = earliestStartTimePoint.minus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS);
+            TimePoint latestEndTimePointPlusExtra = latestEndTimePoint.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+            if (Util.isTimePointInRangeOfTimePointsAandB(wind.getTimePoint(), /* a */earliestStartTimePointMinusExtra, /* b */latestEndTimePointPlusExtra)) {
+                Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
+                if(previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr->tr.takesWindFix(wind) == true).findAny().isPresent()){
+                    result = true;
                 }
             }
         }
@@ -3054,15 +3072,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        if (raceExecutionOrderProvider != null && !attachedRaceExecutionOrderProvider.containsKey(raceExecutionOrderProvider)) {
-            attachedRaceExecutionOrderProvider.put(raceExecutionOrderProvider, raceExecutionOrderProvider);
+        if (raceExecutionOrderProvider != null && !attachedRaceExecutionOrderProviders.containsKey(raceExecutionOrderProvider)) {
+            attachedRaceExecutionOrderProviders.put(raceExecutionOrderProvider, raceExecutionOrderProvider);
         }
     }
 
     protected Set<TrackedRace> getPreviousRacesFromAttachedRaceExecutionOrderProviders() {
         final Set<TrackedRace> result;
-        if (attachedRaceExecutionOrderProvider != null) {
-            result = attachedRaceExecutionOrderProvider.values().stream().map(reop->reop.getPreviousRaceInExecutionOrder(this)).collect(HashSet::new, (r, e)->r.addAll(e), (r, e)->r.addAll(e));
+        if (attachedRaceExecutionOrderProviders != null) {
+            result = attachedRaceExecutionOrderProviders.values().stream().map(reop->reop.getPreviousRacesInExecutionOrder(this)).collect(HashSet::new, (r, e)->r.addAll(e), (r, e)->r.addAll(e));
         } else {
             result = Collections.emptySet();
         }
@@ -3072,7 +3090,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
         if (raceExecutionOrderProvider != null) {
-            attachedRaceExecutionOrderProvider.remove(raceExecutionOrderProvider);
+            attachedRaceExecutionOrderProviders.remove(raceExecutionOrderProvider);
         }
     }
 

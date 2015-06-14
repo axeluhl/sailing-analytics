@@ -275,6 +275,11 @@ public interface TrackedRace extends Serializable {
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    
+    /**
+     * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time for wind recording.
+     */
+    boolean takesWindFix(Wind wind);
 
     /**
      * Same as {@link #getWind(Position, TimePoint, Set) getWind(p, at, Collections.emptyList())}

@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -46,12 +45,10 @@ import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -660,18 +657,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public boolean recordWind(Wind wind, WindSource windSource) {
         final boolean result;
-        // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
-        TimePoint startOfRace = getStartOfRace();
-        TimePoint startOfTracking = getStartOfTracking();
-        TimePoint endOfRace = getEndOfRace();
-        TimePoint endOfTracking = getEndOfTracking();
-        final Duration conditionalTimeBeforeStartToTrackWind = getConditionalTimeBeforeStartToTrackWind(wind.getTimePoint());
-        if ((startOfTracking == null || !startOfTracking.minus(conditionalTimeBeforeStartToTrackWind).after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.minus(conditionalTimeBeforeStartToTrackWind).after(wind.getTimePoint())))
-            &&
-        // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
-        (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||
-        (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
+        if(takesWindFix(wind)){
             result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
@@ -680,15 +666,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             result = false;
         }
         return result;
-    }
-    
-    private Duration getConditionalTimeBeforeStartToTrackWind(TimePoint timePointOfWindFix) {
-        Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
-        if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr->tr.getEndOfTracking() != null).findAny().isPresent()) {
-            return EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
-        } else {
-            return TIME_BEFORE_START_TO_TRACK_WIND_MILLIS;
-        }
     }
 
     @Override
