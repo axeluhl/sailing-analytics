@@ -75,11 +75,11 @@ public class ImagesListComposite extends Composite {
         imagesControlsPanel.setSpacing(5);
         panel.add(imagesControlsPanel);
 
-        Button addPhotoBtn = new Button("Add photo");
+        Button addPhotoBtn = new Button("Add gallery photo");
         addPhotoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(null);
+                openCreateImageDialog(MediaTagConstants.GALLERY);
             }
         });
         imagesControlsPanel.add(addPhotoBtn);

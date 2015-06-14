@@ -185,7 +185,6 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -193,9 +192,6 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
-import com.sap.sse.common.media.MediaDescriptor;
-import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
@@ -982,7 +978,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         try {
             for (DBObject object : eventCollection.find()) {
                 Event event = loadEvent(object);
-                migrateImagesAndVideosOfEvent(event);
+                boolean hasMigratedSomething = loadLegacyImageAndVideoURLs(event, object);
+                if(hasMigratedSomething) {
+                    new MongoObjectFactoryImpl(database).storeEvent(event);
+                }
                 result.add(event);
             }
         } catch (Exception e) {
@@ -1046,7 +1045,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
-        loadLegacyImageAndVideoURLs(result, eventDBObject);
         BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {
@@ -2135,132 +2133,54 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     /**
-     * Migrates images and videos stored as pure URLs to the new richer media format 
-     * @param event the event to migrate
-     */
-    @SuppressWarnings("deprecation")
-    private void migrateImagesAndVideosOfEvent(Event event) {
-        boolean changedAnything = false;
-        
-        List<ImageDescriptor> newImages = new ArrayList<>();
-        for (URL url : event.getImageURLs()) {
-            if (!hasMedia(event.getImages(), url)) {
-                ImageDescriptor image = migrateImageURLtoImage(url, event.getStartDate());
-                String urlAsString = url.toString();
-                if (urlAsString.toLowerCase().indexOf("stage") > 0) {
-                    image.addTag(MediaTagConstants.STAGE);
-                } else if (urlAsString.toLowerCase().indexOf("eventteaser") > 0) {
-                    image.addTag(MediaTagConstants.TEASER);
-                }
-                newImages.add(image);
-                changedAnything = true;
-            }
-        }
-        for (URL url : event.getSponsorImageURLs()) {
-            if (!hasMedia(event.getImages(), url)) {
-                ImageDescriptor image = migrateImageURLtoImage(url, event.getStartDate());
-                image.addTag(MediaTagConstants.SPONSOR);
-                newImages.add(image);
-                changedAnything = true;
-            }
-        }
-        
-        if (event.getLogoImageURL() != null && !hasMedia(event.getImages(), event.getLogoImageURL())) {
-            ImageDescriptor image = migrateImageURLtoImage(event.getLogoImageURL(), event.getStartDate());
-            image.addTag(MediaTagConstants.LOGO);
-            newImages.add(image);
-            changedAnything = true;
-        }
-
-        List<VideoDescriptor> newVideos = new ArrayList<VideoDescriptor>();
-        for (URL url : event.getVideoURLs()) {
-            if (!hasMedia(event.getVideos(), url)) {
-                MimeType mimeType = MediaUtils.detectMimeTypeFromUrl(url.toString());
-                VideoDescriptor video = new VideoDescriptorImpl(url, mimeType, event.getStartDate());
-                newVideos.add(video);
-                changedAnything = true;
-            }
-        }
-
-        if (changedAnything) {
-            for (VideoDescriptor newVideo : newVideos) {
-                event.addVideo(newVideo);
-            }
-            for (ImageDescriptor newImage : newImages) {
-                event.addImage(newImage);
-            }
-            new MongoObjectFactoryImpl(database).storeEvent(event);
-        }
-    }
-    
-    /**
      * Legacy code to support conversion of old image and video URLs 
      * @param event
      * @param eventDBObject
      */
-    @SuppressWarnings("deprecation")
-    private void loadLegacyImageAndVideoURLs(Event event, DBObject eventDBObject) {
+    private boolean loadLegacyImageAndVideoURLs(Event event, DBObject eventDBObject) {
+        URL logoImageURL = null;
+        List<URL> imageURLs = new ArrayList<URL>();
+        List<URL> sponsorImageURLs = new ArrayList<URL>();
+        List<URL> videoURLs = new ArrayList<URL>();
+        
         String logoImageURLAsString = (String) eventDBObject.get(FieldNames.EVENT_LOGO_IMAGE_URL.name());
         if (logoImageURLAsString != null) {
             try {
-                event.setLogoImageURL(new URL(logoImageURLAsString));
+                logoImageURL = new URL(logoImageURLAsString);
             } catch (MalformedURLException e) {
                 logger.severe("Error parsing logo image URL "+logoImageURLAsString+" for event "+event.getName()+". Ignoring this URL.");
             }
         }
-        BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
-        if (imageURLs != null) {
-            List<URL> urls = new ArrayList<>();
-            for (Object imageURL : imageURLs) {
+        BasicDBList imageURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
+        if (imageURLsJson != null) {
+            for (Object imageURL : imageURLsJson) {
                 try {
-                    urls.add(new URL((String) imageURL));
+                   imageURLs.add(new URL((String) imageURL)); 
                 } catch (MalformedURLException e) {
                     logger.severe("Error parsing image URL "+imageURL+" for event "+event.getName()+". Ignoring this image URL.");
                 }
             }
-            event.setImageURLs(urls);
         }
-        BasicDBList videoURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
-        if (videoURLs != null) {
-            List<URL> urls = new ArrayList<>();
-            for (Object videoURL : videoURLs) {
+        BasicDBList videoURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
+        if (videoURLsJson != null) {
+            for (Object videoURL : videoURLsJson) {
                 try {
-                    urls.add(new URL((String) videoURL));
+                    videoURLs.add(new URL((String) videoURL));
                 } catch (MalformedURLException e) {
                     logger.severe("Error parsing video URL "+videoURL+" for event "+event.getName()+". Ignoring this video URL.");
                 }
             }
-            event.setVideoURLs(urls);
         }
-        BasicDBList sponsorImageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
-        if (sponsorImageURLs != null) {
-            List<URL> urls = new ArrayList<>();
-            for (Object sponsorImageURL : sponsorImageURLs) {
+        BasicDBList sponsorImageURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
+        if (sponsorImageURLsJson != null) {
+            for (Object sponsorImageURL : sponsorImageURLsJson) {
                 try {
-                    urls.add(new URL((String) sponsorImageURL));
+                    sponsorImageURLs.add(new URL((String) sponsorImageURL));
                 } catch (MalformedURLException e) {
                     logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+event.getName()+". Ignoring this sponsor image URL.");
                 }
             }
-            event.setSponsorImageURLs(urls);
         }
-    }
-    
-    private ImageDescriptor migrateImageURLtoImage(URL url, TimePoint createdAt) {
-        ImageDescriptorImpl image = new ImageDescriptorImpl(url, createdAt);
-        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
-        if (imageDimensions != null) {
-            image.setSize(imageDimensions);
-        }
-        return image;
-    }
-    
-    private boolean hasMedia(Iterable<? extends MediaDescriptor> media, URL url) {
-        for (MediaDescriptor mediaEntry : media) {
-            if (url.equals(mediaEntry.getURL())) {
-                return true;
-            }
-        }
-        return false;
+        return event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL);
     }
 }

@@ -13,9 +13,15 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.media.MediaUtils;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.common.media.VideoDescriptorImpl;
 
 public abstract class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;
@@ -27,10 +33,6 @@ public abstract class EventBaseImpl implements EventBase {
     private final UUID id;
     private TimePoint startDate;
     private TimePoint endDate;
-    private ConcurrentLinkedQueue<URL> imageURLs;
-    private ConcurrentLinkedQueue<URL> videoURLs;
-    private ConcurrentLinkedQueue<URL> sponsorImageURLs;
-    private URL logoImageURL;
     private URL officialWebsiteURL;
     private ConcurrentLinkedQueue<ImageDescriptor> images;
     private ConcurrentLinkedQueue<VideoDescriptor> videos;
@@ -50,25 +52,12 @@ public abstract class EventBaseImpl implements EventBase {
         this.endDate = endDate;
         this.venue = venue;
         this.isPublic = isPublic;
-        this.imageURLs = new ConcurrentLinkedQueue<URL>();
-        this.videoURLs = new ConcurrentLinkedQueue<URL>();
-        this.sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
         this.images = new ConcurrentLinkedQueue<ImageDescriptor>();
         this.videos = new ConcurrentLinkedQueue<VideoDescriptor>();
-        syncImageAndVideoURLsForBackwardCompatibility();
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
-        if (imageURLs == null) {
-            imageURLs = new ConcurrentLinkedQueue<URL>();
-        }
-        if (videoURLs == null) {
-            videoURLs = new ConcurrentLinkedQueue<URL>();
-        }
-        if (sponsorImageURLs == null) {
-            sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
-        }
         if (images == null) {
             images = new ConcurrentLinkedQueue<ImageDescriptor>();
         }
@@ -144,51 +133,41 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public Iterable<URL> getImageURLs() {
-        return Collections.unmodifiableCollection(imageURLs);
+        List<URL> result = new ArrayList<URL>();
+        for (ImageDescriptor image : images) {
+            if (Util.size(image.getTags()) == 0 || image.hasTag(MediaTagConstants.GALLERY)) {
+                result.add(image.getURL());
+            }
+        }
+        return result;
     }
     
     @Override
-    public void setImageURLs(Iterable<URL> imageURLs) {
-        this.imageURLs.clear();
-        if (imageURLs != null) {
-            Util.addAll(imageURLs, this.imageURLs);
-        }
-    }
-
-    @Override
     public Iterable<URL> getVideoURLs() {
-        return Collections.unmodifiableCollection(videoURLs);
-    }
-
-    @Override
-    public void setVideoURLs(Iterable<URL> videoURLs) {
-        this.videoURLs.clear();
-        if (videoURLs != null) {
-            Util.addAll(videoURLs, this.videoURLs);
+        List<URL> result = new ArrayList<URL>();
+        for(VideoDescriptor video: videos) {
+            result.add(video.getURL());
         }
+        return result;
     }
 
     @Override
     public Iterable<URL> getSponsorImageURLs() {
-        return Collections.unmodifiableCollection(sponsorImageURLs);
+        List<URL> result = new ArrayList<URL>();
+        for(MediaDescriptor media : findMediaWithTag(images, MediaTagConstants.SPONSOR)) {
+            result.add(media.getURL());
+        }
+        return result;
     }
     
     @Override
-    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
-        this.sponsorImageURLs.clear();
-        if (sponsorImageURLs != null) {
-            Util.addAll(sponsorImageURLs, this.sponsorImageURLs);
-        }
-    }
-
-    @Override
     public URL getLogoImageURL() {
-        return logoImageURL;
-    }
-
-    @Override
-    public void setLogoImageURL(URL logoImageURL) {
-        this.logoImageURL = logoImageURL;
+        URL result = null;
+        List<ImageDescriptor> media = findMediaWithTag(images, MediaTagConstants.LOGO);
+        if(media.size() > 0) {
+            result = media.get(0).getURL();
+        }
+        return result;
     }
 
     @Override
@@ -210,14 +189,12 @@ public abstract class EventBaseImpl implements EventBase {
     public void addImage(ImageDescriptor image) {
         if (!images.contains(image)) {
             images.add(image);
-            syncImageURLsFromImagesForBackwardCompatibility();
         }
     }
 
     @Override
     public void removeImage(ImageDescriptor image) {
         images.remove(image);
-        syncImageURLsFromImagesForBackwardCompatibility();
     }
 
     @Override
@@ -225,7 +202,6 @@ public abstract class EventBaseImpl implements EventBase {
         this.images.clear();
         if (images != null) {
             Util.addAll(images, this.images);
-            syncImageURLsFromImagesForBackwardCompatibility();
         }
     }
     
@@ -238,14 +214,12 @@ public abstract class EventBaseImpl implements EventBase {
     public void addVideo(VideoDescriptor video) {
         if (!videos.contains(video)) {
             videos.add(video);
-            syncVideoURLsFromVideosForBackwardCompatibility();
         }
     }
 
     @Override
     public void removeVideo(VideoDescriptor video) {
         videos.remove(video);
-        syncVideoURLsFromVideosForBackwardCompatibility();
     }
 
     @Override
@@ -253,38 +227,81 @@ public abstract class EventBaseImpl implements EventBase {
         this.videos.clear();
         if (videos != null) {
             Util.addAll(videos, this.videos);
-            syncVideoURLsFromVideosForBackwardCompatibility();
         }
     }
 
-    private void syncImageURLsFromImagesForBackwardCompatibility() {
-        List<URL> imageURLs = new ArrayList<>();
-        List<URL> sponsorImageURLs = new ArrayList<>();
-        URL logoImageURL = null;
-        for (ImageDescriptor image : images) {
-            if (image.hasTag(MediaTagConstants.SPONSOR)) {
-                sponsorImageURLs.add(image.getURL());
-            } else if (image.hasTag(MediaTagConstants.LOGO)) {
-                logoImageURL = image.getURL();
-            } else {
-                imageURLs.add(image.getURL());
+    private <T extends MediaDescriptor> List<T> findMediaWithTag(Iterable<T> media, String tagName) {
+        List<T> result = new ArrayList<>();
+        for (T mediaEntry : media) {
+            if(mediaEntry.hasTag(tagName)) {
+                result.add(mediaEntry);
             }
         }
-        setImageURLs(imageURLs);
-        setSponsorImageURLs(sponsorImageURLs);
-        setLogoImageURL(logoImageURL);
+        return result;
     }
     
-    private void syncVideoURLsFromVideosForBackwardCompatibility() {
-        List<URL> videoURLs = new ArrayList<>();
-        for (VideoDescriptor video : videos) {
-            videoURLs.add(video.getURL());
+    /** Sets and converts all event images and videos from the old URL based format to the new richer format */ 
+    public boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL) {
+        boolean changed = false;
+        
+        for (URL url : imageURLs) {
+            if (!hasMedia(images, url)) {
+                ImageDescriptor image = migrateImageURLtoImage(url, getStartDate());
+                String urlAsString = url.toString();
+                if (urlAsString.toLowerCase().indexOf("stage") > 0) {
+                    image.addTag(MediaTagConstants.STAGE);
+                } else if (urlAsString.toLowerCase().indexOf("eventteaser") > 0) {
+                    image.addTag(MediaTagConstants.TEASER);
+                } else {
+                    image.addTag(MediaTagConstants.GALLERY);
+                }
+                addImage(image);
+                changed = true;
+            }
         }
-        setVideoURLs(videoURLs);
+        for (URL url : sponsorImageURLs) {
+            if (!hasMedia(images, url)) {
+                ImageDescriptor image = migrateImageURLtoImage(url, getStartDate());
+                image.addTag(MediaTagConstants.SPONSOR);
+                addImage(image);
+                changed = true;
+            }
+        }
+        
+        if (logoImageURL != null && !hasMedia(images, logoImageURL)) {
+            ImageDescriptor image = migrateImageURLtoImage(logoImageURL, getStartDate());
+            image.addTag(MediaTagConstants.LOGO);
+            addImage(image);
+            changed = true;
+        }
+
+        for (URL url : videoURLs) {
+            if (!hasMedia(videos, url)) {
+                MimeType mimeType = MediaUtils.detectMimeTypeFromUrl(url.toString());
+                VideoDescriptor video = new VideoDescriptorImpl(url, mimeType, getStartDate());
+                addVideo(video);
+                changed = true;
+            }
+        }
+
+        return changed;
     }
 
-    private void syncImageAndVideoURLsForBackwardCompatibility() {
-        syncImageURLsFromImagesForBackwardCompatibility();
-        syncVideoURLsFromVideosForBackwardCompatibility();
+    private ImageDescriptor migrateImageURLtoImage(URL url, TimePoint createdAt) {
+        ImageDescriptorImpl image = new ImageDescriptorImpl(url, createdAt);
+        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
+        if (imageDimensions != null) {
+            image.setSize(imageDimensions);
+        }
+        return image;
+    }
+    
+    private boolean hasMedia(Iterable<? extends MediaDescriptor> media, URL url) {
+        for (MediaDescriptor mediaEntry : media) {
+            if (url.equals(mediaEntry.getURL())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

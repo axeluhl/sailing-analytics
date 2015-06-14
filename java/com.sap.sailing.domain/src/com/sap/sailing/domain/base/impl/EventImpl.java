@@ -34,14 +34,10 @@ import com.sap.sse.common.media.ImageSize;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
-    private static final Logger logger = Logger.getLogger(EventImpl.class.getName());
     
     private final Set<Regatta> regattas;
     
     private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
-    
-    private transient ConcurrentHashMap<URL, Future<ImageSize>> imageSizeFetchers;
-    private transient ExecutorService executor;
     
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -54,8 +50,6 @@ public class EventImpl extends EventBaseImpl implements Event {
         super(name, startDate, endDate, venue, isPublic, id);
         this.regattas = new HashSet<Regatta>();
         this.leaderboardGroups = new ConcurrentLinkedQueue<>();
-        this.imageSizeFetchers = new ConcurrentHashMap<>();
-        this.executor = Executors.newCachedThreadPool();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -63,8 +57,6 @@ public class EventImpl extends EventBaseImpl implements Event {
         if (leaderboardGroups == null) {
             leaderboardGroups = new ConcurrentLinkedQueue<>();
         }
-        this.imageSizeFetchers = new ConcurrentHashMap<>();
-        this.executor = Executors.newCachedThreadPool();
     }
     
     @Override
@@ -105,87 +97,5 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public boolean removeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         return leaderboardGroups.remove(leaderboardGroup);
-    }
-    
-    private Future<ImageSize> getOrCreateImageSizeCalculator(final URL imageURL) {
-        Future<ImageSize> imageSizeFetcher = imageSizeFetchers.get(imageURL);
-        if (imageSizeFetcher == null) {
-            imageSizeFetcher = executor.submit(new Callable<ImageSize>() {
-                @Override
-                public ImageSize call() throws IOException {
-                    ImageSize result = null;
-                    ImageInputStream in = null;
-                    try {
-                        URLConnection conn = imageURL.openConnection();
-                        in = ImageIO.createImageInputStream(conn.getInputStream());
-                        final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-                        if (readers.hasNext()) {
-                            ImageReader reader = readers.next();
-                            try {
-                                reader.setInput(in);
-                                result = new ImageSizeImpl(reader.getWidth(0), reader.getHeight(0));
-                            } finally {
-                                reader.dispose();
-                            }
-                        }
-                    } catch (IOException ioe) {
-                        logger.log(Level.SEVERE, "Stale image link "+imageURL+" for event "+getName()+". Please double-check and replace or remove.", ioe);
-                        throw ioe;
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
-                    }
-                    return result;
-                }
-            });
-            imageSizeFetchers.put(imageURL, imageSizeFetcher);
-        }
-        return imageSizeFetcher;
-    }
-    
-    @Override
-    public ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException {
-        Future<ImageSize> imageSizeCalculator = getOrCreateImageSizeCalculator(imageURL);
-        return imageSizeCalculator.get();
-    }
-
-    private void refreshImageSizeFetcher(URL imageURL) {
-        if (imageURL != null) {
-            removeImageSizeFetcher(imageURL);
-            getOrCreateImageSizeCalculator(imageURL);
-        }
-    }
-
-    private void removeImageSizeFetcher(URL imageURL) {
-        if (imageURL != null) {
-            imageSizeFetchers.remove(imageURL);
-        }
-    }
-
-    @Override
-    public void setImageURLs(Iterable<URL> imageURLs) {
-        super.setImageURLs(imageURLs);
-        if (imageURLs != null) {
-            for (URL imageURL : imageURLs) {
-                refreshImageSizeFetcher(imageURL);
-            }
-        }
-    }
-
-    @Override
-    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
-        super.setSponsorImageURLs(sponsorImageURLs);
-        if (sponsorImageURLs != null) {
-            for (URL imageURL : sponsorImageURLs) {
-                refreshImageSizeFetcher(imageURL);
-            }
-        }
-    }
-
-    @Override
-    public void setLogoImageURL(URL logoImageURL) {
-        super.setLogoImageURL(logoImageURL);
-        refreshImageSizeFetcher(logoImageURL);
     }
 }

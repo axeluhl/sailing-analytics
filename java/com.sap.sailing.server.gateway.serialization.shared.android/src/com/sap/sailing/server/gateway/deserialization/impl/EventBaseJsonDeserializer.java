@@ -22,12 +22,10 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
 import com.sap.sse.common.media.ImageSize;
-import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
@@ -99,31 +97,36 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
     }
 
     private void readImageAndVideoURLsFromLegacyServer(JSONObject eventJson, StrippedEventImpl event) throws JsonDeserializationException {
+        URL logoImageURL = null;
+        List<URL> imageURLs = new ArrayList<URL>();
+        List<URL> sponsorImageURLs = new ArrayList<URL>();
+        List<URL> videoURLs = new ArrayList<URL>();
+
         String logoImageURLAsString = (String) eventJson.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL);
         if (logoImageURLAsString != null) {
             try {
-                event.setLogoImageURL(new URL(logoImageURLAsString));
+                logoImageURL = new URL(logoImageURLAsString);
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing logo image URL for event "+event.getName(), e);
             }
         }
         if (eventJson.get(EventBaseJsonSerializer.FIELD_IMAGE_URLS) != null) {
             try {
-                event.setImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_IMAGE_URLS)));
+                imageURLs = getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_IMAGE_URLS));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing image URLs for event "+event.getName(), e);
             }
         }
         if (eventJson.get(EventBaseJsonSerializer.FIELD_VIDEO_URLS) != null) {
             try {
-                event.setVideoURLs(getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_VIDEO_URLS)));
+                videoURLs = getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_VIDEO_URLS));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing video URLs for event "+event.getName(), e);
             }
         }
         if (eventJson.get(EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS) != null) {
             try {
-                event.setSponsorImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS)));
+                sponsorImageURLs = getURLsFromStrings(Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing sponsor image URLs for event "+event.getName(), e);
             }
@@ -145,6 +148,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 }
             }
         }
+        event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL);
     }
     
     private ImageDescriptor loadImage(JSONObject imageJson) {
@@ -214,16 +218,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         return video;
     }
 
-    private ImageDescriptor migrateImageURLtoImage(URL url, TimePoint createdAt, ImageSize size) {
-        ImageDescriptorImpl image = new ImageDescriptorImpl(url, createdAt);
-        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
-        if (imageDimensions != null) {
-            image.setSize(imageDimensions);
-        }
-        return image;
-    }
-
-    private Iterable<URL> getURLsFromStrings(JSONArray strings) throws MalformedURLException {
+    private List<URL> getURLsFromStrings(JSONArray strings) throws MalformedURLException {
         List<URL> result = new ArrayList<URL>();
         if (strings != null) {
             for (Object string : strings) {

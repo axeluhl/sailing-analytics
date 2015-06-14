@@ -92,6 +92,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
@@ -340,11 +341,12 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
         
         ImageDescriptor image1 = new ImageDescriptorImpl(imageURL, createdAt);
+        image1.addTag(MediaTagConstants.GALLERY);
         event.addImage(image1);
 
         ImageDescriptor image2 = new ImageDescriptorImpl(sponsorImageURL, createdAt);
         event.addImage(image2);
-        image2.addTag("Sponsor");
+        image2.addTag(MediaTagConstants.SPONSOR);
 
         VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, MimeType.mp4, createdAt);
         event.addVideo(video1);
@@ -354,9 +356,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
         final Event loadedEvent = dof.loadEvent(eventName);
         assertEquals(2, Util.size(loadedEvent.getImages()));
+        assertEquals(1, Util.size(loadedEvent.getVideos()));
         assertEquals(1, Util.size(loadedEvent.getImageURLs()));
         assertEquals(1, Util.size(loadedEvent.getSponsorImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getVideos()));
         assertEquals(1, Util.size(loadedEvent.getVideoURLs()));
     }
     

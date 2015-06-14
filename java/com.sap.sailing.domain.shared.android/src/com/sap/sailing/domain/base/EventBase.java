@@ -1,13 +1,11 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
-import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.WithMedia;
 
 /**
@@ -52,17 +50,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     
     /**
      * @deprecated
-    * Replaces the {@link #getImageURLs() current contents of the image URL sequence} by the image URLs in
-    * <code>imageURLs</code>.
-    * 
-    * @param imageURLs
-    *            if <code>null</code>, the internal sequence of image URLs is cleared but remains valid (non-
-    *            <code>null</code>)
-    */
-   void setImageURLs(Iterable<URL> imageURLs);
-
-    /**
-     * @deprecated
      * An event may have zero or more sponsors, each of which usually want to see their logo on the web page.
      * 
      * @return the sponsors' logos; always non-<code>null</code> but possibly empty
@@ -71,25 +58,9 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
 
     /**
      * @deprecated
-     * Replaces the {@link #getSponsorImageURLs() current contents of the sponsorship image URL sequence} by the image URLs in
-     * <code>sponsorImageURLs</code>.
-     * 
-     * @param sponsorImageURLs
-     *            if <code>null</code>, the internal sequence of sponsorship image URLs is cleared but remains valid (non-
-     *            <code>null</code>)
-     */
-    void setSponsorImageURLs(Iterable<URL> sponsorImageURLs);
-
-    /**
-     * @deprecated
      * An optional logo image; may return <code>null</code>.
      */
     URL getLogoImageURL();
-
-    /**
-     * @deprecated
-     */
-    void setLogoImageURL(URL logoImageURL);
 
     /**
      * @deprecated
@@ -101,17 +72,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     Iterable<URL> getVideoURLs();
 
     /**
-     * @deprecated
-     * Replaces the {@link #getVideoURLs() current contents of the video URL sequence} by the video URLs in
-     * <code>videoURLs</code>.
-     * 
-     * @param videoURLs
-     *            if <code>null</code>, the internal sequence of image URLs is cleared but remains valid (non-
-     *            <code>null</code>)
-     */
-    void setVideoURLs(Iterable<URL> videoURLs);
-
-    /**
      * @return the URL of the event's official web site, or <code>null</code> if such a site does not exist or its URL
      *         is not known
      */
@@ -121,9 +81,8 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 
-    /**
-     * For the images references by the image URLs in {@link #getImageURLs()}, {@link #getSponsorImageURLs()} and {@link #getLogoImageURL()}
-     * determines the image dimensions.
-     */
-    ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
+    /** 
+     * Sets and converts all event images and videos from the old URL based format to the new richer format 
+     * */ 
+    boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL);
 }
