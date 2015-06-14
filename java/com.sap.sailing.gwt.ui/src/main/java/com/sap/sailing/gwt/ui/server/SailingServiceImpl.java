@@ -3962,7 +3962,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
         List<String> names = new ArrayList<String>();
         for (BoatClass boatClass : boatClasses) {
-            names.add(boatClass.getDisplayName());
+            names.add(boatClass.getName());
         }
         return names;
     }
