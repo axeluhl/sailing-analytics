@@ -165,9 +165,9 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public URL getLogoImageURL() {
         URL result = null;
-        List<ImageDescriptor> media = findMediaWithTag(images, MediaTagConstants.LOGO);
-        if(media.size() > 0) {
-            result = media.get(0).getURL();
+        ImageDescriptor media = findImageWithTag(MediaTagConstants.LOGO);
+        if(media != null) {
+            result = media.getURL();
         }
         return result;
     }
@@ -230,6 +230,36 @@ public abstract class EventBaseImpl implements EventBase {
         if (videos != null) {
             Util.addAll(videos, this.videos);
         }
+    }
+
+    @Override
+    public ImageDescriptor findImageWithTag(String tagName) {
+        ImageDescriptor result = null;
+        List<ImageDescriptor> mediaWithTag = findMediaWithTag(images, tagName);
+        if(mediaWithTag.size() > 0) {
+            result = mediaWithTag.get(0);
+        } 
+        return result;
+    }
+
+    @Override
+    public VideoDescriptor findVideoWithTag(String tagName) {
+        VideoDescriptor result = null;
+        List<VideoDescriptor> mediaWithTag = findMediaWithTag(videos, tagName);
+        if(mediaWithTag.size() > 0) {
+            result = mediaWithTag.get(0);
+        } 
+        return result;
+    }
+
+    @Override
+    public List<ImageDescriptor> findImagesWithTag(String tagName) {
+        return findMediaWithTag(images, tagName);
+    }
+
+    @Override
+    public List<VideoDescriptor> findVideosWithTag(String tagName) {
+        return findMediaWithTag(videos, tagName);
     }
 
     private <T extends MediaDescriptor> List<T> findMediaWithTag(Iterable<T> media, String tagName) {

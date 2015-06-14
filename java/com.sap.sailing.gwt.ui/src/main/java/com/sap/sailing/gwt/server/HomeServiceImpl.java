@@ -55,8 +55,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -273,7 +275,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         EventViewDTO dto = new EventViewDTO();
         mapToMetadataDTO(event, dto);
         
-        dto.setLogoImageURL(event.getLogoImageURL() == null ? null : event.getLogoImageURL().toString());
+        ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
+        dto.setLogoImage(logoImage != null ? convertToImageDTO(logoImage) : null);
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
@@ -365,7 +368,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         EventSeriesViewDTO dto = new EventSeriesViewDTO();
         dto.setId(id);
-        dto.setLogoImageURL(o.getLogoImageURL() == null ? null : o.getLogoImageURL().toString());
+        ImageDescriptor logoImage = o.findImageWithTag(MediaTagConstants.LOGO);
+        dto.setLogoImage(logoImage != null ? convertToImageDTO(logoImage) : null);
         // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);
         
@@ -520,5 +524,21 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
         return null;
+    }
+    
+    private ImageDTO convertToImageDTO(ImageDescriptor image) {
+        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
+        result.setCopyright(image.getCopyright());
+        result.setTitle(image.getTitle());
+        result.setSubtitle(image.getSubtitle());
+        result.setMimeType(image.getMimeType());
+        result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
+        List<String> tags = new ArrayList<String>();
+        for(String tag: image.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
     }
 }
