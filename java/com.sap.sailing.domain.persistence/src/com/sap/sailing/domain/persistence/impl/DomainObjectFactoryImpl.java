@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -2181,6 +2182,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        return event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL);
+        return event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL, Collections.emptyMap());
     }
 }

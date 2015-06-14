@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -16,6 +17,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MediaUtils;
@@ -240,13 +242,16 @@ public abstract class EventBaseImpl implements EventBase {
         return result;
     }
     
-    /** Sets and converts all event images and videos from the old URL based format to the new richer format */ 
-    public boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL) {
+    /** 
+     * Sets and converts all event images and videos from the old URL based format to the new richer format 
+     */ 
+    public boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs,
+            URL logoImageURL, Map<URL, ImageSize> imageSizes) {
         boolean changed = false;
         
         for (URL url : imageURLs) {
             if (!hasMedia(images, url)) {
-                ImageDescriptor image = migrateImageURLtoImage(url, getStartDate());
+                ImageDescriptor image = migrateImageURLtoImage(url, getStartDate(), imageSizes.get(url));
                 String urlAsString = url.toString();
                 if (urlAsString.toLowerCase().indexOf("stage") > 0) {
                     image.addTag(MediaTagConstants.STAGE);
@@ -261,7 +266,7 @@ public abstract class EventBaseImpl implements EventBase {
         }
         for (URL url : sponsorImageURLs) {
             if (!hasMedia(images, url)) {
-                ImageDescriptor image = migrateImageURLtoImage(url, getStartDate());
+                ImageDescriptor image = migrateImageURLtoImage(url, getStartDate(), imageSizes.get(url));
                 image.addTag(MediaTagConstants.SPONSOR);
                 addImage(image);
                 changed = true;
@@ -269,7 +274,7 @@ public abstract class EventBaseImpl implements EventBase {
         }
         
         if (logoImageURL != null && !hasMedia(images, logoImageURL)) {
-            ImageDescriptor image = migrateImageURLtoImage(logoImageURL, getStartDate());
+            ImageDescriptor image = migrateImageURLtoImage(logoImageURL, getStartDate(), imageSizes.get(logoImageURL));
             image.addTag(MediaTagConstants.LOGO);
             addImage(image);
             changed = true;
@@ -287,11 +292,15 @@ public abstract class EventBaseImpl implements EventBase {
         return changed;
     }
 
-    private ImageDescriptor migrateImageURLtoImage(URL url, TimePoint createdAt) {
+    private ImageDescriptor migrateImageURLtoImage(URL url, TimePoint createdAt, ImageSize imageSize) {
         ImageDescriptorImpl image = new ImageDescriptorImpl(url, createdAt);
-        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
-        if (imageDimensions != null) {
-            image.setSize(imageDimensions);
+        if (imageSize != null) {
+            image.setSize(imageSize.getWidth(), imageSize.getHeight());
+        } else {
+            Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(url);
+            if (imageDimensions != null) {
+                image.setSize(imageDimensions);
+            }
         }
         return image;
     }

@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.WithMedia;
 
 /**
@@ -84,5 +86,5 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     /** 
      * Sets and converts all event images and videos from the old URL based format to the new richer format 
      * */ 
-    boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL);
+    boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL, Map<URL, ImageSize> imageSizes);
 }

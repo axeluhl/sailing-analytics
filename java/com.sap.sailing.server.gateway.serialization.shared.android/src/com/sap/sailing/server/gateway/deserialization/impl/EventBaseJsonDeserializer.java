@@ -148,7 +148,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 }
             }
         }
-        event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL);
+        event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL, imageSizes);
     }
     
     private ImageDescriptor loadImage(JSONObject imageJson) {
