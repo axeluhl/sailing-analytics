@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
 
 public abstract class SessionActivity extends BaseActivity {
@@ -62,15 +63,11 @@ public abstract class SessionActivity extends BaseActivity {
 
     private void doLogout() {
         ExLog.i(this, TAG, "Do logout now!");
-        preferences.isSetUp(false);
-        unloadAllRaces();
+        preferences.isSetUp(false); //FIXME: Is that flag really needed or just data redundancy?
+        // use data manager to unload the races properly
+        DataManager dataManager = (DataManager) DataManager.create(this);
+        dataManager.unloadAllRaces();
         fadeActivity(LoginActivity.class, true);
     }
 
-    private void unloadAllRaces() {
-        ExLog.i(this, TAG, "Issuing intent action clear races");
-        Intent intent = new Intent(this, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
-        this.startService(intent);
-    }
 }
