@@ -141,35 +141,5 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
                 stage.addNews(new LeaderboardNewsEntryDTO((LeaderboardUpdateNewsItem) newsItem));
             }
         }
-//        TODO remove test contents
-//        
-//        boolean singleRegatta = HomeServiceUtil.isSingleRegatta(event);
-//        
-//        stage.addNews(new InfoNewsEntryDTO("Sturm", "Heute keine Rennen mehr", new Date(new Date().getTime() - 125000)));
-//        stage.addNews(new InfoNewsEntryDTO("Abendbespaßung", "Es gibt Freibier und Wurst!!!", new Date()));
-//        stage.addNews(new LeaderboardNewsEntryDTO("Test LB", "505 m", BoatClassMasterdata._5O5.getDisplayName(), new Date(new Date().getTime() - 120000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS));
-//        
-//        LeaderboardNewsEntryDTO lbEntryWithExternalLink = new LeaderboardNewsEntryDTO("Test LB", "Some Regatta", BoatClassMasterdata.LASER_RADIAL.getDisplayName(), new Date(new Date().getTime() - 270000), LeaderboardNewsEntryDTO.Type.NEW_RESULTS);
-//        lbEntryWithExternalLink.setExternalURL("http://www.sap.com/");
-//        stage.addNews(lbEntryWithExternalLink);
-//        
-//        CompetitorDTOImpl testCompetitor = new CompetitorDTOImpl("Peter Mayer", null, null, null, null, null, null, null, null, null, null, null, null);
-//        String regattaName = "470 Men";
-//        String race6 = constructRaceName(regattaName, "R6", "Gold", singleRegatta);
-//        stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R6", race6, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1888000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.CRASH));
-//        String race7 = constructRaceName(regattaName, "R7", "Gold", singleRegatta);
-//        stage.addNews(new RaceCompetitorNewsEntryDTO(regattaName, "470 R7", race7, BoatClassMasterdata.PIRATE.getDisplayName(), new Date(new Date().getTime() - 1337000), testCompetitor, RaceCompetitorNewsEntryDTO.Type.WINNER));
     }
-//    
-//    private String constructRaceName(String regattaDisplayName, String raceName, String fleetName, boolean singleRegatta) {
-//        StringBuilder sb = new StringBuilder();
-//        if(!singleRegatta) {
-//            sb.append(regattaDisplayName).append(" - ");
-//        }
-//        sb.append(raceName);
-//        if(fleetName != null && !fleetName.isEmpty() && !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
-//            sb.append(" - ").append(fleetName);
-//        }
-//        return sb.toString();
-//    }
 }
