@@ -102,178 +102,16 @@ public final class HomeServiceUtil {
     }
     
     private static ImageDescriptor findEventThumbnailImage(EventBase event) {
-
-        final class ImageHolder {
-
-            final int PERFECT_HEIGHT = 240;
-            final int PERFECT_WIDTH = 370;
-            final double PERFECT_RATIO = PERFECT_HEIGHT / (double) PERFECT_WIDTH;
-            final int height;
-            final int width;
-            final int size;
-            final double ratio;
-            final ImageDescriptor image;
-            final boolean stage;
-
-            ImageHolder() {
-                this(null);
-            }
-
-            ImageHolder(ImageDescriptor image) {
-                this.image = image;
-                this.stage = image == null ? false : hasTag(image, MediaTagConstants.STAGE);
-                this.height = image == null || image.getHeightInPx() == null ? 0 : image.getHeightInPx();
-                this.width = image == null || image.getWidthInPx() == null ? 0 : image.getWidthInPx();
-                this.size = height * width;
-                if(width == 0)  {
-                    this.ratio = -1;
-                } else {
-                    this.ratio = height / (double) width;
-                }
-            }
-
-            boolean isBetterWorstcaseThan(ImageHolder otherImageHolder) {
-                if (isNull()) {
-                    return false;
-                }
-
-                if (stage) {
-                    return false;
-                }
-
-                if (otherImageHolder.isNull()) {
-                    return true;
-                }
-
-                if (!isBigEnough() && otherImageHolder.isBigEnough()) {
-                    return true;
-                }
-                if (this.fitsRatio() && otherImageHolder.fitsRatio() && otherImageHolder.isBigEnough()
-                        && otherImageHolder.isSmallerThan(this)) {
-                    return true;
-                }
-                return false;
-            }
-
-            boolean isSmallerThan(ImageHolder otherImageHolder) {
-                return size < otherImageHolder.size;
-            }
-
-            boolean isBigEnough() {
-                return height >= PERFECT_HEIGHT && width >= PERFECT_WIDTH;
-            }
-
-            boolean fitsRatio() {
-                return ratio == PERFECT_RATIO;
-            }
-
-            boolean isPerfectFit() {
-                return (height == PERFECT_HEIGHT && width == PERFECT_WIDTH);
-            }
-
-            boolean isNull() {
-                return image == null;
-            }
-        }
-
-        // search for name pattern
-        for (ImageDescriptor imageUrl : event.getImages()) {
-            if (hasTag(imageUrl, MediaTagConstants.TEASER)) {
-                return imageUrl;
-            }
-        }
-
-        ImageHolder actualWorstcase = new ImageHolder();
-        ImageHolder bestFit = new ImageHolder();
-
-        for (ImageDescriptor candidateImage : getPhotoGalleryImages(event)) {
-            ImageHolder candidate = new ImageHolder(candidateImage);
-
-            if (candidate.isPerfectFit()) {
-                return candidate.image;
-            }
-
-            if (candidate.fitsRatio() && candidate.isBigEnough()) {
-                if (candidate.isSmallerThan(bestFit)) {
-                    bestFit = candidate;
-                }
-            }
-
-            if (candidate.isBetterWorstcaseThan(actualWorstcase)) {
-                actualWorstcase = candidate;
-            }
-
-        }
-
-        if (!bestFit.isNull()) {
-            return bestFit.image;
-        }
-        if (!actualWorstcase.isNull()) {
-            return actualWorstcase.image;
-        }
-        return null;
+        return event.findImageWithTag(MediaTagConstants.TEASER);
     }
     
-    /**
-     * The stage image is determined from the {@link #images} collection by a series of heuristics and fall-back
-     * rules:
-     * <ol>
-     * <li>If one or more image has {@link MediaConstants#STAGE} tag, only they are considered candidates.</li>
-     * <li>If no image has {@link MediaConstants#STAGE} tag, all images are considered
-     * candidates.</li>
-     * <li>From all candidates, the one with the biggest known size (determined by the product of width and height) is
-     * chosen.</li>
-     * <li>If the size isn't known for any candidate, the first candidate in {@link #imageURLs} is picked.</li>
-     * </ol>
-     */
     public static String getStageImageURLAsString(final EventBase event) {
         ImageDescriptor image = getStageImage(event);
         return image == null ? null : image.getURL().toString();
     }
     
-    /**
-     * The stage image is determined from the {@link #images} collection by a series of heuristics and fall-back
-     * rules:
-     * <ol>
-     * <li>If one or more image has {@link MediaConstants#STAGE} tag, only they are considered candidates.</li>
-     * <li>If no image has {@link MediaConstants#STAGE} tag, all images are considered
-     * candidates.</li>
-     * <li>From all candidates, the one with the biggest known size (determined by the product of width and height) is
-     * chosen.</li>
-     * <li>If the size isn't known for any candidate, the first candidate in {@link #imageURLs} is picked.</li>
-     * </ol>
-     */
     public static ImageDescriptor getStageImage(final EventBase event) {
-        ImageDescriptor bestMatch = null;
-        
-        for(ImageDescriptor candidate : event.getImages()) {
-            if(bestMatch == null || isBetterStageImage(candidate, bestMatch)) {
-                bestMatch = candidate;
-                continue;
-            }
-        }
-        
-        return bestMatch;
-    }
-    
-    private static boolean isBetterStageImage(ImageDescriptor candidate, ImageDescriptor reference) {
-        boolean stage = hasTag(candidate, MediaTagConstants.STAGE);
-        boolean stageRef = hasTag(reference, MediaTagConstants.STAGE);
-        if(stage != stageRef) {
-            return stage;
-        }
-        boolean teaser = hasTag(candidate, MediaTagConstants.TEASER);
-        boolean teaserRef = hasTag(reference, MediaTagConstants.TEASER);
-        if(teaser != teaserRef) {
-            return !teaser;
-        }
-        
-        int size = candidate.getArea();
-        int sizeRef = candidate.getArea();
-        if(size != sizeRef) {
-            return size > sizeRef;
-        }
-        return candidate.getCreatedAtDate().compareTo(reference.getCreatedAtDate()) > 0;
+        return event.findImageWithTag(MediaTagConstants.STAGE);
     }
 
     public static List<String> getPhotoGalleryImageURLsAsString(EventBase event) {
@@ -286,22 +124,7 @@ public final class HomeServiceUtil {
     }
 
     public static List<ImageDescriptor> getPhotoGalleryImages(EventBase event) {
-        ImageDescriptor stageImage = getStageImage(event); // if set, exclude stage image from photo gallery
-        List<ImageDescriptor> result = new ArrayList<>();
-        Iterable<ImageDescriptor> imageURLs = event.getImages();
-        
-        boolean first = true;
-        for (Iterator<ImageDescriptor> iter = imageURLs.iterator(); iter.hasNext();  ) {
-            ImageDescriptor image = iter.next();
-            if(hasTag(image, MediaTagConstants.TEASER)) {
-                continue;
-            }
-            if ((first && !iter.hasNext()) || !Util.equalsWithNull(image, stageImage)) {
-                result.add(image);
-            }
-            first = false;
-        }
-        return result;
+        return event.findImagesWithTag(MediaTagConstants.GALLERY);
     }
     
     public static List<ImageDescriptor> getSailingLovesPhotographyImages(EventBase event) {
