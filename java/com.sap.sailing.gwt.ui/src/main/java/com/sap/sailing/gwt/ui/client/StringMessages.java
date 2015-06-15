@@ -1082,6 +1082,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String photos();
     String videos();
     String image();
+    String images();
     String video();
     String flagImageURL();
     String imageURLs();
