@@ -2,24 +2,22 @@ package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-
 public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
     
     public enum Type {
-        WINNER, CRASH
+        WINNER
     }
     
-    private CompetitorDTO competitor;
+    private String competitorName;
     private Type type;
 
     @SuppressWarnings("unused")
     private RaceCompetitorNewsEntryDTO() {
     }
     
-    public RaceCompetitorNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp, CompetitorDTO competitor, Type type) {
+    public RaceCompetitorNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp, String competitorName, Type type) {
         super(regattaName, trackedRaceName, raceTitle, boatClass, timestamp);
-        this.competitor = competitor;
+        this.competitorName = competitorName;
         this.type = type;
     }
 
@@ -28,10 +26,8 @@ public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
         // TODO I18n...
         switch (type) {
         case WINNER:
-            return competitor.getName() + " won the race";
-        case CRASH:
-            return competitor.getName() + " crashed";
+            return competitorName + " won the race";
         }
-        return competitor.getName();
+        return "";
     }
 }
