@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
-import com.sap.sailing.gwt.home.client.place.events.recent.RecentEventTeaser;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -50,11 +49,11 @@ public class EventsOverviewRecentYear extends Composite {
         this.eventsCount.setInnerText(i18n.eventsCount(events.size()));
         boolean first = true;
         for (EventListEventDTO eventDTO : events) {
+
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId()
                     .toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
-            RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState()
-                    .getListStateMarker());
-            recentEvent.hideImage(!first);
+            EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation, eventDTO,
+                    eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
             recentEventsTeaserPanel.add(recentEvent);
             if (first) {
                 first = false;

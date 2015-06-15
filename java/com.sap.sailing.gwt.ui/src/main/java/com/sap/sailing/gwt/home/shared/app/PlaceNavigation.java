@@ -1,9 +1,14 @@
 package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.app.AbstractPlaceNavigator;
 
@@ -88,4 +93,19 @@ public class PlaceNavigation<T extends Place> {
     public void goToPlace() {
         placeNavigator.goToPlace(this);
     }
+    
+    public void configureAnchorElement(AnchorElement e) {
+        DOM.sinkEvents(e, Event.ONCLICK);
+        e.setHref(getTargetUrl());
+        Event.setEventListener(e, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if (LinkUtil.handleLinkClick(event)) {
+                    event.preventDefault();
+                    goToPlace();
+                }
+            }
+        });
+    }
+    
 }
