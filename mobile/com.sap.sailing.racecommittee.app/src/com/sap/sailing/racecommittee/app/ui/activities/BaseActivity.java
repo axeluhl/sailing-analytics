@@ -8,6 +8,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 
 /**
@@ -52,9 +53,8 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
-                //TODO: is this really save? what about all the connected races?
-                InMemoryDataStore.INSTANCE.reset();
-                return onReset();
+                resetApp();
+                return true;
 
             case R.id.options_menu_info:
                 ExLog.i(this, TAG, "Clicked INFO");
@@ -74,9 +74,10 @@ public class BaseActivity extends SendingServiceAwareActivity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     
-    protected boolean onReset() {
+    private void resetApp() {
+        DataManager dataManager = (DataManager) DataManager.create(this);
+        dataManager.resetAll();
         fadeActivity(LoginActivity.class, true);
-        return true;
     }
 
     @Override

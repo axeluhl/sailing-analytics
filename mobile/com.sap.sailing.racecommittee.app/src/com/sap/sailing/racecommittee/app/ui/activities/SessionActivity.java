@@ -36,7 +36,7 @@ public abstract class SessionActivity extends BaseActivity {
         return logoutSession();
     }
 
-    @Override
+    @Deprecated
     protected boolean onReset() {
         return logoutSession();
     }
