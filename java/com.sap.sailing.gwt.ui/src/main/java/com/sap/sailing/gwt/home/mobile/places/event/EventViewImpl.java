@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -11,7 +14,9 @@ import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class EventViewImpl extends Composite implements EventView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -42,6 +47,18 @@ public class EventViewImpl extends Composite implements EventView {
         sailorInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
         sailorInfoUi.setAction(buttonLabel, url);
     }
+    
+    @Override
+    public void setQuickFinderValues(List<RegattaMetadataDTO> regattaMetadatas) {
+        quickFinderUi.addPlaceholderItem(StringMessages.INSTANCE.resultsQuickfinder(), null);
+        for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
+            quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), regattaMetadata.getId());
+        }
+    }
 
+    @Override
+    public HasSelectionHandlers<String> getQuickfinder() {
+        return quickFinderUi;
+    }
     
 }
