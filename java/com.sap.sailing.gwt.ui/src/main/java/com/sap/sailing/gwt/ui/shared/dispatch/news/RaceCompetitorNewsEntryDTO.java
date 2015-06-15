@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
 import java.util.Date;
 
+import com.sap.sailing.gwt.ui.client.StringMessages;
+
 public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
     
     public enum Type {
@@ -23,10 +25,9 @@ public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
 
     @Override
     public String getMessage() {
-        // TODO I18n...
         switch (type) {
         case WINNER:
-            return competitorName + " won the race";
+            return StringMessages.INSTANCE.competitorWonRace(competitorName);
         }
         return "";
     }
