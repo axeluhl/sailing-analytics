@@ -174,11 +174,11 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         public void onClick(View view) {
             switch (view.getId()) {
             case R.id.finish_current:
-                setFinishTime(true);
+                setFinishTime();
                 break;
 
             case R.id.finish_custom:
-                setFinishTime(false);
+                setFinishTime(getCustomFinishTime());
                 break;
 
             default:
@@ -197,7 +197,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             }
         }
 
-        private TimePoint getFinishTime() {
+        private TimePoint getCustomFinishTime() {
             Calendar time = Calendar.getInstance();
             time.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
             time.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
@@ -206,37 +206,50 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             return new MillisecondsTimePoint(time.getTime());
         }
 
-        private void setFinishTime(boolean current) {
-            TimePoint finishTime;
-            if (current) {
-                finishTime = MillisecondsTimePoint.now();
-            } else {
-                finishTime = getFinishTime();
-            }
+        private void setFinishTime() {
+            setFinishTime(MillisecondsTimePoint.now());
+        }
+
+        private void setFinishTime(TimePoint finishTime) {
             switch (getArguments().getInt(START_MODE, 0)) {
             case 1: // Race-State: Finishing -> End Finishing
-                FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
-                if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                    if (ftf.analyze().before(finishTime)) {
-                        getRaceState().setFinishedTime(finishTime);
-                    } else {
-                        Toast
-                            .makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG)
-                            .show();
-                    }
-                }
+                setFinishedTime(finishTime);
                 break;
 
             default: // Race-State: Running -> Start Finishing
-                StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
-                if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
+                setFinishingTime(finishTime);
+                break;
+            }
+        }
+
+        private void setFinishingTime(TimePoint finishTime) {
+            StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
+            if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
+                if (finishTime.after(MillisecondsTimePoint.now())) {
+                    Toast.makeText(getActivity(), "The selected time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
+                } else {
                     if (stf.analyze().before(finishTime)) {
-                        getRace().getState().setFinishingTime(finishTime);
+                        getRaceState().setFinishingTime(finishTime);
                     } else {
                         Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
                     }
                 }
-                break;
+            }
+        }
+
+        private void setFinishedTime(TimePoint finishTime) {
+            FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
+            if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
+                if (finishTime.after(MillisecondsTimePoint.now())) {
+                    Toast.makeText(getActivity(), "The given finish time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
+                } else {
+                    if (ftf.analyze().before(finishTime)) {
+                        getRaceState().setFinishedTime(finishTime);
+                    } else {
+                        Toast.makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
+                    }
+                }
+
             }
         }
     }
