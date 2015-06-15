@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.server;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -19,16 +21,23 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.start.StageEventType;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public final class HomeServiceUtil {
     
@@ -293,5 +302,75 @@ public final class HomeServiceUtil {
             return LocaleMatch.EN_FALLBACK;
         }
         return LocaleMatch.NO_MATCH;
+    }
+    
+    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service) {
+        EventStageDTO dto = new EventStageDTO();
+        mapToMetadataDTO(event, dto, service);
+        dto.setBaseURL(baseURL.toString());
+        dto.setOnRemoteServer(onRemoteServer);
+        dto.setStageType(stageType);
+        dto.setStageImageURL(HomeServiceUtil.getStageImageURLAsString(event));
+        return dto;
+    }
+    
+    public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer, RacingEventService service) {
+        EventListEventDTO dto = new EventListEventDTO();
+        mapToMetadataDTO(event, dto, service);
+        dto.setBaseURL(baseURL.toString());
+        dto.setOnRemoteServer(onRemoteServer);
+        return dto;
+    }
+    
+    public static EventMetadataDTO convertToMetadataDTO(EventBase event, RacingEventService service) {
+        EventMetadataDTO dto = new EventMetadataDTO();
+        mapToMetadataDTO(event, dto, service);
+        return dto;
+    }
+    
+    public static void mapToMetadataDTO(EventBase event, EventMetadataDTO dto, RacingEventService service) {
+        dto.setId((UUID) event.getId());
+        dto.setDisplayName(event.getName());
+        dto.setStartDate(event.getStartDate().asDate());
+        dto.setEndDate(event.getEndDate().asDate());
+        dto.setState(HomeServiceUtil.calculateEventState(event));
+        dto.setVenue(event.getVenue().getName());
+        if(HomeServiceUtil.isFakeSeries(event)) {
+            dto.setLocation(getLocation(event, service));
+        }
+        dto.setThumbnailImageURL(HomeServiceUtil.findEventThumbnailImageUrlAsString(event));
+    }
+    
+    public static String getLocation(EventBase eventBase, RacingEventService service) {
+        if(!(eventBase instanceof Event)) {
+            return null;
+        }
+        Event event = (Event) eventBase;
+        for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
+            if(leaderboard instanceof RegattaLeaderboard) {
+                Regatta regattaEntity = service.getRegattaByName(leaderboard.getName());
+                if(!HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                    continue;
+                }
+            }
+            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
+        }
+        return null;
+    }
+    
+    public static ImageDTO convertToImageDTO(ImageDescriptor image) {
+        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
+        result.setCopyright(image.getCopyright());
+        result.setTitle(image.getTitle());
+        result.setSubtitle(image.getSubtitle());
+        result.setMimeType(image.getMimeType());
+        result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
+        List<String> tags = new ArrayList<String>();
+        for(String tag: image.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
     }
 }
