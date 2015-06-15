@@ -49,8 +49,6 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         }
     }
 
-    private static final String TAG = SendingServiceAwareActivity.class.getName();
-
     protected MenuItem menuItemLive;
     protected int menuItemLiveId = -1;
 
