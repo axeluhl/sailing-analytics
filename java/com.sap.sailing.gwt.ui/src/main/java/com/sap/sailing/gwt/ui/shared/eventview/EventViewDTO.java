@@ -21,6 +21,7 @@ public class EventViewDTO extends EventMetadataDTO {
     private String seriesName;
     private String logoImageURL;
     private String officialWebsiteURL;
+    private String sailorsInfoURL;
 
     public EventViewDTO() {
     }
@@ -100,5 +101,13 @@ public class EventViewDTO extends EventMetadataDTO {
     
     public String getOfficialWebsiteURL() {
         return officialWebsiteURL;
+    }
+
+    public String getSailorsInfoURL() {
+        return sailorsInfoURL;
+    }
+
+    public void setSailorsInfoURL(String sailorsInfoURL) {
+        this.sailorsInfoURL = sailorsInfoURL;
     }
 }

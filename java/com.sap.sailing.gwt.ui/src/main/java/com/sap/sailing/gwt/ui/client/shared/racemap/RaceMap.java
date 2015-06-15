@@ -1171,7 +1171,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.entrySet()) {
             if (Util.contains(competitorsToShow, competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey())) {
                 leadingCompetitorDTO = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey();
-                legOfLeaderCompetitor = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue();
+                legOfLeaderCompetitor = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue() == null ?
+                        0 : competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue();
                 return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
             }
         }

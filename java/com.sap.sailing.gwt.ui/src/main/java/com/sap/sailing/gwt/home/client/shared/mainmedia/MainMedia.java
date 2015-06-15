@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -23,9 +22,6 @@ public class MainMedia extends Composite {
 
     @UiField
     HTMLPanel videosPanel;
-
-    @UiField
-    DivElement videoLightBoxData;
 
     @UiField
     ImageCarousel<SailingImageDTO> imageCarousel;
