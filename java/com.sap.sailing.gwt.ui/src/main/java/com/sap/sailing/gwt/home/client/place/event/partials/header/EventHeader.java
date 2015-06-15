@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
@@ -103,9 +104,7 @@ public class EventHeader extends Composite {
     }
 
     private void initFields() {
-        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
-        eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
-        eventLogo.setTitle(event.getDisplayName());
+        LogoUtil.setEventLogo(eventLogo, event);
         
         String nameToShow;
         if(presenter.showRegattaMetadata()) {
@@ -140,11 +139,7 @@ public class EventHeader extends Composite {
         } else {
             nameToShow = event.getDisplayName();
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
-            String venue = event.getLocationAndVenue();
-            if(event.getVenueCountry() != null && !event.getVenueCountry().isEmpty()) {
-                venue += ", " + event.getVenueCountry();
-            }
-            eventVenue.setInnerText(venue);
+            eventVenue.setInnerText(event.getLocationAndVenueAndCountry());
             
             if(event.getOfficialWebsiteURL() != null) {
                 String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
