@@ -84,7 +84,7 @@ public class GetEventViewAction implements Action<EventViewDTO> {
             dto.setType(EventType.SERIES_EVENT);
             
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
-            dto.setSeriesName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() :overallLeaderboardGroup.getName());
+            dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
             List<Event> fakeSeriesEvents = new ArrayList<Event>();
             
             for (Event eventOfSeries : context.getRacingEventService().getAllEvents()) {

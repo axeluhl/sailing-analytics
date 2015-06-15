@@ -330,7 +330,7 @@ public final class HomeServiceUtil {
     
     public static void mapToMetadataDTO(EventBase event, EventMetadataDTO dto, RacingEventService service) {
         dto.setId((UUID) event.getId());
-        dto.setDisplayName(event.getName());
+        dto.setDisplayName(getEventDisplayName(event, service));
         dto.setStartDate(event.getStartDate().asDate());
         dto.setEndDate(event.getEndDate().asDate());
         dto.setState(HomeServiceUtil.calculateEventState(event));
@@ -339,6 +339,28 @@ public final class HomeServiceUtil {
             dto.setLocation(getLocation(event, service));
         }
         dto.setThumbnailImageURL(HomeServiceUtil.findEventThumbnailImageUrlAsString(event));
+    }
+    
+    public static String getEventDisplayName(EventBase event, RacingEventService service) {
+        if(isFakeSeries(event)) {
+            String seriesName = getSeriesName(event);
+            if(seriesName != null) {
+                String location = getLocation(event, service);
+                if(location != null) {
+                    return seriesName + " - " + location;
+                }
+            }
+        }
+        return event.getName();
+    }
+
+    public static String getSeriesName(EventBase event) {
+        LeaderboardGroupBase overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
+        return getLeaderboardDisplayName(overallLeaderboardGroup);
+    }
+
+    public static String getLeaderboardDisplayName(LeaderboardGroupBase overallLeaderboardGroup) {
+        return overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() : overallLeaderboardGroup.getName();
     }
     
     public static String getLocation(EventBase eventBase, RacingEventService service) {
