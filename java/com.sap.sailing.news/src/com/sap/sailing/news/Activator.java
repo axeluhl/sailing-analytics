@@ -19,7 +19,6 @@ public class Activator implements BundleActivator {
         context.registerService(EventNewsService.class, newsService, null);
         context.registerService(EventNewsProviderRegistry.class, providerRegistry, null);
         
-//        providerRegistry.registerNewsProvider(new SimpleDemoEventNewsProvider());
         providerRegistry.registerNewsProvider(new JsonEventNewsProvider());
         providerRegistry.registerNewsProvider(new LeaderboardUpdateEventNewsProvider());
         logger.info("EventNews Service registered.");
