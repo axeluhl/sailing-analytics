@@ -30,14 +30,11 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected TextBox officialWebsiteURLEntryField;
-    protected TextBox logoImageURLEntryField;
     protected StringListInlineEditorComposite courseAreaNameList;
     protected StringListInlineEditorComposite imageURLList;
     protected StringListInlineEditorComposite videoURLList;
     protected StringListInlineEditorComposite sponsorImageURLList;
     
-    
-
     public RegattaImportDialog(StringMessages stringMessages, String message, 
             com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<String> validator, 
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<String> callback) {
@@ -53,7 +50,7 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
             panel.add(additionalWidget);
         }
 
-        Grid formGrid = new Grid(8, 2);
+        Grid formGrid = new Grid(7, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
@@ -70,8 +67,6 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
         formGrid.setWidget(5, 1, isPublicCheckBox);
         formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
         formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
-        formGrid.setWidget(7, 0, new Label(stringMessages.eventLogoImageURL() + ":"));
-        formGrid.setWidget(7, 1, logoImageURLEntryField);
 
         panel.add(createHeadlineLabel(stringMessages.courseAreas()));
         panel.add(courseAreaNameList);
@@ -89,7 +84,6 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
-        result.setLogoImageURL(logoImageURLEntryField.getText().trim().isEmpty() ? null : logoImageURLEntryField.getText().trim());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -100,15 +94,6 @@ public class RegattaImportDialog extends DataEntryDialog<String>{
             CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
             courseAreaDTO.setName(courseAreaName);
             courseAreas.add(courseAreaDTO);
-        }
-        for (String imageURL : imageURLList.getValue()) {
-            result.addImageURL(imageURL);
-        }
-        for (String videoURL : videoURLList.getValue()) {
-            result.addVideoURL(videoURL);
-        }
-        for (String sponsorImageURL : sponsorImageURLList.getValue()) {
-            result.addSponsorImageURL(sponsorImageURL);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
         return "OK";

@@ -7,12 +7,13 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class EventSeriesViewDTO implements IsSerializable {
     private UUID id;
     private String displayName;
     private ArrayList<EventMetadataDTO> events = new ArrayList<>();
-    private String logoImageURL;
+    private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
 
@@ -61,12 +62,12 @@ public class EventSeriesViewDTO implements IsSerializable {
         this.events.add(event);
     }
 
-    public String getLogoImageURL() {
-        return logoImageURL;
+    public ImageDTO getLogoImage() {
+        return logoImage;
     }
     
-    public void setLogoImageURL(String logoImageURL) {
-        this.logoImageURL = logoImageURL;
+    public void setLogoImage(ImageDTO logoImage) {
+        this.logoImage = logoImage;
     }
 
     public boolean isHasMedia() {
