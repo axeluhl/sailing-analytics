@@ -60,7 +60,7 @@ public class JsonEventNewsProvider implements EventNewsProvider {
                     JSONObject eventAsJson = (JSONObject) eventAsObject;
                     String eventIdAsString = (String) eventAsJson.get("event");
                     Number timestamp = (Number) eventAsJson.get("timestamp");
-                    String title = (String) eventAsJson.get("tite");
+                    String title = (String) eventAsJson.get("title");
                     String message = (String) eventAsJson.get("message");
                     String newsURL = (String) eventAsJson.get("url");
                     UUID eventId = UUID.fromString(eventIdAsString);
