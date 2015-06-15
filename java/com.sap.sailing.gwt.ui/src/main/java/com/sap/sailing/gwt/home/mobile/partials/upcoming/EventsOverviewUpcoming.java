@@ -44,6 +44,7 @@ public class EventsOverviewUpcoming extends Composite {
         
         eventsAnimation = new CollapseAnimation(eventsPlaceholder.getElement());
         
+
         header.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
