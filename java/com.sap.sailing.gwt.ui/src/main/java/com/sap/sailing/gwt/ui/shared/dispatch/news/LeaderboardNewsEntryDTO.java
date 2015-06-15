@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 
 public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
@@ -34,7 +35,7 @@ public class LeaderboardNewsEntryDTO extends NewsEntryDTO {
     public String getMessage() {
         switch (type) {
         case RESULTS_UPDATE:
-            return "Result update";
+            return StringMessages.INSTANCE.resultsUpdate();
         }
         return "";
     }
