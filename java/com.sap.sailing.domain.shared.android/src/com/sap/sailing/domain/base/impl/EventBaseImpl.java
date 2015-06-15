@@ -137,7 +137,7 @@ public abstract class EventBaseImpl implements EventBase {
     public Iterable<URL> getImageURLs() {
         List<URL> result = new ArrayList<URL>();
         for (ImageDescriptor image : images) {
-            if (Util.size(image.getTags()) == 0 || image.hasTag(MediaTagConstants.GALLERY)) {
+            if (!image.hasTag(MediaTagConstants.SPONSOR) && !image.hasTag(MediaTagConstants.LOGO)) {
                 result.add(image.getURL());
             }
         }
