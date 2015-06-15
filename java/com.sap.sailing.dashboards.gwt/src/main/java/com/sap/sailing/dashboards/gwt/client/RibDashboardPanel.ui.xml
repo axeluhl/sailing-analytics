@@ -18,11 +18,15 @@
 			<mgwtcarousel:Carousel ui:field="carousel">
 				<mgwtpanel:Panel styleName="{style.page}">
 					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{style.collumn} {style.left}">
-						<div class="{style.windloadinghint}"><div ui:field="windloadinghintleft" class="{style.windloadinghinttext}"></div></div>
+						<div class="{style.windloadinghint}">
+							<div ui:field="windloadinghintleft" class="{style.windloadinghinttext}"></div>
+						</div>
 					</g:HTMLPanel>
 					<g:HTMLPanel ui:field="rightwindbotcontainer"
 						styleName="{style.collumn} {style.right}">
-						<div class="{style.windloadinghint}"><div ui:field="windloadinghintright" class="{style.windloadinghinttext}"></div></div>
+						<div class="{style.windloadinghint}">
+							<div ui:field="windloadinghintright" class="{style.windloadinghinttext}"></div>
+						</div>
 					</g:HTMLPanel>
 					<g:HTMLPanel ui:field="windcharthint" styleName="{style.windcharthint}"></g:HTMLPanel>
 				</mgwtpanel:Panel>
@@ -33,8 +37,10 @@
 					</g:HTMLPanel>
 					<g:HTMLPanel styleName="{style.collumn} {style.collumn3}">
 						<g:HTMLPanel styleName="{style.startlineadvantagepanel}">
-							<startlineadvantage:StartLineAdvantageComponent
-								ui:field="startLineCAComponent"></startlineadvantage:StartLineAdvantageComponent>
+							<!-- <startlineadvantage:StartLineAdvantageComponent -->
+							<!-- ui:field="startLineCAComponent"></startlineadvantage:StartLineAdvantageComponent> -->
+							<startlineadvantage:StartlineAdvantagesByWindComponent
+								ui:field="startlineAdvantagesByWindComponent"></startlineadvantage:StartlineAdvantagesByWindComponent>
 						</g:HTMLPanel>
 					</g:HTMLPanel>
 				</mgwtpanel:Panel>

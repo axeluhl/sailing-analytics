@@ -97,7 +97,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
                     .equals(StartlineAdvantageType.GEOMETRIC)) {
                 startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometry();
             }else{
-                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByWind();
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWind();
             }
             startanalysis_card_line_advantage
                     .setInnerHTML(startLineAdvantageType

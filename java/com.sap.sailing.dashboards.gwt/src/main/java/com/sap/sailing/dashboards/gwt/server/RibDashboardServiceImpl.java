@@ -30,6 +30,8 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -260,5 +262,18 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         }else{
             return null;
         }
+    }
+
+    @Override
+    public List<Pair<Double, Double>> getAdvantagesOnStartline(String leaderboardName) {
+        return generateRandomAdvantagesOnStartline();
+    }
+    
+    private List<Pair<Double, Double>> generateRandomAdvantagesOnStartline(){
+        List<Pair<Double, Double>> randomAdvantagesOnStartline = new ArrayList<Util.Pair<Double,Double>>();
+        for(int i = 0; i <= 100; i = i+20){
+            randomAdvantagesOnStartline.add(new Pair<Double, Double>(new Double(i), new Double((i+1)/2+(0 + (int)(Math.random()*5)))));
+        }
+        return randomAdvantagesOnStartline;
     }
 }

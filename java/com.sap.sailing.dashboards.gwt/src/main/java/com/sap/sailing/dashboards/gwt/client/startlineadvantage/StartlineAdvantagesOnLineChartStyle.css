@@ -1,0 +1,19 @@
+@CHARSET "UTF-8";
+
+.advantages_on_line_chart_container {
+	position: absolute !important;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif !important;
+}
+
+.advantages_on_line_chart {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif !important;
+}

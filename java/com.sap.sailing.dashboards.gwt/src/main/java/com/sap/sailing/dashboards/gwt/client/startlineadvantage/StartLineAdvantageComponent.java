@@ -29,7 +29,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         stringConstants = StringMessages.INSTANCE;
         initAndSetStartLineAdvantageStates();
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
-        this.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
+        this.header.setInnerText(stringConstants.dashboardStartlineAdvantagesByWind());
         this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css()
                 .startLineAdvantageComponent_header());
         liveAveragePanel.getElement().addClassName(
@@ -116,7 +116,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         @Override
         public void changeStartLineAdvatageComponentsStateToOtherState(
                 StartLineAdvantageComponent startLineAdvantageComponent) {
-            startLineAdvantageComponent.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
+            startLineAdvantageComponent.header.setInnerText(stringConstants.dashboardStartlineAdvantagesByWind());
             startLineAdvantageComponent.startLineAdvantageComponentState = startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry;
             startLineAdvantageComponent.liveNumber
                     .setInnerText(startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry

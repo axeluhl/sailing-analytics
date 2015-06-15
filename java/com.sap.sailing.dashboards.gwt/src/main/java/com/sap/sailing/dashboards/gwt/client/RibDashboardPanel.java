@@ -24,7 +24,7 @@ import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverP
 import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.WrongDeviceOrientationNotification;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComponent;
-import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
+import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesByWindComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -63,9 +63,9 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField
     HTMLPanel rightwindbotcontainer;
-
+    
     @UiField(provided = true)
-    public StartLineAdvantageComponent startLineCAComponent;
+    StartlineAdvantagesByWindComponent startlineAdvantagesByWindComponent;
 
     @UiField
     public DivElement windloadinghintleft;
@@ -90,7 +90,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         windBotComponents = new ArrayList<WindBotComponent>();
         ribDashboardDataRetriever.addDataObserver(this);
         startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
-        startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
+        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(ribDashboardService);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
