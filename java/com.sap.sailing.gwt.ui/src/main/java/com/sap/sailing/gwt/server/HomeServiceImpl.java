@@ -14,9 +14,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -42,8 +39,8 @@ import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesSt
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
@@ -57,9 +54,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.common.media.ImageSize;
-import com.sap.sse.common.media.MediaType;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -67,7 +66,6 @@ import com.sap.sse.util.ServiceTrackerFactory;
  */
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
     private static final long serialVersionUID = 3947782997746039939L;
-    private static final Logger logger = Logger.getLogger(HomeServiceImpl.class.getName());
     
     private static final int MAX_STAGE_EVENTS = 5;
     private static final int MAX_RECENT_EVENTS = 3;
@@ -184,14 +182,14 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
-            Iterable<URL> videosOfEvent = holder.event.getVideoURLs();
+            Iterable<VideoDescriptor> videosOfEvent = holder.event.getVideos();
             if (!Util.isEmpty(videosOfEvent) && result.getVideos().size() < MAX_VIDEO_COUNT) {
-                URL youTubeRandomUrl = HomeServiceUtil.getRandomURL(videosOfEvent);
+                VideoDescriptor youTubeRandomUrl = HomeServiceUtil.getRandomVideo(videosOfEvent);
 
-                MimeType type = MediaUtils.detectMimeTypeFromUrl(youTubeRandomUrl.toString());
-                if (type.mediaType == MediaType.video) {
-                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.toString(), type, //
-                            holder.event.getEndDate().asDate() // FIXME: using event enddate for now
+                MimeType type = youTubeRandomUrl.getMimeType();
+                if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.getURL().toString(), type, //
+                            youTubeRandomUrl.getCreatedAtDate().asDate()
                             );
                     candidate.setTitle(holder.event.getName());
                     result.addVideo(candidate);
@@ -218,22 +216,18 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             EventBase event = holder.event;
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
-            for (URL url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
-                try {
-                    ImageSize imageSize = event.getImageSize(url);
-                    if(imageSize != null) {
-                        // TODO: do we habe a title?
-                        photoGalleryUrls.add(new SailingImageDTO(eventRef, url.toString(), imageSize, null));
-                    }
-                } catch (Exception e) {
+            for (ImageDescriptor url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
+                if(url.hasSize()) {
+                    SailingImageDTO sailingImageDTO = new SailingImageDTO(eventRef, url.getURL().toString(), null);
+                    sailingImageDTO.setSizeInPx(url.getWidthInPx(), url.getHeightInPx());
+                    photoGalleryUrls.add(sailingImageDTO);
                 }
             }
-            for (URL videoUrl : event.getVideoURLs()) {
-                
-                MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl.toString());
-                if (type.mediaType == MediaType.video) {
-                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl.toString(), type, //
-                            holder.event.getEndDate().asDate() // FIXME: using event enddate for now
+            for (VideoDescriptor videoUrl : event.getVideos()) {
+                MimeType type = videoUrl.getMimeType();
+                if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl.getURL().toString(), type, //
+                            videoUrl.getCreatedAtDate().asDate()
                     );
                     candidate.setTitle(holder.event.getName());
                     videoCandidates.add(candidate);
@@ -282,7 +276,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         EventViewDTO dto = new EventViewDTO();
         mapToMetadataDTO(event, dto);
         
-        dto.setLogoImageURL(event.getLogoImageURL() == null ? null : event.getLogoImageURL().toString());
+        ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
+        dto.setLogoImage(logoImage != null ? convertToImageDTO(logoImage) : null);
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
@@ -374,7 +369,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         EventSeriesViewDTO dto = new EventSeriesViewDTO();
         dto.setId(id);
-        dto.setLogoImageURL(o.getLogoImageURL() == null ? null : o.getLogoImageURL().toString());
+        ImageDescriptor logoImage = o.findImageWithTag(MediaTagConstants.LOGO);
+        dto.setLogoImage(logoImage != null ? convertToImageDTO(logoImage) : null);
         // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);
         
@@ -431,25 +427,20 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         EventReferenceDTO eventRef = new EventReferenceDTO(event);
 
         String eventName = event.getName();
-        // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
-        for(URL url : HomeServiceUtil.getPhotoGalleryImageURLs(event)) {
-            ImageSize imageSize = null;
-            try {
-                imageSize = event.getImageSize(url);
-            } catch (InterruptedException | ExecutionException e) {
-                logger.log(Level.FINE, "Was unable to obtain image size for "+url+" earlier.", e);
-            }
-            SailingImageDTO entry = new SailingImageDTO(eventRef, url.toString(), imageSize, //
-                    event.getEndDate().asDate() // FIXME: using the event end date for now, we need a better solution for migration
-                    );
-            entry.setTitle(eventName);
+        for(ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
+            SailingImageDTO entry = new SailingImageDTO(eventRef, image.getURL().toString(), image.getCreatedAtDate().asDate());
+            entry.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+            entry.setTitle(image.getTitle() != null ? image.getTitle(): eventName);
+            entry.setSubtitle(image.getSubtitle());
+            entry.setTags(image.getTags());
+            entry.setCopyright(image.getCopyright());
             media.addPhoto(entry);
         }
-        for(URL url : event.getVideoURLs()) {
-            MimeType type = MediaUtils.detectMimeTypeFromUrl(url.toString());
-            if (type.mediaType == MediaType.video) {
-                SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url.toString(), type, null);
+        for(VideoDescriptor url : event.getVideos()) {
+            MimeType type = url.getMimeType();
+            if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+                SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url.getURL().toString(), type, null);
                 media.addVideo(candidate);
             }
         }
@@ -534,5 +525,21 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
         return null;
+    }
+    
+    private ImageDTO convertToImageDTO(ImageDescriptor image) {
+        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
+        result.setCopyright(image.getCopyright());
+        result.setTitle(image.getTitle());
+        result.setSubtitle(image.getSubtitle());
+        result.setMimeType(image.getMimeType());
+        result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
+        List<String> tags = new ArrayList<String>();
+        for(String tag: image.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
     }
 }
