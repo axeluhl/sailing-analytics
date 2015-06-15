@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.places.event;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 
 public interface EventView {
 
@@ -10,7 +11,9 @@ public interface EventView {
     void setSailorInfos(String description, String buttonLabel, String url);
     
     public interface Presenter {
-        EventContext getCxt();
+        EventContext getCtx();
+
+        DispatchSystem getDispatch();
     }
 }
 

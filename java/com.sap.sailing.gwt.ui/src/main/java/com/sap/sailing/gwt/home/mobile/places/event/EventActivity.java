@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
@@ -58,8 +59,11 @@ public class EventActivity extends AbstractActivity implements Presenter {
     }
     
     @Override
-    public EventContext getCxt() {
+    public EventContext getCtx() {
         return place.getCtx();
     }
 
+    public DispatchSystem getDispatch() {
+        return clientFactory.getDispatch();
+    }
 }

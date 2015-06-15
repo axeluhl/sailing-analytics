@@ -3,6 +3,7 @@
 	xmlns:ui="urn:ui:com.google.gwt.uibinder" 
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
     xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.places.event"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	>
 	<ui:with 
@@ -20,9 +21,6 @@
    			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
    			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
    		</div>
-   		<p>THE EVENT VIEW</p>
-   		
-   		The event view...
-   		
+		<p:overview.EventOverviewStage ui:field="overviewStageUi" />		
 	</g:HTMLPanel>
 </ui:UiBinder>    
