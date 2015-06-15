@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class EventViewDTO extends EventMetadataDTO {
 
@@ -19,7 +20,7 @@ public class EventViewDTO extends EventMetadataDTO {
     private boolean hasMedia;
     private boolean hasAnalytics;
     private String seriesName;
-    private String logoImageURL;
+    private ImageDTO logoImage;
     private String officialWebsiteURL;
     private String sailorsInfoURL;
 
@@ -87,12 +88,12 @@ public class EventViewDTO extends EventMetadataDTO {
         return false;
     }
 
-    public void setLogoImageURL(String logoImageURL) {
-        this.logoImageURL = logoImageURL;
+    public void setLogoImage(ImageDTO logoImage) {
+        this.logoImage = logoImage;
     }
     
-    public String getLogoImageURL() {
-        return logoImageURL;
+    public ImageDTO getLogoImage() {
+        return logoImage;
     }
 
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
