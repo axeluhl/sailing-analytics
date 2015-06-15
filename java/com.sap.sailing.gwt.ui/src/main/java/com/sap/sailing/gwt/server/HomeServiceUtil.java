@@ -185,12 +185,7 @@ public final class HomeServiceUtil {
     }
     
     public static boolean hasPhotos(Event event) {
-        for(ImageDescriptor image : event.getImages()) {
-            if(!hasTag(image, MediaTagConstants.TEASER)) {
-                return true;
-            }
-        }
-        return false;
+        return event.hasImageWithTag(MediaTagConstants.GALLERY);
     }
     
     public static boolean hasVideos(Event event) {
