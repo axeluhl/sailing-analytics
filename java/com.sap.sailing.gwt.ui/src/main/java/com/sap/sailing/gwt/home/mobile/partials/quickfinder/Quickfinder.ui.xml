@@ -1,14 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
-	<ui:with field="res"
-		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
-
+	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:style gss="true">
 	.quickfinder {
 		font-size: 1rem;
 		text-align: center;
 		padding: 0.666666666666667em;
-	
 	}
 	
 	.quickfinder_select {
@@ -34,9 +31,6 @@
 	
 	</ui:style>
 	<div class="{style.quickfinder}">
-		<select ui:field="selectUi"  class="{style.quickfinder_select}">
-			<option selected="selected" disabled="disabled"></option>
-			
-		</select>
+		<select ui:field="selectUi"  class="{style.quickfinder_select}"></select>
 	</div>
 </ui:UiBinder>

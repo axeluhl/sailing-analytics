@@ -8,11 +8,17 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.OptGroupElement;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Quickfinder extends Widget {
+public class Quickfinder extends Widget implements HasSelectionHandlers<String> {
     private static QuickfinderUiBinder uiBinder = GWT.create(QuickfinderUiBinder.class);
 
     interface QuickfinderUiBinder extends UiBinder<Element, Quickfinder> {
@@ -22,26 +28,35 @@ public class Quickfinder extends Widget {
 
     @UiField
     protected SelectElement selectUi;
-
+    
     public Quickfinder() {
         setElement(uiBinder.createAndBindUi(this));
+        Event.sinkEvents(selectUi, Event.ONCHANGE);
+        Event.setEventListener(selectUi, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                OptionElement oe = event.getEventTarget().cast();
+                SelectionEvent.fire(Quickfinder.this, oe.getValue());
+            }
+        });        
+    }
+    
+    @Override
+    public HandlerRegistration addSelectionHandler(SelectionHandler<String> handler) {
+        return addHandler(handler, SelectionEvent.getType());
     }
 
+    public void addPlaceholderItem(String label, String value) {
+        addItemToElement(selectUi, label, value, true, true);
+    }
 
     public void addItem(String label, String value) {
-        OptionElement oe = Document.get().createOptionElement();
-        oe.setLabel(label);
-        oe.setValue(value);
-        selectUi.appendChild(oe);
+        addItemToElement(selectUi, label, value, false, false);
     }
 
     public void addItemToGroup(String groupLabel, String itemLabel, String value) {
-
         OptGroupElement oge = createorFindGroup(groupLabel);
-        OptionElement oe = Document.get().createOptionElement();
-        oe.setLabel(itemLabel);
-        oe.setValue(value);
-        oge.appendChild(oe);
+        addItemToElement(oge, itemLabel, value, false, false);
     }
 
     public void addGroup(String label) {
@@ -60,6 +75,15 @@ public class Quickfinder extends Widget {
             selectUi.appendChild(oge);
         }
         return oge;
+    }
+    
+    private void addItemToElement(Element parent, String label, String value, boolean selected, boolean disabled) {
+        OptionElement oe = Document.get().createOptionElement();
+        oe.setLabel(label);
+        oe.setValue(value);
+        oe.setDefaultSelected(selected);
+        oe.setDisabled(disabled);
+        parent.appendChild(oe);
     }
 
 }
