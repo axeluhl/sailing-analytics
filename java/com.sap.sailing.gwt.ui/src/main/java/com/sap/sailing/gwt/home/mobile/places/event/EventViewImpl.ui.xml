@@ -16,9 +16,9 @@
 	</ui:style>		
    	<g:HTMLPanel>
    		<div class="{style.headerWrapper}">
-   		<mp:eventheader.EventHeader />
-   		<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
-   		<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi"/> 
+   			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
+   			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
+   			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
    		</div>
    		<p>THE EVENT VIEW</p>
    		

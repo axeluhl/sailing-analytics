@@ -29,6 +29,8 @@ public class MobileApplicationClientFactory {
         return homeService;
     }
 
-
+    public PlaceController getPlaceController() {
+        return placeController;
+    }
 
 }

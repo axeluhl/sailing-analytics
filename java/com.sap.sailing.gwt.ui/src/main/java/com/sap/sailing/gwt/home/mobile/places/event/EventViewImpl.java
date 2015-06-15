@@ -6,6 +6,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
+import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 
 public class EventViewImpl extends Composite implements EventView {
@@ -14,14 +16,15 @@ public class EventViewImpl extends Composite implements EventView {
     interface StartPageViewUiBinder extends UiBinder<Widget, EventViewImpl> {
     }
 
-    @UiField
-    SimpleInfoBlock sailorInfoUi;
+    @UiField(provided = true) EventHeader eventHeaderUi;
+    @UiField Quickfinder quickFinderUi;
+    @UiField SimpleInfoBlock sailorInfoUi;
 
     private Presenter currentPresenter;
 
-
     public EventViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
+        eventHeaderUi = new EventHeader(presenter.getCxt().getEventDTO());
         initWidget(uiBinder.createAndBindUi(this));
     }
 

@@ -1,32 +1,65 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.UUID;
+
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
-public class EventActivity extends AbstractActivity implements
- Presenter {
+public class EventActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractEventPlace place;
 
+    
+    
     public EventActivity(AbstractEventPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.place = place;
     }
 
     @Override
-    public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+    public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+        if(place.getCtx().getEventDTO() == null) {
+            final UUID eventUUID = UUID.fromString(place.getCtx().getEventId());
+            
+            clientFactory.getHomeService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
+                @Override
+                public void onSuccess(final EventViewDTO event) {
+                    place.getCtx().updateContext(event);
+                    initUi(panel, eventBus);
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO @FM: extract text?
+                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
+                    // TODO @FM: reload sinnvoll hier?
+                    errorPlace.setComingFrom(place);
+                    clientFactory.getPlaceController().goTo(errorPlace);
+                }
+            });
+        } else {
+            initUi(panel, eventBus);
+        }
+    }
+    
+    private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
         final EventView view = new EventViewImpl(this);
         panel.setWidget(view.asWidget());
-
-        
         view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), "");
-        
     }
-
+    
+    @Override
+    public EventContext getCxt() {
+        return place.getCtx();
+    }
 
 }
