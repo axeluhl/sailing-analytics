@@ -21,6 +21,7 @@
    			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
    			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
    		</div>
-		<p:overview.EventOverviewStage ui:field="overviewStageUi" />		
+		<p:overview.EventOverviewStage ui:field="overviewStageUi" />
+		<mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />		
 	</g:HTMLPanel>
 </ui:UiBinder>    

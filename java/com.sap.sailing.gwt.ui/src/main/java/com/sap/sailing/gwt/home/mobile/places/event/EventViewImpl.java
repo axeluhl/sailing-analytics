@@ -13,12 +13,15 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
+import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
+import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class EventViewImpl extends Composite implements EventView {
+    private static final StringMessages MSG = StringMessages.INSTANCE;
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
     interface StartPageViewUiBinder extends UiBinder<Widget, EventViewImpl> {
@@ -27,8 +30,8 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField(provided = true) EventHeader eventHeaderUi;
     @UiField Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock sailorInfoUi;
-    @UiField(provided = true)
-    EventOverviewStage overviewStageUi;
+    @UiField(provided = true) EventOverviewStage overviewStageUi;
+    @UiField StatisticsBox statisticsBoxUi;
     
     private Presenter currentPresenter;
 
@@ -50,10 +53,18 @@ public class EventViewImpl extends Composite implements EventView {
     
     @Override
     public void setQuickFinderValues(List<RegattaMetadataDTO> regattaMetadatas) {
-        quickFinderUi.addPlaceholderItem(StringMessages.INSTANCE.resultsQuickfinder(), null);
+        quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
         for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
             quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), regattaMetadata.getId());
         }
+    }
+    
+    @Override
+    public void setStatistics(StatisticsDTO statistics) {
+        statisticsBoxUi.addItem(StatisticsBox.ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
+        statisticsBoxUi.addItem(StatisticsBox.ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
+        statisticsBoxUi.addItem(StatisticsBox.ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
+        statisticsBoxUi.addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
     }
 
     @Override
