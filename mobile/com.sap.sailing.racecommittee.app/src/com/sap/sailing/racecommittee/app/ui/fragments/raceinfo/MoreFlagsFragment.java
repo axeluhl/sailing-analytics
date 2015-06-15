@@ -208,8 +208,9 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
         private void setFinishTime(boolean current) {
             TimePoint finishTime;
+            TimePoint now = MillisecondsTimePoint.now();
             if (current) {
-                finishTime = MillisecondsTimePoint.now();
+                finishTime = now;
             } else {
                 finishTime = getFinishTime();
             }
@@ -217,7 +218,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             case 1: // Race-State: Finishing -> End Finishing
                 FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
                 if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                    if (finishTime.before(MillisecondsTimePoint.now())) {
+                    if (finishTime == now || finishTime.before(now)) {
                         if (ftf.analyze().before(finishTime)) {
                             getRaceState().setFinishedTime(finishTime);
                         } else {
@@ -234,9 +235,9 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             default: // Race-State: Running -> Start Finishing
                 StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
                 if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
-                    if (finishTime.before(MillisecondsTimePoint.now())) {
+                    if (finishTime == now || finishTime.before(now)) {
                         if (stf.analyze().before(finishTime)) {
-                            getRace().getState().setFinishingTime(finishTime);
+                            getRaceState().setFinishingTime(finishTime);
                         } else {
                             Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
                         }
