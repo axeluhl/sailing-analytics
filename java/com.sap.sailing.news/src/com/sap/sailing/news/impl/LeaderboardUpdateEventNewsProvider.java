@@ -15,6 +15,11 @@ import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.EventNewsProvider;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * An event news provider looking at leaderboard updates triggered by changes of timePointOfLatestModification 
+ * @author Frank
+ *
+ */
 public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
 
     @Override
