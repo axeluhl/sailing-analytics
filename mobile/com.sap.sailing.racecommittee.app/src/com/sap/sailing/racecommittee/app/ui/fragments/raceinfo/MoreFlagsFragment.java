@@ -218,31 +218,30 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             case 1: // Race-State: Finishing -> End Finishing
                 FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
                 if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                    if (finishTime == now || finishTime.before(now)) {
+                    if (finishTime.after(now)) {
+                        Toast.makeText(getActivity(), "The given finish time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
+                    } else {
                         if (ftf.analyze().before(finishTime)) {
                             getRaceState().setFinishedTime(finishTime);
                         } else {
-                            Toast
-                                .makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG)
-                                .show();
+                            Toast.makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
                         }
-                    } else {
-                        Toast.makeText(getActivity(), "The given finish time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
                     }
+
                 }
                 break;
 
             default: // Race-State: Running -> Start Finishing
                 StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
                 if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
-                    if (finishTime == now || finishTime.before(now)) {
+                    if (finishTime.after(now)) {
+                        Toast.makeText(getActivity(), "The selected time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
+                    } else {
                         if (stf.analyze().before(finishTime)) {
                             getRaceState().setFinishingTime(finishTime);
                         } else {
                             Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
                         }
-                    } else {
-                        Toast.makeText(getActivity(), "The selected time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
                     }
                 }
                 break;
