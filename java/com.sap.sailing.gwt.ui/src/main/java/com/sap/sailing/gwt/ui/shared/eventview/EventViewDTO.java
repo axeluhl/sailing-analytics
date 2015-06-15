@@ -110,4 +110,12 @@ public class EventViewDTO extends EventMetadataDTO {
     public void setSailorsInfoURL(String sailorsInfoURL) {
         this.sailorsInfoURL = sailorsInfoURL;
     }
+    
+    public String getLocationAndVenueAndCountry() {
+        String venue = getLocationAndVenue();
+        if(getVenueCountry() != null && !getVenueCountry().isEmpty()) {
+            return venue + ", " + getVenueCountry();
+        }
+        return venue;
+    }
 }

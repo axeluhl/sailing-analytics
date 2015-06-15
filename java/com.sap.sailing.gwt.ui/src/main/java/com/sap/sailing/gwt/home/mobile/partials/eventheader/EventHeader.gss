@@ -81,12 +81,15 @@
 .eventheader_info_subtitlereduced {
   display: none;
 }
-img.eventheader_info_subtitle_logo {
+.eventheader_info_subtitle_logo {
   width: 2.692307692307693em;
   height: 2.692307692307693em;
   display: inline-block;
   vertical-align: top;
   background: #f6f9fc;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 .eventheader_info_subtitle_info {
   display: inline-block;
