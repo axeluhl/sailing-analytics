@@ -1,9 +1,12 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
 
 /**
  * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.
@@ -36,6 +39,24 @@ public abstract class DataManager implements ReadonlyDataManager {
 
     public Context getContext() {
         return context;
+    }
+
+    /**
+     * Resets the data store properly
+     */
+    public void resetAll() {
+        unloadAllRaces();
+        InMemoryDataStore.INSTANCE.reset();
+    }
+
+    /**
+     * Properly unloading of all races by first unloading them from the race state service
+     */
+    public void unloadAllRaces() {
+        // It's not needed to call getDataStore().getRaces().clear() because it's already called by the service internally.
+        Intent intent = new Intent(context, RaceStateService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
+        context.startService(intent);
     }
 
 }
