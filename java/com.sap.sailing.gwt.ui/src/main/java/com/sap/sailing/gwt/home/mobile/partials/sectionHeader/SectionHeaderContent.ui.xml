@@ -1,0 +1,43 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
+  <g:HTMLPanel>
+    <!-- IF subtitle ADD class 'section-header__item--double-row' -->
+    <div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemdoublerow}">
+      <!-- IF END -->
+      <!-- IF image -->
+      <div style="background-image: url('<!-- image url -->')" class="{local_res.css.sectionheader_item_image}">
+        <div class="{local_res.css.sectionheader_item_image_seperator}"></div>
+      </div>
+      <!-- IF END -->
+      <!-- IF title -->
+      <h2 class="{local_res.css.sectionheader_item_title}">
+        <!-- title -->
+      </h2>
+      <!-- IF END -->
+      <!-- IF label -->
+      <div data-labeltype="<!-- label -->" class="{local_res.css.sectionheader_item_label} {res.mainCss.label}">
+        <!-- label -->
+      </div>
+      <!-- IF END -->
+      <!-- IF subtitle -->
+      <div class="{local_res.css.sectionheader_item_subtitle}">
+        <!-- subtitle -->
+      </div>
+      <!-- IF END -->
+    </div>
+    <div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}">
+      <!-- IF infoText -->
+      <div class="{local_res.css.sectionheader_item_infotext}">
+        <!-- infoText -->
+      </div>
+      <!-- IF END -->
+      <!-- IF link -->
+      <img src="images/home/arrow-grey-right.png" alt="" class="{local_res.css.sectionheader_item_arrow}"></img>
+      <!-- IF END -->
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>
