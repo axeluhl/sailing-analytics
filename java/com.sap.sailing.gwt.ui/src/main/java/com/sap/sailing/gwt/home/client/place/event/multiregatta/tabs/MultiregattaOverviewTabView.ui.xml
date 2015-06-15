@@ -3,18 +3,13 @@
   			 xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive"
   			 xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview">
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  	<ui:style>
-  		.space-top {
-			margin-top: 2em;
-		}
-  	</ui:style>
   <g:HTMLPanel>
     <o:EventOverviewStage ui:field="stage" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <r:RacesListLive ui:field="racesListLive" addStyleNames="{style.space-top}" />
+        <r:RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmediumbig}" />
       </div>
     </div>
-    <g:SimplePanel ui:field="content" addStyleNames="{style.space-top}" />
+    <g:SimplePanel ui:field="content" />
   </g:HTMLPanel>
 </ui:UiBinder>

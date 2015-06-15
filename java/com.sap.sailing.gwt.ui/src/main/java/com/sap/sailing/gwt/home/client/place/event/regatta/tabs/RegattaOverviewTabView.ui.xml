@@ -7,7 +7,7 @@
     <o:EventOverviewStage ui:field="stage" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <r:RacesListLive ui:field="racesListLive" />
+        <r:RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmediumbig}" />
       </div>
     </div>
   </g:HTMLPanel>
