@@ -55,7 +55,11 @@ public class EventActivity extends AbstractActivity implements Presenter {
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
         final EventView view = new EventViewImpl(this);
         panel.setWidget(view.asWidget());
-        view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), "");
+        String sailorInfoUrl = place.getCtx().getEventDTO().getSailorsInfoURL();
+        if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
+            view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
+        }
+        
     }
     
     @Override
