@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -43,7 +44,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
         } else {
             final UUID eventUUID = UUID.fromString(ctx.getEventId());
             
-            clientFactory.getHomeService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
+            clientFactory.getDispatch().execute(new GetEventViewAction(eventUUID), new AsyncCallback<EventViewDTO>() {
                 @Override
                 public void onSuccess(final EventViewDTO event) {
                     ctx.updateContext(event);

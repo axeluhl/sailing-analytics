@@ -979,10 +979,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         try {
             for (DBObject object : eventCollection.find()) {
                 Event event = loadEvent(object);
-                boolean hasMigratedSomething = loadLegacyImageAndVideoURLs(event, object);
-                if(hasMigratedSomething) {
-                    new MongoObjectFactoryImpl(database).storeEvent(event);
-                }
+                loadLegacyImageAndVideoURLs(event, object);
                 result.add(event);
             }
         } catch (Exception e) {
