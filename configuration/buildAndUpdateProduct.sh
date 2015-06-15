@@ -651,7 +651,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
         ./gradlew clean build | tee -a $START_DIR/build.log
-        if [[ $? != 0 ]]; then
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
         # testing deactivated due to errors in hudson
@@ -673,7 +673,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             fi
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
-            if [[ $? != 0 ]]; then
+            if [[ ${PIPESTATUS[0]} != 0 ]]; then
               adb emu kill
               "$ANDROID" delete avd --name ${AVD_NAME}
               exit 101
