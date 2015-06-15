@@ -3,6 +3,7 @@ package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -40,8 +41,11 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     public StartlineAdvantagesByWindComponent(RibDashboardServiceAsync ribDashboardService) {
         startlineAdvantagesOnLineChart = new StartlineAdvantagesOnLineChart(ribDashboardService);
         advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWind(), "s");
+        advantageMaximumLiveAverage.header.getStyle().setFontSize(14, Unit.PT);
+        advantageMaximumLiveAverage.liveLabel.setInnerHTML("advantage max.");
+        advantageMaximumLiveAverage.averageLabel.setInnerHTML("advantage max. average "+StringMessages.INSTANCE.dashboardAverageWindMinutes(15));
         initWidget(uiBinder.createAndBindUi(this));
-        advantageMaximumLiveAverage.updateValues("55", "43");
+        advantageMaximumLiveAverage.updateValues("55.7", "43.9");
     }
     
     @Override

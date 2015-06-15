@@ -130,14 +130,23 @@
 	height: 200%;
 }
 
-.startlineadvantagepanel {
+.startline_advantage_by_wind_container {
 	position: absolute;
 	background-color: white;
-	top: 0pt;
+	top: 27%;
 	right: 0pt;
 	left: 0pt;
-	bottom: 30%;
-	margin-bottom: 5pt;
+	bottom: 0%;
+}
+
+.startline_advantage_by_geometry_container {
+	position: absolute;
+	background-color: white;
+	top: 0%;
+	right: 0pt;
+	left: 0pt;
+	bottom: 73%;
+	margin-bottom: 10pt;
 }
 
 .hintpanel {
