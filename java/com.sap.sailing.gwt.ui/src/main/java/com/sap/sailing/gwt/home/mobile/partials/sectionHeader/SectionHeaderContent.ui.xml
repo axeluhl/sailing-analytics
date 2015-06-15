@@ -9,7 +9,7 @@
     <div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemdoublerow}">
       <!-- IF END -->
       <!-- IF image -->
-      <div style="background-image: url('<!-- image url -->')" class="{local_res.css.sectionheader_item_image}">
+      <div style="background-image: url('')" class="{local_res.css.sectionheader_item_image}">
         <div class="{local_res.css.sectionheader_item_image_seperator}"></div>
       </div>
       <!-- IF END -->
@@ -19,7 +19,7 @@
       </h2>
       <!-- IF END -->
       <!-- IF label -->
-      <div data-labeltype="<!-- label -->" class="{local_res.css.sectionheader_item_label} {res.mainCss.label}">
+      <div data-labeltype="live" class="{local_res.css.sectionheader_item_label} {res.mainCss.label}">
         <!-- label -->
       </div>
       <!-- IF END -->

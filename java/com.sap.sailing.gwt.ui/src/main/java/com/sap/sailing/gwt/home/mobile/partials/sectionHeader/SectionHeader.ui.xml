@@ -6,7 +6,7 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.grid}">
-			<a href="<!-- link url -->" title="<!-- title -->">
+			<a href="#" title="TODO">
 				<!-- IF isStandalone ADD class 'section-header--stand-alone' -->
 				<div class="{local_res.css.sectionheader} {res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.sectionheaderstandalone}">
 					<!-- IF END -->
@@ -18,8 +18,7 @@
 			<!-- IF isStandalone ADD class 'section-header--stand-alone' -->
 			<div class="{local_res.css.sectionheader} {res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.sectionheaderstandalone}">
 				<!-- IF END -->
-				<mp:sectionHeader.SectionHeaderContent ui:field='image'	ui:field='title' ui:field='label' 
-					ui:field='subtitle' ui:field='infoText'	ui:field='link'/>
+				<mp:sectionHeader.SectionHeaderContent />
 			</div>
 		</div>
 	</g:HTMLPanel>
