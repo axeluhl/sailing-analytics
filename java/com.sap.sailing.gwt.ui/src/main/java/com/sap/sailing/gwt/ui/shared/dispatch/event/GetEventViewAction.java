@@ -120,7 +120,7 @@ public class GetEventViewAction implements Action<EventViewDTO> {
 
     @GwtIncompatible
     private RegattaMetadataDTO createRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getName());
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
         regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
