@@ -2064,8 +2064,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String copyright = (String) dbObject.get(FieldNames.IMAGE_COPYRIGHT.name());
             String localeRaw = (String)  dbObject.get(FieldNames.IMAGE_LOCALE.name());
             Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
-            Integer imageWidth = (Integer) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
-            Integer imageHeight = (Integer) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
+            Number imageWidth = (Number) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
+            Number imageHeight = (Number) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.IMAGE_CREATEDATDATE);
             BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.IMAGE_TAGS.name());
             List<String> imageTags = new ArrayList<String>();
@@ -2081,7 +2081,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             image.setLocale(locale);
             image.setTags(imageTags);
             if (imageWidth != null && imageHeight != null) {
-                image.setSize(imageWidth, imageHeight);
+                image.setSize(imageWidth.intValue(), imageHeight.intValue());
             }
         }
         return image;
@@ -2100,7 +2100,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.VIDEO_CREATEDATDATE);
             BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.VIDEO_TAGS.name());
-            Integer lengthInSeconds = (Integer) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
+            Number lengthInSeconds = (Number) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
             URL thumbnailURL = loadURL(dbObject, FieldNames.VIDEO_THUMBNAIL_URL);
             List<String> videoTags = new ArrayList<String>();
             if (tags != null) {
@@ -2114,7 +2114,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             video.setSubtitle(subtitle);
             video.setLocale(locale);
             video.setTags(videoTags);
-            video.setLengthInSeconds(lengthInSeconds);
+            video.setLengthInSeconds(lengthInSeconds == null ? null : lengthInSeconds.intValue());
             video.setThumbnailURL(thumbnailURL);
         }
         return video;

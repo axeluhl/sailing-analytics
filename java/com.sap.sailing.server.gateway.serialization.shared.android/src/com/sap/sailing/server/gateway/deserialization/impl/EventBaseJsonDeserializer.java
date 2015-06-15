@@ -160,10 +160,10 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             String copyright = (String) imageJson.get(EventBaseJsonSerializer.FIELD_COPYRIGHT);
             String localeRaw = (String)  imageJson.get(EventBaseJsonSerializer.FIELD_LOCALE);
             Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
-            Integer imageWidth = (Integer) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH_IN_PX);
-            Integer imageHeight = (Integer) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT_IN_PX);
-            Long createdAtDateInMs = (Long) imageJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
-            TimePoint createdAtDate = createdAtDateInMs != null ? new MillisecondsTimePoint(createdAtDateInMs) : null;
+            Number imageWidth = (Number) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH_IN_PX);
+            Number imageHeight = (Number) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT_IN_PX);
+            Number createdAtDateInMs = (Number) imageJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
+            TimePoint createdAtDate = createdAtDateInMs != null ? new MillisecondsTimePoint(createdAtDateInMs.longValue()) : null;
             JSONArray tags = (JSONArray) imageJson.get(EventBaseJsonSerializer.FIELD_TAGS);
             List<String> imageTags = new ArrayList<String>();
             if (tags != null) {
@@ -178,7 +178,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             image.setSubtitle(subtitle);
             image.setTags(imageTags);
             if (imageWidth != null && imageHeight != null) {
-                image.setSize(imageWidth, imageHeight);
+                image.setSize(imageWidth.intValue(), imageHeight.intValue());
             }
         }
         return image;
@@ -195,8 +195,8 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
             Object mimeTypeRaw = videoJson.get(EventBaseJsonSerializer.FIELD_MIMETYPE);
             MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
-            Long createdAtDateInMs = (Long) videoJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
-            TimePoint createdAtDate = createdAtDateInMs != null ? new MillisecondsTimePoint(createdAtDateInMs) : null;
+            Number createdAtDateInMs = (Number) videoJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
+            TimePoint createdAtDate = createdAtDateInMs != null ? new MillisecondsTimePoint(createdAtDateInMs.longValue()) : null;
             JSONArray tags = (JSONArray) videoJson.get(EventBaseJsonSerializer.FIELD_TAGS);
             Integer lengthInSeconds = (Integer) videoJson.get(EventBaseJsonSerializer.FIELD_VIDEO_LENGTH_IN_SECONDS);
             URL thumbnailURL = Helpers.getURLField(videoJson, EventBaseJsonSerializer.FIELD_VIDEO_THUMBNAIL_URL);
