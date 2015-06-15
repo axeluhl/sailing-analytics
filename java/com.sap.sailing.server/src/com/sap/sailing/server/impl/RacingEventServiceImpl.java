@@ -545,6 +545,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadLinksFromEventsToLeaderboardGroups();
+        storeLoadedEvents();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
@@ -641,6 +642,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
+    /** 
+     * Stores all events directly after loading them.
+     * This is a workaround for a problem with event migration code which requires storing an event after some changes.
+     * Because not all event data is stored in the event collection (e.g. LeaderboardGroup -> Event relation) the storeEvent
+     * method must be called AFTER the event object is fully initialized.
+     */
+    private void storeLoadedEvents() {
+        for(Event event: eventsById.values()) {
+            mongoObjectFactory.storeEvent(event);
+        }
+    }
+    
     private void loadLinksFromEventsToLeaderboardGroups() {
         domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */this, /* leaderboardGroupResolver */
                 this);
