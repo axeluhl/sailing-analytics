@@ -3,6 +3,7 @@ package com.sap.sailing.news.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
@@ -34,11 +35,17 @@ public class JsonEventNewsProvider implements EventNewsProvider {
 
     private static final Logger logger = Logger.getLogger(JsonEventNewsProvider.class.getName());
     
-    // TODO fmittag: use correct URL
-    private static final URL url = JsonEventNewsProvider.class.getResource("news.json");
+    private static URL staticNewsURL;
     
     private List<InfoEventNewsItem> news = new LinkedList<>();
     private long nextUpdate = 0;
+    
+    static {
+        try {
+            staticNewsURL = new URL("http://static.sapsailing.com/events_news/news.json");
+        } catch (MalformedURLException e) {
+        }
+    }
     
     public JsonEventNewsProvider() {
     }
@@ -53,8 +60,8 @@ public class JsonEventNewsProvider implements EventNewsProvider {
         try {
             BufferedReader bufferedReader = null;
             try {
-                logger.fine("Updating news from URL "+url);
-                URLConnection urlConnection = url.openConnection();
+                logger.fine("Updating news from URL "+staticNewsURL);
+                URLConnection urlConnection = staticNewsURL.openConnection();
                 urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
                 urlConnection.connect();
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -82,7 +89,7 @@ public class JsonEventNewsProvider implements EventNewsProvider {
                 }
             }
         } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch news from " + url, e);
+            logger.log(Level.INFO, "Exception trying to fetch news from " + staticNewsURL, e);
         }
     }
     
