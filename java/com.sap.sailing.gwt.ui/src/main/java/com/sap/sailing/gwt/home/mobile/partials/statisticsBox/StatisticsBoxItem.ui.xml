@@ -4,15 +4,9 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBoxResources" />
-	<g:HTMLPanel>
-		<div class="{local_res.css.statisticsbox_content_item}">
-			<img src="<!-- item.icon -->" class="{local_res.css.statisticsbox_content_item_icon}" />
-			<span class="{local_res.css.statisticsbox_content_item_name}">
-				<!-- item.name -->
-			</span>
-			<span class="{local_res.css.statisticsbox_content_item_value}">
-				<!-- item.value -->
-			</span>
-		</div>
-	</g:HTMLPanel>
+	<div class="{local_res.css.statisticsbox_content_item}">
+		<img class="{local_res.css.statisticsbox_content_item_icon}" ui:field="iconUi"/>
+		<span class="{local_res.css.statisticsbox_content_item_name}" ui:field="nameUi"><!-- item.name --></span>
+		<span class="{local_res.css.statisticsbox_content_item_value}" ui:field="valueUi"><!-- item.value --></span>
+	</div>
 </ui:UiBinder>
