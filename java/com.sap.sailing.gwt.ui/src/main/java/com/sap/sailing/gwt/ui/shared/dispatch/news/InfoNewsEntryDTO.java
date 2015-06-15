@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
+import java.util.Locale;
+
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.news.impl.InfoEventNewsItem;
 
@@ -12,9 +14,9 @@ public class InfoNewsEntryDTO extends NewsEntryDTO {
     }
 
     @GwtIncompatible
-    public InfoNewsEntryDTO(InfoEventNewsItem item) {
-        super(item.getTitle(), item.getCreatedAtDate(), item.getRelatedItemLink());
-        this.subtitle = item.getMessage();
+    public InfoNewsEntryDTO(InfoEventNewsItem item, Locale locale) {
+        super(item.getTitle(locale), item.getCreatedAtDate(), item.getRelatedItemLink());
+        this.subtitle = item.getMessage(locale);
     }
 
     @Override

@@ -6,9 +6,15 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,10 +67,12 @@ public class JsonEventNewsProvider implements EventNewsProvider {
                     String eventIdAsString = (String) eventAsJson.get("event");
                     Number timestamp = (Number) eventAsJson.get("timestamp");
                     String title = (String) eventAsJson.get("title");
+                    Map<Locale, String> titles = readI18nText(eventAsJson, "titles");
                     String message = (String) eventAsJson.get("message");
+                    Map<Locale, String> messages = readI18nText(eventAsJson, "messages");
                     String newsURL = (String) eventAsJson.get("url");
                     UUID eventId = UUID.fromString(eventIdAsString);
-                    InfoEventNewsItem newsItem = new InfoEventNewsItem(eventId, title, message, new Date(timestamp.longValue()), null, newsURL == null ? null : new URL(newsURL));
+                    InfoEventNewsItem newsItem = new InfoEventNewsItem(eventId, title, message, new Date(timestamp.longValue()), null, newsURL == null ? null : new URL(newsURL), titles, messages);
                     newNews.add(newsItem);
                 }
                 news = newNews;
@@ -78,6 +86,20 @@ public class JsonEventNewsProvider implements EventNewsProvider {
         }
     }
     
+    private Map<Locale, String> readI18nText(JSONObject eventAsJson, String field) {
+        Object object = eventAsJson.get(field);
+        if(object == null) {
+            return Collections.emptyMap();
+        }
+        JSONObject texts = (JSONObject) object;
+        Set<Entry<Object, Object>> entrySet = texts.entrySet();
+        Map<Locale, String> result = new HashMap<>();
+        for (Entry<Object, Object> entry : entrySet) {
+            result.put(Locale.forLanguageTag((String) entry.getKey()), (String) entry.getValue());
+        }
+        return result;
+    }
+
     @Override
     public Collection<? extends EventNewsItem> getNews(Event event) {
         if(nextUpdate < System.currentTimeMillis()) {

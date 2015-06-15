@@ -135,7 +135,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 
         for(EventNewsItem newsItem: newsItems) {
             if(newsItem instanceof InfoEventNewsItem) {
-                stage.addNews(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem));
+                stage.addNews(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem, dispatchContext.getClientLocale()));
             }
             if(newsItem instanceof LeaderboardUpdateNewsItem) {
                 stage.addNews(new LeaderboardNewsEntryDTO((LeaderboardUpdateNewsItem) newsItem));
