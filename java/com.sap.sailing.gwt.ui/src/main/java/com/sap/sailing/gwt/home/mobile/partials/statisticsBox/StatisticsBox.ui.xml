@@ -9,7 +9,7 @@
 	<mp:section.MobileSection ui:field="itemContainerUi">
 		<mp:header>
 			<mp:sectionHeader.SingleLineNoActionHeader 
-				sectionTitle="{i18n.statisticProvider}" />	
+				sectionTitle="{i18n.statistics}" />	
 		</mp:header>
 	</mp:section.MobileSection>
 </ui:UiBinder>
