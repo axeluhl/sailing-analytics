@@ -6,7 +6,7 @@ We run four servers for the event:
 - on EC2: **Master**, **Replika 1** and **2** with an **ELB** in front,
 - locally: **Cube-Server**
 
-For fast and available switching. The DB they use is called `KW2015`, and so is the replication channel. The git branch we use to merge the features we want to deploy to the event servers is called `XXX` and the git tag used to build a release for it is called `XXX-release`. See http://hudson.sapsailing.com/job/SAPSailingAnalytics-XXX/ and http://hudson.sapsailing.com/job/SAPSailingAnalytics-XXX-release/, respectively, for their Hudson jobs.
+For fast and available switching. The DB they use is called `KW2015`, and so is the replication channel. The git branch we use to merge the features we want to deploy to the event servers is called `kielerwoche2015` and the git tag used to build a release for it is called `XXX-release`. See http://hudson.sapsailing.com/job/SAPSailingAnalytics-XXX/ and http://hudson.sapsailing.com/job/SAPSailingAnalytics-XXX-release/, respectively, for their Hudson jobs.
 
 ### Master Server
 - Admin Console at http://ec2-54-154-151-10.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
