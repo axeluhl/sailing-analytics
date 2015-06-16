@@ -7,7 +7,6 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.news.impl.EventNewsProviderRegistryImpl;
 import com.sap.sailing.news.impl.EventNewsServiceImpl;
-import com.sap.sailing.news.impl.JsonEventNewsProvider;
 import com.sap.sailing.news.impl.LeaderboardUpdateEventNewsProvider;
 
 public class Activator implements BundleActivator {
@@ -19,7 +18,8 @@ public class Activator implements BundleActivator {
         context.registerService(EventNewsService.class, newsService, null);
         context.registerService(EventNewsProviderRegistry.class, providerRegistry, null);
         
-        providerRegistry.registerNewsProvider(new JsonEventNewsProvider());
+        // The json event news provider is only a fallback and should not be activated per default 
+        // providerRegistry.registerNewsProvider(new JsonEventNewsProvider());
         providerRegistry.registerNewsProvider(new LeaderboardUpdateEventNewsProvider());
         logger.info("EventNews Service registered.");
     }
