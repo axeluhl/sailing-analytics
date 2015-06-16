@@ -20,7 +20,8 @@ import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResult<NewsEntryDTO>>> {
     private UUID eventId;
     
-    public GetEventOverviewNewsAction() {
+    @SuppressWarnings("unused")
+    private GetEventOverviewNewsAction() {
     }
 
     public GetEventOverviewNewsAction(UUID eventId) {
