@@ -6,11 +6,13 @@ import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 
 @WithTokenizers({ //
 EventPlace.Tokenizer.class,//
         EventsPlace.Tokenizer.class,//
         EventDefaultPlace.Tokenizer.class,//
+        LatestNewsPlace.Tokenizer.class,//
         StartPlace.Tokenizer.class
 })
 public interface MobileHistoryMapper extends PlaceHistoryMapper {
