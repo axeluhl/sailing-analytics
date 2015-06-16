@@ -107,8 +107,9 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
         boolean sameProcedure = false;
         if (getRaceState().getRacingProcedure().getType() == procedureType) {
             sameProcedure = true;
+        } else {
+            getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         }
-        getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         if (TextUtils.isEmpty(className)) {
             if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                 openMainScheduleFragment();

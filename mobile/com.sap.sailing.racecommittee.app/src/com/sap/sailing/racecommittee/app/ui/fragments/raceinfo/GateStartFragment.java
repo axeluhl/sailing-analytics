@@ -325,6 +325,7 @@ public class GateStartFragment {
                         }
                         if (time_golf != null) {
                             golf = time_golf.getValue() * ONE_MINUTE_MILLISECONDS;
+
                         }
 
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
