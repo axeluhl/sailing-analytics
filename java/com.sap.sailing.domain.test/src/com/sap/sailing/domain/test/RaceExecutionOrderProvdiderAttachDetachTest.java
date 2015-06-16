@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -40,11 +41,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest {
 
-    RaceColumn raceColumn;
-    Series series;
-    Fleet fleet;
-    RaceColumnInSeries raceColumnInSeries;
     Regatta regatta;
+    Series series;
+    RaceColumnInSeries raceColumnInSeries;
+    RaceColumn raceColumn;
+    Fleet fleet;
+    FlexibleLeaderboard flexibleLeaderboard;
     DynamicTrackedRace dynamicTackedRace;
     RaceExecutionOrderProvider raceExecutionOrderProvider;
 

@@ -626,4 +626,9 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public boolean takesWindFix(Wind wind) {
         return false;
     }
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+        return null;
+    }
 }

@@ -29,6 +29,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -255,6 +256,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         if (raceDefinitionSetToUpdate != null) {
             raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition, result);
         }
+        result.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         addTrackedRace(result);
         return result;
     }
