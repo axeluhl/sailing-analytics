@@ -225,7 +225,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             flag = procedure.getStartModeFlag();
         }
         TimePoint now = MillisecondsTimePoint.now();
-        getRaceState().setAdvancePass(now);
         getRaceState().setRacingProcedure(now, mRacingProcedureType);
         getRaceState().forceNewStartTime(now, mStartTime);
         if (procedure != null) {
