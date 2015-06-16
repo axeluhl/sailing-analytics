@@ -6,13 +6,13 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.section.MobileSectionResources" />
 	<g:HTMLPanel styleName="local_res.css.section">
 		<div class="{res.mediaCss.grid}">
-			<div class=" {local_res.css.sectionHeader} {res.mediaCss.small12} {res.mediaCss.columns}">
+			<div ui:field="sectionHeaderHolderUi" class="{local_res.css.sectionHeader} {res.mediaCss.small12} {res.mediaCss.columns}">
 				<g:SimplePanel
 					ui:field="sectionHeaderUi" 
 					/>
 			</div>
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-				<g:SimplePanel 
+				<g:FlowPanel 
 					ui:field="sectionContentUi" 
 					styleName="{local_res.css.sectionContent}" />
 			</div>

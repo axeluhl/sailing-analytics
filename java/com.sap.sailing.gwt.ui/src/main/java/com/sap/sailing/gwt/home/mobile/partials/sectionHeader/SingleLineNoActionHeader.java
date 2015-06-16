@@ -26,4 +26,5 @@ public class SingleLineNoActionHeader extends Widget {
         titleUi.setInnerText(sectionHeaderTitle);
     }
 
+
 }

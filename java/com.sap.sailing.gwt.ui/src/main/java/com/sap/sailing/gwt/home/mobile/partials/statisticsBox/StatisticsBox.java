@@ -4,8 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 
 public class StatisticsBox extends Composite {
     
@@ -20,7 +20,7 @@ public class StatisticsBox extends Composite {
     }
 
     @UiField
-    FlowPanel itemContainerUi;
+    MobileSection itemContainerUi;
     
     public StatisticsBox() {
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
@@ -28,7 +28,7 @@ public class StatisticsBox extends Composite {
     }
     
     public void addItem(String iconUrl, String name, Integer count) {
-        itemContainerUi.add(new StatisticsBoxItem(iconUrl, name, count));
+        itemContainerUi.addContent(new StatisticsBoxItem(iconUrl, name, count));
     }
 
 }
