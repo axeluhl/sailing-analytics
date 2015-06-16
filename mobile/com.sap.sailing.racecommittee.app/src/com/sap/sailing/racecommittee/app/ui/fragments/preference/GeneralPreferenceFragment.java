@@ -25,8 +25,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
 
