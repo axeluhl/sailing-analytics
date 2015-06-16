@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -242,6 +243,13 @@ public class GateStartFragment {
                             .newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
                     }
                 });
+            }
+
+            View additional = ViewHolder.get(layout, R.id.addition_golf_time);
+            if (additional != null) {
+                if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
+                    additional.setVisibility(View.VISIBLE);
+                }
             }
 
             return layout;
