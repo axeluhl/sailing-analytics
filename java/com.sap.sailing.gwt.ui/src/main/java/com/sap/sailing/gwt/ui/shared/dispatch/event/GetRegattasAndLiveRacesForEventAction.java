@@ -40,7 +40,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
             @Override
             public void doForRace(RaceContext context) {
                 LiveRaceDTO liveRace = context.getLiveRaceOrNull();
-                if(liveRace == null) {
+                if(liveRace != null) {
                     Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regatta = ensureRegatta(regattasWithRaces, context);
                     regatta.getB().add(liveRace);
                 }
