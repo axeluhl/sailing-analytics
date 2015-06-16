@@ -57,7 +57,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
   * [[Uploading Media Content|wiki/uploading-media-content]]
 * Information for Event Managers
-  * [[Set up local network with replication server|event-network-with-replica]]
+  * [[Set up local network with replication server|wiki/event-network-with-replica]]
   * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Linking Race Videos|wiki/linking-race-videos]]
   * [[Import official results|wiki/results-import]]
