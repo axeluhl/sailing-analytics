@@ -476,4 +476,15 @@ public final class HomeServiceUtil {
         }
         return LocaleMatch.NO_MATCH;
     }
+    
+    public static RegattaMetadataDTO toRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getName());
+        regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+        regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
+        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
+        regattaDTO.setTrackedRacesCount(HomeServiceUtil.calculateTrackedRaceCount(leaderboard));
+        regattaDTO.setBoatClass(HomeServiceUtil.calculateBoatClass(leaderboard));
+        
+        return regattaDTO;
+    }
 }

@@ -6,12 +6,9 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBoxResources" />
 	<ui:with field="sh_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
 		
-	<mp:section.MobileSection>
+	<mp:section.MobileSection ui:field="itemContainerUi">
 		<mp:header>
-			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.statisticProvider}" />
+			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.statistics}" />
 		</mp:header>
-		<mp:content>
-			<g:FlowPanel ui:field="itemContainerUi" />
-		</mp:content>
 	</mp:section.MobileSection>
 </ui:UiBinder>

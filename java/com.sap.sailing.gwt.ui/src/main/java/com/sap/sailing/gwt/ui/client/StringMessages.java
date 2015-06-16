@@ -1311,4 +1311,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sailorInfo();
     String sailorInfoLongText();
     String resultsQuickfinder();
+
+    String statistics();
 }
