@@ -4,7 +4,7 @@
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.countdown.CountdownResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.countdown.CountdownResources" />
   <g:HTMLPanel addStyleNames="{local_res.css.countdown}">
       <div ui:field="image" class="{local_res.css.countdown_image}"></div>
       <div class="{local_res.css.countdown_content}">
