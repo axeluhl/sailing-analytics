@@ -76,57 +76,53 @@ public class RaceSummaryFragment extends BaseFragment {
 
     private void showData() {
         Calendar calendar = Calendar.getInstance();
-
         Calendar start = (Calendar) calendar.clone();
-        start.setTime(getRaceState().getStartTime().asDate());
+        if (getRaceState().getStartTime() != null) {
+            start.setTime(getRaceState().getStartTime().asDate());
+        }
         Calendar startTime = TimeUtils.floorTime(start);
-
         Calendar finishing = (Calendar) calendar.clone();
-        finishing.setTime(getRaceState().getFinishingTime().asDate());
+        if (getRaceState().getFinishingTime() != null) {
+            finishing.setTime(getRaceState().getFinishingTime().asDate());
+        }
         Calendar finishingTime = TimeUtils.floorTime(finishing);
-
         Calendar finished = (Calendar) calendar.clone();
-        finished.setTime(getRaceState().getFinishedTime().asDate());
-
+        if (getRaceState().getFinishedTime() != null) {
+            finished.setTime(getRaceState().getFinishedTime().asDate());
+        }
         Calendar finishedTime = TimeUtils.floorTime(finished);
-
-        if (mStartTime != null) {
+        if (mStartTime != null && getRaceState().getStartTime() != null) {
             mStartTime.setText(mDateFormat.format(startTime.getTime()));
         }
-
-        if (mFinishStartTime != null) {
+        if (mFinishStartTime != null && getRaceState().getFinishingTime() != null) {
             mFinishStartTime.setText(mDateFormat.format(finishingTime.getTime()));
         }
-
-        if (mFinishStartDuration != null) {
+        if (mFinishStartDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishingTime() != null) {
             mFinishStartDuration.setText(TimeUtils.calcDuration(startTime, finishingTime));
         }
-
-        if (mFinishEndTime != null) {
+        if (mFinishEndTime != null && getRaceState().getFinishedTime() != null) {
             mFinishEndTime.setText(mDateFormat.format(finishedTime.getTime()));
         }
-
-        if (mFinishEndDuration != null) {
+        if (mFinishEndDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishedTime() != null) {
             mFinishEndDuration.setText(TimeUtils.calcDuration(startTime, finishedTime));
         }
-
         if (mFinishDuration != null) {
             mFinishDuration.setText(TimeUtils.calcDuration(finishingTime, finishedTime));
         }
-
+    
         if (mRegionWind != null) {
             mRegionWind.setVisibility(View.GONE);
             if (getRaceState().getWindFix() != null) {
                 mRegionWind.setVisibility(View.VISIBLE);
-
+    
                 Wind wind = getRaceState().getWindFix();
-
+    
                 TextView direction = ViewHolder.get(getView(), R.id.wind_direction);
                 if (direction != null) {
                     String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom().getDegrees());
                     direction.setText(wind_direction);
                 }
-
+    
                 TextView speed = ViewHolder.get(getView(), R.id.wind_speed);
                 if (speed != null) {
                     String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value), wind.getKnots());
@@ -134,7 +130,7 @@ public class RaceSummaryFragment extends BaseFragment {
                 }
             }
         }
-
+    
         if (mRegionRecall != null) {
             mRegionRecall.setVisibility(View.GONE);
         }
