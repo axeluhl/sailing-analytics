@@ -510,8 +510,6 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            //Is this really save? What happen behind the curtains?
-            InMemoryDataStore.INSTANCE.reset();
             setupDataManager();
 
             addEventListFragment();
