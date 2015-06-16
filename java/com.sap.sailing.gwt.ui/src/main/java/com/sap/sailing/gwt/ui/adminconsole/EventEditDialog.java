@@ -8,7 +8,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sse.common.Util;
 
 public class EventEditDialog extends EventDialog {
     public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
@@ -37,22 +36,13 @@ public class EventEditDialog extends EventDialog {
         }
         officialWebsiteURLEntryField = createTextBox(event.getOfficialWebsiteURL());
         officialWebsiteURLEntryField.setVisibleLength(50);
-        logoImageURLEntryField = createTextBox(event.getLogoImageURL());
-        logoImageURLEntryField.setVisibleLength(50);
         courseAreaNameList.setValue(courseAreaNames);
-        List<String> imageURLStringsAsList = new ArrayList<>();
-        Util.addAll(event.getImageURLs(), imageURLStringsAsList);
-        imageURLList.setValue(imageURLStringsAsList);
-        List<String> videoURLStringsAsList = new ArrayList<>();
-        Util.addAll(event.getVideoURLs(), videoURLStringsAsList);
-        videoURLList.setValue(videoURLStringsAsList);
-        List<String> sponsorImageURLStringsAsList = new ArrayList<>();
-        Util.addAll(event.getSponsorImageURLs(), sponsorImageURLStringsAsList);
-        sponsorImageURLList.setValue(sponsorImageURLStringsAsList);
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
         }
         leaderboardGroupList.setValue(leaderboardGroupNames);
+        imagesListComposite.fillImages(event.getImages());
+        videosListComposite.fillVideos(event.getVideos());
     }
 }

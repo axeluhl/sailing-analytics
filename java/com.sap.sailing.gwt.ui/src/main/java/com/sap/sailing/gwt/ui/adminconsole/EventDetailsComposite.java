@@ -23,8 +23,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class EventDetailsComposite extends Composite  {
     private EventDTO event;
@@ -38,11 +39,9 @@ public class EventDetailsComposite extends Composite  {
     private final Label isPublic;
     private final Anchor officialWebsiteURL;
     private final Anchor eventOverviewURL;
-    private final Anchor logoImageURL;
     private final SimpleStringListComposite courseAreaNamesList;
     private final SimpleStringListComposite imageURLList;
     private final SimpleStringListComposite videoURLList;
-    private final SimpleStringListComposite sponsorImageURLList;
     private final SimpleStringListComposite leaderboardGroupList;
     
     private final CaptionPanel mainPanel;
@@ -70,11 +69,9 @@ public class EventDetailsComposite extends Composite  {
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
         officialWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
         eventOverviewURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
-        logoImageURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventLogoImageURL(), "LogoImageURLLabel");
         courseAreaNamesList = createLableAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
-        imageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.imageURLs(), "ImageURLValueList");
-        videoURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.videoURLs(), "VideoURLValueList");
-        sponsorImageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.sponsorImageURLs(), "SponsorImageURLValueList");
+        imageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
+        videoURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.videos(), "VideoURLValueList");
         leaderboardGroupList = createLableAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
         
         for(int i=0; i < rows; i++) {
@@ -136,8 +133,6 @@ public class EventDetailsComposite extends Composite  {
             String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);
             eventOverviewURL.setText(regattaOverviewLink);
             eventOverviewURL.setHref(regattaOverviewLink);
-            logoImageURL.setText(event.getLogoImageURL());
-            logoImageURL.setHref(event.getLogoImageURL());
      
             List<String> courseAreaNames = new ArrayList<>();
             if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
@@ -148,14 +143,15 @@ public class EventDetailsComposite extends Composite  {
             courseAreaNamesList.setValues(courseAreaNames);
 
             List<String> imageURLStringsAsList = new ArrayList<>();
-            Util.addAll(event.getImageURLs(), imageURLStringsAsList);
+            for(ImageDTO image: event.getImages()) {
+                imageURLStringsAsList.add(image.getSourceRef());
+            }
             imageURLList.setValues(imageURLStringsAsList);
             List<String> videoURLStringsAsList = new ArrayList<>();
-            Util.addAll(event.getVideoURLs(), videoURLStringsAsList);
+            for(VideoDTO video: event.getVideos()) {
+                videoURLStringsAsList.add(video.getSourceRef());
+            }
             videoURLList.setValues(videoURLStringsAsList);
-            List<String> sponsorImageURLStringsAsList = new ArrayList<>();
-            Util.addAll(event.getSponsorImageURLs(), sponsorImageURLStringsAsList);
-            sponsorImageURLList.setValues(sponsorImageURLStringsAsList);
             List<String> leaderboardGroupNamesAsList = new ArrayList<>();
             for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
                 leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
