@@ -8,7 +8,7 @@
     <m:Message ui:field="message" />
     <div class="{res.mediaCss.grid}">
       <g:SimplePanel ui:field="stage" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
-      <div ui:field="updatesWrapperUi" class="{res.mediaCss.small12} {res.mediaCss.medium5} {res.mediaCss.large4} {res.mediaCss.columns}" >
+      <div ui:field="updatesWrapperUi" class="{res.mediaCss.small12} {res.mediaCss.medium5} {res.mediaCss.large4} {res.mediaCss.columns}" style="display: none;">
         <u:UpdatesBox ui:field="updatesUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginonlyonsmall}" />
       </div>
     </div>

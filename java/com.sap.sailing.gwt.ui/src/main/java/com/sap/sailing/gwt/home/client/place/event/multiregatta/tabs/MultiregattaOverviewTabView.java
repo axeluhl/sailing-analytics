@@ -23,8 +23,6 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
 import com.sap.sse.common.Util.Triple;
 
@@ -63,8 +61,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         
-        refreshManager.add(stage, new GetEventOverviewStageAction(currentPresenter.getCtx().getEventDTO().getId()));
-        refreshManager.add(stage.getNewsRefreshable(), new GetEventOverviewNewsAction(currentPresenter.getCtx().getEventDTO().getId()));
+        stage.setupRefresh(refreshManager);
         refreshManager.add(racesListLive, new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
 
         contentArea.setWidget(this);

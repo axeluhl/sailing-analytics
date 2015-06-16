@@ -17,16 +17,26 @@ import com.sap.sailing.gwt.home.client.place.event.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.client.place.event.partials.message.Message;
 import com.sap.sailing.gwt.home.client.place.event.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.client.place.event.partials.video.Video;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 
-public class EventOverviewStage extends Composite implements RefreshableWidget<EventOverviewStageDTO> {
+public class EventOverviewStage extends Composite {
     
+    private final RefreshableWidget<EventOverviewStageDTO> refreshable = new RefreshableWidget<EventOverviewStageDTO>() {
+        @Override
+        public void setData(EventOverviewStageDTO data, long nextUpdate, int updateNo) {
+            setStageData(data);
+        }
+    };
     private final RefreshableWidget<ListResult<NewsEntryDTO>> newsRefreshable = new RefreshableWidget<ListResult<NewsEntryDTO>>() {
         @Override
         public void setData(ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
@@ -55,12 +65,20 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
         
         updatesUi = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
+    }
+    
+    public void setupRefresh(RefreshManager refreshManager) {
+        refreshManager.add(refreshable, new GetEventOverviewStageAction(presenter.getCtx().getEventDTO().getId()));
         
-        updatesWrapperUi.getStyle().setDisplay(Display.NONE);
+        if(presenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
+            refreshManager.add(newsRefreshable, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId()));
+        } else {
+            updatesUi.removeFromParent();
+            updatesWrapperUi.removeFromParent();
+        }
     }
 
-    @Override
-    public void setData(EventOverviewStageDTO stageData, long nextUpdate, int updateNo) {
+    private void setStageData(EventOverviewStageDTO stageData) {
         message.setMessage(stageData.getEventMessage());
         
         EventOverviewStageContentDTO data = stageData.getStageContent();
@@ -82,7 +100,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     
     private void setNews(List<NewsEntryDTO> news) {
         if(lastContent == null) {
-            setData(new EventOverviewStageDTO(null, new EventOverviewTickerStageDTO(null, null, null)), 0, 0);
+            setStageData(new EventOverviewStageDTO(null, new EventOverviewTickerStageDTO(null, null, null)));
         }
         
         if(news.isEmpty()) {
@@ -95,9 +113,5 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
             stage.addStyleName(mediaCss.medium7());
             stage.addStyleName(mediaCss.large8());
         }
-    }
-
-    public RefreshableWidget<ListResult<NewsEntryDTO>> getNewsRefreshable() {
-        return newsRefreshable;
     }
 }
