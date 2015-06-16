@@ -5,7 +5,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationActivityMapper;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationClientFactory;
-import com.sap.sailing.gwt.home.desktop.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.EntryPointHelper;

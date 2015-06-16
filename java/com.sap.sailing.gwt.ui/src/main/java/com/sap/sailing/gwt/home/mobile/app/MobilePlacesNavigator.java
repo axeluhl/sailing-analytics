@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
@@ -22,10 +26,6 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new EventsPlace());
     }
 
-    public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {
-        return createLocalPlaceNavigation(new WhatsNewPlace(navigationTab));
-    }
-
     public PlaceNavigation<EventDefaultPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
         EventDefaultPlace eventPlace = new EventDefaultPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace);
@@ -36,4 +36,21 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 
+    // NOT MOBILE PLACES
+
+    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
+        return createLocalPlaceNavigation(new SolutionsPlace(navigationTab));
+    }
+
+    public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {
+        return createLocalPlaceNavigation(new WhatsNewPlace(navigationTab));
+    }
+
+    public PlaceNavigation<AboutUsPlace> getAboutUsNavigation() {
+        return createGlobalPlaceNavigation(new AboutUsPlace());
+    }
+
+    public PlaceNavigation<ContactPlace> getContactNavigation() {
+        return createGlobalPlaceNavigation(new ContactPlace());
+    }
 }

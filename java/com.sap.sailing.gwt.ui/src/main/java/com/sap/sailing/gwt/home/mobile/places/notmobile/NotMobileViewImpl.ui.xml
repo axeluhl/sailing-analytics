@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder 
+	xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
+    xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	>
+	<ui:with 
+		field="res" 
+		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:with field="i18n"
+		type="com.sap.sailing.gwt.ui.client.StringMessages" />	
+	<ui:style>
+		.fullWidthButton {
+			width: 100%;
+			margin-bottom: 1rem;		
+		}
+		.holder {
+			padding: 1rem;
+		}
+		.notAvailableMessage {
+			font-size: 1.5em;
+			margin: 1em 0em;
+
+		}
+		
+	</ui:style>	
+		
+   	<g:HTMLPanel styleName="{style.holder}">
+   		<p class="{style.notAvailableMessage}">
+   		<ui:text from="{i18n.notAvailableOnMobileMessage}" />
+   		</p>
+   		<g:Anchor addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="gotoDesktopUi"
+   		><ui:text from="{i18n.gotoDesktop}" /></g:Anchor>
+   		
+   		<g:Anchor addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="goBackUi"
+   		><ui:text from="{i18n.goBack}" /></g:Anchor>
+   	 	
+   	 	<mp:socialfooter.SocialFooter/>	
+	</g:HTMLPanel>
+</ui:UiBinder>    

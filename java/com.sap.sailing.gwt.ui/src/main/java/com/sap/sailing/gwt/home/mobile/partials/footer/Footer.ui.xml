@@ -55,31 +55,31 @@
 				</div>
 				<div
 					class="{local_res.css.sitefooter_links} {res.mediaCss.small12} {res.mediaCss.columns}">
-					<a href="http://www.sap.com/about/legal/impressum.html" target="_blank"
+					<a href="http://www.sap.com/about/legal/impressum.html" 
 						title="{i18n.footerLegal}">
 						<ui:text from='{i18n.footerLegal}' />
 						|
 					</a>
-					<a href="http://www.sap.com/about/legal/privacy.html" target="_blank"
+					<a href="http://www.sap.com/about/legal/privacy.html"
 						title="{i18n.footerPrivacy}">
 						<ui:text from='{i18n.footerPrivacy}' />
 					</a>
 					<br></br>
 					<a
 						href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback"
-						target="_blank" title="{i18n.footerFeedback}">
+						title="{i18n.footerFeedback}">
 						<ui:text from='{i18n.footerFeedback}' />
 						|
 					</a>
 					<a
 						href="HomeDesktop.html"
-						target="_blank" title="Desktop">
+						title="Desktop">
 						Desktop
 						|
 					</a>
 					<g:Anchor
-						href="http://www.sapsailing.com/gwt/Home.html#WhatsNewPlace:navigationTab=SailingAnalytics"
-						target="_blank" title="{i18n.whatsNew}"
+						
+						title="{i18n.whatsNew}"
 						ui:field="whatsNewLinkUi"
 						>
 						<ui:text from='{i18n.whatsNew}' />

@@ -8,11 +8,15 @@ import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.notmobile.NotMobileActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
+
+    private Place lastVisitedPlace = new StartPlace();
 
     public MobileActivityMapper(MobileApplicationClientFactory clientFactory) {
         super();
@@ -21,12 +25,18 @@ public class MobileActivityMapper implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
+        if (!(place instanceof HasMobileVersion)) {
+            return new NotMobileActivityProxy(lastVisitedPlace, place, clientFactory);
+        }
         if (place instanceof StartPlace) {
+            lastVisitedPlace = place;
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof EventsPlace) {
+            lastVisitedPlace = place;
             EventsPlace eventPlace = (EventsPlace) place;
             return new EventsActivityProxy(eventPlace, clientFactory);
         } else if (place instanceof AbstractEventPlace) {
+            lastVisitedPlace = place;
             return new EventActivityProxy((AbstractEventPlace) place, clientFactory);
         } else {
             return null;

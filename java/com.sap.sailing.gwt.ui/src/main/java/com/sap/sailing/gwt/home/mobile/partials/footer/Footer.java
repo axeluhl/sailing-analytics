@@ -31,9 +31,13 @@ public class Footer extends Composite {
     interface FooterPanelUiBinder extends UiBinder<Widget, Footer> {
     }
 
+    private String otherLanguage;
+    private final LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
+    private MobileApplicationClientFactory appContext;
 
     @UiField Anchor changeLanguageLink;
     @UiField DivElement languageSelectionDiv;
+
     @UiField(provided = true) ValueListBox<Pair<String, String>> changeLanguageList = new ValueListBox<Pair<String,String>>(new Renderer<Pair<String, String>>() {
         @Override
         public String render(Pair<String, String> object) {
@@ -52,9 +56,6 @@ public class Footer extends Composite {
         }
     });
     
-    private String otherLanguage;
-    private final LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
-    private MobileApplicationClientFactory appContext;
 
 
 
