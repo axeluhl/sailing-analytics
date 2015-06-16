@@ -3,11 +3,12 @@ package com.sap.sailing.gwt.ui.shared.eventview;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class EventViewDTO extends EventMetadataDTO {
+public class EventViewDTO extends EventMetadataDTO implements Result {
 
     public enum EventType {
         SINGLE_REGATTA, MULTI_REGATTA, SERIES_EVENT
