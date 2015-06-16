@@ -52,10 +52,10 @@ public enum InMemoryDataStore implements DataStore {
     public Collection<EventBase> getEvents() {
         return eventsById.values();
     }
+    
     public void addEvent(EventBase event) {
         eventsById.put(event.getId(), event);
     }
-
 
     public EventBase getEvent(Serializable id) {
         return eventsById.get(id);
@@ -77,7 +77,6 @@ public enum InMemoryDataStore implements DataStore {
         }
         return null;
     }
-
 
     public CourseArea getCourseArea(EventBase event, String name) {
         Collection<CourseArea> courseAreas = getCourseAreas(event);

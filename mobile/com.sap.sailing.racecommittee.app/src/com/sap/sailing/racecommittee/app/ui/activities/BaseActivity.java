@@ -63,7 +63,6 @@ public class BaseActivity extends SendingServiceAwareActivity {
     @Override
     public void onPause() {
         super.onPause();
-        
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     

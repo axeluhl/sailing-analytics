@@ -42,7 +42,10 @@ public abstract class DataManager implements ReadonlyDataManager {
     }
 
     /**
-     * Resets the data store properly
+     * {@link InMemoryDataStore#reset() Resets} the data store properly and, by means of calling
+     * {@link #unloadAllRaces()}, fires the {@link AppConstants#INTENT_ACTION_CLEAR_RACES} intent which is expected to
+     * be handled by the {@link RaceStateService} which responds by unregistering all its races, stopping to listen on
+     * and poll their race logs and by clearing the data store's races collection.
      */
     public void resetAll() {
         unloadAllRaces();
@@ -50,7 +53,8 @@ public abstract class DataManager implements ReadonlyDataManager {
     }
 
     /**
-     * Properly unloading of all races by first unloading them from the race state service
+     * Properly unloading of all races by first unloading / unregistering them from the race state service. The
+     * {@link RaceStateService} then in turn clears the races on the data store.
      */
     public void unloadAllRaces() {
         // It's not needed to call getDataStore().getRaces().clear() because it's already called by the service internally.
