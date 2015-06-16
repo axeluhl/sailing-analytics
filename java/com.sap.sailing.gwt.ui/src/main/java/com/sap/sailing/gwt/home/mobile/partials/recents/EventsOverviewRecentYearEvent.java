@@ -42,7 +42,12 @@ public class EventsOverviewRecentYearEvent extends Composite {
         eventNameUi.setInnerText(event.getDisplayName());
         if (isTeaserEvent) {
             eventImageUi.getStyle().setDisplay(Display.BLOCK);
-            eventImageUi.setSrc(event.getThumbnailImageURL());
+            if(event.getThumbnailImageURL() == null || event.getThumbnailImageURL().isEmpty()) {
+                eventImageUi.setSrc(EventsOverviewRecentResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
+                
+            }else {
+                eventImageUi.setSrc(event.getThumbnailImageURL());
+            }
         } else {
             eventImageUi.getStyle().setDisplay(Display.NONE);
         }
