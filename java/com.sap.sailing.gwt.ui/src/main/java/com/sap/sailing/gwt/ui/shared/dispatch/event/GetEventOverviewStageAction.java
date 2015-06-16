@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -11,12 +10,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.InfoNewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.news.EventNewsItem;
-import com.sap.sailing.news.impl.InfoEventNewsItem;
-import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -50,7 +44,6 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         
         // TODO get correct message
         EventOverviewStageDTO stage = new EventOverviewStageDTO(null, getStageContent(context, event, state, now));
-        addNews(context, event, stage);
         return new ResultWithTTL<>(ttl, stage);
     }
 
@@ -126,19 +119,5 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //        }
 //        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
-    }
-    
-    @GwtIncompatible
-    private void addNews(DispatchContext dispatchContext, Event event, EventOverviewStageDTO stage) {
-        List<EventNewsItem> newsItems = dispatchContext.getEventNewsService().getNews(event);
-
-        for(EventNewsItem newsItem: newsItems) {
-            if(newsItem instanceof InfoEventNewsItem) {
-                stage.addNews(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem, dispatchContext.getClientLocale()));
-            }
-            if(newsItem instanceof LeaderboardUpdateNewsItem) {
-                stage.addNews(new LeaderboardNewsEntryDTO((LeaderboardUpdateNewsItem) newsItem));
-            }
-        }
     }
 }

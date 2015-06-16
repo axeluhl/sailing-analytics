@@ -4,9 +4,9 @@ import java.net.URL;
 import java.util.Date;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
-public abstract class NewsEntryDTO implements IsSerializable {
+public abstract class NewsEntryDTO implements DTO {
     
     private Date timestamp;
     

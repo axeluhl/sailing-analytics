@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.message.Message;
 import com.sap.sailing.gwt.home.client.place.event.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.client.place.event.partials.video.Video;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
@@ -25,6 +26,13 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class EventOverviewStage extends Composite implements RefreshableWidget<EventOverviewStageDTO> {
+    
+    private final RefreshableWidget<ListResult<NewsEntryDTO>> newsRefreshable = new RefreshableWidget<ListResult<NewsEntryDTO>>() {
+        @Override
+        public void setData(ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
+            setNews(data.getValues());
+        }
+    };
     
     private static StageUiBinder uiBinder = GWT.create(StageUiBinder.class);
 
@@ -70,8 +78,13 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
             lastContent = null;
         }
         stage.setWidget(lastContent);
+    }
+    
+    private void setNews(List<NewsEntryDTO> news) {
+        if(lastContent == null) {
+            setData(new EventOverviewStageDTO(null, new EventOverviewTickerStageDTO(null, null, null)), 0, 0);
+        }
         
-        List<NewsEntryDTO> news = stageData.getNews();
         if(news.isEmpty()) {
             updatesWrapperUi.getStyle().setDisplay(Display.NONE);
             stage.removeStyleName(mediaCss.medium7());
@@ -84,4 +97,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
         }
     }
 
+    public RefreshableWidget<ListResult<NewsEntryDTO>> getNewsRefreshable() {
+        return newsRefreshable;
+    }
 }

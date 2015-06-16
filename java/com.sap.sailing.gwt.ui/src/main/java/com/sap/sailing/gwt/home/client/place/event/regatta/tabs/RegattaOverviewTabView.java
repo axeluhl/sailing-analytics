@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 
@@ -51,6 +52,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
         // TODO regatta specific depending on event type
         refreshManager.add(stage, new GetEventOverviewStageAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(stage.getNewsRefreshable(), new GetEventOverviewNewsAction(currentPresenter.getCtx().getEventDTO().getId()));
         refreshManager.add(racesListLive, new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
 
