@@ -1501,15 +1501,27 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         boolean result = false;
         TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
         TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getStartOfRace(), getStartOfTracking());
-        if (earliestStartTimePoint != null && latestEndTimePoint != null) {
+        if (earliestStartTimePoint != null) {
             TimePoint earliestStartTimePointMinusExtra = earliestStartTimePoint.minus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS);
-            TimePoint latestEndTimePointPlusExtra = latestEndTimePoint.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
-            if (Util.isTimePointInRangeOfTimePointsAandB(wind.getTimePoint(), /* a */earliestStartTimePointMinusExtra, /* b */latestEndTimePointPlusExtra)) {
-                Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
-                if(previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr->tr.takesWindFix(wind) == true).findAny().isPresent()){
-                    result = true;
+            if (latestEndTimePoint != null) {
+                TimePoint latestEndTimePointPlusExtra = latestEndTimePoint.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                if (Util.isTimePointInRangeOfTimePointsAandB(wind.getTimePoint(), /* a */earliestStartTimePointMinusExtra, /* b */latestEndTimePointPlusExtra)) {
+                    result = takesNoPreviousRaceWind(wind);
                 }
-            }
+            } else if (latestEndTimePoint == null){
+                if (wind.getTimePoint().after(earliestStartTimePointMinusExtra)){
+                    result = takesNoPreviousRaceWind(wind);
+                }
+            } 
+        }
+        return result;
+    }
+    
+    private boolean takesNoPreviousRaceWind(Wind wind) {
+        boolean result = false;
+        Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
+        if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr -> tr.takesWindFix(wind) == true).findAny().isPresent()) {
+            result = true;
         }
         return result;
     }
