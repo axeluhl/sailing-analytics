@@ -355,7 +355,9 @@ public class RaceContext {
                 if(upperFlag.equals(Flags.AP)) {
                     raceState = RaceViewState.POSTPONED;
                 } else if(upperFlag.equals(Flags.NOVEMBER)) {
-                    raceState = RaceViewState.CANCELED;
+                    raceState = RaceViewState.ABANDONED;
+                } else if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                    raceState = RaceViewState.ABANDONED;
                 }
             }
         }
