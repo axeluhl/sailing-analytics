@@ -67,7 +67,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
     }
     
     /**
-     * Redefinitions must call this method.
+     * Redefinitions should ensure this implementation is called, e.g., after user confirmation. 
      */
     protected boolean onReset() {
         DataManager dataManager = (DataManager) DataManager.create(this);

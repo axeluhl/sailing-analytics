@@ -7,7 +7,6 @@ import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
 
 public abstract class SessionActivity extends BaseActivity {
 
@@ -35,7 +34,7 @@ public abstract class SessionActivity extends BaseActivity {
 
     @Override
     protected boolean onReset() {
-        return logoutSession();
+        return logoutSession(); // only will call super.onReset() after user confirmation
     }
 
     public boolean logoutSession() {
@@ -61,9 +60,7 @@ public abstract class SessionActivity extends BaseActivity {
     private void doLogout() {
         ExLog.i(this, TAG, "Do logout now!");
         preferences.isSetUp(false); //FIXME: Is that flag really needed or just data redundancy?
-        // use data manager to unload the races properly
-        DataManager dataManager = (DataManager) DataManager.create(this);
-        dataManager.unloadAllRaces();
+        super.onReset(); // consistently resets the InMemoryDataStore and the RaceStateService
         fadeActivity(LoginActivity.class, true);
     }
 
