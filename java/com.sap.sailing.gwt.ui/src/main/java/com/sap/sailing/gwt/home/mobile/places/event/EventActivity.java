@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
@@ -36,7 +37,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
         if(place.getCtx().getEventDTO() == null) {
             currentEventUUId = UUID.fromString(place.getCtx().getEventId());
             
-            clientFactory.getHomeService().getEventViewById(currentEventUUId, new AsyncCallback<EventViewDTO>() {
+            clientFactory.getDispatch().execute(new GetEventViewAction(currentEventUUId), new AsyncCallback<EventViewDTO>() {
                 @Override
                 public void onSuccess(final EventViewDTO event) {
                     place.getCtx().updateContext(event);

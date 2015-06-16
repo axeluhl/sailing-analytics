@@ -5,14 +5,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import android.app.ActionBar;
-import android.app.ActionBar.OnNavigationListener;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Window;
 import android.widget.ArrayAdapter;
@@ -46,7 +45,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
     private static final int RacesLoaderId = 0;
 
-    private class FilterModeSelectionBinder implements OnNavigationListener {
+    private class FilterModeSelectionBinder implements ActionBar.OnNavigationListener {
 
         private ManagedRaceListFragment targetList;
         private ActionBar actionBar;
@@ -206,7 +205,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
     }
 
     private void setupActionBar(CourseArea courseArea) {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         AbstractLogEventAuthor author = preferences.getAuthor();
         String title = String.format(getString(R.string.racingview_header), courseArea.getName());
         title += " (" + author.getName() + ")";

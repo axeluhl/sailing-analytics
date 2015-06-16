@@ -43,7 +43,8 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         }
         
         // TODO get correct message
-        return new ResultWithTTL<>(ttl, new EventOverviewStageDTO(null, getStageContent(context, event, state, now)));
+        EventOverviewStageDTO stage = new EventOverviewStageDTO(null, getStageContent(context, event, state, now));
+        return new ResultWithTTL<>(ttl, stage);
     }
 
     @GwtIncompatible

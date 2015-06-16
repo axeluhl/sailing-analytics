@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
@@ -56,6 +57,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
         PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);
+        PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaName);
         
         void ensureRegattaStructure(AsyncCallback<List<RaceGroupDTO>> callback);
         void ensureLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
