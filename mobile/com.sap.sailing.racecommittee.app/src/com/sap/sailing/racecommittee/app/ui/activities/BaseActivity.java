@@ -45,8 +45,9 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
-                resetApp();
-                return true;
+                final boolean result = onReset();
+                fadeActivity(LoginActivity.class, true);
+                return result;
 
             case R.id.options_menu_info:
                 ExLog.i(this, TAG, "Clicked INFO");
@@ -66,10 +67,13 @@ public class BaseActivity extends SendingServiceAwareActivity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     
-    private void resetApp() {
+    /**
+     * Redefinitions must call this method.
+     */
+    protected boolean onReset() {
         DataManager dataManager = (DataManager) DataManager.create(this);
         dataManager.resetAll();
-        fadeActivity(LoginActivity.class, true);
+        return true;
     }
 
     @Override
