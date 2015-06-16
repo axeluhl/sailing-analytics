@@ -19,7 +19,10 @@
   padding: 0;
 }
 
-.sectionContentHolder {
+.edgeToEdgeSectionContentHolder {
 	padding: 0;
+}
+.sectionContentHolder {
+	
 }
 

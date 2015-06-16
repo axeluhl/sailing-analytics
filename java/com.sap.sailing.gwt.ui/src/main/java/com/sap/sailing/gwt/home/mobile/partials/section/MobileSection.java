@@ -24,6 +24,8 @@ public class MobileSection extends Composite {
     @UiField
     DivElement sectionHeaderHolderUi;
     @UiField
+    DivElement sectionContentHolderUi;
+    @UiField
     SimplePanel sectionHeaderUi;
     @UiField
     FlowPanel sectionContentUi;
@@ -55,5 +57,14 @@ public class MobileSection extends Composite {
     
     public void clearContent() {
         sectionContentUi.clear();
+    }
+
+    public void setEdgeToEdgeContent(boolean setIsEdgeToEdgeContent) {
+
+        if (setIsEdgeToEdgeContent) {
+            sectionContentHolderUi.addClassName(local_res.css().edgeToEdgeSectionContentHolder());
+        } else if (!setIsEdgeToEdgeContent) {
+            sectionContentHolderUi.removeClassName(local_res.css().edgeToEdgeSectionContentHolder());
+        }
     }
 }

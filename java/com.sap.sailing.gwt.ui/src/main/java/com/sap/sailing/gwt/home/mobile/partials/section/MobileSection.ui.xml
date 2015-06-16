@@ -11,7 +11,7 @@
 					ui:field="sectionHeaderUi" 
 					/>
 			</div>
-			<div class="{local_res.css.sectionContentHolder} {res.mediaCss.small12} {res.mediaCss.columns}">
+			<div ui:field="sectionContentHolderUi" class="{local_res.css.sectionContentHolder} {res.mediaCss.small12} {res.mediaCss.columns}">
 				<g:FlowPanel 
 					ui:field="sectionContentUi" 
 					styleName="{local_res.css.sectionContent}" />

@@ -12,13 +12,10 @@ public interface MobileSectionResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String section();
-
         String sectionHeader();
-
         String sectionSubHeader();
-
         String sectionContent();
-
+        String edgeToEdgeSectionContentHolder();
         String sectionContentHolder();
     }
 }

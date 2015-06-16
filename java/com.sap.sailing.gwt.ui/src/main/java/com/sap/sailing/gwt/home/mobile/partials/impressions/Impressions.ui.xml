@@ -6,7 +6,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions" />
 		
-	<mp:section.MobileSection ui:field="mobileSectionUi">
+	<mp:section.MobileSection ui:field="mobileSectionUi" edgeToEdgeContent="true">
 		<mp:header>
 			<mp:sectionHeader.SectionHeaderContent 
 				ui:field="headerUi"
