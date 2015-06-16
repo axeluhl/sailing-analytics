@@ -47,6 +47,7 @@ public interface SharedResources extends ClientBundle {
         String slideto();
         String slidetonav();
         String slidetoactive();
+        String fleetcorner();
     }
 
     public interface MediaCss extends CssResource{

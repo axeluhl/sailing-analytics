@@ -7,7 +7,7 @@
 	<g:HTMLPanel>
 		<a title="" ui:field="linkUi">
 			<div class="{local_res.css.regattastatus_content_regatta_race} {res.mediaCss.grid}">
-				<div style="border-color: race.fleetColor;" class="res.mainCss.fleetcorner-FIXME"></div>
+				<div class="{res.mainCss.fleetcorner}" ui:field="fleetCornerUi"></div>
 				<div class="{local_res.css.regattastatus_content_regatta_race_title} {res.mediaCss.small3} {res.mediaCss.columns}" 
 					ui:field="raceTitleUi"><!-- race.title -->
 				</div>
