@@ -1,15 +1,13 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -19,116 +17,93 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
-import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
+ * Covers the linking and unlinking between {@link RaceColumn}s and {@link TrackedRaces}s
+ * and tests whether {@link RaceExecutionOrderProvider}s get correctly attached and detached. Also tests
+ * late attaching and detaching of {@link RaceExecutionOrderProvider}s in case the {@link RaceExecutionOrderProvider}
+ * was <code>null</code> when {@link RaceColumn} was linked to {@link TrackedRace}.
+ * 
  * @author Alexander Ries (D062114)
  *
  */
 public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest {
-    
-    RaceExecutionOrderProvider raceExecutionOrderProvider;
-    FlexibleLeaderboard flexibleLeaderboard;
+    private FlexibleLeaderboard flexibleLeaderboard;
+    private RaceColumnInSeries raceColumnInSeries;
+    private Fleet fleet;
+    private TrackedRaceImpl trackedRace;
+    private Regatta regatta;
+    private Series series;
 
-    RaceColumnInSeries raceColumnInSeries;
-    FlexibleRaceColumn raceColumnFlexibleLeaderboard;
-    Fleet fleet;
-    
-    TrackedRaceImpl trackedRace;
-    Regatta regatta;
-    Series series;
     private final String REGATTA = "TestRegatta";
     private final String RACE = "TestRace";
     private final String FLEET = "TestFleet";
-    private final String BOATCLASS = "49er";
-    private final String RACECOLUMN_SERIES = "SeriesRaceColumn";
-    private final String RACECOLUMN_FLEXIBLELEADERBOARD = "FlexibleLeadrboarRaceColumn";
-
-    @Before
-    public void setUp() {
-        setUpForAllTestCases();
-        setUpForFlexibleLeaderboardRaceColumnsTests();
-        setUpRaceColumnInSeriesTest();
-    }
+    private final String BOATCLASS = "TestClass";
+    private final String SERIES = "TestSeries";
+    private final String FLEXIBLELEADERBOARD = "TestFlexibleLeaderboard";
+    private final String RACECOLUMN_SERIES = "TestSeriesRaceColumn";
+    private final String RACECOLUMN_FLEXIBLELEADERBOARD = "TestFlexibleLeadrboarRaceColumn";
 
     @Test
-    public void testRaceExecutionOrderProviderAttachWhenSettingTrackedRaceToRaceCollumn() {
+    public void testRaceExecutionOrderProviderAttachDetachWithRaceCollumn() {
+        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(),
+                MillisecondsTimePoint.now());
+        flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
+                new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
         flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD, false);
-        System.out.println(""+trackedRace.hasRaceExecutionOrderProvidersAttached());
         assertTrue(trackedRace.hasRaceExecutionOrderProvidersAttached());
-    }
-
-    @Test
-    public void testRaceExecutionOrderProviderDetachWhenReleasingTrackedRaceFromRaceCollumn() {
         flexibleLeaderboard.removeRaceColumn(RACECOLUMN_FLEXIBLELEADERBOARD);
         assertFalse(trackedRace.hasRaceExecutionOrderProvidersAttached());
     }
 
     @Test
-    public void testRaceExecutionOrderProviderAttachWhenSettingTrackedRaceToRaceCollumnInSeries() {
+    public void testRaceExecutionOrderProviderAttachDetachWithRaceCollumnInSeries() {
+        createTestSetupWithRegattaAndSeries(/* linkSeriesToRegatta */true);
         raceColumnInSeries.setTrackedRace(fleet, trackedRace);
         assertTrue(trackedRace.hasRaceExecutionOrderProvidersAttached());
-    }
-
-    @Test
-    public void testRaceExecutionOrderProviderDetachWhenReleasingTrackedRaceFromRaceCollumnInSeries() {
         raceColumnInSeries.releaseTrackedRace(fleet);
         assertFalse(trackedRace.hasRaceExecutionOrderProvidersAttached());
     }
-    
-    private void setUpForAllTestCases(){
-        final List<Competitor> emptyCompetitorList = Collections.emptyList();
-        TimePoint now = MillisecondsTimePoint.now();
-        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, emptyCompetitorList, now);
-        raceExecutionOrderProvider = new AbstractRaceExecutionOrderProvider() {
-            private static final long serialVersionUID = 1L;
 
-            @Override
-            protected Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries() {
-                return Collections.<Fleet, Iterable<? extends RaceColumn>>emptyMap();
-            }
-        };
-    }
-    
-    private void setUpForFlexibleLeaderboardRaceColumnsTests(){
-        flexibleLeaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }),
-                new LowPoint(), null);
-    }
-    
-    private void setUpRaceColumnInSeriesTest(){
-      fleet = new FleetImpl(FLEET);
-      series = createSeries(null, fleet);
-      Set<Series> seriesSet = new HashSet<>();
-      seriesSet.add(series);
-      BoatClass boatClass = new BoatClassImpl(BOATCLASS, true);
-      String raceColumnName = RACECOLUMN_SERIES;
-      raceColumnInSeries = series.addRaceColumn(raceColumnName, null);
-      ScoringScheme scoringScheme = new LowPoint();
-      regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
-      /* startDate */null, /* endDate */null, seriesSet, false, scoringScheme, UUID.randomUUID(),
-              null, OneDesignRankingMetric::new);
+    @Test
+    public void testRaceExecutionOrderProviderAttachDetachWhenSeriesRegattaIsSetAndRemovedAfterTrackedRaceHaveBeenSetToRaceColumns() {
+        createTestSetupWithRegattaAndSeries(/* linkSeriesToRegatta */false);
+        raceColumnInSeries.setTrackedRace(fleet, trackedRace);
+        assertFalse(trackedRace.hasRaceExecutionOrderProvidersAttached());
+        series.setRegatta(regatta);
+        assertTrue(trackedRace.hasRaceExecutionOrderProvidersAttached());
+        series.setRegatta(null);
+        assertFalse(trackedRace.hasRaceExecutionOrderProvidersAttached());
     }
 
-    private Series createSeries(TrackedRegattaRegistry trackedRegattaRegistry, Fleet fleet) {
+    private void createTestSetupWithRegattaAndSeries(boolean linkSeriesToRegatta) {
+        trackedRace = createTestTrackedRace(null, null, null, Collections.<Competitor> emptyList(),
+                MillisecondsTimePoint.now());
+        fleet = new FleetImpl(FLEET);
         Set<Fleet> fleets = new HashSet<>();
         fleets.add(fleet);
-        Series series = new SeriesImpl("TestSeries", false, fleets, new HashSet<String>(), trackedRegattaRegistry);
-        return series;
+        series = new SeriesImpl(SERIES, false, fleets, new HashSet<String>(), null);
+        Set<Series> seriesSet = new HashSet<>();
+        if (linkSeriesToRegatta)
+            seriesSet.add(series);
+        BoatClass boatClass = new BoatClassImpl(BOATCLASS, true);
+        raceColumnInSeries = series.addRaceColumn(RACECOLUMN_SERIES, null);
+        ScoringScheme scoringScheme = new LowPoint();
+        regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
+        /* startDate */null, /* endDate */null, seriesSet, false, scoringScheme, UUID.randomUUID(), null,
+                OneDesignRankingMetric::new);
     }
 }
