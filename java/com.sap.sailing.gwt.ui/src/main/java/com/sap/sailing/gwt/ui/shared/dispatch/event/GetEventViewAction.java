@@ -28,7 +28,8 @@ import com.sap.sse.common.media.MediaTagConstants;
 public class GetEventViewAction implements Action<EventViewDTO> {
     private UUID eventId;
     
-    public GetEventViewAction() {
+    @SuppressWarnings("unused")
+    private GetEventViewAction() {
     }
 
     public GetEventViewAction(UUID eventId) {

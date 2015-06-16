@@ -23,7 +23,8 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
     
     private UUID eventId;
     
-    public GetRegattasAndLiveRacesForEventAction() {
+    @SuppressWarnings("unused")
+    private GetRegattasAndLiveRacesForEventAction() {
     }
 
     public GetRegattasAndLiveRacesForEventAction(UUID eventId) {

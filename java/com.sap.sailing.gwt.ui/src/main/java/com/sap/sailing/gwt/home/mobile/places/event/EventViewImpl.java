@@ -20,13 +20,13 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -67,6 +67,7 @@ public class EventViewImpl extends Composite implements EventView {
         refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
         refreshManager.add(regattaStatusUi, new GetRegattasAndLiveRacesForEventAction(eventId));
         refreshManager.add(newsRefreshable, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
         impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
     }
 
@@ -84,14 +85,6 @@ public class EventViewImpl extends Composite implements EventView {
         }
     }
     
-    @Override
-    public void setStatistics(StatisticsDTO statistics) {
-        statisticsBoxUi.addItem(StatisticsBox.ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
-        statisticsBoxUi.addItem(StatisticsBox.ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
-        statisticsBoxUi.addItem(StatisticsBox.ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
-        statisticsBoxUi.addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
-    }
-
     @Override
     public HasSelectionHandlers<String> getQuickfinder() {
         return quickFinderUi;

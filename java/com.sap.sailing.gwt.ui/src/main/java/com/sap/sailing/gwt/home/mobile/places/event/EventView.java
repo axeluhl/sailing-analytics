@@ -7,7 +7,6 @@ import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
@@ -37,8 +36,6 @@ public interface EventView {
 
         void gotoNewsPlace(Collection<NewsEntryDTO> newsEntries);
     }
-
-    void setStatistics(StatisticsDTO statistics);
 
     void setNavigator(MobilePlacesNavigator navigator);
 }

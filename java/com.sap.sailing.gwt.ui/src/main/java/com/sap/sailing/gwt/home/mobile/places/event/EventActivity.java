@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -71,7 +70,6 @@ public class EventActivity extends AbstractActivity implements Presenter {
         }
         view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
         view.getQuickfinder().addSelectionHandler(new QuickfinderSelectionHandler());
-        view.setStatistics(new StatisticsDTO()); // TODO set correct stats
         view.setNavigator(clientFactory.getNavigator());
         clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
             @Override

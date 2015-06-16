@@ -14,7 +14,8 @@ public class GetLiveRacesForEventAction implements Action<ResultWithTTL<LiveRace
     
     private UUID eventId;
     
-    public GetLiveRacesForEventAction() {
+    @SuppressWarnings("unused")
+    private GetLiveRacesForEventAction() {
     }
 
     public GetLiveRacesForEventAction(UUID eventId) {
