@@ -37,11 +37,10 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         ConnectivityManager cService = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cService.getActiveNetworkInfo();
-        if (networkInfo == null || !networkInfo.isConnected())
-            return;
-        context.startService(MessageSendingService.createSendDelayedIntent(context));
-
-        disable(context);
+        if (networkInfo != null && networkInfo.isConnected()) { 
+            context.startService(MessageSendingService.createSendDelayedIntent(context));
+            disable(context);
+        }
     }
 
     /**
