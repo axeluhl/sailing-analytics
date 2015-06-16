@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -127,7 +126,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
@@ -1326,12 +1327,10 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         RacingEventService sourceService = new RacingEventServiceImpl();
 
-        Iterable<URL> imageURLs = new HashSet<>();
-        Iterable<URL> videoURLs = new HashSet<>();
-        Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
-                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
-                videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
+                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(),
+                /* officialWebsiteURL */ null, /* images */Collections.<ImageDescriptor> emptyList(),
+                /* videos */Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
         Regatta regatta = sourceService.createRegatta(
@@ -1393,12 +1392,10 @@ public class MasterDataImportTest {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
 
-        Iterable<URL> imageURLs = new HashSet<>();
-        Iterable<URL> videoURLs = new HashSet<>();
-        Iterable<URL> sponsorImageURLs = new HashSet<>();
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */ null,
-                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs,
-                videoURLs, sponsorImageURLs, /* logoImageURL */ null, /* officialWebsiteURL */ null);
+                new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), 
+                /* officialWebsiteURL */ null, /* images */Collections.<ImageDescriptor> emptyList(),
+                /* videos */Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
 
         List<String> raceColumnNames = new ArrayList<String>();

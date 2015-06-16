@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.partials.countdown.CountdownResources.LocalCss;
+import com.sap.sailing.gwt.home.client.place.event.partials.countdownTimer.CountdownTimer;
 import com.sap.sailing.gwt.home.client.shared.stage.StageResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -72,7 +73,7 @@ public class Countdown extends Composite {
         }
         
         if(data.getStartTime() != null) {
-            this.tickerContainer.setWidget(new CountdownTicker(data.getStartTime()));
+            this.tickerContainer.setWidget(new CountdownTimer(data.getStartTime()));
         } else {
             this.tickerContainer.setWidget(null);
         }
