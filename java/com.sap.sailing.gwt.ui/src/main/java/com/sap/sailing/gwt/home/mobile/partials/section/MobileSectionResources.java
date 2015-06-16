@@ -18,5 +18,7 @@ public interface MobileSectionResources extends ClientBundle {
         String sectionSubHeader();
 
         String sectionContent();
+
+        String sectionContentHolder();
     }
 }

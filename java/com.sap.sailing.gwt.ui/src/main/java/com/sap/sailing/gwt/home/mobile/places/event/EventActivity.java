@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.places.event;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -18,10 +19,12 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 public class EventActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractEventPlace place;
+    private UUID currentEventUUId;
     
     public EventActivity(AbstractEventPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
@@ -31,9 +34,9 @@ public class EventActivity extends AbstractActivity implements Presenter {
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         if(place.getCtx().getEventDTO() == null) {
-            final UUID eventUUID = UUID.fromString(place.getCtx().getEventId());
+            currentEventUUId = UUID.fromString(place.getCtx().getEventId());
             
-            clientFactory.getHomeService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
+            clientFactory.getHomeService().getEventViewById(currentEventUUId, new AsyncCallback<EventViewDTO>() {
                 @Override
                 public void onSuccess(final EventViewDTO event) {
                     place.getCtx().updateContext(event);
@@ -64,6 +67,17 @@ public class EventActivity extends AbstractActivity implements Presenter {
         view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
         view.getQuickfinder().addSelectionHandler(new QuickfinderSelectionHandler());
         view.setStatistics(new StatisticsDTO()); // TODO set correct stats
+        clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Failed to load media");
+            }
+
+            @Override
+            public void onSuccess(MediaDTO result) {
+                view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
+            }
+        });
     }
     
     @Override

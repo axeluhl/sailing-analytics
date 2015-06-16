@@ -53,4 +53,7 @@ public class MobileSection extends Composite {
         sectionHeaderHolderUi.addClassName(local_res.css().sectionSubHeader());
     }
     
+    public void clearContent() {
+        sectionContentUi.clear();
+    }
 }

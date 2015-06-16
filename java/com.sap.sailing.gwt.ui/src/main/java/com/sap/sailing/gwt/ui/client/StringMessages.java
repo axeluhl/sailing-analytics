@@ -1313,4 +1313,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String resultsQuickfinder();
 
     String statistics();
+
+    String impressions();
 }

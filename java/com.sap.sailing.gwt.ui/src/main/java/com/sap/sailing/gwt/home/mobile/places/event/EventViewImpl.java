@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.places.event;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,6 +12,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
+import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
@@ -19,6 +21,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
 public class EventViewImpl extends Composite implements EventView {
     private static final StringMessages MSG = StringMessages.INSTANCE;
@@ -31,6 +34,7 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock sailorInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
+    @UiField Impressions impressionsUi;
     @UiField StatisticsBox statisticsBoxUi;
     
     private Presenter currentPresenter;
@@ -43,6 +47,7 @@ public class EventViewImpl extends Composite implements EventView {
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(currentPresenter.getCtx().getEventDTO()
                 .getId()));
+        impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
     }
 
     @Override
@@ -71,5 +76,11 @@ public class EventViewImpl extends Composite implements EventView {
     public HasSelectionHandlers<String> getQuickfinder() {
         return quickFinderUi;
     }
-    
+
+    @Override
+    public void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images) {
+        impressionsUi.getElement().getStyle().setDisplay(Display.BLOCK);
+        impressionsUi.setStatistis(nrOfImages, nrOfVideos);
+        impressionsUi.addImages(images);
+    }
 }

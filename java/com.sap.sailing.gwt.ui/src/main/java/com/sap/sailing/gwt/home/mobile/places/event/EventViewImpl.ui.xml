@@ -22,6 +22,7 @@
    			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
    		</div>
 		<p:overview.EventOverviewStage ui:field="overviewStageUi" />
+		<mp:impressions.Impressions ui:field="impressionsUi" />		
 		<mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />		
 	</g:HTMLPanel>
 </ui:UiBinder>    

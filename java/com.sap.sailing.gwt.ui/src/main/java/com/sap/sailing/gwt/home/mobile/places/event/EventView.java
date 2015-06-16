@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
 public interface EventView {
 
@@ -18,6 +19,8 @@ public interface EventView {
     void setSailorInfos(String description, String buttonLabel, String url);
     
     void setQuickFinderValues(List<RegattaMetadataDTO> regattaMetadatas);
+
+    void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images);
 
     public interface Presenter {
         EventContext getCtx();
