@@ -33,7 +33,7 @@ Event Page (newhome): http://505worlds2014.sapsailing.com/gwt/Home.html#EventPla
 
 ## Replication to Cube Server
 
-At this event we operate a replica on our SAP Sail Cube server. The server is physically located behind the ground floor desk. With one of its network adapters it is hooked up to the lounge network, using a radio link from realTV. The second network adapter (Mainboard) is connected to the cube's network, allowing access from studio PCs to the cube server. This adapter is also the default route, providing the cube server, cube showroom and realTV with Internet access. As a backup it is possible to switch the default route to the launch. See `ip route show`.
+At this event we operate a replica on our SAP Sail Cube server. The server is physically located behind the ground floor desk. With one of its network adapters it is hooked up to the lounge network, using a radio link from realTV. The second network adapter (Mainboard) is connected to the cube's network, allowing access from studio PCs to the cube server. This adapter is also the default route, providing the cube server, cube showroom and realTV with Internet access. As a backup it is possible to switch the default route to the lounge. See `ip route show`.
 
 The server runs a isc-dhcp-server, which requires all connected routers to NOT deliver a dhcp server. All required subnet config is in `/etc/dhcp/dhcpd.conf`. We have a /22 subnet for cube and a /24 subnet for the launch. BeTomorrow get static ips assigned by the dhcp through MAC-addresses, because their server always needs the same ip address. Futhermore the dhcp deploys our own DNS server here. For further description of the DNS setup read further.
 
