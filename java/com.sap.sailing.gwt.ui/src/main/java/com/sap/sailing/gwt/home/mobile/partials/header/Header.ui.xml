@@ -18,14 +18,9 @@
           </a>
         </div>
         <div class="{local_res.css.header_navigation}">
-          <img src="images/mobile/navigation-icon.svg" class="{local_res.css.header_navigation_icon}"></img>
-          <nav class="{local_res.css.header_navigation_nav}">
-            <ul class="{local_res.css.header_navigation_nav_list}">
-            
-              <s:header.HeaderNavigationItem ui:field='homeLinkUi'  text="{i18n.home}" />
-              <s:header.HeaderNavigationItem ui:field='eventsLinkUi'  text="{i18n.events}" />
-              <s:header.HeaderNavigationItem ui:field='solutionsLinkUi'  text="{i18n.solutions}" />
-            </ul>
+          <img ui:field="dropdownTriggerUi" src="images/mobile/navigation-icon.svg" class="{local_res.css.header_navigation_icon}"></img>
+          <nav ui:field="dropdownContainerUi" class="{local_res.css.header_navigation_nav}" style="display: none;">
+            <g:FlowPanel tag="ul" ui:field="dropdownListUi" addStyleNames="{local_res.css.header_navigation_nav_list}" />
           </nav>
         </div>
         <div class="{local_res.css.header_search}">

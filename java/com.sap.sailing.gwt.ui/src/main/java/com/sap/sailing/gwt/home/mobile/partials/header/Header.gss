@@ -96,7 +96,6 @@ img.header_logo_image {
   background: #0a0a0a;
 }
 .header_navigation_nav {
-  display: none;
   position: absolute;
   top: 100%;
   right: 0;

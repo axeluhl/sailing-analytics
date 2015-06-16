@@ -5,19 +5,16 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBoxResources" />
 	<ui:with field="sh_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
-	<g:HTMLPanel>
-		<div class="{res.mediaCss.grid}">
-			<div class="{sh_res.css.sectionheader} {res.mediaCss.small12} {res.mediaCss.columns}">
-				<div class="{sh_res.css.sectionheader_item}">
-					<h2 class="{sh_res.css.sectionheader_item_title}">
-						Statistics
-					</h2>
-				</div>
-			</div>
-			<div class="{local_res.css.statisticsbox} {res.mediaCss.small12} {res.mediaCss.columns}">
-				<div class="{local_res.css.statisticsbox_content}" ui:field="itemContainerUi">
-				</div>
-			</div>
-		</div>
-	</g:HTMLPanel>
+		
+	<mp:section.MobileSection>
+		<mp:header>
+			<mp:sectionHeader.SingleLineNoActionHeader 
+				sectionTitle="{i18n.statisticProvider}" />	
+		</mp:header>
+		<mp:content>
+			<g:FlowPanel
+				ui:field="itemContainerUi"
+			/>		
+		</mp:content>
+	</mp:section.MobileSection>
 </ui:UiBinder>
