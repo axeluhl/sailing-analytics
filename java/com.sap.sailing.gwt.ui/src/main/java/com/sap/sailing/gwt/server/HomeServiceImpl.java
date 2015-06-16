@@ -20,30 +20,21 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
@@ -58,16 +49,34 @@ import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
-import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
  * The server side implementation of the RPC service.
  */
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
+    private static final long serialVersionUID = 3947782997746039939L;
+    
+    private static final int MAX_STAGE_EVENTS = 5;
+    private static final int MAX_RECENT_EVENTS = 3;
+    private static final int MAX_VIDEO_COUNT = 3;
+
+    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
+    public HomeServiceImpl() {
+        BundleContext context = Activator.getDefault();
+        
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+    }
+
+    protected RacingEventService getService() {
+        return racingEventServiceTracker.getService(); 
+    }
+
     private interface EventVisitor {
         void visit(EventBase event, boolean onRemoteServer, URL baseURL);
     }
+    
     private static class EventHolder {
         EventBase event;
         boolean onRemoteServer;
@@ -89,24 +98,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             TimeRange event2Range = new TimeRangeImpl(eventAndStageType2.getB().event.getStartDate(), eventAndStageType2.getB().event.getEndDate());
             return event1Range.timeDifference(now).compareTo(event2Range.timeDifference(now));
         }
-    }
-    
-    private static final long serialVersionUID = 3947782997746039939L;
-    
-    private static final int MAX_STAGE_EVENTS = 5;
-    private static final int MAX_RECENT_EVENTS = 3;
-    private static final int MAX_VIDEO_COUNT = 3;
-
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-
-    public HomeServiceImpl() {
-        BundleContext context = Activator.getDefault();
-        
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-    }
-
-    protected RacingEventService getService() {
-        return racingEventServiceTracker.getService(); // grab the service
     }
     
     public void forAllPublicEvents(EventVisitor visitor) throws MalformedURLException {
@@ -177,7 +168,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             Pair<StageEventType, EventHolder> pair = featuredEvents.get(i);
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
-            result.addStageEvent(convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType));
+            result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService()));
             
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
@@ -209,7 +200,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         for(EventHolder holder : recentEventsOfLast12Month) {
             if(result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
-                result.addRecentEvent(convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer));
+                result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, getService()));
             }
             
             EventBase event = holder.event;
@@ -264,89 +255,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         // TODO media
         return result;
     }
-
-    @Override
-    public EventViewDTO getEventViewById(UUID id) {
-        Event event = getService().getEvent(id);
-        if (event == null) {
-            throw new RuntimeException("Event not found");
-        }
-
-        EventViewDTO dto = new EventViewDTO();
-        mapToMetadataDTO(event, dto);
-        
-        ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
-        dto.setLogoImage(logoImage != null ? convertToImageDTO(logoImage) : null);
-        dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
-
-        dto.setHasMedia(HomeServiceUtil.hasMedia(event));
-        dto.setState(HomeServiceUtil.calculateEventState(event));
-        dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
-
-        boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
-        
-        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if(leaderboard instanceof RegattaLeaderboard) {
-                    Regatta regatta = getService().getRegattaByName(leaderboard.getName());
-                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, regatta)) {
-                        continue;
-                    }
-                    
-                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
-                    regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
-                    regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
-                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
-                    dto.getRegattas().add(regattaDTO);
-                    
-                } else if(leaderboard instanceof FlexibleLeaderboard) {
-                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
-                    
-                    regattaDTO.setStartDate(null);
-                    regattaDTO.setEndDate(null);
-                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
-                    dto.getRegattas().add(regattaDTO);
-                }
-            }
-        }
-        
-        if (isFakeSeries) {
-            dto.setType(EventType.SERIES_EVENT);
-            
-            LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
-            dto.setSeriesName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() :overallLeaderboardGroup.getName());
-            List<Event> fakeSeriesEvents = new ArrayList<Event>();
-            
-            for (Event eventOfSeries : getService().getAllEvents()) {
-                for (LeaderboardGroup leaderboardGroup : eventOfSeries.getLeaderboardGroups()) {
-                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                        fakeSeriesEvents.add(eventOfSeries);
-                    }
-                }
-            }
-            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
-                public int compare(Event e1, Event e2) {
-                    return e1.getStartDate().compareTo(e2.getEndDate());
-                }
-            });
-            for(Event eventInSeries: fakeSeriesEvents) {
-                String displayName = getLocation(eventInSeries);
-                if(displayName == null) {
-                    displayName = eventInSeries.getName();
-                }
-                dto.getEventsOfSeries().add(new EventReferenceDTO(eventInSeries.getId(), displayName));
-            }
-        } else {
-            dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
-        }
-        
-        // Special solution for Kieler Woche 2015
-        if("a9d6c5d5-cac3-47f2-9b5c-506e441819a1".equals(event.getId().toString())) {
-            dto.setSailorsInfoURL("http://sailorsinfo.kieler-woche.de/");
-        }
-
-        return dto;
-    }
     
     @Override
     public EventSeriesViewDTO getEventSeriesViewById(UUID id) {
@@ -358,7 +266,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         EventSeriesViewDTO dto = new EventSeriesViewDTO();
         dto.setId(id);
         ImageDescriptor logoImage = o.findImageWithTag(MediaTagConstants.LOGO);
-        dto.setLogoImage(logoImage != null ? convertToImageDTO(logoImage) : null);
+        dto.setLogoImage(logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null);
         // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);
         
@@ -387,7 +295,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 }
             });
             for(Event eventInSeries: fakeSeriesEvents) {
-                EventMetadataDTO eventOfSeries = convertToMetadataDTO(eventInSeries);
+                EventMetadataDTO eventOfSeries = HomeServiceUtil.convertToMetadataDTO(eventInSeries, getService());
                 dto.addEvent(eventOfSeries);
                 
                 oneEventStarted |= eventOfSeries.isStarted();
@@ -448,7 +356,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         forAllPublicEvents(new EventVisitor() {
             @Override
             public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-                EventListEventDTO eventDTO = convertToEventListDTO(event, baseURL, onRemoteServer);
+                EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, getService());
                 result.addEvent(eventDTO, getYear(eventDTO.getStartDate()));
             }
         });
@@ -459,75 +367,5 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         Calendar cal = GregorianCalendar.getInstance();
         cal.setTime(date);
         return cal.get(Calendar.YEAR);
-    }
-
-    private EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType) {
-        EventStageDTO dto = new EventStageDTO();
-        mapToMetadataDTO(event, dto);
-        dto.setBaseURL(baseURL.toString());
-        dto.setOnRemoteServer(onRemoteServer);
-        dto.setStageType(stageType);
-        dto.setStageImageURL(HomeServiceUtil.getStageImageURLAsString(event));
-        return dto;
-    }
-    
-    private EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer) {
-        EventListEventDTO dto = new EventListEventDTO();
-        mapToMetadataDTO(event, dto);
-        dto.setBaseURL(baseURL.toString());
-        dto.setOnRemoteServer(onRemoteServer);
-        return dto;
-    }
-    
-    private EventMetadataDTO convertToMetadataDTO(EventBase event) {
-        EventMetadataDTO dto = new EventMetadataDTO();
-        mapToMetadataDTO(event, dto);
-        return dto;
-    }
-    
-    private void mapToMetadataDTO(EventBase event, EventMetadataDTO dto) {
-        dto.setId((UUID) event.getId());
-        dto.setDisplayName(event.getName());
-        dto.setStartDate(event.getStartDate().asDate());
-        dto.setEndDate(event.getEndDate().asDate());
-        dto.setState(HomeServiceUtil.calculateEventState(event));
-        dto.setVenue(event.getVenue().getName());
-        if(HomeServiceUtil.isFakeSeries(event)) {
-            dto.setLocation(getLocation(event));
-        }
-        dto.setThumbnailImageURL(HomeServiceUtil.findEventThumbnailImageUrlAsString(event));
-    }
-    
-    public String getLocation(EventBase eventBase) {
-        if(!(eventBase instanceof Event)) {
-            return null;
-        }
-        Event event = (Event) eventBase;
-        for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(leaderboard instanceof RegattaLeaderboard) {
-                Regatta regattaEntity = getService().getRegattaByName(leaderboard.getName());
-                if(!HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
-                    continue;
-                }
-            }
-            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
-        }
-        return null;
-    }
-    
-    private ImageDTO convertToImageDTO(ImageDescriptor image) {
-        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
-        result.setCopyright(image.getCopyright());
-        result.setTitle(image.getTitle());
-        result.setSubtitle(image.getSubtitle());
-        result.setMimeType(image.getMimeType());
-        result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
-        result.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
-        List<String> tags = new ArrayList<String>();
-        for(String tag: image.getTags()) {
-            tags.add(tag);
-        }
-        result.setTags(tags);
-        return result;
     }
 }

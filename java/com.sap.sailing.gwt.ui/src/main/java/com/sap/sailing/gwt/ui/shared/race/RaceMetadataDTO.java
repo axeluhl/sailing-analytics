@@ -38,7 +38,7 @@ public class RaceMetadataDTO implements IsSerializable {
                 return StringMessages.INSTANCE.raceIsPostponed();
             }
         },
-        CANCELED {      // the running racing has been canceled
+        ABANDONED {      // the running racing has been abandoned
             @Override
             public String getLabel() {
                 return StringMessages.INSTANCE.raceIsCanceled();

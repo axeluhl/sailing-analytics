@@ -50,6 +50,7 @@
     <module>com.sap.sailing.domain.swisstimingadapter</module>
     <module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
     <module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+    <module>com.sap.sailing.news</module>
     <module>com.sap.sailing.declination</module>
     <module>com.sap.sailing.udpconnector</module>
     <module>com.sap.sailing.expeditionconnector</module>

@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
@@ -116,6 +117,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return new RegattaRacesPlace(contextForRegatta(regattaId));
     }
 
+    public RegattaLeaderboardPlace getPlaceForRegattaLeaderboard(String regattaId) {
+        return new RegattaLeaderboardPlace(contextForRegatta(regattaId));
+    }
+
     protected EventContext contextForRegatta(String regattaId) {
         return new EventContext(ctx).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
     }
@@ -179,6 +184,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaId) {
         return homePlacesNavigator.getEventNavigation(getPlaceForRegatta(regattaId), null, false);
+    }
+
+    @Override
+    public PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaId) {
+        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaLeaderboard(regattaId), null, false);
     }
 
     @Override
