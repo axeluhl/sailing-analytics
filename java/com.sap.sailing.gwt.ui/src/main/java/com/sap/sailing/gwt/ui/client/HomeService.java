@@ -14,7 +14,7 @@ public interface HomeService extends RemoteService {
     MediaDTO getMediaForEvent(UUID eventId);
     
     MediaDTO getMediaForEventSeries(UUID seriesId);
-    
+
     EventListViewDTO getEventListView() throws Exception;
     
     StartViewDTO getStartView() throws Exception;

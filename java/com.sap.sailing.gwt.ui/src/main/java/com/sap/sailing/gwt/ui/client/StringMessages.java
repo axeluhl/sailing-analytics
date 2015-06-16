@@ -1291,6 +1291,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceIsCanceled();
     String raceIsPostponed();
     String startingInMinutes(@PluralCount(DefaultRule_0_1_n.class) int minutes);
+    String latestNews();
     String showCompetitorTimeOnTimeFactorColumn();
     String showCompetitorTimeOnDistanceAllowanceColumn();
     String rankingMetric();
@@ -1310,4 +1311,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
+    String resultsUpdate();
+    String competitorWonRace(String competitorName);
 }
