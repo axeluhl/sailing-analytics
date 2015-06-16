@@ -4,11 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.WindowManager;
+
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -41,19 +44,14 @@ public class BaseActivity extends SendingServiceAwareActivity {
                 ExLog.i(this, TAG, "Clicked SETTINGS");
                 intent = new Intent(this, PreferenceActivity.class);
                 startActivity(intent);
-//                Intent intent = new Intent(this, PreferenceActivity.class);
-//                Bundle info = new Bundle();
-//                intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, RegattaPreferenceFragment.class.getName());
-//                info.putString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME, PreferenceActivity.SPECIFIC_REGATTA_PREFERENCES_NAME);
-//                info.putString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_NAME, "Test");
-//                intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS, info);
-//                startActivity(intent);
                 return true;
 
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
-                //TODO: is this really save? what about all the connected races?
                 InMemoryDataStore.INSTANCE.reset();
+                Intent i = new Intent(this, RaceStateService.class);
+                i.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
+                startService(i);
                 return onReset();
 
             case R.id.options_menu_info:
