@@ -322,13 +322,13 @@ public class LoginActivity extends BaseActivity
 
     @Override
     protected boolean onReset() {
-        final boolean result = super.onReset();
+        resetDataManager();
         Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
         if (courseAreaFragment != null) {
             getFragmentManager().beginTransaction().remove(courseAreaFragment).commitAllowingStateLoss();
         }
         recreate();
-        return result;
+        return true;
     }
 
     @Override

@@ -6,7 +6,7 @@
         android:id="@+id/options_menu_reload"
         android:icon="@drawable/ic_menu_info_details"
         android:title="@string/options_menu_reload"
-        android:visible="false"/>
+        android:visible="true"/>
 
     <item
         android:id="@+id/options_menu_reset"

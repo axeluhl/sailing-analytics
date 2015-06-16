@@ -60,8 +60,7 @@ public abstract class SessionActivity extends BaseActivity {
     private void doLogout() {
         ExLog.i(this, TAG, "Do logout now!");
         preferences.isSetUp(false); //FIXME: Is that flag really needed or just data redundancy?
-        super.onReset(); // consistently resets the InMemoryDataStore and the RaceStateService
-        fadeActivity(LoginActivity.class, true);
+        super.onReset(); // resets the data manager and fades the activity
     }
 
 }

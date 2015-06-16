@@ -46,7 +46,6 @@ public class BaseActivity extends SendingServiceAwareActivity {
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
                 final boolean result = onReset();
-                fadeActivity(LoginActivity.class, true);
                 return result;
 
             case R.id.options_menu_info:
@@ -67,12 +66,18 @@ public class BaseActivity extends SendingServiceAwareActivity {
     }
     
     /**
-     * Redefinitions should ensure this implementation is called, e.g., after user confirmation. 
+     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then
+     * fades this activity. 
      */
     protected boolean onReset() {
+        resetDataManager();
+        fadeActivity(LoginActivity.class, true);
+        return true;
+    }
+
+    protected void resetDataManager() {
         DataManager dataManager = (DataManager) DataManager.create(this);
         dataManager.resetAll();
-        return true;
     }
 
     @Override
