@@ -105,12 +105,19 @@ public class EventHeader extends Composite {
     private void initFields() {
         String logoUrl = event.getLogoImage() != null ? event.getLogoImage().getSourceRef() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
-        eventLogo.setTitle(event.getDisplayName());
+        
+        String eventDisplayName = event.getDisplayName();
+        eventLogo.setTitle(eventDisplayName);
         
         String nameToShow;
         if(presenter.showRegattaMetadata()) {
             HasRegattaMetadata regattaMetadata = presenter.getRegattaMetadata();
-            nameToShow = regattaMetadata.getDisplayName();
+            String regattaDisplayName = regattaMetadata.getDisplayName();
+            if(regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
+                nameToShow = regattaDisplayName;
+            } else {
+                nameToShow = eventDisplayName + " - " + regattaDisplayName;
+            }
             
             if(regattaMetadata.getCompetitorsCount() > 0) {
                 competitors.setInnerText((i18n.competitorsCount(regattaMetadata.getCompetitorsCount())));
@@ -138,7 +145,7 @@ public class EventHeader extends Composite {
             
             hide(eventVenueContainer, eventLink);
         } else {
-            nameToShow = event.getDisplayName();
+            nameToShow = eventDisplayName;
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
             String venue = event.getLocationAndVenue();
             if(event.getVenueCountry() != null && !event.getVenueCountry().isEmpty()) {
