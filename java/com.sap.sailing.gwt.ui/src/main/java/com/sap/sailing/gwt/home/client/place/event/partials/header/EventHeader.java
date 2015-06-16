@@ -103,7 +103,7 @@ public class EventHeader extends Composite {
     }
 
     private void initFields() {
-        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
+        String logoUrl = event.getLogoImage() != null ? event.getLogoImage().getSourceRef() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
         eventLogo.setTitle(event.getDisplayName());
         

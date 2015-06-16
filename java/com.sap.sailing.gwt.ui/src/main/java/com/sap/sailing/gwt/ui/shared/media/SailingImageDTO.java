@@ -3,23 +3,19 @@ package com.sap.sailing.gwt.ui.shared.media;
 import java.util.Date;
 
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sse.common.media.ImageMetadataDTO;
-import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class SailingImageDTO extends ImageMetadataDTO {
+public class SailingImageDTO extends ImageDTO {
     
-    private static final long serialVersionUID = 1L;
-
     private EventReferenceDTO eventRef;
 
-    @SuppressWarnings("unused")
-    private SailingImageDTO() {
+    protected SailingImageDTO() {
+        super();
     }
 
-    public SailingImageDTO(EventReferenceDTO eventRef, String imageURL, ImageSize size, Date createdAtDate) {
-        super(imageURL, size, createdAtDate);
+    public SailingImageDTO(EventReferenceDTO eventRef, String imageRef, Date createdAtDate) {
+        super(imageRef, createdAtDate);
         this.eventRef = eventRef;
-
     }
 
     public EventReferenceDTO getEventRef() {
