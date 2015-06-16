@@ -255,6 +255,7 @@ public class GateStartFragment {
             return layout;
         }
 
+        //TODO extract some meaningful methods when already working on this!
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
@@ -275,6 +276,7 @@ public class GateStartFragment {
             ThemeHelper.setPickerTextColor(getActivity(), time_launch, ThemeHelper.getColor(getActivity(), R.attr.white));
             ThemeHelper.setPickerTextColor(getActivity(), time_golf, ThemeHelper.getColor(getActivity(), R.attr.white));
             GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+            //FIXME: why ceck null if set before?
             int timeLaunch = 0;
             if (time_launch != null) {
                 time_launch.setMinValue(MIN_VALUE);
