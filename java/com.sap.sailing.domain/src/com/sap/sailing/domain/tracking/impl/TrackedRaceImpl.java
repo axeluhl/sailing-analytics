@@ -3105,6 +3105,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             attachedRaceExecutionOrderProviders.remove(raceExecutionOrderProvider);
         }
     }
+    
+    public boolean hasRaceExecutionOrderProvidersAttached(){
+        return !attachedRaceExecutionOrderProviders.isEmpty();
+    }
 
     private ReadonlyRaceState getRaceState(RaceLog raceLog) {
         ReadonlyRaceState result;
