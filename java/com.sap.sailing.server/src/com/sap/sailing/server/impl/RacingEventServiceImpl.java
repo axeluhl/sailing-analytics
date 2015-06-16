@@ -207,6 +207,7 @@ import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -540,7 +541,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        loadStoredEvents();
+        
+        final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
@@ -548,6 +550,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
+
+        // Stores all events which run through a data migration 
+        // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
+        for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
+            if (eventAndRequireStoreFlag.getB()) {
+                mongoObjectFactory.storeEvent(eventAndRequireStoreFlag.getA());
+            }
+        }
     }
 
     @Override
@@ -634,13 +644,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
-    private void loadStoredEvents() {
-        for (Event event : domainObjectFactory.loadAllEvents()) {
+    private Iterable<Pair<Event, Boolean>> loadStoredEvents() {
+        Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = domainObjectFactory.loadAllEvents(); 
+        for (Pair<Event, Boolean> eventAndFlag : loadedEventsWithRequireStoreFlag) {
+            Event event = eventAndFlag.getA();
             if (event.getId() != null)
                 eventsById.put(event.getId(), event);
         }
+        return loadedEventsWithRequireStoreFlag;
     }
-
+    
     private void loadLinksFromEventsToLeaderboardGroups() {
         domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */this, /* leaderboardGroupResolver */
                 this);

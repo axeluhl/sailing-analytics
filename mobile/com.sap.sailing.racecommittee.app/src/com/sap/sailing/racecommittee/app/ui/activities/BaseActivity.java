@@ -9,7 +9,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -42,13 +41,6 @@ public class BaseActivity extends SendingServiceAwareActivity {
                 ExLog.i(this, TAG, "Clicked SETTINGS");
                 intent = new Intent(this, PreferenceActivity.class);
                 startActivity(intent);
-//                Intent intent = new Intent(this, PreferenceActivity.class);
-//                Bundle info = new Bundle();
-//                intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, RegattaPreferenceFragment.class.getName());
-//                info.putString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME, PreferenceActivity.SPECIFIC_REGATTA_PREFERENCES_NAME);
-//                info.putString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_NAME, "Test");
-//                intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS, info);
-//                startActivity(intent);
                 return true;
 
             case R.id.options_menu_reload:

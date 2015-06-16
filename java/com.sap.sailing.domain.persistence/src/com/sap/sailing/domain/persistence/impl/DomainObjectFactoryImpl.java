@@ -186,6 +186,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -972,18 +973,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Event> loadAllEvents() {
-        ArrayList<Event> result = new ArrayList<Event>();
+    public Iterable<Pair<Event, Boolean>> loadAllEvents() {
+        ArrayList<Pair<Event, Boolean>> result = new ArrayList<>();
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
 
         try {
             for (DBObject object : eventCollection.find()) {
                 Event event = loadEvent(object);
-                boolean hasMigratedSomething = loadLegacyImageAndVideoURLs(event, object);
-                if(hasMigratedSomething) {
-                    new MongoObjectFactoryImpl(database).storeEvent(event);
-                }
-                result.add(event);
+                Boolean requiresStoreAfterMigration = loadLegacyImageAndVideoURLs(event, object);
+                result.add(new Pair<Event, Boolean>(event, requiresStoreAfterMigration));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");

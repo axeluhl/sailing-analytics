@@ -57,6 +57,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
   * [[Uploading Media Content|wiki/uploading-media-content]]
 * Information for Event Managers
+  * [[Set up local network with replication server|wiki/event-network-with-replica]]
   * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Linking Race Videos|wiki/linking-race-videos]]
   * [[Import official results|wiki/results-import]]
@@ -66,6 +67,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
+  * [[Kieler Woche event page|wiki/kieler-woche-2015]]
 
 ### Internal services (not related to wiki but useful)
 

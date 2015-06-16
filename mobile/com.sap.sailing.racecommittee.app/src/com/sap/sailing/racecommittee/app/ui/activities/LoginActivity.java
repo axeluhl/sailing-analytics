@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.UUID;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -19,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -33,7 +38,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
@@ -53,10 +57,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
     implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -272,11 +272,6 @@ public class LoginActivity extends BaseActivity
 
         setContentView(R.layout.login_view);
 
-        //BUG 2953 - clear state because of "registering races -> already registered. ignoring"
-        Intent intent = new Intent(this, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
-        startService(intent);
-
         mReceiver = new IntentReceiver();
 
         // setup the login list views fragment
@@ -383,7 +378,7 @@ public class LoginActivity extends BaseActivity
     private void setupDataManager() {
         showProgressDialog();
 
-        ReadonlyDataManager dataManager = DataManager.create(this);
+        final ReadonlyDataManager dataManager = DataManager.create(this);
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
             .getDeviceIdentifier());
 
@@ -399,6 +394,11 @@ public class LoginActivity extends BaseActivity
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                     ExLog.ex(LoginActivity.this, TAG, reason);
                 }
+
+                // Slide up, if events are available
+                if (!dataManager.getDataStore().getEvents().isEmpty()) {
+                    slideUpBackdropDelayed();
+                }
             }
 
             @Override
@@ -411,7 +411,6 @@ public class LoginActivity extends BaseActivity
                 Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                 // showCourseAreaListFragment(eventId);
                 slideUpBackdropDelayed();
-
             }
         });
 

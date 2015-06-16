@@ -473,37 +473,56 @@ public class RaceListFragment
         }
     }
 
-    private void showRefreshDialog() {
-        DataHelper.logout(getActivity());
-    }
 
     public interface RaceListCallbacks {
         void onRaceListItemSelected(RaceListDataType selectedItem);
     }
+
 
     private class IntentReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
-                String extra = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                if (extra != null) {
-                    for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
-                        if (extra.equals(raceGroupSeriesFleet.getDisplayName())) {
-                            List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
-                            ReadonlyDataManager manager = DataManager.create(getActivity());
-                            for (ManagedRace race : races) {
-                                if (manager.getDataStore().getRace(race.getId()) != null) {
-                                    showRefreshDialog();
-                                    return;
-                                }
-                            }
-                            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
-                            fragment.show(getFragmentManager(), null);
-                        }
-                    }
+                String raceGroupName = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (raceGroupName != null) {
+                    showProtestTimeDialog(raceGroupName);
+                } else {
+                    ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
                 }
             }
         }
     }
+
+    private void showProtestTimeDialog(String raceGroupName) {
+        // Find the race group for which the
+        for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
+            Boolean matchingRaceGroup = raceGroupName.equals(raceGroupSeriesFleet.getDisplayName());
+            if (matchingRaceGroup) {
+                List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
+                if (!isRaceListDirty(races)) {
+                    ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
+                    fragment.show(getFragmentManager(), null);
+                }
+            }
+        }
+    }
+
+    private boolean isRaceListDirty(List<ManagedRace> races) {
+        ReadonlyDataManager manager = DataManager.create(getActivity());
+        for (ManagedRace race : races) {
+            // check for data consistency if race is still in data store and not only in fragment
+            if (manager.getDataStore().getRace(race.getId()) == null) {
+                showRefreshDialog();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void showRefreshDialog() {
+        DataHelper.logout(getActivity());
+    }
+
+
 }
