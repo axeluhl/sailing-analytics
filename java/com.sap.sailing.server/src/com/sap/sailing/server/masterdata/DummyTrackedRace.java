@@ -627,8 +627,4 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return false;
     }
 
-    @Override
-    public RaceExecutionOrderProvider getRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        return null;
-    }
 }

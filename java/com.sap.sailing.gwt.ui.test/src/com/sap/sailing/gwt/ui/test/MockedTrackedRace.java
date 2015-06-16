@@ -790,9 +790,4 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return false;
     }
 
-    @Override
-    public RaceExecutionOrderProvider getRaceExecutionOrderProvider(
-            RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        return null;
-    }
 }

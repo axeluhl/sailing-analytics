@@ -652,9 +652,4 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return false;
     }
 
-    @Override
-    public RaceExecutionOrderProvider getRaceExecutionOrderProvider(
-            RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        return null;
-    }
 }

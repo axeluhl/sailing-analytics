@@ -692,12 +692,6 @@ public interface TrackedRace extends Serializable {
     RaceLog getRaceLog(Serializable identifier);
     
     /**
-     * Returns the attached raceExecutionOrderProvider.
-     * Otherwise <code>null</code>.
-     */
-    RaceExecutionOrderProvider getRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
-    
-    /**
      * A setter for the listener on course design changes suggested by one of the {@link RaceLog}s attached to this
      * race. The listener is mostly part of the tracking provider adapter.
      * 

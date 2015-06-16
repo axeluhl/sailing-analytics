@@ -3133,12 +3133,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return attachedRaceLogs.get(identifier);
     }
     
-
-    @Override
-    public RaceExecutionOrderProvider getRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
-        return attachedRaceExecutionOrderProviders.get(raceExecutionOrderProvider);
-    }
-    
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
         final Distance result;
