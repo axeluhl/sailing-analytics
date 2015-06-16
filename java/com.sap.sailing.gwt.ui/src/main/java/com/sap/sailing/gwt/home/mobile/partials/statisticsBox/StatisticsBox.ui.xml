@@ -8,13 +8,10 @@
 		
 	<mp:section.MobileSection>
 		<mp:header>
-			<mp:sectionHeader.SingleLineNoActionHeader 
-				sectionTitle="{i18n.statisticProvider}" />	
+			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.statisticProvider}" />
 		</mp:header>
 		<mp:content>
-			<g:FlowPanel
-				ui:field="itemContainerUi"
-			/>		
+			<g:FlowPanel ui:field="itemContainerUi" />
 		</mp:content>
 	</mp:section.MobileSection>
 </ui:UiBinder>

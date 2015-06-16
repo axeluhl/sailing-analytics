@@ -19,8 +19,7 @@ public class StatisticsBox extends Composite {
     interface StatisticsBoxUiBinder extends UiBinder<Widget, StatisticsBox> {
     }
 
-    @UiField
-    FlowPanel itemContainerUi;
+    @UiField FlowPanel itemContainerUi;
     
     public StatisticsBox() {
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
