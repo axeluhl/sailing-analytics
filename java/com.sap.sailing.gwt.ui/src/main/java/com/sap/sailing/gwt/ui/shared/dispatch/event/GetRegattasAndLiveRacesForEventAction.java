@@ -55,6 +55,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         return new ResultWithTTL<RegattasAndLiveRacesDTO>(1000 * 60 * 2, result);
     }
 
+    @GwtIncompatible
     private void ensureRegattas(ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces, DispatchContext context) {
         Event event = context.getRacingEventService().getEvent(eventId);
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
@@ -64,6 +65,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         }
     }
 
+    @GwtIncompatible
     protected Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> ensureRegatta(ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces,
             RaceContext context) {
         String regattaName = context.getRegattaName();
@@ -72,6 +74,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         return ensureRegatta(regattasWithRaces, regattaName, leaderboardGroup, leaderboard);
     }
 
+    @GwtIncompatible
     private Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> ensureRegatta(
             ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces, String regattaName,
             LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
