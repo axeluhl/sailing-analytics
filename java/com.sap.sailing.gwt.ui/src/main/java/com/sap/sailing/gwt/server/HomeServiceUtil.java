@@ -402,7 +402,7 @@ public final class HomeServiceUtil {
     }
     
     public static RegattaMetadataDTO toRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getName());
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
         regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
