@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -56,9 +57,11 @@ public class RaceContext {
     private final ReadonlyRaceState state;
     private final Event event;
     private final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
+    private final LeaderboardGroup leaderboardGroup;
     
-    public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
+    public RaceContext(Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         this.event = event;
+        this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;
         this.raceColumn = raceColumn;
         this.raceDefinition = raceColumn.getRaceDefinition(fleet);
@@ -72,7 +75,7 @@ public class RaceContext {
         return !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName());
     }
 
-    private String getRegattaName() {
+    public String getRegattaName() {
         if (leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
             return regatta.getName();
@@ -272,9 +275,16 @@ public class RaceContext {
     }
 
     public void addLiveRace(LiveRacesDTO result) {
+        LiveRaceDTO liveRaceDTO = getLiveRaceOrNull();
+        if(liveRaceDTO != null) {
+            result.addRace(liveRaceDTO);        
+        }
+    }
+    
+    public LiveRaceDTO getLiveRaceOrNull() {
         TimePoint startTime = getStartTime();
         TimePoint finishTime = getFinishTime();
-            // a race is of 'public interest' of a race is a combination of it's 'live' state
+        // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
         if(isLiveOrOfPublicInterest(startTime, finishTime)) {
             // the start time is always given for live races
@@ -292,8 +302,9 @@ public class RaceContext {
             liveRaceDTO.setProgress(getProgressOrNull());
             liveRaceDTO.setWind(getWindOrNull());
             
-            result.addRace(liveRaceDTO);        
+            return liveRaceDTO;
         }
+        return null;
     }
     
     private boolean isLiveOrOfPublicInterest(TimePoint startTime, TimePoint finishTime) {
@@ -380,5 +391,13 @@ public class RaceContext {
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
         return trackedRace.getRaceIdentifier();
+    }
+    
+    public Leaderboard getLeaderboard() {
+        return leaderboard;
+    }
+    
+    public LeaderboardGroup getLeaderboardGroup() {
+        return leaderboardGroup;
     }
 }
