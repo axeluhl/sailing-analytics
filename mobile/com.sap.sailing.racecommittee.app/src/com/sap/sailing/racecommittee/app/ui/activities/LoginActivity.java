@@ -272,11 +272,6 @@ public class LoginActivity extends BaseActivity
 
         setContentView(R.layout.login_view);
 
-        //BUG 2953 - clear state because of "registering races -> already registered. ignoring"
-        Intent intent = new Intent(this, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
-        startService(intent);
-
         mReceiver = new IntentReceiver();
 
         // setup the login list views fragment
@@ -383,7 +378,7 @@ public class LoginActivity extends BaseActivity
     private void setupDataManager() {
         showProgressDialog();
 
-        ReadonlyDataManager dataManager = DataManager.create(this);
+        final ReadonlyDataManager dataManager = DataManager.create(this);
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
             .getDeviceIdentifier());
 
@@ -399,6 +394,11 @@ public class LoginActivity extends BaseActivity
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                     ExLog.ex(LoginActivity.this, TAG, reason);
                 }
+
+                // Slide up, if events are available
+                if (!dataManager.getDataStore().getEvents().isEmpty()) {
+                    slideUpBackdropDelayed();
+                }
             }
 
             @Override
@@ -411,7 +411,6 @@ public class LoginActivity extends BaseActivity
                 Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                 // showCourseAreaListFragment(eventId);
                 slideUpBackdropDelayed();
-
             }
         });
 
