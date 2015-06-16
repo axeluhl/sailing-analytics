@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.RGBColor;
 
 /**
@@ -53,6 +54,12 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private boolean flagImageChanged;
     private URI oldFlagImageURL;
     private URI newFlagImageURL;
+    private boolean timeOnTimeFactorChanged;
+    private Double oldTimeOnTimeFactor;
+    private Double newTimeOnTimeFactor;
+    private boolean timeOnDistanceAllowancePerNauticalMileChanged;
+    private Duration oldTimeOnDistanceAllowancePerNauticalMile;
+    private Duration newTimeOnDistanceAllowancePerNauticalMile;
     
     @Before
     public void setUp() {
@@ -77,6 +84,12 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         flagImageChanged = false;
         oldFlagImageURL = null;
         newFlagImageURL = null;
+        timeOnTimeFactorChanged = false;
+        oldTimeOnTimeFactor = null;
+        newTimeOnTimeFactor = null;
+        timeOnDistanceAllowancePerNauticalMileChanged = false;
+        oldTimeOnDistanceAllowancePerNauticalMile = null;
+        newTimeOnDistanceAllowancePerNauticalMile = null;
         listener = new CompetitorChangeListener() {
             private static final long serialVersionUID = 4581029778988240209L;
 
@@ -122,6 +135,22 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
                 CompetitorListenerTest.this.oldFlagImageURL = oldFlagImageURL;
                 CompetitorListenerTest.this.newFlagImageURL = newFlagImageURL;
             }
+
+            @Override
+            public void timeOnTimeFactorChanged(Double oldTimeOnTimeFactor, Double newTimeOnTimeFactor) {
+                timeOnTimeFactorChanged = true;
+                CompetitorListenerTest.this.oldTimeOnTimeFactor = oldTimeOnTimeFactor;
+                CompetitorListenerTest.this.newTimeOnTimeFactor = newTimeOnTimeFactor;
+            }
+
+            @Override
+            public void timeOnDistanceAllowancePerNauticalMileChanged(
+                    Duration oldTimeOnDistanceAllowancePerNauticalMile,
+                    Duration newTimeOnDistanceAllowancePerNauticalMile) {
+                timeOnDistanceAllowancePerNauticalMileChanged = true;
+                CompetitorListenerTest.this.oldTimeOnDistanceAllowancePerNauticalMile = oldTimeOnDistanceAllowancePerNauticalMile;
+                CompetitorListenerTest.this.newTimeOnDistanceAllowancePerNauticalMile = newTimeOnDistanceAllowancePerNauticalMile;
+            }
         };
         competitor.addCompetitorChangeListener(listener);
     }
@@ -136,6 +165,22 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         assertEquals(baseDomainFactory.getOrCreateNationality("GER"), competitor.getTeam().getNationality());
         competitor.getTeam().setNationality(null);
         assertNull(competitor.getTeam().getNationality());
+    }
+    
+    @Test
+    public void testChangeTimeOnTimeFactor() {
+        competitor.setTimeOnTimeFactor(1.209);
+        assertTrue(timeOnTimeFactorChanged);
+        assertNull(oldTimeOnTimeFactor);
+        assertEquals(1.209, newTimeOnTimeFactor, 0.00000001);
+    }
+    
+    @Test
+    public void testChangeTimeOnDistanceAllowancePerNauticalMile() {
+        competitor.setTimeOnDistanceAllowancePerNauticalMile(Duration.ONE_HOUR);
+        assertTrue(timeOnDistanceAllowancePerNauticalMileChanged);
+        assertNull(oldTimeOnDistanceAllowancePerNauticalMile);
+        assertEquals(Duration.ONE_HOUR.asMillis(), newTimeOnDistanceAllowancePerNauticalMile.asMillis());
     }
     
     @Test

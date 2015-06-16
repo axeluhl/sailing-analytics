@@ -34,7 +34,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
     public PathGeneratorOpportunistEuclidian360(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
-        parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
+        parameters = new SimulationParametersImpl(params.getCourse(), params.getStartLine(), params.getEndLine(), polarDiagramClone, params.getWindField(),
                 params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
@@ -71,6 +71,28 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
 
         Position startPos = parameters.getCourse().get(0);
         Position endPos = parameters.getCourse().get(1);
+        Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
+
+        List<Position> startLine = this.parameters.getStartLine();
+        if (startLine != null) {
+            Bearing bearStartLine = startLine.get(0).getBearingGreatCircle(startLine.get(1));
+            double diffStartLineVrt = bearVrt.getDifferenceTo(bearStartLine).getDegrees();
+            Position startPositionLeft;
+            Position startPositionRight;
+            if ((diffStartLineVrt > 0) && (diffStartLineVrt < 180)) {
+                startPositionLeft = startLine.get(0);
+                startPositionRight = startLine.get(1);
+            } else {
+                startPositionLeft = startLine.get(1);
+                startPositionRight = startLine.get(0);
+            }
+            if (startLeft == true) {
+                startPos = startPositionLeft;
+            } else {
+                startPos = startPositionRight;
+            }
+            bearVrt = startPos.getBearingGreatCircle(endPos);
+        }
 
         TimePoint startTime = wf.getStartTime();
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
@@ -205,7 +227,7 @@ public class PathGeneratorOpportunistEuclidian360 extends PathGeneratorBase {
                 double targetDistanceMetersRight = Math.round(targetDistanceRight.getMeters() * 1000.) / 1000.;
                 prevPrevDirection = prevDirection;
                 
-                if (prevDirection == BoatDirection.NONE) {
+                if ((prevDirection == BoatDirection.NONE) && (startLine == null)) {
                     
                     if (startLeft) {
                         if (pointOfSail == PointOfSail.TACKING) {

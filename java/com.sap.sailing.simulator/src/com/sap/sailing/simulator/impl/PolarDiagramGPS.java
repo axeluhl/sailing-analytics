@@ -65,8 +65,9 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 beatStar = null;
             }
             if (beatStar != null) {
-                Bearing avgBeatAngle = new DegreeBearingImpl((beatStar.getBearing().getDegrees() + (360 - beatPort
-                        .getBearing().getDegrees()) % 360) / 2.0);
+                double beatStarAngle = Math.abs((beatStar.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                double beatPortAngle = Math.abs((beatPort.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                Bearing avgBeatAngle = new DegreeBearingImpl((beatStarAngle + beatPortAngle) / 2.0);
                 beatAngles.add(avgBeatAngle);
                 Speed avgBeatSpeed = new KnotSpeedImpl((beatStar.getKnots() + beatPort.getKnots()) / 2.0);
                 beatSpeed.add(avgBeatSpeed);
@@ -93,8 +94,9 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 jibeStar = null;
             }
             if (jibeStar != null) {
-                Bearing avgJibeAngle = new DegreeBearingImpl((jibeStar.getBearing().getDegrees() + (360 - jibePort
-                        .getBearing().getDegrees()) % 360) / 2.0);
+                double jibeStarAngle = Math.abs((jibeStar.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                double jibePortAngle = Math.abs((jibePort.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                Bearing avgJibeAngle = new DegreeBearingImpl((jibeStarAngle + jibePortAngle) / 2.0);
                 jibeAngles.add(avgJibeAngle);
                 Speed avgJibeSpeed = new KnotSpeedImpl((jibeStar.getKnots() + jibePort.getKnots()) / 2.0);
                 jibeSpeed.add(avgJibeSpeed);

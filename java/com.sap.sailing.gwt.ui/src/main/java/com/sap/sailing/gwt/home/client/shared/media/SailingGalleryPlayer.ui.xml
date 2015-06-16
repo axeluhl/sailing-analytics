@@ -41,7 +41,7 @@
 	.close {
 		height: 30px;
 		width: 30px;
-
+		cursor: pointer;
 	}
 	.subcontent {
 		border-top: 1px solid #ebebeb;

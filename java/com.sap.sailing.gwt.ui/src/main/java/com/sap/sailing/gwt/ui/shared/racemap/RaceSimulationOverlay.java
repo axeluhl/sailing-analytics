@@ -1,12 +1,15 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
@@ -54,6 +57,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ColorPalette colors;
     private SimulatorResultsDTO simulationResult;
+    private Boolean[] visiblePaths;
     private PathDTO racePath;
     private int raceLeg = 0;
     private Canvas simulationLegend;
@@ -109,13 +113,19 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         simulationLegend = Canvas.createIfSupported();
         simulationLegend.addStyleName("MapSimulationLegend");
         simulationLegend.setTitle(stringMessages.simulationLegendTooltip());
-        /*simulationLegend.addClickHandler(new ClickHandler() {
+        simulationLegend.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
+                int clickPixelY = event.getRelativeY(simulationLegend.getElement());
+                int legendRow = clickPixelY / ((int) rectHeight);
+                int pathRow = legendRow - (racePath!=null ? 1 : 0);
+                //Window.alert("clickPixelY: " + clickPixelY + "\nlegendRow: " + legendRow);
+                visiblePaths[pathRow] = !visiblePaths[pathRow];
+                clearCanvas();
+                drawPaths();
             }
-        });*/
-        map.setControls(ControlPosition.LEFT_TOP, simulationLegend);
+        });
+        map.setControls(ControlPosition.RIGHT_BOTTOM, simulationLegend);
         simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
     }
     
@@ -164,7 +174,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         int colorIdx = paths.length;
         for (PathDTO path : paths) {
             colorIdx--;
-            if (path.getMixedLeg()) {
+            if (!visiblePaths[colorIdx] || (path.getMixedLeg())) {
                 continue;
             }
             List<SimulatorWindDTO> points = path.getPoints();
@@ -253,12 +263,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         setCanvasSize(canvas, canvasWidth, canvasHeight);
         if (racePath != null) {
             drawRectangleWithText(context2d, xOffset, yOffset, null,
-                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime);
+                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime, true);
         }
         for (PathDTO path : paths) {
             String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
             drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index-(racePath==null?1:0)) * rectHeight, this.colors.getColor(paths.length-1-index),
-                path.getName().split("#")[1], timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)));
+                path.getName().split("#")[1], timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)), visiblePaths[paths.length-1-index]);
             index++;
         }
     }
@@ -276,11 +286,25 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         context2d.fillRect(x, y, rectWidth, rectHeight);
     }
 
-    protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta) {
+    protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta, boolean visible) {
         double offset = 3.0;
         context2d.setFont(textFont);
         if (color != null) {
             drawRectangle(context2d, x, y, color);
+        }
+        if ((visible) && (color != null)) {
+            context2d.setGlobalAlpha(1.0);
+            context2d.setLineWidth(3.0);
+            context2d.setStrokeStyle("white");
+            context2d.beginPath();
+            context2d.moveTo(x + 4.0,y + 4.0);
+            context2d.lineTo(x + rectWidth - 4.0, y + rectHeight - 4.0);
+            context2d.stroke();
+            context2d.beginPath();
+            context2d.moveTo(x + 4.0, y + rectHeight - 4.0);
+            context2d.lineTo(x + rectWidth - 4.0,y + 4.0);
+            context2d.stroke();
+            context2d.setStrokeStyle("black");            
         }
         context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
@@ -324,16 +348,21 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                     racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
                                     racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
                                     racePath.setPoints(racePathPoints);
-                                    racePath.setName("0#Race");
+                                    racePath.setName("0#Race Leader");
                                 } else {
                                     racePath = null;
                                 }
+                                visiblePaths = new Boolean[simulationResult.getPaths().length];
+                                Arrays.fill(visiblePaths, Boolean.TRUE);
+                                visiblePaths[1] = Boolean.FALSE; // hide left-opportunist by default
+                                visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
                                 clearCanvas();
                                 drawPaths();
                             }
                         } else {
                             raceLeg = 0;
                             simulationResult = null;
+                            visiblePaths = null;
                             clearCanvas();
                         }
                     }

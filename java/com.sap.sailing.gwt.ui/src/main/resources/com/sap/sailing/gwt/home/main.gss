@@ -462,6 +462,16 @@ figcaption {
 .spacermarginbottombig {
   margin-bottom: 5.333333333333333em;
 }
+@media (min-width: 720px) {
+  .spacermarginonlyonsmall {
+    margin: 0;
+  }
+}
+@media (max-width: 720px) {
+  .spacermarginonlyonlarge {
+    margin: 0;
+  }
+}
 .stickyheader {
   background: inherit;
 }

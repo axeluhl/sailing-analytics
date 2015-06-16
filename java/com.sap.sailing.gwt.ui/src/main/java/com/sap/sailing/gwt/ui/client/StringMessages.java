@@ -94,7 +94,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String gapToLeaderInSeconds();
     String velocityMadeGoodInKnots();
     String windwardDistanceToGoInMeters();
-    String windwardDistanceToLeaderInMeters();
+    String windwardDistanceToCompetitorFarthestAheadInMeters();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();
@@ -171,6 +171,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String distance();
     String in();
     String secondsUnit();
+    String secondsPerNauticalMileUnit();
     String metersUnit();
     @Override
     String close();
@@ -511,7 +512,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String penaltyCircleTooltip();
     String raceAverageSpeedInKnotsTooltip();
     String currentSpeedOverGroundInKnotsTooltip();
-    String windwardDistanceToLeaderInMetersTooltip();
+    String windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
     String raceDistanceTraveledTooltip();
     String rankTooltip();
     String rankGainTooltip();
@@ -1081,6 +1082,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String photos();
     String videos();
     String image();
+    String images();
     String video();
     String flagImageURL();
     String imageURLs();
@@ -1289,4 +1291,23 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceIsCanceled();
     String raceIsPostponed();
     String startingInMinutes(@PluralCount(DefaultRule_0_1_n.class) int minutes);
+    String showCompetitorTimeOnTimeFactorColumn();
+    String showCompetitorTimeOnDistanceAllowanceColumn();
+    String rankingMetric();
+    String oneDesignRankingMetric();
+    String orcPerformanceCurveRankingMetric();
+    String timeOnTimeAndDistanceRankingMetric();
+    String oneDesignRankingMetricDescription();
+    String orcPerformanceCurveRankingMetricDescription();
+    String timeOnTimeAndDistanceRankingMetricDescription();
+    String timeOnTimeFactor();
+    String timeOnDistanceAllowanceInSecondsPerNauticalMile();
+    String calculatedTimeTraveled();
+    String calculatedTimeTraveledTooltip();
+    String timeOnTimeFactorTooltip();
+    String timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
+    String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
+    String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
+    String sailorInfo();
+    String sailorInfoLongText();
 }

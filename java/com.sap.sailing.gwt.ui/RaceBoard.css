@@ -83,9 +83,19 @@ table {
 	padding-left: 10px;
 }
 
-.MapSimulationLegendParentDiv {
+.TrueNorthIndicatorPanelParentDiv {
 	padding-top: 10px;
 	padding-left: 10px;
+}
+
+.MapSimulationLegendParentDiv {
+	padding-bottom: 10px;
+	padding-right: 10px;
+	pointer-events: none;
+}
+
+.MapSimulationLegend {
+	pointer-events: all;
 }
 
 .RaceMap-HeaderPanel {
