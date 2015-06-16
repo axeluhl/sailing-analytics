@@ -5,11 +5,13 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBoxResources;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
@@ -31,6 +33,16 @@ public class Impressions extends Composite {
     public Impressions() {
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    public void setClickDestinaton(final PlaceNavigation<?> placeNavigation) {
+
+        headerUi.setClickAction(new Command() {
+            @Override
+            public void execute() {
+                placeNavigation.goToPlace();
+            }
+        });
     }
 
     public void setStatistis(int nrOfImages, int nrOfVideos) {

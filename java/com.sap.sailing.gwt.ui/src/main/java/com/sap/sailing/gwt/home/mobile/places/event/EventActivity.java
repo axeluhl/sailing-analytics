@@ -67,6 +67,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
         view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
         view.getQuickfinder().addSelectionHandler(new QuickfinderSelectionHandler());
         view.setStatistics(new StatisticsDTO()); // TODO set correct stats
+        view.setNavigator(clientFactory.getNavigator());
         clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
