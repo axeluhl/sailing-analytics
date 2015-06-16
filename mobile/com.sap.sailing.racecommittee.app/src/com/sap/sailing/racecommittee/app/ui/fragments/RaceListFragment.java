@@ -493,7 +493,8 @@ public class RaceListFragment
                             List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                             ReadonlyDataManager manager = DataManager.create(getActivity());
                             for (ManagedRace race : races) {
-                                if (manager.getDataStore().getRace(race.getId()) != null) {
+                                // check for data consistency if race is still in data store and not only in fragment
+                                if (manager.getDataStore().getRace(race.getId()) == null) {
                                     showRefreshDialog();
                                     return;
                                 }
