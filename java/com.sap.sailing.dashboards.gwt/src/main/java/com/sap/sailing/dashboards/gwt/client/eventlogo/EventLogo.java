@@ -35,7 +35,6 @@ public class EventLogo extends Image {
                             Window.setTitle(event.getName() + " Dashboard");
                         }
                     }
-                    
                 }
 
                 @Override
