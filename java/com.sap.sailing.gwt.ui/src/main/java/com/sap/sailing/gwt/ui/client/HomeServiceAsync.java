@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
  */
 public interface HomeServiceAsync {
     void getEventSeriesViewById(UUID id, AsyncCallback<EventSeriesViewDTO> asyncCallback);
-    
+
     void getMediaForEvent(UUID eventId, AsyncCallback<MediaDTO> callback); 
 
     void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);

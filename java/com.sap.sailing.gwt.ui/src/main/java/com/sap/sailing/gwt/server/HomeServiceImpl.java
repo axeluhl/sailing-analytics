@@ -55,9 +55,28 @@ import com.sap.sse.util.ServiceTrackerFactory;
  * The server side implementation of the RPC service.
  */
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
+    private static final long serialVersionUID = 3947782997746039939L;
+    
+    private static final int MAX_STAGE_EVENTS = 5;
+    private static final int MAX_RECENT_EVENTS = 3;
+    private static final int MAX_VIDEO_COUNT = 3;
+
+    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
+    public HomeServiceImpl() {
+        BundleContext context = Activator.getDefault();
+        
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+    }
+
+    protected RacingEventService getService() {
+        return racingEventServiceTracker.getService(); 
+    }
+
     private interface EventVisitor {
         void visit(EventBase event, boolean onRemoteServer, URL baseURL);
     }
+    
     private static class EventHolder {
         EventBase event;
         boolean onRemoteServer;
@@ -79,24 +98,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             TimeRange event2Range = new TimeRangeImpl(eventAndStageType2.getB().event.getStartDate(), eventAndStageType2.getB().event.getEndDate());
             return event1Range.timeDifference(now).compareTo(event2Range.timeDifference(now));
         }
-    }
-    
-    private static final long serialVersionUID = 3947782997746039939L;
-    
-    private static final int MAX_STAGE_EVENTS = 5;
-    private static final int MAX_RECENT_EVENTS = 3;
-    private static final int MAX_VIDEO_COUNT = 3;
-
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-
-    public HomeServiceImpl() {
-        BundleContext context = Activator.getDefault();
-        
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-    }
-
-    protected RacingEventService getService() {
-        return racingEventServiceTracker.getService(); // grab the service
     }
     
     public void forAllPublicEvents(EventVisitor visitor) throws MalformedURLException {
