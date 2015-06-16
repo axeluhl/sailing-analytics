@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.home.mobile.partials.statisticsBox;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources;
 
 public class StatisticsBox extends Composite {
     
@@ -20,17 +19,16 @@ public class StatisticsBox extends Composite {
     interface StatisticsBoxUiBinder extends UiBinder<Widget, StatisticsBox> {
     }
 
-    @UiField DivElement itemContainerUi;
+    @UiField
+    FlowPanel itemContainerUi;
     
     public StatisticsBox() {
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
-        SectionHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     
     public void addItem(String iconUrl, String name, Integer count) {
-        StatisticsBoxItem item = new StatisticsBoxItem(iconUrl, name, count);
-        itemContainerUi.appendChild(item.getElement());
+        itemContainerUi.add(new StatisticsBoxItem(iconUrl, name, count));
     }
 
 }
