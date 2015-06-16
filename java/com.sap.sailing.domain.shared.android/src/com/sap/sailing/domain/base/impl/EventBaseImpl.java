@@ -251,6 +251,12 @@ public abstract class EventBaseImpl implements EventBase {
         } 
         return result;
     }
+    
+    @Override
+    public boolean hasImageWithTag(String tagName) {
+        List<ImageDescriptor> mediaWithTag = findMediaWithTag(images, tagName);
+        return mediaWithTag.size() > 0;
+    }
 
     @Override
     public List<ImageDescriptor> findImagesWithTag(String tagName) {
