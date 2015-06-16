@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
@@ -15,12 +16,14 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
+import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsDTO;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
@@ -35,6 +38,7 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock sailorInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
+    @UiField RegattaStatus regattaStatusUi;
     @UiField Impressions impressionsUi;
     @UiField StatisticsBox statisticsBoxUi;
     
@@ -47,8 +51,9 @@ public class EventViewImpl extends Composite implements EventView {
         overviewStageUi = new EventOverviewStage(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(currentPresenter.getCtx().getEventDTO()
-                .getId()));
+        UUID eventId = currentPresenter.getCtx().getEventDTO() .getId();
+        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
+        refreshManager.add(regattaStatusUi, new GetRegattasAndLiveRacesForEventAction(eventId));
         impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
     }
 

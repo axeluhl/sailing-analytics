@@ -1,4 +1,4 @@
-RegattaStatusRace<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
@@ -9,10 +9,10 @@ RegattaStatusRace<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtm
 		<a title="" ui:field="linkUi">
 			<div class="{local_res.css.regattastatus_content_regatta_race} {res.mediaCss.grid}">
 				<div style="border-color: race.fleetColor;" class="res.mainCss.fleetcorner-FIXME"></div>
-				<div class="{local_res.css.regattastatus_content_regatta_race_title} {res.mediaCss.small4} {res.mediaCss.columns}" 
+				<div class="{local_res.css.regattastatus_content_regatta_race_title} {res.mediaCss.small3} {res.mediaCss.columns}" 
 					ui:field="raceTitleUi"><!-- race.title -->
 				</div>
-				<div class="{local_res.css.regattastatus_content_regatta_race_flag} {res.mediaCss.small2} {res.mediaCss.columns}"
+				<div class="{local_res.css.regattastatus_content_regatta_race_flag} {res.mediaCss.small3} {res.mediaCss.columns}"
 					ui:field="raceFlagContainerUi" >
 				</div>
 				<div class="{local_res.css.regattastatus_content_regatta_race_state} {res.mediaCss.small6} {res.mediaCss.columns}"
@@ -31,7 +31,7 @@ RegattaStatusRace<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtm
 					</div>
 				</div>
 				<!-- IF END -->
-				<img src="images/home/arrow-grey-right.png" class="{local_res.css.regattastatus_content_regatta_race_arrow}"></img>
+				<!-- <img src="images/home/arrow-grey-right.png" class="{local_res.css.regattastatus_content_regatta_race_arrow}"></img> -->
 			</div>
 		</a>
 	</g:HTMLPanel>

@@ -2,24 +2,11 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusResources" />
-	<g:HTMLPanel>
-		<!-- IF regatta.state === 'live' -->
-		<div class="{local_res.css.regattastatus_content_regatta}">
-			<!-- <ubi:global.sectionHeader ui:field='title' /> -->
-			<!-- EACH race in regatta.liveraces -->
-			<!-- <ubi:global.regattaStatusRace ui:field='race' /> -->
-			<!-- EACH END -->
-		</div>
-		<!-- IF END -->
-		<!-- IF regatta.state != 'live' -->
-		<!-- IF (eventState === 'live') ADD class regatta-status__content__regatta--hidden -->
-		<div class="{local_res.css.regattastatus_content_regatta}">
-			<!-- IF END -->
-			<!-- <ubi:global.sectionHeader ui:field='image'/> -->
-		</div>
-		<!-- IF END -->
-	</g:HTMLPanel>
+	<mp:section.MobileSection ui:field="itemContainerUi">
+		<mp:header>
+			<mp:sectionHeader.SectionHeaderContent ui:field="headerUi" />
+		</mp:header>
+	</mp:section.MobileSection>
 </ui:UiBinder>
