@@ -211,7 +211,7 @@ public class GateStartFragment {
         private final static String START_MODE = "startMode";
 
         private final int MIN_VALUE = 0;
-        private final int MAX_VALUE = 20;
+        private final int MAX_VALUE = 60;
 
         public static Timing newInstance(String nat, String num) {
             return newInstance(0, nat, num);
@@ -264,36 +264,42 @@ public class GateStartFragment {
             final TextView totalTimeText = (TextView) getActivity().findViewById(R.id.total_time_text);
             final NumberPicker time_launch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
             final NumberPicker time_golf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
-            ThemeHelper
-                .setPickerTextColor(getActivity(), time_launch, ThemeHelper.getColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerTextColor(getActivity(), time_launch, ThemeHelper.getColor(getActivity(), R.attr.white));
             ThemeHelper.setPickerTextColor(getActivity(), time_golf, ThemeHelper.getColor(getActivity(), R.attr.white));
+            GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+            int timeLaunch = 0;
             if (time_launch != null) {
                 time_launch.setMinValue(MIN_VALUE);
                 time_launch.setMaxValue(MAX_VALUE);
                 time_launch.setWrapSelectorWheel(false);
-                int value = (int) GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
-                time_launch.setValue(value - 1);
+                int value = (int) (procedure.getGateLaunchStopTime() / ONE_MINUTE_MILLISECONDS);
+                time_launch.setValue(value);
                 time_launch.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                         totalTimeText.setText("" + (newVal + time_golf.getValue()));
                     }
                 });
+                timeLaunch = value;
             }
 
             if (time_golf != null) {
                 time_golf.setMinValue(MIN_VALUE);
                 time_golf.setMaxValue(MAX_VALUE);
                 time_golf.setWrapSelectorWheel(false);
-                int value = (int) GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
-                time_golf.setValue(value - 1);
+                int value = (int) (procedure.getGolfDownTime() / ONE_MINUTE_MILLISECONDS);
+                time_golf.setValue(value);
                 time_golf.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                        totalTimeText.setText("" + (newVal + (time_launch.getValue())));
+                        int launch = 0;
+                        if (time_launch != null) {
+                            launch = time_launch.getValue();
+                        }
+                        totalTimeText.setText("" + (newVal + launch));
                     }
                 });
-                totalTimeText.setText("" + (time_launch.getValue() + time_golf.getValue()));
+                totalTimeText.setText("" + (timeLaunch + time_golf.getValue()));
             }
 
             View button = getActivity().findViewById(R.id.set_gate_time);
@@ -307,10 +313,10 @@ public class GateStartFragment {
                         long golf = 0;
 
                         if (time_launch != null) {
-                            launch = (time_launch.getValue() - 1) * ONE_MINUTE_MILLISECONDS;
+                            launch = time_launch.getValue() * ONE_MINUTE_MILLISECONDS;
                         }
                         if (time_golf != null) {
-                            golf = (time_golf.getValue() - 1) * ONE_MINUTE_MILLISECONDS;
+                            golf = time_golf.getValue() * ONE_MINUTE_MILLISECONDS;
                         }
 
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
