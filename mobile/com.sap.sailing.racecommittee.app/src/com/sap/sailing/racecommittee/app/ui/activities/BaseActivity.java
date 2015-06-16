@@ -52,7 +52,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
-                //TODO: is this really save? what about all the connected races?
+                //TODO: is this really safe? what about all the connected races? Axel: no it's not. We need to fire the intent INTENT_ACTION_CLEAR_RACES to tell the RaceStateService to clear its structures
                 InMemoryDataStore.INSTANCE.reset();
                 return onReset();
 
