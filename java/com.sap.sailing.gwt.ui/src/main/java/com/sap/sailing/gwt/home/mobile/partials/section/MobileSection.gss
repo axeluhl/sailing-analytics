@@ -15,7 +15,6 @@
 }
 
 .sectionContent {
-  font-size: 0.866666666666667em;
   padding: 0;
 }
 

@@ -45,7 +45,7 @@ public class RegattaStatusRace extends Composite {
     }
 
     private void initRaceFlagInfo(FlagStateDTO value) {
-        raceFlagContainerUi.setInnerSafeHtml(SailingFlagsBuilder.render(value, 0.35, FlagsMeaningExplanator.getFlagsMeaning(I18N,
+        raceFlagContainerUi.setInnerSafeHtml(SailingFlagsBuilder.render(value, 0.40, FlagsMeaningExplanator.getFlagsMeaning(I18N,
                 value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
     }
 

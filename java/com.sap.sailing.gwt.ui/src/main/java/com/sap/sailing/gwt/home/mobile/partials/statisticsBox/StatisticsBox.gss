@@ -7,6 +7,7 @@
 .statisticsbox_content_item {
   position: relative;
   padding: 1.153846153846154em 0;
+  font-size: 0.866666666666667em;
 }
 .statisticsbox_content_item:first-child {
   padding-top: 1.923076923076923em;
