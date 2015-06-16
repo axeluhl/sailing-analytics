@@ -124,7 +124,6 @@ public abstract class TrackBasedTest {
         DegreePosition topPosition = new DegreePosition(54.48, 10.24);
         TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the fix timed
         trackedRace.setStartOfTrackingReceived(timePointForFixes);
-        trackedRace.setEndOfTrackingReceived(timePointForFixes);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), new MillisecondsTimePoint(0)));
         trackedRace.getOrCreateTrack(right).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.24), new MillisecondsTimePoint(0)));
         trackedRace.getOrCreateTrack(windwardMark).addGPSFix(new GPSFixImpl(topPosition, new MillisecondsTimePoint(0)));
