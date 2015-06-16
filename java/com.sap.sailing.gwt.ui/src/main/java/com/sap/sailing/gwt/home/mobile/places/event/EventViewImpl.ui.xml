@@ -23,6 +23,7 @@
    		</div>
 		<p:overview.EventOverviewStage ui:field="overviewStageUi" />
 		<mp:regattaStatus.RegattaStatus ui:field="regattaStatusUi" />
+		<mp:updatesBox.UpdatesBox ui:field="updatesBoxUi" />
 		<mp:impressions.Impressions ui:field="impressionsUi" />		
 		<mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />		
 	</g:HTMLPanel>

@@ -1,0 +1,20 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBoxResources" />
+  <li class="{local_res.css.box_content_item}">
+    <a ui:field="link" class="{local_res.css.updatesbox_item} {local_res.css.updatesbox_itemlink}">
+      <div ui:field="icon" style="background-image: url('images/home/news-i.png')" class="{local_res.css.updatesbox_item_icon}"></div>
+      <div class="{local_res.css.updatesbox_item_content}">
+        <b class="{local_res.css.updatesbox_item_content_text}">
+          <span ui:field="titleUi"></span>
+          <span ui:field="boatClassUi" class="{local_res.css.updatesbox_item_content_text_boatclass}"></span>
+        </b>
+        <div ui:field="messageUi" class="{local_res.css.updatesbox_item_content_text}">
+        </div>
+        <div ui:field="timestampUi" class="{local_res.css.updatesbox_item_content_text}">
+        </div>
+      </div>
+    </a>
+  </li>
+</ui:UiBinder>
