@@ -2,6 +2,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +77,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
-            candidates.put(c, new TreeSet<Candidate>());
+            candidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
             currentMarkPasses.put(c, new HashMap<Waypoint, MarkPassing>());
             TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new Comparator<Candidate>() {
                 @Override
