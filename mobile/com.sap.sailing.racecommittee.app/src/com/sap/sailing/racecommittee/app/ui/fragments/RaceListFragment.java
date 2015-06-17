@@ -36,6 +36,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.SessionActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
@@ -513,15 +514,12 @@ public class RaceListFragment
         for (ManagedRace race : races) {
             // check for data consistency if race is still in data store and not only in fragment
             if (manager.getDataStore().getRace(race.getId()) == null) {
-                showRefreshDialog();
+                SessionActivity sessionActivity = (SessionActivity) getActivity();
+                sessionActivity.forceLogout();
                 return true;
             }
         }
         return false;
-    }
-
-    private void showRefreshDialog() {
-        DataHelper.logout(getActivity());
     }
 
 
