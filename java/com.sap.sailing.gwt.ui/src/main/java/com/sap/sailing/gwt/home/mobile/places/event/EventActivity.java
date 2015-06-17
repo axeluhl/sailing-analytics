@@ -5,8 +5,6 @@ import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -14,7 +12,6 @@ import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
@@ -72,7 +69,6 @@ public class EventActivity extends AbstractActivity implements Presenter {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
         }
         view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
-        view.getQuickfinder().addSelectionHandler(new QuickfinderSelectionHandler());
         view.setNavigator(clientFactory.getNavigator());
         clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
             @Override
@@ -96,19 +92,10 @@ public class EventActivity extends AbstractActivity implements Presenter {
         return clientFactory.getDispatch();
     }
     
-    private class QuickfinderSelectionHandler implements SelectionHandler<String> {
-        @Override
-        public void onSelection(SelectionEvent<String> event) {
-            // TODO Link to correct places
-            clientFactory.getPlaceController().goTo(new StartPlace());
-        }
-    }
-
-
     @Override
     public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
-        return clientFactory.getNavigator().getEventNavigation(
-                new RegattaLeaderboardPlace(new EventContext().withRegattaId(leaderboardName)), null, false);
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
     }
 
     @Override

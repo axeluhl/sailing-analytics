@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared.eventview;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class RegattaReferenceDTO implements IsSerializable {
+public class RegattaReferenceDTO implements IsSerializable, Comparable<RegattaReferenceDTO> {
     private String id;
     private String displayName;
     
@@ -27,5 +27,10 @@ public class RegattaReferenceDTO implements IsSerializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public int compareTo(RegattaReferenceDTO o) {
+        return displayName.compareTo(o.displayName);
     }
 }

@@ -1,29 +1,34 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
-import com.sap.sse.common.Util.Pair;
 
 public class RegattasAndLiveRacesDTO implements DTO {
     
-    private ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces;
+    private TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces;
+    private TreeSet<RegattaMetadataDTO> regattasWithoutRaces;
     
     @SuppressWarnings("unused")
     private RegattasAndLiveRacesDTO() {
     }
 
-    public RegattasAndLiveRacesDTO(ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces) {
+    public RegattasAndLiveRacesDTO(TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces, TreeSet<RegattaMetadataDTO> regattasWithoutRaces) {
         super();
         this.regattasWithRaces = regattasWithRaces;
+        this.regattasWithoutRaces = regattasWithoutRaces;
     }
     
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public List<Pair<RegattaMetadataDTO, Set<LiveRaceDTO>>> getRegattasWithRaces() {
-        return (List)regattasWithRaces;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public Map<RegattaMetadataDTO, Set<LiveRaceDTO>> getRegattasWithRaces() {
+        return (Map)regattasWithRaces;
+    }
+    
+    public Set<RegattaMetadataDTO> getRegattasWithoutRaces() {
+        return regattasWithoutRaces;
     }
 }

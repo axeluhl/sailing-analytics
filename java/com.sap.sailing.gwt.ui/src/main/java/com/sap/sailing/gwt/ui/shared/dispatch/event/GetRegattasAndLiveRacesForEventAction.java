@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -16,7 +19,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
-import com.sap.sse.common.Util.Pair;
 
 public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithTTL<RegattasAndLiveRacesDTO>> {
     private static final Logger logger = Logger.getLogger(GetRegattasAndLiveRacesForEventAction.class.getName());
@@ -35,57 +37,53 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
     @GwtIncompatible
     public ResultWithTTL<RegattasAndLiveRacesDTO> execute(DispatchContext context) {
         long start = System.currentTimeMillis();
-        final ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces = new ArrayList<>();
+        final Map<String, RegattaMetadataDTO> regattas = mapRegattas(context);
+        final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
         
         RacesActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
             @Override
             public void doForRace(RaceContext context) {
                 LiveRaceDTO liveRace = context.getLiveRaceOrNull();
                 if(liveRace != null) {
-                    Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regatta = ensureRegatta(regattasWithRaces, context);
-                    regatta.getB().add(liveRace);
+                    ensureRegatta(context, regattas, regattasWithRaces).add(liveRace);
                 }
             }
         });
         
-        ensureRegattas(regattasWithRaces, context);
+        final TreeSet<RegattaMetadataDTO> regattasWithoutRaces = new TreeSet<>();
+        for(RegattaMetadataDTO regatta : regattas.values()) {
+            if(!regattasWithRaces.containsKey(regatta)) {
+                regattasWithoutRaces.add(regatta);
+            }
+        }
         
-        RegattasAndLiveRacesDTO result = new RegattasAndLiveRacesDTO(regattasWithRaces);
+        RegattasAndLiveRacesDTO result = new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces);
         long duration = System.currentTimeMillis() - start;
         logger.log(Level.INFO, "Calculating live races for event "+ eventId + " took: "+ duration + "ms");
         return new ResultWithTTL<RegattasAndLiveRacesDTO>(1000 * 60 * 2, result);
     }
 
     @GwtIncompatible
-    private void ensureRegattas(ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces, DispatchContext context) {
+    private Map<String, RegattaMetadataDTO> mapRegattas(DispatchContext context) {
         Event event = context.getRacingEventService().getEvent(eventId);
+        Map<String, RegattaMetadataDTO> result = new HashMap<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             for (Leaderboard lb : lg.getLeaderboards()) {
-                ensureRegatta(regattasWithRaces, lb.getName(), lg, lb);
+                result.put(lb.getName(), HomeServiceUtil.toRegattaMetadataDTO(lg, lb));
             }
         }
+        return result;
     }
 
     @GwtIncompatible
-    protected Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> ensureRegatta(ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces,
-            RaceContext context) {
+    protected Set<LiveRaceDTO> ensureRegatta(RaceContext context, Map<String, RegattaMetadataDTO> regattas, Map<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces) {
         String regattaName = context.getRegattaName();
-        LeaderboardGroup leaderboardGroup = context.getLeaderboardGroup();
-        Leaderboard leaderboard = context.getLeaderboard();
-        return ensureRegatta(regattasWithRaces, regattaName, leaderboardGroup, leaderboard);
-    }
-
-    @GwtIncompatible
-    private Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> ensureRegatta(
-            ArrayList<Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>> regattasWithRaces, String regattaName,
-            LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        for(Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regatta : regattasWithRaces) {
-            if(regatta.getA().getId().equals(regattaName)) {
-                return regatta;
-            }
+        RegattaMetadataDTO regatta = regattas.get(regattaName);
+        TreeSet<LiveRaceDTO> races = regattasWithRaces.get(regatta);
+        if(races == null) {
+            races = new TreeSet<>();
+            regattasWithRaces.put(regatta, races);
         }
-        Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> newEntry = new Pair<RegattaMetadataDTO, TreeSet<LiveRaceDTO>>(HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard), new TreeSet<LiveRaceDTO>());
-        regattasWithRaces.add(newEntry);
-        return newEntry;
+        return races;
     }
 }

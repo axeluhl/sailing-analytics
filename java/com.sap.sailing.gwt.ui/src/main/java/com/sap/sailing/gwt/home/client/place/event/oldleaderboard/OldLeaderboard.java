@@ -106,8 +106,8 @@ public class OldLeaderboard extends Composite {
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
             } else {
-                lastScoringUpdateTimeDiv.setInnerText("&nbsp;");
-                lastScoringUpdateTextDiv.setInnerText("&nbsp;");
+                lastScoringUpdateTimeDiv.setInnerText("");
+                lastScoringUpdateTextDiv.setInnerText("");
             }
             setVisible(hasLiveRaceDiv, hasLiveRace);
 
