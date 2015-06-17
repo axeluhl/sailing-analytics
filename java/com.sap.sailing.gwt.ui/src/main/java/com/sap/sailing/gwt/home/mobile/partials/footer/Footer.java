@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -81,9 +83,14 @@ public class Footer extends Composite {
         updateDesktopLink(null);
     }
     
-    protected void updateDesktopLink(Place place) {
-        String link = desktopBaseUrl + Window.Location.getQueryString() + Window.Location.getHash();
-        desktopUi.setHref(link);
+    protected void updateDesktopLink(final Place place) {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                String link = desktopBaseUrl + Window.Location.getQueryString() + Window.Location.getHash();
+                desktopUi.setHref(link);
+            }
+        });
     }
 
     @UiHandler("changeLanguageLink")
