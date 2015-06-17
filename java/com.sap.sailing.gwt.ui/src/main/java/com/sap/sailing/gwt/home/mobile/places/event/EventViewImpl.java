@@ -11,7 +11,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
-import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
@@ -45,7 +44,6 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField(provided = true) UpdatesBox updatesBoxUi;
 
     private Presenter currentPresenter;
-    private MobilePlacesNavigator navigator;
 
     public EventViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
@@ -86,10 +84,4 @@ public class EventViewImpl extends Composite implements EventView {
         // TODO: desktop media navigation
         impressionsUi.setClickDestinaton(currentPresenter.getMediaPageNavigation());
     }
-
-    @Override
-    public void setNavigator(MobilePlacesNavigator navigator) {
-        this.navigator = navigator;
-    }
-
 }

@@ -71,7 +71,6 @@ public class EventActivity extends AbstractActivity implements Presenter {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
         }
         view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
-        view.setNavigator(clientFactory.getNavigator());
         clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
