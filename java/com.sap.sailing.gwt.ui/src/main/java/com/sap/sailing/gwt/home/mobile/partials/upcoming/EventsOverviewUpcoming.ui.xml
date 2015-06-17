@@ -8,8 +8,7 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.upcoming.EventsOverviewUpcomingResources" />
  
 
-	<g:HTMLPanel>
-	  <div class="{local_res.css.eventsoverviewupcoming} {local_res.css.accordion}">
+	<g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewupcoming} {local_res.css.accordion}">
 	    <g:HTMLPanel ui:field="header" addStyleNames="{local_res.css.eventsoverviewupcoming_header} {local_res.css.accordion_trigger}">
 	      <img src="images/mobile/calender-icon-blue.svg" class="{local_res.css.eventsoverviewupcoming_header_icon} {local_res.css.eventsoverviewupcoming_headeritem}"></img>
 	      <h3 class="{local_res.css.eventsoverviewupcoming_header_title} {local_res.css.eventsoverviewupcoming_headeritem}">
@@ -27,7 +26,6 @@
 	      	ui:field="eventsPlaceholder" 
 	      	addStyleNames="{local_res.css.eventsoverviewupcoming_content} {local_res.css.accordion_content}" />
 	    </div>
-	  </div>
 	</g:HTMLPanel>
    
 </ui:UiBinder>
