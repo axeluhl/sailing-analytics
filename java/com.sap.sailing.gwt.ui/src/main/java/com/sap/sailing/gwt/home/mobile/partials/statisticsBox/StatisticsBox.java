@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.statisticsBox;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -21,6 +22,8 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     public static final String ICON_WIND_FIX = "images/mobile/strongest_wind.svg";
     public static final String ICON_SUM_MILES = "images/mobile/sum_miles.svg";
     private static StatisticsBoxUiBinder uiBinder = GWT.create(StatisticsBoxUiBinder.class);
+    
+    private NumberFormat simpleFormat = NumberFormat.getFormat("#0.0");
 
     interface StatisticsBoxUiBinder extends UiBinder<Widget, StatisticsBox> {
     }
@@ -54,6 +57,19 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
         addItemIfNotNull(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
  + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
         addItemIfNotNull(StatisticsBox.ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
-        addItemIfNotNull(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled());
+        addItemIfNotNull(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), compactNumber(statistics.getTotalDistanceTraveled()));
+    }
+    
+    private String compactNumber(double value) {
+        if(value < 100.0) {
+            return simpleFormat.format(value);
+        }
+        if(value < 100_000.0) {
+            return "" + Double.valueOf(value).intValue();
+        }
+        if(value < 100_000_000.0) {
+            return "" + StringMessages.INSTANCE.millionValue(value / 1_000_000.0);
+        }
+        return "" + StringMessages.INSTANCE.billionValue(value / 1_000_000_000.0);
     }
 }
