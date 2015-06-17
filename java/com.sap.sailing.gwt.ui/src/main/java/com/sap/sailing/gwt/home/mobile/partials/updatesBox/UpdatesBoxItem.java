@@ -56,7 +56,7 @@ public class UpdatesBoxItem extends Widget {
             link.setHref(directLink);
             link.setTarget("_blank");
         } else {
-            final PlaceNavigation<?> placeNavigation = provider.getPlaceNavigation(entry);
+            final PlaceNavigation<?> placeNavigation = provider.getNewsEntryPlaceNavigation(entry);
             if(placeNavigation != null) {
                 placeNavigation.configureAnchorElement(link);
             } else {

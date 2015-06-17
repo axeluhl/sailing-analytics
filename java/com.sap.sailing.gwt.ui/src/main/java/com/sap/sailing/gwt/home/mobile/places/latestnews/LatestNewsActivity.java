@@ -14,7 +14,6 @@ import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
@@ -44,15 +43,14 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
     }
 
     @Override
-    public PlaceNavigation<?> getPlaceNavigation(NewsEntryDTO entry) {
+    public PlaceNavigation<?> getNewsEntryPlaceNavigation(NewsEntryDTO entry) {
         MobilePlacesNavigator navigator = clientFactory.getNavigator();
         if (entry instanceof LeaderboardNewsEntryDTO) {
             final LeaderboardNewsEntryDTO dto = (LeaderboardNewsEntryDTO) entry;
             final String regattaId = dto.getLeaderboardName();
             navigator.getEventNavigation(new RegattaLeaderboardPlace(new EventContext().withRegattaId(regattaId)),
                     null, false);
-        } else if (entry instanceof AbstractRaceNewsEntryDTO) {
-            // TODO
+
         }
         return null;
     }

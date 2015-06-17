@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -95,11 +94,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
         return clientFactory.getDispatch();
     }
     
-    @Override
-    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
-        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
-    }
+
 
     @Override
     public PlaceNavigation<?> getMediaPageNavigation() {
@@ -111,26 +106,29 @@ public class EventActivity extends AbstractActivity implements Presenter {
     }
 
     @Override
-    public String getRaceViewerURL(String regattaName, String trackedRaceName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-
-    @Override
-    public PlaceNavigation<?> getPlaceNavigation(NewsEntryDTO entry) {
+    public PlaceNavigation<?> getNewsEntryPlaceNavigation(NewsEntryDTO entry) {
         if(entry instanceof LeaderboardNewsEntryDTO) {
             final LeaderboardNewsEntryDTO dto = (LeaderboardNewsEntryDTO) entry;
             return getRegattaLeaderboardNavigation(dto.getLeaderboardName());
-        } else if(entry instanceof AbstractRaceNewsEntryDTO) {
-            // TODO
         } 
         return null;
+    }
+
+    @Override
+    public String getRaceViewerURL(String regattaName, String trackedRaceName) {
+        return null;
+    }
+
+    @Override
+    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
     }
 
     @Override
     public void gotoNewsPlace(List<NewsEntryDTO> values) {
         clientFactory.getPlaceController().goTo(new LatestNewsPlace(place.getCtx(), values));
     }
+
 
 }
