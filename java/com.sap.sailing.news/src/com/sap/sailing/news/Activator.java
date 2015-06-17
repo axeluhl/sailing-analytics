@@ -1,0 +1,29 @@
+package com.sap.sailing.news;
+
+import java.util.logging.Logger;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+
+import com.sap.sailing.news.impl.EventNewsProviderRegistryImpl;
+import com.sap.sailing.news.impl.EventNewsServiceImpl;
+import com.sap.sailing.news.impl.LeaderboardUpdateEventNewsProvider;
+
+public class Activator implements BundleActivator {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
+
+    public void start(BundleContext context) throws Exception {
+        EventNewsProviderRegistry providerRegistry = new EventNewsProviderRegistryImpl(); 
+        EventNewsService newsService = new EventNewsServiceImpl(providerRegistry);
+        context.registerService(EventNewsService.class, newsService, null);
+        context.registerService(EventNewsProviderRegistry.class, providerRegistry, null);
+        
+        // The json event news provider is only a fallback and should not be activated per default 
+        // providerRegistry.registerNewsProvider(new JsonEventNewsProvider());
+        providerRegistry.registerNewsProvider(new LeaderboardUpdateEventNewsProvider());
+        logger.info("EventNews Service registered.");
+    }
+
+    public void stop(BundleContext bundleContext) throws Exception {
+    }
+}

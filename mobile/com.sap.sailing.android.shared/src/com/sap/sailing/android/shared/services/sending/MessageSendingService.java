@@ -1,16 +1,5 @@
 package com.sap.sailing.android.shared.services.sending;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,13 +11,18 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -132,7 +126,8 @@ public class MessageSendingService extends Service implements MessageSendingList
         serviceLogger.onMessageSentSuccessful();
     }
 
-    public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
+    public static Intent createMessageIntent(Context context, String url, 
+    		Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
@@ -202,15 +197,16 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (persistenceManager.areIntentsDelayed()) {
             handleDelayedMessages();
         }
+        ExLog.i(this, TAG, "Sending Service on Create.");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
-            ExLog.i(this, TAG, "Service is restarted.");
+            ExLog.i(this, TAG, "Sending Service is restarted.");
             return START_STICKY;
         }
-        ExLog.i(this, TAG, "Service is called by following intent: " + intent.getAction());
+        ExLog.i(this, TAG, "Sending Service is called by following intent: " + intent.getAction());
         handleCommand(intent, startId);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -270,7 +266,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     private void sendMessage(Intent intent) {
         boolean sendingActive = PrefUtils.getBoolean(this, R.string.preference_isSendingActive_key,
                 R.bool.preference_isSendingActive_default);
-        if (! sendingActive) {
+        if (!sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
             Serializable messageId = getMessageId(intent);
@@ -365,7 +361,8 @@ public class MessageSendingService extends Service implements MessageSendingList
                 RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
                 PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
                 URLEncoder.encode(raceGroupName, charsetName),
-                URLEncoder.encode(raceName, charsetName), URLEncoder.encode(fleetName, charsetName), uuid);
+                URLEncoder.encode(raceName, charsetName), 
+				URLEncoder.encode(fleetName, charsetName), uuid);
         return url;
     }
 
@@ -432,5 +429,15 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (apiConnectivityListener != null) {
             apiConnectivityListener.setUnsentGPSFixesCount(getDelayedIntentsCount());
         }
+    }
+
+    public static String getRacePositionsUrl(Context context, final String regattaName, final String raceName)
+            throws UnsupportedEncodingException {
+        String url = String
+                .format("%s/sailingserver/api/v1/regattas/%s/races/%s/marks/positions",
+                        PrefUtils.getString(context, R.string.preference_server_url_key,
+                                R.string.preference_server_url_default), URLEncoder.encode(regattaName, charsetName)
+                                .replace("+", "%20"), URLEncoder.encode(raceName, charsetName.replace("+", "%20")));// ,
+        return url;
     }
 }

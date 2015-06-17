@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
-import com.sap.sse.common.media.MimeType;
 
 public class MainMediaVideo extends Composite {
 
@@ -29,11 +28,11 @@ public class MainMediaVideo extends Composite {
     
     final VideoJSPlayer vJs = new VideoJSPlayer();
 
-    public MainMediaVideo(String eventName, String sourceRef, MimeType type) {
-        this(eventName, sourceRef, type, false);
+    public MainMediaVideo(SailingVideoDTO video) {
+        this(video, false);
     }
     
-    public MainMediaVideo(String eventName, String sourceRef, MimeType type, boolean showInfo) {
+    public MainMediaVideo(SailingVideoDTO video, boolean showInfo) {
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -43,9 +42,10 @@ public class MainMediaVideo extends Composite {
         // youtubeUrl += "&showinfo=0";
         // }
 
-        vJs.setSource(sourceRef, type);
+        vJs.setVideo(video);
         videoHolderUi.clear();
         videoHolderUi.add(vJs);
+        String eventName = video.getTitle();
         if(eventName == null || eventName.isEmpty()) {
             videoTitleWrapper.removeFromParent();
         } else {
@@ -64,9 +64,8 @@ public class MainMediaVideo extends Composite {
 
     }
 
-    public void show(SailingVideoDTO videoCandidateInfo) {
-        vJs.setSource(videoCandidateInfo.getSourceRef(), videoCandidateInfo.getMimeType());
-
+    public void show(SailingVideoDTO video) {
+        vJs.setVideo(video);
     }
     
 }
