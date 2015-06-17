@@ -9,7 +9,7 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBoxResources" />
   
   
-  <mp:section.MobileSection ui:field="itemContainerUi">
+  <mp:section.MobileSection ui:field="itemContainerUi" edgeToEdgeContent="true">
 		<mp:header>
 			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.latestNews}" ui:field="headerUi" />
 		</mp:header>
