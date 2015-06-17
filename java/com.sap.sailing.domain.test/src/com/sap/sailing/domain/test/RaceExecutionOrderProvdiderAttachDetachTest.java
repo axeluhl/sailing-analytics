@@ -90,7 +90,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
     }
 
     private void createTestSetupWithRegattaAndSeries(boolean linkSeriesToRegatta) {
-        trackedRace = createTestTrackedRace(null, null, null, Collections.<Competitor> emptyList(),
+        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(),
                 MillisecondsTimePoint.now());
         fleet = new FleetImpl(FLEET);
         Set<Fleet> fleets = new HashSet<>();
