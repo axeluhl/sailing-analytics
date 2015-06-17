@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
@@ -16,15 +17,18 @@ public class EventStatisticsDTO implements DTO {
 
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
-    private Triple<Competitor, Speed, TimePoint> maxSpeed;
+    private String competitorInfo;
+    private String competitorSpeed;
     private Distance totalDistanceTraveled;
     
     @SuppressWarnings("unused")
     private EventStatisticsDTO() {
     }
     
+    @GwtIncompatible
     public EventStatisticsDTO(Integer regattasFoughtCount, Integer competitorsCount, Integer racesRunCount,
-            Integer trackedRacesCount, long numberOfGPSFixes, long numberOfWindFixes, Triple<Competitor, Speed, TimePoint> maxSpeed, Distance totalDistanceTraveled) {
+            Integer trackedRacesCount, long numberOfGPSFixes, long numberOfWindFixes,
+            Triple<Competitor, Speed, TimePoint> maxSpeed, Distance totalDistanceTraveled) {
         super();
         this.regattasFoughtCount = regattasFoughtCount;
         this.competitorsCount = competitorsCount;
@@ -32,7 +36,8 @@ public class EventStatisticsDTO implements DTO {
         this.trackedRacesCount = trackedRacesCount;
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
-        this.maxSpeed = maxSpeed;
+        this.competitorInfo = maxSpeed.getA().getName();
+        this.competitorSpeed = maxSpeed.getB().getKnots() + "kn";
         this.totalDistanceTraveled = totalDistanceTraveled;
     }
 
@@ -77,8 +82,12 @@ public class EventStatisticsDTO implements DTO {
         return numberOfWindFixes;
     }
 
-    public Triple<Competitor, Speed, TimePoint> getMaxSpeed() {
-        return maxSpeed;
+    public String getCompetitorInfo() {
+        return competitorInfo;
+    }
+
+    public String getCompetitorSpeed() {
+        return competitorSpeed;
     }
 
     public Distance getTotalDistanceTraveled() {

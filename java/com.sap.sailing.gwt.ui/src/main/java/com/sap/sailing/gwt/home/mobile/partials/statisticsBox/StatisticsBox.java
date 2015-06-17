@@ -52,7 +52,7 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
         addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
         addItemIfNotNull(StatisticsBox.ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
         addItemIfNotNull(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
-                + statistics.getMaxSpeed().getA().getName(), statistics.getMaxSpeed().getB().getKnots());
+ + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
         addItemIfNotNull(StatisticsBox.ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
         addItemIfNotNull(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled());
     }
