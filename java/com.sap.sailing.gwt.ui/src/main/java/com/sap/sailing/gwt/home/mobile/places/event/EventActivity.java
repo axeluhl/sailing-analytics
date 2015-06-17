@@ -71,17 +71,19 @@ public class EventActivity extends AbstractActivity implements Presenter {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
         }
         view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
-        clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Failed to load media");
-            }
+        if (getCtx().getEventDTO().isHasMedia()) {
+            clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Failed to load media");
+                }
 
-            @Override
-            public void onSuccess(MediaDTO result) {
-                view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
-            }
-        });
+                @Override
+                public void onSuccess(MediaDTO result) {
+                    view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
+                }
+            });
+        }
     }
     
     @Override
