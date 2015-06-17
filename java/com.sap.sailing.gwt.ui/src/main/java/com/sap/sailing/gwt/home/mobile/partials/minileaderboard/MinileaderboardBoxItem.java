@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.partials.minileaderboard;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -15,10 +16,22 @@ public class MinileaderboardBoxItem extends Widget {
     
     @UiField
     Element competitorNameUi;
+    @UiField
+    Element competitorRankUi;
+    @UiField
+    Element competitorPointsUi;
+    @UiField
+    Element competitorCountryNameUi;
+    @UiField
+    ImageElement competitorFlagUi;
     
     public MinileaderboardBoxItem(SimplifiedLeaderboardItemDTO entry) {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
+        competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getCountryName()));
+        competitorRankUi.setInnerText(String.valueOf(entry.getRank()));
+        competitorPointsUi.setInnerText(String.valueOf(entry.getPoints()));
+        competitorFlagUi.setSrc(entry.getCompetitor().getFlagImageURL());
         
     }
 
