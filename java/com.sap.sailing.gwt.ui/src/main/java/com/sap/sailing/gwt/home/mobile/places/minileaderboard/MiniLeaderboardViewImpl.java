@@ -30,7 +30,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventContext ctx = presenter.getCtx();
         UUID uuid = UUID.fromString(ctx.getEventId());
-        refreshManager.add(minileaderboardUi, new GetMobileLeaderbordAction(uuid, ""));
+        refreshManager.add(minileaderboardUi, new GetMobileLeaderbordAction(uuid, presenter.getCtx().getRegattaId()));
 
     }
 
