@@ -31,6 +31,10 @@ public class RegattaReferenceDTO implements IsSerializable, Comparable<RegattaRe
 
     @Override
     public int compareTo(RegattaReferenceDTO o) {
-        return displayName.compareTo(o.displayName);
+        int compareByDisplayName = displayName.compareTo(o.displayName);
+        if(compareByDisplayName != 0) {
+            return compareByDisplayName;
+        }
+        return id.compareTo(o.id);
     }
 }
