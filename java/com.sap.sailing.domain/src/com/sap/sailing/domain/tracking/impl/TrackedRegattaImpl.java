@@ -256,7 +256,6 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         if (raceDefinitionSetToUpdate != null) {
             raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition, result);
         }
-        result.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         addTrackedRace(result);
         return result;
     }
