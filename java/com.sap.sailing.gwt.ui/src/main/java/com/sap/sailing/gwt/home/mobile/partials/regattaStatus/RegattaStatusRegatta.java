@@ -47,9 +47,7 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection {
     }
 
     private void initRegattaHeader(RegattaMetadataDTO regatta, final PlaceNavigation<?> placeNavigation) {
-        ImageResource image = regatta.getBoatClass() == null ? BoatClassImageResources.INSTANCE.genericBoatClass() :
-            BoatClassImageResolver.getBoatClassIconResource(regatta.getBoatClass());
-        headerUi.setImageUrl(image.getSafeUri().asString());
+        headerUi.setImageUrl(getBootClassIcon(regatta.getBoatClass()).getSafeUri().asString());
         headerUi.setSectionTitle(regatta.getDisplayName());
         headerUi.setClickAction(new Command() {
             @Override
@@ -57,6 +55,16 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection {
                 placeNavigation.goToPlace();
             }
         });
+    }
+    
+    private ImageResource getBootClassIcon(String bootClass) {
+        if (bootClass != null) {
+            ImageResource image = BoatClassImageResolver.getBoatClassIconResource(bootClass);
+            if (image != null) {
+                return image;
+            }
+        }
+        return BoatClassImageResources.INSTANCE.genericBoatClass();
     }
 
 }
