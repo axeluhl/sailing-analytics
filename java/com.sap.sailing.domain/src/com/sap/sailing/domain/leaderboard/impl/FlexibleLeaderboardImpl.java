@@ -172,7 +172,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (raceColumn != null) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 raceLogStore.removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                if (raceColumn.getTrackedRace(fleet) != null) {
                 raceColumn.getTrackedRace(fleet).detachRaceExecutionOrderProvider(raceExecutionOrderProvider);
+                }
             }
             races.remove(raceColumn);
             getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
