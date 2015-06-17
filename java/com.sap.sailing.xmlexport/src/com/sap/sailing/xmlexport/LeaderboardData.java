@@ -302,20 +302,23 @@ public class LeaderboardData extends ExportAction {
                 // found a competitor that is available in leaderboard but not in that race
                 // check if he has an overwritten score for that race
                 MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
-                if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
-                    // add this competitor to the list to have him evaluated
-                    Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
-                    Element competitorRaceDataElement = new Element("competitor_race_data");
-                    MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
-                    addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
-                    boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, race.getEndOfRace());
-                    addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-                    Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, race.getEndOfRace());
-                    addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
-                    competitorElement.addContent(competitorRaceDataElement);
-                    raceElement.addContent(competitorElement);
-                    raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
-                    additionalCompetitorCount++;
+                Fleet fleetCompetitorIsSailingIn = column.getFleetOfCompetitor(competitorInLeaderboard);
+                if (fleetCompetitorIsSailingIn != null && fleetCompetitorIsSailingIn.equals(fleet)) {
+                    if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
+                        // add this competitor to the list to have him evaluated
+                        Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
+                        Element competitorRaceDataElement = new Element("competitor_race_data");
+                        MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
+                        addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
+                        boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, race.getEndOfRace());
+                        addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
+                        Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, race.getEndOfRace());
+                        addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
+                        competitorElement.addContent(competitorRaceDataElement);
+                        raceElement.addContent(competitorElement);
+                        raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
+                        additionalCompetitorCount++;
+                    }
                 }
             }
         }
