@@ -10,10 +10,10 @@ import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoJSPlayer extends Widget {
     
@@ -43,7 +43,7 @@ public class VideoJSPlayer extends Widget {
         videoElement.setAttribute("controls", "");
     }
 
-    public void setVideo(SailingVideoDTO video) {
+    public void setVideo(VideoDTO video) {
         String source = video.getSourceRef();
         MimeType mimeType = video.getMimeType();
         if (mimeType == null || mimeType.mediaType != MediaType.video) {

@@ -337,14 +337,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         for(VideoDescriptor video : event.getVideos()) {
             MimeType type = video.getMimeType();
             if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
-                SailingVideoDTO videoDTO = new SailingVideoDTO(eventRef, video.getURL().toString(), type, video.getCreatedAtDate().asDate());
-                videoDTO.setTitle(video.getTitle());
-                videoDTO.setSubtitle(video.getSubtitle());
-                videoDTO.setTags(video.getTags());
-                videoDTO.setCopyright(video.getCopyright());
-                videoDTO.setLocale(video.getLocale() != null ? video.getLocale().toString() : null);
-                videoDTO.setLengthInSeconds(video.getLengthInSeconds());
-                videoDTO.setThumbnailRef(video.getThumbnailURL() != null ? video.getThumbnailURL().toString(): null);
+                SailingVideoDTO videoDTO = HomeServiceUtil.toSailingVideoDTO(eventRef, video);
                 media.addVideo(videoDTO);
             }
         }

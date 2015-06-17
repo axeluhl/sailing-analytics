@@ -57,7 +57,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         Collection<String> tags = state == EventState.FINISHED ? rankedTagsFinished : rankedTags;
         VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), tags, true);
         if(stageVideo != null) {
-            return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, stageVideo.getMimeType(), stageVideo.getURL().toString());
+            return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, HomeServiceUtil.toVideoDTO(stageVideo));
         }
         String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
