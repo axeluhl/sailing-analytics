@@ -7,17 +7,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMobileLeaderbordAction.SimplifiedLeaderboardItemDTO;
 import com.sap.sailing.server.RacingEventService;
 
-public class GetMobileLeaderbordAction implements Action<ListResult<SimplifiedLeaderboardItemDTO>> {
+public class GetMobileLeaderbordAction implements Action<ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>>> {
     private static final Logger logger = Logger.getLogger(GetMobileLeaderbordAction.class.getName());
     
     @SuppressWarnings("unused")
@@ -35,15 +38,24 @@ public class GetMobileLeaderbordAction implements Action<ListResult<SimplifiedLe
 
     @Override
     @GwtIncompatible
-    public ListResult<SimplifiedLeaderboardItemDTO> execute(DispatchContext context) {
+    public ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>> execute(DispatchContext context) {
         final Leaderboard leaderboard = context.getRacingEventService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            return new ListResult<>(Collections.<SimplifiedLeaderboardItemDTO>emptyList());
+            return new ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<>(Collections.<SimplifiedLeaderboardItemDTO>emptyList()));
         }
         RacingEventService service = context.getRacingEventService();
         try {
             LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null,
                     Collections.<String>emptyList(), true, service, service.getBaseDomainFactory(), false);
+            
+            int rank = 0;
+            LinkedList<SimplifiedLeaderboardItemDTO> items = new LinkedList<SimplifiedLeaderboardItemDTO>();
+            for(CompetitorDTO competitor : leaderboardDTO.competitors) {
+                rank++;
+                LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
+                items.add(new SimplifiedLeaderboardItemDTO(competitor, rank, row.totalPoints));
+            }
+            return new ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<SimplifiedLeaderboardItemDTO>(items));
             
             // TODO: mini leaderboard magic
             
@@ -51,13 +63,35 @@ public class GetMobileLeaderbordAction implements Action<ListResult<SimplifiedLe
             logger.log(Level.SEVERE, "Error loading leaderboard", e);
             throw new DispatchException("Error loading leaderboard");
         }
-        
-        LinkedList<SimplifiedLeaderboardItemDTO> items = new LinkedList<SimplifiedLeaderboardItemDTO>();
-        return new ListResult<SimplifiedLeaderboardItemDTO>(items);
     }
 
     public static class SimplifiedLeaderboardItemDTO implements DTO {
+        private CompetitorDTO competitor;
+        private int rank;
+        private Double points;
         
+        @SuppressWarnings("unused")
+        private SimplifiedLeaderboardItemDTO() {
+        }
+        
+        public SimplifiedLeaderboardItemDTO(CompetitorDTO competitor, int rank, Double points) {
+            super();
+            this.competitor = competitor;
+            this.rank = rank;
+            this.points = points;
+        }
+        
+        public CompetitorDTO getCompetitor() {
+            return competitor;
+        }
+        
+        public Double getPoints() {
+            return points;
+        }
+        
+        public int getRank() {
+            return rank;
+        }
     }
 
 }
