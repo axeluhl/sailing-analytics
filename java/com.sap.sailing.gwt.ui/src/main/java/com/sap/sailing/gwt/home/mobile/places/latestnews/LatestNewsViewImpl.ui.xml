@@ -8,11 +8,8 @@
 	<ui:with 
 		field="res" 
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
-		
-   	<g:HTMLPanel>
-   		<p>START VIEW</p>
-   		
-   		<p>Go to <g:Anchor ui:field="eventsLinkUi">events...</g:Anchor></p>
-   	 	<mp:socialfooter.SocialFooter/>	
-	</g:HTMLPanel>
+	
+	<mp:updatesBox.UpdatesBox ui:field="updatesBox"/>
+	
+   	
 </ui:UiBinder>    

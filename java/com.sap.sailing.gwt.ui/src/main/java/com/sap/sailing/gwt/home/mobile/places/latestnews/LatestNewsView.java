@@ -6,7 +6,7 @@ public interface LatestNewsView {
 
     Widget asWidget();
     
-    public interface Presenter {
+    public interface Presenter extends NewsItemLinkProvider {
         void gotoEvents();
     }
 }

@@ -1,13 +1,11 @@
 package com.sap.sailing.gwt.home.mobile.places.latestnews;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 
 public class LatestNewsViewImpl extends Composite implements LatestNewsView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -17,18 +15,15 @@ public class LatestNewsViewImpl extends Composite implements LatestNewsView {
 
     private Presenter currentPresenter;
 
-    @UiField
-    protected Anchor eventsLinkUi;
+    @UiField(provided = true)
+    protected UpdatesBox updatesBox;
 
     public LatestNewsViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
+        updatesBox = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
-
     }
 
-    @UiHandler("eventsLinkUi")
-    public void gotoEvents(ClickEvent e) {
-        currentPresenter.gotoEvents();
-    }
     
+
 }

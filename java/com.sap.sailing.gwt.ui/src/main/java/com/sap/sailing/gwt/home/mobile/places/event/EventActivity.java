@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -13,14 +14,18 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
@@ -104,8 +109,8 @@ public class EventActivity extends AbstractActivity implements Presenter {
 
     @Override
     public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
-        // TODO Auto-generated method stub
-        return null;
+        return clientFactory.getNavigator().getEventNavigation(
+                new RegattaLeaderboardPlace(new EventContext().withRegattaId(leaderboardName)), null, false);
     }
 
     @Override
@@ -117,5 +122,22 @@ public class EventActivity extends AbstractActivity implements Presenter {
     @Override
     public void gotoNewsPlace(Collection<NewsEntryDTO> newsEntries) {
         clientFactory.getPlaceController().goTo(new LatestNewsPlace(newsEntries));
+    }
+
+    @Override
+    public PlaceNavigation<?> getPlaceNavigation(NewsEntryDTO entry) {
+        MobilePlacesNavigator navigator = clientFactory.getNavigator();
+        if(entry instanceof LeaderboardNewsEntryDTO) {
+            final LeaderboardNewsEntryDTO dto = (LeaderboardNewsEntryDTO) entry;
+            return getRegattaLeaderboardNavigation(dto.getLeaderboardName());
+        } else if(entry instanceof AbstractRaceNewsEntryDTO) {
+            // TODO
+        } 
+        return null;
+    }
+
+    @Override
+    public void gotoNewsPlace(List<NewsEntryDTO> values) {
+        clientFactory.getPlaceController().goTo(new LatestNewsPlace(values));
     }
 }

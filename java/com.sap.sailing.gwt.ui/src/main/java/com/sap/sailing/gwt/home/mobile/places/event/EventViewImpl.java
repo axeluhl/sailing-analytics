@@ -12,7 +12,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
@@ -23,12 +22,10 @@ import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
@@ -50,12 +47,7 @@ public class EventViewImpl extends Composite implements EventView {
 
     private Presenter currentPresenter;
     private MobilePlacesNavigator navigator;
-    private final RefreshableWidget<ListResult<NewsEntryDTO>> newsRefreshable = new RefreshableWidget<ListResult<NewsEntryDTO>>() {
-        @Override
-        public void setData(ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
-            setNews(data.getValues());
-        }
-    };
+
     public EventViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
@@ -66,7 +58,7 @@ public class EventViewImpl extends Composite implements EventView {
         UUID eventId = currentPresenter.getCtx().getEventDTO() .getId();
         refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
         refreshManager.add(regattaStatusUi, new GetRegattasAndLiveRacesForEventAction(eventId));
-        refreshManager.add(newsRefreshable, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId()));
         refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
         impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
     }
@@ -104,12 +96,4 @@ public class EventViewImpl extends Composite implements EventView {
         this.navigator = navigator;
     }
 
-    private void setNews(List<NewsEntryDTO> news) {
-        if (news.isEmpty()) {
-            updatesBoxUi.getElement().getStyle().setDisplay(Display.NONE);
-        } else {
-            updatesBoxUi.getElement().getStyle().clearDisplay();
-            updatesBoxUi.setData(news);
-        }
-    }
 }
