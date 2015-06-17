@@ -46,7 +46,7 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
     private List<NewsEntryDTO> getNews(DispatchContext dispatchContext, Event event) {
         List<EventNewsItem> newsItems = dispatchContext.getEventNewsService().getNews(event);
 
-        if(this.limit <= 0 && newsItems.size() > limit) {
+        if(this.limit > 0 && newsItems.size() > limit) {
             newsItems = newsItems.subList(0, limit);
         }
         List<NewsEntryDTO> news = new ArrayList<>(newsItems.size());
