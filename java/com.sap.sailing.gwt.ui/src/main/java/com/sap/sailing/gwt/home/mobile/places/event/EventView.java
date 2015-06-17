@@ -30,6 +30,7 @@ public interface EventView {
 
         String getRaceViewerURL(String regattaName, String trackedRaceName);
 
+        PlaceNavigation<?> getMediaPageNavigation();
     }
 
     void setNavigator(MobilePlacesNavigator navigator);

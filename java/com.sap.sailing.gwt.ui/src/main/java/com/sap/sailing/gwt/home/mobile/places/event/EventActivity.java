@@ -11,7 +11,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
@@ -23,6 +25,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 public class EventActivity extends AbstractActivity implements Presenter {
@@ -99,6 +102,15 @@ public class EventActivity extends AbstractActivity implements Presenter {
     }
 
     @Override
+    public PlaceNavigation<?> getMediaPageNavigation() {
+        if (getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            return clientFactory.getNavigator().getEventNavigation(new MultiregattaMediaPlace(getCtx()), null, false);
+        } else {
+            return clientFactory.getNavigator().getEventNavigation(new RegattaMediaPlace(getCtx()), null, false);
+        }
+    }
+
+    @Override
     public String getRaceViewerURL(String regattaName, String trackedRaceName) {
         // TODO Auto-generated method stub
         return null;
@@ -120,4 +132,5 @@ public class EventActivity extends AbstractActivity implements Presenter {
     public void gotoNewsPlace(List<NewsEntryDTO> values) {
         clientFactory.getPlaceController().goTo(new LatestNewsPlace(place.getCtx(), values));
     }
+
 }

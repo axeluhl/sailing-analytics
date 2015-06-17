@@ -84,7 +84,7 @@ public class EventViewImpl extends Composite implements EventView {
         impressionsUi.setStatistis(nrOfImages, nrOfVideos);
         impressionsUi.addImages(images);
         // TODO: desktop media navigation
-        impressionsUi.setClickDestinaton(navigator.getHomeNavigation());
+        impressionsUi.setClickDestinaton(currentPresenter.getMediaPageNavigation());
     }
 
     @Override
