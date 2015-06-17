@@ -9,10 +9,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
 public class EventStatisticsDTO implements DTO {
-    private Integer regattasFoughtCount;
-    private Integer competitorsCount;
-    private Integer racesRunCount;
-    private Integer trackedRacesCount;
+    private int regattasFoughtCount;
+    private int competitorsCount;
+    private int racesRunCount;
+    private int trackedRacesCount;
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
     private String competitorInfo;
@@ -24,8 +24,8 @@ public class EventStatisticsDTO implements DTO {
     }
 
     @GwtIncompatible
-    public EventStatisticsDTO(Integer regattasFoughtCount, Integer competitorsCount, Integer racesRunCount,
-            Integer trackedRacesCount, long numberOfGPSFixes, long numberOfWindFixes,
+    public EventStatisticsDTO(int regattasFoughtCount, int competitorsCount, int racesRunCount, int trackedRacesCount,
+            long numberOfGPSFixes, long numberOfWindFixes,
             Triple<Competitor, Speed, TimePoint> maxSpeed, Distance totalDistanceTraveled) {
         super();
         this.regattasFoughtCount = regattasFoughtCount;
@@ -43,35 +43,35 @@ public class EventStatisticsDTO implements DTO {
         }
     }
 
-    public Integer getRegattasFoughtCount() {
+    public int getRegattasFoughtCount() {
         return regattasFoughtCount;
     }
 
-    public void setRegattasFoughtCount(Integer regattasFoughtCount) {
+    public void setRegattasFoughtCount(int regattasFoughtCount) {
         this.regattasFoughtCount = regattasFoughtCount;
     }
 
-    public Integer getCompetitorsCount() {
+    public int getCompetitorsCount() {
         return competitorsCount;
     }
 
-    public void setCompetitorsCount(Integer competitorsCount) {
+    public void setCompetitorsCount(int competitorsCount) {
         this.competitorsCount = competitorsCount;
     }
 
-    public Integer getRacesRunCount() {
+    public int getRacesRunCount() {
         return racesRunCount;
     }
 
-    public void setRacesRunCount(Integer racesRunCount) {
+    public void setRacesRunCount(int racesRunCount) {
         this.racesRunCount = racesRunCount;
     }
 
-    public Integer getTrackedRacesCount() {
+    public int getTrackedRacesCount() {
         return trackedRacesCount;
     }
 
-    public void setTrackedRacesCount(Integer trackedRacesCount) {
+    public void setTrackedRacesCount(int trackedRacesCount) {
         this.trackedRacesCount = trackedRacesCount;
     }
 

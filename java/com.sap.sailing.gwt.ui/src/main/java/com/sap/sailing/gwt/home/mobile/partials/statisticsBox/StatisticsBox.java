@@ -38,7 +38,7 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     }
 
     public void addItemIfNotNull(String iconUrl, String name, Object payload) {
-        if (payload != null) {
+        if (payload != null || payload instanceof Number && ((Number) payload).longValue() != 0) {
             itemContainerUi.addContent(new StatisticsBoxItem(iconUrl, name, payload));
         }
     }
