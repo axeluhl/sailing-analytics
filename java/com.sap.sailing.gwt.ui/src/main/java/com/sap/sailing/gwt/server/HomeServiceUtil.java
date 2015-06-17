@@ -27,8 +27,10 @@ import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
+import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
@@ -38,6 +40,7 @@ import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public final class HomeServiceUtil {
     
@@ -108,6 +111,28 @@ public final class HomeServiceUtil {
             return EventState.FINISHED;
         }
         return EventState.RUNNING;
+    }
+    
+    public static VideoDTO toVideoDTO(VideoDescriptor video) {
+        VideoDTO videoDTO = new VideoDTO(video.getURL().toString(), video.getMimeType(), video.getCreatedAtDate().asDate());
+        fillVideoDTOFields(video, videoDTO);
+        return videoDTO;
+    }
+    
+    public static SailingVideoDTO toSailingVideoDTO(EventReferenceDTO eventRef, VideoDescriptor video) {
+        SailingVideoDTO videoDTO = new SailingVideoDTO(eventRef, video.getURL().toString(), video.getMimeType(), video.getCreatedAtDate().asDate());
+        fillVideoDTOFields(video, videoDTO);
+        return videoDTO;
+    }
+
+    private static void fillVideoDTOFields(VideoDescriptor video, VideoDTO videoDTO) {
+        videoDTO.setTitle(video.getTitle());
+        videoDTO.setSubtitle(video.getSubtitle());
+        videoDTO.setTags(video.getTags());
+        videoDTO.setCopyright(video.getCopyright());
+        videoDTO.setLocale(video.getLocale() != null ? video.getLocale().toString() : null);
+        videoDTO.setLengthInSeconds(video.getLengthInSeconds());
+        videoDTO.setThumbnailRef(video.getThumbnailURL() != null ? video.getThumbnailURL().toString(): null);
     }
     
     private static ImageDescriptor findEventThumbnailImage(EventBase event) {

@@ -19,6 +19,7 @@ import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 
 public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResult<NewsEntryDTO>>> {
     private UUID eventId;
+    private int limit = 0;
     
     @SuppressWarnings("unused")
     private GetEventOverviewNewsAction() {
@@ -26,6 +27,11 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
 
     public GetEventOverviewNewsAction(UUID eventId) {
         this.eventId = eventId;
+    }
+    
+    public GetEventOverviewNewsAction(UUID eventId, int limit) {
+        this.eventId = eventId;
+        this.limit = limit;
     }
     
     @Override
@@ -40,6 +46,9 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
     private List<NewsEntryDTO> getNews(DispatchContext dispatchContext, Event event) {
         List<EventNewsItem> newsItems = dispatchContext.getEventNewsService().getNews(event);
 
+        if(this.limit <= 0 && newsItems.size() > limit) {
+            newsItems = newsItems.subList(0, limit);
+        }
         List<NewsEntryDTO> news = new ArrayList<>(newsItems.size());
         for(EventNewsItem newsItem: newsItems) {
             if(newsItem instanceof InfoEventNewsItem) {

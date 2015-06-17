@@ -137,9 +137,9 @@ public class MediaPage extends Composite {
         }
     }
 
-    private void putVideoOnDisplay(final SailingVideoDTO videoCandidateInfo, boolean autoplay) {
+    private void putVideoOnDisplay(final SailingVideoDTO video, boolean autoplay) {
         videoDisplayUi = new VideoJSPlayer(true, autoplay);
-        videoDisplayUi.setSource(videoCandidateInfo.getSourceRef(), videoCandidateInfo.getMimeType());
+        videoDisplayUi.setVideo(video);
         videoDisplayHolderUi.setWidget(videoDisplayUi);
     }
 }

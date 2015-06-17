@@ -4,7 +4,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 
 
 public enum BoatClassMasterdata {
-    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR"),
+    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR", "2.4 Metre"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM"),
     _29ER ("29er", true, 4.45, 1.70, BoatHullType.MONOHULL, true),

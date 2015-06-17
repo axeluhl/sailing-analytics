@@ -42,8 +42,7 @@ public class MainMedia extends Composite {
         int videoCount = 0;
         while(videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
             SailingVideoDTO videoDTO = videoIterator.next();
-            MainMediaVideo video = new MainMediaVideo(videoDTO.getTitle(), videoDTO.getSourceRef(),
-                    videoDTO.getMimeType());
+            MainMediaVideo video = new MainMediaVideo(videoDTO);
             videosPanel.add(video);
             videoCount++;
         }
