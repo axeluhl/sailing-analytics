@@ -26,7 +26,6 @@ public class UpdatesBoxItem extends Widget {
     @UiField AnchorElement link;
     @UiField DivElement icon;
     @UiField SpanElement titleUi;
-    @UiField SpanElement boatClassUi;
     @UiField DivElement messageUi;
     @UiField DivElement timestampUi;
     
@@ -39,9 +38,6 @@ public class UpdatesBoxItem extends Widget {
         String boatClass = entry.getBoatClass();
         if(boatClass != null && !boatClass.isEmpty()) {
             icon.getStyle().setBackgroundImage("url(\"" + BoatClassImageResolver.getBoatClassIconResource(boatClass).getSafeUri().asString() + "\")");
-            boatClassUi.setInnerText(" / " + boatClass);
-        } else {
-            boatClassUi.removeFromParent();
         }
         
         Date timestamp = entry.getTimestamp();

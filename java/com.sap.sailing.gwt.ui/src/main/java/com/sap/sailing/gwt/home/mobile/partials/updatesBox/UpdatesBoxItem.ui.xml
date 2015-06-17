@@ -8,7 +8,6 @@
       <div class="{local_res.css.updatesbox_item_content}">
         <b class="{local_res.css.updatesbox_item_content_text}">
           <span ui:field="titleUi"></span>
-          <span ui:field="boatClassUi" class="{local_res.css.updatesbox_item_content_text_boatclass}"></span>
         </b>
         <div ui:field="messageUi" class="{local_res.css.updatesbox_item_content_text}">
         </div>
