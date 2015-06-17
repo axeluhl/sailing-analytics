@@ -55,13 +55,8 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
         } else {
             getElement().getStyle().clearDisplay();
             itemContainerUi.clearContent();
-            int count = 0;
             for (NewsEntryDTO newsEntryDTO : data) {
                 itemContainerUi.addContent(new UpdatesBoxItem(newsEntryDTO, presenter));
-                count++;
-                if (count > 3) {
-                    break;
-                }
             }
             if (!dontDrillDown) {
                 headerUi.setClickAction(new Command() {
