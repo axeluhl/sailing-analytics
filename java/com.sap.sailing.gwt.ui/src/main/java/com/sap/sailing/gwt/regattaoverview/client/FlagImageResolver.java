@@ -32,8 +32,10 @@ public class FlagImageResolver {
         flagImageMap.put(Flags.GOLF, resources.flagGolf());
         flagImageMap.put(Flags.HOTEL, resources.flagHotel());
         flagImageMap.put(Flags.INDIA, resources.flagIndia());
+        flagImageMap.put(Flags.INDIA_ZULU, resources.flagIndiaZulu());
         flagImageMap.put(Flags.NOVEMBER, resources.flagNovember());
         flagImageMap.put(Flags.PAPA, resources.flagPapa());
+        flagImageMap.put(Flags.UNIFORM, resources.flagUniform());
         flagImageMap.put(Flags.XRAY, resources.flagXray());
         flagImageMap.put(Flags.ZULU, resources.flagZulu());
     }

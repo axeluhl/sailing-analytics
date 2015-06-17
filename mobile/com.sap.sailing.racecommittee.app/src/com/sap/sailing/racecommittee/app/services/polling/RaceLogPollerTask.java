@@ -13,7 +13,7 @@ import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sse.common.Util;
 
 public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
-    
+
     public interface PollingResultListener {
         public void onPollingResult(PollingResult result);
         public void onPollingFinished();
@@ -51,12 +51,12 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
         }
         return null;
     }
-    
+
     @Override
     protected void onProgressUpdate(PollingResult... values) {
         listener.onPollingResult(values[0]);
     }
-    
+
     @Override
     protected void onPostExecute(Void result) {
         listener.onPollingFinished();
