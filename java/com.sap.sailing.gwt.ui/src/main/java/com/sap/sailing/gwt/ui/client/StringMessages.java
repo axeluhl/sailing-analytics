@@ -1321,4 +1321,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitorWonRace(String competitorName);
     String showAllX(String text);
     String collapseX(String text);
+    String numberOfGPSFixes();
+    String fastestSailor();
+    String numberWindFixes();
+    String sailedMiles();
 }

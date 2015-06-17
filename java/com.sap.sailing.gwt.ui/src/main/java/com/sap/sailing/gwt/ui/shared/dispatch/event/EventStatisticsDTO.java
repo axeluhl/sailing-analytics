@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
 
 public class EventStatisticsDTO implements DTO {
 
@@ -8,26 +13,28 @@ public class EventStatisticsDTO implements DTO {
     private Integer competitorsCount;
     private Integer racesRunCount;
     private Integer trackedRacesCount;
-    private Integer rawGPSFixes;
-    private Integer sumSailedMiles;
-    private Integer fastestSailorSpeed;
-    private String fastestSailorInfo;
-    private String strongestWind;
+
+    private long numberOfGPSFixes;
+    private long numberOfWindFixes;
+    private Triple<Competitor, Speed, TimePoint> maxSpeed;
+    private Distance totalDistanceTraveled;
     
     @SuppressWarnings("unused")
     private EventStatisticsDTO() {
     }
     
     public EventStatisticsDTO(Integer regattasFoughtCount, Integer competitorsCount, Integer racesRunCount,
-            Integer trackedRacesCount) {
+            Integer trackedRacesCount, long numberOfGPSFixes, long numberOfWindFixes, Triple<Competitor, Speed, TimePoint> maxSpeed, Distance totalDistanceTraveled) {
         super();
         this.regattasFoughtCount = regattasFoughtCount;
         this.competitorsCount = competitorsCount;
         this.racesRunCount = racesRunCount;
         this.trackedRacesCount = trackedRacesCount;
+        this.numberOfGPSFixes = numberOfGPSFixes;
+        this.numberOfWindFixes = numberOfWindFixes;
+        this.maxSpeed = maxSpeed;
+        this.totalDistanceTraveled = totalDistanceTraveled;
     }
-
-
 
     public Integer getRegattasFoughtCount() {
         return regattasFoughtCount;
@@ -61,43 +68,22 @@ public class EventStatisticsDTO implements DTO {
         this.trackedRacesCount = trackedRacesCount;
     }
 
-    public Integer getRawGPSFixes() {
-        return rawGPSFixes;
+
+    public long getNumberOfGPSFixes() {
+        return numberOfGPSFixes;
     }
 
-    public void setRawGPSFixes(Integer rawGPSFixes) {
-        this.rawGPSFixes = rawGPSFixes;
+    public long getNumberOfWindFixes() {
+        return numberOfWindFixes;
     }
 
-    public Integer getSumSailedMiles() {
-        return sumSailedMiles;
+    public Triple<Competitor, Speed, TimePoint> getMaxSpeed() {
+        return maxSpeed;
     }
 
-    public void setSumSailedMiles(Integer sumSailedMiles) {
-        this.sumSailedMiles = sumSailedMiles;
+    public Distance getTotalDistanceTraveled() {
+        return totalDistanceTraveled;
     }
 
-    public Integer getFastestSailorSpeed() {
-        return fastestSailorSpeed;
-    }
 
-    public void setFastestSailorSpeed(Integer fastestSailorSpeed) {
-        this.fastestSailorSpeed = fastestSailorSpeed;
-    }
-
-    public String getFastestSailorInfo() {
-        return fastestSailorInfo;
-    }
-
-    public void setFastestSailorInfo(String fastestSailorInfo) {
-        this.fastestSailorInfo = fastestSailorInfo;
-    }
-
-    public String getStrongestWind() {
-        return strongestWind;
-    }
-
-    public void setStrongestWind(String strongestWind) {
-        this.strongestWind = strongestWind;
-    }
 }

@@ -18,7 +18,7 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     public static final String ICON_TRACKED_COUNT = "images/mobile/icon_trackedCount.svg";
     public static final String ICON_FASTEST_SAILOR = "images/mobile/fastest_sailor.svg";
     public static final String ICON_RAW_GPS_FIX = "images/mobile/raw_gps_fixes.svg";
-    public static final String ICON_STRONGEST_WIND = "images/mobile/strongest_wind.svg";
+    public static final String ICON_WIND_FIX = "images/mobile/strongest_wind.svg";
     public static final String ICON_SUM_MILES = "images/mobile/sum_miles.svg";
     private static StatisticsBoxUiBinder uiBinder = GWT.create(StatisticsBoxUiBinder.class);
 
@@ -50,10 +50,10 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
         addItem(StatisticsBox.ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
         addItem(StatisticsBox.ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
         addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
-        addItemIfNotNull(StatisticsBox.ICON_RAW_GPS_FIX, MSG.rawGPSFixes(), statistics.getRawGPSFixes());
-        addItemIfNotNull(StatisticsBox.ICON_FASTEST_SAILOR,
-                MSG.fastestSailor() + ": " + statistics.getFastestSailorInfo(), statistics.getFastestSailorSpeed());
-        addItemIfNotNull(StatisticsBox.ICON_STRONGEST_WIND, MSG.strongestWind(), statistics.getStrongestWind());
-        addItemIfNotNull(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), statistics.getSumSailedMiles());
+        addItemIfNotNull(StatisticsBox.ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
+        addItemIfNotNull(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
+                + statistics.getMaxSpeed().getA().getName(), statistics.getMaxSpeed().getB().getKnots());
+        addItemIfNotNull(StatisticsBox.ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
+        addItemIfNotNull(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled());
     }
 }
