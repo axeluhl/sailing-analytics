@@ -64,7 +64,12 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                 for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
                     for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
-                        numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
+                        competitorTrack.lockForRead();
+                        try {
+                            numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
+                        } finally {
+                            competitorTrack.unlockAfterRead();
+                        }
                         if (trackedRace.hasStarted(now)) {
                             final NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
                             MarkPassing lastMarkPassingBeforeNow = null;
@@ -95,11 +100,21 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                     }
                     for (Mark mark : trackedRace.getMarks()) {
                         GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
-                        numberOfGPSFixes += Util.size(markTrack.getRawFixes());
+                        markTrack.lockForRead();
+                        try {
+                            numberOfGPSFixes += Util.size(markTrack.getRawFixes());
+                        } finally {
+                            markTrack.unlockAfterRead();
+                        }
                     }
                     for (WindSource windSource : trackedRace.getWindSources()) {
                         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                        numberOfWindFixes += Util.size(windTrack.getRawFixes());
+                        windTrack.lockForRead();
+                        try {
+                            numberOfWindFixes += Util.size(windTrack.getRawFixes());
+                        } finally {
+                            windTrack.unlockAfterRead();
+                        }
                     }
                 }
             }
