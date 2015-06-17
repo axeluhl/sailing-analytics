@@ -10,8 +10,10 @@ import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
+import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
@@ -30,6 +32,7 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
         final LatestNewsView view = new LatestNewsViewImpl(this);
         panel.setWidget(view.asWidget());
         Window.setTitle(place.getTitle());
+        view.showNews(place.getNews());
     }
 
     @Override
@@ -56,6 +59,16 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
 
     @Override
     public void gotoNewsPlace(List<NewsEntryDTO> values) {
-        clientFactory.getPlaceController().goTo(new LatestNewsPlace(values));
+        clientFactory.getPlaceController().goTo(new LatestNewsPlace(place.getCtx(), values));
+    }
+
+    @Override
+    public EventContext getCtx() {
+        return place.getCtx();
+    }
+
+    @Override
+    public DispatchSystem getDispatch() {
+        return clientFactory.getDispatch();
     }
 }

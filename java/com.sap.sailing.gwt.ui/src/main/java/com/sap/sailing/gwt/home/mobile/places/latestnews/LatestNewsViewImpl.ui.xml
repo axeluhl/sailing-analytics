@@ -9,7 +9,7 @@
 		field="res" 
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	
-	<mp:updatesBox.UpdatesBox ui:field="updatesBox"/>
+	<mp:updatesBox.UpdatesBox dontHide="true" dontDrillDown="true" ui:field="updatesBoxUi"/>
 	
    	
 </ui:UiBinder>    

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.latestnews;
+package com.sap.sailing.gwt.home.mobile.partials.updatesBox;
 
 import java.util.List;
 

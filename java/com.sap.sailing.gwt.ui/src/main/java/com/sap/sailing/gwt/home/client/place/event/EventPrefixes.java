@@ -19,4 +19,5 @@ public class EventPrefixes {
     public static final String EventSeriesOverallLeaderboard = "/series/overallleaderboard/";
     public static final String EventSeriesLeaderboards = "/series/leaderboards/";
     public static final String EventSeriesMedia = "/series/media/";
+    public static final String EventNews = "/event/news/";
 }
