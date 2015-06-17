@@ -307,13 +307,15 @@ public class CandidateChooserImpl implements CandidateChooser {
                         // currentCheapestEdge.getEnd(), summing up their cost with the cost required
                         // to reach currentCheapestEdge.getEnd()
                         Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
-                        for (Edge e : edgesForNewCandidate) {
-                            int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
-                            // only add edge if it stays within the current segment, not exceeding
-                            // the next fixed mark passing
-                            if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
-                                    && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                        if (edgesForNewCandidate != null) {
+                            for (Edge e : edgesForNewCandidate) {
+                                int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
+                                // only add edge if it stays within the current segment, not exceeding
+                                // the next fixed mark passing
+                                if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
+                                        && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
+                                    currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                                }
                             }
                         }
                     }
