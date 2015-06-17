@@ -52,7 +52,8 @@
             <a href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.footerFeedback}' />
             </a>
-            <a ui:field="mobileUi" href="HomeMobile.html" class="{local_res.css.sitefooter_links_link}">
+            <a ui:field="mobileUi" href="HomeMobile.html" 
+            		class="{local_res.css.sitefooter_links_link} {res.mediaCss.showonsmall} {res.mediaCss.hideonmedium} {res.mediaCss.hideonlarge}">
               Mobile
             </a>
             <a href="{releaseNotesNavigation.getTargetUrl}" class="{local_res.css.sitefooter_links_link}">
