@@ -27,10 +27,10 @@ public class EventNewsServiceImpl implements EventNewsService {
             result.addAll(news);
         }
         Collections.sort(result);
-        if(result.size() <= 15) {
+        if(result.size() <= 25) {
             return result;
         }
-        return result.subList(0, 16);
+        return result.subList(0, 25);
     }
 
     @Override
@@ -41,10 +41,10 @@ public class EventNewsServiceImpl implements EventNewsService {
             result.addAll(news);
         }
         Collections.sort(result);
-        if(result.size() <= 15) {
+        if(result.size() <= 25) {
             return result;
         }
-        return result.subList(0, 16);
+        return result.subList(0, 25);
     }
 
     @Override
