@@ -80,7 +80,7 @@ vjs.ACCESS_PROTOCOL = ('https:' == document.location.protocol ? 'https://' : 'ht
 * Full player version
 * @type {string}
 */
-vjs['VERSION'] = '4.12.6';
+vjs['VERSION'] = '4.12.9';
 
 /**
  * Global Player instance options, surfaced from vjs.Player.prototype.options_
@@ -1302,6 +1302,18 @@ vjs.round = function(num, dec) {
  * @private
  */
 vjs.createTimeRange = function(start, end){
+  if (start === undefined && end === undefined) {
+    return {
+      length: 0,
+      start: function() {
+        throw new Error('This TimeRanges object is empty');
+      },
+      end: function() {
+        throw new Error('This TimeRanges object is empty');
+      }
+    };
+  }
+
   return {
     length: 1,
     start: function() { return start; },
@@ -4919,7 +4931,12 @@ vjs.Player.prototype.load = function(){
  * @return {String} The current source
  */
 vjs.Player.prototype.currentSrc = function(){
-  return this.techGet('currentSrc') || this.cache_.src || '';
+  var techSrc = this.techGet('currentSrc');
+
+  if (techSrc === undefined) {
+    return this.cache_.src || '';
+  }
+  return techSrc;
 };
 
 /**
@@ -5159,6 +5176,13 @@ vjs.Player.prototype.ended = function(){ return this.techGet('ended'); };
  * @return {Boolean} True if the player is in the seeking state, false if not.
  */
 vjs.Player.prototype.seeking = function(){ return this.techGet('seeking'); };
+
+/**
+ * Returns the TimeRanges of the media that are currently available
+ * for seeking to.
+ * @return {TimeRanges} the seekable intervals of the media timeline
+ */
+vjs.Player.prototype.seekable = function(){ return this.techGet('seekable'); };
 
 // When the player is first initialized, trigger activity so components
 // like the control bar show themselves if needed
@@ -5601,6 +5625,7 @@ vjs.DurationDisplay = vjs.Component.extend({
     // Once the order of durationchange and this.player_.duration() being set is figured out,
     // this can be updated.
     this.on(player, 'timeupdate', this.updateContent);
+    this.on(player, 'loadedmetadata', this.updateContent);
   }
 });
 
@@ -6569,6 +6594,8 @@ vjs.MediaTechController = vjs.Component.extend({
       this.emulateTextTracks();
     }
 
+    this.on('loadstart', this.updateCurrentSource_);
+
     this.initTextTrackListeners();
   }
 });
@@ -6699,6 +6726,24 @@ vjs.MediaTechController.prototype.onClick = function(event){
  */
 vjs.MediaTechController.prototype.onTap = function(){
   this.player().userActive(!this.player().userActive());
+};
+
+/**
+ * Set currentSource_ asynchronously to simulate the media element's
+ * asynchronous execution of the `resource selection algorithm`
+ *
+ * currentSource_ is set either as the first loadstart event OR
+ * in a timeout to make sure it is set asynchronously before anything else
+ * but before other loadstart handlers have had a chance to execute
+ */
+vjs.MediaTechController.prototype.updateCurrentSource_ = function () {
+  // We could have been called with a 0-ms setTimeout OR via loadstart (which ever
+  // happens first) so we should clear the timeout to be a good citizen
+  this.clearTimeout(this.updateSourceTimer_);
+
+  if (this.pendingSource_) {
+    this.currentSource_ = this.pendingSource_;
+  }
 };
 
 /* Fallbacks for unsupported event types
@@ -6959,6 +7004,8 @@ vjs.MediaTechController.prototype['featuresNativeTextTracks'] = false;
  *
  */
 vjs.MediaTechController.withSourceHandlers = function(Tech){
+  Tech.prototype.currentSource_ = {src: ''};
+
   /**
    * Register a source handler
    * Source handlers are scripts for handling specific formats.
@@ -7043,7 +7090,12 @@ vjs.MediaTechController.withSourceHandlers = function(Tech){
     this.disposeSourceHandler();
     this.off('dispose', this.disposeSourceHandler);
 
-    this.currentSource_ = source;
+    // Schedule currentSource_ to be set asynchronously
+    if (source && source.src !== '') {
+      this.pendingSource_ = source;
+      this.updateSourceTimer_ = this.setTimeout(vjs.bind(this, this.updateCurrentSource_), 0);
+    }
+
     this.sourceHandler_ = sh.handleSource(source, this);
     this.on('dispose', this.disposeSourceHandler);
 
@@ -7142,7 +7194,7 @@ vjs.Html5 = vjs.MediaTechController.extend({
     // In Chrome (15), if you have autoplay + a poster + no controls, the video gets hidden (but audio plays)
     // This fixes both issues. Need to wait for API, so it updates displays correctly
     player.ready(function(){
-      if (this.tag && this.options_['autoplay'] && this.paused()) {
+      if (this.src() && this.tag && this.options_['autoplay'] && this.paused()) {
         delete this.tag['poster']; // Chrome Fix. Fixed in Chrome v16.
         this.play();
       }
@@ -7395,7 +7447,13 @@ vjs.Html5.prototype.setSrc = function(src) {
 };
 
 vjs.Html5.prototype.load = function(){ this.el_.load(); };
-vjs.Html5.prototype.currentSrc = function(){ return this.el_.currentSrc; };
+vjs.Html5.prototype.currentSrc = function(){
+  if (this.currentSource_) {
+    return this.currentSource_.src;
+  } else {
+    return this.el_.currentSrc;
+  }
+};
 
 vjs.Html5.prototype.poster = function(){ return this.el_.poster; };
 vjs.Html5.prototype.setPoster = function(val){ this.el_.poster = val; };
@@ -7414,6 +7472,7 @@ vjs.Html5.prototype.setLoop = function(val){ this.el_.loop = val; };
 
 vjs.Html5.prototype.error = function(){ return this.el_.error; };
 vjs.Html5.prototype.seeking = function(){ return this.el_.seeking; };
+vjs.Html5.prototype.seekable = function(){ return this.el_.seekable; };
 vjs.Html5.prototype.ended = function(){ return this.el_.ended; };
 vjs.Html5.prototype.defaultMuted = function(){ return this.el_.defaultMuted; };
 
@@ -7919,6 +7978,15 @@ vjs.Flash.prototype['setPoster'] = function(){
   // poster images are not handled by the Flash tech so make this a no-op
 };
 
+vjs.Flash.prototype.seekable = function() {
+  var duration = this.duration();
+  if (duration === 0) {
+    // The SWF reports a duration of zero when the actual duration is unknown
+    return vjs.createTimeRange();
+  }
+  return vjs.createTimeRange(0, this.duration());
+};
+
 vjs.Flash.prototype.buffered = function(){
   return vjs.createTimeRange(0, this.el_.vjs_getProperty('buffered'));
 };
@@ -7935,7 +8003,7 @@ vjs.Flash.prototype.enterFullScreen = function(){
   // Create setters and getters for attributes
   var api = vjs.Flash.prototype,
     readWrite = 'rtmpConnection,rtmpStream,preload,defaultPlaybackRate,playbackRate,autoplay,loop,mediaGroup,controller,controls,volume,muted,defaultMuted'.split(','),
-    readOnly = 'error,networkState,readyState,seeking,initialTime,duration,startOffsetTime,paused,played,seekable,ended,videoTracks,audioTracks,videoWidth,videoHeight'.split(','),
+    readOnly = 'error,networkState,readyState,seeking,initialTime,duration,startOffsetTime,paused,played,ended,videoTracks,audioTracks,videoWidth,videoHeight'.split(','),
     // Overridden: buffered, currentTime, currentSrc
     i;
 
