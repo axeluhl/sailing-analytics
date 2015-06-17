@@ -46,7 +46,7 @@ public class RegattaStatusRace extends Composite {
 
     private void initRaceFleetCorner(FleetMetadataDTO fleet) {
         if (fleet != null) {
-            fleetCornerUi.getStyle().setProperty("borderColor", fleet.getFleetColor());
+            fleetCornerUi.getStyle().setBorderColor(fleet.getFleetColor() + " transparent");
         }
     }
     
