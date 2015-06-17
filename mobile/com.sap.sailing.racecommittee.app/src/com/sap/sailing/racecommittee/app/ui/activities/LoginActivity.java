@@ -143,9 +143,6 @@ public class LoginActivity extends BaseActivity
                 @Override
                 public void onClick(View v) {
                     ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
-                    DataStore dataStore = dataManager.getDataStore();
-                    dataStore.setEventUUID(mSelectedEventId);
-                    dataStore.setCourseUUID(mSelectedCourseAreaUUID);
                     login();
                 }
             });
@@ -153,6 +150,13 @@ public class LoginActivity extends BaseActivity
     }
 
     private void login() {
+        DataStore dataStore = dataManager.getDataStore();
+        dataStore.setEventUUID(mSelectedEventId);
+        dataStore.setCourseUUID(mSelectedCourseAreaUUID);
+        switchToRacingActivity();
+    }
+
+    private void switchToRacingActivity(){
         Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
         intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
         intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
@@ -275,10 +279,12 @@ public class LoginActivity extends BaseActivity
 
         dataManager = DataManager.create(this);
         DataStore dataStore = dataManager.getDataStore();
+
+        // Check if the user has been logged in before and if so bring him directly to the racing activity
         mSelectedCourseAreaUUID = dataStore.getCourseUUID();
         mSelectedEventId = dataStore.getEventUUID();
         if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
-            login();
+            switchToRacingActivity();
         }
 
         ThemeHelper.setTheme(this);
