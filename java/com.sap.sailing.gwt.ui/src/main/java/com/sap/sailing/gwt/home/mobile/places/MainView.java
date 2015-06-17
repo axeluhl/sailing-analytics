@@ -41,7 +41,7 @@ public class MainView extends Composite {
 
     public MainView(MobileApplicationClientFactory appContext, EventBus eventBus) {
         headerPanel = new Header(appContext);
-        footerPanel = new Footer(appContext);
+        footerPanel = new Footer(appContext, eventBus);
         initWidget(uiBinder.createAndBindUi(this));
         eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
             @Override
@@ -55,12 +55,9 @@ public class MainView extends Composite {
         });
     }
 
-
     public AcceptsOneWidget getContent() {
         return mainContentPanel;
     }
-    
-    
 
     public ErrorReporter getErrorReporter() {
         return errorReporter;

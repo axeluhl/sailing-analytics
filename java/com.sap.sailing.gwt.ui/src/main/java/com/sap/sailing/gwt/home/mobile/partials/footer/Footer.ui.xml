@@ -71,7 +71,7 @@
 						<ui:text from='{i18n.footerFeedback}' />
 						|
 					</a>
-					<a
+					<a ui:field="desktopUi"
 						href="HomeDesktop.html"
 						title="Desktop">
 						Desktop

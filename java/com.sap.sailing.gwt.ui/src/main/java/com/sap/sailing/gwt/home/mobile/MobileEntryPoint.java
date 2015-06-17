@@ -34,7 +34,7 @@ public class MobileEntryPoint implements EntryPoint {
                 RemoteServiceMappingConstants.homeServiceRemotePath);
         
         ActivityMapper mobileActivityMapper = new MobileActivityMapper(appContext);
-        ActivityManager activityManager = new ActivityManager(mobileActivityMapper, eventBus);
+        ActivityManager activityManager = new CustomActivityManager(mobileActivityMapper, eventBus);
         MainView panel = new MainView(appContext, eventBus);
         RootPanel.get().add(panel);
         activityManager.setDisplay(panel.getContent());
