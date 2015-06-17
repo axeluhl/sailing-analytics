@@ -6,11 +6,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -21,11 +23,14 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
@@ -53,6 +58,10 @@ public class Footer extends Composite {
         }
     });
     
+    @UiField AnchorElement mobileUi;
+    
+    private final String mobileBaseUrl;
+    
     private String otherLanguage;
     private final LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
 
@@ -60,13 +69,30 @@ public class Footer extends Composite {
     @UiField(provided = true)
     final PlaceNavigation<WhatsNewPlace> releaseNotesNavigation;
 
-    public Footer(final DesktopPlacesNavigator navigator) {
+    public Footer(final DesktopPlacesNavigator navigator, EventBus eventBus) {
         FooterResources.INSTANCE.css().ensureInjected();
         releaseNotesNavigation = navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
 
         initWidget(uiBinder.createAndBindUi(this));
+        mobileBaseUrl = mobileUi.getHref();
         
         updateUI();
+        
+        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
+            @Override
+            public void onPlaceChanged(PlaceChangedEvent event) {
+                updateMobileLink(event.getNewPlace());
+            }
+        });
+        updateMobileLink(null);
+    }
+    
+    protected void updateMobileLink(Place place) {
+        String link = mobileBaseUrl + Window.Location.getQueryString();
+        if(place instanceof HasMobileVersion) {
+            link += Window.Location.getHash();
+        }
+        mobileUi.setHref(link);
     }
     
     @UiHandler("changeLanguageLink")
