@@ -5,19 +5,19 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusResources" />
 	
-	<mp:section.MobileSection ui:field="itemContainerUi">
-		<mp:header>
-			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.regattas}" />
-		</mp:header>
-		<mp:content>
-			<g:HTMLPanel>
-				<div class="{local_res.css.regattastatus_content}" ui:field="regattaContainerUi"></div>
-<!-- 				<div class="{local_res.css.regattastatus_content} {local_res.css.togglecontainerhidden}"  -->
-<!-- 					ui:field="collapsableContainerUi"></div> -->
-			</g:HTMLPanel>
-		</mp:content>
-		<!-- IF (eventState === 'live') -->
-		<!-- <ubi:global.toggleButton ui:field='showMessage' ui:field='hideMessage' /> -->
-		<!-- IF END -->
-	</mp:section.MobileSection>
+	<g:FlowPanel>
+		<mp:section.MobileSection ui:field="itemContainerUi">
+			<mp:header>
+				<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.regattas}" />
+			</mp:header>
+			<mp:content>
+				<g:FlowPanel addStyleNames="{local_res.css.regattastatus_content}" ui:field="regattaContainerUi"/>
+			</mp:content>
+			<mp:content>
+				<g:FlowPanel addStyleNames="{local_res.css.regattastatus_content} {local_res.css.togglecontainerhidden}" 
+						ui:field="collapsableContainerUi" />
+			</mp:content>
+		</mp:section.MobileSection>
+		<mp:toggleButton.ToggleButton ui:field="toggleButtonUi" buttonText="Show all Regattas"/>
+	</g:FlowPanel>
 </ui:UiBinder>
