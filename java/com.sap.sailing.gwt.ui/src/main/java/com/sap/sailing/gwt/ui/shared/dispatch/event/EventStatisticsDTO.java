@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sse.common.TimePoint;
@@ -15,13 +16,14 @@ public class EventStatisticsDTO implements DTO {
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
     private Triple<Competitor, Speed, TimePoint> maxSpeed;
+    private Distance totalDistanceTraveled;
     
     @SuppressWarnings("unused")
     private EventStatisticsDTO() {
     }
     
     public EventStatisticsDTO(Integer regattasFoughtCount, Integer competitorsCount, Integer racesRunCount,
-            Integer trackedRacesCount, long numberOfGPSFixes, long numberOfWindFixes, Triple<Competitor, Speed, TimePoint> maxSpeed) {
+            Integer trackedRacesCount, long numberOfGPSFixes, long numberOfWindFixes, Triple<Competitor, Speed, TimePoint> maxSpeed, Distance totalDistanceTraveled) {
         super();
         this.regattasFoughtCount = regattasFoughtCount;
         this.competitorsCount = competitorsCount;
@@ -30,6 +32,7 @@ public class EventStatisticsDTO implements DTO {
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
         this.maxSpeed = maxSpeed;
+        this.totalDistanceTraveled = totalDistanceTraveled;
     }
 
     public Integer getRegattasFoughtCount() {
@@ -74,6 +77,10 @@ public class EventStatisticsDTO implements DTO {
 
     public Triple<Competitor, Speed, TimePoint> getMaxSpeed() {
         return maxSpeed;
+    }
+
+    public Distance getTotalDistanceTraveled() {
+        return totalDistanceTraveled;
     }
 
 }
