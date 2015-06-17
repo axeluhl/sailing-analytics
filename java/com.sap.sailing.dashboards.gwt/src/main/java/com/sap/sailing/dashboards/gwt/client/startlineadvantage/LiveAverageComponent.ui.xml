@@ -13,7 +13,7 @@
 		<g:HTMLPanel ui:field="livePanel" styleName="{style.liveAverageCompoment_live_container}">
 			    <div class="{style.liveAverageCompoment_value_panel}">
 					<span class="{style.liveAverageCompoment_panel_value_number}" ui:field="liveNumber"></span>
-					<span class="{style.liveAverageCompoment_panel_value_number}" ui:field="liveUnit"></span>
+					<span class="{style.liveAverageCompoment_panel_value_unit}" ui:field="liveUnit"></span>
 				</div>
 		</g:HTMLPanel>
 
@@ -24,7 +24,7 @@
 		<g:HTMLPanel ui:field="averagePanel" styleName="{style.liveAverageCompoment_average_container}">
 			    <div class="{style.liveAverageCompoment_value_panel}">
 					<span class="{style.liveAverageCompoment_panel_value_number}" ui:field="averageNumber"></span>
-					<span class="{style.liveAverageCompoment_panel_value_number}" ui:field="averageUnit"></span>
+					<span class="{style.liveAverageCompoment_panel_value_unit}" ui:field="averageUnit"></span>
 				</div>
 		</g:HTMLPanel>
 
