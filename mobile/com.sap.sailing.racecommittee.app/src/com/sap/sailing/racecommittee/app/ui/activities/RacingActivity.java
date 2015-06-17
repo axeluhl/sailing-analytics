@@ -161,7 +161,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         EventBase event = dataManager.getDataStore().getEvent(eventId);
         if (event == null) {
             ExLog.e(this, TAG, "Noooo the event is null :/");
-            preferences.isSetUp(false);
             PackageManager pm = getPackageManager();
             Intent intent = pm.getLaunchIntentForPackage(getPackageName());
             startActivity(intent);

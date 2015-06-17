@@ -4,10 +4,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-
-import com.sap.sailing.android.shared.logging.ExLog;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
@@ -80,7 +79,6 @@ public abstract class SessionActivity extends BaseActivity {
 
     private void doLogout() {
         ExLog.i(this, TAG, "Do logout now!");
-        preferences.isSetUp(false); //FIXME: Is that flag really needed or just data redundancy?
         super.onReset(); // resets the data manager and fades the activity
     }
 
