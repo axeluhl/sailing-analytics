@@ -18,6 +18,6 @@
 						ui:field="collapsableContainerUi" />
 			</mp:content>
 		</mp:section.MobileSection>
-		<mp:toggleButton.ToggleButton ui:field="toggleButtonUi" buttonText="Show all Regattas"/>
+		<mp:toggleButton.ToggleButton ui:field="toggleButtonUi" label="{i18n.regattas}"/>
 	</g:FlowPanel>
 </ui:UiBinder>
