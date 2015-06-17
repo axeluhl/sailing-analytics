@@ -18,25 +18,18 @@ public class MobileSection extends Composite {
     interface MyBinder extends UiBinder<Widget, MobileSection> {
     }
 
-
-    @UiField
-    MobileSectionResources local_res;
-    @UiField
-    DivElement sectionHeaderHolderUi;
-    @UiField
-    DivElement sectionContentHolderUi;
-    @UiField
-    SimplePanel sectionHeaderUi;
-    @UiField
-    FlowPanel sectionContentUi;
-    
+    @UiField MobileSectionResources local_res;
+    @UiField DivElement sectionHeaderHolderUi;
+    @UiField DivElement sectionContentHolderUi;
+    @UiField SimplePanel sectionHeaderUi;
+    @UiField FlowPanel sectionContentUi;
 
     public MobileSection() {
         MobileSectionResources.INSTANCE.css().ensureInjected();
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
-
+    
     @UiChild
     public void addHeader(Widget theHeaderWidget) {
         sectionHeaderUi.setWidget(theHeaderWidget);
@@ -44,6 +37,10 @@ public class MobileSection extends Composite {
 
     @UiChild
     public void addContent(Widget theContentWidget) {
+        if (theContentWidget instanceof IsMobileSection) {
+            IsMobileSection mobileSubSection = (IsMobileSection) theContentWidget;
+            mobileSubSection.getMobileSection().showAsSubSection();
+        }
         if (theContentWidget instanceof MobileSection) {
             MobileSection mobileSubSection = (MobileSection) theContentWidget;
             mobileSubSection.showAsSubSection();
@@ -60,7 +57,6 @@ public class MobileSection extends Composite {
     }
 
     public void setEdgeToEdgeContent(boolean setIsEdgeToEdgeContent) {
-
         if (setIsEdgeToEdgeContent) {
             sectionContentHolderUi.addClassName(local_res.css().edgeToEdgeSectionContentHolder());
         } else if (!setIsEdgeToEdgeContent) {
