@@ -47,7 +47,7 @@
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
-  width: 2.692307692307693em;
+  width: 3.1em;
   text-align: center;
   padding: 0.230769230769231em 0;
   background: #ebebeb;
