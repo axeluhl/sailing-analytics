@@ -13,7 +13,8 @@
 	<ui:style>
 		.fullWidthButton {
 			width: 100%;
-			margin-bottom: 1rem;		
+			margin-bottom: 1rem;
+			text-align: center;		
 		}
 		.holder {
 			padding: 1rem;
@@ -21,21 +22,15 @@
 		.notAvailableMessage {
 			font-size: 1.5em;
 			margin: 1em 0em;
-
+			line-height: 1.4em;
 		}
 		
 	</ui:style>	
-		
-   	<g:HTMLPanel styleName="{style.holder}">
-   		<p class="{style.notAvailableMessage}">
-   		<ui:text from="{i18n.notAvailableOnMobileMessage}" />
-   		</p>
-   		<g:Anchor addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="gotoDesktopUi"
-   		><ui:text from="{i18n.gotoDesktop}" /></g:Anchor>
-   		
-   		<g:Anchor addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="goBackUi"
-   		><ui:text from="{i18n.goBack}" /></g:Anchor>
-   	 	
-   	 	<mp:socialfooter.SocialFooter/>	
-	</g:HTMLPanel>
+   	<div class="{style.holder}">
+   		<p class="{style.notAvailableMessage}" ui:field="notAvailableMessageUi" />
+   		<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="gotoDesktopUi"
+   		><ui:text from="{i18n.gotoDesktop}" /></a>
+   		<button class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="goBackUi"
+   		><ui:text from="{i18n.goBack}" /></button>
+	</div>
 </ui:UiBinder>    

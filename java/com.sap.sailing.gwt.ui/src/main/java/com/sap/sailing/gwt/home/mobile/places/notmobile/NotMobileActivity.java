@@ -25,27 +25,15 @@ public class NotMobileActivity extends AbstractActivity implements Presenter {
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         final NotMobileView view = new NotMobileViewImpl(this);
+        view.setGotoDesktopUrl("HomeDesktop.html" + Window.Location.getQueryString() + "#"
+                + mapper.getToken(notMobilePlace));
         panel.setWidget(view.asWidget());
     }
 
-    @Override
-    public void gotoEvents() {
-        clientFactory //
-                .getNavigator() //
-                .getEventsNavigation()//
-                .goToPlace();
-    }
 
     @Override
     public void goBack() {
         clientFactory.getPlaceController().goTo(comingFrom);
     }
 
-    @Override
-    public void gotoDesktopVersion() {
-        StringBuilder destinationBuilder = new StringBuilder(GWT.getHostPageBaseURL());
-        destinationBuilder.append("HomeDesktop.html#");
-        destinationBuilder.append(mapper.getToken(notMobilePlace));
-        Window.Location.assign(destinationBuilder.toString());
-    }
 }
