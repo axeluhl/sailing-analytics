@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
@@ -52,5 +53,9 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<ContactPlace> getContactNavigation() {
         return createGlobalPlaceNavigation(new ContactPlace());
+    }
+
+    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
+        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
     }
 }

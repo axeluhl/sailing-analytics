@@ -23,7 +23,7 @@
             <g:FlowPanel tag="ul" ui:field="dropdownListUi" addStyleNames="{local_res.css.header_navigation_nav_list}" />
           </nav>
         </div>
-        <div class="{local_res.css.header_search}">
+        <div ui:field="searchUi" class="{local_res.css.header_search}">
           <img src="images/mobile/search-icon.svg"  class="{local_res.css.header_search_icon}"></img>
         </div>
 <!--         <div class="{local_res.css.header_searchbox}"> -->

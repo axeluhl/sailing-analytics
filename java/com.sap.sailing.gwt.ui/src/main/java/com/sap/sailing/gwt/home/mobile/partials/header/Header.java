@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,6 +27,7 @@ public class Header extends Composite {
     @UiField ImageElement dropdownTriggerUi;
     @UiField Element dropdownContainerUi;
     @UiField FlowPanel dropdownListUi;
+    @UiField Element searchUi;
 
     @UiField
     DivElement locationTitleUi;
@@ -36,9 +38,8 @@ public class Header extends Composite {
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
     private DropdownHandler dropdownHandler;
 //    private MobileApplicationClientFactory appContext;
-
     
-    public Header(MobileApplicationClientFactory appContext) {
+    public Header(final MobileApplicationClientFactory appContext) {
 //        this.appContext = appContext;
         HeaderResources.INSTANCE.css().ensureInjected();
 
@@ -49,6 +50,18 @@ public class Header extends Composite {
 //        addNavigation(appContext.getNavigator().getSolutionsNavigation(), StringMessages.INSTANCE.solutions());
 
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
+        
+        Event.sinkEvents(searchUi, Event.ONCLICK);
+        Event.setEventListener(searchUi, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if(LinkUtil.handleLinkClick(event)) {
+                    event.preventDefault();
+                    appContext.getNavigator().getSearchResultNavigation("").goToPlace();
+                }
+                
+            }
+        });
     }
     
     private void addNavigation(final PlaceNavigation<?> placeNavigation, String name) {
