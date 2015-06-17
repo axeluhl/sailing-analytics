@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
 
@@ -119,6 +120,10 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 builder.setMessage(getString(R.string.url_refresh_message));
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.create().show();
+                // reset all data because it's all dependent on the server url
+                DataManager dataManager = (DataManager) DataManager.create(getActivity());
+                dataManager.resetAll();
+                // TODO force a reload of the app now!
                 return true;
             }
         });

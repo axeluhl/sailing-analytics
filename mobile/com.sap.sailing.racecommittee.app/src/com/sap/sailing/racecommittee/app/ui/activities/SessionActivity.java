@@ -39,7 +39,7 @@ public abstract class SessionActivity extends BaseActivity {
 
     @Override
     protected boolean onReset() {
-        return logoutSession();
+        return logoutSession(); // only will call super.onReset() after user confirmation
     }
 
     public boolean logoutSession() {
@@ -62,17 +62,26 @@ public abstract class SessionActivity extends BaseActivity {
         return true;
     }
 
-    private void doLogout() {
-        ExLog.i(this, TAG, "Do logout now!");
-        preferences.isSetUp(false);
-        unloadAllRaces();
-        fadeActivity(LoginActivity.class, true);
+
+    public void forceLogout() {
+        ExLog.w(this, TAG, String.format("Forcing Logout from activity %s", this.getClass().getSimpleName()));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        builder.setTitle(this.getString(R.string.data_reload_title));
+        builder.setMessage(this.getString(R.string.data_reload_message));
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                doLogout();
+            }
+        });
+        builder.setCancelable(false);
+        builder.show();
     }
 
-    private void unloadAllRaces() {
-        ExLog.i(this, TAG, "Issuing intent action clear races");
-        Intent intent = new Intent(this, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
-        this.startService(intent);
+    private void doLogout() {
+        ExLog.i(this, TAG, "Do logout now!");
+        preferences.isSetUp(false); //FIXME: Is that flag really needed or just data redundancy?
+        super.onReset(); // resets the data manager and fades the activity
     }
+
 }

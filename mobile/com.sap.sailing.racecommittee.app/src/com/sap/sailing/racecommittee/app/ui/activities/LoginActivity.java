@@ -320,15 +320,6 @@ public class LoginActivity extends BaseActivity
         updateSignInButtonState();
     }
 
-    @Override
-    protected boolean onReset() {
-        Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
-        if (courseAreaFragment != null) {
-            getFragmentManager().beginTransaction().remove(courseAreaFragment).commitAllowingStateLoss();
-        }
-        recreate();
-        return true;
-    }
 
     @Override
     public void onResume() {

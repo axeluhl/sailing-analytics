@@ -4,14 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.WindowManager;
-
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.services.RaceStateService;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -48,11 +45,8 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_reload:
                 ExLog.i(this, TAG, "Clicked RESET");
-                InMemoryDataStore.INSTANCE.reset();
-                Intent i = new Intent(this, RaceStateService.class);
-                i.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
-                startService(i);
-                return onReset();
+                final boolean result = onReset();
+                return result;
 
             case R.id.options_menu_info:
                 ExLog.i(this, TAG, "Clicked INFO");
@@ -68,13 +62,22 @@ public class BaseActivity extends SendingServiceAwareActivity {
     @Override
     public void onPause() {
         super.onPause();
-        
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     
+    /**
+     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then
+     * fades this activity. 
+     */
     protected boolean onReset() {
+        resetDataManager();
         fadeActivity(LoginActivity.class, true);
         return true;
+    }
+
+    protected void resetDataManager() {
+        DataManager dataManager = (DataManager) DataManager.create(this);
+        dataManager.resetAll();
     }
 
     @Override
