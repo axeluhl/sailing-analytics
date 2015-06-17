@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
 
-    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA);
+    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA, Flags.UNIFORM, Flags.INDIA_ZULU);
     
     private final RacingProcedureTypeAnalyzer procedureAnalyzer;
     private final List<Flags> startModeFlags;

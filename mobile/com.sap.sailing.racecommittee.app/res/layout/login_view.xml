@@ -1,32 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/loginLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:baselineAligned="false"
-    android:background="@drawable/background" >
-	
-    <FrameLayout
-        android:id="@+id/login_view_left_container"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools">
+
+    <fragment
+        android:id="@+id/login_view_backdrop"
+        class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
         android:layout_width="match_parent"
-    	android:layout_height="match_parent"
-    	android:layout_weight="0.5">
-    </FrameLayout>
+        android:layout_height="match_parent"
+        tools:layout="@layout/login_backdrop"/>
 
-	<LinearLayout
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:layout_weight="0.99"
-	    android:orientation="vertical"
-	    android:background="@color/welter_deep_gray">
-	</LinearLayout>
-	
     <FrameLayout
-        android:id="@+id/login_view_right_container"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:layout_weight="0.5">
-    </FrameLayout>
+        android:id="@+id/login_listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="?sap_gray_black_30"
+        tools:layout="@layout/login_listviews"/>
+</merge>
 
-</LinearLayout>

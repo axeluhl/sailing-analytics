@@ -24,9 +24,8 @@ public class CompetitorPositioningListAdapter extends ArrayAdapter<Util.Triple<S
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (convertView == null) {
-
-            LayoutInflater li = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            view = li.inflate(R.layout.welter_positioning_item, null);
+            LayoutInflater inflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+            view = inflater.inflate(R.layout.welter_positioning_item, parent, false);
         }
 
         Util.Triple<Serializable, String, MaxPointsReason> competitorMaxPoint = getItem(position);
