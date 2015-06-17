@@ -43,6 +43,9 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
             }
         }
         
-        return new ResultWithTTL<EventStatisticsDTO>(1000 * 60 * 5, new EventStatisticsDTO(regattas, competitors, races, trackedRaces));
+        EventStatisticsDTO statisticsDTO = new EventStatisticsDTO(regattas, competitors, races, trackedRaces);
+        // TODO: add more stats to DTO
+
+        return new ResultWithTTL<EventStatisticsDTO>(1000 * 60 * 5, statisticsDTO);
     }
 }

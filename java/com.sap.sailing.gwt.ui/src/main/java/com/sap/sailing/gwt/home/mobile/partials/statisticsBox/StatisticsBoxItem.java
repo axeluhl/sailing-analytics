@@ -19,11 +19,11 @@ class StatisticsBoxItem extends Widget {
     @UiField SpanElement nameUi;
     @UiField SpanElement valueUi;
 
-    public StatisticsBoxItem(String iconUrl, String name, Integer value) {
+    public StatisticsBoxItem(String iconUrl, String name, Object payload) {
         setElement(uiBinder.createAndBindUi(this));
         iconUi.setSrc(iconUrl);
         nameUi.setInnerText(name);
-        valueUi.setInnerText(value == null ? "n/a" : String.valueOf(value));
+        valueUi.setInnerText(payload == null ? "n/a" : String.valueOf(payload));
     }
 
 }

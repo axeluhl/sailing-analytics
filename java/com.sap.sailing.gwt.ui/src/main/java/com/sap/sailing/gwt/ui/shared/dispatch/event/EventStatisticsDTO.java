@@ -8,6 +8,11 @@ public class EventStatisticsDTO implements DTO {
     private Integer competitorsCount;
     private Integer racesRunCount;
     private Integer trackedRacesCount;
+    private Integer rawGPSFixes;
+    private Integer sumSailedMiles;
+    private Integer fastestSailorSpeed;
+    private String fastestSailorInfo;
+    private String strongestWind;
     
     @SuppressWarnings("unused")
     private EventStatisticsDTO() {
@@ -56,4 +61,43 @@ public class EventStatisticsDTO implements DTO {
         this.trackedRacesCount = trackedRacesCount;
     }
 
+    public Integer getRawGPSFixes() {
+        return rawGPSFixes;
+    }
+
+    public void setRawGPSFixes(Integer rawGPSFixes) {
+        this.rawGPSFixes = rawGPSFixes;
+    }
+
+    public Integer getSumSailedMiles() {
+        return sumSailedMiles;
+    }
+
+    public void setSumSailedMiles(Integer sumSailedMiles) {
+        this.sumSailedMiles = sumSailedMiles;
+    }
+
+    public Integer getFastestSailorSpeed() {
+        return fastestSailorSpeed;
+    }
+
+    public void setFastestSailorSpeed(Integer fastestSailorSpeed) {
+        this.fastestSailorSpeed = fastestSailorSpeed;
+    }
+
+    public String getFastestSailorInfo() {
+        return fastestSailorInfo;
+    }
+
+    public void setFastestSailorInfo(String fastestSailorInfo) {
+        this.fastestSailorInfo = fastestSailorInfo;
+    }
+
+    public String getStrongestWind() {
+        return strongestWind;
+    }
+
+    public void setStrongestWind(String strongestWind) {
+        this.strongestWind = strongestWind;
+    }
 }
