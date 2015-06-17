@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.home.mobile.partials.recents;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
@@ -16,11 +16,11 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
-public class EventsOverviewRecentYearEvent extends Composite {
+public class EventsOverviewRecentYearEvent extends Widget {
 
     private static RecentEventTeaserUiBinder uiBinder = GWT.create(RecentEventTeaserUiBinder.class);
 
-    interface RecentEventTeaserUiBinder extends UiBinder<Widget, EventsOverviewRecentYearEvent> {
+    interface RecentEventTeaserUiBinder extends UiBinder<Element, EventsOverviewRecentYearEvent> {
     }
     
     @UiField
@@ -38,7 +38,7 @@ public class EventsOverviewRecentYearEvent extends Composite {
 
     public EventsOverviewRecentYearEvent(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event,
             LabelType labelType, boolean isTeaserEvent) {
-        initWidget(uiBinder.createAndBindUi(this));
+        setElement(uiBinder.createAndBindUi(this));
         eventNameUi.setInnerText(event.getDisplayName());
         if (isTeaserEvent) {
             eventImageUi.getStyle().setDisplay(Display.BLOCK);

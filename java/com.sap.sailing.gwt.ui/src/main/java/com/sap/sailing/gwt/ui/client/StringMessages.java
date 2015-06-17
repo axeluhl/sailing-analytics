@@ -1319,4 +1319,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String goBack();
     String resultsUpdate();
     String competitorWonRace(String competitorName);
+    String showAllX(String text);
+    String collapseX(String text);
 }
