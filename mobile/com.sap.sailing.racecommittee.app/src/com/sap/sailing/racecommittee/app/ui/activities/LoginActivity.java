@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.UUID;
-
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -23,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -38,6 +33,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
@@ -56,6 +52,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
     implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -84,6 +84,8 @@ public class LoginActivity extends BaseActivity
     private IntentReceiver mReceiver;
 
     private ProgressDialog progressDialog;
+
+    private ReadonlyDataManager dataManager;
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
@@ -141,14 +143,20 @@ public class LoginActivity extends BaseActivity
                 @Override
                 public void onClick(View v) {
                     ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
-                    preferences.isSetUp(true);
-                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-                    intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
-                    startActivity(intent);
+                    DataStore dataStore = dataManager.getDataStore();
+                    dataStore.setEventUUID(mSelectedEventId);
+                    dataStore.setCourseUUID(mSelectedCourseAreaUUID);
+                    login();
                 }
             });
         }
+    }
+
+    private void login() {
+        Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+        intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
+        intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
+        startActivity(intent);
     }
 
     private Serializable selectEvent(EventBase event) {
@@ -164,7 +172,6 @@ public class LoginActivity extends BaseActivity
     @Deprecated
     private void selectEvent(Serializable eventId) {
         mSelectedEventId = eventId;
-        preferences.setEventID(eventId);
         ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
     }
 
@@ -182,7 +189,6 @@ public class LoginActivity extends BaseActivity
     private void selectCourseArea(CourseArea courseArea) {
         courseName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        preferences.setCourseUUID(mSelectedCourseAreaUUID);
         loginListViews.getAreaContainer().setHeaderText(courseName);
     }
 
@@ -267,6 +273,14 @@ public class LoginActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         ExLog.i(this, TAG, "Starting Login: " + AppUtils.getBuildInfo(this));
 
+        dataManager = DataManager.create(this);
+        DataStore dataStore = dataManager.getDataStore();
+        mSelectedCourseAreaUUID = dataStore.getCourseUUID();
+        mSelectedEventId = dataStore.getEventUUID();
+        if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
+            login();
+        }
+
         ThemeHelper.setTheme(this);
 
         setContentView(R.layout.login_view);
@@ -278,18 +292,6 @@ public class LoginActivity extends BaseActivity
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
 
-        // default the selected course area from preferences
-        UUID courseUUID = preferences.getCourseUUID();
-        if (courseUUID != new UUID(0, 0)) {
-            mSelectedCourseAreaUUID = courseUUID;
-        }
-
-        // default the selected id from the preferences
-        Serializable eventId = preferences.getEventID();
-        if (eventId != null) {
-            selectEvent(eventId);
-        }
-
         new AutoUpdater(this).notifyAfterUpdate();
 
         //setup the backdrop click listener
@@ -297,7 +299,6 @@ public class LoginActivity extends BaseActivity
         if (backdrop != null) {
             backdrop.setOnClickListener(new BackdropClick());
         }
-
     }
 
     @Override
@@ -349,16 +350,6 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
             }
         }
-
-        if (preferences.isSetUp() && mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
-            // FIXME: this should call selectEvent
-//            addCourseAreaListFragment(mSelectedEventId);
-
-            Intent message = new Intent(this, RacingActivity.class);
-            message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-            message.putExtra(AppConstants.EventIdTag, mSelectedEventId);
-            fadeActivity(message);
-        }
     }
 
     @Override
@@ -377,7 +368,6 @@ public class LoginActivity extends BaseActivity
     private void setupDataManager() {
         showProgressDialog();
 
-        final ReadonlyDataManager dataManager = DataManager.create(this);
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
             .getDeviceIdentifier());
 

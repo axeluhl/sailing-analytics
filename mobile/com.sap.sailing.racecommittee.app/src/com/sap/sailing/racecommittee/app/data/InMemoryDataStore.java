@@ -1,20 +1,13 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.sap.sailing.android.shared.util.CollectionUtils;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.*;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+
+import java.io.Serializable;
+import java.util.*;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
@@ -25,17 +18,23 @@ public enum InMemoryDataStore implements DataStore {
     private CourseBase courseData;
     private SharedDomainFactory domainFactory;
 
-    private InMemoryDataStore() {
+    private Serializable eventUUID;
+    private UUID courseUUID;
+
+    InMemoryDataStore() {
         reset();
     }
 
     @Override
     public void reset() {
-        this.eventsById = new HashMap<>();
-        this.managedRaceById = new HashMap<>();
-        this.marksById = new HashMap<>();
-        this.courseData = null;
-        this.domainFactory = new SharedDomainFactoryImpl();
+        eventsById = new HashMap<>();
+        managedRaceById = new HashMap<>();
+        marksById = new HashMap<>();
+        courseData = null;
+        domainFactory = new SharedDomainFactoryImpl();
+
+        eventUUID = null;
+        courseUUID = null;
     }
 
     @Override
@@ -194,5 +193,25 @@ public enum InMemoryDataStore implements DataStore {
             }
         }
         return null;
+    }
+
+    @Override
+    public Serializable getEventUUID() {
+        return eventUUID;
+    }
+
+    @Override
+    public void setEventUUID(Serializable uuid) {
+        eventUUID = uuid;
+    }
+
+    @Override
+    public UUID getCourseUUID() {
+        return courseUUID;
+    }
+
+    @Override
+    public void setCourseUUID(UUID uuid) {
+        courseUUID = uuid;
     }
 }
