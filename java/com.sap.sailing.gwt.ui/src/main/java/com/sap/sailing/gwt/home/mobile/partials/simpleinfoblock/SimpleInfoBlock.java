@@ -8,8 +8,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -37,7 +35,6 @@ public class SimpleInfoBlock extends Composite {
         actionUi.getStyle().setDisplay(Display.BLOCK);
         actionUi.setInnerText(label);
         actionUi.setHref(UriUtils.fromString(url));
-        DOM.sinkEvents(actionUi, Event.ONCLICK);
     }
 
 }

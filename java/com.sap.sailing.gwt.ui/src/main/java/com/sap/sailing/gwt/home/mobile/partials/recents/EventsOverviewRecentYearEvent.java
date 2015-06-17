@@ -54,7 +54,7 @@ public class EventsOverviewRecentYearEvent extends Composite {
         eventLinkUi.setTitle(event.getDisplayName());
         eventLinkUi.setHref(placeNavigation.getTargetUrl());
         placeNavigation.configureAnchorElement(eventLinkUi);
-        LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
+        LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getListStateMarker());
         venueUi.setInnerText(event.getLocationOrVenue());
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(),
                 event.getEndDate()));

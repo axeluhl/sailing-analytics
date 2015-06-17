@@ -20,9 +20,7 @@
 						class="{local_res.css.eventsoverviewupcoming_content_event_link_body_name}" />
 					<div
 						class="{local_res.css.eventsoverviewupcoming_content_event_link_body_location}">
-						<span ui:field='venueName' />
-						,
-						<span ui:field='eventStartDate' />
+						<span ui:field='venueName' />, <span ui:field='eventStartDate' />
 					</div>
 				</div>
 				<div
