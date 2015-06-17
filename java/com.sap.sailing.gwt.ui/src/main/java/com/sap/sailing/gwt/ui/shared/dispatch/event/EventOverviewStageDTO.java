@@ -7,8 +7,6 @@ public class EventOverviewStageDTO implements DTO {
     private String eventMessage;
     private EventOverviewStageContentDTO stageContent;
 
-    // TODO news
-
     @SuppressWarnings("unused")
     private EventOverviewStageDTO() {
     }

@@ -73,7 +73,7 @@ public class SeriesHeader extends Composite {
     }
 
     private void initFields() {
-        String logoUrl = series.getLogoImageURL() != null ? series.getLogoImageURL() : SeriesHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
+        String logoUrl = series.getLogoImage() != null ? series.getLogoImage().getSourceRef() : SeriesHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
         eventLogo.setTitle(series.getDisplayName());
         eventName.setInnerText(series.getDisplayName());

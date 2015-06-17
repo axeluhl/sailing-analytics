@@ -207,7 +207,10 @@ import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
@@ -538,7 +541,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        loadStoredEvents();
+        
+        final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
@@ -546,6 +550,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
+
+        // Stores all events which run through a data migration 
+        // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
+        for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
+            if (eventAndRequireStoreFlag.getB()) {
+                mongoObjectFactory.storeEvent(eventAndRequireStoreFlag.getA());
+            }
+        }
     }
 
     @Override
@@ -632,13 +644,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
-    private void loadStoredEvents() {
-        for (Event event : domainObjectFactory.loadAllEvents()) {
+    private Iterable<Pair<Event, Boolean>> loadStoredEvents() {
+        Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = domainObjectFactory.loadAllEvents(); 
+        for (Pair<Event, Boolean> eventAndFlag : loadedEventsWithRequireStoreFlag) {
+            Event event = eventAndFlag.getA();
             if (event.getId() != null)
                 eventsById.put(event.getId(), event);
         }
+        return loadedEventsWithRequireStoreFlag;
     }
-
+    
     private void loadLinksFromEventsToLeaderboardGroups() {
         domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */this, /* leaderboardGroupResolver */
                 this);
@@ -2572,13 +2587,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
-                id, /* imageURLs */Collections.<URL> emptyList(),
-                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(), /* logoImageURL */
-                null, /* officialWebsiteURL */null);
-        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, /* imageURLs */
-        id, Collections.<URL> emptyList(),
-        /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(),
-        /* logoimageURL */null, /* officialWebsiteURLAsString */null));
+                id, /* officialWebsiteURL */null, /* images */Collections.<ImageDescriptor> emptyList(),
+                /* videos */Collections.<VideoDescriptor> emptyList());
+        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, id,
+                /* officialWebsiteURLAsString */null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
         return result;
     }
 
@@ -2589,16 +2601,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, Iterable<URL> imageURLs,
-            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Iterable<ImageDescriptor> images,
+            Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
-        result.setImageURLs(imageURLs);
-        result.setVideoURLs(videoURLs);
-        result.setSponsorImageURLs(sponsorImageURLs);
-        result.setLogoImageURL(logoImageURL);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setImages(images);
+        result.setVideos(videos);
         return result;
     }
 
@@ -2614,7 +2624,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
-            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2637,10 +2647,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setLogoImageURL(logoImageURL);
-        event.setImageURLs(imageURLs);
-        event.setVideoURLs(videoURLs);
-        event.setSponsorImageURLs(sponsorImageURLs);
+        event.setImages(images);
+        event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         // to keep changes minimial
         mongoObjectFactory.storeEvent(event);

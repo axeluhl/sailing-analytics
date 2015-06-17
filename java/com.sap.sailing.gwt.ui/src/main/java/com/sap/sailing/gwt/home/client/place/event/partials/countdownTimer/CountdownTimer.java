@@ -1,24 +1,24 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.countdown;
+package com.sap.sailing.gwt.home.client.place.event.partials.countdownTimer;
 
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.Countdown;
 import com.sap.sailing.gwt.home.client.shared.Countdown.CountdownListener;
 import com.sap.sailing.gwt.home.client.shared.Countdown.RemainingTime;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CountdownTicker extends Composite {
+public class CountdownTimer extends Widget {
 
     private static CountdownTickerUiBinder uiBinder = GWT.create(CountdownTickerUiBinder.class);
 
-    interface CountdownTickerUiBinder extends UiBinder<Widget, CountdownTicker> {
+    interface CountdownTickerUiBinder extends UiBinder<Element, CountdownTimer> {
     }
     
     @UiField DivElement majorContainer, majorValue, majorUnit;
@@ -26,8 +26,9 @@ public class CountdownTicker extends Composite {
 
     private final Countdown countdown;
 
-    public CountdownTicker(Date startTime) {
-        initWidget(uiBinder.createAndBindUi(this));
+    public CountdownTimer(Date startTime) {
+        CountdownTimerResources.INSTANCE.css().ensureInjected();
+        setElement(uiBinder.createAndBindUi(this));
         this.countdown = new Countdown(new MillisecondsTimePoint(startTime), new CountdownTickerListener());
     }
 
