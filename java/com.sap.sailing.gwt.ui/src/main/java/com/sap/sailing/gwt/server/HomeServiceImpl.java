@@ -325,19 +325,20 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         String eventName = event.getName();
         MediaDTO media = new MediaDTO();
         for(ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
-            SailingImageDTO entry = new SailingImageDTO(eventRef, image.getURL().toString(), image.getCreatedAtDate().asDate());
-            entry.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
-            entry.setTitle(image.getTitle() != null ? image.getTitle(): eventName);
-            entry.setSubtitle(image.getSubtitle());
-            entry.setTags(image.getTags());
-            entry.setCopyright(image.getCopyright());
-            media.addPhoto(entry);
+            SailingImageDTO imageDTO = new SailingImageDTO(eventRef, image.getURL().toString(), image.getCreatedAtDate().asDate());
+            imageDTO.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+            imageDTO.setTitle(image.getTitle() != null ? image.getTitle(): eventName);
+            imageDTO.setSubtitle(image.getSubtitle());
+            imageDTO.setTags(image.getTags());
+            imageDTO.setCopyright(image.getCopyright());
+            imageDTO.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
+            media.addPhoto(imageDTO);
         }
-        for(VideoDescriptor url : event.getVideos()) {
-            MimeType type = url.getMimeType();
+        for(VideoDescriptor video : event.getVideos()) {
+            MimeType type = video.getMimeType();
             if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
-                SailingVideoDTO candidate = new SailingVideoDTO(eventRef, url.getURL().toString(), type, null);
-                media.addVideo(candidate);
+                SailingVideoDTO videoDTO = HomeServiceUtil.toSailingVideoDTO(eventRef, video);
+                media.addVideo(videoDTO);
             }
         }
         return media;

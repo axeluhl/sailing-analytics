@@ -16,8 +16,12 @@
 		.vjs-big-play-button:BEFORE {
 			content: "" !important;
 		}
+		.caption {
+			padding: 5px;
+		} 
 	</ui:style>
 	<div>
 		<video class="video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
+		<div class="{style.caption}" ui:field="captionUi" />
 	</div>
 </ui:UiBinder>
