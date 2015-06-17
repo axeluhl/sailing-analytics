@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 
 public class Quickfinder extends Widget implements HasSelectionHandlers<String> {
     private static QuickfinderUiBinder uiBinder = GWT.create(QuickfinderUiBinder.class);
@@ -29,14 +30,14 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
     @UiField
     protected SelectElement selectUi;
     
-    public Quickfinder() {
+    public Quickfinder(final Presenter presenter) {
         setElement(uiBinder.createAndBindUi(this));
         Event.sinkEvents(selectUi, Event.ONCHANGE);
         Event.setEventListener(selectUi, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
                 OptionElement oe = event.getEventTarget().cast();
-                SelectionEvent.fire(Quickfinder.this, oe.getValue());
+                presenter.getRegattaLeaderboardNavigation(oe.getValue()).goToPlace();
             }
         });        
     }

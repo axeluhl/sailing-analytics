@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -37,7 +36,7 @@ public class EventViewImpl extends Composite implements EventView {
     }
 
     @UiField(provided = true) EventHeader eventHeaderUi;
-    @UiField Quickfinder quickFinderUi;
+    @UiField(provided = true) Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock sailorInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
     @UiField RegattaStatus regattaStatusUi;
@@ -51,6 +50,7 @@ public class EventViewImpl extends Composite implements EventView {
     public EventViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
+        quickFinderUi = new Quickfinder(currentPresenter);
         overviewStageUi = new EventOverviewStage(currentPresenter);
         updatesBoxUi = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
@@ -77,11 +77,6 @@ public class EventViewImpl extends Composite implements EventView {
         }
     }
     
-    @Override
-    public HasSelectionHandlers<String> getQuickfinder() {
-        return quickFinderUi;
-    }
-
     @Override
     public void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images) {
         impressionsUi.getElement().getStyle().setDisplay(Display.BLOCK);
