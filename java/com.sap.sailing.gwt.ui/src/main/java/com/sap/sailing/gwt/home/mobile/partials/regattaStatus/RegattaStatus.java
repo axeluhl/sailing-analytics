@@ -11,6 +11,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
+import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RegattasAndLiveRacesDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -24,8 +26,10 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
 
     @UiField MobileSection itemContainerUi;
     @UiField DivElement regattaContainerUi;
+    private final Presenter presenter;
     
-    public RegattaStatus() {
+    public RegattaStatus(Presenter presenter) {
+        this.presenter = presenter;
         RegattaStatusResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -39,7 +43,8 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     }
     
     public void addRegatta(RegattaMetadataDTO regatta, Set<LiveRaceDTO> liveRaces) {
-        RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta);
+        PlaceNavigation<?> placeNavigation = presenter.getRegattaLeaderboardNavigation(regatta.getId());
+        RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, placeNavigation);
         itemContainerUi.addContent(regattaWidget);
         for (LiveRaceDTO race : liveRaces) {
             regattaWidget.addRace(race);

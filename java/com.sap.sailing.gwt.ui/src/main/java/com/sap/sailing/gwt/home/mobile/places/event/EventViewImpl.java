@@ -39,7 +39,7 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField(provided = true) Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock sailorInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
-    @UiField RegattaStatus regattaStatusUi;
+    @UiField(provided = true) RegattaStatus regattaStatusUi;
     @UiField Impressions impressionsUi;
     @UiField StatisticsBox statisticsBoxUi;
     @UiField(provided = true) UpdatesBox updatesBoxUi;
@@ -52,6 +52,7 @@ public class EventViewImpl extends Composite implements EventView {
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
         quickFinderUi = new Quickfinder(currentPresenter);
         overviewStageUi = new EventOverviewStage(currentPresenter);
+        regattaStatusUi = new RegattaStatus(currentPresenter);
         updatesBoxUi = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
