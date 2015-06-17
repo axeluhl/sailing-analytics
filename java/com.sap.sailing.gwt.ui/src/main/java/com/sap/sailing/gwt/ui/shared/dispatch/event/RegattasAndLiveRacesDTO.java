@@ -35,4 +35,8 @@ public class RegattasAndLiveRacesDTO implements DTO {
     public boolean hasRegattasWithRaces() {
         return !regattasWithRaces.isEmpty();
     }
+
+    public boolean hasRegattasWithoutRaces() {
+        return !regattasWithoutRaces.isEmpty();
+    }
 }

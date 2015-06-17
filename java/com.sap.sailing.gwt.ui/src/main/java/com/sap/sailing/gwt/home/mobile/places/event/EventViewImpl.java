@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,7 +70,7 @@ public class EventViewImpl extends Composite implements EventView {
     }
     
     @Override
-    public void setQuickFinderValues(List<RegattaMetadataDTO> regattaMetadatas) {
+    public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
         quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
         for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
             quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), regattaMetadata.getId());

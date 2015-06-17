@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -16,7 +17,7 @@ public interface EventView {
     
     void setSailorInfos(String description, String buttonLabel, String url);
     
-    void setQuickFinderValues(List<RegattaMetadataDTO> regattaMetadatas);
+    void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas);
 
     void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images);
 
