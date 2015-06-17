@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
-import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -42,17 +41,19 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
                 .goToPlace();
     }
 
+
     @Override
     public PlaceNavigation<?> getNewsEntryPlaceNavigation(NewsEntryDTO entry) {
-        MobilePlacesNavigator navigator = clientFactory.getNavigator();
         if (entry instanceof LeaderboardNewsEntryDTO) {
             final LeaderboardNewsEntryDTO dto = (LeaderboardNewsEntryDTO) entry;
-            final String regattaId = dto.getLeaderboardName();
-            navigator.getEventNavigation(new RegattaLeaderboardPlace(new EventContext().withRegattaId(regattaId)),
-                    null, false);
-
+            return getRegattaLeaderboardNavigation(dto.getLeaderboardName());
         }
         return null;
+    }
+
+    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
     }
 
     @Override
