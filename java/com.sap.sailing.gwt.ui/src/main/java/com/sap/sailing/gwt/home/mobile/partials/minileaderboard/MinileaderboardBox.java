@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.Refreshab
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMobileLeaderbordAction.SimplifiedLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.SimplifiedLeaderboardItemDTO;
 
 public class MinileaderboardBox extends Composite implements RefreshableWidget<ListResult<SimplifiedLeaderboardItemDTO>> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -34,7 +34,6 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<L
     }
 
     public void setData(final List<SimplifiedLeaderboardItemDTO> data) {
-
         itemContainerUi.clearContent();
         for (SimplifiedLeaderboardItemDTO item : data) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item));
