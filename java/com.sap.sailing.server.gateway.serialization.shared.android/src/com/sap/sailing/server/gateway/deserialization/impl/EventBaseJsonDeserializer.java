@@ -159,7 +159,8 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             String subtitle = (String) imageJson.get(EventBaseJsonSerializer.FIELD_SUBTITLE);
             String copyright = (String) imageJson.get(EventBaseJsonSerializer.FIELD_COPYRIGHT);
             String localeRaw = (String)  imageJson.get(EventBaseJsonSerializer.FIELD_LOCALE);
-            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
+            // TODO use Locale.forLanguageTag(localeRaw) -> only possible with Android API Level 21
+            Locale locale = localeRaw != null ? new Locale(localeRaw) : null; 
             Number imageWidth = (Number) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_WIDTH_IN_PX);
             Number imageHeight = (Number) imageJson.get(EventBaseJsonSerializer.FIELD_IMAGE_HEIGHT_IN_PX);
             Number createdAtDateInMs = (Number) imageJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);
@@ -192,7 +193,8 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             String subtitle = (String) videoJson.get(EventBaseJsonSerializer.FIELD_SUBTITLE);
             String copyright = (String) videoJson.get(EventBaseJsonSerializer.FIELD_COPYRIGHT);
             String localeRaw = (String)  videoJson.get(EventBaseJsonSerializer.FIELD_LOCALE);
-            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
+            // TODO use Locale.forLanguageTag(localeRaw) -> only possible with Android API Level 21
+            Locale locale = localeRaw != null ? new Locale(localeRaw) : null; 
             Object mimeTypeRaw = videoJson.get(EventBaseJsonSerializer.FIELD_MIMETYPE);
             MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
             Number createdAtDateInMs = (Number) videoJson.get(EventBaseJsonSerializer.FIELD_CREATEDATDATE);

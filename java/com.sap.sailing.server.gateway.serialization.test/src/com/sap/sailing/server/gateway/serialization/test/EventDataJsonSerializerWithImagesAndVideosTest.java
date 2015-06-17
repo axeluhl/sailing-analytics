@@ -59,7 +59,8 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
     
     private final URL videoURL;
     private final URL videoThumbnailURL;
-    private final Locale locale2 = Locale.CANADA_FRENCH;
+    private final Locale localeFr = Locale.FRENCH;
+    private final Locale localeFrCa = Locale.CANADA_FRENCH;
     private final Integer videoLengthInSeconds = 2  * 60 * 60 * 1000; // 2h 
     private final MimeType mimeType = MimeType.mp4;
     private final String copyright2 = "copyright by Don";
@@ -92,7 +93,7 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         
         VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, mimeType, createdAt);
         video1.setCopyright(copyright2);
-        video1.setLocale(locale2);
+        video1.setLocale(localeFrCa);
         video1.setTitle(videoTitle);
         video1.setSubtitle(videoSubtitle);
         video1.setThumbnailURL(videoThumbnailURL);
@@ -180,12 +181,12 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         assertEquals(videoURL, video1.getURL());
         assertEquals(mimeType, video1.getMimeType());
         assertEquals(copyright2, video1.getCopyright());
-        assertEquals(locale2, video1.getLocale());
+        // Only the language part of the locale is being used
+        assertEquals(localeFr, video1.getLocale());
         assertEquals(videoTitle, video1.getTitle());
         assertEquals(videoSubtitle, video1.getSubtitle());
         assertEquals(videoThumbnailURL, video1.getThumbnailURL());
         assertEquals(videoLengthInSeconds, video1.getLengthInSeconds());
         assertEquals(4, Util.size(video1.getTags()));
     }
-
 }
