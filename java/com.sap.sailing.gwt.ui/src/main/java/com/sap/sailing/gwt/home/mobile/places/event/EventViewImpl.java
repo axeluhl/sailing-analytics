@@ -59,7 +59,7 @@ public class EventViewImpl extends Composite implements EventView {
         UUID eventId = currentPresenter.getCtx().getEventDTO() .getId();
         refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
         refreshManager.add(regattaStatusUi, new GetRegattasAndLiveRacesForEventAction(eventId));
-        refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId(), 3));
+        refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId(), 2));
         refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
         impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
     }
