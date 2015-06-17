@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.partials.regattaStatus;
 
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -13,7 +14,6 @@ import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RegattasAndLiveRacesDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
-import com.sap.sse.common.Util.Pair;
 
 public class RegattaStatus extends Composite implements RefreshableWidget<RegattasAndLiveRacesDTO> {
 
@@ -33,8 +33,8 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     @Override
     public void setData(RegattasAndLiveRacesDTO data, long nextUpdate, int updateNo) {
         itemContainerUi.clearContent();
-        for (Pair<RegattaMetadataDTO, Set<LiveRaceDTO>> pair : data.getRegattasWithRaces()) {
-            addRegatta(pair.getA(), pair.getB());
+        for (Entry<RegattaMetadataDTO, Set<LiveRaceDTO>> pair : data.getRegattasWithRaces().entrySet()) {
+            addRegatta(pair.getKey(), pair.getValue());
         }
     }
     
