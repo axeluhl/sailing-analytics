@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
@@ -8,6 +9,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
@@ -31,6 +33,8 @@ public interface EventView {
         PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName);
 
         String getRaceViewerURL(String regattaName, String trackedRaceName);
+
+        void gotoNewsPlace(Collection<NewsEntryDTO> newsEntries);
     }
 
     void setNavigator(MobilePlacesNavigator navigator);
