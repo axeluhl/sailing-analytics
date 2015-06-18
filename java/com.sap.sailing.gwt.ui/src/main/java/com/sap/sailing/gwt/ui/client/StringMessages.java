@@ -1329,4 +1329,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String billionValue(double value);
     String noResults();
     String pointsValue(double value);
+    String openLeaderboard();
 }
