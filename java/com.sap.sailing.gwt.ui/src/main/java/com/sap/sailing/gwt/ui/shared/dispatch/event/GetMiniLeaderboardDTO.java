@@ -4,16 +4,12 @@ import java.util.ArrayList;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
-public class GetMiniLeaderbordDTO implements DTO {
+public class GetMiniLeaderboardDTO implements DTO {
     private ArrayList<MiniLeaderboardItemDTO> items = new ArrayList<MiniLeaderboardItemDTO>();
     private String leaderboardDetailsURL;
+    private String scoreCorrectionText;
 
-    @SuppressWarnings("unused")
-    private GetMiniLeaderbordDTO() {
-    }
-
-    public GetMiniLeaderbordDTO(String leaderboardDetailsURL) {
-        this.leaderboardDetailsURL = leaderboardDetailsURL;
+    public GetMiniLeaderboardDTO() {
     }
 
     public ArrayList<MiniLeaderboardItemDTO> getItems() {
@@ -23,8 +19,20 @@ public class GetMiniLeaderbordDTO implements DTO {
     public void addItem(MiniLeaderboardItemDTO item) {
         items.add(item);
     }
+    
+    public void setLeaderboardDetailsURL(String leaderboardDetailsURL) {
+        this.leaderboardDetailsURL = leaderboardDetailsURL;
+    }
 
     public String getLeaderboardDetailsURL() {
         return leaderboardDetailsURL;
+    }
+
+    public String getScoreCorrectionText() {
+        return scoreCorrectionText;
+    }
+
+    public void setScoreCorrectionText(String scoreCorrectionText) {
+        this.scoreCorrectionText = scoreCorrectionText;
     }
 }

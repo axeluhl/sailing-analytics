@@ -17,10 +17,9 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.server.RacingEventService;
 
-public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLeaderbordDTO>> {
+public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLeaderboardDTO>> {
     private static final Logger logger = Logger.getLogger(GetMiniLeaderbordAction.class.getName());
-    // TODO fmittag: correct URL -> replace where leaderboard name should be filled with {0}
-    private static final String urlTemplate = "Leaderboard.html?name={0}&displayName=29er&legDetail=AVERAGE_SPEED_OVER_GROUND_IN_KNOTS&legDetail=DISTANCE_TRAVELED&legDetail=RANK_GAIN&raceDetail=DISPLAY_LEGS&overallDetail=REGATTA_RANK&maneuverDetail=TACK&maneuverDetail=JIBE&maneuverDetail=PENALTY_CIRCLE&showAddedScores=false";
+    private static final String urlTemplate = "Leaderboard.html?name={0}&displayName={1}&embedded=true&hideToolbar=true&refreshIntervalMillis=3000&legDetail=AVERAGE_SPEED_OVER_GROUND_IN_KNOTS&legDetail=DISTANCE_TRAVELED&legDetail=RANK_GAIN&overallDetail=REGATTA_RANK&maneuverDetail=TACK&maneuverDetail=JIBE&maneuverDetail=PENALTY_CIRCLE&lastN=1&showAddedScores=false";
 
     @SuppressWarnings("unused")
     private UUID eventId;
@@ -37,17 +36,19 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
 
     @Override
     @GwtIncompatible
-    public ResultWithTTL<GetMiniLeaderbordDTO> execute(DispatchContext context) {
+    public ResultWithTTL<GetMiniLeaderboardDTO> execute(DispatchContext context) {
         RacingEventService service = context.getRacingEventService();
         final Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
-        GetMiniLeaderbordDTO result = new GetMiniLeaderbordDTO(MessageFormat.format(urlTemplate, leaderboardName));
+        GetMiniLeaderboardDTO result = new GetMiniLeaderboardDTO();
         if (leaderboard == null) {
             return new ResultWithTTL<>(1000 * 60 * 5, result);
         }
+        result.setLeaderboardDetailsURL(MessageFormat.format(urlTemplate, leaderboardName, leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName()));
         
         try {
             LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
                     service, service.getBaseDomainFactory(), false);
+            result.setScoreCorrectionText(leaderboardDTO.getComment());
             int rank = 0;
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;

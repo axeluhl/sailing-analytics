@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.partials.minileaderboard;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -17,10 +15,10 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.Refreshab
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
 
-public class MinileaderboardBox extends Composite implements RefreshableWidget<GetMiniLeaderbordDTO> {
+public class MinileaderboardBox extends Composite implements RefreshableWidget<GetMiniLeaderboardDTO> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Widget, MinileaderboardBox> {
@@ -36,8 +34,8 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     }
 
     @Override
-    public void setData(final GetMiniLeaderbordDTO data, long nextUpdate, int updateNo) {
-        setData(data.getItems());
+    public void setData(final GetMiniLeaderboardDTO data, long nextUpdate, int updateNo) {
+        setData(data);
         headerUi.setInfoText(StringMessages.INSTANCE.details());
         headerUi.setClickAction(new Command() {
             @Override
@@ -47,15 +45,20 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         });
     }
 
-    public void setData(final List<MiniLeaderboardItemDTO> data) {
+    public void setData(final GetMiniLeaderboardDTO data) {
         itemContainerUi.clearContent();
         
-        if(data.isEmpty()) {
+        if(data.getItems().isEmpty()) {
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
         
-        for (MiniLeaderboardItemDTO item : data) {
+        if(data.getScoreCorrectionText() != null) {
+            itemContainerUi.addContent(new Label(data.getScoreCorrectionText()));
+        }
+        
+        
+        for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item));
         }
     }
