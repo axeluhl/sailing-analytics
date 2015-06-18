@@ -52,7 +52,8 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
             
             result.setScoreCorrectionText(leaderboardDTO.getComment());
             result.setLastScoreUpdate(leaderboardDTO.getTimePointOfLastCorrectionsValidity());
-            result.setLive(HomeServiceUtil.hasLiveRace(leaderboardDTO));
+            boolean isLive = HomeServiceUtil.hasLiveRace(leaderboardDTO);
+            result.setLive(isLive);
             
             int rank = 0;
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
@@ -60,7 +61,8 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 result.addItem(new MiniLeaderboardItemDTO(competitor, rank, row.totalPoints));
             }
-            return new ResultWithTTL<>(1000 * 60 * 5, result);
+            int ttl = isLive ? 1000 * 60 : 1000 * 60 * 2;
+            return new ResultWithTTL<>(ttl, result);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error loading leaderboard", e);
             throw new DispatchException("Error loading leaderboard");
