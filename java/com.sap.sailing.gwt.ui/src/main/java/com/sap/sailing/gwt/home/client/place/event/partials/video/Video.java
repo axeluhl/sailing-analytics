@@ -27,8 +27,7 @@ public class Video extends Composite {
     }
 
     public void setData(EventOverviewVideoStageDTO data) {
-        this.source = data.getSource();
-        videoPlayer.setSource(source, data.getMimeType());
+        videoPlayer.setVideo(data.getVideo());
     }
     
     public boolean shouldBeReplaced(String newSource) {

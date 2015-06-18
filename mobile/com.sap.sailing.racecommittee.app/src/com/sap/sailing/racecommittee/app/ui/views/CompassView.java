@@ -1,12 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.RotateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -14,66 +19,118 @@ import com.sap.sailing.racecommittee.app.R;
 
 public class CompassView extends RelativeLayout {
 
-    public interface CompassDirectionListener {
-        public void onDirectionChanged(float degree);
-    }
-
     private CompassDirectionListener changeListener = null;
     private RotateAnimation rotation = null;
     private ImageView needleView = null;
+    private BackAwareEditText degreeView = null;
     private float currentDegrees = 0.0f;
-    private Float deferredToDegress = null;
-
-    private float getNeedlePivotX() { return needleView.getWidth() / 2; }
-    private float getNeedlePivotY() { return needleView.getHeight() / 2; }
+    private Float deferredToDegrees = null;
 
     public CompassView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        inflate(context);
+        inflate();
     }
 
     public CompassView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        inflate(context);
+        inflate();
     }
 
     public CompassView(Context context) {
         super(context);
-        inflate(context);
+        inflate();
     }
 
-    private void inflate(Context context) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    private float getNeedlePivotX() {
+        return needleView.getMeasuredWidth() / 2;
+    }
+
+    private float getNeedlePivotY() {
+        return needleView.getMeasuredHeight() / 2;
+    }
+
+    private void inflate() {
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.compass_view, this);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
         needleView = (ImageView) findViewById(R.id.compass_view_needle);
+        degreeView = (BackAwareEditText) findViewById(R.id.compass_view_degree);
+        degreeView.setSelectAllOnFocus(true);
+        degreeView.setInputDownPressedListener(new BackAwareEditText.InputDownPressedListener() {
+            @Override
+            public void onImeBack(BackAwareEditText editText) {
+                float degree = currentDegrees > 0 ? currentDegrees : currentDegrees + 360;
+                degreeView.clearFocus();
+                degreeView.setText(String.format("%.0f°", degree));
+            }
+        });
+        degreeView.setOnKeyListener(new OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    String value = degreeView.getText().toString();
+                    value = value.replace("°", "");
+                    value = value.replace(" ", "");
+                    float degree = Float.valueOf(value);
+                    if (degree >= 0 && degree <= 360) {
+                        setDirection(degree);
+                    } else {
+                        generateAndShowAlert();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void generateAndShowAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(getContext().getString(R.string.error_wrong_degree_value_title));
+        builder.setMessage(getContext().getString(R.string.error_wrong_degree_value_message));
+        builder.setPositiveButton(android.R.string.ok, null);
+        AlertDialog dialog = builder.create();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                degreeView.requestFocus();
+                degreeView.selectAll();
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(degreeView, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+        dialog.show();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        float rotateX = (-1) * (event.getY() - needleView.getY() - getNeedlePivotY());
+        float rotateY = event.getX() - needleView.getX() - getNeedlePivotX();
 
-        float rotateX = event.getX() - needleView.getX() - getNeedlePivotX();
-        float rotateY = (-1) * (event.getY() - needleView.getY() - getNeedlePivotY());
-
-        float toDegrees = (float) Math.toDegrees(Math.atan2(rotateX, rotateY));
+        float toDegrees = (float) Math.toDegrees(Math.atan2(rotateY, rotateX));
         cancelAndStartAnimation(toDegrees, 0);
-        
+
         return true;
     }
-    
+
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
         doDeferredRotation();
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    public float getDirection() {
+        return currentDegrees;
     }
 
     public void setDirection(float toDegrees) {
         if (isNeedleReady()) {
-            deferredToDegress = toDegrees;
+            deferredToDegrees = toDegrees;
         } else {
             cancelAndStartAnimation(toDegrees, 500);
         }
@@ -90,6 +147,13 @@ public class CompassView extends RelativeLayout {
         rotation.setFillAfter(true);
         rotation.setAnimationListener(new NeedleRotationListener(toDegrees));
         needleView.startAnimation(rotation);
+        if (degreeView != null) {
+            float degree = toDegrees;
+            if (degree < 0) {
+                degree += 360;
+            }
+            degreeView.setText(String.format("%.0f°", degree));
+        }
     }
 
     public void setDirectionListener(CompassDirectionListener listener) {
@@ -102,26 +166,31 @@ public class CompassView extends RelativeLayout {
             if (Math.abs(degree) == 360) {
                 degree = 0;
             }
+            degreeView.clearFocus();
             changeListener.onDirectionChanged(degree);
         }
     }
-    
+
     private void doDeferredRotation() {
-        if (deferredToDegress != null) {
-            float toDegrees = deferredToDegress;
-            deferredToDegress = null;
+        if (deferredToDegrees != null) {
+            float toDegrees = deferredToDegrees;
+            deferredToDegrees = null;
             setDirection(toDegrees);
         }
     }
-    
+
     private boolean isNeedleReady() {
         return getNeedlePivotX() == 0.0;
     }
 
+    public interface CompassDirectionListener {
+        void onDirectionChanged(float degree);
+    }
+
     private class NeedleRotationListener implements AnimationListener {
-        
+
         private float targetDegrees;
-        
+
         public NeedleRotationListener(float toDegrees) {
             this.targetDegrees = toDegrees;
         }
@@ -141,7 +210,5 @@ public class CompassView extends RelativeLayout {
         @Override
         public void onAnimationStart(Animation animation) {
         }
-
     }
-
 }

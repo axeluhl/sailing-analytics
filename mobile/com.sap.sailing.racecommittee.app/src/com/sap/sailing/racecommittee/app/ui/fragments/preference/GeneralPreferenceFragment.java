@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -13,14 +12,19 @@ import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
 
@@ -39,6 +43,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupConnection();
         setupPolling();
         setupGeneral();
+        setupDeveloperOptions();
     }
     protected void setupGeneral() {
         setupLanguageButton();
@@ -46,6 +51,19 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
+        bindPreferenceToListEntry(findPreference(R.string.preference_theme_key), getString(R.string.preference_theme_default));
+        addOnPreferenceChangeListener(findPreference(R.string.preference_theme_key), new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),R.style.AppTheme_AlertDialog);
+                builder.setTitle(getString(R.string.theme_changed_title));
+                builder.setMessage(R.string.theme_changed_message);
+                builder.setPositiveButton(getString(android.R.string.ok),null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                return true;
+            }
+        });
     }
 
     private void setupPolling() {
@@ -55,13 +73,22 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToInteger(intervalPreference);
     }
 
+    protected void setupDeveloperOptions() {
+        PreferenceScreen screen = getPreferenceScreen();
+        PreferenceCategory category = (PreferenceCategory)findPreference(getString(R.string.preference_developer_key));
+        if (!BuildConfig.DEBUG) {
+            if (screen != null && category != null) {
+                screen.removePreference(category);
+            }
+        }
+    }
 
     protected void setupConnection() {
         setupIdentifierBox();
         setupServerUrlBox();
         setupSyncQRCodeButton();
         setupForceUpdateButton();
-        
+
         bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
     }
 
@@ -88,8 +115,15 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Toast.makeText(getActivity(), 
-                        getString(R.string.settings_please_reload), Toast.LENGTH_LONG).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                builder.setTitle(getString(R.string.url_refresh_title));
+                builder.setMessage(getString(R.string.url_refresh_message));
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.create().show();
+                // reset all data because it's all dependent on the server url
+                DataManager dataManager = (DataManager) DataManager.create(getActivity());
+                dataManager.resetAll();
+                // TODO force a reload of the app now!
                 return true;
             }
         });
@@ -177,13 +211,18 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                     
                     new AutoUpdater(getActivity()).checkForUpdate(false);
                 } else {
-                    Toast.makeText(getActivity(), "Error scanning QRCode (malformed URL)", Toast.LENGTH_LONG).show();
+                    String toastText = getString(R.string.error_scanning_qr_malformed);
+                    Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                 }
             } catch (IllegalArgumentException e) {
-                Toast.makeText(getActivity(), "Error scanning QRCode (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
+                String toastText = getString(R.string.error_scanning_qr);
+                toastText = String.format(toastText, e.getMessage());
+                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
             }
         } else {
-            Toast.makeText(getActivity(), "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
+            String toastText = getString(R.string.error_scanning_qr);
+            toastText = String.format(toastText, "" + resultCode);
+            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
         }
     }
 

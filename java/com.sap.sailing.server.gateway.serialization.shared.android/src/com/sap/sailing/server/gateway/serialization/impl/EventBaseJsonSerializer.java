@@ -96,7 +96,8 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     private void addImage(ImageDescriptor image, JSONArray imagesJson) {
         JSONObject imageJson = new JSONObject();
         imageJson.put(FIELD_SOURCE_URL, image.getURL().toString());
-        imageJson.put(FIELD_LOCALE, image.getLocale() != null ? image.getLocale().toLanguageTag() : null);
+        // TODO use toLanguageTag() when deserializer can use Locale.forLanguageTag()
+        imageJson.put(FIELD_LOCALE, image.getLocale() != null ? image.getLocale().getLanguage() : null);
         imageJson.put(FIELD_TITLE, image.getTitle());
         imageJson.put(FIELD_SUBTITLE, image.getSubtitle());
         imageJson.put(FIELD_MIMETYPE, image.getMimeType().name());
@@ -115,7 +116,8 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     private void addVideo(VideoDescriptor video, JSONArray videosJson) {
         JSONObject videoJson = new JSONObject();
         videoJson.put(FIELD_SOURCE_URL, video.getURL().toString());
-        videoJson.put(FIELD_LOCALE, video.getLocale() != null ? video.getLocale().toLanguageTag() : null);
+        // TODO use toLanguageTag() when deserializer can use Locale.forLanguageTag()
+        videoJson.put(FIELD_LOCALE, video.getLocale() != null ? video.getLocale().getLanguage() : null);
         videoJson.put(FIELD_VIDEO_THUMBNAIL_URL, video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
         videoJson.put(FIELD_TITLE, video.getTitle());
         videoJson.put(FIELD_SUBTITLE, video.getSubtitle());

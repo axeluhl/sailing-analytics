@@ -53,13 +53,13 @@ public class MarkImageDescriptor {
             isSameType = type == typeToCheck;
         }
         if(colorToCheck != null && color != null) {
-            isSameColor = color.equalsIgnoreCase(colorToCheck) ? true : false;
+            isSameColor = color.equalsIgnoreCase(colorToCheck);
         }
         if(shapeToCheck != null && shape != null) {
-            isSameShape = shape.equalsIgnoreCase(shapeToCheck) ? true : false;
+            isSameShape = shape.equalsIgnoreCase(shapeToCheck);
         }
         if(patternToCheck != null && pattern != null) {
-            isSamePattern = pattern.equalsIgnoreCase(patternToCheck) ? true : false;
+            isSamePattern = pattern.equalsIgnoreCase(patternToCheck);
         }   
 
         if(isSameType && isSameColor) {
@@ -74,5 +74,4 @@ public class MarkImageDescriptor {
 
         return result;    
     }
-
 }

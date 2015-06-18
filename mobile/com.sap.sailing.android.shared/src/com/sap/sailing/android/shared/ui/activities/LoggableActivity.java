@@ -1,12 +1,12 @@
 package com.sap.sailing.android.shared.ui.activities;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-import android.support.v7.app.ActionBarActivity;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
-public abstract class LoggableActivity extends ActionBarActivity {
+public abstract class LoggableActivity extends AppCompatActivity {
     private static final String TAG = LoggableActivity.class.getName();
 
     private LifecycleLogger lifeLogger;

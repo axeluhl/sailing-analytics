@@ -2972,12 +2972,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
-        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
-            // no more new data can be expected; stop mark passing calculator if one is being used
-            if (isUsingMarkPassingCalculator()) {
-                markPassingCalculator.stop();
-            }
-        }
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {

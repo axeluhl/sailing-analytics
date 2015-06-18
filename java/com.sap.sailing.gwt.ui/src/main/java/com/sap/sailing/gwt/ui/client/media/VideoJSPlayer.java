@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SourceElement;
@@ -12,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoJSPlayer extends Widget {
     
@@ -21,6 +23,7 @@ public class VideoJSPlayer extends Widget {
     }
 
     @UiField VideoElement videoElement;
+    @UiField DivElement captionUi;
     
     private final String elementId;
     private JavaScriptObject player;
@@ -40,7 +43,9 @@ public class VideoJSPlayer extends Widget {
         videoElement.setAttribute("controls", "");
     }
 
-    public void setSource(String source, MimeType mimeType) {
+    public void setVideo(VideoDTO video) {
+        String source = video.getSourceRef();
+        MimeType mimeType = video.getMimeType();
         if (mimeType == null || mimeType.mediaType != MediaType.video) {
             return;
         }
@@ -58,6 +63,7 @@ public class VideoJSPlayer extends Widget {
             se.setType(type);
             videoElement.appendChild(se);
         }
+        captionUi.setInnerText(video.getTitle());
     }
     
     public VideoElement getVideoElement() {

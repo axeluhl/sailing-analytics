@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="6dp" >
+    android:padding="6dp">
 
     <TimePicker
         android:id="@+id/protest_time_time_time_picker"

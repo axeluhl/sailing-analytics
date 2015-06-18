@@ -11,7 +11,7 @@
 ## Scenarios
 ### Standard FritzBox / ... network
 If you have a given network setup (without own router) I would suggest the following solution:
-The server has three network adapters to connect to multiple networks at the same time (e.g. Cube and Lounge,..). You could simply integrate the server into all networks and set up a static ip on each of the networks for the server. then simply configure the sailing instance to listen on all interfaces and that should be it. You could additionally use the replica's DNS server to also overwrite `event.sapsailing.com` URL's but therefore you need to tell each router of the network to server the replica as DNS server to other LAN clients.
+The server has three network adapters to connect to multiple networks at the same time (e.g. Cube and Lounge,..). You could simply integrate the server into all networks and set up a static ip on each of the networks for the server. then simply configure the sailing instance to listen on all interfaces and that should be it. You could additionally use the replica's DNS server to also overwrite `event.sapsailing.com` URL's but therefore you need to tell each router of the network to serve the replica as DNS server to other LAN clients.
 
 ### Single WAN uplink (Meraki)
 - Create 3 VLAN's with (VLAN-ID 10=>ADMIN,20=>CUBE,30=>GUEST) 

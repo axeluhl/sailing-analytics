@@ -70,9 +70,14 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.INTERNATIONAL_14.getDisplayName(), imageResources.International14Icon());
         boatClassIconsMap.put(BoatClassMasterdata.DYAS.getDisplayName(), imageResources.DyasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPEN_BIC.getDisplayName(), imageResources.OpenBicIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.RS800.getDisplayName(), imageResources.RS800Icon());
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {
-        return boatClassIconsMap.get(displayName);
+        ImageResource imageResource = boatClassIconsMap.get(displayName);
+        if(imageResource == null) {
+            imageResource = BoatClassImageResources.INSTANCE.genericBoatClass(); 
+        }
+        return imageResource;
     }
 }
