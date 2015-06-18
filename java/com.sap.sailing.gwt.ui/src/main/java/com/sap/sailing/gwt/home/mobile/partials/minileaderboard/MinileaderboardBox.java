@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class MinileaderboardBox extends Composite implements RefreshableWidget<GetMiniLeaderboardDTO> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -54,6 +55,8 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
+        
+        headerUi.setLabelType(data.isLive() ? LabelType.LIVE : LabelType.NONE);
         
         if(data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
             itemContainerUi.addContent(getScoreInformation(data));
