@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
@@ -18,8 +19,6 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.io.Serializable;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 

@@ -1,17 +1,26 @@
 package com.sap.sailing.racecommittee.app.data;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import com.sap.sailing.android.shared.util.CollectionUtils;
-import com.sap.sailing.domain.base.*;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sse.common.Util.Triple;
-
-import java.io.Serializable;
-import java.util.*;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;

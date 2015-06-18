@@ -1,17 +1,17 @@
 package com.sap.sailing.racecommittee.app.services.polling;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import android.content.Context;
 import android.os.AsyncTask;
+
 import com.sap.sailing.android.shared.data.http.HttpJsonGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sse.common.Util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.URL;
-
-public class RacePositionsPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
+public class RacePositionsPollerTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
 
     private final PollingResultListener listener;
     private final Context context;
@@ -23,8 +23,8 @@ public class RacePositionsPollerTask extends AsyncTask<Util.Pair<Serializable, U
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Void doInBackground(Util.Pair<Serializable, URL>... queries) {
-        for (Util.Pair<Serializable, URL> query : queries) {
+    protected Void doInBackground(Util.Pair<String, URL>... queries) {
+        for (Util.Pair<String, URL> query : queries) {
             if (isCancelled()) {
                 return null;
             }
