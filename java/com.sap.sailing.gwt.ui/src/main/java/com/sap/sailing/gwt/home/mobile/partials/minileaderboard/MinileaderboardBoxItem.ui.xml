@@ -7,44 +7,37 @@
 		.minileaderboard_item {
 			margin: 0 !important;
 			position: relative;
-			padding: 1em;
+			padding: 1em 0.75em;
 	  		font-size: 0.866666666666667em;
 		}
-		.minileaderboard_outerBox_item_rank {
-			width: 1.5em;
-			display: inline-block;
-	     	vertical-align: middle;
-	     	text-align: right;
-		}
-		.minileaderboard_outerBox_item_flag {
-			display: inline-block;
-	     	vertical-align: middle;
-	     	width: 2.5em;
-		}
-		.minileaderboard_outerBox_item_name {
-			padding: 0 10px;
-			display: inline-block;
-	     	vertical-align: middle;
-		}
-		.minileaderboard_outerBox_item_points {
-	     	position: absolute;
+		.minileaderboard_outerBox_item_rank, .minileaderboard_outerBox_item_flag, .minileaderboard_outerBox_item_points {
+			position: absolute;
 			top: 50%;
-			right: 1em;
 			-webkit-transform: translateY(-50%);
 			   -moz-transform: translateY(-50%);
 			    -ms-transform: translateY(-50%);
 			        transform: translateY(-50%);
+		}
+		.minileaderboard_outerBox_item_rank {
+			width: 1.5em;
+	     	text-align: right;
+	     	font-weight: bold;
+		}
+		.minileaderboard_outerBox_item_flag {
+	     	margin-left: 1.75em;
+		}
+		.minileaderboard_outerBox_item_name {
+	     	margin-left: 5em;
+	     	margin-right: 4em;
+		}
+		.minileaderboard_outerBox_item_points {
+			right: 1em;
 			width: 3.1em;
 			text-align: center;
 			padding: 0.230769230769231em 0;
 			background: #ebebeb;
 			border: 1px solid #dedede;
 			border-radius: 0.384615384615385em;
-		}
-		.minileaderboard_outerBox_item_country {
-			margin-left: 3em;
-			padding: 0 10px;
-	     	vertical-align: middle;
 		}
 	</ui:style>
 
