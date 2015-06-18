@@ -1499,8 +1499,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public boolean takesWindFix(Wind wind) {
         boolean result = false;
-        TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
-        TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getStartOfRace(), getStartOfTracking());
+        final TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
+        final TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getEndOfRace(), getEndOfTracking());
         if (earliestStartTimePoint != null) {
             TimePoint earliestStartTimePointMinusExtra = earliestStartTimePoint.minus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS);
             if (latestEndTimePoint != null) {
