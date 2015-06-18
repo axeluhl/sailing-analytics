@@ -19,6 +19,8 @@ public class EventHeader extends Composite {
     }
     
     @UiField SpanElement eventNameUi;
+    @UiField
+    SpanElement eventRegattaUi;
     @UiField DivElement eventStateUi;
     @UiField DivElement eventLogoUi;
     @UiField DivElement eventDateUi;
@@ -36,11 +38,10 @@ public class EventHeader extends Composite {
     }
 
     private void setUiFieldValues(EventViewDTO event, String optionalRegattaDisplayName) {
-        String title = event.getDisplayName();
+        eventNameUi.setInnerText(event.getDisplayName());
         if(optionalRegattaDisplayName != null && !optionalRegattaDisplayName.isEmpty()) {
-            title += " - " + optionalRegattaDisplayName;
+            eventRegattaUi.setInnerText(optionalRegattaDisplayName);
         }
-        eventNameUi.setInnerText(title);
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         LogoUtil.setEventLogo(eventLogoUi, event);
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
