@@ -39,10 +39,22 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     public void addItem(String iconUrl, String name, Object payload) {
         itemContainerUi.addContent(new StatisticsBoxItem(iconUrl, name, payload));
     }
+    
+    public void addItemWithCompactFormat(String iconUrl, String name, Double payload) {
+        if (payload != null && payload != 0) {
+            addItem(iconUrl, name, compactNumber(payload));
+        }
+    }
+    
+    public void addItemWithCompactFormat(String iconUrl, String name, long payload) {
+        if (payload != 0) {
+            addItem(iconUrl, name, compactNumber(payload));
+        }
+    }
 
     public void addItemIfNotNull(String iconUrl, String name, Object payload) {
         if (payload != null || payload instanceof Number && ((Number) payload).longValue() != 0) {
-            itemContainerUi.addContent(new StatisticsBoxItem(iconUrl, name, payload));
+            addItem(iconUrl, name, payload);
         }
     }
 
@@ -53,11 +65,11 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
         addItem(StatisticsBox.ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
         addItem(StatisticsBox.ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
         addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
-        addItemIfNotNull(StatisticsBox.ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
-        addItemIfNotNull(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
- + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
-        addItemIfNotNull(StatisticsBox.ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
-        addItemIfNotNull(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), compactNumber(statistics.getTotalDistanceTraveled()));
+        addItemWithCompactFormat(StatisticsBox.ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
+        addItemWithCompactFormat(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
+                + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
+        addItemWithCompactFormat(StatisticsBox.ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
+        addItemWithCompactFormat(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled());
     }
     
     private String compactNumber(double value) {
@@ -68,8 +80,18 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
             return "" + Double.valueOf(value).intValue();
         }
         if(value < 100_000_000.0) {
-            return "" + StringMessages.INSTANCE.millionValue(value / 1_000_000.0);
+            return StringMessages.INSTANCE.millionValue(simpleFormat.format(value / 1_000_000.0));
         }
-        return "" + StringMessages.INSTANCE.billionValue(value / 1_000_000_000.0);
+        return StringMessages.INSTANCE.billionValue(simpleFormat.format(value / 1_000_000_000.0));
+    }
+    
+    private String compactNumber(long value) {
+        if(value < 100_000l) {
+            return "" + value;
+        }
+        if(value < 100_000_000l) {
+            return StringMessages.INSTANCE.millionValue("" + (value / 1_000_000l));
+        }
+        return StringMessages.INSTANCE.billionValue("" + (value / 1_000_000_000l));
     }
 }
