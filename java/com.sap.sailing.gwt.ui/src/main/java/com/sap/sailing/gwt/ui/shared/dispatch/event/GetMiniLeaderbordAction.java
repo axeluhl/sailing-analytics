@@ -18,28 +18,28 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.server.RacingEventService;
 
-public class GetMobileLeaderbordAction implements Action<ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>>> {
-    private static final Logger logger = Logger.getLogger(GetMobileLeaderbordAction.class.getName());
+public class GetMiniLeaderbordAction implements Action<ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>> {
+    private static final Logger logger = Logger.getLogger(GetMiniLeaderbordAction.class.getName());
     
     @SuppressWarnings("unused")
     private UUID eventId;
     private String leaderboardName;
 
     @SuppressWarnings("unused")
-    private GetMobileLeaderbordAction() {
+    private GetMiniLeaderbordAction() {
     }
 
-    public GetMobileLeaderbordAction(UUID eventId, String leaderboardName) {
+    public GetMiniLeaderbordAction(UUID eventId, String leaderboardName) {
         this.eventId = eventId;
         this.leaderboardName = leaderboardName;
     }
 
     @Override
     @GwtIncompatible
-    public ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>> execute(DispatchContext context) {
+    public ResultWithTTL<ListResult<MiniLeaderboardItemDTO>> execute(DispatchContext context) {
         final Leaderboard leaderboard = context.getRacingEventService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            return new ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<>(Collections.<SimplifiedLeaderboardItemDTO>emptyList()));
+            return new ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<>(Collections.<MiniLeaderboardItemDTO>emptyList()));
         }
         RacingEventService service = context.getRacingEventService();
         try {
@@ -47,13 +47,13 @@ public class GetMobileLeaderbordAction implements Action<ResultWithTTL<ListResul
                     Collections.<String>emptyList(), true, service, service.getBaseDomainFactory(), false);
             
             int rank = 0;
-            LinkedList<SimplifiedLeaderboardItemDTO> items = new LinkedList<SimplifiedLeaderboardItemDTO>();
+            LinkedList<MiniLeaderboardItemDTO> items = new LinkedList<MiniLeaderboardItemDTO>();
             for(CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
-                items.add(new SimplifiedLeaderboardItemDTO(competitor, rank, row.totalPoints));
+                items.add(new MiniLeaderboardItemDTO(competitor, rank, row.totalPoints));
             }
-            return new ResultWithTTL<ListResult<SimplifiedLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<SimplifiedLeaderboardItemDTO>(items));
+            return new ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<MiniLeaderboardItemDTO>(items));
             
             // TODO: mini leaderboard magic
             

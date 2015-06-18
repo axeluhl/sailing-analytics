@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMobileLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 
 public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboardView {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -30,10 +30,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventContext ctx = presenter.getCtx();
         UUID uuid = UUID.fromString(ctx.getEventId());
-        refreshManager.add(minileaderboardUi, new GetMobileLeaderbordAction(uuid, presenter.getCtx().getRegattaId()));
+        refreshManager.add(minileaderboardUi, new GetMiniLeaderbordAction(uuid, presenter.getCtx().getRegattaId()));
 
     }
-
-    
-
 }

@@ -6,7 +6,7 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.SimplifiedLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
 
 public class MinileaderboardBoxItem extends Widget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -25,7 +25,7 @@ public class MinileaderboardBoxItem extends Widget {
     @UiField
     ImageElement competitorFlagUi;
     
-    public MinileaderboardBoxItem(SimplifiedLeaderboardItemDTO entry) {
+    public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry) {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
         competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getCountryName()));

@@ -11,9 +11,9 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.Refreshab
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.SimplifiedLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
 
-public class MinileaderboardBox extends Composite implements RefreshableWidget<ListResult<SimplifiedLeaderboardItemDTO>> {
+public class MinileaderboardBox extends Composite implements RefreshableWidget<ListResult<MiniLeaderboardItemDTO>> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Widget, MinileaderboardBox> {
@@ -29,13 +29,13 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<L
     }
 
     @Override
-    public void setData(final ListResult<SimplifiedLeaderboardItemDTO> data, long nextUpdate, int updateNo) {
+    public void setData(final ListResult<MiniLeaderboardItemDTO> data, long nextUpdate, int updateNo) {
         setData(data.getValues());
     }
 
-    public void setData(final List<SimplifiedLeaderboardItemDTO> data) {
+    public void setData(final List<MiniLeaderboardItemDTO> data) {
         itemContainerUi.clearContent();
-        for (SimplifiedLeaderboardItemDTO item : data) {
+        for (MiniLeaderboardItemDTO item : data) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item));
         }
     }

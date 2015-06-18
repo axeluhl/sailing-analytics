@@ -3,16 +3,16 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
-public class SimplifiedLeaderboardItemDTO implements DTO {
+public class MiniLeaderboardItemDTO implements DTO {
     private CompetitorDTO competitor;
     private int rank;
     private Double points;
     
     @SuppressWarnings("unused")
-    private SimplifiedLeaderboardItemDTO() {
+    private MiniLeaderboardItemDTO() {
     }
     
-    public SimplifiedLeaderboardItemDTO(CompetitorDTO competitor, int rank, Double points) {
+    public MiniLeaderboardItemDTO(CompetitorDTO competitor, int rank, Double points) {
         super();
         this.competitor = competitor;
         this.rank = rank;
