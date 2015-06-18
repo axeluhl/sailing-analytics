@@ -32,7 +32,7 @@ public class MinileaderboardBoxItem extends Widget {
     public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry) {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
-        competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getCountryName()));
+        competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getSailID()));
         competitorRankUi.setInnerText(String.valueOf(entry.getRank()) + ".");
         competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getPoints()));
         

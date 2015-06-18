@@ -9,8 +9,9 @@
 			position: relative;
 			padding: 1em 0.75em;
 	  		font-size: 0.866666666666667em;
+	  		min-height: 4.5em;
 		}
-		.minileaderboard_outerBox_item_rank, .minileaderboard_outerBox_item_flag, .minileaderboard_outerBox_item_points {
+		.minileaderboard_item_rank, .minileaderboard_item_flag, .minileaderboard_item_name, .minileaderboard_item_points {
 			position: absolute;
 			top: 50%;
 			-webkit-transform: translateY(-50%);
@@ -18,21 +19,24 @@
 			    -ms-transform: translateY(-50%);
 			        transform: translateY(-50%);
 		}
-		.minileaderboard_outerBox_item_rank {
+		.minileaderboard_item_rank {
 			width: 1.5em;
 	     	text-align: right;
 	     	font-weight: bold;
 		}
-		.minileaderboard_outerBox_item_flag {
-	     	margin-left: 1.75em;
+		.minileaderboard_item_flag {
+			width: 2.25em;
+	     	margin-left: 2em;
 		}
-		.minileaderboard_outerBox_item_name {
-	     	margin-left: 5em;
-	     	margin-right: 4em;
+		.minileaderboard_item_name {
+	     	margin: 0 5em;
 		}
-		.minileaderboard_outerBox_item_points {
+		.minileaderboard_item_name > span:FIRST-CHILD{
+	     	font-weight: bold;
+		}
+		.minileaderboard_item_points {
 			right: 1em;
-			width: 3.1em;
+			width: 3.75em;
 			text-align: center;
 			padding: 0.230769230769231em 0;
 			background: #ebebeb;
@@ -42,13 +46,13 @@
 	</ui:style>
 
 	<div class="{res.mediaCss.grid} {style.minileaderboard_item}">
-		<div class="{style.minileaderboard_outerBox_item_rank}" ui:field="competitorRankUi" />
-		<img class="{style.minileaderboard_outerBox_item_flag}" ui:field="competitorFlagUi" />
-		<div class="{style.minileaderboard_outerBox_item_name}"> 
-			<div ui:field="competitorNameUi" />
-			<div ui:field="competitorCountryNameUi" />
+		<div class="{style.minileaderboard_item_rank}" ui:field="competitorRankUi" />
+		<img class="{style.minileaderboard_item_flag}" ui:field="competitorFlagUi" />
+		<div class="{style.minileaderboard_item_name}"> 
+			<span ui:field="competitorCountryNameUi" />
+			<span ui:field="competitorNameUi" />
 		</div>			
-		<div class="{style.minileaderboard_outerBox_item_points}" ui:field="competitorPointsUi" />
+		<div class="{style.minileaderboard_item_points}" ui:field="competitorPointsUi" />
 	</div>
 
 </ui:UiBinder>
