@@ -48,7 +48,10 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
         try {
             LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
                     service, service.getBaseDomainFactory(), false);
+            
             result.setScoreCorrectionText(leaderboardDTO.getComment());
+            result.setLastScoreUpdate(leaderboardDTO.getTimePointOfLastCorrectionsValidity());
+            
             int rank = 0;
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;
