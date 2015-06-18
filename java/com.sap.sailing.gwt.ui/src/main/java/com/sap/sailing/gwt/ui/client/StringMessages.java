@@ -1325,7 +1325,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String fastestSailor();
     String numberWindFixes();
     String sailedMiles();
-    String millionValue(String value);
-    String billionValue(String value);
+    String millionValue(double value);
+    String billionValue(double value);
     String noResults();
 }

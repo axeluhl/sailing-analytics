@@ -80,9 +80,9 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
             return "" + Double.valueOf(value).intValue();
         }
         if(value < 100_000_000.0) {
-            return StringMessages.INSTANCE.millionValue(simpleFormat.format(value / 1_000_000.0));
+            return StringMessages.INSTANCE.millionValue(value / 1_000_000.0);
         }
-        return StringMessages.INSTANCE.billionValue(simpleFormat.format(value / 1_000_000_000.0));
+        return StringMessages.INSTANCE.billionValue(value / 1_000_000_000.0);
     }
     
     private String compactNumber(long value) {
@@ -90,8 +90,8 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
             return "" + value;
         }
         if(value < 100_000_000l) {
-            return StringMessages.INSTANCE.millionValue("" + (value / 1_000_000.0));
+            return StringMessages.INSTANCE.millionValue(value / 1_000_000.0);
         }
-        return StringMessages.INSTANCE.billionValue("" + (value / 1_000_000_000.0));
+        return StringMessages.INSTANCE.billionValue(value / 1_000_000_000.0);
     }
 }
