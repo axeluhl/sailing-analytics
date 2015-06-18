@@ -97,13 +97,14 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         fleets.add(fleet);
         series = new SeriesImpl(SERIES, false, fleets, new HashSet<String>(), null);
         Set<Series> seriesSet = new HashSet<>();
-        if (linkSeriesToRegatta)
+        if (linkSeriesToRegatta) {
             seriesSet.add(series);
+        }
         BoatClass boatClass = new BoatClassImpl(BOATCLASS, true);
         raceColumnInSeries = series.addRaceColumn(RACECOLUMN_SERIES, null);
         ScoringScheme scoringScheme = new LowPoint();
         regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
-        /* startDate */null, /* endDate */null, seriesSet, false, scoringScheme, UUID.randomUUID(), null,
+                /* startDate */null, /* endDate */null, seriesSet, false, scoringScheme, UUID.randomUUID(), null,
                 OneDesignRankingMetric::new);
     }
 }
