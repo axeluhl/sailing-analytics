@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
-import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivity;
+import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.notmobile.NotMobileActivityProxy;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
@@ -44,7 +44,7 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof RegattaLeaderboardPlace) {
             lastVisitedPlace = place;
             RegattaLeaderboardPlace eventPlace = (RegattaLeaderboardPlace) place;
-            return new MiniLeaderboardActivity(eventPlace, clientFactory);
+            return new MiniLeaderboardActivityProxy(eventPlace, clientFactory);
         } else if (place instanceof LatestNewsPlace) {
             lastVisitedPlace = place;
             LatestNewsPlace eventPlace = (LatestNewsPlace) place;
