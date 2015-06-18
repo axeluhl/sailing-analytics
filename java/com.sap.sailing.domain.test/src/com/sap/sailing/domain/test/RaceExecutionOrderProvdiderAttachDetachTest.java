@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -94,6 +95,86 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
                 /* speedInKnots */18, new DegreeBearingImpl(185)));
         assertTrue(previousTrackedRace.takesWindFix(wind)); // previous race has tracking still open and takes the fix
         assertTrue(trackedRace.takesWindFix(wind)); // tracked race also needs to take the fix as it falls into the regular tracking interval
+    }
+
+    @Test
+    public void testWindInExtendedLeadIntervalWithPreviousRaceStillTracking() {
+        final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
+        final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
+        final TimePoint startOfSecondRace = startOfFirstRace.plus(Duration.ONE_HOUR);
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace);
+        previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
+        previousTrackedRace.setEndOfTrackingReceived(endOfFirstRace); // a very short race...
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace);
+        flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
+                new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
+        flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
+        flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"2", false);
+        // the wind fix is after the grace period of the first race's end, so won't be accepted by it, but within the extended
+        // time range before the second race, so shall be accepted by it.
+        Wind wind = new WindImpl(new DegreePosition(12, 13),
+                endOfFirstRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(Duration.ONE_MINUTE), // fix is after the grace period
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
+        assertFalse(previousTrackedRace.takesWindFix(wind)); // previous race has tracking closed one second after it started and doesn't accept the fix
+        assertTrue(trackedRace.takesWindFix(wind)); // tracked race also needs to take the fix as it falls into the regular tracking interval
+    }
+
+    @Test
+    public void testWindInExtendedLeadIntervalWithNoPreviousRace() {
+        final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
+        final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
+        final TimePoint startOfSecondRace = startOfFirstRace.plus(Duration.ONE_HOUR);
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace);
+        flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
+                new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
+        flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD, false);
+        // the wind fix is within the extended time range before the second race, and there is no previous race, so shall be accepted by it
+        Wind wind = new WindImpl(new DegreePosition(12, 13),
+                endOfFirstRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(Duration.ONE_MINUTE), // fix is after the grace period
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
+        assertTrue(trackedRace.takesWindFix(wind));
+    }
+
+    @Test
+    public void testWindInExtendedLeadIntervalWithPreviousRaceLongAgo() {
+        final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
+        final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
+        final TimePoint startOfSecondRace = startOfFirstRace.plus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.times(2));
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace);
+        previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
+        previousTrackedRace.setEndOfTrackingReceived(endOfFirstRace); // a very short race...
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace);
+        flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
+                new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
+        flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
+        flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"2", false);
+        // the wind fix is outside the extended time range before the second race, and the previous race doesn't accept it; shall not be accepted
+        Wind wind = new WindImpl(new DegreePosition(12, 13),
+                endOfFirstRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(Duration.ONE_MINUTE), // fix is after the grace period
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
+        assertFalse(previousTrackedRace.takesWindFix(wind)); // fix is after first race's end plus grace period
+        assertFalse(trackedRace.takesWindFix(wind));
+    }
+
+    @Test
+    public void testWindInExtendedLeadIntervalButStillRecordedByPreviousRace() {
+        final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
+        final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
+        final TimePoint startOfSecondRace = startOfFirstRace.plus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.divide(2));
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace);
+        previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
+        previousTrackedRace.setEndOfTrackingReceived(endOfFirstRace); // a very short race...
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace);
+        flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
+                new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
+        flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
+        flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"2", false);
+        // the wind fix is inside the extended time range before the second race, but the previous race still accepts it; shall not be accepted
+        Wind wind = new WindImpl(new DegreePosition(12, 13),
+                startOfFirstRace.plus(Duration.ONE_SECOND), // fix is recorded by previous race
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
+        assertTrue(previousTrackedRace.takesWindFix(wind)); // fix is after first race's end plus grace period
+        assertFalse(trackedRace.takesWindFix(wind));
     }
 
     @Test
