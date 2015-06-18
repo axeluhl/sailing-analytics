@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.home.mobile.partials.minileaderboard;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.FontStyle;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
@@ -48,12 +51,20 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         itemContainerUi.clearContent();
         
         if(data.isEmpty()) {
-            itemContainerUi.addContent(new Label(StringMessages.INSTANCE.noResults()));
+            itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
         
         for (MiniLeaderboardItemDTO item : data) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item));
         }
+    }
+    
+    private Widget getNoResultsInfoWidget() {
+        Label label = new Label(StringMessages.INSTANCE.noResults());
+        label.getElement().getStyle().setPadding(1, Unit.EM);
+        label.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        label.getElement().getStyle().setFontStyle(FontStyle.ITALIC);
+        return label;
     }
 }
