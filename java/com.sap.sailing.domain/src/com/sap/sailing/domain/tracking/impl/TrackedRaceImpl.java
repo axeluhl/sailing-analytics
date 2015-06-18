@@ -1506,18 +1506,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (latestEndTimePoint != null) {
                 TimePoint latestEndTimePointPlusExtra = latestEndTimePoint.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
                 if (Util.isTimePointInRangeOfTimePointsAandB(wind.getTimePoint(), /* a */earliestStartTimePointMinusExtra, /* b */latestEndTimePointPlusExtra)) {
-                    result = takesNoPreviousRaceWind(wind);
+                    result = noPreviousRaceTakesWind(wind);
                 }
-            } else if (latestEndTimePoint == null){
-                if (wind.getTimePoint().after(earliestStartTimePointMinusExtra)){
-                    result = takesNoPreviousRaceWind(wind);
+            } else if (latestEndTimePoint == null) {
+                if (wind.getTimePoint().after(earliestStartTimePointMinusExtra)) {
+                    result = noPreviousRaceTakesWind(wind);
                 }
-            } 
+            }
         }
         return result;
     }
     
-    private boolean takesNoPreviousRaceWind(Wind wind) {
+    private boolean noPreviousRaceTakesWind(Wind wind) {
         boolean result = false;
         Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
         if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr -> tr.takesWindFix(wind) == true).findAny().isPresent()) {
