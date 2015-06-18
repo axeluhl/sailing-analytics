@@ -88,8 +88,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
-        flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD, false);
-        flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD, false);
+        flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
+        flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"2", false);
         Wind wind = new WindImpl(new DegreePosition(12, 13), startOfSecondRace.plus(Duration.ONE_MINUTE), new KnotSpeedWithBearingImpl(
                 /* speedInKnots */18, new DegreeBearingImpl(185)));
         assertTrue(previousTrackedRace.takesWindFix(wind)); // previous race has tracking still open and takes the fix
