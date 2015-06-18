@@ -16,9 +16,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO.RaceLiveState;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
-import com.sap.sailing.domain.common.dto.RaceDTO.RaceLiveState;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class EventRegattaRacesRace extends Composite {
@@ -28,9 +28,9 @@ public class EventRegattaRacesRace extends Composite {
     }
 
     @UiField DivElement fleetColor;
-    @UiField SpanElement raceName;
+    @UiField DivElement raceName;
     @UiField SpanElement raceName2;
-    @UiField SpanElement raceTime;
+    @UiField DivElement raceTime;
     @UiField SpanElement averageRaceWind;
     
     @UiField DivElement raceNotTrackedDiv;
@@ -59,7 +59,7 @@ public class EventRegattaRacesRace extends Composite {
     @UiField SpanElement currentLegNo;
     @UiField SpanElement totalLegsCount;
     
-    private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
+    private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, HH:mm");
     
     private final RaceDTO race;
 
