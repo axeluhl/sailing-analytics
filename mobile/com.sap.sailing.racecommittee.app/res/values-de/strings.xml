@@ -239,7 +239,7 @@
     <string name="toggle_group_race_mode">Gruppenrennen?</string>
     <string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
     <string name="toggle_group_race_mode_on">Gruppenrennen</string>
-    <string name="the_selected_time_is_before_the_ace_start_">Die ausgewählte Zeit liegt vor dem Rennbeginn.</string>
+    <string name="the_selected_time_is_before_the_race_start_">Die ausgewählte Zeit liegt vor dem Rennbeginn.</string>
     <string name="welcome">WILLKOMMEN</string>
     <string name="races_all">ALLE RENNEN</string>
     <string name="races_current">AKTUELLE RENNEN</string>
