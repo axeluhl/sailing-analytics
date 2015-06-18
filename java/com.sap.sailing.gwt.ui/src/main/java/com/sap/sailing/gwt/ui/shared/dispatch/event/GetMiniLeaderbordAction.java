@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
@@ -51,6 +52,7 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
             
             result.setScoreCorrectionText(leaderboardDTO.getComment());
             result.setLastScoreUpdate(leaderboardDTO.getTimePointOfLastCorrectionsValidity());
+            result.setLive(HomeServiceUtil.hasLiveRace(leaderboardDTO));
             
             int rank = 0;
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
