@@ -31,13 +31,15 @@
 }
 .statisticsbox_content_item_icon {
   width: 1.538461538461539em;
+  position: absolute;
   display: inline-block;
   vertical-align: middle;
 }
 .statisticsbox_content_item_name {
   display: inline-block;
   vertical-align: middle;
-  margin-left: 1.538461538461539em;
+  margin-left: 3em;
+  margin-right: 3.5em;
 }
 .statisticsbox_content_item_value {
   position: absolute;
