@@ -90,8 +90,8 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
             return "" + value;
         }
         if(value < 100_000_000l) {
-            return StringMessages.INSTANCE.millionValue("" + (value / 1_000_000l));
+            return StringMessages.INSTANCE.millionValue("" + (value / 1_000_000.0));
         }
-        return StringMessages.INSTANCE.billionValue("" + (value / 1_000_000_000l));
+        return StringMessages.INSTANCE.billionValue("" + (value / 1_000_000_000.0));
     }
 }
