@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardView.Presenter;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -52,12 +53,19 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
 
     private void initUi(AcceptsOneWidget panel, EventBus eventBus) {
         final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this);
+        view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
         panel.setWidget(view.asWidget());
     }
 
     @Override
     public EventContext getCtx() {
         return place.getCtx();
+    }
+
+    @Override
+    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
     }
 
     @Override

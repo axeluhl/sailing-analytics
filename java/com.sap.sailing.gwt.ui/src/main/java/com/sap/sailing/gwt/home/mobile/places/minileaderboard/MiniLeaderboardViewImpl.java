@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.minileaderboard;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -16,12 +17,15 @@ import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
+import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboardView {
     private static final boolean showLeaderboard = true;
-    
+    private static final StringMessages MSG = StringMessages.INSTANCE;
+   
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Widget, MiniLeaderboardViewImpl> {
@@ -34,6 +38,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
     @UiField DivElement buttonsUi;
     @UiField AnchorElement leaderboardLinkUi;
     @UiField AnchorElement dektopLinkUi;
+    @UiField(provided = true) Quickfinder quickFinderUi;
 
     public MiniLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
@@ -41,7 +46,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         RegattaMetadataDTO regatta = presenter.getCtx().getRegatta();
         // TODO check if regatta is valid!
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regatta.getDisplayName());
-        
+        quickFinderUi = new Quickfinder(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
         
         if(showLeaderboard) {
@@ -65,6 +70,13 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
             minileaderboardUi.removeFromParent();
         }
         
+    }
+    @Override
+    public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
+        quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
+        for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
+            quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), regattaMetadata.getId());
+        }
     }
     
     private String constructExternalLeaderboardURL(String leaderboardId, String leaderboardDisplayName) {
