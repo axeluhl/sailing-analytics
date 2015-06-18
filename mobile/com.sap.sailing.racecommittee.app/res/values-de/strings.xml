@@ -101,7 +101,6 @@
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>
-    <string name="options_menu_reload">Neuladen</string>
     <string name="options_menu_settings">Einstellungen</string>
     <string name="results_capturing_title">Ergebnislisten</string>
     <string name="results_capturing_view_subject">E-Mail Betreff</string>
