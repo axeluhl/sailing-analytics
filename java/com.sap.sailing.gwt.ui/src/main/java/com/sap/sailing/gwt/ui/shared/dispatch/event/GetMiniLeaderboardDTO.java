@@ -10,6 +10,7 @@ public class GetMiniLeaderboardDTO implements DTO {
     private String leaderboardDetailsURL;
     private String scoreCorrectionText;
     private Date lastScoreUpdate;
+    private boolean live;
 
     public GetMiniLeaderboardDTO() {
     }
@@ -44,5 +45,13 @@ public class GetMiniLeaderboardDTO implements DTO {
 
     public void setLastScoreUpdate(Date lastScoreUpdate) {
         this.lastScoreUpdate = lastScoreUpdate;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
     }
 }
