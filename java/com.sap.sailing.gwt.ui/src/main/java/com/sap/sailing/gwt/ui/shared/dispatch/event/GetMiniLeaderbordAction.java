@@ -20,7 +20,7 @@ import com.sap.sailing.server.RacingEventService;
 
 public class GetMiniLeaderbordAction implements Action<ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>> {
     private static final Logger logger = Logger.getLogger(GetMiniLeaderbordAction.class.getName());
-    
+
     @SuppressWarnings("unused")
     private UUID eventId;
     private String leaderboardName;
@@ -39,24 +39,22 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<ListResult<
     public ResultWithTTL<ListResult<MiniLeaderboardItemDTO>> execute(DispatchContext context) {
         final Leaderboard leaderboard = context.getRacingEventService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            return new ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<>(Collections.<MiniLeaderboardItemDTO>emptyList()));
+            return new ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<>(
+                    Collections.<MiniLeaderboardItemDTO> emptyList()));
         }
         RacingEventService service = context.getRacingEventService();
         try {
-            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null,
-                    Collections.<String>emptyList(), true, service, service.getBaseDomainFactory(), false);
-            
+            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
+                    service, service.getBaseDomainFactory(), false);
             int rank = 0;
             LinkedList<MiniLeaderboardItemDTO> items = new LinkedList<MiniLeaderboardItemDTO>();
-            for(CompetitorDTO competitor : leaderboardDTO.competitors) {
+            for (CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 items.add(new MiniLeaderboardItemDTO(competitor, rank, row.totalPoints));
             }
-            return new ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>(1000 * 60 * 5, new ListResult<MiniLeaderboardItemDTO>(items));
-            
-            // TODO: mini leaderboard magic
-            
+            return new ResultWithTTL<ListResult<MiniLeaderboardItemDTO>>(1000 * 60 * 5,
+                    new ListResult<MiniLeaderboardItemDTO>(items));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error loading leaderboard", e);
             throw new DispatchException("Error loading leaderboard");
