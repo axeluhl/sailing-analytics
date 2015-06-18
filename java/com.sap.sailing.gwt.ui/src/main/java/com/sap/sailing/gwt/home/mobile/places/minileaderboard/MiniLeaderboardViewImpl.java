@@ -22,12 +22,13 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
     private Presenter currentPresenter;
 
     @UiField(provided = true) EventHeader eventHeaderUi;
-    @UiField MinileaderboardBox minileaderboardUi;
+    @UiField(provided = true) MinileaderboardBox minileaderboardUi;
 
     public MiniLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
 
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
+        minileaderboardUi = new MinileaderboardBox(presenter.getCtx().getRegatta().getDisplayName());
         
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
