@@ -37,6 +37,10 @@
 			<!-- <mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
 			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> -->
 		</div>
+		<div ui:field="buttonsUi" class="{style.holder}">
+			<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="leaderboardLinkUi"><ui:text from="{i18n.openLeaderboard}" /></a>
+			<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="dektopLinkUi"><ui:text from="{i18n.gotoDesktop}" /></a>
+		</div>
 		<mp:minileaderboard.MinileaderboardBox ui:field="minileaderboardUi"/>
 	</g:HTMLPanel>	
 </ui:UiBinder>

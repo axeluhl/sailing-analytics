@@ -62,7 +62,7 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                 trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(leaderboard);
                 regattas++;
                 String disableStats = System.getenv("DISABLE_STATS");
-                if (disableStats == null || !disableStats.isEmpty()) {
+                if (disableStats == null || "false".equals(disableStats)) {
                     for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
                         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                             GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
