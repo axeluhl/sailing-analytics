@@ -150,4 +150,7 @@ public interface BoatClassImageResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/OPENBIC.png")
     ImageResource OpenBicIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS800.png")
+    ImageResource RS800Icon();
 }
