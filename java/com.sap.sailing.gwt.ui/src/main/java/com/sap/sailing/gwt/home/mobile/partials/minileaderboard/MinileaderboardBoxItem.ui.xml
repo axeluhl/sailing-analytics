@@ -41,6 +41,7 @@
 			padding: 0.230769230769231em 0;
 			background: #ebebeb;
 			border: 1px solid #dedede;
+			font-weight: bold;
 			border-radius: 0.384615384615385em;
 		}
 	</ui:style>

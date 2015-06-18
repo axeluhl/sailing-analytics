@@ -9,7 +9,7 @@
   
   <mp:section.MobileSection ui:field="itemContainerUi" edgeToEdgeContent="true">
 		<mp:header>
-			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.leaderboard}" ui:field="headerUi" />
+			<mp:sectionHeader.SectionHeaderContent sectionTitle="Results/ Standings" ui:field="headerUi" />
 		</mp:header>
   </mp:section.MobileSection>
   
