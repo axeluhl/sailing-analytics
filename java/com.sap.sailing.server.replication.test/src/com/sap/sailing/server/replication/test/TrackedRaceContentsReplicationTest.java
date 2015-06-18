@@ -143,11 +143,11 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
 
     @Test
     public void testWindAdditionReplication() throws InterruptedException {
-        final TimePoint now = MillisecondsTimePoint.now();
-        final Wind wind = new WindImpl(new DegreePosition(2, 3), now,
+        TimePoint now = MillisecondsTimePoint.now();
+        trackedRace.setStartOfTrackingReceived(now);
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(now.asMillis()+1234),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        trackedRace.setStartOfTrackingReceived(now);
         trackedRace.recordWind(wind, webWindSource);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
@@ -193,12 +193,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     
     @Test
     public void testReplicationOfLoadingOfStoredWindTrack() throws UnknownHostException, MongoException, InterruptedException {
+        TimePoint now = MillisecondsTimePoint.now();
+        trackedRace.setStartOfTrackingReceived(now);
         MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory());
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         WindTrack windTrack = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
                 /* delayForWindEstimationCacheInvalidation */ 10000);
-        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(now.asMillis()+1234),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         windTrack.add(wind);
         Thread.sleep(1000); // give MongoDB time to read its own writes in a separate session
