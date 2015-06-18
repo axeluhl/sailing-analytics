@@ -25,16 +25,23 @@
 			margin: 1em 0em;
 			line-height: 1.4em;
 		}
+		.headerWrapper {
+			background-color: #f2f2f2;
+			padding-bottom: 10px;
+		}
 	</ui:style>	
-
 	<g:HTMLPanel>
+		<div class="{style.headerWrapper}">
+			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
+			<!-- TODO do we need this here? -->
+			<!-- <mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
+			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> -->
+		</div>
 		<mp:minileaderboard.MinileaderboardBox ui:field="minileaderboardUi"/>
 
 		<div class="{style.holder}">
-	   		<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="gotoDesktopUi"
-	   		><ui:text from="{i18n.gotoDesktop}" /></a>
+			<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="gotoDesktopUi"
+			><ui:text from="{i18n.gotoDesktop}" /></a>
 		</div>
-  
 	</g:HTMLPanel>	
-   	
-</ui:UiBinder>    
+</ui:UiBinder>

@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
+import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 
@@ -20,12 +21,14 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
 
     private Presenter currentPresenter;
 
-    @UiField
-    protected MinileaderboardBox minileaderboardUi;
+    @UiField(provided = true) EventHeader eventHeaderUi;
+    @UiField MinileaderboardBox minileaderboardUi;
 
     public MiniLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
 
+        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
+        
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventContext ctx = presenter.getCtx();
