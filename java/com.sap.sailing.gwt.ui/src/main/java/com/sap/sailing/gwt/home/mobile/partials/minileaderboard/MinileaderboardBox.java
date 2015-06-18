@@ -6,10 +6,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
 
@@ -35,6 +37,12 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<L
 
     public void setData(final List<MiniLeaderboardItemDTO> data) {
         itemContainerUi.clearContent();
+        
+        if(data.isEmpty()) {
+            itemContainerUi.addContent(new Label(StringMessages.INSTANCE.noResults()));
+            return;
+        }
+        
         for (MiniLeaderboardItemDTO item : data) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item));
         }
