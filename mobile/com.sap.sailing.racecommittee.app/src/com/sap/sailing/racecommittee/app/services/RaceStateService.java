@@ -1,13 +1,5 @@
 package com.sap.sailing.racecommittee.app.services;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,7 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
-
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
@@ -30,15 +22,19 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPoller;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class RaceStateService extends Service {
 
@@ -90,7 +86,7 @@ public class RaceStateService extends Service {
         
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         setupNotificationBuilder();
-        
+
         super.onCreate();
         ExLog.i(this, TAG, "Started.");
     }
@@ -101,8 +97,8 @@ public class RaceStateService extends Service {
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
         notificationBuilder = new NotificationCompat.Builder(this)
-            .setSmallIcon(R.drawable.sap_sailing_app_icon)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.sap_sailing_app_icon))
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
             .setContentTitle(getText(R.string.service_info))
             .setContentText(getText(R.string.service_text_no_races))
             .setContentIntent(contentIntent)
@@ -194,20 +190,18 @@ public class RaceStateService extends Service {
 
     private void handleClearRaces(Intent intent) {
         unregisterAllRaces();
-        clearAllRaces();
-        
+        DataStore dataStore = dataManager.getDataStore();
+        dataStore.getRaces().clear();
+        dataStore.setEventUUID(null);
+        dataStore.setCourseUUID(null);
+        ExLog.i(this, TAG, "handleClearRaces: Cleared all races.");
         stopForeground(true);
-    }
-
-    private void clearAllRaces() {
-        dataManager.getDataStore().getRaces().clear();
-        ExLog.i(this, TAG, "Cleared all races.");
     }
 
     private void handleRegisterRace(Intent intent) {
         ManagedRace race = getRaceFromIntent(intent);
         if (race == null) {
-            ExLog.i(this, TAG, "Intent did not carry valid race information.");
+            ExLog.w(this, TAG, "Intent did not carry valid race information.");
             return;
         }
         registerRace(race);
@@ -258,7 +252,8 @@ public class RaceStateService extends Service {
     }
 
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ALARM_ACTION);
+        Intent intent = new Intent(this, RaceStateService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
         intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
         intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
         intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, event);

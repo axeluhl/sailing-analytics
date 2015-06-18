@@ -31,9 +31,8 @@
 	<entry-point class='com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint'/>
 	
 	<!-- Specify the paths for translatable code                    -->
-        	<extend-property name="locale" values="en,de,cn,ru" />
-        <extend-property name="locale" values="en,de,cn,ru" />
-        <set-property name="locale" value="en,de,cn,ru" />
+        <extend-property name="locale" values="en,de,zh,ru" />
+        <set-property name="locale" value="en,de,zh,ru" />
         <set-property-fallback name="locale" value="en"/>
   	
 	<source path='common'/>

@@ -133,7 +133,8 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -207,7 +208,10 @@ import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
@@ -483,7 +487,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
                         .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
-                        competitor.getTeam().getImage(), competitor.getFlagImage()));
+                        competitor.getTeam().getImage(), competitor.getFlagImage(),
+                        competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile()));
             }
         });
         this.windStore = windStore;
@@ -537,7 +542,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        loadStoredEvents();
+        
+        final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
@@ -545,6 +551,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
+
+        // Stores all events which run through a data migration 
+        // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
+        for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
+            if (eventAndRequireStoreFlag.getB()) {
+                mongoObjectFactory.storeEvent(eventAndRequireStoreFlag.getA());
+            }
+        }
     }
 
     @Override
@@ -631,13 +645,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
-    private void loadStoredEvents() {
-        for (Event event : domainObjectFactory.loadAllEvents()) {
+    private Iterable<Pair<Event, Boolean>> loadStoredEvents() {
+        Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = domainObjectFactory.loadAllEvents(); 
+        for (Pair<Event, Boolean> eventAndFlag : loadedEventsWithRequireStoreFlag) {
+            Event event = eventAndFlag.getA();
             if (event.getId() != null)
                 eventsById.put(event.getId(), event);
         }
+        return loadedEventsWithRequireStoreFlag;
     }
-
+    
     private void loadLinksFromEventsToLeaderboardGroups() {
         domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */this, /* leaderboardGroupResolver */
                 this);
@@ -1171,10 +1188,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta createRegatta(String fullRegattaName, String boatClassName, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
                 fullRegattaName, boatClassName, startDate, endDate, id, series, persistent, scoringScheme,
-                defaultCourseAreaId, useStartTimeInference);
+                defaultCourseAreaId, useStartTimeInference, rankingMetricConstructor);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             onRegattaLikeAdded(regatta);
@@ -1207,11 +1224,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName,
             String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, useStartTimeInference);
+                scoringScheme, id, courseArea, useStartTimeInference, rankingMetricConstructor);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
@@ -1395,7 +1412,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         replicate(new AddSpecificRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
                 .getBoatClass().getName(), regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference()));
+                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference(), regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {
             replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -2485,7 +2502,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
+                    dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
+                    dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
@@ -2569,13 +2588,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
-                id, /* imageURLs */Collections.<URL> emptyList(),
-                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(), /* logoImageURL */
-                null, /* officialWebsiteURL */null);
-        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, /* imageURLs */
-        id, Collections.<URL> emptyList(),
-        /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(),
-        /* logoimageURL */null, /* officialWebsiteURLAsString */null));
+                id, /* officialWebsiteURL */null, /* images */Collections.<ImageDescriptor> emptyList(),
+                /* videos */Collections.<VideoDescriptor> emptyList());
+        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, id,
+                /* officialWebsiteURLAsString */null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
         return result;
     }
 
@@ -2586,16 +2602,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, Iterable<URL> imageURLs,
-            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Iterable<ImageDescriptor> images,
+            Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
-        result.setImageURLs(imageURLs);
-        result.setVideoURLs(videoURLs);
-        result.setSponsorImageURLs(sponsorImageURLs);
-        result.setLogoImageURL(logoImageURL);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setImages(images);
+        result.setVideos(videos);
         return result;
     }
 
@@ -2611,7 +2625,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
-            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2634,10 +2648,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setLogoImageURL(logoImageURL);
-        event.setImageURLs(imageURLs);
-        event.setVideoURLs(videoURLs);
-        event.setSponsorImageURLs(sponsorImageURLs);
+        event.setImages(images);
+        event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         // to keep changes minimial
         mongoObjectFactory.storeEvent(event);
@@ -3193,5 +3205,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             polarDataService = null;
             setPolarDataService(null);
         }
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
+        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+        final List<Competitor> result = new ArrayList<>();
+        Util.addAll(trackedRace.getRace().getCompetitors(), result);
+        result.sort((c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c2).getWindwardDistanceSailed().compareTo(
+                rankingInfo.getCompetitorRankingInfo().apply(c1).getWindwardDistanceSailed()));
+        return result;
     }
 }

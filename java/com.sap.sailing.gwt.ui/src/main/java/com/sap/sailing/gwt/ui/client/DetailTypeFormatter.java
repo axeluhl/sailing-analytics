@@ -44,6 +44,8 @@ public class DetailTypeFormatter {
             return stringMessages.velocityMadeGoodInKnots();
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
+        case CORRECTED_TIME_TRAVELED:
+            return stringMessages.calculatedTimeTraveled();
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
             return stringMessages.gapChangeSinceLegStartInSeconds();
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
@@ -58,16 +60,16 @@ public class DetailTypeFormatter {
             return stringMessages.averageSpeedInKnots();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
-        case RACE_DISTANCE_TO_LEADER_IN_METERS:
-            return stringMessages.windwardDistanceToLeaderInMeters();
+        case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMeters();
         case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
         case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageSignedCrossTrackErrorInMeters();
         case START_TACK:
             return stringMessages.startTack();
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            return stringMessages.windwardDistanceToLeaderInMeters();
+        case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMeters();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStart();
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
@@ -98,6 +100,10 @@ public class DetailTypeFormatter {
             return stringMessages.maximumSpeedOverGroundInKnots();
         case TOTAL_DISTANCE_TRAVELED:
             return stringMessages.totalDistanceTraveled();
+        case TIME_ON_TIME_FACTOR:
+            return stringMessages.timeOnTimeFactor();
+        case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+            return stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile();
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
             return stringMessages.totalTimeSailedDownwindInSeconds();
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
@@ -122,6 +128,10 @@ public class DetailTypeFormatter {
             return stringMessages.speedOverGroundFiveSecondsBeforeStart();
         case RACE_TIME_TRAVELED:
             return stringMessages.time();
+        case RACE_CALCULATED_TIME_TRAVELED:
+            return stringMessages.calculatedTimeTraveled();
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
         case RACE_TIME_TRAVELED_DOWNWIND:
             return stringMessages.timeDownwind();
         case RACE_TIME_TRAVELED_REACHING:
@@ -160,11 +170,11 @@ public class DetailTypeFormatter {
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
             return stringMessages.knotsUnit();
 
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+        case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case DISTANCE_TRAVELED:
         case DISTANCE_TRAVELED_INCLUDING_GATE_START:
-        case RACE_DISTANCE_TO_LEADER_IN_METERS:
+        case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
         case RACE_DISTANCE_TRAVELED:
         case RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START:
         case AVERAGE_TACK_LOSS_IN_METERS:
@@ -189,13 +199,19 @@ public class DetailTypeFormatter {
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case TIME_TRAVELED:
+        case CORRECTED_TIME_TRAVELED:
+        case RACE_CALCULATED_TIME_TRAVELED:
         case RACE_TIME_TRAVELED:
         case RACE_TIME_TRAVELED_DOWNWIND:
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.secondsUnit();
 
+        case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+            return stringMessages.secondsPerNauticalMileUnit();
+            
         case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
             return stringMessages.ratio();
             
@@ -222,6 +238,7 @@ public class DetailTypeFormatter {
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case BEAT_ANGLE:
+        case TIME_ON_TIME_FACTOR:
             return "";
         }
         // Throwing an exception to get notified if an implementation of
@@ -271,6 +288,8 @@ public class DetailTypeFormatter {
             return stringMessages.estimatedTimeToNextWaypointInSecondsTooltip();
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
+        case CORRECTED_TIME_TRAVELED:
+            return stringMessages.calculatedTimeTraveledTooltip();
         case JIBE:
             return stringMessages.jibeTooltip();
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
@@ -285,10 +304,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
-        case RACE_DISTANCE_TO_LEADER_IN_METERS:
-            return stringMessages.windwardDistanceToLeaderInMetersTooltip();
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            return stringMessages.windwardDistanceToLeaderInMetersTooltip();
+        case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
+        case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStartTooltip();
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
@@ -307,6 +326,10 @@ public class DetailTypeFormatter {
             return stringMessages.raceDistanceTraveledIncludingGateStartTooltip();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
+        case RACE_CALCULATED_TIME_TRAVELED:
+            return stringMessages.calculatedTimeTraveledTooltip();
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+            return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
         case RACE_RANK:
             return stringMessages.rankTooltip();
         case REGATTA_RANK:
@@ -337,6 +360,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalDistanceTraveledTooltip();
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.totalAverageSpeedOverGroundTooltip();
+        case TIME_ON_TIME_FACTOR:
+            return stringMessages.timeOnTimeFactorTooltip();
+        case TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+            return stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
         case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:

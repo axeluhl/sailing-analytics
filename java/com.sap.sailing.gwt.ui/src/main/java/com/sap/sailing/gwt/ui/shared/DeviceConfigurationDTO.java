@@ -29,7 +29,7 @@ public class DeviceConfigurationDTO implements IsSerializable {
 
         public static class RacingProcedureConfigurationDTO implements IsSerializable {
             public Flags classFlag;
-            public Boolean hasInidividualRecall;
+            public Boolean hasIndividualRecall;
         }
         public RacingProcedureType defaultRacingProcedureType;
         public CourseDesignerMode defaultCourseDesignerMode;

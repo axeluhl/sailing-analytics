@@ -43,7 +43,6 @@
     </div>
    </div>
    <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
-    <div ui:field="videoLightBoxData" class="{res.mainCss.lightbox_content}"></div>
     <g:HTMLPanel ui:field="videosPanel" />
    </div>
   </div>

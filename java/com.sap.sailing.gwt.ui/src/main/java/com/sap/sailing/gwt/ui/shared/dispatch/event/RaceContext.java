@@ -128,7 +128,7 @@ public class RaceContext {
 
     private FlagStateDTO getFlagStateOrNull() {
         // Code extracted from SailingServiceImpl.createRaceInfoDTO
-        // TODO extract to to util to be used from both places
+        // TODO: extract to to util to be used from both places
         TimePoint startTime = state.getStartTime();
         
         Flags lastUpperFlag = null;
@@ -152,30 +152,34 @@ public class RaceContext {
             }
         }
         
-        RaceLogRaceStatus lastStatus = state.getStatus();
-        
-        AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-        
-        RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
-        if (abortingFlagEvent != null) {
-            if (lastStatus == RaceLogRaceStatus.UNSCHEDULED) {
-                lastUpperFlag = abortingFlagEvent.getUpperFlag();
-                lastLowerFlag = abortingFlagEvent.getLowerFlag();
-                lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
-                lastFlagsDisplayedStateChanged = true;
-            }
-        }
-        
-        
-        if (lastStatus == RaceLogRaceStatus.FINISHED) {
-            TimePoint protestStartTime = state.getProtestTime();
-            if (protestStartTime != null) {
-                lastUpperFlag = Flags.BRAVO;
-                lastLowerFlag = Flags.NONE;
-                lastFlagsAreDisplayed = true;
-                lastFlagsDisplayedStateChanged = true;
-            }
-        }
+        switch(state.getStatus()) {
+            case FINISHED:
+                TimePoint protestStartTime = state.getProtestTime();
+                if (protestStartTime != null) {
+                    lastUpperFlag = Flags.BRAVO;
+                    lastLowerFlag = Flags.NONE;
+                    lastFlagsAreDisplayed = true;
+                    lastFlagsDisplayedStateChanged = true;
+                }
+                break;
+            case UNSCHEDULED:
+                // search for race aborting in last pass
+                AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+                RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+                if (abortingFlagEvent != null) {
+                    lastUpperFlag = abortingFlagEvent.getUpperFlag();
+                    lastLowerFlag = abortingFlagEvent.getLowerFlag();
+                    lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
+                    lastFlagsDisplayedStateChanged = true;
+                }
+                break;
+            case FINISHING:
+            case RUNNING:
+            case SCHEDULED:
+            case STARTPHASE:
+            case UNKNOWN:
+                break;
+        };
         
         if(lastUpperFlag != null || lastLowerFlag != null) {
             return new FlagStateDTO(lastUpperFlag, lastLowerFlag, lastFlagsAreDisplayed, lastFlagsDisplayedStateChanged);
@@ -281,7 +285,7 @@ public class RaceContext {
         if(isLiveOrOfPublicInterest(startTime, finishTime)) {
             // the start time is always given for live races
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
-            liveRaceDTO.setViewState(getRaceViewState(startTime, finishTime));
+            liveRaceDTO.setViewState(getLiveRaceViewState(startTime, finishTime));
             liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
@@ -339,14 +343,25 @@ public class RaceContext {
         return trackingState;
     }
     
-    private RaceViewState getRaceViewState(TimePoint startTime, TimePoint finishTime) {
+    private RaceViewState getLiveRaceViewState(TimePoint startTime, TimePoint finishTime) {
         RaceViewState raceState = RaceViewState.RUNNING;
         if (startTime != null && now.before(startTime)) {
             raceState = RaceViewState.SCHEDULED;
         } else if (finishTime != null && now.after(finishTime)) {
             raceState = RaceViewState.FINISHED;
-        } else {
-            // TODO: Resolve ABORTED and POSTPONED states
+        } else if(raceLog != null) {
+            AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+            if (abortingFlagEvent != null) {
+                Flags upperFlag = abortingFlagEvent.getUpperFlag();
+                if(upperFlag.equals(Flags.AP)) {
+                    raceState = RaceViewState.POSTPONED;
+                } else if(upperFlag.equals(Flags.NOVEMBER)) {
+                    raceState = RaceViewState.ABANDONED;
+                } else if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                    raceState = RaceViewState.ABANDONED;
+                }
+            }
         }
         return raceState;
     }

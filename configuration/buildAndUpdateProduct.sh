@@ -633,7 +633,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
         NOW=$(date +"%s")
-        BUILD_TOOLS=22.0.0
+        BUILD_TOOLS=22.0.1
         TARGET_API=22
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
@@ -651,7 +651,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
         ./gradlew clean build | tee -a $START_DIR/build.log
-        if [[ $? != 0 ]]; then
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
         # testing deactivated due to errors in hudson
@@ -673,7 +673,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             fi
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
-            if [[ $? != 0 ]]; then
+            if [[ ${PIPESTATUS[0]} != 0 ]]; then
               adb emu kill
               "$ANDROID" delete avd --name ${AVD_NAME}
               exit 101

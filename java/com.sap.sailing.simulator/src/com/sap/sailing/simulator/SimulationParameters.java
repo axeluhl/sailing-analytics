@@ -16,6 +16,8 @@ public interface SimulationParameters {
     
     List<Position> getStartLine();
 
+    List<Position> getEndLine();
+
     PolarDiagram getBoatPolarDiagram();
 
     WindFieldGenerator getWindField();

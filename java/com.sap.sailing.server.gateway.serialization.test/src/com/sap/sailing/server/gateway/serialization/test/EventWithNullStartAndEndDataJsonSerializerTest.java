@@ -31,6 +31,8 @@ import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public class EventWithNullStartAndEndDataJsonSerializerTest {
 
@@ -55,6 +57,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
     }
     
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -74,6 +77,8 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
+        when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         doReturn(expectedLeaderboardGroups).when(event).getLeaderboardGroups();
 
         // ... and the serializer itself.		
@@ -91,6 +96,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         assertNull(result.get(EventBaseJsonSerializer.FIELD_END_DATE));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testBasicAttributesAfterDeserialization() throws JsonDeserializationException {
         final JSONObject result = serializer.serialize(event);

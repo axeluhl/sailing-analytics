@@ -1,14 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-
+import android.view.WindowManager;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -19,42 +19,74 @@ public class BaseActivity extends SendingServiceAwareActivity {
     protected AppPreferences preferences;
     
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.preferences = AppPreferences.on(getApplicationContext());
+    protected int getOptionsMenuResId() {
+        return R.menu.options_menu;
     }
 
-    protected boolean onReset() {
-        fadeActivity(LoginActivity.class, true);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS.");
-            fadeActivity(SettingsActivity.class, false);
-            return true;
-        case R.id.options_menu_reload:
-            ExLog.i(this, TAG, "Clicked RESET.");
-            InMemoryDataStore.INSTANCE.reset();
-            return onReset();
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            fadeActivity(SystemInformationActivity.class, false);
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
-    
     public RaceApplication getRaceApplication() {
         return (RaceApplication) getApplication();
     }
 
     @Override
-    protected int getOptionsMenuResId() {
-        return R.menu.options_menu;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.preferences = AppPreferences.on(getApplicationContext());
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS");
+                intent = new Intent(this, PreferenceActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.options_menu_reload:
+                ExLog.i(this, TAG, "Clicked RESET");
+                final boolean result = onReset();
+                return result;
+
+            case R.id.options_menu_info:
+                ExLog.i(this, TAG, "Clicked INFO");
+                intent = new Intent(this, SystemInformationActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+    
+    /**
+     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then
+     * fades this activity. 
+     */
+    protected boolean onReset() {
+        resetDataManager();
+        fadeActivity(LoginActivity.class, true);
+        return true;
+    }
+
+    protected void resetDataManager() {
+        DataManager dataManager = (DataManager) DataManager.create(this);
+        dataManager.resetAll();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        preferences = AppPreferences.on(this);
+        if (preferences.wakelockEnabled()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 }

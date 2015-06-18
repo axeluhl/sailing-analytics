@@ -10,6 +10,8 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceDialogFragment extends LoggableDialogFragment implements TickListener {
 
@@ -43,7 +45,7 @@ public abstract class RaceDialogFragment extends LoggableDialogFragment implemen
     public void onStart() {
         super.onStart();
         TickSingleton.INSTANCE.registerListener(this);
-        notifyTick();
+        notifyTick(MillisecondsTimePoint.now());
     }
 
     @Override
@@ -61,7 +63,7 @@ public abstract class RaceDialogFragment extends LoggableDialogFragment implemen
     }
     
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
         // see subclasses
     }
 

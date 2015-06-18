@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -31,6 +32,7 @@ public class RegattaDTO extends NamedDTO {
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
+    public RankingMetrics rankingMetricType;
 
     public RegattaDTO() {}
     
@@ -57,6 +59,7 @@ public class RegattaDTO extends NamedDTO {
         this.scoringScheme = other.scoringScheme;
         this.defaultCourseAreaUuid = other.defaultCourseAreaUuid;
         this.defaultCourseAreaName = other.defaultCourseAreaName;
+        this.rankingMetricType = other.rankingMetricType;
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
     }

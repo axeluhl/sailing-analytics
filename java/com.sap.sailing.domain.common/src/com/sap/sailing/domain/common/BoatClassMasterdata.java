@@ -4,16 +4,18 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 
 
 public enum BoatClassMasterdata {
-    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR"),
+    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR", "2.4 Metre", "2.4-metre"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
-    _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM"),
+    _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM", "12-metre", "12 metre"),
     _29ER ("29er", true, 4.45, 1.70, BoatHullType.MONOHULL, true),
     _49ER ("49er", true, 4.88, 1.93, BoatHullType.MONOHULL, true),
     _49ERFX ("49erFX", true, 4.88, 1.93, BoatHullType.MONOHULL, true, "49FX"),
     _420 ("420", true, 4.20, 1.65, BoatHullType.MONOHULL, true, "420er", "420M", "420W"),
     _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W"),
+    RS800 ("RS 800", true, 4.80, 1.88, BoatHullType.MONOHULL, true, "RS800"),
     A_CAT ("A-Catamaran", true, 5.49, 2.30, BoatHullType.CATAMARAN, false, "A-Cat", "ACat", "A-Class Catamaran"),
     ALBIN_EXPRESS ("Albin Express", true, 7.77, 2.50, BoatHullType.MONOHULL, false),
+    ALBIN_BALLAD ("Albin Ballad", true, 9.12, 2.95, BoatHullType.MONOHULL, false),
     B_ONE ("B/ONE", true, 7.80, 2.49, BoatHullType.MONOHULL, true, "B-ONE"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, true, "Drachen", "Dragon"),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, true, "Extreme-40", "Extreme40", "ESS40"),

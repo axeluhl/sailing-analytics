@@ -73,6 +73,10 @@ public class BoatClassImageResolver {
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {
-        return boatClassIconsMap.get(displayName);
+        ImageResource imageResource = boatClassIconsMap.get(displayName);
+        if(imageResource == null) {
+            imageResource = BoatClassImageResources.INSTANCE.genericBoatClass(); 
+        }
+        return imageResource;
     }
 }
