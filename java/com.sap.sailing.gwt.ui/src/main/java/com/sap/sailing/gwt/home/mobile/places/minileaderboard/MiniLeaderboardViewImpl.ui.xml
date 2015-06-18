@@ -38,10 +38,5 @@
 			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> -->
 		</div>
 		<mp:minileaderboard.MinileaderboardBox ui:field="minileaderboardUi"/>
-
-		<div class="{style.holder}">
-			<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="gotoDesktopUi"
-			><ui:text from="{i18n.gotoDesktop}" /></a>
-		</div>
 	</g:HTMLPanel>	
 </ui:UiBinder>
