@@ -83,10 +83,8 @@ public class LoginActivity extends BaseActivity
     private UUID mSelectedCourseAreaUUID;
 
     private IntentReceiver mReceiver;
-
-    private ProgressDialog progressDialog;
-
     private ReadonlyDataManager dataManager;
+    private View progressSpinner;
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
@@ -358,11 +356,11 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onStop() {
         super.onStop();
-        dismissProgressDialog();
+        dismissProgressSpinner();
     }
 
     private void setupDataManager() {
-        showProgressDialog();
+        showProgressSpinner();
 
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
             .getDeviceIdentifier());
@@ -371,7 +369,8 @@ public class LoginActivity extends BaseActivity
 
             @Override
             public void onLoadFailed(Exception reason) {
-                dismissProgressDialog();
+                dismissProgressSpinner();
+
                 if (reason instanceof FileNotFoundException) {
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
                     ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
@@ -385,7 +384,7 @@ public class LoginActivity extends BaseActivity
 
             @Override
             public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                dismissProgressDialog();
+                dismissProgressSpinner();
 
                 // this is our 'global' configuration, let's store it in app preferences
                 PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
@@ -399,23 +398,22 @@ public class LoginActivity extends BaseActivity
             // always reload the configuration...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
-            dismissProgressDialog();
+            dismissProgressSpinner();
         }
     }
 
-    private void showProgressDialog() {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage(getString(R.string.loading_configuration));
-            progressDialog.setCancelable(false);
-            progressDialog.setIndeterminate(true);
+    private void showProgressSpinner() {
+        if (progressSpinner == null) {
+            progressSpinner = findViewById(R.id.progress_spinner);
         }
-        progressDialog.show();
+        if (progressSpinner != null) {
+            progressSpinner.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void dismissProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
+    private void dismissProgressSpinner() {
+        if (progressSpinner != null && progressSpinner.getVisibility() == View.VISIBLE) {
+            progressSpinner.setVisibility(View.GONE);
         }
     }
 
