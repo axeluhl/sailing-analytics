@@ -65,7 +65,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
     private final String SERIES = "TestSeries";
     private final String FLEXIBLELEADERBOARD = "TestFlexibleLeaderboard";
     private final String RACECOLUMN_SERIES = "TestSeriesRaceColumn";
-    private final String RACECOLUMN_FLEXIBLELEADERBOARD = "TestFlexibleLeadrboarRaceColumn";
+    private final String RACECOLUMN_FLEXIBLELEADERBOARD = "TestFlexibleLeaderboardRaceColumn";
 
     @Test
     public void testRaceExecutionOrderProviderAttachDetachWithRaceCollumn() {
