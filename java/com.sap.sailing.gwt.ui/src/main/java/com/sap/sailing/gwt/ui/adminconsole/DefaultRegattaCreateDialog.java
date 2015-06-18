@@ -16,7 +16,6 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFleetsDialog<EventAndRegattaDTO> {
-
     public DefaultRegattaCreateDialog(List<EventDTO> existingEvents, RegattaDTO selectedRegatta,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
@@ -30,6 +29,11 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
         sailingEventsListBox.setSelectedIndex(1);
         sailingEventsListBox.setEnabled(false);
         setCourseAreaSelection();
+        for (int i=0; i<getRankingMetricListBox().getItemCount(); i++) {
+            if (getRankingMetricListBox().getValue(i).equals(selectedRegatta.rankingMetricType.name())) {
+                getRankingMetricListBox().setSelectedIndex(i);
+            }
+        }
     }
 
     protected ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series) {
@@ -37,6 +41,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
     }
 
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel, Grid formGrid) {
+        insertRankingMetricTabPanel(formGrid);
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(getSeriesEditor(), stringMessages.series());
@@ -46,7 +51,9 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
 
     @Override
     protected EventAndRegattaDTO getResult() {
-        EventAndRegattaDTO eventAndRegatta = new EventAndRegattaDTO(getSelectedEvent(), getRegattaDTO());
+        final RegattaDTO regattaDTO = getRegattaDTO();
+        EventAndRegattaDTO eventAndRegatta = new EventAndRegattaDTO(getSelectedEvent(), regattaDTO);
+        setRankingMetrics(regattaDTO);
         return eventAndRegatta;
     }
 }
