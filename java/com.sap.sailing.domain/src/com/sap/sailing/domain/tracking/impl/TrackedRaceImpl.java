@@ -1498,30 +1498,46 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public boolean takesWindFix(Wind wind) {
-        boolean result = false;
+        final boolean result;
         final TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
         final TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getEndOfRace(), getEndOfTracking());
         if (earliestStartTimePoint != null) {
-            TimePoint earliestStartTimePointMinusExtra = earliestStartTimePoint.minus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS);
-            if (latestEndTimePoint != null) {
-                TimePoint latestEndTimePointPlusExtra = latestEndTimePoint.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
-                if (Util.isTimePointInRangeOfTimePointsAandB(wind.getTimePoint(), /* a */earliestStartTimePointMinusExtra, /* b */latestEndTimePointPlusExtra)) {
-                    result = noPreviousRaceTakesWind(wind);
+            // first check if the fix meets the criteria set by the latestEndTimePoint: either the latestEndTimePoint is null, meaning an
+            // open interval which will continue to accept late wind fixes, or the fix time point is before the latestEndTimePoint plus a grace
+            // interval:
+            if (latestEndTimePoint == null || wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(latestEndTimePoint)) {
+                // then check, if fix is accepted anyway because it's after earliestStartTimePoint.minus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS)
+                // and before latestEndTimePoint.plus(IS_LIVE_GRACE_PERIOD_IN_MILLIS) or latestEndTimePoint is null. In this case, no expensive
+                // recursive check whether previous races take the fix are required.
+                if (wind.getTimePoint().plus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(earliestStartTimePoint)) {
+                    result = true;
+                } else {
+                    // if the fix is older than even the extended lead interval would accept, don't accept the fix:
+                    if (wind.getTimePoint().plus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).before(earliestStartTimePoint)) {
+                        result = false;
+                    } else {
+                        // the fix is in the critical interval between EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS and
+                        // TIME_BEFORE_START_TO_TRACK_WIND_MILLIS before the earliestStartTimePoint; the fix shall only be accepted
+                        // if no previous race exists that accepts it
+                        result = noPreviousRaceTakesWind(wind);
+                    }
                 }
             } else {
-                if (wind.getTimePoint().after(earliestStartTimePointMinusExtra)) {
-                    result = noPreviousRaceTakesWind(wind);
-                }
+                result = false; // don't accept the fix if it's after the latest end time point plus some grace interval
             }
+        } else {
+            result = false; // don't accept a fix if we don't have any start time information about the race
         }
         return result;
     }
     
     private boolean noPreviousRaceTakesWind(Wind wind) {
-        boolean result = false;
+        final boolean result;
         Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
         if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr -> tr.takesWindFix(wind) == true).findAny().isPresent()) {
             result = true;
+        } else {
+            result = false;
         }
         return result;
     }
