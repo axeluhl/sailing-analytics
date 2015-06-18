@@ -4,13 +4,12 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 
 	<ui:style>
-	.outerBox {
-		border-top: 1px solid grey;
-		border-bottom: 1px solid grey;
-		margin: 0 !important;
-		position: relative;
-		padding: 1.333333333333333em 0;
-	}
+		.outerBox {
+			margin: 0 !important;
+			position: relative;
+			padding: 1em 0;
+	  		font-size: 0.866666666666667em;
+		}
 	</ui:style>
 
 	<div class="{res.mediaCss.grid} {style.outerBox}">
