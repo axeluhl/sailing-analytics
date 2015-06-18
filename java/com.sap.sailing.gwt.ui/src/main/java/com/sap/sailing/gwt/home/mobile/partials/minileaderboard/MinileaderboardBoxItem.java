@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
 
 public class MinileaderboardBoxItem extends Widget {
@@ -32,8 +33,8 @@ public class MinileaderboardBoxItem extends Widget {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
         competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getCountryName()));
-        competitorRankUi.setInnerText(String.valueOf(entry.getRank()));
-        competitorPointsUi.setInnerText(String.valueOf(entry.getPoints()));
+        competitorRankUi.setInnerText(String.valueOf(entry.getRank()) + ".");
+        competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getPoints()));
         
         CompetitorDTO competitor = entry.getCompetitor();
         String flagImageURL = competitor.getFlagImageURL();

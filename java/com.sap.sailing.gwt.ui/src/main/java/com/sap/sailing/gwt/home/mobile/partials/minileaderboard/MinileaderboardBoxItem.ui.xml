@@ -4,22 +4,58 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 
 	<ui:style>
-		.outerBox {
+		.minileaderboard_item {
 			margin: 0 !important;
 			position: relative;
-			padding: 1em 0;
+			padding: 1em;
 	  		font-size: 0.866666666666667em;
+		}
+		.minileaderboard_outerBox_item_rank {
+			width: 1.5em;
+			display: inline-block;
+	     	vertical-align: middle;
+	     	text-align: right;
+		}
+		.minileaderboard_outerBox_item_flag {
+			display: inline-block;
+	     	vertical-align: middle;
+	     	width: 2.5em;
+		}
+		.minileaderboard_outerBox_item_name {
+			padding: 0 10px;
+			display: inline-block;
+	     	vertical-align: middle;
+		}
+		.minileaderboard_outerBox_item_points {
+	     	position: absolute;
+			top: 50%;
+			right: 1em;
+			-webkit-transform: translateY(-50%);
+			   -moz-transform: translateY(-50%);
+			    -ms-transform: translateY(-50%);
+			        transform: translateY(-50%);
+			width: 3.1em;
+			text-align: center;
+			padding: 0.230769230769231em 0;
+			background: #ebebeb;
+			border: 1px solid #dedede;
+			border-radius: 0.384615384615385em;
+		}
+		.minileaderboard_outerBox_item_country {
+			margin-left: 3em;
+			padding: 0 10px;
+	     	vertical-align: middle;
 		}
 	</ui:style>
 
-	<div class="{res.mediaCss.grid} {style.outerBox}">
-		<div class="{res.mediaCss.small1} {res.mediaCss.columns}" ui:field="competitorRankUi" />
-		<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-			<img ui:field="competitorFlagUi" />
-		</div>
-		<div class="{res.mediaCss.small7} {res.mediaCss.columns}" ui:field="competitorNameUi" />
-		<div class="{res.mediaCss.small2} {res.mediaCss.columns}" ui:field="competitorPointsUi" />
-		<div class="{res.mediaCss.smalloffset3} {res.mediaCss.small9} {res.mediaCss.columns}" ui:field="competitorCountryNameUi" />
+	<div class="{res.mediaCss.grid} {style.minileaderboard_item}">
+		<div class="{style.minileaderboard_outerBox_item_rank}" ui:field="competitorRankUi" />
+		<img class="{style.minileaderboard_outerBox_item_flag}" ui:field="competitorFlagUi" />
+		<div class="{style.minileaderboard_outerBox_item_name}"> 
+			<div ui:field="competitorNameUi" />
+			<div ui:field="competitorCountryNameUi" />
+		</div>			
+		<div class="{style.minileaderboard_outerBox_item_points}" ui:field="competitorPointsUi" />
 	</div>
 
 </ui:UiBinder>
