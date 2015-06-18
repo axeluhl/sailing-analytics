@@ -10,6 +10,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/GENERIC_BOATCLASS.png")
     ImageResource genericBoatClass();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ORC.png")
+    ImageResource ORCIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/12MR.png")
     ImageResource _12mRIcon();
     
