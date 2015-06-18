@@ -11,7 +11,7 @@
   <div class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_name}">
       <span ui:field="raceName" class="{local_res.css.eventregattarace_nameshort}"></span>
       <ui:text from='{i18n.eventRegattaRaceRace}'/>&nbsp;<span ui:field="raceName2" /><br></br>
-      <span ui:field="raceState" />&nbsp;<span ui:field="raceTime" />
+      <span ui:field="raceTime" class="{local_res.css.eventregattarace_racetime}" />
   </div>
   <!-- race state  if race.isScheduled and race.isTracked -->
   <div ui:field="raceFlagDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_flag}">
@@ -36,7 +36,7 @@
     <div ui:field="featureGPS" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featuregps}"></div>
     <div ui:field="featureWind" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featurewind}"></div>
     <div ui:field="featureVideo" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featurevideo}"></div>
-    <div ui:field="featureAudio" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featureaudio}"></div>
+    <!--<div ui:field="featureAudio" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featureaudio}"></div> -->
   </div>
   <div ui:field="raceNotTrackedDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
       <ui:text from='{i18n.eventRegattaRaceNotTracked}'/>

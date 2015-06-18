@@ -30,7 +30,6 @@ public class EventRegattaRacesRace extends Composite {
     @UiField DivElement fleetColor;
     @UiField SpanElement raceName;
     @UiField SpanElement raceName2;
-    @UiField SpanElement raceState;
     @UiField SpanElement raceTime;
     @UiField SpanElement averageRaceWind;
     
@@ -54,7 +53,7 @@ public class EventRegattaRacesRace extends Composite {
     
     @UiField DivElement featureGPS;
     @UiField DivElement featureWind;
-    @UiField DivElement featureAudio;
+    // @UiField DivElement featureAudio;
     @UiField DivElement featureVideo;
     
     @UiField SpanElement currentLegNo;
@@ -168,11 +167,13 @@ public class EventRegattaRacesRace extends Composite {
         } else {
             featureVideo.setTitle(String.valueOf(race.trackedRaceStatistics.videoTracksCount));
         }
+        /* not used for now 
         if(!race.trackedRaceStatistics.hasAudioData) {
             featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         } else {
             featureAudio.setTitle(String.valueOf(race.trackedRaceStatistics.audioTracksCount));
         }
+        */
     }
     
     private void hideElement(Element el) {
