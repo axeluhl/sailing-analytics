@@ -24,9 +24,8 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<L
     @UiField
     SectionHeaderContent headerUi;
 
-    public MinileaderboardBox(String leaderboardDisplayName) {
+    public MinileaderboardBox() {
         initWidget(uiBinder.createAndBindUi(this));
-        // TODO show leaderboard name near the event header
     }
 
     @Override

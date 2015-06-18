@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboardView {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -22,13 +23,14 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
     private Presenter currentPresenter;
 
     @UiField(provided = true) EventHeader eventHeaderUi;
-    @UiField(provided = true) MinileaderboardBox minileaderboardUi;
+    @UiField MinileaderboardBox minileaderboardUi;
 
     public MiniLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
 
-        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
-        minileaderboardUi = new MinileaderboardBox(presenter.getCtx().getRegatta().getDisplayName());
+        RegattaMetadataDTO regatta = presenter.getCtx().getRegatta();
+        // TODO check if regatta is valid!
+        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regatta.getDisplayName());
         
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
