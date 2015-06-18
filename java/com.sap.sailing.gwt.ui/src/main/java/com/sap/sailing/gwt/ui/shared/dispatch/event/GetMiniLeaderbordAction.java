@@ -19,6 +19,7 @@ import com.sap.sailing.server.RacingEventService;
 
 public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLeaderbordDTO>> {
     private static final Logger logger = Logger.getLogger(GetMiniLeaderbordAction.class.getName());
+    // TODO fmittag: correct URL -> replace where leaderboard name should be filled with {0}
     private static final String urlTemplate = "Leaderboard.html?name={0}&displayName=29er&legDetail=AVERAGE_SPEED_OVER_GROUND_IN_KNOTS&legDetail=DISTANCE_TRAVELED&legDetail=RANK_GAIN&raceDetail=DISPLAY_LEGS&overallDetail=REGATTA_RANK&maneuverDetail=TACK&maneuverDetail=JIBE&maneuverDetail=PENALTY_CIRCLE&showAddedScores=false";
 
     @SuppressWarnings("unused")
