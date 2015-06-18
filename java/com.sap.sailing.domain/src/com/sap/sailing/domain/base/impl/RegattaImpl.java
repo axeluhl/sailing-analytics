@@ -216,7 +216,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     public static String getDefaultName(String baseName, String boatClassName) {
-        return baseName+(boatClassName==null?"":" ("+boatClassName+")");
+        return baseName+(boatClassName==null?"":" ("+boatClassName+")").replace('/', '_');
     }
     
     @Override
