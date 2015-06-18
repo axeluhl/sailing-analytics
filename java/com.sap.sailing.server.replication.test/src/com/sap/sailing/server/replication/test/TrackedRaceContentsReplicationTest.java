@@ -55,6 +55,7 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -142,9 +143,11 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
 
     @Test
     public void testWindAdditionReplication() throws InterruptedException {
-        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+        final TimePoint now = MillisecondsTimePoint.now();
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), now,
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
+        trackedRace.setStartOfTrackingReceived(now);
         trackedRace.recordWind(wind, webWindSource);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
