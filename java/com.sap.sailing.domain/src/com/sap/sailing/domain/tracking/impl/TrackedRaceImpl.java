@@ -1508,7 +1508,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 if (Util.isTimePointInRangeOfTimePointsAandB(wind.getTimePoint(), /* a */earliestStartTimePointMinusExtra, /* b */latestEndTimePointPlusExtra)) {
                     result = noPreviousRaceTakesWind(wind);
                 }
-            } else if (latestEndTimePoint == null) {
+            } else {
                 if (wind.getTimePoint().after(earliestStartTimePointMinusExtra)) {
                     result = noPreviousRaceTakesWind(wind);
                 }
