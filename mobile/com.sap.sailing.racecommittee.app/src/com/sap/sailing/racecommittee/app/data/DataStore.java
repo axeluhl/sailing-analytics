@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 
 public interface DataStore {
     
@@ -27,8 +28,10 @@ public interface DataStore {
 
     Collection<ManagedRace> getRaces();
     void addRace(ManagedRace race);
-    ManagedRace getRace(Serializable id);
-    boolean hasRace(Serializable id);
+    public ManagedRace getRace(String id);
+    public ManagedRace getRace(SimpleRaceLogIdentifier id);
+    public boolean hasRace(String id);
+    public boolean hasRace(SimpleRaceLogIdentifier id);
 
     Collection<Mark> getMarks();
     Mark getMark(Serializable id);

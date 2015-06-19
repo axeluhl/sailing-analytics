@@ -24,13 +24,10 @@ public class RaceLogStartTimeEventDeserializer extends RaceLogRaceStatusEventDes
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-
         long startTime = (Long) object.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME);
-
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
-
         return factory.createStartTimeEvent(event.getCreatedAt(), author, event.getLogicalTimePoint(), event.getId(), event.getInvolvedBoats(), 
-                event.getPassId(), new MillisecondsTimePoint(startTime));
+                event.getPassId(), new MillisecondsTimePoint(startTime), event.getNextStatus());
     }
 
 }

@@ -16,9 +16,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO.RaceLiveState;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
-import com.sap.sailing.domain.common.dto.RaceDTO.RaceLiveState;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class EventRegattaRacesRace extends Composite {
@@ -28,10 +28,9 @@ public class EventRegattaRacesRace extends Composite {
     }
 
     @UiField DivElement fleetColor;
-    @UiField SpanElement raceName;
+    @UiField DivElement raceName;
     @UiField SpanElement raceName2;
-    @UiField SpanElement raceState;
-    @UiField SpanElement raceTime;
+    @UiField DivElement raceTime;
     @UiField SpanElement averageRaceWind;
     
     @UiField DivElement raceNotTrackedDiv;
@@ -54,13 +53,13 @@ public class EventRegattaRacesRace extends Composite {
     
     @UiField DivElement featureGPS;
     @UiField DivElement featureWind;
-    @UiField DivElement featureAudio;
+    // @UiField DivElement featureAudio;
     @UiField DivElement featureVideo;
     
     @UiField SpanElement currentLegNo;
     @UiField SpanElement totalLegsCount;
     
-    private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
+    private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, HH:mm");
     
     private final RaceDTO race;
 
@@ -168,11 +167,13 @@ public class EventRegattaRacesRace extends Composite {
         } else {
             featureVideo.setTitle(String.valueOf(race.trackedRaceStatistics.videoTracksCount));
         }
+        /* not used for now 
         if(!race.trackedRaceStatistics.hasAudioData) {
             featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         } else {
             featureAudio.setTitle(String.valueOf(race.trackedRaceStatistics.audioTracksCount));
         }
+        */
     }
     
     private void hideElement(Element el) {

@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.io.Serializable;
-
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -19,7 +17,7 @@ public abstract class RaceDialogFragment extends LoggableDialogFragment implemen
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
-        arguments.putSerializable(AppConstants.RACE_ID_KEY, race.getId());
+        arguments.putString(AppConstants.RACE_ID_KEY, race.getId());
         return arguments;
     }
 
@@ -35,8 +33,7 @@ public abstract class RaceDialogFragment extends LoggableDialogFragment implemen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
-        Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
+        String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
         managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
         if (managedRace == null) {
             throw new IllegalStateException(
@@ -77,7 +74,7 @@ public abstract class RaceDialogFragment extends LoggableDialogFragment implemen
      */
     protected Bundle getParameterBundle() {
         Bundle args = new Bundle();
-        args.putSerializable(AppConstants.RACE_ID_KEY, managedRace.getId());
+        args.putString(AppConstants.RACE_ID_KEY, managedRace.getId());
         return args;
     }
 }

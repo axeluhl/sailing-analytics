@@ -8,25 +8,16 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.OptionElement;
-import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
-    private final ListBox rankingMetricListBox;
     
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
         private StringMessages stringMessages;
@@ -112,13 +103,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(),
                 stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
-        rankingMetricListBox = createListBox(/* isMultipleSelect */ false);
-        for (RankingMetrics rankingMetricType : RankingMetrics.values()) {
-            rankingMetricListBox.addItem(RankingMetricTypeFormatter.format(rankingMetricType, stringMessages), rankingMetricType.name());
-            final SelectElement selectElement = rankingMetricListBox.getElement().cast();
-            final NodeList<OptionElement> options = selectElement.getOptions();
-            options.getItem(options.getLength()-1).setTitle(RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages));
-        }
     }
 
     @Override
@@ -129,10 +113,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel, Grid formGrid) {
         super.setupAdditionalWidgetsOnPanel(panel, formGrid);
-        int gridRow = formGrid.insertRow(formGrid.getRowCount());
-        formGrid.setWidget(gridRow, 0, new Label(stringMessages.rankingMetric()));
-        formGrid.setWidget(gridRow, 1, rankingMetricListBox);
-        TabPanel tabPanel = new TabPanel();
+        insertRankingMetricTabPanel(formGrid);
+        final TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(getSeriesEditor(), stringMessages.series());
         tabPanel.selectTab(0);
@@ -148,7 +130,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO dto = super.getResult();
-        dto.rankingMetricType = RankingMetrics.valueOf(rankingMetricListBox.getValue(rankingMetricListBox.getSelectedIndex()));
+        setRankingMetrics(dto);
         return dto;
     }
 
