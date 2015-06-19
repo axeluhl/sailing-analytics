@@ -22,6 +22,7 @@ public class SectionHeaderContent extends Widget {
 
     @UiField DivElement headerMainUi;
     @UiField DivElement headerLeftUi; 
+    @UiField DivElement titleAndLabelContainerUi;
     @UiField HeadingElement titleUi;
     @UiField DivElement labelUi;
     @UiField DivElement imageUi;
@@ -59,6 +60,7 @@ public class SectionHeaderContent extends Widget {
     public void setImageUrl(String imageUrl) {
         imageUi.getStyle().clearDisplay();
         imageUi.getStyle().setBackgroundImage("url(" + imageUrl + ")");
+        titleAndLabelContainerUi.addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title());
     }
     
     public void setInfoText(String infoText) {

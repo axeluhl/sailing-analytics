@@ -23,5 +23,6 @@ public interface SectionHeaderResources extends ClientBundle {
         String sectionheader_item_subtitle();
         String sectionheader_item_infotext();
         String sectionheader_item_arrow();
+        String sectionheader_item_adjust_title();
     }
 }

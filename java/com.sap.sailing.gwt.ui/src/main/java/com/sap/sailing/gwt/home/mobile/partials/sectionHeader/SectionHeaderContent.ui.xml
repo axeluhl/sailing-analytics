@@ -9,8 +9,10 @@
 			<div class="{local_res.css.sectionheader_item_image}" style="display:none;" ui:field="imageUi">
 	        	<div class="{local_res.css.sectionheader_item_image_seperator}"></div>
 	      	</div>
-			<h2 class="{local_res.css.sectionheader_item_title}" ui:field="titleUi"></h2>
-			<div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;" ui:field="labelUi"></div>
+	      	<div ui:field="titleAndLabelContainerUi">
+				<h2 class="{local_res.css.sectionheader_item_title}" ui:field="titleUi"></h2>
+				<div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;" ui:field="labelUi"></div>
+	      	</div>
 			<div class="{local_res.css.sectionheader_item_subtitle}" style="display:none;" ui:field="subtitleUi"></div>
 		</div>
 		<div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}" style="display:none;" ui:field="headerRightUi">
