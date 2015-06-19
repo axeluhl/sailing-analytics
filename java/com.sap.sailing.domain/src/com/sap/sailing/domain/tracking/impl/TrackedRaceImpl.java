@@ -103,6 +103,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -720,7 +721,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                startTime = new StartTimeFinder(raceLog).analyze();
+                
+                //FIXME: how to get the HasRegattaLike?
+                startTime = new StartTimeFinder(new ServerSideRaceLogResolver(null), raceLog).analyze().getStartTime();
                 if (startTime != null) {
                     break;
                 }
@@ -2935,12 +2938,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
-        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
-            // no more new data can be expected; stop mark passing calculator if one is being used
-            if (isUsingMarkPassingCalculator()) {
-                markPassingCalculator.stop();
-            }
-        }
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
@@ -3050,7 +3047,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (raceStates) {
             result = raceStates.get(raceLog);
             if (result == null) {
-                result = RaceStateImpl.create(raceLog);
+                //FIXME: how to get the corresponding RegattaLike?
+                result = RaceStateImpl.create(new ServerSideRaceLogResolver(null), raceLog);
                 raceStates.put(raceLog, result);
             }
         }

@@ -23,7 +23,7 @@
         <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemgps}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div>
         <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemwind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
         <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemvideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
-        <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemaudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>
+<!-- <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemaudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>-->
       </div>
       <g:HTMLPanel ui:field="regattaPhasesPanel" />
     </div>

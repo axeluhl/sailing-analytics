@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
@@ -19,15 +20,13 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.io.Serializable;
-
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
     private static final String TAG = RaceFragment.class.getName();
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
-        arguments.putSerializable(AppConstants.RACE_ID_KEY, race.getId());
+        arguments.putString(AppConstants.RACE_ID_KEY, race.getId());
         return arguments;
     }
 
@@ -50,7 +49,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
      */
     protected Bundle getRecentArguments() {
         Bundle args = new Bundle();
-        args.putSerializable(AppConstants.RACE_ID_KEY, managedRace.getId());
+        args.putString(AppConstants.RACE_ID_KEY, managedRace.getId());
         return args;
     }
 
@@ -66,9 +65,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         if (getArguments() != null) {
-            Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
+            String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null && !(getClass() == RaceFlagViewerFragment.class)) {
                 throw new IllegalStateException("Unable to obtain ManagedRace from datastore on start of " + getClass().getName());

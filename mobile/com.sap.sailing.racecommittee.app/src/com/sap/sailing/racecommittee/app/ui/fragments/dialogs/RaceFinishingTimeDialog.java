@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -32,13 +33,14 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
 
     private void setAndAnnounceFinishedTime() {
         TimePoint finishingTime = getFinishingTime();
-        StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
-        if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
-            if (stf.analyze().before(finishingTime)) {
+        StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
+        TimePoint startTime = stf.analyze().getStartTime();
+        if (getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
+            if (startTime.before(finishingTime)) {
                 getRace().getState().setFinishingTime(finishingTime);
                 dismiss();
-            }else{
-                Toast.makeText(getActivity(), getString(R.string.error_time_before_finish), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.the_selected_time_is_before_the_race_start_), Toast.LENGTH_LONG).show();
             }
         }
     }
