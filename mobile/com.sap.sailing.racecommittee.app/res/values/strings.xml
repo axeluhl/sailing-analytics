@@ -255,6 +255,7 @@
     <string name="toggle_group_race_mode">Group Race?</string>
     <string name="toggle_group_race_mode_off">No Group Racing</string>
     <string name="toggle_group_race_mode_on">Group Racing</string>
+    <string name="the_selected_time_is_before_the_race_start_">The selected time is before the race start.</string>
 
     <string name="confirm_start_time">Confirm Start Time</string>
     <string name="confirm_start_mode">Confirm Start Mode</string>

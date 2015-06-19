@@ -232,6 +232,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -843,25 +844,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceColumnDTOs;
     }
     
-    private RaceInfoDTO createRaceInfoDTO(String seriesName, RaceColumn raceColumn, Fleet fleet) {
+    private RaceInfoDTO createRaceInfoDTO(Leaderboard leaderboard, String seriesName, RaceColumn raceColumn, Fleet fleet) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-            
             raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            
+            final HasRegattaLike regattaLike;
+            if (leaderboard instanceof HasRegattaLike) {
+                regattaLike = (HasRegattaLike) leaderboard;
+            } else {
+                regattaLike = null;
+            }
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver(regattaLike), raceLog);
             TimePoint startTime = state.getStartTime();
             if (startTime != null) {
                 raceInfoDTO.startTime = startTime.asDate();
             }
-
             raceInfoDTO.lastStatus = state.getStatus();
-            
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
-            
             TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
@@ -4240,7 +4242,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         entry.boatClassName = boatClassName;
         entry.regattaDisplayName = regattaName;
         entry.regattaName = leaderboard.getName();
-        entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
+        entry.raceInfo = createRaceInfoDTO(leaderboard, seriesName, raceColumn, fleet);
         entry.currentServerTime = new Date();
         
         if (showOnlyRacesOfSameDay) {

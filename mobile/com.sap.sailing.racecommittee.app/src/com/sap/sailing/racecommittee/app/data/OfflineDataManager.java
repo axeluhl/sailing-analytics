@@ -110,8 +110,8 @@ public class OfflineDataManager extends DataManager {
         log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
                 AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
-                raceGroup), RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -119,16 +119,16 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
-                raceGroup), RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup),
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
          * RaceLogRaceStatus.FINISHED));
          */
-        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
-                raceGroup), RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup),
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
