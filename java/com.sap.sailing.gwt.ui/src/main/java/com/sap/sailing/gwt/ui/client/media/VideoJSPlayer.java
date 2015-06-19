@@ -43,7 +43,7 @@ public class VideoJSPlayer extends Widget {
         videoElement.setAttribute("controls", "");
     }
 
-    public void setVideo(VideoDTO video) {
+    public void setVideo(VideoDTO video, boolean showTitle) {
         String source = video.getSourceRef();
         MimeType mimeType = video.getMimeType();
         if (mimeType == null || mimeType.mediaType != MediaType.video) {
@@ -63,7 +63,9 @@ public class VideoJSPlayer extends Widget {
             se.setType(type);
             videoElement.appendChild(se);
         }
-        captionUi.setInnerText(video.getTitle());
+        if(showTitle) {
+            captionUi.setInnerText(video.getTitle());
+        }
     }
     
     public VideoElement getVideoElement() {
@@ -81,7 +83,7 @@ public class VideoJSPlayer extends Widget {
      * @return duration in seconds
      */
     public native int getDuration() /*-{
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.duration();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.duration();
     }-*/;
 
     /**
@@ -99,7 +101,7 @@ public class VideoJSPlayer extends Widget {
      * @return duration in seconds
      */
     public native void setCurrentTime(int currentTime) /*-{
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
     
     /**
@@ -108,7 +110,7 @@ public class VideoJSPlayer extends Widget {
      * @return <code>true</code> if the player is running in full screen mode, <code>false</code> otherwise
      */
     public native boolean isFullscreen() /*-{
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.isFullscreen();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.isFullscreen();
     }-*/;
 
     /**
@@ -117,7 +119,7 @@ public class VideoJSPlayer extends Widget {
      * @return <code>true</code> if the player is paused, <code>false</code> if it is playing
      */
     public native boolean paused() /*-{
-	return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.paused();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.paused();
     }-*/;
     
     /**
@@ -126,21 +128,21 @@ public class VideoJSPlayer extends Widget {
      * @param uniqueId
      */
     native void _onLoad(boolean autoplay) /*-{
-	var player = $wnd.videojs(
-	    this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
-	    {
-		"width" : "auto",
-		"height" : "auto",
-		"playsInline" : true,
-		"customControlsOnMobile" : true
-	    }, 
-	    function() {
-		console.log("play: " + autoplay);
-		if (autoplay) {
-		    this.play();
-		}
-	    });
-	this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
+        var player = $wnd.videojs(
+            this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
+            {
+                "width" : "auto",
+                "height" : "auto",
+                "playsInline" : true,
+                "customControlsOnMobile" : true
+            }, 
+            function() {
+                console.log("play: " + autoplay);
+                if (autoplay) {
+                    this.play();
+                }
+            });
+        this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
     }-*/;
     
     native void _onUnload() /*-{
