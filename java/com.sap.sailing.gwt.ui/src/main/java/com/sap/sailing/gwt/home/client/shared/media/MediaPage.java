@@ -139,7 +139,7 @@ public class MediaPage extends Composite {
 
     private void putVideoOnDisplay(final SailingVideoDTO video, boolean autoplay) {
         videoDisplayUi = new VideoJSPlayer(true, autoplay);
-        videoDisplayUi.setVideo(video);
+        videoDisplayUi.setVideo(video, true);
         videoDisplayHolderUi.setWidget(videoDisplayUi);
     }
 }
