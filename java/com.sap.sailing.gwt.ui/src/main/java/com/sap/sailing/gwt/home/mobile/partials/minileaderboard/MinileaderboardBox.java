@@ -81,8 +81,8 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
             scoreInformation.add(new Label(data.getScoreCorrectionText()));
         }
         if (data.getLastScoreUpdate() != null) {
-            String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(data.getLastScoreUpdate()) + ", "
-                    + DateAndTimeFormatterUtil.longTimeFormatter.render(data.getLastScoreUpdate());
+            String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(data.getLastScoreUpdate()) + " "
+                    + DateAndTimeFormatterUtil.formatElapsedTime(data.getLastScoreUpdate().getTime());
             scoreInformation.add(new Label(StringMessages.INSTANCE.lastScoreUpdate() + ": " + lastUpdate));
         }
         scoreInformation.getElement().getStyle().setBackgroundColor("#f2f2f2");
