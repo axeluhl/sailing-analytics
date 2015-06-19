@@ -10,10 +10,10 @@ import java.util.SortedSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
 
@@ -45,13 +45,12 @@ public class RaceRankComparator implements Comparator<Competitor> {
     private final DummyMarkPassingWithTimePointOnly markPassingWithTimePoint;
     private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
     
-    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint) {
+    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         super();
         this.trackedRace = trackedRace;
         this.timePoint = timePoint;
         this.markPassingWithTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
-        LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
             if (trackedLegOfCompetitor != null) {

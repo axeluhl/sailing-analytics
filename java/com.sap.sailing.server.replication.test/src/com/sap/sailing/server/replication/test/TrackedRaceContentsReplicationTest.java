@@ -55,6 +55,7 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -75,7 +76,8 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
+                new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
@@ -141,7 +143,9 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
 
     @Test
     public void testWindAdditionReplication() throws InterruptedException {
-        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+        TimePoint now = MillisecondsTimePoint.now();
+        trackedRace.setStartOfTrackingReceived(now);
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(now.asMillis()+1234),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         trackedRace.recordWind(wind, webWindSource);
@@ -189,12 +193,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     
     @Test
     public void testReplicationOfLoadingOfStoredWindTrack() throws UnknownHostException, MongoException, InterruptedException {
+        TimePoint now = MillisecondsTimePoint.now();
+        trackedRace.setStartOfTrackingReceived(now);
         MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory());
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         WindTrack windTrack = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
                 /* delayForWindEstimationCacheInvalidation */ 10000);
-        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(now.asMillis()+1234),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         windTrack.add(wind);
         Thread.sleep(1000); // give MongoDB time to read its own writes in a separate session

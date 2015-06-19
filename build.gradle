@@ -2,21 +2,23 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.1.1'
     }
 }
 
 allprojects {
     repositories {
-        mavenCentral()
+        jcenter()
     }
+
     version = "1.0.0-SNAPSHOT"
+
     tasks.withType(JavaCompile) { 
-	sourceCompatibility = "1.7"
-	targetCompatibility = "1.7" 
+	    sourceCompatibility = "1.7"
+	    targetCompatibility = "1.7"
     }
 }

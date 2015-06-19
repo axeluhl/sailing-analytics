@@ -4,16 +4,18 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 
 
 public enum BoatClassMasterdata {
-    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR"),
+    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR", "2.4 Metre", "2.4-metre"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
-    _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM"),
+    _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM", "12-metre", "12 metre"),
     _29ER ("29er", true, 4.45, 1.70, BoatHullType.MONOHULL, true),
     _49ER ("49er", true, 4.88, 1.93, BoatHullType.MONOHULL, true),
     _49ERFX ("49erFX", true, 4.88, 1.93, BoatHullType.MONOHULL, true, "49FX"),
     _420 ("420", true, 4.20, 1.65, BoatHullType.MONOHULL, true, "420er", "420M", "420W"),
     _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W"),
+    RS800 ("RS 800", true, 4.80, 1.88, BoatHullType.MONOHULL, true, "RS800"),
     A_CAT ("A-Catamaran", true, 5.49, 2.30, BoatHullType.CATAMARAN, false, "A-Cat", "ACat", "A-Class Catamaran"),
     ALBIN_EXPRESS ("Albin Express", true, 7.77, 2.50, BoatHullType.MONOHULL, false),
+    ALBIN_BALLAD ("Albin Ballad", true, 9.12, 2.95, BoatHullType.MONOHULL, false),
     B_ONE ("B/ONE", true, 7.80, 2.49, BoatHullType.MONOHULL, true, "B-ONE"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, true, "Drachen", "Dragon"),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, true, "Extreme-40", "Extreme40", "ESS40"),
@@ -43,7 +45,7 @@ public enum BoatClassMasterdata {
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17", "Nacra-17"),
     OK ("OK Dinghy", true, 5.25, 2.59, BoatHullType.MONOHULL, false, "OK-Dinghy", "OK-Jolle", "OK"),
     OPTIMIST ("Optimist", true, 2.34, 1.07, BoatHullType.MONOHULL, false, "Opti", "Optimist Dinghy"),
-    PIRAT ("Pirat", true, 5.00, 1.61, BoatHullType.MONOHULL, false, "Pirate", "Piraten"),
+    PIRATE ("Pirate", true, 5.00, 1.61, BoatHullType.MONOHULL, false, "Pirat", "Piraten"),
     PLATU_25 ("Platu 25", true, 7.53, 2.62, BoatHullType.MONOHULL, true, "Platu", "Platu-25", "PLA", "B25"),
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X"),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
@@ -57,7 +59,13 @@ public enum BoatClassMasterdata {
     FLYING_DUTCHMAN ("Flying Dutchman", true, 6.10, 1.80, BoatHullType.MONOHULL, true),
     DYAS("Dyas", true, 7.15, 1.95, BoatHullType.MONOHULL, true),
     INTERNATIONAL_14("International 14", true, 4.27, 1.83, BoatHullType.MONOHULL, true, "I14"),
-    OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC");
+    OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC"),
+    
+    // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass
+    ORC ("ORC", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+    ORC_CLUB ("ORC Club", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+    ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int.");
+
 
     private final String displayName;
     private final String[] alternativeNames;

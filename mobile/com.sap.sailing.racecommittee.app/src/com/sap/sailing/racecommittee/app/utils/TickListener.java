@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import com.sap.sse.common.TimePoint;
+
 public interface TickListener {
-	public void notifyTick();
+    void notifyTick(TimePoint now);
 }

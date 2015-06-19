@@ -73,6 +73,8 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                     try {
                         if (liveDataConnection != null) {
                             liveDataConnection.stop();
+                            liveDataConnection.removeListener(igtimiWindReceiver);
+                            liveDataConnection.removeListener(this);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -97,7 +99,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         out.println("<meta http-equiv=refresh content='10; url="+req.getRequestURI()+"'>");
         out.println("</head>");
         out.println("<body>");
-        out.println("<p>Reload wind connectors with parameter reloadWindReceiver=true. This will force a connection reset and a reloading of the wind receivers.</p>");
+        out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
         if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
             final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;

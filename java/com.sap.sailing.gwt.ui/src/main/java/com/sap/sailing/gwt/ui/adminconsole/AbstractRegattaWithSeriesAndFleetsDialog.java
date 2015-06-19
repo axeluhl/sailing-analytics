@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.OptionElement;
+import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -11,9 +14,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -43,6 +48,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
     private final ListEditorComposite<SeriesDTO> seriesEditor;
+    private final ListBox rankingMetricListBox;
 
     protected final List<EventDTO> existingEvents;
 
@@ -52,6 +58,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         this.stringMessages = stringMessages;
         this.regatta = regatta;
         this.existingEvents = existingEvents;
+        rankingMetricListBox = createListBox(/* isMultipleSelect */ false);
+        for (RankingMetrics rankingMetricType : RankingMetrics.values()) {
+            rankingMetricListBox.addItem(RankingMetricTypeFormatter.format(rankingMetricType, stringMessages), rankingMetricType.name());
+            final SelectElement selectElement = rankingMetricListBox.getElement().cast();
+            final NodeList<OptionElement> options = selectElement.getOptions();
+            options.getItem(options.getLength()-1).setTitle(RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages));
+        }
         startDateBox = createDateTimeBox(regatta.startDate);
         startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         endDateBox = createDateTimeBox(regatta.endDate);
@@ -77,7 +90,33 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         setupEventAndCourseAreaListBoxes(stringMessages);
     }
 
-    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
+    /**
+     * Subclasses that want to display a list box for the ranking metric can use this method to create a tab
+     * panel that can be inserted into the grid panel in the {@link #setupAdditionalWidgetsOnPanel(VerticalPanel, Grid)} method.
+     */
+    protected void insertRankingMetricTabPanel(Grid formGrid) {
+        int gridRow = formGrid.insertRow(formGrid.getRowCount());
+        formGrid.setWidget(gridRow, 0, new Label(stringMessages.rankingMetric()));
+        formGrid.setWidget(gridRow, 1, rankingMetricListBox);
+    }
+
+    protected void setRankingMetrics(RegattaDTO dto) {
+        dto.rankingMetricType = RankingMetrics.valueOf(getRankingMetricListBox().getValue(getRankingMetricListBox().getSelectedIndex()));
+    }
+
+    protected ListBox getRankingMetricListBox() {
+        return rankingMetricListBox;
+    }
+    
+   /**
+     * @param panel
+     *            the panel holding dialog elements
+     * @param formGrid
+     *            a grid at the top of the <code>panel</code> in which the default label/checkbox pairs are presented;
+     *            implementors may use this to {@link Grid#insertRow(int) insert} more rows which then are formatted
+     *            properly together with the label/checkbox pairs provided by this class.
+     */
+    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid);
 
     protected abstract ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series);
     
@@ -106,7 +145,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(4, 1, courseAreaListBox);
         formGrid.setWidget(5, 0, new Label(stringMessages.useStartTimeInference() + ":"));
         formGrid.setWidget(5, 1, useStartTimeInferenceCheckBox);
-        setupAdditionalWidgetsOnPanel(panel);
+        setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
 

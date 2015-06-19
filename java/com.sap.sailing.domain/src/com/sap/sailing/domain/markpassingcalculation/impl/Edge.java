@@ -60,7 +60,6 @@ public class Edge implements Comparable<Edge> {
         return "Edge from Waypoint " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getCost();
     }
 
-    // TODO Only for Debugging!
     @Override
     public int compareTo(Edge o) {
         return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getCost().compareTo(o.getCost());

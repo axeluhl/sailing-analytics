@@ -36,7 +36,9 @@ public abstract class AbstractSpeedImpl implements Speed {
 
     @Override
     public int compareTo(Speed speed) {
-        return getMetersPerSecond() > speed.getMetersPerSecond() ? 1 : getMetersPerSecond() == speed.getMetersPerSecond() ? 0 : -1;
+        final double metersPerSecond = getMetersPerSecond();
+        final double otherMetersPerSecond = speed.getMetersPerSecond();
+        return metersPerSecond > otherMetersPerSecond ? 1 : metersPerSecond == otherMetersPerSecond ? 0 : -1;
     }
     
     @Override

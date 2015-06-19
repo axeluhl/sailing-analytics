@@ -69,7 +69,8 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
             configuration = configurationDeserializer.deserialize(value);
         }
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_DISPLAY_NAME)) {
-            displayName = object.get(RaceGroupJsonSerializer.FIELD_DISPLAY_NAME).toString();
+            final Object displayNameJson = object.get(RaceGroupJsonSerializer.FIELD_DISPLAY_NAME);
+            displayName = displayNameJson == null ? null : displayNameJson.toString();
         }
         return new RaceGroupImpl(name, displayName, boatClass, courseArea, series, configuration);
     }

@@ -5,9 +5,7 @@ import java.util.Iterator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,6 +29,11 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
     private static LiveAverageComponentUiBinder uiBinder = GWT.create(LiveAverageComponentUiBinder.class);
 
     interface LiveAverageComponentUiBinder extends UiBinder<Widget, LiveAverageComponent> {
+    }
+    
+    interface LiveAverageComponentStyle extends CssResource {
+        
+        String liveAverageCompoment_panel_value_unit_degrees();
     }
 
     @UiField
@@ -65,6 +68,9 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
 
     @UiField
     HTMLPanel averagePanel;
+    
+    @UiField
+    LiveAverageComponentStyle style;
 
     private StringMessages stringConstants;
     public LiveAverageComponent() {
@@ -87,12 +93,8 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
         this.averageUnit.setInnerText(unit);
         // Lifts the degrees unit string "°". Otherwise it would be too small.
         if (unit.equals("°")) {
-            this.liveUnit.getStyle().setFontSize(15, Unit.PT);
-            this.averageUnit.getStyle().setFontSize(15, Unit.PT);
-            this.liveUnit.getStyle().setFontWeight(Style.FontWeight.LIGHTER);
-            this.averageUnit.getStyle().setFontWeight(Style.FontWeight.LIGHTER);
-            this.liveUnit.getStyle().setPosition(Position.ABSOLUTE);
-            this.averageUnit.getStyle().setPosition(Position.ABSOLUTE);
+            this.liveUnit.addClassName(style.liveAverageCompoment_panel_value_unit_degrees());
+            this.averageUnit.setClassName(style.liveAverageCompoment_panel_value_unit_degrees());
         }
         this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
         this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));

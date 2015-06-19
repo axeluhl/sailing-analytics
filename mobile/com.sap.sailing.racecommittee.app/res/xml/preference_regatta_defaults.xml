@@ -99,4 +99,20 @@
         
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="League Start" >
+
+        <ListPreference
+            android:key="@string/preference_racing_procedure_league_classflag_key"
+            android:defaultValue="@string/preference_racing_procedure_classflag_default"
+            android:title="@string/preference_racing_procedure_classflag_header"
+            android:summary="@string/empty" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_league_hasxray_key"
+            android:defaultValue="@bool/preference_racing_procedure_league_hasxray_default"
+            android:title="@string/preference_racing_procedure_hasxray_header"
+            android:summary="@string/preference_racing_procedure_hasxray_description" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

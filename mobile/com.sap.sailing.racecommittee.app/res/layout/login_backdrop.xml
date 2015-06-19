@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/backdrop"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginStart="@dimen/default_margin"
+        android:layout_marginTop="25dp"
+        android:src="@drawable/sap_logo"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignBottom="@+id/view"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/gradient"/>
+
+    <TextView
+        android:id="@+id/backdrop_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/view"
+        android:layout_alignLeft="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:text="@string/login_text"
+        android:textColor="@color/constant_white"
+        android:textSize="@dimen/textSize_40"/>
+
+    <TextView
+        android:id="@+id/backdrop_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/backdrop_title"
+        android:layout_alignLeft="@id/imageView"
+        android:layout_alignStart="@id/imageView"
+        android:alpha="0"
+        android:drawableLeft="@drawable/ic_assignment_white_48dp"
+        android:drawablePadding="@dimen/default_padding_half"
+        android:drawableStart="@drawable/ic_assignment_white_48dp"
+        android:text="@string/login_sub_text"
+        android:textColor="@color/constant_white"
+        android:textSize="@dimen/textSize_40"/>
+
+    <ImageView
+        android:id="@+id/settings_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:alpha="0"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:src="@drawable/ic_settings_white_48dp"
+        tools:alpha="1"/>
+
+    <ImageView
+        android:id="@+id/technical_info"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin_half"
+        android:layout_toLeftOf="@id/settings_button"
+        android:alpha="0"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:src="@drawable/ic_info_outline_white_48dp"
+        tools:alpha="1"/>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentBottom="true"
+        android:background="?sap_yellow_1"/>
+</RelativeLayout>

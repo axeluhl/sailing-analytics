@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -176,8 +176,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 				R.id.listViewPreviousCourse);
 		previousCourseListView.setAdapter(previousCourseElementAdapter);
 
-		takePreviousButton = (Button) getView().findViewById(
-				R.id.takePreviousCourseDesignButton);
+		takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
 		takePreviousButton.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View arg0) {
@@ -281,8 +280,8 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 							}
 
 							@Override
-							public void onLoadSucceded(Collection<Mark> data,
-									boolean isCached) {
+							public void onLoadSucceeded(Collection<Mark> data,
+							    boolean isCached) {
 								onLoadMarksSucceeded(data);
 							}
 						}));
@@ -398,8 +397,8 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 
     private void createUsePreviousCourseDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Use previous course design");
-        builder.setMessage("Use previously published course design?");
+        builder.setTitle(getString(R.string.use_previous_course_dialog_title));
+        builder.setMessage(getString(R.string.use_previous_course_dialog_message));
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
             @Override
@@ -461,7 +460,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         for (PassingInstruction instruction : PassingInstruction.relevantValues()) {
             instructions.add(instruction.name());
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int position) {
@@ -469,8 +468,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
                         onPassingInstructionPicked(courseElement, pickedDirection);
                     }
                 });
-        builder.create();
-        builder.show();
+        builder.create().show();
     }
 
 

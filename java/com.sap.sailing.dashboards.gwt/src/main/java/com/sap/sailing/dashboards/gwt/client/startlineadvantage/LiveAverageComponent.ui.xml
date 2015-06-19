@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-    <ui:style src="LiveAverageComponent.css" />
+    <ui:style type='com.sap.sailing.dashboards.gwt.client.startlineadvantage.LiveAverageComponent.LiveAverageComponentStyle' src='LiveAverageComponent.css'></ui:style>
     
 	<g:HTMLPanel ui:field="liveAveragePanel" styleName="{style.liveAverageCompoment_panel}">
 

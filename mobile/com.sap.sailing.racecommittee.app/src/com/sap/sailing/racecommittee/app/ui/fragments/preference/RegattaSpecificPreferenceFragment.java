@@ -18,18 +18,17 @@ import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 
 public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         Context context = getActivity();
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
-        
-        
+
         Set<RaceGroup> raceGroups = getRaceGroups(context);
         if (raceGroups.isEmpty()) {
             Preference preference = new Preference(context);
@@ -56,25 +55,25 @@ public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
         Preference preference = new Preference(screen.getContext());
         preference.setTitle(getString(R.string.configure_regatta, raceGroup.getName()));
         preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            
+
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                SettingsActivity.openSpecificRegattaConfiguration(getActivity(), raceGroup);
+                PreferenceActivity.openSpecificRegattaConfiguration(getActivity(), raceGroup);
                 return false;
             }
         });
         screen.addPreference(preference);
     }
-    
+
     private static class RaceGroupComparator implements Comparator<RaceGroup> {
 
         private NaturalComparator nameComparator = new NaturalComparator();
-        
+
         @Override
         public int compare(RaceGroup lhs, RaceGroup rhs) {
             return nameComparator.compare(lhs.getName(), rhs.getName());
         }
-        
+
     }
 
 }

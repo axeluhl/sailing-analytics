@@ -78,8 +78,8 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
             }
         }
 
+        setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
-        response.setContentType("application/json");
     }
 
     private UUID toUUID(String value) {

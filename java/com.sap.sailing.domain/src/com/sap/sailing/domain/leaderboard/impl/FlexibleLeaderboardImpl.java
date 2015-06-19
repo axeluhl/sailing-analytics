@@ -3,11 +3,14 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -18,6 +21,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -31,7 +35,9 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
@@ -53,6 +59,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
     private transient RaceLogStore raceLogStore;
     private CourseArea courseArea;
+    private RaceExecutionOrderProvider raceExecutionOrderProvider;
     
     /**
      * @see RegattaLog for the reason why the leaderboard manages a {@code RegattaLog}
@@ -74,10 +81,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
         this.name = name;
-        this.races = new ArrayList<FlexibleRaceColumn>();
+        this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
+        this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
     }
 
     /**
@@ -92,6 +100,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         for (RaceColumn column : getRaceColumns()) {
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
         }
+    }
+    
+    protected Object readResolve() throws ObjectStreamException {
+        raceExecutionOrderProvider.triggerUpdate();
+        return this;
     }
 
     @Override
@@ -159,6 +172,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (raceColumn != null) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 raceLogStore.removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                if (raceColumn.getTrackedRace(fleet) != null) {
+                    raceColumn.getTrackedRace(fleet).detachRaceExecutionOrderProvider(raceExecutionOrderProvider);
+                }
             }
             races.remove(raceColumn);
             getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
@@ -168,11 +184,17 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+        final Iterable<RaceColumn> result;
+        if (races != null) {
+            result = Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace) {
-        return new RaceColumnImpl(column, medalRace);
+        return new RaceColumnImpl(column, medalRace, raceExecutionOrderProvider);
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {
@@ -281,6 +303,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
+    public Double getTimeOnTimeFactor(Competitor competitor) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor);
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
+    }
+
+    @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<>();
         for (Competitor c : super.getAllCompetitors()) {
@@ -290,5 +322,21 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
         result.addAll(viaLog);
         return result;
+    }
+    
+    private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
+        private static final long serialVersionUID = 652833386555762661L;
+
+        public RaceExecutionOrderCache() {
+            super();
+            addRaceColumnListener(this);
+        }
+
+        @Override
+        protected Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries() {
+            final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
+            result.put(FlexibleLeaderboardImpl.defaultFleet, getRaceColumns());
+            return result;
+        }
     }
 }

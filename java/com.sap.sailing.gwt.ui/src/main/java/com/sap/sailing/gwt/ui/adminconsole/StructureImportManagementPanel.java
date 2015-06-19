@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
@@ -246,9 +247,9 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
             courseAreaNames.add(courseAreaDTO.getName());
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
-                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), 
+                newEvent.getImages(), newEvent.getVideos(),
+                new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(stringMessages.errorTryingToCreateNewEvent(newEvent.getName(), t.getMessage()));
@@ -324,6 +325,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
         result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length in meters */ 5);
         result.series = regatta.series;
+        result.rankingMetricType = RankingMetrics.ONE_DESIGN;
         return result;
     }
 

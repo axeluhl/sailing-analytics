@@ -47,10 +47,12 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -76,10 +78,10 @@ public class OfflineDataManager extends DataManager {
         cal.set(2012, 12, 5);
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
 
-        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet()));
-        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet()));
-        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet()));
-        EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet());
+        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet()));
+        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet()));
+        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet()));
+        EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet());
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", UUID.randomUUID()));
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
@@ -90,27 +92,26 @@ public class OfflineDataManager extends DataManager {
                         medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null, null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null, null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null, null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final AbstractLogEventAuthor author = AppPreferences.on(context).getAuthor();
-        ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
-        
-        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
-                1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
+        ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader
+                .loadFromPreferences(preferences);
+
+        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
+                new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
         log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
-                AppPreferences.on(context).getAuthor(),
-                1, RaceLogRaceStatus.FINISHING));
+                AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -118,18 +119,16 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup), 
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup),
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
          * RaceLogRaceStatus.FINISHED));
          */
-        ManagedRace q3 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup), 
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup),
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
@@ -168,6 +167,19 @@ public class OfflineDataManager extends DataManager {
                     @Override
                     public Collection<CourseArea> call() throws Exception {
                         return dataStore.getCourseAreas(dataStore.getEvent(parentEventId));
+                    }
+                });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+            final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+        // TODO Auto-generated method stub
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+                        return dataStore.getCourseAreas(parentEvent);
                     }
                 });
     }
@@ -219,14 +231,22 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<DeviceConfiguration> callback) {
-        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback, new Callable<DeviceConfiguration>() {
-            @Override
-            public DeviceConfiguration call() throws Exception {
-                throw new IllegalStateException("No remote configuration in offline mode.");
-            }
-        });
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
+            DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
+        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback,
+                new Callable<DeviceConfiguration>() {
+                    @Override
+                    public DeviceConfiguration call() throws Exception {
+                        throw new IllegalStateException("No remote configuration in offline mode.");
+                    }
+                });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+            PositionListFragment positionListFragment) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

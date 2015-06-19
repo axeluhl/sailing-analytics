@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
@@ -22,14 +25,9 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     private String description;
     private List<? extends LeaderboardGroupBaseDTO> leaderboardGroups;
-    private List<String> imageURLs = new ArrayList<>();
-    private List<String> videoURLs = new ArrayList<>();
-    private List<String> sponsorImageURLs = new ArrayList<>();
-    private String logoImageURL;
     private String officialWebsiteURL;
-    /** placeholder for social media URL's -> attributes will be implemented later on */
-    private String facebookURL;
-    private String twitterURL;
+    private List<ImageDTO> images = new ArrayList<>();
+    private List<VideoDTO> videos = new ArrayList<>();
 
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it
@@ -65,6 +63,17 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.imageSizes = new HashMap<String, ImageSize>();
     }
 
+    public ImageDTO getLogoImage() {
+        ImageDTO result = null;
+        for (ImageDTO image : images) {
+            if (image.hasTag(MediaTagConstants.LOGO)) {
+                result = image;
+                break;
+            }
+        }
+        return result;
+    }
+    
     public boolean isRunning() {
         Date now = new Date();
         if (startDate != null && endDate != null && (now.after(startDate) && now.before(endDate))) {
@@ -79,14 +88,6 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getLogoImageURL() {
-        return logoImageURL;
-    }
-
-    public void setLogoImageURL(String logoImageURL) {
-        this.logoImageURL = logoImageURL;
     }
 
     public String getOfficialWebsiteURL() {
@@ -110,30 +111,6 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.baseURL = baseURL;
     }
 
-    public void addImageURL(String imageURL) {
-        imageURLs.add(imageURL);
-    }
-
-    public void addVideoURL(String videoURL) {
-        videoURLs.add(videoURL);
-    }
-
-    public void addSponsorImageURL(String sponsorImageURL) {
-        sponsorImageURLs.add(sponsorImageURL);
-    }
-
-    public List<String> getImageURLs() {
-        return imageURLs;
-    }
-
-    public List<String> getVideoURLs() {
-        return videoURLs;
-    }
-
-    public List<String> getSponsorImageURLs() {
-        return sponsorImageURLs;
-    }
-
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {
         return leaderboardGroups;
     }
@@ -146,20 +123,20 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.isOnRemoteServer = isOnRemoteServer;
     }
 
-    public String getFacebookURL() {
-        return facebookURL;
+    public void addImage(ImageDTO image) {
+        images.add(image);
     }
 
-    public void setFacebookURL(String facebookURL) {
-        this.facebookURL = facebookURL;
+    public List<ImageDTO> getImages() {
+        return images;
     }
 
-    public String getTwitterURL() {
-        return twitterURL;
+    public void addVideo(VideoDTO video) {
+        videos.add(video);
     }
 
-    public void setTwitterURL(String twitterURL) {
-        this.twitterURL = twitterURL;
+    public List<VideoDTO> getVideos() {
+        return videos;
     }
 
     public void setImageSize(String imageURL, ImageSize imageSize) {

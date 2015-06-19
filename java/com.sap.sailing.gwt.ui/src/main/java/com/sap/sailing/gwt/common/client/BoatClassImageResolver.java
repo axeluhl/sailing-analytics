@@ -18,6 +18,11 @@ public class BoatClassImageResolver {
     
     static {
         boatClassIconsMap = new HashMap<String, ImageResource>();
+
+        // handicap sailing icons
+        boatClassIconsMap.put(BoatClassMasterdata.ORC.getDisplayName(), imageResources.ORCIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ORC_CLUB.getDisplayName(), imageResources.ORCIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ORC_INTERNATIONAL.getDisplayName(), imageResources.ORCIcon());
         
         boatClassIconsMap.put(BoatClassMasterdata._12M.getDisplayName(), imageResources._12mRIcon());
         boatClassIconsMap.put(BoatClassMasterdata._2_4M.getDisplayName(), imageResources._2_4mIcon());
@@ -58,7 +63,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());
         boatClassIconsMap.put(BoatClassMasterdata.OK.getDisplayName(), imageResources.OKIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPTIMIST.getDisplayName(), imageResources.OptimistIcon());
-        boatClassIconsMap.put(BoatClassMasterdata.PIRAT.getDisplayName(), imageResources.PiratIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.PIRATE.getDisplayName(), imageResources.PiratIcon());
         boatClassIconsMap.put(BoatClassMasterdata.PLATU_25.getDisplayName(), imageResources.Platu25Icon());
         boatClassIconsMap.put(BoatClassMasterdata.RS_X.getDisplayName(), imageResources.RSXIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SONAR.getDisplayName(), imageResources.SonarIcon());
@@ -70,9 +75,14 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.INTERNATIONAL_14.getDisplayName(), imageResources.International14Icon());
         boatClassIconsMap.put(BoatClassMasterdata.DYAS.getDisplayName(), imageResources.DyasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPEN_BIC.getDisplayName(), imageResources.OpenBicIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.RS800.getDisplayName(), imageResources.RS800Icon());
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {
-        return boatClassIconsMap.get(displayName);
+        ImageResource imageResource = boatClassIconsMap.get(displayName);
+        if(imageResource == null) {
+            imageResource = BoatClassImageResources.INSTANCE.genericBoatClass(); 
+        }
+        return imageResource;
     }
 }

@@ -619,10 +619,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
-	ANDROID="$ANDROID_HOME/tools/android"
-	if [ \! -x "$ANDROID" ]; then
-	  ANDROID="$ANDROID_HOME/tools/android.bat"
-	fi
+        ANDROID="$ANDROID_HOME/tools/android"
+	    if [ \! -x "$ANDROID" ]; then
+	        ANDROID="$ANDROID_HOME/tools/android.bat"
+	    fi
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
@@ -633,7 +633,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
         NOW=$(date +"%s")
-        BUILD_TOOLS=22.0.0
+        BUILD_TOOLS=22.0.1
         TARGET_API=22
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
@@ -651,11 +651,15 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
         ./gradlew clean build | tee -a $START_DIR/build.log
-        if [[ $? != 0 ]]; then
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
-        # testing deactivated due to errors in hudson
         if [ $testing -eq 1 ]; then
+            echo "Starting JUnit tests..."
+            ./gradlew test | tee -a $START_DIR/build.log
+            if [[ ${PIPESTATUS[0]} != 0 ]]; then
+                exit 103
+            fi
             adb emu kill
             echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
             echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
@@ -673,7 +677,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             fi
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
-            if [[ $? != 0 ]]; then
+            if [[ ${PIPESTATUS[0]} != 0 ]]; then
               adb emu kill
               "$ANDROID" delete avd --name ${AVD_NAME}
               exit 101

@@ -81,10 +81,8 @@ public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener>
 
     @Override
     public void onWindFixChanged(ReadonlyRaceState state) {
-        // TODO Auto-generated method stub
-        
+        for (RaceStateChangedListener listener : this) {
+            listener.onWindFixChanged(state);
+        }
     }
-    
-    
-
 }

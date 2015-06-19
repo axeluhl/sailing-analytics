@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	android:gravity="fill_horizontal"
-    android:orientation="vertical" >
+    android:gravity="fill_horizontal"
+    android:orientation="vertical">
 
     <View
         android:id="@+id/race_flag_space_splitter"
@@ -17,7 +16,7 @@
         android:layout_height="0dp"
         android:layout_alignBottom="@id/race_flag_space_splitter"
         android:layout_alignParentTop="true"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/race_flag_space_up_flags"
@@ -25,8 +24,7 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:gravity="top"
-            android:orientation="horizontal" >
-        </LinearLayout>
+            android:orientation="horizontal" />
 
         <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
             android:layout_width="wrap_content"
@@ -43,7 +41,7 @@
         android:layout_height="0dp"
         android:layout_alignParentBottom="true"
         android:layout_alignTop="@id/race_flag_space_splitter"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/race_flag_space_down_flags"
@@ -51,8 +49,7 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:gravity="bottom"
-            android:orientation="horizontal" >
-        </LinearLayout>
+            android:orientation="horizontal" />
 
         <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
             android:layout_width="wrap_content"

@@ -10,16 +10,19 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -27,7 +30,8 @@ import com.sap.sse.common.Util.Triple;
  */
 public class MultiregattaRegattasTabView extends Composite implements MultiregattaTabView<MultiregattaRegattasPlace> {
     
-    @UiField FlowPanel content;
+    @UiField SimplePanel content;
+    @UiField(provided = true) RacesListLive racesListLive;
     private Presenter currentPresenter;
 
     public MultiregattaRegattasTabView() {
@@ -51,13 +55,18 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
 
     @Override
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
+        racesListLive = new RacesListLive(currentPresenter, true);
+        initWidget(ourUiBinder.createAndBindUi(this));
+        RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        refreshManager.add(racesListLive, new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        contentArea.setWidget(this);
         
      // TODO: understand, and than move this into appropiate place (probably context)
         currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
                     @Override
                     public void onSuccess(List<RaceGroupDTO> raceGroups) {
                         if (raceGroups.size() > 0) {
-                            initView(contentArea);
+                            initView();
                         } else {
                             // createEventWithoutRegattasView(event, panel);
                         }
@@ -72,12 +81,10 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
                 });
     }
 
-    protected void initView(AcceptsOneWidget contentArea) {
+    protected void initView() {
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure();
         EventRegattaList eventRegattaList = new EventRegattaList(regattaStructure, currentPresenter);
-//        initWidget(ourUiBinder.createAndBindUi(this));
-//        contentArea.setWidget(this);
-        contentArea.setWidget(eventRegattaList);
+        content.setWidget(eventRegattaList);
     }
     
     private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure() {
@@ -105,7 +112,6 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
     }
 
-    @SuppressWarnings("unused")
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override

@@ -86,9 +86,9 @@
   width: 13.333333333333334em;
 }
 .search_button {
-  width: 2.666666666666667em;
-  height: 1em;
-  vertical-align: middle;
+  width: 2.666666666666667em !important;
+  height: 1em !important;
+  vertical-align: middle !important;
 }
 @media (min-width: 61em) {
   .search_button {
