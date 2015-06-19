@@ -43,7 +43,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
 
     public static Triple<String, String, String> unescape(String escapedId) {
         int arrayIndex = 0;
-        StringBuilder[] split = new StringBuilder[3];
+        StringBuilder[] split = new StringBuilder[4];
         for (int i=0; i<split.length; i++) {
             split[i] = new StringBuilder();
         }
@@ -63,7 +63,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
             }
         }
         String leaderboardName = split[0].toString();
-        String raceColumnName = split[1].toString();
+        String raceColumnName = split[3].toString();
         String fleetName = split[2].toString();
         return new Triple<>(leaderboardName, raceColumnName, fleetName);
     }
