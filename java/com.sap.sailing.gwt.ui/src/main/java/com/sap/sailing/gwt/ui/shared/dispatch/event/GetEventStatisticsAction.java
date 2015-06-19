@@ -2,9 +2,11 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
@@ -55,77 +57,81 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
         Distance totalDistanceTraveled = Distance.NULL;
         Triple<Competitor, Speed, TimePoint> maxSpeed = null;
         final TimePoint now = MillisecondsTimePoint.now();
+        final Set<Leaderboard> leaderboards = new HashSet<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                competitors += HomeServiceUtil.calculateCompetitorsCount(leaderboard);
-                races += HomeServiceUtil.calculateRaceCount(leaderboard);
-                trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(leaderboard);
-                regattas++;
-                String disableStats = System.getenv("DISABLE_STATS");
-                if (disableStats == null || "false".equals(disableStats)) {
-                    for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-                        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                            GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
-                            competitorTrack.lockForRead();
+                leaderboards.add(leaderboard);
+            }
+        }
+        for (Leaderboard leaderboard : leaderboards) {
+            competitors += HomeServiceUtil.calculateCompetitorsCount(leaderboard);
+            races += HomeServiceUtil.calculateRaceCount(leaderboard);
+            trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(leaderboard);
+            regattas++;
+            String disableStats = System.getenv("DISABLE_STATS");
+            if (disableStats == null || "false".equals(disableStats)) {
+                for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+                        competitorTrack.lockForRead();
+                        try {
+                            numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
+                        } finally {
+                            competitorTrack.unlockAfterRead();
+                        }
+                        if (trackedRace.hasStarted(now)) {
+                            final NavigableSet<MarkPassing> competitorMarkPassings = trackedRace
+                                    .getMarkPassings(competitor);
+                            MarkPassing lastMarkPassingBeforeNow = null;
+                            trackedRace.lockForRead(competitorMarkPassings);
                             try {
-                                numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
-                            } finally {
-                                competitorTrack.unlockAfterRead();
-                            }
-                            if (trackedRace.hasStarted(now)) {
-                                final NavigableSet<MarkPassing> competitorMarkPassings = trackedRace
-                                        .getMarkPassings(competitor);
-                                MarkPassing lastMarkPassingBeforeNow = null;
-                                trackedRace.lockForRead(competitorMarkPassings);
-                                try {
-                                    MarkPassing next = null;
-                                    Iterator<MarkPassing> i = competitorMarkPassings.descendingIterator();
-                                    while (i.hasNext() && (next = i.next()).getTimePoint().after(now))
-                                        ;
-                                    if (next != null) {
-                                        lastMarkPassingBeforeNow = next;
-                                    }
-                                } finally {
-                                    trackedRace.unlockAfterRead(competitorMarkPassings);
+                                MarkPassing next = null;
+                                Iterator<MarkPassing> i = competitorMarkPassings.descendingIterator();
+                                while (i.hasNext() && (next = i.next()).getTimePoint().after(now))
+                                    ;
+                                if (next != null) {
+                                    lastMarkPassingBeforeNow = next;
                                 }
-                                if (lastMarkPassingBeforeNow != null) {
-                                    // competitor has started and has at least one mark passing before now; compute
-                                    // distance traveled
-                                    // up to that mark passing, increasing likelihood of cache hits as compared to using
-                                    // "now" as
-                                    // the query time point
-                                    totalDistanceTraveled = totalDistanceTraveled.add(competitorTrack
-                                            .getDistanceTraveled(trackedRace.getStartOfRace(),
-                                                    lastMarkPassingBeforeNow.getTimePoint()));
-                                    Pair<GPSFixMoving, Speed> competitorMaxSpeed = competitorTrack
-                                            .getMaximumSpeedOverGround(trackedRace.getStartOfRace(),
-                                                    lastMarkPassingBeforeNow.getTimePoint());
-                                    if (competitorMaxSpeed != null
-                                            && (maxSpeed == null || competitorMaxSpeed.getB()
-                                                    .compareTo(maxSpeed.getB()) > 0)) {
-                                        maxSpeed = new Triple<>(competitor, competitorMaxSpeed.getB(),
-                                                competitorMaxSpeed.getA().getTimePoint());
-                                    }
+                            } finally {
+                                trackedRace.unlockAfterRead(competitorMarkPassings);
+                            }
+                            if (lastMarkPassingBeforeNow != null) {
+                                // competitor has started and has at least one mark passing before now; compute
+                                // distance traveled
+                                // up to that mark passing, increasing likelihood of cache hits as compared to using
+                                // "now" as
+                                // the query time point
+                                totalDistanceTraveled = totalDistanceTraveled.add(competitorTrack
+                                        .getDistanceTraveled(trackedRace.getStartOfRace(),
+                                                lastMarkPassingBeforeNow.getTimePoint()));
+                                Pair<GPSFixMoving, Speed> competitorMaxSpeed = competitorTrack
+                                        .getMaximumSpeedOverGround(trackedRace.getStartOfRace(),
+                                                lastMarkPassingBeforeNow.getTimePoint());
+                                if (competitorMaxSpeed != null
+                                        && (maxSpeed == null || competitorMaxSpeed.getB()
+                                                .compareTo(maxSpeed.getB()) > 0)) {
+                                    maxSpeed = new Triple<>(competitor, competitorMaxSpeed.getB(),
+                                            competitorMaxSpeed.getA().getTimePoint());
                                 }
                             }
                         }
-                        for (Mark mark : trackedRace.getMarks()) {
-                            GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
-                            markTrack.lockForRead();
-                            try {
-                                numberOfGPSFixes += Util.size(markTrack.getRawFixes());
-                            } finally {
-                                markTrack.unlockAfterRead();
-                            }
+                    }
+                    for (Mark mark : trackedRace.getMarks()) {
+                        GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                        markTrack.lockForRead();
+                        try {
+                            numberOfGPSFixes += Util.size(markTrack.getRawFixes());
+                        } finally {
+                            markTrack.unlockAfterRead();
                         }
-                        for (WindSource windSource : trackedRace.getWindSources()) {
-                            WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                            windTrack.lockForRead();
-                            try {
-                                numberOfWindFixes += Util.size(windTrack.getRawFixes());
-                            } finally {
-                                windTrack.unlockAfterRead();
-                            }
+                    }
+                    for (WindSource windSource : trackedRace.getWindSources()) {
+                        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+                        windTrack.lockForRead();
+                        try {
+                            numberOfWindFixes += Util.size(windTrack.getRawFixes());
+                        } finally {
+                            windTrack.unlockAfterRead();
                         }
                     }
                 }
