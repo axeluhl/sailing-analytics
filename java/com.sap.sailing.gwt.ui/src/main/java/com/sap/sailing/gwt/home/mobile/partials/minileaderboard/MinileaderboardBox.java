@@ -43,7 +43,8 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         headerUi.setClickAction(new Command() {
             @Override
             public void execute() {
-                Window.open(data.getLeaderboardDetailsURL(), "Leaderboard", "");
+                String link = "HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash();
+                Window.Location.assign(link);
             }
         });
     }
