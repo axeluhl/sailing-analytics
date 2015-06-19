@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +40,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public Serializable getId() {
+    public String getId() {
         return identifier.getId();
     }
 
