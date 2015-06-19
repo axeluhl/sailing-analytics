@@ -18,8 +18,10 @@ public class Video extends Composite {
     
     private String source;
     @UiField(provided = true) VideoJSPlayer videoPlayer = new VideoJSPlayer(false, false);
+    private final boolean showTitle;
 
-    public Video() {
+    public Video(boolean showTitle) {
+        this.showTitle = showTitle;
         VideoResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         videoPlayer.getVideoElement().addClassName(VideoResources.INSTANCE.css().videoplaceholder_image());
@@ -27,7 +29,8 @@ public class Video extends Composite {
     }
 
     public void setData(EventOverviewVideoStageDTO data) {
-        videoPlayer.setVideo(data.getVideo());
+        source = data.getVideo().getSourceRef();
+        videoPlayer.setVideo(data.getVideo(), showTitle);
     }
     
     public boolean shouldBeReplaced(String newSource) {
