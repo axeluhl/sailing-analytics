@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.eventheader;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BRElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -19,8 +20,8 @@ public class EventHeader extends Composite {
     }
     
     @UiField SpanElement eventNameUi;
-    @UiField
-    SpanElement eventRegattaUi;
+    @UiField BRElement nameSeparatorUi;
+    @UiField SpanElement eventRegattaUi;
     @UiField DivElement eventStateUi;
     @UiField DivElement eventLogoUi;
     @UiField DivElement eventDateUi;
@@ -41,6 +42,8 @@ public class EventHeader extends Composite {
         eventNameUi.setInnerText(event.getDisplayName());
         if(optionalRegattaDisplayName != null && !optionalRegattaDisplayName.isEmpty()) {
             eventRegattaUi.setInnerText(optionalRegattaDisplayName);
+        } else {
+            nameSeparatorUi.removeFromParent();
         }
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         LogoUtil.setEventLogo(eventLogoUi, event);

@@ -16,7 +16,7 @@
 						<!-- IF event.name -->
 						<h3 class="{local_res.css.eventheader_info_title_text}">
 							<span ui:field="eventNameUi"></span>
-							<br />
+							<br ui:field="nameSeparatorUi" />
 							<span ui:field="eventRegattaUi"></span>
 							<!-- event.name -->
 							<!-- IF event.state -->
