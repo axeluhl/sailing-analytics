@@ -41,9 +41,13 @@ public class FleetIdentifierImpl implements FleetIdentifier {
         return fragment.replace("\\", "\\\\").replace(".", "\\.");
     }
 
+    /**
+     * @return a triple consisting of regattaLikeName/raceColumnName/fleetName; note that the series name which is
+     *         encoded in the <code>escapedId</code> in second place (zero-based index 1) is silently ignored
+     */
     public static Triple<String, String, String> unescape(String escapedId) {
         int arrayIndex = 0;
-        StringBuilder[] split = new StringBuilder[3];
+        StringBuilder[] split = new StringBuilder[4];
         for (int i=0; i<split.length; i++) {
             split[i] = new StringBuilder();
         }
@@ -63,7 +67,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
             }
         }
         String leaderboardName = split[0].toString();
-        String raceColumnName = split[1].toString();
+        String raceColumnName = split[3].toString();
         String fleetName = split[2].toString();
         return new Triple<>(leaderboardName, raceColumnName, fleetName);
     }

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -94,11 +95,12 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             unlockTrackedRacesAfterRead();
         }
     }
+    
     /**
      * Resolving replaces this de-serialized object (which has a <code>null</code> {@link #raceListeners} collection) by
      * a new one into which all other collection contents are copied.
      */
-    private Object readResolve() {
+    private Object readResolve() throws ObjectStreamException {
         TrackedRegattaImpl result = new TrackedRegattaImpl(this.regatta);
         result.trackedRaces.putAll(this.trackedRaces);
         result.trackedRacesByBoatClass.putAll(this.trackedRacesByBoatClass);
