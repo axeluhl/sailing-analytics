@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +29,9 @@ import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 
 public class EventActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
@@ -70,7 +76,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
         }
-        view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
+        view.setQuickFinderValues(getSortedQuickFinderValues());
         if (getCtx().getEventDTO().isHasMedia()) {
             clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
                 @Override
@@ -84,6 +90,20 @@ public class EventActivity extends AbstractActivity implements Presenter {
                 }
             });
         }
+    }
+    
+    private Collection<RegattaMetadataDTO> getSortedQuickFinderValues() {
+        Collection<RegattaMetadataDTO> regattas = place.getCtx().getEventDTO().getRegattas();
+        List<RegattaMetadataDTO> sortedRegattas = new ArrayList<RegattaMetadataDTO>(regattas);
+        Collections.sort(sortedRegattas, new Comparator<RegattaMetadataDTO>() {
+            private Comparator<String> bootCatComparator = new NullSafeComparableComparator<String>();
+            @Override
+            public int compare(RegattaMetadataDTO o1, RegattaMetadataDTO o2) {
+                int bootCategoryComparison = bootCatComparator.compare(o1.getBoatCategory(), o2.getBoatCategory());
+                return bootCategoryComparison == 0 ? o1.compareTo(o2) : bootCategoryComparison;
+            }
+        });
+        return sortedRegattas;
     }
     
     @Override
