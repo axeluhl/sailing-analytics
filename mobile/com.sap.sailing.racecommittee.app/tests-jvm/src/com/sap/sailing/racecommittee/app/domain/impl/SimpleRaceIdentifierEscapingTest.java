@@ -43,6 +43,6 @@ public class SimpleRaceIdentifierEscapingTest {
     }
 
     private String escape(String s) {
-        return s.replace("\\", "\\\\");
+        return s.replace("\\", "\\\\").replace(".", "\\.");
     }
 }
