@@ -15,6 +15,10 @@ android {
             java.srcDirs = ["src"]
             res.srcDirs = ["res"]
         }
+
+        test {
+            java.srcDirs = ["tests-jvm/src"]
+        }
     }
 
     signingConfigs {
@@ -46,6 +50,11 @@ dependencies {
 
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:7.3.0"
+
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
+
+    /* JVM tests */
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.9.5"
 }
