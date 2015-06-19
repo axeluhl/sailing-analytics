@@ -74,6 +74,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
             if (trackedRace != null) {
                 trackedRace.attachRaceLog(getRaceLog(fleet));
+                trackedRace.attachRaceExecutionProvider(getRaceExecutionOrderProvider());
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
         }
@@ -98,6 +99,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         if (previouslyLinkedRace != null && regattaLikeParent != null) {
             RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
+            previouslyLinkedRace.detachRaceExecutionOrderProvider(getRaceExecutionOrderProvider());
             getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
         }
     }
@@ -197,5 +199,4 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
         trackedRaces.setMasterDataExportOngoingThreadFlag(flagValue);
     }
-    
 }

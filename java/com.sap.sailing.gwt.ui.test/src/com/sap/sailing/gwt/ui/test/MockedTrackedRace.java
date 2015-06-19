@@ -49,6 +49,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -591,10 +592,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachAllRaceLogs() {
-    }
-
-    @Override
     public void invalidateStartTime() {
     }
 
@@ -778,5 +775,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public RankingMetric getRankingMetric() {
         return null;
+    }
+
+    @Override
+    public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+    }
+
+    @Override
+    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
     }
 }
