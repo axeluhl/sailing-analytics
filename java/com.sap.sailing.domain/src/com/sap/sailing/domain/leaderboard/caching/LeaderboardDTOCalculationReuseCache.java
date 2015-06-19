@@ -8,6 +8,10 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -16,6 +20,7 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * A cache structure that is used for a single call to
@@ -47,9 +52,12 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     
     
     /**
-     * the wind at competitor's position at timePoint
+     * the wind at competitor's position at timePoint; <code>null</code> values are represented by {@link #NULL_WIND}.
      */
     final ConcurrentHashMap<Triple<TrackedRace, Competitor, TimePoint>, Wind> windCache;
+    
+    private static final Wind NULL_WIND = new WindImpl(/* position */ new DegreePosition(0, 0),
+            /* time point */ MillisecondsTimePoint.now(), /* windSpeedWithBearing */ new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
     
     /**
      * the leg's bearing at timePoint
@@ -100,7 +108,9 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         Wind result = windCache.get(cacheKey);
         if (result == null) {
             result = trackedRace.getWind(trackedRace.getTrack(competitor).getEstimatedPosition(timePoint, false), timePoint);
-            windCache.put(cacheKey, result);
+            windCache.put(cacheKey, result == null ? NULL_WIND : result);
+        } else if (result == NULL_WIND) {
+            result = null;
         }
         return result;
     }
