@@ -6,10 +6,13 @@
 	>
 	<ui:style>
 		.videoTitle {
-			padding: 10px;
+			margin: 5px 10px;
+			font-weight: 600;
 		}
 		.videoSubTitle {
-			padding: 10px;
+			margin: 5px 10px;
+			margin-top: 0px;
+			font-size: 0.8em;
 		}
 	</ui:style>
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
