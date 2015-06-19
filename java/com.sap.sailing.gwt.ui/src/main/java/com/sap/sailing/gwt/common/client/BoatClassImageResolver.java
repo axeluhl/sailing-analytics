@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.domain.common.HandicapSystemMasterdata;
 
 /**
  * All images are expected to be 140x140px with transparent background.
@@ -19,13 +18,7 @@ public class BoatClassImageResolver {
     
     static {
         boatClassIconsMap = new HashMap<String, ImageResource>();
-
-        // handicap sailing icons
-        boatClassIconsMap.put(HandicapSystemMasterdata.ORC.getDisplayName(), imageResources.ORCIcon());
-        boatClassIconsMap.put(HandicapSystemMasterdata.ORC_CLUB.getDisplayName(), imageResources.ORCIcon());
-        boatClassIconsMap.put(HandicapSystemMasterdata.ORC_INTERNATIONAL.getDisplayName(), imageResources.ORCIcon());
         
-        // one design boat class icons
         boatClassIconsMap.put(BoatClassMasterdata._12M.getDisplayName(), imageResources._12mRIcon());
         boatClassIconsMap.put(BoatClassMasterdata._2_4M.getDisplayName(), imageResources._2_4mIcon());
         boatClassIconsMap.put(BoatClassMasterdata._29ER.getDisplayName(), imageResources._29erIcon());

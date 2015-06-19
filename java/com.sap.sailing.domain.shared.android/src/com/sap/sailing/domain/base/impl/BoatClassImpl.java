@@ -130,7 +130,7 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     }
 
     public String getDisplayName() {
-        return displayName != null ? displayName : getName();
+        return displayName;
     }
 
     public Distance getHullBeam() {

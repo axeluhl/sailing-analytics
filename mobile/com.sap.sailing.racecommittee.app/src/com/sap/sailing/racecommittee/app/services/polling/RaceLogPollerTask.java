@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.services.polling;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.URL;
 
 import android.content.Context;
@@ -12,7 +11,7 @@ import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sse.common.Util;
 
-public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
+public class RaceLogPollerTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
 
     public interface PollingResultListener {
         public void onPollingResult(PollingResult result);
@@ -29,8 +28,8 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Void doInBackground(Util.Pair<Serializable, URL>... queries) {
-        for (Util.Pair<Serializable, URL> query : queries) {
+    protected Void doInBackground(Util.Pair<String, URL>... queries) {
+        for (Util.Pair<String, URL> query : queries) {
             if (isCancelled()) {
                 return null;
             }
@@ -40,7 +39,7 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
             try {
                 responseStream = request.execute();
                 publishProgress(new PollingResult(true, 
-                        new Util.Pair<Serializable, InputStream>(query.getA(), responseStream)));
+                        new Util.Pair<String, InputStream>(query.getA(), responseStream)));
             } catch (IOException e) {
                 // don't need to close responseStream as it still must
                 // be null because the only call that may throw an

@@ -57,10 +57,10 @@ public class EventRaceStatesSerializer implements JsonSerializer<Pair<Event, Ite
         result.put(FIELD_EVENT_ID, event.getId().toString());
         JSONArray raceStatesLogEntriesJson = new JSONArray();
         result.put(FIELD_RACE_STATES, raceStatesLogEntriesJson);
-        RaceStateSerializer raceStateSerializer = new RaceStateSerializer();
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             if(filterByCourseArea == null || courseArea.getName().equals(filterByCourseArea)) {
                 for (Leaderboard leaderboard : leaderboards) {
+                    RaceStateSerializer raceStateSerializer = new RaceStateSerializer(leaderboard);
                     if (filterByLeaderboardName == null || leaderboard.getName().equals(filterByLeaderboardName)) {
                         if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
                             String leaderboardName = leaderboard.getName();
