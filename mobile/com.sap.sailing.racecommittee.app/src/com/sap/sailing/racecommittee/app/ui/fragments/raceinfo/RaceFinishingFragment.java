@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
-
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,13 +8,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
 
 public class RaceFinishingFragment extends BaseFragment {
+
+    private SimpleDateFormat mDateFormat;
+    private TextView mFinishingSince;
 
     public static RaceFinishingFragment newInstance() {
         RaceFinishingFragment fragment = new RaceFinishingFragment();
@@ -29,6 +34,9 @@ public class RaceFinishingFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finishing, container, false);
+
+        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
+        mFinishingSince = ViewHolder.get(layout, R.id.first_vessel_since);
 
         ImageView flag = ViewHolder.get(layout, R.id.flag);
         if (flag != null) {
@@ -55,11 +63,19 @@ public class RaceFinishingFragment extends BaseFragment {
         if (getView() != null) {
             TextView first_vessel = ViewHolder.get(getView(), R.id.first_vessel);
             if (first_vessel != null && getRaceState() != null && getRaceState().getFinishingTime() != null) {
-                String vessel_time = getString(R.string.finishing_started);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
-                vessel_time = vessel_time.replace("#TIME#", dateFormat.format(getRaceState().getFinishingTime().asDate()));
-                first_vessel.setText(vessel_time);
+                first_vessel.setText(getString(R.string.finishing_started, mDateFormat.format(getRaceState().getFinishingTime().asDate())));
             }
+        }
+        notifyTick(MillisecondsTimePoint.now());
+    }
+
+    @Override
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
+
+        if (mFinishingSince != null) {
+            String timeDiff = TimeUtils.formatDurationSince(now.minus(getRaceState().getFinishingTime().asMillis()).asMillis());
+            mFinishingSince.setText(getString(R.string.finishing_started_since, timeDiff));
         }
     }
 }
