@@ -15,7 +15,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IndividualRecallDi
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IndividualRecallRemovedFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsFinishedAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsInFinishingPhaseAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Base class for all your {@link RacingProcedure}s.
@@ -54,7 +55,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private final RacingProcedureConfiguration configuration;
 
     private final RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> changedListeners;
-    private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
     private final IndividualRecallDisplayedFinder recallDisplayedFinder;
     private final IndividualRecallRemovedFinder recallRemovedFinder;
     private final FinishingTimeFinder finishingTimeFinder;
@@ -64,28 +64,26 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     private boolean cachedIsIndividualRecallDisplayed;
 
-
     /**
      * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
+     * @param raceLogResolver TODO
      */
     public BaseRacingProcedure(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
-            RacingProcedureConfiguration configuration) {
+            RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
         if (configuration == null) {
             throw new IllegalArgumentException("configuration must not be null");
         }
-        
         this.raceLog = raceLog;
         this.author = author;
         this.factory = factory;
         this.configuration = configuration;
 
         this.changedListeners = createChangedListenerContainer();
-        this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
         this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
         this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
-        this.startTimeFinder = new StartTimeFinder(raceLog);
+        this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -133,12 +131,16 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
             break;
         case RUNNING:
             if (isIndividualRecallDisplayed()) {
-                rescheduleIndividualRecallTimeout(startTimeFinder.analyze());
+                rescheduleIndividualRecallTimeout();
             }
             break;
         default:
             break;
         }
+    }
+
+    private TimePoint getStartTime() {
+        return startTimeFinder.analyze().getStartTime();
     }
 
     @Override
@@ -148,10 +150,10 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     @Override
     public boolean isIndividualRecallDisplayed(TimePoint at) {
-        if (hasIndividualRecall()) {
-            return new IsIndividualRecallDisplayedAnalyzer(getRaceLog(), at).analyze();
-        }
-        return false;
+        final TimePoint individualRecallDisplayedTime = getIndividualRecallDisplayedTime();
+        final TimePoint individualRecallRemovalTime = getIndividualRecallRemovalTime();
+        return (hasIndividualRecall() && individualRecallDisplayedTime != null && !individualRecallDisplayedTime.after(at) &&
+                individualRecallRemovalTime != null && !individualRecallRemovalTime.after(at));
     }
     
     @Override
@@ -165,7 +167,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     @Override
     public TimePoint getIndividualRecallRemovalTime() {
         final TimePoint result;
-        final TimePoint raceStartTime = startTimeFinder.analyze();
+        final TimePoint raceStartTime = getStartTime();
         final TimePoint removedEvent;
         if (hasIndividualRecall() && (removedEvent = recallRemovedFinder.analyze()) != null && (raceStartTime == null || removedEvent.after(raceStartTime))) {
             result = removedEvent;
@@ -212,18 +214,21 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     }
 
     protected void update() {
-        boolean isRecallDisplayed = isRecallDisplayedAnalyzer.analyze();
-        
+        // TODO an X-ray up event with a time point in the future will not be recognized here because at the current time the flag is not displayed and no other race log event will trigger the update; we'd need to schedule another state event; as long as clocks are set correctly, additional transmission time will make this unlikely
+        boolean isRecallDisplayed = isIndividualRecallDisplayed(MillisecondsTimePoint.now());
         if (cachedIsIndividualRecallDisplayed != isRecallDisplayed) {
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
-            if (cachedIsIndividualRecallDisplayed) {
-                changedListeners.onIndividualRecallDisplayed(this);
-                rescheduleIndividualRecallTimeout(startTimeFinder.analyze());
-            } else {
+            if (!cachedIsIndividualRecallDisplayed) {
+                // individual recall was removed; no need to schedule an event for removal
                 changedListeners.onIndividualRecallRemoved(this);
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
-        }    
+        }
+        // (re-)schedule the individual recall removal in any case; the removal time may have changed
+        if (cachedIsIndividualRecallDisplayed) {
+            changedListeners.onIndividualRecallDisplayed(this);
+            rescheduleIndividualRecallTimeout();
+        }
         
         // always call listeners for changed flag, as this does not only affect recall, but also
         // changes start procedure, for which some text elements need to be updated
@@ -231,9 +236,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         changedListeners.onActiveFlagsChanged(this);
     }
 
-    private void rescheduleIndividualRecallTimeout(TimePoint raceStartTime) {
+    private void rescheduleIndividualRecallTimeout() {
         unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
-        scheduleStateEvents(new RaceStateEventImpl(raceStartTime.plus(individualRecallRemovalTimeout), RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
+        scheduleStateEvents(new RaceStateEventImpl(getIndividualRecallRemovalTime(), RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
     }
     
     protected void scheduleStateEvents(RaceStateEvent stateEvent) {

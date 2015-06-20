@@ -730,7 +730,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                
                 //FIXME: how to get the HasRegattaLike?
                 startTime = new StartTimeFinder(new ServerSideRaceLogResolver(null), raceLog).analyze().getStartTime();
                 if (startTime != null) {

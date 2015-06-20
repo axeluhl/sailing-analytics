@@ -428,7 +428,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             removeChangedListener(racingProcedure);
             racingProcedure.detach();
         }
-        racingProcedure = procedureFactory.createRacingProcedure(cachedRacingProcedureType, raceLog);
+        racingProcedure = procedureFactory.createRacingProcedure(cachedRacingProcedureType, raceLog, raceLogResolver);
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
 

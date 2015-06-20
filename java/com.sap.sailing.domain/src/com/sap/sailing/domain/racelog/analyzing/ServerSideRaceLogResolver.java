@@ -6,8 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 
 public class ServerSideRaceLogResolver implements RaceLogResolver {
-
-    private HasRegattaLike regattaLike;
+    private final HasRegattaLike regattaLike;
 
     public ServerSideRaceLogResolver(HasRegattaLike regattaLike) {
         this.regattaLike = regattaLike;
