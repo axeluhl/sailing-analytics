@@ -175,6 +175,7 @@ public class StartTimeFragment extends BaseFragment
                 ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mDatePicker.setOnValueChangedListener(this);
                 TimeUtils.initDatePicker(getActivity(), mDatePicker, time, PAST_DAYS, FUTURE_DAYS);
+                mDatePicker.setValue(Math.abs(PAST_DAYS));
             }
             mTimePicker = ViewHolder.get(getView(), R.id.time_picker);
             if (mTimePicker != null) {
@@ -235,13 +236,14 @@ public class StartTimeFragment extends BaseFragment
                 mTimeRight.add(Calendar.MINUTE, -1);
                 timeRight = TimeUtils.formatDurationSince(mTimeRight.getTimeInMillis());
             }
-
         }
+
         if (mCountdown != null) {
             String countdown = getString(resId).replace("#TIME#", time);
             mCountdown.setText(countdown);
             mCountdown.setTag(resId);
         }
+
         if (mMinuteDec != null) {
             String countdown = getString(resId).replace("#TIME#", timeLeft);
             if (countdown.equals("-00:00:00")) {
@@ -249,6 +251,7 @@ public class StartTimeFragment extends BaseFragment
             }
             mMinuteDec.setText(countdown);
         }
+
         if (mMinuteInc != null) {
             String countdown = getString(resId).replace("#TIME#", timeRight);
             if (countdown.equals("-00:00:00")) {

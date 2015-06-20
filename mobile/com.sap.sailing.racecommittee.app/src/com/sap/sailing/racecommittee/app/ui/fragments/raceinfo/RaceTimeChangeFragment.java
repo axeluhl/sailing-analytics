@@ -22,13 +22,11 @@ import java.util.Calendar;
 
 public class RaceTimeChangeFragment extends BaseFragment implements View.OnClickListener {
 
-    private final static String START_MODE = "startMode";
-
     public final static int START_TIME_MODE = 0;
     public final static int FINISHING_TIME_MODE = 1;
     public final static int FINISHED_TIME_MODE = 2;
-
-    private static final int FUTURE_DAYS = 25;
+    private final static String START_MODE = "startMode";
+    private static final int FUTURE_DAYS = 3;
     private static final int PAST_DAYS = -3;
 
     private NumberPicker mDatePicker;
@@ -83,9 +81,9 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         mDatePicker = (NumberPicker) layout.findViewById(R.id.date_picker);
         if (mDatePicker != null) {
             ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
-            TimeUtils.initDatePicker(getActivity(), mDatePicker, calendar, PAST_DAYS, FUTURE_DAYS);
-            int days = TimeUtils.daysBetween(Calendar.getInstance(), calendar) + Math.abs(PAST_DAYS);
-            mDatePicker.setValue(days);
+            TimeUtils.initDatePicker(getActivity(), mDatePicker, calendar, PAST_DAYS, FUTURE_DAYS, false);
+            mDatePicker.setValue(Math.abs(PAST_DAYS));
+            mDatePicker.setTag(calendar);
         }
 
         mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
@@ -141,7 +139,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
     }
 
     private TimePoint getPickerTime() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = (Calendar) mDatePicker.getTag();
         calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
