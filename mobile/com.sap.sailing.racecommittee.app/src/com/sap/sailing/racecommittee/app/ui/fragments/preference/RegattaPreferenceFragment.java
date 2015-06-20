@@ -16,6 +16,7 @@ import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -109,54 +110,58 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
     private void setupRacingProcedureTypePreference() {
         final ListPreference startProcedurePreference = findPreference(R.string.preference_racing_procedure_override_key);
 
-        List<CharSequence> entries = new ArrayList<CharSequence>();
-        List<CharSequence> entryValues = new ArrayList<CharSequence>();
+        List<String> entries = new ArrayList<>();
+        List<String> entryValues = new ArrayList<>();
         for (RacingProcedureType type : RacingProcedureType.validValues()) {
             entries.add(type.toString());
             entryValues.add(type.name());
         }
 
-        startProcedurePreference.setEntries(entries.toArray(new CharSequence[entries.size()]));
-        startProcedurePreference.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+        startProcedurePreference.setEntries(entries.toArray(new String[entries.size()]));
+        startProcedurePreference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
 
         bindPreferenceSummaryToValue(startProcedurePreference);
     }
 
     private void setupCourseDesignerTypePreference() {
-        final ListPreference courseDesignerPreference = findPreference(R.string.preference_course_designer_override_key);
+        final ListPreference preference = findPreference(R.string.preference_course_designer_override_key);
 
-        List<CharSequence> entries = new ArrayList<CharSequence>();
-        List<CharSequence> entryValues = new ArrayList<CharSequence>();
+        List<String> entries = new ArrayList<>();
+        List<String> entryValues = new ArrayList<>();
         for (CourseDesignerMode type : CourseDesignerMode.validValues()) {
             entries.add(type.toString());
             entryValues.add(type.name());
         }
 
-        courseDesignerPreference.setEntries(entries.toArray(new CharSequence[0]));
-        courseDesignerPreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+        preference.setEntries(entries.toArray(new String[entries.size()]));
+        preference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
 
-        bindPreferenceSummaryToValue(courseDesignerPreference);
+        bindPreferenceSummaryToValue(preference);
     }
 
     private void setupRRS26StartmodeFlagsList() {
-        MultiSelectListPreference listPreference = findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
-        List<String> flags = new ArrayList<String>();
+        MultiSelectListPreference preference = findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
+        List<String> flags = new ArrayList<>();
         for (Flags flag : Flags.validValues()) {
             flags.add(flag.name());
         }
-        listPreference.setEntries(flags.toArray(new String[flags.size()]));
-        listPreference.setEntryValues(flags.toArray(new String[flags.size()]));
+
+        Collections.sort(flags);
+        preference.setEntries(flags.toArray(new String[flags.size()]));
+        preference.setEntryValues(flags.toArray(new String[flags.size()]));
     }
 
     private void setupClassFlagList(ListPreference preference) {
-        List<CharSequence> entries = new ArrayList<CharSequence>();
-        List<CharSequence> entryValues = new ArrayList<CharSequence>();
+        List<String> entries = new ArrayList<>();
+        List<String> entryValues = new ArrayList<>();
         for (Flags flag : Flags.validValues()) {
             entries.add(flag.toString());
             entryValues.add(flag.name());
         }
 
-        preference.setEntries(entries.toArray(new CharSequence[entries.size()]));
-        preference.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+        Collections.sort(entries);
+        Collections.sort(entryValues);
+        preference.setEntries(entries.toArray(new String[entries.size()]));
+        preference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
     }
 }
