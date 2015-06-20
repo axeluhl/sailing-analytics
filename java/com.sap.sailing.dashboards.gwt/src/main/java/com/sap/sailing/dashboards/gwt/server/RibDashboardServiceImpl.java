@@ -153,13 +153,15 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             for (RaceColumn column : lb.getRaceColumns()) {
                 for (Fleet fleet : column.getFleets()) {
                     TrackedRace race = column.getTrackedRace(fleet);
-                    TimePoint startOfRace = race.getStartOfRace();
-                    // not relying on isLive() because the time window is too short
-                    // to retrieve wind information we need to extend the time window
-                    if (race != null && startOfRace != null && race.getEndOfRace() == null && 
-                            MillisecondsTimePoint.now().after(startOfRace.minus(Duration.ONE_MINUTE.times(20)))) {
-                        result = race;
-                        // no break here as we want to have the last race that is deemed to be live
+                    if (race != null) {
+                        TimePoint startOfRace = race.getStartOfRace();
+                        // not relying on isLive() because the time window is too short
+                        // to retrieve wind information we need to extend the time window
+                        if (startOfRace != null && race.getEndOfRace() == null && 
+                                MillisecondsTimePoint.now().after(startOfRace.minus(Duration.ONE_MINUTE.times(20)))) {
+                            result = race;
+                            // no break here as we want to have the last race that is deemed to be live
+                        }
                     }
                 }
             }
