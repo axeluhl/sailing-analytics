@@ -51,6 +51,8 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -226,7 +228,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator, EventFetcher {
+        LeaderboardRegistry, Replicator, EventFetcher, RaceLogResolver {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -3215,6 +3217,48 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Util.addAll(trackedRace.getRace().getCompetitors(), result);
         result.sort((c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c2).getWindwardDistanceSailed().compareTo(
                 rankingInfo.getCompetitorRankingInfo().apply(c1).getWindwardDistanceSailed()));
+        return result;
+    }
+
+    /**
+     * A {@link SimpleRaceLogIdentifier} in particular has a {@link SimpleRaceLogIdentifier#getRegattaLikeParentName()}
+     * which identifies either a regatta by name or a flexible leaderboard by name. Here is why this can luckily be
+     * resolved unanimously: A regatta leaderboard always uses as its name the regatta name (see
+     * {@link RegattaImpl#getName()}). Trying to {@link RegattaLeaderboardImpl#setName(String) set} the regatta leaderboard's
+     * name can only update its {@link Leaderboard#getDisplayName() display name}. Therefore, regatta leaderboards are always
+     * keyed in {@link #leaderboardsByName} by their regatta's name. Thus, no flexible leaderboard can have a regatta's name
+     * as its name, and therefore leaderboard names <em>and</em> regatta names are unitedly unique.
+     */
+    @Override
+    public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
+        final RaceLog result;
+        final IsRegattaLike regattaLike;
+        final Regatta regatta = regattasByName.get(identifier.getRegattaLikeParentName());
+        if (regatta != null) {
+            regattaLike = regatta;
+        } else {
+            final Leaderboard leaderboard = leaderboardsByName.get(identifier.getRegattaLikeParentName());
+            if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
+                regattaLike = (FlexibleLeaderboard) leaderboard;
+            } else {
+                regattaLike = null;
+            }
+        }
+        if (regattaLike != null) {
+            final RaceColumn raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
+                if (fleet != null) {
+                    result = raceColumn.getRaceLog(fleet);
+                } else {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
         return result;
     }
 }
