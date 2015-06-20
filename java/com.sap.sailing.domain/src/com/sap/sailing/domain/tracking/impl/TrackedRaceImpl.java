@@ -104,6 +104,7 @@ import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -315,7 +316,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
-    private final GPSFixStore gpsFixStore;
+    private transient GPSFixStore gpsFixStore;
     
     /**
      * Wind and loading is started in a background thread during object construction. If a client needs to
@@ -585,6 +586,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
+        gpsFixStore = EmptyGPSFixStore.INSTANCE;
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();

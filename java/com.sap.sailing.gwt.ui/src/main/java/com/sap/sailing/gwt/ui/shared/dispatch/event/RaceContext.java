@@ -350,8 +350,7 @@ public class RaceContext {
         } else if (finishTime != null && now.after(finishTime)) {
             raceState = RaceViewState.FINISHED;
         } else if(raceLog != null) {
-            AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+            RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
                 if(upperFlag.equals(Flags.AP)) {

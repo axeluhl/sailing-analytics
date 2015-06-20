@@ -39,6 +39,25 @@ Whichever master is current, we map the main Apache URL http://kielerwoche2015-m
 - RabbitMQ server for replication: 52.16.112.6 (Web: http://52.16.112.6:15672/)
 - Replication Exchange Name: KW2015
 
+## Switching from one Master to Another
+ - switch Cube Replica's Apache server to direct http://kielerwoche2015.sapsailing.com to the cloud by editing its `/etc/apache2/sites-enabled/001-events.conf`, then as user `root` running `service apache2 reload`.
+ - upgrade the new master to the release you want, using the `refreshInstance.sh` script
+ - prepare switching in sapsailing.com:/etc/httpd/conf.d/001-events.conf so that in particular http://kielerwoche2015-master.sapsailing.com points to the new master's IP; save the file but don't do `service httpd reload` as yet
+ - remove the replicas from the ELB
+ - cleanly stop replication for all replicas currently active on the master you want to take offline. (Exception: if your current master is really broken and cannot serve requests anymore, in order to keep up at least some form of availability you may leave the replicas running until the new master is up.)
+ - stop replication on the Cube Replica
+ - start the new master
+ - track all the races that need to be tracked
+ - add the new master to the ELB and remove the old master from the ELB
+ - immediately afterwards do `service httpd reload` as user `root` on sapsailing.com to activate the new master
+ - validate that you haven't lost any RCApp events, ideally by comparing the RegattaOverview.html page for the old and the new master; in case you lost events, reload the race logs for those leaderboards in the new master's AdminConsole.
+ - upgrade the replicas (including the Cube Replica) to the new master if the new master runs a different release than the old master, using `refreshInstance.sh`
+ - adjust the replicas' (including the Cube Replica) `env.sh` to point to the new master with their `REPLICATE_MASTER_SERVLET_HOST` setting
+ - restart the Java server instance on the replicas (including the Cube Replica), using the usual `./stop; ./start` sequence. This will automatically re-start the replication
+ - when the replicas have finished their initial load (can be verified by looking at the RabbitMQ queues at http://ec2-52-16-112-6.eu-west-1.compute.amazonaws.com:15672/#/queues which should no longer have any "initialLoad" queues), add them again to the load balancer
+ - in the Cube server's Apache configuration let http://kielerwoche2015.sapsailing.com point again to the local replica by editing `/etc/apache2/sites-enabled/001-events.conf`, then as user `root` run `service httpd reload`
+ - shut down the other master server to avoid confusion with database writes
+
 ## Other links
 - Regatta Overview: http://kielerwoche2015ro.sapsailing.com (currently not yet established)
 - Manage2Sail Event URL: http://manage2sail.com/api/public/links/event/d56f7fea-0ca1-4972-83a4-d71d79f26b93?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
