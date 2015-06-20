@@ -171,10 +171,13 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         final TimePoint removedEvent;
         if (hasIndividualRecall() && (removedEvent = recallRemovedFinder.analyze()) != null && (raceStartTime == null || removedEvent.after(raceStartTime))) {
             result = removedEvent;
-        } else if (raceStartTime != null) {
-            result = raceStartTime.plus(individualRecallRemovalTimeout);
         } else {
-            result = null;
+            final TimePoint individualRecallDisplayedTime = getIndividualRecallDisplayedTime();
+            if (individualRecallDisplayedTime != null && raceStartTime != null) {
+                result = raceStartTime.plus(individualRecallRemovalTimeout);
+            } else {
+                result = null;
+            }
         }
         return result;
     }
