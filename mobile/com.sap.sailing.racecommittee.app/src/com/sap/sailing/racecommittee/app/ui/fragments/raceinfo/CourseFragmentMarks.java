@@ -36,7 +36,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementA
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.EventListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkLongClick;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkClick;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -48,7 +48,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class CourseFragmentMarks extends CourseFragment implements MarkLongClick, ElementLongClick, EventListener {
+public class CourseFragmentMarks extends CourseFragment implements MarkClick, ElementLongClick, EventListener {
 
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
@@ -327,7 +327,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkLongClick
     }
 
     @Override
-    public void onItemLongClick(Mark mark) {
+    public void onItemClick(Mark mark) {
         if (mElements.isEmpty()) {
             addNewCourseElementToList(mark);
         } else {
