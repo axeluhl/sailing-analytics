@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -110,7 +111,7 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
-        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>> {
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 

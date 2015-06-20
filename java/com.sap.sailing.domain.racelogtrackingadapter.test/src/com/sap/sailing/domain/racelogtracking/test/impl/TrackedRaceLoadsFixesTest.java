@@ -4,6 +4,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -80,7 +82,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new);
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
@@ -125,7 +128,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new);
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
 
         trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override

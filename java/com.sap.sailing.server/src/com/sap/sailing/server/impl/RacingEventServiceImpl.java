@@ -52,7 +52,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -132,7 +131,6 @@ import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFacto
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -159,6 +157,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
@@ -212,6 +211,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -228,7 +228,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator, EventFetcher, RaceLogResolver {
+        LeaderboardRegistry, Replicator, EventFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -1336,10 +1336,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
-                    tracker = params.createRaceTracker(this, windStore, gpsFixStore);
+                    tracker = params.createRaceTracker(this, windStore, gpsFixStore, /* raceLogResolver */ this);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
-                    tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore);
+                    tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore, /* raceLogResolver */ this);
                     assert tracker.getRegatta() == regatta;
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
@@ -1482,7 +1482,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator);
+                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -2531,6 +2531,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             regattaImpl.initializeSeriesAfterDeserialize();
             regattaImpl.addRaceColumnListener(raceLogReplicator);
         }
+        // re-establish RaceLogResolver references to this RacingEventService in all TrackedRace instances
+        for (DynamicTrackedRegatta trackedRegatta : regattaTrackingCache.values()) {
+            trackedRegatta.lockTrackedRacesForRead();
+            try {
+                for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                    ((TrackedRaceImpl) trackedRace).setRaceLogResolver(this);
+                }
+            } finally {
+                trackedRegatta.unlockTrackedRacesAfterRead();
+            }
+        }
         logger.info(logoutput.toString());
     }
 
@@ -2919,8 +2930,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         final TimePoint result;
         if (leaderboard instanceof HasRegattaLike && raceLog != null) {
-            RaceState state = RaceStateImpl.create(new ServerSideRaceLogResolver((HasRegattaLike) leaderboard), raceLog,
-                    new LogEventAuthorImpl(authorName, authorPriority));
+            RaceState state = RaceStateImpl.create(/* race log resolver */ this, raceLog, new LogEventAuthorImpl(authorName, authorPriority));
             if (passId > raceLog.getCurrentPassId()) {
                 state.setAdvancePass(logicalTimePoint);
             }
@@ -2949,22 +2959,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(
             String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
-        if (!(leaderboard instanceof HasRegattaLike)){
-            return null;
-        }
-        
-        if (raceLog == null) {
-            return null;
-        }
-
-        ReadonlyRaceState state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver(
-                (HasRegattaLike) leaderboard), raceLog);
-        return new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
+        final Triple<TimePoint, Integer, RacingProcedureType> result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
+            result = new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
                 raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
-
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private Iterable<WindTrackerFactory> getWindTrackerFactories() {
