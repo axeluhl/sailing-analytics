@@ -24,8 +24,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="@dimen/default_margin_half"
+            android:layout_marginTop="@dimen/default_margin_half"
             android:text="@string/finishing_started"
+            android:textAppearance="?textNormal"/>
+
+        <TextView
+            android:id="@+id/first_vessel_since"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/default_margin_half"
+            android:text="@string/finishing_started_since"
             android:textAppearance="?textNormal"/>
 
         <ImageView
