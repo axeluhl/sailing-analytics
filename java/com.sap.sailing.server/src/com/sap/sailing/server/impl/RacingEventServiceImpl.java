@@ -130,10 +130,12 @@ import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFacto
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -2912,16 +2914,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             String authorName, int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime,
             RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null) {
-            RaceState state = RaceStateImpl.create(raceLog, new LogEventAuthorImpl(authorName, authorPriority));
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final TimePoint result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            RaceState state = RaceStateImpl.create(new ServerSideRaceLogResolver((HasRegattaLike) leaderboard), raceLog,
+                    new LogEventAuthorImpl(authorName, authorPriority));
             if (passId > raceLog.getCurrentPassId()) {
                 state.setAdvancePass(logicalTimePoint);
             }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
             state.forceNewStartTime(logicalTimePoint, startTime);
-            return state.getStartTime();
+            result = state.getStartTime();
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
@@ -2940,12 +2947,22 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(
             String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            return new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
-                    raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+        
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        
+        if (!(leaderboard instanceof HasRegattaLike)){
+            return null;
         }
-        return null;
+        
+        if (raceLog == null) {
+            return null;
+        }
+
+        ReadonlyRaceState state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver(
+                (HasRegattaLike) leaderboard), raceLog);
+        return new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
+                raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+
     }
 
     private Iterable<WindTrackerFactory> getWindTrackerFactories() {

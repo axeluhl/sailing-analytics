@@ -7,8 +7,12 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.DependentStartTimeResolver;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
@@ -26,6 +30,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -40,27 +45,27 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
-    public static RaceState create(RaceLog raceLog, AbstractLogEventAuthor author) {
-        return create(raceLog, author, new EmptyRegattaConfiguration());
+    public static RaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author) {
+        return create(raceLogResolver, raceLog, author, new EmptyRegattaConfiguration());
     }
     
     /**
      * Creates a {@link RaceState}.
      */
-    public static RaceState create(RaceLog raceLog, AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
-        return new RaceStateImpl(raceLog, author, 
+    public static RaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
+        return new RaceStateImpl(raceLogResolver, raceLog, author, 
                 RaceLogEventFactory.INSTANCE,
                 new RacingProcedureFactoryImpl(author, RaceLogEventFactory.INSTANCE, configuration));
     }
     
-    public RaceStateImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory,
+    public RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureFactory procedureFactory) {
-        this(raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
+        this(raceLogResolver, raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
-    private RaceStateImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
+    private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
-        super(raceLog, analyzersClock, procedureFactory, /* update */ true);
+        super(raceLogResolver, raceLog, analyzersClock, procedureFactory, /* update */ true);
         this.author = author;
         this.factory = eventFactory;
     }
@@ -112,6 +117,30 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void forceNewStartTime(TimePoint now, TimePoint startTime) {
         raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
+    }
+    
+    @Override
+    public void requestNewDependentStartTime(final TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentRace, RaceLogResolver raceLogResolver, RacingProcedurePrerequisite.Resolver resolver) {
+        final RaceLogDependentStartTimeEvent dependentStartTimeEvent = factory.createDependentStartTimeEvent(now, author, raceLog.getCurrentPassId(), dependentRace, startTimeDifference);
+        
+        RacingProcedurePrerequisite.FulfillmentFunction function = new RacingProcedurePrerequisite.FulfillmentFunction() {
+            @Override
+            public void execute() {
+                raceLog.add(dependentStartTimeEvent);
+            }
+        };
+        
+        TimePoint startTime = null;
+            
+        DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(raceLogResolver);
+        startTime = dependentStartTimeResolver.resolve(dependentStartTimeEvent).getStartTime();
+        
+        getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
+    }
+    
+    @Override
+    public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace) {
+        raceLog.add(factory.createDependentStartTimeEvent(now, author, raceLog.getCurrentPassId(), dependentOnRace, startTimeDifference));
     }
 
     @Override

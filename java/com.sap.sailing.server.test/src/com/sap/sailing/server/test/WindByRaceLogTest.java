@@ -101,6 +101,7 @@ public class WindByRaceLogTest {
         service.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+        trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
     }
 

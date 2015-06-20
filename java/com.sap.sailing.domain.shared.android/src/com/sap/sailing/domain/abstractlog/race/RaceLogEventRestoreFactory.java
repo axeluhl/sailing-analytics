@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
@@ -32,7 +33,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
             Serializable id, List<Competitor> involvedBoats, int passId, Flags upperFlag, Flags lowerFlag, boolean isDisplayed);
 
     RaceLogStartTimeEvent createStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime);
+            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime, RaceLogRaceStatus nextStatue);
 
     RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
@@ -98,4 +99,8 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     RaceLogAdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId,
             AdditionalScoringInformationType informationType);
+    
+    RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> involvedBoats, int passId,
+            SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference, RaceLogRaceStatus nextStatus);
 }

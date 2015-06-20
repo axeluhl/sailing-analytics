@@ -1,17 +1,26 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
@@ -19,9 +28,6 @@ import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick {
 
@@ -223,12 +229,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         private void setFinishingTime(TimePoint finishTime) {
-            StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
+            StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
             if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
                 if (finishTime.after(MillisecondsTimePoint.now())) {
                     Toast.makeText(getActivity(), "The selected time is in the future. Please recheck the time.", Toast.LENGTH_LONG).show();
                 } else {
-                    if (stf.analyze().before(finishTime)) {
+                    if (stf.analyze().getStartTime().before(finishTime)) {
                         getRaceState().setFinishingTime(finishTime);
                     } else {
                         Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();

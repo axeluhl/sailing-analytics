@@ -42,6 +42,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -439,10 +440,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void detachAllRaceLogs() {
-    }
-
-    @Override
     public void attachRaceLog(RaceLog raceLog) {
     }
 
@@ -615,5 +612,13 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public RankingMetric getRankingMetric() {
         return null;
+    }
+
+    @Override
+    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+    }
+
+    @Override
+    public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
     }
 }

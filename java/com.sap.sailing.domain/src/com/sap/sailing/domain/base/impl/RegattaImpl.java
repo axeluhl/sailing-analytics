@@ -2,11 +2,14 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -46,6 +49,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -88,7 +92,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
-
+    private RaceExecutionOrderCache raceExecutionOrderCache;
+    
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
      * durably and don't contain valuable information worth being preserved; or they are constructed explicitly
@@ -192,6 +197,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.defaultCourseArea = courseArea;
         this.configuration = null;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore);
+        this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
 
     @Override
@@ -216,7 +222,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     public static String getDefaultName(String baseName, String boatClassName) {
-        return baseName+(boatClassName==null?"":" ("+boatClassName+")");
+        return baseName+(boatClassName==null?"":" ("+boatClassName+")").replace('/', '_');
     }
     
     @Override
@@ -242,6 +248,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
     }
     
+    protected Object readResolve() throws ObjectStreamException {
+        raceExecutionOrderCache.triggerUpdate(); // now we're fully initialized and the cache can do its job
+        return this;
+    }
+    
     /**
      * {@link RaceColumnListeners} may not be de-serialized (yet) when the regatta
      * is de-serialized. Do avoid re-registering empty objects most probably leading
@@ -263,7 +274,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<? extends Series> getSeries() {
-        return Collections.unmodifiableCollection(series);
+        final Iterable<? extends Series> result;
+        if (series != null) {
+            result = Collections.unmodifiableCollection(series);
+        } else {
+            result = null;
+        }
+        return result;
     }
     
     @Override
@@ -627,5 +644,37 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             }
         }
 
+    }
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        return raceExecutionOrderCache;
+    }
+    
+    private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
+        private static final long serialVersionUID = 1658153438012186894L;
+
+        public RaceExecutionOrderCache() {
+            super();
+            addRaceColumnListener(this);
+        }
+
+        @Override
+        protected Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries() {
+            final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
+            final Iterable<? extends Series> mySeries = getSeries();
+            if (mySeries != null) {
+                for (Series currentSeries : mySeries) {
+                    if (currentSeries.getFleets() != null) {
+                        for (Fleet fleet : currentSeries.getFleets()) {
+                            if (currentSeries.getRaceColumns() != null) {
+                                result.put(fleet, currentSeries.getRaceColumns());
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
     }
 }

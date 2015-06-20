@@ -31,6 +31,8 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -65,7 +67,7 @@ public class RaceContext {
         this.fleet = fleet;
         trackedRace = raceColumn.getTrackedRace(fleet);
         raceLog = raceColumn.getRaceLog(fleet);
-        state = ReadonlyRaceStateImpl.create(raceLog);
+        state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver((HasRegattaLike) leaderboard), raceLog);
     }
 
     private boolean isShowFleetData() {
@@ -348,8 +350,7 @@ public class RaceContext {
         } else if (finishTime != null && now.after(finishTime)) {
             raceState = RaceViewState.FINISHED;
         } else if(raceLog != null) {
-            AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+            RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
                 if(upperFlag.equals(Flags.AP)) {

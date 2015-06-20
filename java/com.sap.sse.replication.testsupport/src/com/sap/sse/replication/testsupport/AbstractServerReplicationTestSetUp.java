@@ -73,10 +73,32 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
      */
     public void setUp() throws Exception {
         try {
+            Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = setUpWithoutStartingToReplicateYet();
+            result.getA().startToReplicateFrom(result.getB());
+        } catch (Exception e) {
+            tearDown();
+            throw e;
+        }
+    }
+
+    /**
+     * Sets up master and replica, starts the JMS message broker and registers the replica with the master. If you want
+     * to drop the DB in your particular test case first, override {@link #persistenceSetUp(boolean)}. If you don't want
+     * replication to start right away for your test, override this method, execute only
+     * {@link #basicSetUp(boolean, Replicable, Replicable)}, do what you need to do and then explicitly call
+     * {@link ReplicationServiceTestImpl#startToReplicateFrom(ReplicationMasterDescriptor)} or
+     * {@link ReplicationServiceTestImpl#startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor, boolean)}
+     * on the first component returned by {@link #basicSetUp(boolean, Replicable, Replicable)}.
+     * 
+     * @return callers may call <code>result.getA().startToReplicateFrom(result.getB())</code> on the result to actually
+     *         start replication, e.g., after having done more set-up on the master
+     */
+    protected Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> setUpWithoutStartingToReplicateYet() throws Exception {
+        try {
             Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = basicSetUp(
                     /* dropDB */true, /* master=null means create a new one */null,
                     /* replica=null means create a new one */null);
-            result.getA().startToReplicateFrom(result.getB());
+            return result;
         } catch (Exception e) {
             tearDown();
             throw e;

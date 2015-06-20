@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.services.polling;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -168,7 +167,7 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
                 return;
             }
             
-            List<Util.Pair<Serializable, URL>> queries = getPollingQueries();
+            List<Util.Pair<String, URL>> queries = getPollingQueries();
             task = new RacePositionsPollerTask(this, context);
             task.execute(queries.toArray(new Util.Pair[0]));
         }
@@ -181,9 +180,9 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
                 return;
             }
             if (result.isSuccess) {
-                Serializable raceId = result.resultStreamForRaceId.getA();
+                String raceId = result.resultStreamForRaceId.getA();
                 InputStream responseStream = result.resultStreamForRaceId.getB();
-                processor.processResponse(poller.context, responseStream, raceId.toString());
+                processor.processResponse(poller.context, responseStream, raceId);
             } else {
                 ExLog.i(context, TAG, "Polling attempt not successful.");
             }
@@ -200,8 +199,8 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
             poller.pollingHandler.postDelayed(this, pollingInterval);
         }
 
-        private List<Util.Pair<Serializable, URL>> getPollingQueries() {
-            List<Util.Pair<Serializable, URL>> queries = new ArrayList<>();
+        private List<Util.Pair<String, URL>> getPollingQueries() {
+            List<Util.Pair<String, URL>> queries = new ArrayList<>();
             for (Entry<ManagedRace, URL> entry : poller.races.entrySet()) {
                 queries.add(new Util.Pair<>(entry.getKey().getId(), entry.getValue()));
             }

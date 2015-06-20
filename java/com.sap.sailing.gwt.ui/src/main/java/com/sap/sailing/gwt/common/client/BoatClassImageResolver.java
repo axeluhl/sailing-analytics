@@ -18,6 +18,11 @@ public class BoatClassImageResolver {
     
     static {
         boatClassIconsMap = new HashMap<String, ImageResource>();
+
+        // handicap sailing icons
+        boatClassIconsMap.put(BoatClassMasterdata.ORC.getDisplayName(), imageResources.ORCIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ORC_CLUB.getDisplayName(), imageResources.ORCIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ORC_INTERNATIONAL.getDisplayName(), imageResources.ORCIcon());
         
         boatClassIconsMap.put(BoatClassMasterdata._12M.getDisplayName(), imageResources._12mRIcon());
         boatClassIconsMap.put(BoatClassMasterdata._2_4M.getDisplayName(), imageResources._2_4mIcon());
@@ -70,6 +75,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.INTERNATIONAL_14.getDisplayName(), imageResources.International14Icon());
         boatClassIconsMap.put(BoatClassMasterdata.DYAS.getDisplayName(), imageResources.DyasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPEN_BIC.getDisplayName(), imageResources.OpenBicIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.RS800.getDisplayName(), imageResources.RS800Icon());
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {

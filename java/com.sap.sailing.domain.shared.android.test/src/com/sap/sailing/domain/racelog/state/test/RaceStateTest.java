@@ -17,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -61,7 +62,7 @@ public class RaceStateTest {
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
-        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
     }
     
     @Test
@@ -91,7 +92,7 @@ public class RaceStateTest {
         config.setBasicConfiguration(mock(RacingProcedureConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
-        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
         
         assertEquals(RacingProcedureType.BASIC, state.getRacingProcedure().getType());
     }
@@ -106,7 +107,7 @@ public class RaceStateTest {
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
         raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, author, nowMock, "12", null, 0, RacingProcedureType.ESS));
-        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
         
         assertEquals(RacingProcedureType.ESS, state.getRacingProcedure().getType());
     }

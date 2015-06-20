@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public interface RaceLogEventFactory {
@@ -129,4 +130,11 @@ public interface RaceLogEventFactory {
 
     RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint);
+
+    RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, List<Competitor> involvedBoats, int passId, SimpleRaceLogIdentifier dependentOnRace,
+            Duration startTimeDifference);
+
+    RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference);
 }

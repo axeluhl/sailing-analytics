@@ -6,6 +6,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
@@ -184,6 +185,12 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(SuppressedMarkPassingsEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        mongoObjectFactory.storeRaceLogEventEvent(object);
+    }
+
+    @Override
+    public void visit(RaceLogDependentStartTimeEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
