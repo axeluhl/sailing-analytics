@@ -245,14 +245,14 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             String leaderboardName) {
         List<StartAnalysisDTO> startAnalysisDTOs = new ArrayList<StartAnalysisDTO>();
         if (leaderboardName != null) {
-            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(
-                    competitorIdAsString);
+            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
             List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
             for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
                 StartAnalysisDTO startAnalysisDTO = startAnalysisCreationController
                         .checkStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
-                if (startAnalysisDTO != null)
+                if (startAnalysisDTO != null) {
                     startAnalysisDTOs.add(startAnalysisDTO);
+                }
             }
         }
         return startAnalysisDTOs;
@@ -261,11 +261,11 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     @Override
     public List<CompetitorDTO> getCompetitorsInLeaderboard(String leaderboardName) {
         logger.log(Level.INFO, "getCompetitorsInLeaderboard(...) Request.");
-        if(leaderboardName != null){
-        Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
-        return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(
-                new Date())));
-        }else{
+        if (leaderboardName != null) {
+            Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
+            return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(
+                    new Date())));
+        } else {
             return null;
         }
     }
