@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -109,7 +110,9 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                                                 lastMarkPassingBeforeNow.getTimePoint());
                                 if (competitorMaxSpeed != null
                                         && (maxSpeed == null || competitorMaxSpeed.getB()
-                                                .compareTo(maxSpeed.getB()) > 0)) {
+                                                .compareTo(maxSpeed.getB()) > 0)
+                                        // only accept "reasonable" max speeds
+                                        && competitorMaxSpeed.getB().compareTo(GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) <= 0) {
                                     maxSpeed = new Triple<>(competitor, competitorMaxSpeed.getB(),
                                             competitorMaxSpeed.getA().getTimePoint());
                                 }
@@ -126,12 +129,15 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                         }
                     }
                     for (WindSource windSource : trackedRace.getWindSources()) {
-                        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                        windTrack.lockForRead();
-                        try {
-                            numberOfWindFixes += Util.size(windTrack.getRawFixes());
-                        } finally {
-                            windTrack.unlockAfterRead();
+                        // don't count the "virtual" wind sources
+                        if (windSource.canBeStored() || windSource.getType() == WindSourceType.RACECOMMITTEE) {
+                            WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+                            windTrack.lockForRead();
+                            try {
+                                numberOfWindFixes += Util.size(windTrack.getRawFixes());
+                            } finally {
+                                windTrack.unlockAfterRead();
+                            }
                         }
                     }
                 }
