@@ -149,13 +149,18 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
                 new Date()));
         startLineAdvantageDTO.startLineAdvantage = startline.getAdvantage().getMeters();
         startAnalysisWindLineInfoDTO.startLineAdvantage = startLineAdvantageDTO;
-        Position portMarkPosition = trackedRace.getOrCreateTrack(
-                trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getStarboardMarkWhileApproachingLine())
-                .getEstimatedPosition(trackedRace.getStartTimeReceived(), /* extrapolate */
-                false);
-        Wind windAtStart = trackedRace.getWind(portMarkPosition, trackedRace.getStartTimeReceived());
-        startAnalysisWindLineInfoDTO.windDirectionInDegrees = windAtStart.getBearing().getDegrees();
-        startAnalysisWindLineInfoDTO.windSpeedInKnots = windAtStart.getKnots();
+	if (trackedRace.getStartTimeReceived() != null) {
+	    Position portMarkPosition = trackedRace.getOrCreateTrack(
+		    trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getStarboardMarkWhileApproachingLine())
+		    .getEstimatedPosition(trackedRace.getStartTimeReceived(), /* extrapolate */
+		    false);
+	    Wind windAtStart = trackedRace.getWind(portMarkPosition, trackedRace.getStartTimeReceived());
+	    startAnalysisWindLineInfoDTO.windDirectionInDegrees = windAtStart.getBearing().getDegrees();
+	    startAnalysisWindLineInfoDTO.windSpeedInKnots = windAtStart.getKnots();
+	} else {
+	    startAnalysisWindLineInfoDTO.windDirectionInDegrees = 0.0;
+	    startAnalysisWindLineInfoDTO.windSpeedInKnots = 0.0;
+	}
         return startAnalysisWindLineInfoDTO;
     }
 
