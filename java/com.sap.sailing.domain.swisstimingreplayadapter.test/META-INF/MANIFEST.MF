@@ -10,4 +10,5 @@ Import-Package: org.json.simple,
  org.json.simple.parser
 Require-Bundle: com.sap.sailing.domain.test,
  org.junit4;bundle-version="4.8.2",
- com.sap.sse.common
+ com.sap.sse.common,
+ org.mockito.mockito-core;bundle-version="1.10.14"

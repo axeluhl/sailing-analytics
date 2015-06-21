@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -109,7 +111,7 @@ public class ReachingLegTest extends TrackBasedTest {
         		EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
-                OneDesignRankingMetric::new);
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate, the offset
         // mark is slightly west of the top mark; wind from the north makes the leg from top to offset a reaching leg
         Position leftPosition = new DegreePosition(0, -0.00001);

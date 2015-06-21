@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -16,6 +17,7 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -33,7 +35,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testLoadRaceJson() throws Exception {
         String swissTimingUrlText = "/2012_OSG.json";
         InputStream inputStream = getClass().getResourceAsStream(swissTimingUrlText);
-        final SwissTimingReplayServiceImpl swissTimingReplayService = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE);
+        final SwissTimingReplayServiceImpl swissTimingReplayService = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class));
         List<SwissTimingReplayRace> races = swissTimingReplayService.parseJSONObject(inputStream , swissTimingUrlText);
         assertEquals(201, races.size());
         assertEquals("446483", races.get(0).getRaceId());
@@ -178,7 +180,7 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     public void testRaceData_SAW010955_20120802_WithDomainAdapter() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
-                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false);
+                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false, mock(RaceLogResolver.class));
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         assertFalse(Util.isEmpty(trackedRaces));
@@ -192,7 +194,7 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     public void testStartPerformanceDetection() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
-                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false);
+                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false, mock(RaceLogResolver.class));
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();
