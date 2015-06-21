@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.event.overview;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -25,6 +27,8 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     
     @UiField SimplePanel stage;
     @UiField Message message;
+    @UiField DivElement videoUi;
+    @UiField DivElement videoSubTitleUi;
     
     private Widget lastContent;
 
@@ -39,11 +43,24 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     public void setData(EventOverviewStageDTO stageData, long nextUpdate, int updateNo) {
         message.setMessage(stageData.getEventMessage());
         
+        videoUi.getStyle().setDisplay(Display.NONE);
+        videoSubTitleUi.getStyle().setDisplay(Display.NONE);
         EventOverviewStageContentDTO data = stageData.getStageContent();
         if(data instanceof EventOverviewVideoStageDTO) {
-            if(!(lastContent instanceof Video) || ((Video) lastContent).shouldBeReplaced(((EventOverviewVideoStageDTO) data).getVideo().getSourceRef())) {
-                lastContent = new Video();
-                ((Video)lastContent).setData((EventOverviewVideoStageDTO) data);
+
+            EventOverviewVideoStageDTO videoStageDTO = (EventOverviewVideoStageDTO) data;
+            if (videoStageDTO.getVideo().getTitle() != null && !videoStageDTO.getVideo().getTitle().isEmpty()) {
+                videoUi.getStyle().clearDisplay();
+                videoUi.setInnerText(videoStageDTO.getVideo().getTitle());
+            }
+            if (videoStageDTO.getVideo().getSubtitle() != null && !videoStageDTO.getVideo().getSubtitle().isEmpty()) {
+                videoSubTitleUi.getStyle().clearDisplay();
+                videoSubTitleUi.setInnerText(videoStageDTO.getVideo().getSubtitle());
+            }
+            if (!(lastContent instanceof Video)
+                    || ((Video) lastContent).shouldBeReplaced(videoStageDTO.getVideo().getSourceRef())) {
+                lastContent = new Video(false);
+                ((Video) lastContent).setData(videoStageDTO);
             } 
         } else if (data instanceof EventOverviewTickerStageDTO) {
             if (!(lastContent instanceof Countdown)) {

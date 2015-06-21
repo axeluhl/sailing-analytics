@@ -4,6 +4,17 @@
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" 
 	xmlns:m="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.message"
 	>
+	<ui:style>
+		.videoTitle {
+			margin: 5px 10px;
+			font-weight: 600;
+		}
+		.videoSubTitle {
+			margin: 5px 10px;
+			margin-top: 0px;
+			font-size: 0.8em;
+		}
+	</ui:style>
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
@@ -12,6 +23,8 @@
     <m:Message ui:field="message" />
     <div class="{res.mediaCss.grid}">
       <g:SimplePanel ui:field="stage" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
+      <div class="{style.videoTitle}" ui:field="videoUi" ></div>
+      <div class="{style.videoSubTitle}" ui:field="videoSubTitleUi" ></div>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>

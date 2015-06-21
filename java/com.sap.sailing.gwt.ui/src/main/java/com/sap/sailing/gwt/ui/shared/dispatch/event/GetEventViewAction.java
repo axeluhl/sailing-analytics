@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 
@@ -52,7 +51,8 @@ public class GetEventViewAction implements Action<EventViewDTO> {
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));
-        dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
+        // bug2982: always show leaderboard and competitor analytics 
+        dto.setHasAnalytics(true);
 
         boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
         

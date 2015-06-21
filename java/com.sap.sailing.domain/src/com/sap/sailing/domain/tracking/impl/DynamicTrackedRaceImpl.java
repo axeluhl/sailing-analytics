@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -658,17 +657,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public boolean recordWind(Wind wind, WindSource windSource) {
         final boolean result;
-        // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
-        TimePoint startOfRace = getStartOfRace();
-        TimePoint startOfTracking = getStartOfTracking();
-        TimePoint endOfRace = getEndOfRace();
-        TimePoint endOfTracking = getEndOfTracking();
-        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
-            &&
-        // Caution: don't add to endOfTracking; it may be the end of time, leading to a wrap-around / overflow
-        (endOfTracking == null || endOfTracking.after(wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS)) ||
-        (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
+        if (takesWindFix(wind)) {
             result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
@@ -759,7 +748,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
         super.detachRaceLog(identifier);
     }
-
+    
     @Override
     public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
         this.courseDesignChangedListeners.add(listener);
@@ -818,4 +807,5 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
+
 }

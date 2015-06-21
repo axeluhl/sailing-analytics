@@ -362,4 +362,46 @@ public class Util {
         }
         return null;
     }
+    
+    /**
+     * Returns the earlier {@link TimePoint} of a and b. If one of them is <code>null</code> and the other
+     * <code>!null</code>, the TimePoint that is not <code>!null</code> gets returned. If both are <code>null</code>,
+     * <code>null</code> is the result.
+     */
+    public static TimePoint getEarliestOfTimePoints(TimePoint a, TimePoint b) {
+        TimePoint result = null;
+        if (a != null && b != null) {
+            result = a.before(b) ? a : b;
+        } else {
+            result = (a != null && b == null) ? a : (a == null && b != null) ? b : null;
+        }
+        return result;
+    }
+    
+    /**
+     * Returns the latest {@link TimePoint} of a and b. If one of them is <code>null</code> and the other
+     * <code>!null</code>, the TimePoint that is not <code>!null</code> gets returned. If both are <code>null</code>,
+     * <code>null</code> is the result.
+     */
+    public static TimePoint getLatestOfTimePoints(TimePoint a, TimePoint b) {
+        TimePoint result = null;
+        if (a != null && b != null) {
+            result = a.after(b) ? a : b;
+        } else {
+            result = (a != null && b == null) ? a : (a == null && b != null) ? b : null;
+        }
+        return result;
+    }
+    
+    /**
+     * Returns <code>true</code> if <code>timePoint</code> is after <code>a</code> an before <code>b</code>.
+     * If one of the parameters is <code>null</code> the method returns <code>false</code>.
+     */
+    public static boolean isTimePointInRangeOfTimePointsAandB(TimePoint timePoint, TimePoint a, TimePoint b) {
+        boolean result = false;
+        if (timePoint != null && a != null && b != null) {
+            result = timePoint.after(a) && timePoint.before(b);
+        }
+        return result;
+    }
 }

@@ -77,3 +77,16 @@ img.sectionheader_item_arrow {
   margin-left: 1em;
   height: 0.8em;
 }
+.sectionheader_item_adjust_title {
+  margin-left: 4em;
+  margin-right: 2.5em;
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+     -moz-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+.sectionheader_item_adjust_title > h2 {
+	display: inline;
+}

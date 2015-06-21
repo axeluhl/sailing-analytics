@@ -8,6 +8,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sse.common.Named;
@@ -187,6 +188,8 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
      * opposite end of the association needs to be maintained on the event's side.
      */
     void adjustEventToRegattaAssociation(EventFetcher eventFetcher);
+    
+    RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 
     default RankingMetrics getRankingMetricType() {
         return RankingMetricsFactory.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());

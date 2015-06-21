@@ -66,10 +66,10 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
         addItem(StatisticsBox.ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
         addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
         addItemWithCompactFormat(StatisticsBox.ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
-        addItemWithCompactFormat(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
-                + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
         addItemWithCompactFormat(StatisticsBox.ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
         addItemWithCompactFormat(StatisticsBox.ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled());
+        addItemWithCompactFormat(StatisticsBox.ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
+                + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
     }
     
     private String compactNumber(double value) {
