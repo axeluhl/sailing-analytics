@@ -7,6 +7,7 @@
     android:background="?sap_gray_black_30">
 
     <LinearLayout
+        android:id="@+id/picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -26,18 +27,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"/>
+
+        <NumberPicker
+            android:id="@+id/second_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:descendantFocusability="blocksDescendants"
+            android:visibility="gone"
+            tools:visibility="visible"/>
     </LinearLayout>
 
     <Button
         android:id="@+id/set_date_time"
-        style="?attr/buttonSolidSmall"
+        style="?attr/buttonSolidXSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_centerInParent="true"
+        android:layout_below="@+id/picker"
         android:layout_margin="@dimen/default_margin_twice"
         android:maxWidth="200dp"
+        android:layout_centerHorizontal="true"
         android:text="@string/race_set_time"/>
 
     <TextView

@@ -31,6 +31,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
+    private NumberPicker mSecondPicker;
 
     public static RaceTimeChangeFragment newInstance(int mode) {
         RaceTimeChangeFragment fragment = new RaceTimeChangeFragment();
@@ -57,7 +58,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             return;
         }
 
-        Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance();
         TextView headerText = (TextView) layout.findViewById(R.id.header_headline);
         if (headerText != null) {
             switch (getArguments().getInt(START_MODE, 0)) {
@@ -92,6 +93,39 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             mTimePicker.setIs24HourView(true);
             mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
             mTimePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
+        }
+
+        mSecondPicker = (NumberPicker) layout.findViewById(R.id.second_picker);
+        if (mSecondPicker != null) {
+            ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+            mSecondPicker.setVisibility(View.VISIBLE);
+            mSecondPicker.setMinValue(0);
+            mSecondPicker.setMaxValue(59);
+            mSecondPicker.setValue(calendar.get(Calendar.SECOND));
+            mSecondPicker.setFormatter(new NumberPicker.Formatter() {
+                @Override
+                public String format(int i) {
+                    return String.format("%02d", i);
+                }
+            });
+            mSecondPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                @Override
+                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                    if (mTimePicker != null) {
+                        Calendar pickerTime = (Calendar) calendar.clone();
+                        pickerTime.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
+                        pickerTime.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
+                        if (oldVal == 0 && newVal == 59) {
+                            pickerTime.add(Calendar.MINUTE, -1);
+                        }
+                        if (oldVal == 59 && newVal == 0) {
+                            pickerTime.add(Calendar.MINUTE, 1);
+                        }
+                        mTimePicker.setCurrentHour(pickerTime.get(Calendar.HOUR_OF_DAY));
+                        mTimePicker.setCurrentMinute(pickerTime.get(Calendar.MINUTE));
+                    }
+                }
+            });
         }
 
         View setTime = layout.findViewById(R.id.set_date_time);
@@ -143,7 +177,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.SECOND, mSecondPicker.getValue());
         calendar.set(Calendar.MILLISECOND, 0);
         return new MillisecondsTimePoint(calendar.getTime());
     }

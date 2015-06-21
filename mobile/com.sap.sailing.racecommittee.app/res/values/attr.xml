@@ -16,6 +16,7 @@
     <attr name="white_invert" format="color"/>
 
     <!-- custom references (e.g. styles) -->
+    <attr name="buttonSolidXSmall" format="reference"/>
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
     <attr name="textXXSmall" format="reference"/>
