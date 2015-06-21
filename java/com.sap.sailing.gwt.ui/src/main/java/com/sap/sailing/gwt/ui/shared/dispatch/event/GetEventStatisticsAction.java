@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -8,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
