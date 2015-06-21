@@ -20,7 +20,7 @@ public class ConditionalDateTimeFormatter {
                 result = stringMessages.minutesAgo(format.format(diffTime));
             } else {
                 if (sameDay(newsTimestamp, currentTimestamp)) {
-                    DateTimeFormat format = DateTimeFormat.getFormat("h:m");
+                    DateTimeFormat format = DateTimeFormat.getFormat("hh:mm");
                     Date diffTime = new Date(currentTimestamp.getTime() - newsTimestamp.getTime());
                     result = stringMessages.hoursAgo(format.format(diffTime));
                 } else {
