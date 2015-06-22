@@ -3,7 +3,6 @@ package com.sap.sailing.domain.ranking;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -52,9 +51,9 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
 
     public final static RankingMetricConstructor CONSTRUCTOR = TimeOnTimeAndDistanceRankingMetric::new;
 
-    private final Function<Competitor, Double> timeOnTimeFactor;
+    private final TimeOnTimeFactorMapping timeOnTimeFactor;
 
-    private final Function<Competitor, Duration> timeOnDistanceFactorNauticalMile;
+    private final TimeOnDistanceAllowancePerNauticalMileMap timeOnDistanceFactorNauticalMile;
     
     /**
      * The regular constructor that can also be used as <code>TimeOnTimeAndDistanceRankingMetric::new</code>
@@ -72,8 +71,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
      * its regatta, handicap mappings can be passed directly and overrule anything defined for the competitor or
      * on the regatta.
      */
-    public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace, Function<Competitor, Double> timeOnTimeFactor,
-            Function<Competitor, Duration> timeOnDistanceFactorInSecondsPerNauticalMile) {
+    public TimeOnTimeAndDistanceRankingMetric(final TrackedRace trackedRace, TimeOnTimeFactorMapping timeOnTimeFactor,
+            TimeOnDistanceAllowancePerNauticalMileMap timeOnDistanceFactorInSecondsPerNauticalMile) {
         super(trackedRace);
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
