@@ -66,7 +66,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     /**
      * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
-     * @param raceLogResolver TODO
      */
     public BaseRacingProcedure(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
             RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
