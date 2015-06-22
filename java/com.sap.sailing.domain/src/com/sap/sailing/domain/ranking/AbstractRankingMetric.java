@@ -512,9 +512,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         if (legTo.hasFinishedLeg(timePoint)) {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
             final TimePoint whosLegFinishTime = legWho.getFinishTime();
-            if (whosLegFinishTime != null) {
-                // who's leg finishing time is known; we don't need to extrapolate
-                // TODO but we probably should still extrapolate based on what we would have known at timePoint; otherwise we'd get unsteady results depending on the time at which we look at this
+            if (whosLegFinishTime != null && !whosLegFinishTime.after(timePoint)) {
+                // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
                 assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
