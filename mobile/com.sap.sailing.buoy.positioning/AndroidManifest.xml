@@ -84,6 +84,10 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".service.MarkerService"
+            android:exported="false"/>
+
         <provider
             android:name="com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsProvider"
             android:authorities="com.sap.sailing.android.buoy.positioning.app.provider.db"

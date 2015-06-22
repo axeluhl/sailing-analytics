@@ -9,9 +9,9 @@ import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
@@ -86,6 +86,9 @@ public class RegattaActivity extends AbstractRegattaActivity {
     @Override
     public void onStart() {
         super.onStart();
+        Intent intent = new Intent(this, MarkerService.class);
+        intent.putExtra(getString(R.string.check_in_url_key), checkinUrl);
+        startService(intent);
         Intent messageSendingServiceIntent = new Intent(this, MessageSendingService.class);
         bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -103,6 +106,8 @@ public class RegattaActivity extends AbstractRegattaActivity {
                 ExLog.i(this, TAG, "Unbound transmitting Service");
             }
         }
+        Intent intent = new Intent(this, MarkerService.class);
+        stopService(intent);
     }
 
     @Override
