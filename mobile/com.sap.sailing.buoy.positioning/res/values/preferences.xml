@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="preference_data_refresh_interval_millis_key">messageResendIntervalMillis</string>
+    <string name="preference_data_refresh_interval_millis_key" translatable="false">messageResendIntervalMillis</string>
     <integer name="preference_data_refresh_interval_millis_default">120000</integer>
-    <string name="check_in_url_key">check_in_url</string>
+    <string name="check_in_url_key" translatable="false">check_in_url</string>
 </resources>
