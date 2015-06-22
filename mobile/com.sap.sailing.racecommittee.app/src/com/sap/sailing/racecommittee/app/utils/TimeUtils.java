@@ -139,13 +139,13 @@ public class TimeUtils {
             dates.add(context.getString(R.string.tomorrow));
             calendar.add(Calendar.DAY_OF_MONTH, 3);
         } else {
-            for (int i = 0; i < 3; i++) {
+            for (int i = (pastDays == 0 ? pastDays : -1); i < (futureDays < 2 ? futureDays + 1 : 2); i++) {
                 dates.add(dateFormat.format(calendar.getTime()));
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
             }
         }
         // Future
-        for (int i = 3; i <= futureDays + 1; i++) {
+        for (int i = 2; i <= futureDays; i++) {
             dates.add(dateFormat.format(calendar.getTime()));
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
