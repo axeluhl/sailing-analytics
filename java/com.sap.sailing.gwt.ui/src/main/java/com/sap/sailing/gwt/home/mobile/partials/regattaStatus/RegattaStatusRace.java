@@ -51,8 +51,10 @@ public class RegattaStatusRace extends Composite {
     }
     
     private void initRaceFlagInfo(FlagStateDTO value) {
-        raceFlagContainerUi.setInnerSafeHtml(SailingFlagsBuilder.render(value, 0.40, FlagsMeaningExplanator.getFlagsMeaning(I18N,
-                value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
+        if (value != null) {
+            raceFlagContainerUi.setInnerSafeHtml(SailingFlagsBuilder.render(value, 0.40, FlagsMeaningExplanator
+                    .getFlagsMeaning(I18N, value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
+        }
     }
 
     private void initRaceStateOrLegsInfo(RaceViewState state, Date start, RaceProgressDTO progress) {
@@ -63,7 +65,7 @@ public class RegattaStatusRace extends Composite {
         } else {
             raceLegsInfoUi.removeFromParent();
             raceStateInfoUi.setInnerText(state.getLabel());
-            if (state == RaceViewState.SCHEDULED) {
+            if (state == RaceViewState.SCHEDULED && start != null) {
                 double min = MillisecondsTimePoint.now().until(new MillisecondsTimePoint(start)).asMinutes();
                 raceStateInfoUi.setInnerText(I18N.startingInMinutes((int) min));
             }
