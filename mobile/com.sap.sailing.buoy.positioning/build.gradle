@@ -65,10 +65,10 @@ android {
 
 dependencies {
     /* support libraries */
-    compile "com.android.support:appcompat-v7:22.1.1"
+    compile "com.android.support:appcompat-v7:22.2.0"
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:7.3.0"
+    compile "com.google.android.gms:play-services-location:7.5.0"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
