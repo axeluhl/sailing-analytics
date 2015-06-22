@@ -30,6 +30,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -61,6 +62,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private final FinishingTimeFinder finishingTimeFinder;
     private final FinishedTimeFinder finishedTimeFinder;
     private final RaceLogEventVisitor raceLogListener;
+    private final StartTimeFinder startTimeFinder;
 
     private boolean cachedIsIndividualRecallDisplayed;
 
@@ -89,8 +91,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
-        // Use the following in order to initialize a start time finder once it's needed for start time-dependent individual recall timeouts
-        //        this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
+        this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
