@@ -281,7 +281,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     /**
      * Constructs a comparator based on the results of
      * {@link #getWindwardDistanceTraveled(Competitor, TimePoint, WindLegTypeAndLegBearingCache)} where competitors are
-     * "less" than other competitors ("better") if they have a greater windward distance traveled.
+     * "less" than other competitors ("better") if they are in a later leg or, if in the same leg, have a greater
+     * windward distance traveled. If both competitors have already finished the race, the finishing time is compared.
      */
     private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
         final Map<Competitor, Distance> windwardDistanceTraveledPerCompetitor = new HashMap<>();
@@ -289,9 +290,13 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
         }
         final Comparator<Distance> nullsFirstDistanceComparator = Comparator.nullsFirst(Comparator.naturalOrder());
-        return (c1, c2) -> nullsFirstDistanceComparator.compare(
+        return (c1, c2) -> {
+            int result = 
+            if (trackedRace.getTrackedLeg(c2, timePoint) != null
+                    nullsFirstDistanceComparator.compare(
                 windwardDistanceTraveledPerCompetitor.get(c2),
                 windwardDistanceTraveledPerCompetitor.get(c1));
+        }
     }
 
     /**
@@ -510,6 +515,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             final TimePoint whosLegFinishTime = legWho.getFinishTime();
             if (whosLegFinishTime != null) {
                 // who's leg finishing time is known; we don't need to extrapolate
+                // TODO but we probably should still extrapolate based on what we would have known at timePoint; otherwise we'd get unsteady results depending on the time at which we look at this
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
                 assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
