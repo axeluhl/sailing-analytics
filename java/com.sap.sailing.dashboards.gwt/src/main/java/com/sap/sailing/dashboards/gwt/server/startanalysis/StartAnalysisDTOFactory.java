@@ -53,8 +53,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
 
         boolean isCompetitorOneOfFirstThree = false;
         for (int i = 0; i < MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS; i++) {
-            competitors.add(createStartAnalysisCompetitorDTO(trackedRace, i + 1, markPassingsInOrder.get(i)
-                    .getCompetitor()));
+            competitors.add(createStartAnalysisCompetitorDTO(trackedRace, i + 1, markPassingsInOrder.get(i).getCompetitor()));
             if (markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
                 isCompetitorOneOfFirstThree = true;
             }
@@ -75,9 +74,9 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
             startAnalysisDTO.racingProcedureType = RacingProcedureType.GateStart;
             long timePointOfGolfDownTime = trackedRace.getGateStartGolfDownTime();
             startAnalysisDTO.timeOfStartInMilliSeconds = trackedRace.getStartOfRace().asMillis();
-            if(timePointOfGolfDownTime < trackedRace.getStartOfRace().asMillis() || timePointOfGolfDownTime == 0){
+            if (timePointOfGolfDownTime < trackedRace.getStartOfRace().asMillis() || timePointOfGolfDownTime == 0) {
                 startAnalysisDTO.tailLenghtInMilliseconds = DEFAULT_GATE_START_INTERVALL_IN_MILLISECONDS;
-            }else{
+            } else {
                 startAnalysisDTO.tailLenghtInMilliseconds = timePointOfGolfDownTime-trackedRace.getStartOfRace().asMillis();
             }
         } else {
@@ -142,19 +141,26 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
 
     private WindAndAdvantagesInfoForStartLineDTO createStartAnalysisWindAndLineData(TrackedRace trackedRace) {
         WindAndAdvantagesInfoForStartLineDTO startAnalysisWindLineInfoDTO = new WindAndAdvantagesInfoForStartLineDTO();
-        LineDetails startline = trackedRace.getStartLine(trackedRace.getStartTimeReceived());
+        final TimePoint startOfRace = trackedRace.getStartOfRace();
+        final TimePoint timePoint = startOfRace == null ? MillisecondsTimePoint.now() : startOfRace;
+        LineDetails startline = trackedRace.getStartLine(timePoint);
         StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
         startLineAdvantageDTO.startLineAdvatageType = getStartlineAdvantageType(trackedRace, new MillisecondsTimePoint(
                 new Date()));
         startLineAdvantageDTO.startLineAdvantage = startline.getAdvantage().getMeters();
         startAnalysisWindLineInfoDTO.startLineAdvantage = startLineAdvantageDTO;
-        Position portMarkPosition = trackedRace.getOrCreateTrack(
-                trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getStarboardMarkWhileApproachingLine())
-                .getEstimatedPosition(trackedRace.getStartTimeReceived(), /* extrapolate */
-                false);
-        Wind windAtStart = trackedRace.getWind(portMarkPosition, trackedRace.getStartTimeReceived());
-        startAnalysisWindLineInfoDTO.windDirectionInDegrees = windAtStart.getBearing().getDegrees();
-        startAnalysisWindLineInfoDTO.windSpeedInKnots = windAtStart.getKnots();
+	if (trackedRace.getStartTimeReceived() != null) {
+	    Position portMarkPosition = trackedRace.getOrCreateTrack(
+		    trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getStarboardMarkWhileApproachingLine())
+		    .getEstimatedPosition(trackedRace.getStartTimeReceived(), /* extrapolate */
+		    false);
+	    Wind windAtStart = trackedRace.getWind(portMarkPosition, trackedRace.getStartTimeReceived());
+	    startAnalysisWindLineInfoDTO.windDirectionInDegrees = windAtStart.getBearing().getDegrees();
+	    startAnalysisWindLineInfoDTO.windSpeedInKnots = windAtStart.getKnots();
+	} else {
+	    startAnalysisWindLineInfoDTO.windDirectionInDegrees = 0.0;
+	    startAnalysisWindLineInfoDTO.windSpeedInKnots = 0.0;
+	}
         return startAnalysisWindLineInfoDTO;
     }
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,7 +53,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
@@ -306,31 +304,6 @@ public class ImportMasterDataOperation extends
                 }
             }
         }
-    }
-
-    /**
-     * Hack adding a dummy tracked race, so that the competitors will be added to the leaderboards
-     * 
-     * @param leaderboard
-     * @return the race column and fleet the dummy was attached to
-     */
-    public com.sap.sse.common.Util.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
-            Regatta regatta) {
-        RaceColumn raceColumn = null;
-        Fleet fleet = null;
-        Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
-        Iterator<RaceColumn> raceColumnIterator = raceColumns.iterator();
-        if (raceColumnIterator.hasNext()) {
-            raceColumn = raceColumnIterator.next();
-            Iterable<? extends Fleet> fleets = raceColumn.getFleets();
-            Iterator<? extends Fleet> fleetIterator = fleets.iterator();
-            if (fleetIterator.hasNext()) {
-                fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(UUID.randomUUID(), leaderboard.getAllCompetitors(), regatta, null, EmptyWindStore.INSTANCE);
-                raceColumn.setTrackedRace(fleet, dummy);
-            }
-        }
-        return new com.sap.sse.common.Util.Pair<RaceColumn, Fleet>(raceColumn, fleet);
     }
 
     private void createWindTracks(RacingEventService toState) {

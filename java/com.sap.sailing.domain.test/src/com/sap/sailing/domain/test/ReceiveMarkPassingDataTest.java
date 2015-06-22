@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -11,6 +12,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -106,9 +108,9 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */null,
-                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
-                getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
-                ReceiverType.RAWPOSITIONS)) {
+                mock(RaceLogResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
+                null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS,
+                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);

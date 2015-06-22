@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -136,6 +137,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private RaceStatus lastRaceStatus;
     
     private final boolean useInternalMarkPassingAlgorithm;
+    
+    private final RaceLogResolver raceLogResolver;
 
     /**
      * @param regatta
@@ -144,7 +147,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm) {
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver) {
+        this.raceLogResolver = raceLogResolver;
         this.regatta = regatta;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         racePerRaceID = new HashMap<>();
@@ -317,7 +321,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm);
+                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver);
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
