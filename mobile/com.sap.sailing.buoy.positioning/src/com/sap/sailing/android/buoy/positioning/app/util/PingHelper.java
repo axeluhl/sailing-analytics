@@ -1,19 +1,17 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.util.UUID;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.location.Location;
-
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.UUID;
 
 public class PingHelper {
     private static String TAG = PingHelper.class.getName();
