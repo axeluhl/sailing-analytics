@@ -6,6 +6,7 @@ import java.util.Date;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -19,31 +20,30 @@ public class EventRaceStatesSerializer implements JsonSerializer<Pair<Event, Ite
     public static final String FIELD_EVENT_ID = "id";
     public static final String FIELD_RACE_STATES = "raceStates";
     
-    private String filterByCourseArea;
-    private String filterByLeaderboardName;
-    private Calendar filterDay;
+    private final String filterByCourseArea;
+    private final String filterByLeaderboardName;
+    private final Calendar filterDay;
+    private final RaceLogResolver raceLogResolver;
 
-    public EventRaceStatesSerializer() {
-        this.filterByCourseArea = null;
-        this.filterByLeaderboardName = null;
-        this.filterDay = null;
-    }
-
-    public EventRaceStatesSerializer(String filterByCourseArea, String filterByLeaderboard, String filterByDayOffset) {
+    public EventRaceStatesSerializer(String filterByCourseArea, String filterByLeaderboard, String filterByDayOffset, RaceLogResolver raceLogResolver) {
         this.filterByCourseArea = filterByCourseArea;
         this.filterByLeaderboardName = filterByLeaderboard;
-        
+        this.raceLogResolver = raceLogResolver;
         Integer dayOffset = null;
-        if(filterByDayOffset != null) {
+        if (filterByDayOffset != null) {
+            Calendar myFilterDay;
             try {
                 dayOffset = Integer.parseInt(filterByDayOffset);
-                filterDay = Calendar.getInstance();
-                filterDay.setTime(new Date());
-                filterDay.add(Calendar.DAY_OF_YEAR, dayOffset);
+                myFilterDay = Calendar.getInstance();
+                myFilterDay.setTime(new Date());
+                myFilterDay.add(Calendar.DAY_OF_YEAR, dayOffset);
             } catch (NumberFormatException e) {
                 // invalid integer
-                filterDay = null;
+                myFilterDay = null;
             }
+            filterDay = myFilterDay;
+        } else {
+            filterDay = null;
         }
     }
 
@@ -60,7 +60,7 @@ public class EventRaceStatesSerializer implements JsonSerializer<Pair<Event, Ite
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             if(filterByCourseArea == null || courseArea.getName().equals(filterByCourseArea)) {
                 for (Leaderboard leaderboard : leaderboards) {
-                    RaceStateSerializer raceStateSerializer = new RaceStateSerializer(leaderboard);
+                    RaceStateSerializer raceStateSerializer = new RaceStateSerializer(raceLogResolver);
                     if (filterByLeaderboardName == null || leaderboard.getName().equals(filterByLeaderboardName)) {
                         if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
                             String leaderboardName = leaderboard.getName();

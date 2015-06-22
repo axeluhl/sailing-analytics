@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -63,22 +64,22 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver);
         return tracker;
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI,
                 courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm,
                 raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver);
         return tracker;
     }
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -54,13 +55,13 @@ public interface SwissTimingFactory {
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
             boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws InterruptedException, UnknownHostException,
             IOException, ParseException;
 
     RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
             WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws UnknownHostException,
             InterruptedException, IOException, ParseException;
 
     Race createRace(String raceId, String raceName, String description, BoatClass boatClass);

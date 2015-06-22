@@ -45,6 +45,7 @@ import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -67,6 +68,11 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     
     @Before
     public void setUp() throws Exception {
+        final EmptyGPSFixStore gpsFixStore = EmptyGPSFixStore.INSTANCE;
+        setUp(gpsFixStore);
+    }
+
+    protected void setUp(final GPSFixStore gpsFixStore) throws Exception, UnknownHostException, InterruptedException {
         super.setUp();
         final String boatClassName = "49er";
         // FIXME use master DomainFactory; see bug 592
@@ -95,11 +101,27 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 5000,
+                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), gpsFixStore, /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.waitUntilLoadingFromWindStoreComplete();
     }
     
+    protected Competitor getCompetitor() {
+        return competitor;
+    }
+
+    protected DynamicTrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+
+    protected RegattaNameAndRaceName getRaceIdentifier() {
+        return raceIdentifier;
+    }
+
+    protected DynamicTrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
+    }
+
     @Test
     public void testGPSFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(1, 2), new MillisecondsTimePoint(12345),

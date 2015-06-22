@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -24,6 +25,8 @@ public interface IsRegattaLike extends Serializable {
      * of its {@link Regatta#getRegattaLog Regatta}, whereas a {@link FlexibleLeaderboard} creates its own {@code RegattaLog}).
      */
     RegattaLog getRegattaLog();
+    
+    RaceColumn getRaceColumnByName(String raceColumnName);
     
     RegattaLikeIdentifier getRegattaLikeIdentifier();
     
