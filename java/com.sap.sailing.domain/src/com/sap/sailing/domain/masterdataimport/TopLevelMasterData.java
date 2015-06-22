@@ -41,6 +41,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
@@ -255,7 +256,14 @@ public class TopLevelMasterData implements Serializable {
     }
 
     public void setMasterDataExportFlagOnRaceColumns(boolean flagValue) {
-        for (LeaderboardGroup group : leaderboardGroups) {
+        // collect all leaderboard groups for all events that will be touched during serialization
+        final Set<LeaderboardGroup> allLeaderboardGroups = new HashSet<>();
+        for (Entry<LeaderboardGroup, Set<Event>> i : eventForLeaderboardGroup.entrySet()) {
+            for (Event e : i.getValue()) {
+                Util.addAll(e.getLeaderboardGroups(), allLeaderboardGroups);
+            }
+        }
+        for (LeaderboardGroup group : allLeaderboardGroups) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     raceColumn.setMasterDataExportOngoingThreadFlag(true);
