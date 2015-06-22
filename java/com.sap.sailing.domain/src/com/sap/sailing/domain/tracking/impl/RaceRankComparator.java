@@ -41,7 +41,7 @@ public class RaceRankComparator extends AbstractRaceRankComparator<Distance> {
     private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
     
     public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        super(trackedRace, timePoint);
+        super(trackedRace, timePoint, /* lessIsBetter */ true);
         this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
@@ -53,7 +53,7 @@ public class RaceRankComparator extends AbstractRaceRankComparator<Distance> {
     }
 
     @Override
-    protected Distance getComparisonValueForSameLegLessIsBetter(Competitor o1) {
+    protected Distance getComparisonValueForSameLeg(Competitor o1) {
         return windwardDistanceToGoInLegCache.get(o1);
     }
 }

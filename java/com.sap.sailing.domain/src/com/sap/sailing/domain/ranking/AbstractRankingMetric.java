@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceRankComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -289,14 +290,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         for (final Competitor competitor : getCompetitors()) {
             windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
         }
-        final Comparator<Distance> nullsFirstDistanceComparator = Comparator.nullsFirst(Comparator.naturalOrder());
-        return (c1, c2) -> {
-            int result = 
-            if (trackedRace.getTrackedLeg(c2, timePoint) != null
-                    nullsFirstDistanceComparator.compare(
-                windwardDistanceTraveledPerCompetitor.get(c2),
-                windwardDistanceTraveledPerCompetitor.get(c1));
-        }
+        return new AbstractRaceRankComparator<Distance>(trackedRace, timePoint, /* lessIsBetter */ false) {
+            @Override
+            protected Distance getComparisonValueForSameLeg(Competitor competitor) {
+                return windwardDistanceTraveledPerCompetitor.get(competitor);
+            }
+        };
     }
 
     /**

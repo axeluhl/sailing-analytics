@@ -38,12 +38,19 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
     private final TrackedRace trackedRace;
     private final TimePoint timePoint;
     private final DummyMarkPassingWithTimePointOnly markPassingWithTimePoint;
+    private final boolean lessIsBetter;
     
-    public AbstractRaceRankComparator(TrackedRace trackedRace, TimePoint timePoint) {
+    /**
+     * @param lessIsBetter
+     *            tells whether lesser return values for {@link #getComparisonValueForSameLeg(Competitor)} denote a
+     *            better competitor ranking or not.
+     */
+    public AbstractRaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, boolean lessIsBetter) {
         super();
         this.trackedRace = trackedRace;
         this.timePoint = timePoint;
         this.markPassingWithTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
+        this.lessIsBetter = lessIsBetter;
     }
 
     @Override
@@ -107,9 +114,9 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
                                     trackedRace.getRace().getCourse().getLegs().indexOf(o2Leg.getLeg());
                         } else {
                             // competitors are in same leg; compare their windward distance to go
-                            final C wwdtgO1 = getComparisonValueForSameLegLessIsBetter(o1);
-                            final C wwdtgO2 = getComparisonValueForSameLegLessIsBetter(o2);
-                            result = wwdtgO1==null?wwdtgO2==null?0:-1:wwdtgO2==null?1:wwdtgO1.compareTo(wwdtgO2);
+                            final C wwdtgO1 = getComparisonValueForSameLeg(o1);
+                            final C wwdtgO2 = getComparisonValueForSameLeg(o2);
+                            result = wwdtgO1==null?wwdtgO2==null?0:-1:wwdtgO2==null?1:(lessIsBetter?1:-1)*wwdtgO1.compareTo(wwdtgO2);
                         }
                     }
                 }
@@ -118,5 +125,5 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         return result;
     }
 
-    protected abstract C getComparisonValueForSameLegLessIsBetter(Competitor o1);
+    protected abstract C getComparisonValueForSameLeg(Competitor competitor);
 }
