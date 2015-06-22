@@ -110,18 +110,13 @@ public class RaceFlagViewerFragment extends BaseFragment {
             }
         } else {
             String time = getString(R.string.until_xray_removed);
-            if (mXrayCountdown != null) {
+            if (mXrayCountdown != null && mRecall != null) {
                 TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
                 if (timePoint.before(flagDown)) {
                     time = time.replace("#TIME#", TimeUtils.formatDurationUntil(flagDown.minus(timePoint.asMillis()).asMillis()).replace("-", ""));
                     mXrayCountdown.setText(time);
-                } else {
-                    procedure.removeIndividualRecall(timePoint);
+                    mRecall.setVisibility(View.VISIBLE);
                 }
-            }
-
-            if (mRecall != null) {
-                mRecall.setVisibility(View.VISIBLE);
             }
         }
     }
