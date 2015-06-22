@@ -2374,18 +2374,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
 
-        logger.info("Serializing events...");
-        oos.writeObject(eventsById);
-        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
-        for (Event event : eventsById.values()) {
-            logoutput.append(String.format("%3s\n", event.toString()));
-        }
-
         logger.info("Serializing regattas...");
         oos.writeObject(regattasByName);
         logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        logger.info("Serializing events...");
+        oos.writeObject(eventsById);
+        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
 
         logger.info("Serializing regattas observed...");
@@ -2441,18 +2441,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // de-serialization; this will cause all classes to be visible that this bundle
         // (com.sap.sailing.server) can see
         StringBuffer logoutput = new StringBuffer();
-        logger.info("Reading all events...");
-        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
-        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
-        for (Event event : eventsById.values()) {
-            logoutput.append(String.format("%3s\n", event.toString()));
-        }
-
         logger.info("Reading all regattas...");
         regattasByName.putAll((Map<String, Regatta>) ois.readObject());
         logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        logger.info("Reading all events...");
+        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
+        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
 
         // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
