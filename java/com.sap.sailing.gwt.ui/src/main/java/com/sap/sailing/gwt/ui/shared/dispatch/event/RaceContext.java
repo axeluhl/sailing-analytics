@@ -6,6 +6,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
@@ -31,8 +32,6 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
-import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -57,9 +56,10 @@ public class RaceContext {
     private final RaceLog raceLog;
     private final ReadonlyRaceState state;
     private final Event event;
+    private final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
     private final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
     
-    public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
+    public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.event = event;
         this.leaderboard = leaderboard;
         this.raceColumn = raceColumn;
@@ -67,7 +67,7 @@ public class RaceContext {
         this.fleet = fleet;
         trackedRace = raceColumn.getTrackedRace(fleet);
         raceLog = raceColumn.getRaceLog(fleet);
-        state = ReadonlyRaceStateImpl.create(new ServerSideRaceLogResolver((HasRegattaLike) leaderboard), raceLog);
+        state = ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
     }
 
     private boolean isShowFleetData() {
@@ -309,7 +309,7 @@ public class RaceContext {
                 result = trackedRace.isLive(now);
             } else {
                 // no data from tracking but maybe a manual setting of the start and finish time
-                TimePoint startOfLivePeriod = startTime.minus(TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+                TimePoint startOfLivePeriod = startTime.minus(TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE);
                 TimePoint endOfLivePeriod = finishTime != null ? finishTime.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) : null; 
                 if(now.after(startOfLivePeriod) && (endOfLivePeriod == null || now.before(endOfLivePeriod))) {
                     result = true;

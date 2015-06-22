@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -51,18 +52,18 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore) throws Exception {
+            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
         return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port,
                 startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore, gpsFixStore, useInternalMarkPassingAlgorithm,
-                domainFactory, trackedRegattaRegistry);
+                domainFactory, trackedRegattaRegistry, raceLogResolver);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
         return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname,
                 port, startList, delayToLiveInMillis, windStore, gpsFixStore, useInternalMarkPassingAlgorithm,
-                domainFactory, trackedRegattaRegistry);
+                domainFactory, trackedRegattaRegistry, raceLogResolver);
     }
 
     @Override

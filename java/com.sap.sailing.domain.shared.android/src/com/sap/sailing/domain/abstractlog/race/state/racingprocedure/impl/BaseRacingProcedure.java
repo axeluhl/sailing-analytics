@@ -30,7 +30,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -43,6 +42,9 @@ import com.sap.sse.common.TimePoint;
 public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener implements RacingProcedure,
         RaceLogChangedListener {
     private static final Logger logger = Logger.getLogger(BaseRacingProcedure.class.getName());
+    /**
+     * The time since race start after which the X-ray flag has to go down
+     */
     private final static Duration individualRecallRemovalTimeout = Duration.ONE_MINUTE.times(4);
 
     private RaceStateEventScheduler scheduler;
@@ -59,7 +61,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private final FinishingTimeFinder finishingTimeFinder;
     private final FinishedTimeFinder finishedTimeFinder;
     private final RaceLogEventVisitor raceLogListener;
-    private final StartTimeFinder startTimeFinder;
 
     private boolean cachedIsIndividualRecallDisplayed;
 
@@ -88,7 +89,8 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
-        this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
+        // Use the following in order to initialize a start time finder once it's needed for start time-dependent individual recall timeouts
+        //        this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);

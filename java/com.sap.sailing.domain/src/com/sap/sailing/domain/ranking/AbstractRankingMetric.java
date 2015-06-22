@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceRankComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -281,17 +282,20 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     /**
      * Constructs a comparator based on the results of
      * {@link #getWindwardDistanceTraveled(Competitor, TimePoint, WindLegTypeAndLegBearingCache)} where competitors are
-     * "less" than other competitors ("better") if they have a greater windward distance traveled.
+     * "less" than other competitors ("better") if they are in a later leg or, if in the same leg, have a greater
+     * windward distance traveled. If both competitors have already finished the race, the finishing time is compared.
      */
     private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
         final Map<Competitor, Distance> windwardDistanceTraveledPerCompetitor = new HashMap<>();
         for (final Competitor competitor : getCompetitors()) {
             windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
         }
-        final Comparator<Distance> nullsFirstDistanceComparator = Comparator.nullsFirst(Comparator.naturalOrder());
-        return (c1, c2) -> nullsFirstDistanceComparator.compare(
-                windwardDistanceTraveledPerCompetitor.get(c2),
-                windwardDistanceTraveledPerCompetitor.get(c1));
+        return new AbstractRaceRankComparator<Distance>(trackedRace, timePoint, /* lessIsBetter */ false) {
+            @Override
+            protected Distance getComparisonValueForSameLeg(Competitor competitor) {
+                return windwardDistanceTraveledPerCompetitor.get(competitor);
+            }
+        };
     }
 
     /**
@@ -508,8 +512,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         if (legTo.hasFinishedLeg(timePoint)) {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
             final TimePoint whosLegFinishTime = legWho.getFinishTime();
-            if (whosLegFinishTime != null) {
-                // who's leg finishing time is known; we don't need to extrapolate
+            if (whosLegFinishTime != null && !whosLegFinishTime.after(timePoint)) {
+                // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
                 assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(

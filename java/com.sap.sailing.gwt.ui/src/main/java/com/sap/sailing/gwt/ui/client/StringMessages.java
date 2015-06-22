@@ -1313,4 +1313,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sailorInfoLongText();
     String resultsUpdate();
     String competitorWonRace(String competitorName);
+    String now();
+    String minutesAgo(String minutes);
+    String hoursAgo(String hours);
 }

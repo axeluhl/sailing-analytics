@@ -88,7 +88,7 @@ public class EventsResource extends AbstractSailingServerResource {
             response = getBadEventErrorResponse(eventId);
         } else {
             EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseArea,
-                    filterByLeaderboard, filterByDayOffset);
+                    filterByLeaderboard, filterByDayOffset, getService());
             JSONObject raceStatesJson = eventRaceStatesSerializer.serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
             String json = raceStatesJson.toJSONString();
             response = Response.ok(json, MediaType.APPLICATION_JSON).build();
