@@ -258,6 +258,7 @@ public class TopLevelMasterData implements Serializable {
     public void setMasterDataExportFlagOnRaceColumns(boolean flagValue) {
         // collect all leaderboard groups for all events that will be touched during serialization
         final Set<LeaderboardGroup> allLeaderboardGroups = new HashSet<>();
+        allLeaderboardGroups.addAll(leaderboardGroups);
         for (Entry<LeaderboardGroup, Set<Event>> i : eventForLeaderboardGroup.entrySet()) {
             for (Event e : i.getValue()) {
                 Util.addAll(e.getLeaderboardGroups(), allLeaderboardGroups);
