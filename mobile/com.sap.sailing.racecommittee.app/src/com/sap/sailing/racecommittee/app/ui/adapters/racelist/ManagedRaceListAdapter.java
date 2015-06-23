@@ -54,7 +54,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private ImageView current_flag;
     private TextView race_name;
     private TextView flag_timer;
-    private ImageView arrow_direction;
     private TextView boat_class;
     private TextView fleet_series;
     private ImageView protest_image;
@@ -277,7 +276,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     private void findViews(View convertView) {
         marker = ViewHolder.get(convertView, R.id.race_marker);
-        arrow_direction = ViewHolder.get(convertView, R.id.arrow_direction);
         current_flag = ViewHolder.get(convertView, R.id.current_flag);
         update_badge = ViewHolder.get(convertView, R.id.update_badge);
         race_flag = ViewHolder.get(convertView, R.id.race_flag);
@@ -328,16 +326,14 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (state == null || state.getStartTime() == null) {
             return;
         }
-        FlagPoleState flagPoleState = state.getTypedRacingProcedure()
-            .getActiveFlags(state.getStartTime(), MillisecondsTimePoint.now());
+        FlagPoleState flagPoleState = state.getTypedRacingProcedure().getActiveFlags(state.getStartTime(), MillisecondsTimePoint.now());
         List<FlagPole> flagChanges = flagPoleState.computeUpcomingChanges();
         if (!flagChanges.isEmpty()) {
             TimePoint changeAt = flagPoleState.getNextStateValidFrom();
             FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
             if (changeAt != null) {
-                current_flag.setImageDrawable(
-                    FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
+                current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
                 String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
                 flag_timer.setText(text.replace("-", ""));
                 Drawable arrow;
@@ -346,7 +342,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 } else {
                     arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
                 }
-                arrow_direction.setImageDrawable(arrow);
+                flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
                 race_flag.setVisibility(View.VISIBLE);
             }
         }

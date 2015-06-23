@@ -71,34 +71,40 @@
             android:src="?marker_race"/>
 
         <LinearLayout
-            android:id="@+id/race_flag"
+            android:id="@+id/additional_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:orientation="vertical">
+            android:layout_centerVertical="true">
 
             <ImageView
-                android:id="@+id/current_flag"
-                android:layout_width="40dp"
-                android:layout_height="25dp"
-                android:layout_gravity="center_horizontal"
-                android:scaleType="centerInside"
-                tools:src="@drawable/alpha_flag"/>
-
-            <LinearLayout
+                android:id="@+id/has_dependent_races"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:src="?link_18dp"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="5dp"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <LinearLayout
+                android:id="@+id/race_flag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <ImageView
-                    android:id="@+id/arrow_direction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:src="?arrow_down"/>
+                    android:id="@+id/current_flag"
+                    android:layout_width="40dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center_horizontal"
+                    android:scaleType="centerInside"
+                    tools:src="@drawable/alpha_flag"/>
 
                 <TextView
                     android:id="@+id/flag_timer"
@@ -106,6 +112,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:textAppearance="?textXSmall"
+                    android:drawableLeft="?arrow_down"
                     tools:text="01:12"/>
             </LinearLayout>
         </LinearLayout>
@@ -119,8 +126,8 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
-            android:layout_toLeftOf="@id/race_flag"
-            android:layout_toStartOf="@id/race_flag"
+            android:layout_toLeftOf="@id/additional_info"
+            android:layout_toStartOf="@id/additional_info"
             android:orientation="vertical"
             android:singleLine="true"
             android:textAppearance="?textNormal"
