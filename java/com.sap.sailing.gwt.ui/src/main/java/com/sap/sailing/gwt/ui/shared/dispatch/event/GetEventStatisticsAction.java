@@ -37,6 +37,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStatisticsDTO>> {
     private static final Logger logger = Logger.getLogger(GetEventStatisticsAction.class.getName());
     private UUID eventId;
+    private static boolean CALCULATE_MAX_SPEED = false;
+    private static boolean CALCULATE_SAILED_MILES = true;
 
     @SuppressWarnings("unused")
     private GetEventStatisticsAction() {
@@ -104,20 +106,24 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                                     // competitor has started and has at least one mark passing before now; compute
                                     // distance traveled up to that mark passing, increasing likelihood of cache hits as compared to
                                     // using "now" as the query time point
-                                    totalDistanceTraveled = totalDistanceTraveled.add(competitorTrack
-                                            .getDistanceTraveled(trackedRace.getStartOfRace(),
-                                                    lastMarkPassingBeforeNow.getTimePoint()));
-                                    Pair<GPSFixMoving, Speed> competitorMaxSpeed = competitorTrack
-                                            .getMaximumSpeedOverGround(trackedRace.getStartOfRace(),
-                                                    lastMarkPassingBeforeNow.getTimePoint());
-                                    if (competitorMaxSpeed != null
-                                            && (maxSpeed == null || competitorMaxSpeed.getB()
-                                                    .compareTo(maxSpeed.getB()) > 0)
-                                            // only accept "reasonable" max speeds
-                                            && competitorMaxSpeed.getB().compareTo(
-                                                    GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) <= 0) {
-                                        maxSpeed = new Triple<>(competitor, competitorMaxSpeed.getB(),
-                                                competitorMaxSpeed.getA().getTimePoint());
+                                    if (CALCULATE_SAILED_MILES) {
+                                        totalDistanceTraveled = totalDistanceTraveled.add(competitorTrack
+                                                .getDistanceTraveled(trackedRace.getStartOfRace(),
+                                                        lastMarkPassingBeforeNow.getTimePoint()));
+                                    }
+                                    if (CALCULATE_MAX_SPEED) {
+                                        Pair<GPSFixMoving, Speed> competitorMaxSpeed = competitorTrack
+                                                .getMaximumSpeedOverGround(trackedRace.getStartOfRace(),
+                                                        lastMarkPassingBeforeNow.getTimePoint());
+                                        if (competitorMaxSpeed != null
+                                                && (maxSpeed == null || competitorMaxSpeed.getB().compareTo(
+                                                        maxSpeed.getB()) > 0)
+                                                // only accept "reasonable" max speeds
+                                                && competitorMaxSpeed.getB().compareTo(
+                                                        GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) <= 0) {
+                                            maxSpeed = new Triple<>(competitor, competitorMaxSpeed.getB(),
+                                                    competitorMaxSpeed.getA().getTimePoint());
+                                        }
                                     }
                                 }
                             }
@@ -148,6 +154,9 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
                     logger.log(Level.WARNING, "Exception during calculation of event statistics", e);
                 }
             }
+        }
+        if (totalDistanceTraveled == Distance.NULL) {
+            totalDistanceTraveled = null;
         }
         return new ResultWithTTL<EventStatisticsDTO>(1000 * 60 * 5, new EventStatisticsDTO(regattas, competitors,
                 races, trackedRaces, numberOfGPSFixes, numberOfWindFixes, maxSpeed, totalDistanceTraveled));
