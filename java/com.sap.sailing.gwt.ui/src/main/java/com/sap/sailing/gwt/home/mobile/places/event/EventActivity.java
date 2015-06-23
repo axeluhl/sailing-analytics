@@ -72,9 +72,13 @@ public class EventActivity extends AbstractActivity implements Presenter {
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
         final EventView view = new EventViewImpl(this);
         panel.setWidget(view.asWidget());
-        String sailorInfoUrl = place.getCtx().getEventDTO().getSailorsInfoURL();
+        EventViewDTO event = getCtx().getEventDTO();
+        String sailorInfoUrl = event.getSailorsInfoURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
+        } else if (event.getType() == EventType.SERIES_EVENT) {
+            view.setSeriesNavigation(event.getSeriesName(),
+                    clientFactory.getNavigator().getEventSeriesNavigation(event.getSeriesIdAsString(), null, false));
         }
         view.setQuickFinderValues(getSortedQuickFinderValues());
         if (getCtx().getEventDTO().isHasMedia()) {

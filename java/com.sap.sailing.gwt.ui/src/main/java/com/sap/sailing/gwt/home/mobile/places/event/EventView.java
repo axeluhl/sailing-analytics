@@ -18,6 +18,8 @@ public interface EventView {
     
     void setSailorInfos(String description, String buttonLabel, String url);
     
+    void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
+    
     void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas);
 
     void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images);
