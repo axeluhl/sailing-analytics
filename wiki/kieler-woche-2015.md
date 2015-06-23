@@ -3,18 +3,18 @@
 ## Server Landscape
 
 We run four servers for the event:
-- on EC2: **Master 1**, **Master 2**, **Replica 1** and **Replica 2** with an **ELB** in front,
+- on EC2: **Master 1**, **Master 2**, **Master 3**, **Replica 1** and **Replica 2** with an **ELB** in front,
 - ELB canonical name is KW2015-553831863.eu-west-1.elb.amazonaws.com
 - locally: **Cube-Server**
 
 for fast and available switching. The DB they use is called `KW2015`, and so is the replication channel. The git branch we use to merge the features we want to deploy to the event servers is called `kielerwoche2015` and the git tag used to build a release for it is called `kielerwoche2015-release`. See http://hudson.sapsailing.com/job/SAPSailingAnalytics-kielerwoche2015/ and http://hudson.sapsailing.com/job/SAPSailingAnalytics-kielerwoche2015-release/, respectively, for their Hudson jobs.
 
-### Master 1 Server
+### Master 1 Server (32GB)
 - Admin Console at http://ec2-54-154-151-10.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
 - External IP: 54.154.151.10
 - Internal IP: 172.31.24.187
 
-### Master 2 Server
+### Master 2 Server (32GB)
 - Admin Console at http://ec2-54-76-169-213.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
 - External IP: 54.76.169.213
 - Internal IP: 172.31.30.73
