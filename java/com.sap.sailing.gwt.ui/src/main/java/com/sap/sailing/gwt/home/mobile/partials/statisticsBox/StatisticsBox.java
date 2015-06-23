@@ -28,10 +28,15 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     interface StatisticsBoxUiBinder extends UiBinder<Widget, StatisticsBox> {
     }
 
-    @UiField
-    MobileSection itemContainerUi;
-
+    @UiField MobileSection itemContainerUi;
+    private final boolean showRegattaInformation;
+    
     public StatisticsBox() {
+        this(true);
+    }
+
+    public StatisticsBox(boolean showRegattaInformation) {
+        this.showRegattaInformation = showRegattaInformation;
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -61,7 +66,9 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     @Override
     public void setData(EventStatisticsDTO statistics, long nextUpdate, int updateNo) {
         itemContainerUi.clearContent();
-        addItem(StatisticsBox.ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
+        if (showRegattaInformation) {
+            addItem(StatisticsBox.ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
+        }
         addItem(StatisticsBox.ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
         addItem(StatisticsBox.ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
         addItem(StatisticsBox.ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());

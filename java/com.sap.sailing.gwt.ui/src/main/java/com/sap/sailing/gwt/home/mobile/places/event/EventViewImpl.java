@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
@@ -43,7 +44,7 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField(provided = true) EventOverviewStage overviewStageUi;
     @UiField(provided = true) RegattaStatus regattaStatusUi;
     @UiField Impressions impressionsUi;
-    @UiField StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) StatisticsBox statisticsBoxUi;
     @UiField(provided = true) UpdatesBox updatesBoxUi;
 
     private Presenter currentPresenter;
@@ -54,6 +55,7 @@ public class EventViewImpl extends Composite implements EventView {
         quickFinderUi = new Quickfinder(currentPresenter);
         overviewStageUi = new EventOverviewStage(currentPresenter);
         regattaStatusUi = new RegattaStatus(currentPresenter);
+        statisticsBoxUi = new StatisticsBox(presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA);
         updatesBoxUi = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
