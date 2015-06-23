@@ -227,6 +227,20 @@ public interface PolarDataService {
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
     void insertExistingFixes(TrackedRace trackedRace);
+    
+    /**
+     * 
+     * @param boatClass When polars of this boat class change, the listener will be notified. May not be null.
+     * @param listener may not be null
+     */
+    void registerListener(BoatClass boatClass, PolarsChangedListener listener);
+    
+    /**
+     * 
+     * @param boatClass
+     * @param listener
+     */
+    void unregisterListener(BoatClass boatClass, PolarsChangedListener listener);
 
 
 }
