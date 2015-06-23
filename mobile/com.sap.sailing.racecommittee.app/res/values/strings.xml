@@ -249,7 +249,7 @@
     <string name="race_start_in_1_minute">1 Minute</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
-    <string name="race_set_start">Set Start Time</string>
+    <string name="race_set_time">Set Time</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
     <string name="toggle_group_race_mode">Group Race?</string>
@@ -444,5 +444,9 @@
     <string name="send_mail">Send mail...</string>
     <string name="data_reload_title">Data has changed externally</string>
     <string name="data_reload_message">Data have to be reloaded. Possible data loss is possible.</string>
+    <string name="error_finished_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
+    <string name="error_finishing_time">The selected time is before the race start.</string>
+    <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
+    <string name="error_wrong_race_state">The RaceState isn\'t in the correct state (needed: %1$s - current: %2$s)</string>
 
 </resources>
