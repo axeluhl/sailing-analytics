@@ -19,6 +19,11 @@ for fast and available switching. The DB they use is called `KW2015`, and so is 
 - External IP: 54.76.169.213
 - Internal IP: 172.31.30.73
 
+### Master 3 Server (64GB)
+- Admin Console at http://ec2-54-171-148-10.eu-west-1.compute.amazonaws.com:8888/gwt/AdminConsole.html
+- External IP: 54.171.148.10
+- Internal IP: 172.31.26.119
+
 ### "Current" Master
 Whichever master is current, we map the main Apache URL http://kielerwoche2015-master.sapsailing.com to it. This is also the URL to use for Tablet and Smartphone configurations.
 
