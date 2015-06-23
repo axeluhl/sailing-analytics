@@ -19,15 +19,14 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
-import com.sap.sse.datamining.impl.AbstractDataSourceProvider;
-import com.sap.sse.datamining.impl.ModifiableStatisticQueryDefinition;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
@@ -67,7 +66,7 @@ public class TestStatisticQuery {
      * Creates a query definition, that filters all numbers < 10, groups them by
      * their length, extracts the cross sum and aggregates their sum.
      */
-    private StatisticQueryDefinition<Collection<Number>, Number, Double> createQueryDefinition() {
+    private StatisticQueryDefinition<Collection<Number>, Number, Double, Double> createQueryDefinition() {
         FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
         
         @SuppressWarnings("unchecked")
@@ -75,8 +74,9 @@ public class TestStatisticQuery {
         retrieverChain.startWith(NumberRetrievalProcessor.class, Number.class, "Number");
         
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        ModifiableStatisticQueryDefinition<Collection<Number>, Number, Double> definition =
-                new ModifiableStatisticQueryDefinition<>(Locale.ENGLISH, retrieverChain, functionFactory.createMethodWrappingFunction(getCrossSumMethod), AggregatorType.Sum);
+        AggregationProcessorDefinition<Double, Double> sumAggregatorDefinition = ParallelGroupedDoubleDataSumAggregationProcessor.getDefinition();
+        ModifiableStatisticQueryDefinition<Collection<Number>, Number, Double, Double> definition =
+                new ModifiableStatisticQueryDefinition<>(Locale.ENGLISH, retrieverChain, functionFactory.createMethodWrappingFunction(getCrossSumMethod), sumAggregatorDefinition);
         
         Method getLengthMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getLength");
         definition.addDimensionToGroupBy(functionFactory.createMethodWrappingFunction(getLengthMethod));

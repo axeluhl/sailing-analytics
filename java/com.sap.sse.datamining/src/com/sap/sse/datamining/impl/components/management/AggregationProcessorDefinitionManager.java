@@ -4,18 +4,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
-import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
-import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.util.Classes;
 
 public class AggregationProcessorDefinitionManager implements AggregationProcessorDefinitionRegistry {

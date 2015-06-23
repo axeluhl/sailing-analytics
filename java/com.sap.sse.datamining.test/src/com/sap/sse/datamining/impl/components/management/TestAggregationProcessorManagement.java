@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl.components.management;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.test.domain.Test_Competitor;
 import com.sap.sse.datamining.test.domain.Test_Named;
 import com.sap.sse.datamining.test.domain.Test_Race;
@@ -107,6 +109,25 @@ public class TestAggregationProcessorManagement {
 
         assertThat(server.getAggregationProcessorDefinition(Test_Race.class, "RaceAggregator"), is(raceAggregatorDefinition));
         assertThat(server.getAggregationProcessorDefinition(Test_Competitor.class, "CompetitorAggregator"), is(competitorAggregatorDefinition));
+    }
+    
+    @Test
+    public void testGetByDTO() {
+        ModifiableDataMiningServer server = TestsUtil.createNewServer();
+        server.registerAggregationProcessor(anyDataAggregatorDefinition);
+        server.registerAggregationProcessor(namedAggregatorDefinition);
+        server.registerAggregationProcessor(raceAggregatorDefinition);
+        
+        AggregationProcessorDefinitionDTO anyDataAggregatorDefinitionDTO = TestsUtil.getDTOFactory().createAggregationProcessorDefinitionDTO(anyDataAggregatorDefinition);
+        assertThat(server.getAggregationProcessorDefinitionForDTO(anyDataAggregatorDefinitionDTO), is(anyDataAggregatorDefinition));
+        
+        AggregationProcessorDefinitionDTO namedDataAggregatorDefinitionDTO = TestsUtil.getDTOFactory().createAggregationProcessorDefinitionDTO(namedAggregatorDefinition);
+        assertThat(server.getAggregationProcessorDefinitionForDTO(namedDataAggregatorDefinitionDTO), is(namedAggregatorDefinition));
+        
+        AggregationProcessorDefinitionDTO competitorAggregatorDefinitionDTO = TestsUtil.getDTOFactory().createAggregationProcessorDefinitionDTO(competitorAggregatorDefinition);
+        assertThat(server.getAggregationProcessorDefinitionForDTO(competitorAggregatorDefinitionDTO), nullValue());
+        
+        assertThat(server.getAggregationProcessorDefinitionForDTO(null), nullValue());
     }
 
 }

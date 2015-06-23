@@ -243,7 +243,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregatorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO) {
+    public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO) {
         return aggregationProcessorDefinitionRegistry.getForDTO(aggregatorDefinitionDTO);
     }
 
@@ -278,7 +278,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         Function<ExtractedType> statisticToCalculate = (Function<ExtractedType>) getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());
         
         if (locale != null && retrieverChain != null && statisticToCalculate != null) {
-            AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition = getAggregatorDefinitionForDTO(queryDefinitionDTO.getAggregatorDefinition());
+            AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition = getAggregationProcessorDefinitionForDTO(queryDefinitionDTO.getAggregatorDefinition());
             queryDefinition = new ModifiableStatisticQueryDefinition<>(locale, retrieverChain, statisticToCalculate, aggregatorDefinition);
              
             for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {

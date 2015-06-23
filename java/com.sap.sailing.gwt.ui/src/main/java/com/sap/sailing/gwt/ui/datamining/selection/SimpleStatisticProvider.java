@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,8 +22,8 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -37,10 +36,11 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final Set<StatisticChangedListener> listeners;
     
     private final ExtractionFunctionSet extractionFunctionSet;
+    private final Collection<AggregationProcessorDefinitionDTO> aggregatorDefinitions;
     
     private final HorizontalPanel mainPanel;
     private final ValueListBox<StrippedFunctionDTO> extractionFunctionListBox;
-    private final ValueListBox<AggregatorType> aggregatorListBox;
+    private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
     private final ValueListBox<String> baseDataTypeListBox;
 
     public SimpleStatisticProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
@@ -50,6 +50,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
         listeners = new HashSet<StatisticChangedListener>();
         
         extractionFunctionSet = new ExtractionFunctionSet();
+        aggregatorDefinitions = new HashSet<>();
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
@@ -66,7 +67,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
         baseDataTypeListBox = createBaseDataTypeListBox();
         mainPanel.add(baseDataTypeListBox);
 
-        updateExtractionFunctions();
+        updateContent();
     }
     
     @Override
@@ -76,10 +77,10 @@ public class SimpleStatisticProvider implements StatisticProvider {
     
     @Override
     public void reloadComponents() {
-        updateExtractionFunctions();
+        updateContent();
     }
 
-    private void updateExtractionFunctions() {
+    private void updateContent() {
         dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             
             @Override
@@ -90,9 +91,11 @@ public class SimpleStatisticProvider implements StatisticProvider {
                     extractionFunctionSet.addAll(extractionFunctions);
                     updateExtractionFunctionListBox();
                     updateBaseDataTypeListBox();
+                    updateAggregators();
                 } else {
                     clearListBox(extractionFunctionListBox);
                     clearListBox(baseDataTypeListBox);
+                    clearListBox(aggregatorListBox);
                 }
 
                 notifyListeners();
@@ -101,6 +104,28 @@ public class SimpleStatisticProvider implements StatisticProvider {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the available statistics from the server: " + caught.getMessage());
+            }
+        });
+    }
+    
+    private void updateAggregators() {
+        dataMiningService.getAggregatorDefinitionsFor(getStatisticToCalculate(), LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<AggregationProcessorDefinitionDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error fetching the available aggregators from the server: " + caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Iterable<AggregationProcessorDefinitionDTO> definitions) {
+                aggregatorDefinitions.clear();
+                
+                if (definitions.iterator().hasNext()) {
+                    for (AggregationProcessorDefinitionDTO definitionDTO : definitions) {
+                        aggregatorDefinitions.add(definitionDTO);
+                    }
+                    updateAggregatorListBox();
+                } else {
+                    clearListBox(aggregatorListBox);
+                }
             }
         });
     }
@@ -115,6 +140,12 @@ public class SimpleStatisticProvider implements StatisticProvider {
         List<String> acceptableBaseDataTypes = new ArrayList<>(extractionFunctionSet.getSourceTypeNames(extractionFunctionListBox.getValue()));
         Collections.sort(acceptableBaseDataTypes);
         updateListBox(baseDataTypeListBox, acceptableBaseDataTypes);
+    }
+    
+    private void updateAggregatorListBox() {
+        List<AggregationProcessorDefinitionDTO> acceptableDefinitions = new ArrayList<>(aggregatorDefinitions);
+        Collections.sort(acceptableDefinitions);
+        updateListBox(aggregatorListBox, acceptableDefinitions);
     }
     
     private <T> void updateListBox(ValueListBox<T> listBox, Collection<T> acceptableValues) {
@@ -158,24 +189,23 @@ public class SimpleStatisticProvider implements StatisticProvider {
         return baseDataTypeListBox;
     }
     
-    private ValueListBox<AggregatorType> createAggregatorListBox() {
-        ValueListBox<AggregatorType> aggregatorListBox = new ValueListBox<AggregatorType>(new SimpleObjectRenderer<AggregatorType>());
-        aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorType>() {
+    private ValueListBox<AggregationProcessorDefinitionDTO> createAggregatorListBox() {
+        ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox = new ValueListBox<AggregationProcessorDefinitionDTO>(new AbstractObjectRenderer<AggregationProcessorDefinitionDTO>() {
             @Override
-            public void onValueChange(ValueChangeEvent<AggregatorType> event) {
+            protected String convertObjectToString(AggregationProcessorDefinitionDTO nonNullObject) {
+                return nonNullObject.getDisplayName();
+            }
+        });
+        aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregationProcessorDefinitionDTO>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<AggregationProcessorDefinitionDTO> event) {
                 notifyListeners();
             }
         });
-        
-        List<AggregatorType> acceptableValues = Arrays.asList(AggregatorType.values());
-        aggregatorListBox.setAcceptableValues(acceptableValues);
-        aggregatorListBox.setValue(acceptableValues.get(0), false);
-        aggregatorListBox.setAcceptableValues(acceptableValues);
-        
         return aggregatorListBox;
     }
 
-    private HorizontalPanel surroundAggregatorListBoxWithBraces(ValueListBox<AggregatorType> aggregatorListBox) {
+    private HorizontalPanel surroundAggregatorListBoxWithBraces(ValueListBox<?> aggregatorListBox) {
         HorizontalPanel aggregatorPanel = new HorizontalPanel();
         aggregatorPanel.setSpacing(1);
         aggregatorPanel.add(new Label("("));
@@ -193,7 +223,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
     private void notifyListeners() {
         for (StatisticChangedListener listener : listeners) {
-            listener.statisticChanged(getStatisticToCalculate(), getAggregatorType());
+            listener.statisticChanged(getStatisticToCalculate(), getAggregatorDefinition());
         }
     }
 
@@ -208,7 +238,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public AggregatorType getAggregatorType() {
+    public AggregationProcessorDefinitionDTO getAggregatorDefinition() {
         return aggregatorListBox.getValue();
     }
 

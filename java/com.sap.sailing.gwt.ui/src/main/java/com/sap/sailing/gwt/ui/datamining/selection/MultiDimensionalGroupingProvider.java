@@ -22,8 +22,8 @@ import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
@@ -78,7 +78,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     }
     
     @Override
-    public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
+    public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregationProcessorDefinitionDTO newAggregatorDefinition) {
         if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
             currentStatisticToCalculate = newStatisticToCalculate;
             if (!isAwaitingReload) {

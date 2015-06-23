@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +20,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -27,6 +29,7 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
@@ -68,6 +71,31 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public Iterable<FunctionDTO> getAllStatistics(String localeInfoName) {
         Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsFunctionDTOs(statistics, localeInfoName);
+    }
+    
+    @Override
+    public Iterable<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName) {
+        Class<?> returnType = getReturnType(extractionFunction);
+        @SuppressWarnings("unchecked")
+        Iterable<AggregationProcessorDefinition<?, ?>> definitions = 
+                (Iterable<AggregationProcessorDefinition<?, ?>>)(Iterable<?>) getDataMiningServer().getAggregationProcessorDefinitions(returnType);
+        return aggregatorDefinitionsAsDTOs(definitions, localeInfoName);
+    }
+
+    private Class<?> getReturnType(FunctionDTO extractionFunction) {
+        return getDataMiningServer().getFunctionForDTO(extractionFunction).getReturnType();
+    }
+
+    private Iterable<AggregationProcessorDefinitionDTO> aggregatorDefinitionsAsDTOs(
+            Iterable<AggregationProcessorDefinition<?, ?>> definitions, String localeInfoName) {
+        ResourceBundleStringMessages stringMessages = getDataMiningServer().getStringMessages();
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        
+        Collection<AggregationProcessorDefinitionDTO> definitionDTOs = new HashSet<>();
+        for (AggregationProcessorDefinition<?,?> definition : definitions) {
+            definitionDTOs.add(dtoFactory.createAggregationProcessorDefinitionDTO(definition, stringMessages, locale));
+        }
+        return definitionDTOs;
     }
 
     @Override

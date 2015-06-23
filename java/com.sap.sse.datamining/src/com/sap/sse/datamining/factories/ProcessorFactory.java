@@ -1,8 +1,5 @@
 package com.sap.sse.datamining.factories;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +18,6 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -39,31 +35,7 @@ public class ProcessorFactory {
                                                                       AggregationProcessorDefinition<ExtractedType, AggregatedType> aggregatorDefinition) {
         Collection<Processor<Map<GroupKey, AggregatedType>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(query.getResultReceiver());
-        return createAggregationProcessor(resultReceivers, aggregatorDefinition);
-    }
-    
-    public <ExtractedType, AggregatedType> Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, AggregatedType>>
-                                           createAggregationProcessor(Collection<Processor<Map<GroupKey, AggregatedType>, ?>> resultReceivers,
-                                                                      AggregationProcessorDefinition<ExtractedType, AggregatedType> aggregatorDefinition) {
-        Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregatorType = aggregatorDefinition.getAggregationProcessor();
-        Constructor<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregatorConstructor = null;
-        try {
-            aggregatorConstructor = aggregatorType.getConstructor(ExecutorService.class, Collection.class);
-        } catch (NoSuchMethodException | SecurityException e) {
-            throw new IllegalArgumentException("Couldn't get an usable constructor from the given aggregatorDefinition '"
-                    + aggregatorDefinition + "'", e);
-        }
-
-        if (Modifier.isPublic(aggregatorConstructor.getModifiers())) {
-            // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
-            aggregatorConstructor.setAccessible(true);
-        }
-        try {
-            return aggregatorConstructor.newInstance(executor, resultReceivers);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new UnsupportedOperationException("Couldn't create a aggregator instance with the constructor "
-                    + aggregatorConstructor.toString(), e);
-        }
+        return aggregatorDefinition.construct(executor, resultReceivers);
     }
     
     /**

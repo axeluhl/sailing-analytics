@@ -6,12 +6,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelGroupedDoubleDataSumAggregationProcessor
              extends AbstractParallelGroupedDataStoringAggregationProcessor<Double, Double> {
+    
+    private static final AggregationProcessorDefinition<Double, Double> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Sum", ParallelGroupedDoubleDataSumAggregationProcessor.class);
+    
+    public static AggregationProcessorDefinition<Double, Double> getDefinition() {
+        return DEFINITION;
+    }
 
     private Map<GroupedDataEntry<Double>, Integer> elementAmountMap;
 

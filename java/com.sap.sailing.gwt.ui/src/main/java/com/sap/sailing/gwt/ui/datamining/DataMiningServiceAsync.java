@@ -12,6 +12,7 @@ import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
@@ -20,6 +21,9 @@ public interface DataMiningServiceAsync {
     public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
     void getAllStatistics(String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
+
+    void getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName,
+            AsyncCallback<Iterable<AggregationProcessorDefinitionDTO>> asyncCallback);
 
     void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
     void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,

@@ -30,8 +30,8 @@ import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilterSelectionProvider;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
@@ -150,7 +150,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     @Override
     public StatisticQueryDefinitionDTO getQueryDefinition() {
         ModifiableStatisticQueryDefinitionDTO queryDTO = new ModifiableStatisticQueryDefinitionDTO(LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getStatisticToCalculate(),
-                                                               statisticProvider.getAggregatorType(), retrieverChainProvider.getDataRetrieverChainDefinition());
+                                                               statisticProvider.getAggregatorDefinition(), retrieverChainProvider.getDataRetrieverChainDefinition());
         
         for (FunctionDTO dimension : groupingProvider.getDimensionsToGroupBy()) {
             queryDTO.appendDimensionToGroupBy(dimension);
@@ -223,12 +223,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                                               GroupingChangedListener, FilterSelectionChangedListener {
 
         @Override
-        public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregatorType newAggregatorType) {
+        public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregationProcessorDefinitionDTO newAggregatorDefinition) {
             if (isReloading) {
-                groupingProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorType());
+                groupingProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorDefinition());
                 groupingProvider.reloadComponents();
                 
-                retrieverChainProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorType());
+                retrieverChainProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorDefinition());
                 retrieverChainProvider.reloadComponents();
             } else {
                 scheduleQueryDefinitionChanged();

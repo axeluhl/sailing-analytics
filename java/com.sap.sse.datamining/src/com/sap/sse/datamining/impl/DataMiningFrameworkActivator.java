@@ -20,7 +20,6 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
-import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMaxAggregationProcessor;
@@ -64,18 +63,12 @@ public class DataMiningFrameworkActivator implements BundleActivator {
 
     private Iterable<AggregationProcessorDefinition<?, ?>> getDefaultAggregationProcessors() {
         Collection<AggregationProcessorDefinition<?, ?>> defaultAggregationProcessors = new HashSet<>();
-        AggregationProcessorDefinition<Object, Double> countAggregatorDefinition = new SimpleAggregationProcessorDefinition<>(Object.class, Double.class, "Count", ParallelGroupedDataCountAggregationProcessor.class);
-        defaultAggregationProcessors.add(countAggregatorDefinition);
-        AggregationProcessorDefinition<Double, Double> averageAggregatorDefinition = new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Average", ParallelGroupedDoubleDataAverageAggregationProcessor.class);
-        defaultAggregationProcessors.add(averageAggregatorDefinition);
-        AggregationProcessorDefinition<Double, Double> maximumAggregatorDefinition = new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Maximum", ParallelGroupedDoubleDataMaxAggregationProcessor.class);
-        defaultAggregationProcessors.add(maximumAggregatorDefinition);
-        AggregationProcessorDefinition<Double, Double> medianAggregatorDefinition = new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Median", ParallelGroupedDoubleDataMedianAggregationProcessor.class);
-        defaultAggregationProcessors.add(medianAggregatorDefinition);
-        AggregationProcessorDefinition<Double, Double> minimumAggregatorDefinition = new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Minimum", ParallelGroupedDoubleDataMinAggregationProcessor.class);
-        defaultAggregationProcessors.add(minimumAggregatorDefinition);
-        AggregationProcessorDefinition<Double, Double> sumAggregatorDefinition = new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Sum", ParallelGroupedDoubleDataSumAggregationProcessor.class);
-        defaultAggregationProcessors.add(sumAggregatorDefinition);
+        defaultAggregationProcessors.add(ParallelGroupedDataCountAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedDoubleDataAverageAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedDoubleDataMaxAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedDoubleDataMedianAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedDoubleDataMinAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedDoubleDataSumAggregationProcessor.getDefinition());
         return defaultAggregationProcessors;
     }
 

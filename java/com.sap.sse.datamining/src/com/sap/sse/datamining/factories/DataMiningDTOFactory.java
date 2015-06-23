@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningDTOFactory {
 
     /**
-     * Creates the corresponding DTO for the given function, with the functions simple name as display name.
+     * Creates the corresponding DTO for the given {@link Function}, without localization.<br>
+     * The display name of the resulting DTO is the {@link Function#getSimpleName() simple name} of the given function.
      */
     public FunctionDTO createFunctionDTO(Function<?> function) {
         return createFunctionDTO(function, function.getSimpleName());
@@ -43,6 +46,29 @@ public class DataMiningDTOFactory {
             parameterTypeNames.add(parameterType.getSimpleName());
         }
         return parameterTypeNames;
+    }
+
+    /**
+     * Creates the corresponding DTO for the given {@link AggregationProcessorDefinition aggregator definition}, without localization.<br>
+     * The display name of the resulting DTO is the message key of the given aggregation definition.
+     */
+    public AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition) {
+        return createAggregationProcessorDefinitionDTO(aggregatorDefinition, aggregatorDefinition.getAggregationNameMessageKey());
+    }
+
+
+    /**
+     * Creates the corresponding localized DTO for the given {@link AggregationProcessorDefinition aggregator definition}.
+     */
+    public AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition,
+                                                                                     ResourceBundleStringMessages stringMessages, Locale locale) {
+        return createAggregationProcessorDefinitionDTO(aggregatorDefinition, stringMessages.get(locale, aggregatorDefinition.getAggregationNameMessageKey()));
+    }
+
+    private AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition, String displayName) {
+        return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getExtractedType().getSimpleName(),
+                                                     aggregatorDefinition.getAggregatedType().getSimpleName(),
+                                                     displayName);
     }
 
 }
