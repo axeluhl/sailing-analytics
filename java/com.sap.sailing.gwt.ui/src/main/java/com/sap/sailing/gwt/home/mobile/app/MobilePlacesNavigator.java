@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
@@ -30,6 +31,11 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<EventDefaultPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
         EventDefaultPlace eventPlace = new EventDefaultPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace);
+    }
+    
+    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(String seriesId, String baseUrl, boolean isOnRemoteServer) {
+        SeriesDefaultPlace place = new SeriesDefaultPlace(seriesId);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
     
     public <P extends AbstractEventPlace> PlaceNavigation<P> getEventNavigation(P place, String baseUrl,
