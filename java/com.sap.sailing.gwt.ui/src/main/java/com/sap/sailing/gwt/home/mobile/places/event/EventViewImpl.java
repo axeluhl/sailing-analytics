@@ -10,10 +10,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
+import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
@@ -25,7 +27,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -42,37 +46,57 @@ public class EventViewImpl extends Composite implements EventView {
     @UiField(provided = true) Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock simpleInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
-    @UiField(provided = true) RegattaStatus regattaStatusUi;
+    @UiField SimplePanel listContentUi;
     @UiField Impressions impressionsUi;
     @UiField(provided = true) StatisticsBox statisticsBoxUi;
     @UiField(provided = true) UpdatesBox updatesBoxUi;
 
-    private Presenter currentPresenter;
+    private final Presenter currentPresenter;
+    private final RefreshManager refreshManager;
 
     public EventViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
-        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
+        this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        EventViewDTO event = currentPresenter.getCtx().getEventDTO();
+        eventHeaderUi = new EventHeader(event);
         quickFinderUi = new Quickfinder(currentPresenter);
-        overviewStageUi = new EventOverviewStage(currentPresenter);
-        regattaStatusUi = new RegattaStatus(currentPresenter);
-        statisticsBoxUi = new StatisticsBox(presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA);
-        updatesBoxUi = new UpdatesBox(presenter);
+        this.setupOverviewStage(event.getId());
+        this.setupUpdateBox(event.getId());
+        this.setupStatisticsBox(event);
         initWidget(uiBinder.createAndBindUi(this));
+        this.setupListContent(event);
         impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
-        setupRefresh();
     }
     
-    private void setupRefresh() {
-        RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        UUID eventId = currentPresenter.getCtx().getEventDTO() .getId();
+    private void setupOverviewStage(UUID eventId) {
+        overviewStageUi = new EventOverviewStage(currentPresenter);
         refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
-        refreshManager.add(regattaStatusUi, new GetRegattasAndLiveRacesForEventAction(eventId));
+    }
+    
+    private void setupListContent(EventViewDTO event) {
+        if (event.getType() == EventType.MULTI_REGATTA) {
+            RegattaStatus regattaStatus = new RegattaStatus(currentPresenter);
+            listContentUi.add(regattaStatus);
+            refreshManager.add(regattaStatus, new GetRegattasAndLiveRacesForEventAction(event.getId()));
+        } else {
+            MinileaderboardBox miniLeaderboard = new MinileaderboardBox();
+            listContentUi.add(miniLeaderboard);
+            refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(event.getId(), currentPresenter.getCtx().getRegattaId()));
+        }
+    }
+    
+    private void setupUpdateBox(UUID eventId) {
+        updatesBoxUi = new UpdatesBox(currentPresenter);
         if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
-            refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(currentPresenter.getCtx().getEventDTO().getId(), 2));
+            refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(eventId, 2));
         } else {
             updatesBoxUi.removeFromParent();
         }
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
+    }
+    
+    private void setupStatisticsBox(EventViewDTO event) {
+        statisticsBoxUi = new StatisticsBox(event.getType() == EventType.MULTI_REGATTA);
+        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(event.getId()));
     }
 
     @Override

@@ -22,7 +22,7 @@
    			<mp:simpleinfoblock.SimpleInfoBlock ui:field="simpleInfoUi" /> 
    		</div>
 		<p:overview.EventOverviewStage ui:field="overviewStageUi" />
-		<mp:regattaStatus.RegattaStatus ui:field="regattaStatusUi" />
+		<g:SimplePanel ui:field="listContentUi"/>
 		<mp:updatesBox.UpdatesBox ui:field="updatesBoxUi" />
 		<mp:impressions.Impressions ui:field="impressionsUi" />		
 		<mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />		
