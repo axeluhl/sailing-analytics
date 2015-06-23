@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
 public class EventViewImpl extends Composite implements EventView {
@@ -54,13 +55,21 @@ public class EventViewImpl extends Composite implements EventView {
         regattaStatusUi = new RegattaStatus(currentPresenter);
         updatesBoxUi = new UpdatesBox(presenter);
         initWidget(uiBinder.createAndBindUi(this));
+        impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
+        setupRefresh();
+    }
+    
+    private void setupRefresh() {
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         UUID eventId = currentPresenter.getCtx().getEventDTO() .getId();
         refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
         refreshManager.add(regattaStatusUi, new GetRegattasAndLiveRacesForEventAction(eventId));
-        refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId(), 2));
+        if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
+            refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(currentPresenter.getCtx().getEventDTO().getId(), 2));
+        } else {
+            updatesBoxUi.removeFromParent();
+        }
         refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
-        impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
     }
 
     @Override
