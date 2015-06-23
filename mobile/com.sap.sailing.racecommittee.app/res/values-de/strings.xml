@@ -423,4 +423,7 @@
     <string name="send_mail">Sende Email...</string>
     <string name="data_reload_title">Daten wurden extern verändert</string>
     <string name="data_reload_message">Daten müssen neu geladen werden. Eventueller Datenverlust ist möglich.</string>
+    <string name="preference_allow_dependent_races_header">Relative Startzeit</string>
+    <string name="preference_allow_dependent_races_description">Aktiviert relative Startzeiten zwischen Rennen</string>
+    <string name="preference_dependent_races_offset_header">Standard Offset der relativen Startzeit (Minuten)</string>
 </resources>

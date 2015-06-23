@@ -444,5 +444,8 @@
     <string name="send_mail">Send mail...</string>
     <string name="data_reload_title">Data has changed externally</string>
     <string name="data_reload_message">Data have to be reloaded. Possible data loss is possible.</string>
+    <string name="preference_allow_dependent_races_header">Relative Start Time (Minutes)</string>
+    <string name="preference_allow_dependent_races_description">Enable Relative Start Time between Races</string>
+    <string name="preference_dependent_races_offset_header">Default Relative Start Time Offset</string>
 
 </resources>
