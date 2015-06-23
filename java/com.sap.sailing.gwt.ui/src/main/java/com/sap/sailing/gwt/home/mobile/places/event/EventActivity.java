@@ -80,7 +80,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
             view.setSeriesNavigation(event.getSeriesName(),
                     clientFactory.getNavigator().getEventSeriesNavigation(event.getSeriesIdAsString(), null, false));
         }
-        view.setQuickFinderValues(getSortedQuickFinderValues());
+        view.setQuickFinderValues(event.getType() == EventType.MULTI_REGATTA ? getSortedQuickFinderValues() : null);
         if (getCtx().getEventDTO().isHasMedia()) {
             clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
                 @Override

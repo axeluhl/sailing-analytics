@@ -88,6 +88,10 @@ public class EventViewImpl extends Composite implements EventView {
     
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
+        if (regattaMetadatas == null) {
+            quickFinderUi.removeFromParent();
+            return;
+        }
         quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
         for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
             quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), regattaMetadata.getId());
