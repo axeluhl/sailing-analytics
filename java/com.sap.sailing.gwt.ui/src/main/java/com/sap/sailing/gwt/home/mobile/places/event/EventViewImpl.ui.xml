@@ -19,7 +19,7 @@
    		<div class="{style.headerWrapper}">
    			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
    			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
-   			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
+   			<mp:simpleinfoblock.SimpleInfoBlock ui:field="simpleInfoUi" /> 
    		</div>
 		<p:overview.EventOverviewStage ui:field="overviewStageUi" />
 		<mp:regattaStatus.RegattaStatus ui:field="regattaStatusUi" />

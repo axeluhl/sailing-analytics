@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
@@ -38,7 +39,7 @@ public class EventViewImpl extends Composite implements EventView {
 
     @UiField(provided = true) EventHeader eventHeaderUi;
     @UiField(provided = true) Quickfinder quickFinderUi;
-    @UiField SimpleInfoBlock sailorInfoUi;
+    @UiField SimpleInfoBlock simpleInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
     @UiField(provided = true) RegattaStatus regattaStatusUi;
     @UiField Impressions impressionsUi;
@@ -74,8 +75,13 @@ public class EventViewImpl extends Composite implements EventView {
 
     @Override
     public void setSailorInfos(String description, String buttonLabel, String url) {
-        sailorInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
-        sailorInfoUi.setAction(buttonLabel, url);
+        simpleInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
+        simpleInfoUi.setAction(buttonLabel, url);
+    }
+    
+    @Override
+    public void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation) {
+        simpleInfoUi.setAction(buttonLabel, placeNavigation);
     }
     
     @Override

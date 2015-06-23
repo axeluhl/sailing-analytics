@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 
 public class SimpleInfoBlock extends Composite {
     private static SimpleInfoBlockUiBinder uiBinder = GWT.create(SimpleInfoBlockUiBinder.class);
@@ -35,6 +36,12 @@ public class SimpleInfoBlock extends Composite {
         actionUi.getStyle().setDisplay(Display.BLOCK);
         actionUi.setInnerText(label);
         actionUi.setHref(UriUtils.fromString(url));
+    }
+    
+    public void setAction(String label, PlaceNavigation<?> placeNavigation) {
+        actionUi.getStyle().setDisplay(Display.BLOCK);
+        actionUi.setInnerText(label);
+        placeNavigation.configureAnchorElement(actionUi);
     }
 
 }
