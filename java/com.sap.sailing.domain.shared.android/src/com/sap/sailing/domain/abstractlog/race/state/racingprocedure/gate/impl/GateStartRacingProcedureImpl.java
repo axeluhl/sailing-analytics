@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.PathfinderFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
@@ -43,8 +44,8 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     private String cachedPathfinder;
 
     public GateStartRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
-            GateStartConfiguration configuration) {
-        super(raceLog, author, factory, configuration);
+            GateStartConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, factory, configuration, raceLogResolver);
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
         this.pathfinderAnalyzer = new PathfinderFinder(raceLog);
 

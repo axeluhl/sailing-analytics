@@ -6,8 +6,8 @@
     android:background="@drawable/list_selector"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="6dip" >
-    
+    android:paddingLeft="6dip">
+
     <TextView
         android:id="@+id/Welter.Cell.OneRowTwoColumns.columnOne.txtTitle"
         android:layout_width="20dp"
@@ -25,5 +25,4 @@
         android:padding="5dp"
         android:textColor="@drawable/text_selector"
         android:textSize="9pt" />
-
 </LinearLayout>

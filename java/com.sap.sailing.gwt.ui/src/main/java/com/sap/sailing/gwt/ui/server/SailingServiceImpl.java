@@ -431,10 +431,18 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaUtils;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.common.media.VideoDescriptorImpl;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
@@ -535,7 +543,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // TODO what about passing on the mongo/domain object factory to obtain an according SwissTimingAdapterPersistence instance similar to how the tractracDomainObjectFactory etc. are created below?
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingReplayService = ServiceTrackerFactory.createAndOpen(context, SwissTimingReplayServiceFactory.class)
-                .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
+                .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory(),
+                /* raceLogResolver */ getService());
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
@@ -839,21 +848,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-            
             raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(getService(), raceLog);
             TimePoint startTime = state.getStartTime();
             if (startTime != null) {
                 raceInfoDTO.startTime = startTime.asDate();
             }
-
             raceInfoDTO.lastStatus = state.getStatus();
-            
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
-            
             TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
@@ -3292,48 +3296,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
-            String logoImageURLString, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings,
-            Iterable<String> sponsorImageURLStrings) throws MalformedURLException {
+            Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
-        URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
-        List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
-        List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
-        List<URL> sponsorimagieURLs = createURLsFromStrings(sponsorImageURLStrings);
+        List<ImageDescriptor> eventImages = convertToImages(images);
+        List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
-                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
-                        sponsorimagieURLs));
+                        isPublic, leaderboardGroupIds, officialWebsiteURL, eventImages, eventVideos));
         return getEventById(eventId, false);
-    }
-
-    /**
-     * @param urlStrings
-     * @return
-     * @throws MalformedURLException
-     */
-    private List<URL> createURLsFromStrings(Iterable<String> urlStrings) throws MalformedURLException {
-        List<URL> imageURLs = new ArrayList<>();
-        for (String imageURLString : urlStrings) {
-            imageURLs.add(new URL(imageURLString));
-        }
-        return imageURLs;
     }
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
-            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURLAsString, String officialWebsiteURLAsString)
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, Iterable<ImageDTO> images, Iterable<VideoDTO> videos)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        List<ImageDescriptor> eventImages = convertToImages(images);
+        List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        createURLsFromStrings(imageURLs), createURLsFromStrings(videoURLs),
-                        createURLsFromStrings(sponsorImageURLs),
-                        logoImageURLAsString == null ? null : new URL(logoImageURLAsString), officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString)));
+                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString), eventImages, eventVideos));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3412,33 +3398,119 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        if (event.getLogoImageURL() == null) {
-            eventDTO.setLogoImageURL(null);
-        } else {
-            eventDTO.setLogoImageURL(event.getLogoImageURL().toString());
-            setImageSize(event, eventDTO, event.getLogoImageURL());
+        for(ImageDescriptor image: event.getImages()) {
+            eventDTO.addImage(convertToImageDTO(image));
         }
-        for(URL url: event.getSponsorImageURLs()) {
-            eventDTO.addSponsorImageURL(url.toString());
-            setImageSize(event, eventDTO, url);
-        }
-        for(URL url: event.getImageURLs()) {
-            eventDTO.addImageURL(url.toString());
-            setImageSize(event, eventDTO, url);
-        }
-        for(URL url: event.getVideoURLs()) {
-            eventDTO.addVideoURL(url.toString());
+        for(VideoDescriptor video: event.getVideos()) {
+            eventDTO.addVideo(convertToVideoDTO(video));
         }
     }
 
-    private void setImageSize(EventBase event, EventBaseDTO eventDTO, URL imageURL) {
-        try {
-            eventDTO.setImageSize(imageURL.toString(), event.getImageSize(imageURL));
-        } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.FINE, "Was unable to obtain image size for "+imageURL+" earlier.", e);
+    private List<ImageDescriptor> convertToImages(Iterable<ImageDTO> images) throws MalformedURLException {
+        List<ImageDescriptor> eventImages = new ArrayList<ImageDescriptor>();
+        for (ImageDTO image : images) {
+            try {
+                eventImages.add(convertToImage(image));
+            } catch(Exception e) {
+                // broken URLs are not being stored
+            }
         }
+        return eventImages;
+    }
+
+    private List<VideoDescriptor> convertToVideos(Iterable<VideoDTO> videos) throws MalformedURLException {
+        List<VideoDescriptor> eventVideos = new ArrayList<VideoDescriptor>();
+        for (VideoDTO video : videos) {
+            try {
+                eventVideos.add(convertToVideo(video));
+            } catch(Exception e) {
+                // broken URLs are not being stored
+            }
+        }
+        return eventVideos;
+    }
+
+    private ImageDescriptor convertToImage(ImageDTO image) throws MalformedURLException {
+        ImageDescriptor result = new ImageDescriptorImpl(new URL(image.getSourceRef()), new MillisecondsTimePoint(image.getCreatedAtDate()));
+        result.setCopyright(image.getCopyright());
+        result.setTitle(image.getTitle());
+        result.setSubtitle(image.getSubtitle());
+        result.setCopyright(image.getCopyright());
+        result.setSize(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(toLocale(image.getLocale()));
+        for (String tag : image.getTags()) {
+            result.addTag(tag);
+        }
+        return result;
+    }
+
+    private VideoDescriptor convertToVideo(VideoDTO video) throws MalformedURLException {
+        MimeType mimeType = video.getMimeType();
+        if(mimeType == null || mimeType == MimeType.unknown) {
+            mimeType = MediaUtils.detectMimeTypeFromUrl(video.getSourceRef());
+        }
+        VideoDescriptor result = new VideoDescriptorImpl(new URL(video.getSourceRef()), mimeType, new MillisecondsTimePoint(video.getCreatedAtDate()));
+        result.setCopyright(video.getCopyright());
+        result.setTitle(video.getTitle());
+        result.setSubtitle(video.getSubtitle());
+        result.setCopyright(video.getCopyright());
+        result.setLengthInSeconds(video.getLengthInSeconds());
+        if(video.getThumbnailRef() != null && !video.getThumbnailRef().isEmpty())
+        result.setThumbnailURL(new URL(video.getThumbnailRef()));
+        result.setLocale(toLocale(video.getLocale()));
+        for (String tag : video.getTags()) {
+            result.addTag(tag);
+        }
+        return result;
+    }
+
+    private ImageDTO convertToImageDTO(ImageDescriptor image) {
+        ImageDTO result = new ImageDTO(image.getURL().toString(), image.getCreatedAtDate() != null ? image.getCreatedAtDate().asDate() : null);
+        result.setCopyright(image.getCopyright());
+        result.setTitle(image.getTitle());
+        result.setSubtitle(image.getSubtitle());
+        result.setMimeType(image.getMimeType());
+        result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
+        result.setLocale(toLocaleName(image.getLocale()));
+        List<String> tags = new ArrayList<String>();
+        for(String tag: image.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
+    }
+
+    private VideoDTO convertToVideoDTO(VideoDescriptor video) {
+        VideoDTO result = new VideoDTO(video.getURL().toString(), video.getMimeType(), 
+                video.getCreatedAtDate() != null ? video.getCreatedAtDate().asDate() : null);
+        result.setCopyright(video.getCopyright());
+        result.setTitle(video.getTitle());
+        result.setSubtitle(video.getSubtitle());
+        result.setThumbnailRef(video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
+        result.setLengthInSeconds(video.getLengthInSeconds());
+        result.setLocale(toLocaleName(video.getLocale()));
+        List<String> tags = new ArrayList<String>();
+        for(String tag: video.getTags()) {
+            tags.add(tag);
+        }
+        result.setTags(tags);
+        return result;
     }
     
+    private Locale toLocale(String localeName) {
+        if(localeName == null || localeName.isEmpty()) {
+            return null;
+        }
+        return Locale.forLanguageTag(localeName);
+    }
+    
+    private String toLocaleName(Locale locale) {
+        if(locale == null) {
+            return null;
+        }
+        return locale.toString();
+    }
+
     private EventDTO convertToEventDTO(Event event, boolean withStatisticalData) {
         EventDTO eventDTO = new EventDTO(event.getName());
         copyEventBaseFieldsToDTO(event, eventDTO);
@@ -3886,7 +3958,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
         List<String> names = new ArrayList<String>();
         for (BoatClass boatClass : boatClasses) {
-            names.add(boatClass.getDisplayName());
+            names.add(boatClass.getName());
         }
         return names;
     }
@@ -4066,9 +4138,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
         updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
-                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                newEvent.getSponsorImageURLs());
+                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(),
+                newEvent.getImages(), newEvent.getVideos());
     }
     
     @Override

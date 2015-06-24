@@ -1,16 +1,11 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.media.ImageSize;
 
 /**
  * A simplified implementation of the {@link EventBase} interface which maintains an immutable collection of
@@ -23,7 +18,6 @@ import com.sap.sse.common.media.ImageSize;
 public class StrippedEventImpl extends EventBaseImpl {
     private static final long serialVersionUID = 5608501747499933988L;
     private final Iterable<LeaderboardGroupBase> leaderboardGroups;
-    private final Map<URL, ImageSize> imageSizes;
     
     public StrippedEventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName,
             boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups) {
@@ -34,20 +28,10 @@ public class StrippedEventImpl extends EventBaseImpl {
             boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups) {
         super(name, startDate, endDate, venue, isPublic, id);
         this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<URL, ImageSize>();
     }
 
     @Override
     public Iterable<LeaderboardGroupBase> getLeaderboardGroups() {
         return leaderboardGroups;
-    }
-
-    public void setImageSize(URL imageURL, ImageSize imageSize) {
-        imageSizes.put(imageURL, imageSize);
-    }
-    
-    @Override
-    public ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException {
-        return imageSizes.get(imageURL);
     }
 }

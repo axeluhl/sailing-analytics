@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
@@ -148,6 +149,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(SuppressedMarkPassingsEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogDependentStartTimeEvent event) {
         
     }
 }

@@ -106,10 +106,10 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         JSONArray jsonLeaderboards = new JSONArray();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (String leaderboardName : leaderboards.keySet()) {
-            if (!leaderboardName.equals(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME))
+            if (!leaderboardName.equals(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME)) {
                 jsonLeaderboards.add(leaderboardName);
+            }
         }
-
         String json = jsonLeaderboards.toJSONString();
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }

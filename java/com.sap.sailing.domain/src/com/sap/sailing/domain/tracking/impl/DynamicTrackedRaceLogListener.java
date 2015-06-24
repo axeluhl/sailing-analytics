@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -67,7 +68,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             trackedRace.invalidateStartTime();
             trackedRace.invalidateEndTime();
             courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-            startTimeFinder = new StartTimeFinder(raceLog);
+            startTimeFinder = new StartTimeFinder(trackedRace.getRaceLogResolver(), raceLog);
             abortingFlagFinder = new AbortingFlagFinder(raceLog);
             initializeWindTrack(raceLog);
             analyze();
@@ -160,10 +161,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
         /* start time will be set by StartTimeFinder in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
-
-        TimePoint startTime = startTimeFinder.analyze();
+        
+        TimePoint startTime = startTimeFinder.analyze().getStartTime();
+        
         if (startTime == null) {
-            startTime = startTimeProvidedByEvent;
+            startTime  = startTimeProvidedByEvent;
         }
 
         if (startTime != null) {
@@ -253,5 +255,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                         ((FixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
         }
+    }
+
+    @Override
+    public void visit(RaceLogDependentStartTimeEvent event) {
+        analyzeStartTime(null);
     }
 }

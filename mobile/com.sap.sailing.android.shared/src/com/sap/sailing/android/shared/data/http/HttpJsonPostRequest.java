@@ -26,6 +26,7 @@ public class HttpJsonPostRequest extends HttpRequest {
 
     @Override
     protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {
+        connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setChunkedStreamingMode(0);
 
@@ -43,5 +44,9 @@ public class HttpJsonPostRequest extends HttpRequest {
         if (requestBody != null) {
             outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
         }
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

@@ -2,6 +2,8 @@ package com.sap.sailing.polars.mining;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -14,6 +16,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
@@ -33,9 +36,12 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
     private final Map<BoatClass, Long> fixCountPerBoatClass = new HashMap<>();
 
     private final ClusterGroup<Bearing> angleClusterGroup;
+
+    private final ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
     
-    public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
+    public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup, ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.angleClusterGroup = angleClusterGroup;
+        this.listeners = listeners;
     }
     
     @Override
@@ -64,6 +70,12 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
+        Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
+        if (listenersForBoatClass != null) {
+            for (PolarsChangedListener listener : listenersForBoatClass) {
+                listener.polarsChanged();
+            }
+        }
     }
     
     /**

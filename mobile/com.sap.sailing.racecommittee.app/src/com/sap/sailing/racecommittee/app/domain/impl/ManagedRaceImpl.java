@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.MapMarker;
 
 public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
@@ -23,6 +24,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private final RaceState state;
     private final ManagedRaceIdentifier identifier;
     private Collection<Competitor> competitors;
+    private List<MapMarker> mapMarkers;
     private CourseBase courseOnServer;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
@@ -38,7 +40,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public Serializable getId() {
+    public String getId() {
         return identifier.getId();
     }
 
@@ -93,6 +95,11 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
+    public List<MapMarker> getMapMarkers(){
+        return mapMarkers;
+    }
+
+    @Override
     public CourseBase getCourseOnServer() {
         return courseOnServer;
     }
@@ -105,6 +112,11 @@ public class ManagedRaceImpl implements ManagedRace {
     @Override
     public void setCompetitors(Collection<Competitor> competitors) {
         this.competitors = competitors;
+    }
+
+    @Override
+    public void setMapMarkers(List<MapMarker> markers) {
+        this.mapMarkers = markers;
     }
 
 }

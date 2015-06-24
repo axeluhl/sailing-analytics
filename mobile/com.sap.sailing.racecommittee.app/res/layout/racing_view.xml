@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/racingLayout"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/background"
-    android:baselineAligned="false"
-    android:orientation="horizontal" >
+    android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/racing_view_left_container"
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.70" />
+        android:fitsSystemWindows="false">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.99"
-        android:background="@color/welter_deep_gray"
-        android:orientation="vertical" />
+        <LinearLayout
+            android:id="@+id/racingLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:fitsSystemWindows="true"
+            android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/racing_view_right_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.30" />
+            <include layout="@layout/toolbar_racing_activity" />
 
-</LinearLayout>
+            <include layout="@layout/race_main_screen" />
+        </LinearLayout>
+
+        <fragment
+            android:id="@+id/navigation_drawer"
+            android:name="com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment"
+            android:layout_width="@dimen/navigation_drawer_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="start" />
+    </android.support.v4.widget.DrawerLayout>
+</RelativeLayout>

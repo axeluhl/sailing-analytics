@@ -5,9 +5,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -51,9 +54,11 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
@@ -184,11 +189,17 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.common.media.VideoDescriptorImpl;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -965,13 +976,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Event> loadAllEvents() {
-        ArrayList<Event> result = new ArrayList<Event>();
+    public Iterable<Pair<Event, Boolean>> loadAllEvents() {
+        ArrayList<Pair<Event, Boolean>> result = new ArrayList<>();
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
 
         try {
-            for (DBObject o : eventCollection.find()) {
-                result.add(loadEvent(o));
+            for (DBObject object : eventCollection.find()) {
+                Event event = loadEvent(object);
+                Boolean requiresStoreAfterMigration = loadLegacyImageAndVideoURLs(event, object);
+                result.add(new Pair<Event, Boolean>(event, requiresStoreAfterMigration));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
@@ -1034,41 +1047,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
-        String logoImageURLAsString = (String) eventDBObject.get(FieldNames.EVENT_LOGO_IMAGE_URL.name());
-        if (logoImageURLAsString != null) {
-            try {
-                result.setLogoImageURL(new URL(logoImageURLAsString));
-            } catch (MalformedURLException e) {
-                logger.severe("Error parsing logo image URL "+logoImageURLAsString+" for event "+name+". Ignoring this URL.");
-            }
-        }
-        BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
-        if (imageURLs != null) {
-            for (Object imageURL : imageURLs) {
-                try {
-                    result.addImageURL(new URL((String) imageURL));
-                } catch (MalformedURLException e) {
-                    logger.severe("Error parsing image URL "+imageURL+" for event "+name+". Ignoring this image URL.");
+        BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
+        if (images != null) {
+            for (Object imageObject : images) {
+                ImageDescriptor image = loadImage((DBObject) imageObject);
+                if (image != null) {
+                    result.addImage(image);
                 }
             }
         }
-        BasicDBList videoURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
-        if (videoURLs != null) {
-            for (Object videoURL : videoURLs) {
-                try {
-                    result.addVideoURL(new URL((String) videoURL));
-                } catch (MalformedURLException e) {
-                    logger.severe("Error parsing video URL "+videoURL+" for event "+name+". Ignoring this video URL.");
-                }
-            }
-        }
-        BasicDBList sponsorImageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
-        if (sponsorImageURLs != null) {
-            for (Object sponsorImageURL : sponsorImageURLs) {
-                try {
-                    result.addSponsorImageURL(new URL((String) sponsorImageURL));
-                } catch (MalformedURLException e) {
-                    logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+name+". Ignoring this sponsor image URL.");
+        BasicDBList videos = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEOS.name());
+        if (videos != null) {
+            for (Object videoObject : videos) {
+                VideoDescriptor video = loadVideo((DBObject) videoObject);
+                if (video != null) {
+                    result.addVideo(video);
                 }
             }
         }
@@ -1359,6 +1352,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName())) {
             return loadRaceLogStartTimeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogDependentStartTimeEvent.class.getSimpleName())) {
+            return loadRaceLogDependentStartTimeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRaceStatusEvent.class.getSimpleName())) {
             return loadRaceLogRaceStatusEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFlagEvent.class.getSimpleName())) {
@@ -1635,8 +1630,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);        
-        return raceLogEventFactory.createStartTimeEvent(createdAt, author, logicalTimePoint, id, competitors, passId, startTime);
+        TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);
+        final String nextStatusName = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name());
+        final RaceLogRaceStatus nextStatus = nextStatusName==null?null:RaceLogRaceStatus.valueOf(nextStatusName);
+        return raceLogEventFactory.createStartTimeEvent(createdAt, author, logicalTimePoint, id, competitors, passId, startTime, nextStatus);
+    }
+
+    private RaceLogDependentStartTimeEvent loadRaceLogDependentStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        final Object regattaLikeNameObject = dbObject.get(FieldNames.RACE_LOG_DEPDENDENT_ON_REGATTALIKE.name());
+        final String regattaLikeName = regattaLikeNameObject == null ? null : regattaLikeNameObject.toString();
+        final Object raceColumnNameObject = dbObject.get(FieldNames.RACE_LOG_DEPDENDENT_ON_RACECOLUMN.name());
+        final String raceColumnName = raceColumnNameObject == null ? null : raceColumnNameObject.toString();
+        final Object fleetNameObject = dbObject.get(FieldNames.RACE_LOG_DEPDENDENT_ON_FLEET.name());
+        final String fleetName = fleetNameObject == null ? null : fleetNameObject.toString();
+        final SimpleRaceLogIdentifier dependentRaceLog = new SimpleRaceLogIdentifierImpl(regattaLikeName, raceColumnName, fleetName);
+        final Object startTimeDifferenceObject = dbObject.get(FieldNames.RACE_LOG_START_TIME_DIFFERENCE_IN_MS.name());
+        final Duration startTimeDifference = startTimeDifferenceObject == null ? null :
+            new MillisecondsDurationImpl(((Number) startTimeDifferenceObject).longValue());
+        RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
+        return raceLogEventFactory.createDependentStartTimeEvent(createdAt, author, logicalTimePoint, id, competitors,
+                passId, dependentRaceLog, startTimeDifference, nextStatus);
     }
 
     private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
@@ -2061,5 +2074,135 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             set.add(url);
         }
         return resultUrls;
+    }
+    
+    private ImageDescriptor loadImage(DBObject dbObject) {
+        ImageDescriptor image = null;
+        URL imageURL = loadURL(dbObject, FieldNames.IMAGE_URL);
+        if (imageURL != null) {
+            String title = (String) dbObject.get(FieldNames.IMAGE_TITLE.name());
+            String subtitle = (String) dbObject.get(FieldNames.IMAGE_SUBTITLE.name());
+            String copyright = (String) dbObject.get(FieldNames.IMAGE_COPYRIGHT.name());
+            String localeRaw = (String)  dbObject.get(FieldNames.IMAGE_LOCALE.name());
+            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
+            Number imageWidth = (Number) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
+            Number imageHeight = (Number) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
+            TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.IMAGE_CREATEDATDATE);
+            BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.IMAGE_TAGS.name());
+            List<String> imageTags = new ArrayList<String>();
+            if (tags != null) {
+                for (Object tagObject : tags) {
+                    imageTags.add((String) tagObject);
+                }
+            }
+            image = new ImageDescriptorImpl(imageURL, createdAtDate);
+            image.setCopyright(copyright);
+            image.setTitle(title);
+            image.setSubtitle(subtitle);
+            image.setLocale(locale);
+            image.setTags(imageTags);
+            if (imageWidth != null && imageHeight != null) {
+                image.setSize(imageWidth.intValue(), imageHeight.intValue());
+            }
+        }
+        return image;
+    }
+    
+    private VideoDescriptor loadVideo(DBObject dbObject) {
+        VideoDescriptor video = null;
+        URL videoURL = loadURL(dbObject, FieldNames.VIDEO_URL);
+        if(videoURL != null) {
+            String title = (String) dbObject.get(FieldNames.VIDEO_TITLE.name());
+            String subtitle = (String) dbObject.get(FieldNames.VIDEO_SUBTITLE.name());
+            String copyright = (String) dbObject.get(FieldNames.VIDEO_COPYRIGHT.name());
+            Object mimeTypeRaw = dbObject.get(FieldNames.VIDEO_MIMETYPE.name());
+            MimeType mimeType = mimeTypeRaw == null ? null : MimeType.valueOf((String) mimeTypeRaw);
+            String localeRaw = (String)  dbObject.get(FieldNames.VIDEO_LOCALE.name());
+            Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
+            TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.VIDEO_CREATEDATDATE);
+            BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.VIDEO_TAGS.name());
+            Number lengthInSeconds = (Number) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
+            URL thumbnailURL = loadURL(dbObject, FieldNames.VIDEO_THUMBNAIL_URL);
+            List<String> videoTags = new ArrayList<String>();
+            if (tags != null) {
+                for (Object tagObject : tags) {
+                    videoTags.add((String) tagObject);
+                }
+            }
+            video = new VideoDescriptorImpl(videoURL, mimeType, createdAtDate);
+            video.setCopyright(copyright);
+            video.setTitle(title);
+            video.setSubtitle(subtitle);
+            video.setLocale(locale);
+            video.setTags(videoTags);
+            video.setLengthInSeconds(lengthInSeconds == null ? null : lengthInSeconds.intValue());
+            video.setThumbnailURL(thumbnailURL);
+        }
+        return video;
+    }
+
+    private URL loadURL(DBObject dbObject, FieldNames field) {
+        URL result = null;
+        String urlAsString = (String) dbObject.get(field.name());
+        if(urlAsString != null) {
+            try {
+                result = new URL(urlAsString);
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing URL '"+urlAsString+"' in field "+field.name()+".");
+            }
+        }
+        return result; 
+    }
+    
+    /**
+     * Legacy code to support conversion of old image and video URLs 
+     * @param event
+     * @param eventDBObject
+     */
+    private boolean loadLegacyImageAndVideoURLs(Event event, DBObject eventDBObject) {
+        URL logoImageURL = null;
+        List<URL> imageURLs = new ArrayList<URL>();
+        List<URL> sponsorImageURLs = new ArrayList<URL>();
+        List<URL> videoURLs = new ArrayList<URL>();
+        
+        String logoImageURLAsString = (String) eventDBObject.get(FieldNames.EVENT_LOGO_IMAGE_URL.name());
+        if (logoImageURLAsString != null) {
+            try {
+                logoImageURL = new URL(logoImageURLAsString);
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing logo image URL "+logoImageURLAsString+" for event "+event.getName()+". Ignoring this URL.");
+            }
+        }
+        BasicDBList imageURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
+        if (imageURLsJson != null) {
+            for (Object imageURL : imageURLsJson) {
+                try {
+                   imageURLs.add(new URL((String) imageURL)); 
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing image URL "+imageURL+" for event "+event.getName()+". Ignoring this image URL.");
+                }
+            }
+        }
+        BasicDBList videoURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
+        if (videoURLsJson != null) {
+            for (Object videoURL : videoURLsJson) {
+                try {
+                    videoURLs.add(new URL((String) videoURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing video URL "+videoURL+" for event "+event.getName()+". Ignoring this video URL.");
+                }
+            }
+        }
+        BasicDBList sponsorImageURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
+        if (sponsorImageURLsJson != null) {
+            for (Object sponsorImageURL : sponsorImageURLsJson) {
+                try {
+                    sponsorImageURLs.add(new URL((String) sponsorImageURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+event.getName()+". Ignoring this sponsor image URL.");
+                }
+            }
+        }
+        return event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL, Collections.emptyMap());
     }
 }

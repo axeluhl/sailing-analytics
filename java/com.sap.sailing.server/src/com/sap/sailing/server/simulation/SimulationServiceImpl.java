@@ -379,9 +379,13 @@ public class SimulationServiceImpl implements SimulationService {
 
             // determine legtype upwind/downwind/reaching
             LegType legType = null;
-            try {
-                legType = trackedRace.getTrackedLeg(leg).getLegType(startTimePoint);
-            } catch (NoWindException e) {
+            if (startTimePoint != null) {
+                try {
+                    legType = trackedRace.getTrackedLeg(leg).getLegType(startTimePoint);
+                } catch (NoWindException e) {
+                    return null;
+                }
+            } else {
                 return null;
             }
 
