@@ -2505,6 +2505,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Reading competitors...");
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
+            // the following should actually be redundant because during de-serialization the Competitor objects,
+            // whose classes implement IsManagedByCache, should already have been got/created from/in the
+            // competitor store
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
                     dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                     dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
