@@ -9,6 +9,8 @@ import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
@@ -32,8 +34,12 @@ public class RaceFlagViewerFragment extends BaseFragment {
     private TextView mXrayCountdown;
     private Button mXrayButton;
 
-    public RaceFlagViewerFragment() {
+    private ProcedureChangedListener mProcedureListener;
+    private FlagsCache mFlagCache;
 
+    public RaceFlagViewerFragment() {
+        mProcedureListener = new ProcedureChangedListener();
+        mFlagCache = null;
     }
 
     public static RaceFlagViewerFragment newInstance() {
@@ -70,6 +76,20 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        getRaceState().getRacingProcedure().addChangedListener(mProcedureListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        getRaceState().getRacingProcedure().removeChangedListener(mProcedureListener);
+    }
+
+    @Override
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
@@ -102,10 +122,12 @@ public class RaceFlagViewerFragment extends BaseFragment {
             for (FlagPole flagPole : currentState) {
                 size++;
                 flag = flagPole.getUpperFlag();
-                mLayout.addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                mLayout.addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole),
+                    currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
                 if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
                     flag = flagPole.getLowerFlag();
-                    mLayout.addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, false, LOWER_FLAG));
+                    mLayout
+                        .addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, false, LOWER_FLAG));
                 }
             }
         } else {
@@ -125,9 +147,10 @@ public class RaceFlagViewerFragment extends BaseFragment {
         return pole != null && flag.equals(pole.getUpperFlag());
     }
 
-    private RelativeLayout renderFlag(TimePoint timePoint, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry, boolean isDisplayed, int flagType) {
+    private RelativeLayout renderFlag(TimePoint timePoint, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry,
+        boolean isDisplayed, int flagType) {
         RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
@@ -187,7 +210,22 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private int getFleetColorId() {
-        Util.Triple<Integer, Integer, Integer> rgb = getRace().getFleet().getColor() == null ? new Util.Triple<>(0, 0, 0) : getRace().getFleet().getColor().getAsRGB();
+        Util.Triple<Integer, Integer, Integer> rgb =
+            getRace().getFleet().getColor() == null ? new Util.Triple<>(0, 0, 0) : getRace().getFleet().getColor().getAsRGB();
         return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
+    }
+
+    private class ProcedureChangedListener extends BaseRacingProcedureChangedListener {
+
+        @Override
+        public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
+            super.onActiveFlagsChanged(racingProcedure);
+
+            mFlagCache = null;
+        }
+    }
+
+    private class FlagsCache {
+
     }
 }
