@@ -224,7 +224,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends LiveRaceDTO> SortableRaceListColumn<T, String> getWindSpeedColumn() {
+    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getWindSpeedColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator =  new InvertibleComparatorWrapper<T, Double>( new NullSafeComparableComparator<Double>()) {
             @Override
@@ -250,7 +250,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends LiveRaceDTO> SortableRaceListColumn<T, SimpleWindDTO> getWindDirectionColumn() {
+    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, SimpleWindDTO> getWindDirectionColumn() {
         Cell<SimpleWindDTO> cell = new AbstractCell<SimpleWindDTO>() {
             @Override
             public void render(Context context, SimpleWindDTO value, SafeHtmlBuilder sb) {

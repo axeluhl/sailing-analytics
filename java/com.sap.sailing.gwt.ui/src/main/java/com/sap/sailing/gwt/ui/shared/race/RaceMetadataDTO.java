@@ -65,6 +65,7 @@ public class RaceMetadataDTO implements IsSerializable {
     private String boatClass;
     private RaceViewState state;
     private RaceTrackingState trackingState;
+    private SimpleWindDTO wind;
 
     protected RaceMetadataDTO() {
     }
@@ -144,6 +145,14 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setTrackedRaceName(String trackedRaceName) {
         this.trackedRaceName = trackedRaceName;
+    }
+    
+    public SimpleWindDTO getWind() {
+        return wind;
+    }
+
+    public void setWind(SimpleWindDTO wind) {
+        this.wind = wind;
     }
 
     public String getRegattaDisplayName() {

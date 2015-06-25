@@ -25,8 +25,8 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
     protected final SortableRaceListColumn<T, ?> raceNameColumn = RaceListColumnFactory.getRaceNameColumn();
     protected final SortableRaceListColumn<T, ?> fleetNameColumn = RaceListColumnFactory.getFleetNameColumn(); 
     protected final SortableRaceListColumn<T, ?> startTimeColumn = RaceListColumnFactory.getStartTimeColumn();
-    protected final SortableRaceListColumn<T, ?> courseAreaColumn = RaceListColumnFactory.getCourseAreaColumn();
-    protected final SortableRaceListColumn<T, ?> courseColumn = RaceListColumnFactory.getCourseColumn();
+    protected final SortableRaceListColumn<T, ?> windSpeedColumn = RaceListColumnFactory.getWindSpeedColumn();
+    protected final SortableRaceListColumn<T, ?> windDirectionColumn = RaceListColumnFactory.getWindDirectionColumn();
     protected final SortableRaceListColumn<T, ?> raceViewerButtonColumn;
     
     private SortedCellTable<T> cellTable;

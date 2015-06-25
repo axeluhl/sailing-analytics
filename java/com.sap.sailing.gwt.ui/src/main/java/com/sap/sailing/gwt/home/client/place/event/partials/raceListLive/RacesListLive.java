@@ -36,8 +36,8 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
 
         private final SortableRaceListColumn<LiveRaceDTO, ?> regattaNameColumn = RaceListColumnFactory.getRegattaNameColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> flagsColumn = RaceListColumnFactory.getFlagsColumn();
-        private final SortableRaceListColumn<LiveRaceDTO, ?> windSpeedColumn = RaceListColumnFactory.getWindSpeedColumn();
-        private final SortableRaceListColumn<LiveRaceDTO, ?> windDirectionColumn = RaceListColumnFactory.getWindDirectionColumn();
+        private final SortableRaceListColumn<LiveRaceDTO, ?> courseAreaColumn = RaceListColumnFactory.getCourseAreaColumn();
+        private final SortableRaceListColumn<LiveRaceDTO, ?> courseColumn = RaceListColumnFactory.getCourseColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> raceViewStateColumn = RaceListColumnFactory.getRaceViewStateColumn();
 
         public RaceListLiveRaces(EventView.Presenter presenter, boolean showRegattaDetails) {
