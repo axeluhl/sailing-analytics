@@ -1,0 +1,44 @@
+package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.TextHeader;
+import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
+import com.sap.sse.common.Util;
+
+public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> {
+    private final String headerText;
+    private final InvertibleComparator<T> comparator;
+    
+    private boolean showDetails = true;
+
+    protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
+        super(cell, SortingOrder.ASCENDING);
+        this.headerText = headerText;
+        this.comparator = comparator;
+    }
+
+    @Override
+    public final InvertibleComparator<T> getComparator() {
+        return comparator;
+    }
+
+    @Override
+    public final Header<?> getHeader() {
+        return new TextHeader(headerText);
+    }
+    
+    public void setShowDetails(boolean showDetails) {
+        this.showDetails = showDetails;
+    }
+    
+    public boolean isShowDetails() {
+        return showDetails;
+    }
+
+    protected final String getStyleNamesString(String... styleNames) {
+        return Util.join(" ", styleNames);
+    }
+}
