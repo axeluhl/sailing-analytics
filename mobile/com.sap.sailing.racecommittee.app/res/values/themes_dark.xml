@@ -31,6 +31,7 @@
         <item name="white_invert">@color/constant_black</item>
 
         <!-- styles -->
+        <item name="buttonSolidXSmall">@style/AppTheme.Dark.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Dark.Button.Normal</item>
         <item name="textXXSmall">@style/AppTheme.Dark.Text.XXSmall</item>
@@ -57,7 +58,7 @@
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
         <item name="chevron_left_36dp">@drawable/ic_chevron_left_white_36dp</item>
         <item name="chevron_right_36dp">@drawable/ic_chevron_right_white_36dp</item>
-        <item name="create_36dp">@drawable/ic_create_white_36dp</item>
+        <item name="create">@drawable/ic_create_dark</item>
         <item name="compass_back">@drawable/compass_back_dark</item>
         <item name="compass_needle">@drawable/compass_needle_dark</item>
         <item name="course_triangle_48dp">@drawable/course_triangle_48dp_dark</item>
@@ -113,6 +114,10 @@
         <item name="android:background">@drawable/edit_text_dark</item>
         <item name="android:textColor">?white</item>
         <item name="android:textColorHint">?sap_light_gray</item>
+    </style>
+
+    <style name="AppTheme.Dark.Button.XSmall">
+        <item name="android:textSize">@dimen/textSize_18</item>
     </style>
 
     <style name="AppTheme.Dark.Button.Small">
