@@ -190,7 +190,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
         
         Location initialLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        onLocationChanged(initialLocation);
+        
+        if (initialLocation != null) {
+            onLocationChanged(initialLocation);
+        }
     }
 
     public void updateMap() {
