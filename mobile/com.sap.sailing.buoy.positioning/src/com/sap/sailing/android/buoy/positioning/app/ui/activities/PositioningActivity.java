@@ -23,25 +23,18 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     private MarkInfo markInfo;
     private MarkPingInfo markPing;
     private LeaderboardInfo leaderBoard;
+    private String markerID;
+    private String checkinDigest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
         Intent intent = getIntent();
-        String markerID = intent.getExtras().getString(getString(R.string.mark_id));
-        String checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
-        List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
-        setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
-        for (MarkInfo mark : marks) {
-            if (mark.getId().equals(markerID)) {
-                setMarkInfo(mark);
-                break;
-            }
-        }
-        if (markInfo != null) {
-            setPingFromDatabase(markerID);
-        }
+        markerID = intent.getExtras().getString(getString(R.string.mark_id));
+        checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
+
+        loadDataFromDatabase();
 
         OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -61,6 +54,20 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         fragment.setPingListener(this);
         replaceFragment(R.id.content_frame, fragment);
 
+    }
+
+    public void loadDataFromDatabase() {
+        List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
+        setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
+        for (MarkInfo mark : marks) {
+            if (mark.getId().equals(markerID)) {
+                setMarkInfo(mark);
+                break;
+            }
+        }
+        if (markInfo != null) {
+            setPingFromDatabase(markerID);
+        }
     }
 
     @Override

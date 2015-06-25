@@ -2,11 +2,16 @@ package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import java.text.DecimalFormat;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -47,6 +52,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private pingListener pingListener;
     private SignalQualityIndicatorView signalQualityIndicatorView;
     private boolean initialLocationUpdate;
+    private IntentReceiver mReceiver;
+    private PositioningActivity positioningActivity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,14 +82,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
-        mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        positioningActivity = (PositioningActivity) getActivity();
+        mapFragment = (MapFragment) positioningActivity.getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
         initLocationProvider();
-        MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
+        MarkInfo mark = positioningActivity.getMarkInfo();
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
-            markHeaderTextView.setText(mark.getName());
             setUpTextUI(lastKnownLocation);
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
@@ -92,6 +99,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
             }
         }
+        initMarkerReceiver();
+    }
+
+    private void initMarkerReceiver() {
+        mReceiver = new IntentReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.database_changed));
+        LocalBroadcastManager.getInstance(positioningActivity.getApplicationContext()).registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -99,9 +114,12 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onPause();
         // Unsubscribe location updates for power saving
         locationManager.removeUpdates(this);
+        LocalBroadcastManager.getInstance(positioningActivity.getApplicationContext()).unregisterReceiver(mReceiver);
     }
 
     public void setUpTextUI(Location location) {
+        MarkInfo mark = positioningActivity.getMarkInfo();
+        markHeaderTextView.setText(mark.getName());
         String longitudeText = "";
         String latitudeText = "";
         String accuracyText = "";
@@ -117,7 +135,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             longitudeText += "n/a";
             accuracyText += "n/a";
         }
-        MarkPingInfo markPing = ((PositioningActivity) getActivity()).getMarkPing();
+        MarkPingInfo markPing = positioningActivity.getMarkPing();
         if (markPing != null) {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
@@ -253,8 +271,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 PingHelper helper = new PingHelper();
                 try {
                     if (lastKnownLocation != null) {
-                        MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
-                        LeaderboardInfo leaderBoard = ((PositioningActivity) getActivity()).getLeaderBoard();
+                        MarkInfo mark = positioningActivity.getMarkInfo();
+                        LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
                         helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
                         helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark);
                         ((PositioningActivity) getActivity()).updatePing();
@@ -271,6 +289,20 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 }
             } else if (id == R.id.marker_reset_position_button) {
                 // Reset position
+            }
+        }
+    }
+
+    // Broadcast receiver to update ui on data changed
+    private class IntentReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(this.getClass().getName(), "Ui will be updated");
+            String action = intent.getAction();
+            if(action.equals(getString(R.string.database_changed))) {
+                positioningActivity.loadDataFromDatabase();
+                setUpTextUI(lastKnownLocation);
+                updateMap();
             }
         }
     }

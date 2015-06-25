@@ -106,8 +106,13 @@ public class RegattaActivity extends AbstractRegattaActivity {
                 ExLog.i(this, TAG, "Unbound transmitting Service");
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
         Intent intent = new Intent(this, MarkerService.class);
         stopService(intent);
+        super.onDestroy();
     }
 
     @Override
