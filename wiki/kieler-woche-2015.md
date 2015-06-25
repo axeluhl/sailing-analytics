@@ -39,6 +39,7 @@ Whichever master is current, we map the main Apache URL http://kielerwoche2015-m
 
 ## TracTrac URL
 - http://event.tractrac.com/events/event_20150616_KielerWoch/jsonservice.php for the Olympic Week
+- http://event.tractrac.com/events/event_20150625_KielerWoch/jsonservice.php for the International Week
 
 ## Replication
 - RabbitMQ server for replication: 52.16.112.6 (Web: http://52.16.112.6:15672/)
