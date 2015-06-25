@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.EventNewsProvider;
 import com.sap.sse.common.TimePoint;
@@ -28,20 +29,21 @@ public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
         Iterable<LeaderboardGroup> leaderboardGroups = event.getLeaderboardGroups();
         for(LeaderboardGroup leaderboardGroup: leaderboardGroups) {
             for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
-                TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-                if(timePointOfLatestModification == null) {
-                    continue;
-                }
-                
-                String displayName = leaderboard.getDisplayName() != null ?leaderboard.getDisplayName() :leaderboard.getName();
-                String boatClassName= null;
-                if(leaderboard instanceof RegattaLeaderboard) {
-                    BoatClass boatClass = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass();
-                    if(boatClass != null) {
-                        boatClassName = boatClass.getDisplayName();
+                SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+                if(scoreCorrection != null) {
+                    TimePoint timePointOfLatestModification = scoreCorrection.getTimePointOfLastCorrectionsValidity();
+                    if(timePointOfLatestModification != null) {
+                        String displayName = leaderboard.getDisplayName() != null ?leaderboard.getDisplayName() :leaderboard.getName();
+                        String boatClassName= null;
+                        if(leaderboard instanceof RegattaLeaderboard) {
+                            BoatClass boatClass = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass();
+                            if(boatClass != null) {
+                                boatClassName = boatClass.getDisplayName();
+                            }
+                        }
+                        result.add(new LeaderboardUpdateNewsItem(event.getId(), timePointOfLatestModification.asDate(), leaderboard.getName(), displayName, boatClassName));
                     }
                 }
-                result.add(new LeaderboardUpdateNewsItem(event.getId(), timePointOfLatestModification.asDate(), leaderboard.getName(), displayName, boatClassName));
             }
         }
         

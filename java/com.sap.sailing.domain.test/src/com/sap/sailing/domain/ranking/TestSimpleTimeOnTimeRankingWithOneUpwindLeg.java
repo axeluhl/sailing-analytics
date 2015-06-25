@@ -61,7 +61,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
     private DynamicTrackedRace trackedRace;
     private Competitor c1, c2;
     
-    private void setUp(Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
+    private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         c1 = TrackBasedTest.createCompetitor("FastBoat");
         c2 = TrackBasedTest.createCompetitor("SlowBoat");
         trackedRace = createTrackedRace(Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
@@ -70,7 +70,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         assertSame(RankingMetrics.TIME_ON_TIME_AND_DISTANCE, trackedRace.getTrackedRegatta().getRegatta().getRankingMetricType());
     }
     
-    private DynamicTrackedRace createTrackedRace(Iterable<Competitor> competitors, Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
+    private DynamicTrackedRace createTrackedRace(Iterable<Competitor> competitors, TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         final TimePoint timePointForFixes = MillisecondsTimePoint.now();
         BoatClassImpl boatClass = new BoatClassImpl("Some Handicap Boat Class", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,

@@ -88,6 +88,7 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -2374,18 +2375,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
 
-        logger.info("Serializing events...");
-        oos.writeObject(eventsById);
-        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
-        for (Event event : eventsById.values()) {
-            logoutput.append(String.format("%3s\n", event.toString()));
-        }
-
         logger.info("Serializing regattas...");
         oos.writeObject(regattasByName);
         logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        logger.info("Serializing events...");
+        oos.writeObject(eventsById);
+        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
 
         logger.info("Serializing regattas observed...");
@@ -2441,18 +2442,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // de-serialization; this will cause all classes to be visible that this bundle
         // (com.sap.sailing.server) can see
         StringBuffer logoutput = new StringBuffer();
-        logger.info("Reading all events...");
-        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
-        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
-        for (Event event : eventsById.values()) {
-            logoutput.append(String.format("%3s\n", event.toString()));
-        }
-
         logger.info("Reading all regattas...");
         regattasByName.putAll((Map<String, Regatta>) ois.readObject());
         logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        logger.info("Reading all events...");
+        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
+        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
 
         // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
@@ -2504,6 +2505,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Reading competitors...");
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
+            // the following should actually be redundant because during de-serialization the Competitor objects,
+            // whose classes implement IsManagedByCache, should already have been got/created from/in the
+            // competitor store
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
                     dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                     dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
@@ -3218,9 +3222,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
         final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
         final List<Competitor> result = new ArrayList<>();
-        Util.addAll(trackedRace.getRace().getCompetitors(), result);
-        result.sort((c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c2).getWindwardDistanceSailed().compareTo(
-                rankingInfo.getCompetitorRankingInfo().apply(c1).getWindwardDistanceSailed()));
+        final Map<Competitor, Distance> windwardDistanceSailedPerCompetitor = new HashMap<>();
+        for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            result.add(competitor);
+            windwardDistanceSailedPerCompetitor.put(competitor, rankingInfo.getCompetitorRankingInfo().apply(competitor).getWindwardDistanceSailed());
+        }
+        result.sort((c1, c2) -> windwardDistanceSailedPerCompetitor.get(c2).compareTo(
+                                windwardDistanceSailedPerCompetitor.get(c1)));
         return result;
     }
 

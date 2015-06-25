@@ -1,5 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
+import java.text.DecimalFormat;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,14 +25,15 @@ import com.sap.sailing.android.buoy.positioning.app.util.PingHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
-import java.text.DecimalFormat;
-
 public class BuoyFragment extends BaseFragment implements LocationListener {
+    private static final int GPS_MIN_DISTANCE = 1;
+    private static final int GPS_MIN_TIME = 1000;
     private OpenSansTextView markHeaderTextView;
     private OpenSansTextView latitudeTextView;
     private OpenSansTextView longitudeTextView;
@@ -80,7 +83,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
-            setUpTextUI(null);
+            setUpTextUI(lastKnownLocation);
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
             updateMap();
@@ -124,6 +127,11 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             accuracyText += " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy()))
                     + ")";
         }
+        
+          ExLog.w(getActivity(), getTag(), "Setting latitude to: "+latitudeText);
+          ExLog.w(getActivity(), getTag(), "Setting longitude to: "+longitudeText);
+          ExLog.w(getActivity(), getTag(), "Setting accuracy to: "+accuracyText);
+        
         latitudeTextView.setText(latitudeText);
         longitudeTextView.setText(longitudeText);
         accuracyTextView.setText(accuracyText);
@@ -179,7 +187,13 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private void initLocationProvider() {
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
+        
+        Location initialLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        
+        if (initialLocation != null) {
+            onLocationChanged(initialLocation);
+        }
     }
 
     public void updateMap() {
