@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -89,23 +90,24 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port,
-            StartList startList, long delayToLiveInMillis, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
+            BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
+            boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
+            throws InterruptedException, UnknownHostException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(raceID, raceName, raceDescription, boatClass, hostname, port, startList,
                 raceLogStore, regattaLogStore, windStore, gpsFixStore, domainFactory, this,
-                trackedRegattaRegistry, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+                trackedRegattaRegistry, raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
-            int port, StartList startList, long delayToLiveInMillis, WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
-            InterruptedException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore, gpsFixStore, domainFactory,
-                this, trackedRegattaRegistry, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+    public RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
+            BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
+            WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
+            throws UnknownHostException, InterruptedException, IOException, ParseException {
+        return new SwissTimingRaceTrackerImpl(regatta, raceID, raceName, raceDescription, boatClass, hostname, port,
+                startList, windStore, gpsFixStore, domainFactory, this, trackedRegattaRegistry, raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
     }
 
     @Override
