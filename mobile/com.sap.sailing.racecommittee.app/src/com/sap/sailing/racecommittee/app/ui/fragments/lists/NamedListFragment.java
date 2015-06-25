@@ -43,7 +43,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
     private void loadItems() {
-        setListShown(false);
         setupLoader();
     }
 
@@ -98,7 +97,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public void onLoadFailed(Exception reason) {
-        setListShown(true);
         namedList.clear();
         listAdapter.notifyDataSetChanged();
 
@@ -113,7 +111,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
-        setListShown(true);
         namedList.clear();
         //TODO: Quickfix for 2889
         if (data != null) {

@@ -3,11 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
@@ -22,7 +24,7 @@ public class LoginBackdrop extends Fragment {
         ImageView button = (ImageView) layout.findViewById(R.id.settings_button);
         if (button != null) {
             button.setOnClickListener(new View.OnClickListener() {
-                
+
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), PreferenceActivity.class);
@@ -40,6 +42,17 @@ public class LoginBackdrop extends Fragment {
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), SystemInformationActivity.class);
                     startActivity(intent);
+                }
+            });
+        }
+
+        ImageView refresh = (ImageView) layout.findViewById(R.id.refresh_data);
+        if (refresh != null) {
+            refresh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
+                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 }
             });
         }
