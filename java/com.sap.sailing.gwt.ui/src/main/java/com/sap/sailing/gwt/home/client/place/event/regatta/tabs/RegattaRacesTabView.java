@@ -10,15 +10,26 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.place.event.EventView;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.client.place.event.partials.regattaraces.EventRegattaRaces;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -32,17 +43,16 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
 
     private Presenter currentPresenter;
 
-    @UiField(provided = true)
-    protected EventRegattaRaces regattaRaces;
+    @UiField FlowPanel latestUpdateContainer;
+    @UiField SimplePanel oldContentContainer;
 
     public RegattaRacesTabView() {
-
+        initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
     }
 
     @Override
     public void setPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
-
     }
     
     @Override
@@ -52,52 +62,46 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
-
-        // TODO: understand, and than move this into appropiate place (probably context)
         final String selectedRegattaId = myPlace.getCtx().getRegattaId();
         
+        currentPresenter.getDispatch().execute(new GetLiveRacesForRegattaAction(myPlace.getCtx().getEventDTO().getId(),
+                selectedRegattaId), new AsyncCallback<ResultWithTTL<LiveRacesDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(ResultWithTTL<LiveRacesDTO> result) {
+                String date = DateAndTimeFormatterUtil.longDateFormatter.render(MillisecondsTimePoint.now().asDate());
+                RaceListFinishedRaces raceList = new RaceListFinishedRaces(currentPresenter);
+                latestUpdateContainer.add(new RaceListContainer<LiveRaceDTO>(date, raceList));;
+                raceList.setListData(result.getDto());
+            }
+        });
+        
         currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
-                    @Override
-                    public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                        if (raceGroups.size() > 0) {
-                            Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure();
+            @Override
+            public void onSuccess(List<RaceGroupDTO> raceGroups) {
+                if (raceGroups.size() > 0) {
+                    Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> rs = getRegattaStructure();
+                    Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = rs .get(selectedRegattaId);
+                    EventRegattaRaces regattaRaces = new EventRegattaRaces(currentPresenter);
+                    oldContentContainer.setWidget(regattaRaces);
+                    regattaRaces.setRaces(selectedRegatta.getC(), false, selectedRegatta.getB(), selectedRegatta.getA());
+                    contentArea.setWidget(RegattaRacesTabView.this);
+                } else {
+                    
+                }
+            }
 
-                            Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = regattaStructure
-                                    .get(selectedRegattaId);
-
-                            regattaRaces = new EventRegattaRaces(currentPresenter);
-
-                            regattaRaces.setRaces(selectedRegatta.getC(), false, selectedRegatta.getB(),
-                                    selectedRegatta.getA());
-
-                            // if (eventDTO.isRunning()) {
-                            // // create update time for race states only for running events
-                            // serverUpdateTimer.addTimeListener(new TimeListener() {
-                            // @Override
-                            // public void timeChanged(Date newTime, Date oldTime) {
-                            // loadAndUpdateEventRaceStatesLog();
-                            // }
-                            // });
-                            // }
-                            initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
-                            contentArea.setWidget(RegattaRacesTabView.this);
-                        } else {
-                            // createEventWithoutRegattasView(event, panel);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // createErrorView(
-                        // "Error while loading the regatta structure with service getRegattaStructureOfEvent()",
-                        // caught, panel);
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
     }
 
     @Override
     public void stop() {
-
     }
 
     @Override
@@ -125,6 +129,34 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }
         }
         return result;
+    }
+    
+    private class RaceListFinishedRaces extends AbstractRaceList<LiveRaceDTO> {
+
+        public RaceListFinishedRaces(EventView.Presenter presenter) {
+            super(presenter);
+        }
+
+        public void setListData(LiveRacesDTO data) {
+//            boolean hasFleets = data.hasFleets();
+//            this.fleetCornerColumn.setShowDetails(hasFleets);
+//            this.fleetNameColumn.setShowDetails(hasFleets);
+//            boolean hasWind = data.hasWind();
+//            this.windSpeedColumn.setShowDetails(hasWind);
+//            this.windDirectionColumn.setShowDetails(hasWind);
+            setTableData(data.getRaces());
+        }
+
+        @Override
+        protected void initTableColumns() {
+            add(fleetCornerColumn);
+            add(raceNameColumn);
+            add(fleetNameColumn);
+            add(startTimeColumn);
+            add(windSpeedColumn);
+            add(windDirectionColumn);
+            add(raceViewerButtonColumn);
+        }
     }
 
 }
