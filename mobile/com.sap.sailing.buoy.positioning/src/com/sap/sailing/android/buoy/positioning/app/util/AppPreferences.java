@@ -28,13 +28,13 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setDataRefreshInterval(long interval){
-        preferences.edit().putLong(context.getString(R.string.preference_data_refresh_interval_millis_key), interval)
+        preferences.edit().putLong(context.getString(R.string.preference_data_refresh_interval_seconds_key), interval)
             .apply();
     }
 
     public long getDataRefreshInterval(){
-        return preferences.getLong(context.getString(R.string.preference_data_refresh_interval_millis_key),
-            context.getResources().getInteger(R.integer.preference_data_refresh_interval_millis_default));
+        return preferences.getLong(context.getString(R.string.preference_data_refresh_interval_seconds_key),
+            context.getResources().getInteger(R.integer.preference_data_refresh_interval_seconds_default));
     }
 
     public static boolean getPrintDatabaseOperationDebugMessages() {

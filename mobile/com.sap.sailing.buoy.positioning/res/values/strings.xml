@@ -16,5 +16,13 @@
     <string name="accuracy">Accuracy</string>
     <string name="position_set">The position has been set</string>
     <string name="no_information">No information</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="settings">Settings</string>
+
+    <string name="server">Server</string>
+    <string name="server_sync_settings">Interval of server synchronisation in seconds</string>
 
 </resources>

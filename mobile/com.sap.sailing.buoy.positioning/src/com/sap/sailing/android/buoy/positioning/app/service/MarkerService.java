@@ -87,7 +87,7 @@ public class MarkerService extends Service implements  CheckinManager.DataChange
             while (running) {
                 long timeDiff = Calendar.getInstance().getTimeInMillis() - lastCheck;
 
-                if(timeDiff > preferences.getDataRefreshInterval()) {
+                if(timeDiff > preferences.getDataRefreshInterval() * 1000) {
                     manager.callServerAndGenerateCheckinData();
                     lastCheck = Calendar.getInstance().getTimeInMillis();
                 }

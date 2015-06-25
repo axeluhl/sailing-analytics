@@ -134,6 +134,9 @@ public class RegattaActivity extends AbstractRegattaActivity {
             AboutDialog aboutDialog = new AboutDialog(this);
             aboutDialog.show();
             return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
