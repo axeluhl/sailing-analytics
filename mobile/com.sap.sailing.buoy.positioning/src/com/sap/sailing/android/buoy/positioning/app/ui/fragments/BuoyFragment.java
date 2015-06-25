@@ -107,6 +107,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         mReceiver = new IntentReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(getString(R.string.database_changed));
+        filter.addAction(getString(R.string.ping_reached_server));
         LocalBroadcastManager.getInstance(positioningActivity.getApplicationContext()).registerReceiver(mReceiver, filter);
     }
 
