@@ -37,9 +37,14 @@ public class TimeUtils {
     }
 
     public static String formatDuration(TimePoint now, TimePoint timePoint) {
+        return formatDuration(now, timePoint, true);
+    }
+
+    public static String formatDuration(TimePoint now, TimePoint timePoint, boolean inclSign) {
         String duration;
         if (timePoint.after(now)) {
-            duration = "-" + TimeUtils.formatDurationUntil(timePoint.minus(now.asMillis()).asMillis(), false);
+            String sign = (inclSign) ? "-" : "";
+            duration = sign + TimeUtils.formatDurationUntil(timePoint.minus(now.asMillis()).asMillis(), false);
         } else {
             duration = TimeUtils.formatDurationSince(now.minus(timePoint.asMillis()).asMillis(), false);
         }

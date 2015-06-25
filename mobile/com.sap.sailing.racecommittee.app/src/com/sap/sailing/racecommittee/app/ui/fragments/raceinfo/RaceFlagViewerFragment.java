@@ -96,7 +96,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         updateFlags(now);
     }
 
-    private void updateFlags(TimePoint timePoint) {
+    private void updateFlags(TimePoint now) {
         if (getRace() == null || getRaceState() == null || getRaceState().getStartTime() == null) {
             return;
         }
@@ -107,37 +107,55 @@ public class RaceFlagViewerFragment extends BaseFragment {
         if (mRecall != null) {
             mRecall.setVisibility(View.GONE);
         }
+
         RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
         if (!procedure.isIndividualRecallDisplayed()) {
             if (mLayout != null) {
                 mLayout.setVisibility(View.VISIBLE);
-            }
-            FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(), timePoint);
-            List<FlagPole> currentState = poleState.getCurrentState();
-            List<FlagPole> upcoming = poleState.computeUpcomingChanges();
-            FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
-            mLayout.removeAllViews();
-            int size = 0;
-            Flags flag;
-            for (FlagPole flagPole : currentState) {
-                size++;
-                flag = flagPole.getUpperFlag();
-                mLayout.addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole),
-                    currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
-                if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
-                    flag = flagPole.getLowerFlag();
-                    mLayout
-                        .addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, false, LOWER_FLAG));
+                if (mFlagCache == null) {
+                    mLayout.removeAllViews();
+                    FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(), now);
+                    List<FlagPole> currentState = poleState.getCurrentState();
+                    List<FlagPole> upcoming = poleState.computeUpcomingChanges();
+                    FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
+                    mFlagCache = new FlagsCache(poleState.getNextStateValidFrom());
+                    int size = 0;
+                    Flags flag;
+                    boolean nextFlag;
+                    for (FlagPole flagPole : currentState) {
+                        size++;
+                        flag = flagPole.getUpperFlag();
+                        nextFlag = isNextFlag(flag, nextPole);
+                        if (nextFlag) {
+                            mFlagCache.nextFlag = size;
+                        }
+                        mLayout.addView(createFlagView(now, poleState, flag, nextFlag, currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                        if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
+                            flag = flagPole.getLowerFlag();
+                            nextFlag = isNextFlag(flag, nextPole);
+                            if (nextFlag) {
+                                mFlagCache.nextFlag = size;
+                            }
+                            mLayout.addView(createFlagView(now, poleState, flag, nextFlag, currentState.size() == size, false, LOWER_FLAG));
+                        }
+                    }
+                } else {
+                    if (mLayout != null) {
+                        int nextFlag = 0;
+                        for (int i = 0; i < mLayout.getChildCount(); i++) {
+                            if (mFlagCache.nextFlag == ++nextFlag) {
+                                updateFlagView(now, mLayout.getChildAt(i));
+                            }
+                        }
+                    }
                 }
             }
         } else {
-            String time = getString(R.string.until_xray_removed);
             if (mXrayCountdown != null && mRecall != null) {
                 TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
-                if (timePoint.before(flagDown)) {
-                    time = time.replace("#TIME#", TimeUtils.formatDurationUntil(flagDown.minus(timePoint.asMillis()).asMillis()).replace("-", ""));
-                    mXrayCountdown.setText(time);
+                if (now.before(flagDown)) {
                     mRecall.setVisibility(View.VISIBLE);
+                    mXrayCountdown.setText(getString(R.string.until_xray_removed, TimeUtils.formatDuration(now, flagDown, false)));
                 }
             }
         }
@@ -147,18 +165,28 @@ public class RaceFlagViewerFragment extends BaseFragment {
         return pole != null && flag.equals(pole.getUpperFlag());
     }
 
-    private RelativeLayout renderFlag(TimePoint timePoint, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry,
+    private View updateFlagView(TimePoint now, View flagView) {
+        TimePoint change = mFlagCache.mChange;
+        if (change != null) {
+            TextView flag_text = ViewHolder.get(flagView, R.id.flag_text);
+            String timer = TimeUtils.formatDuration(now, change, false);
+            flag_text.setText(timer);
+        }
+        return flagView;
+    }
+
+    private RelativeLayout createFlagView(TimePoint now, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry,
         boolean isDisplayed, int flagType) {
         RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
-        ImageView flagView = (ImageView) layout.findViewById(R.id.flag);
-        TextView textView = (TextView) layout.findViewById(R.id.flag_text);
-        View downView = layout.findViewById(R.id.arrow_down);
-        View upView = layout.findViewById(R.id.arrow_up);
-        View line = layout.findViewById(R.id.line);
+        ImageView flagView = ViewHolder.get(layout, R.id.flag);
+        TextView textView = ViewHolder.get(layout, R.id.flag_text);
+        View downView = ViewHolder.get(layout, R.id.arrow_down);
+        View upView = ViewHolder.get(layout, R.id.arrow_up);
+        View line = ViewHolder.get(layout, R.id.line);
         if (lastEntry) {
             line.setVisibility(View.GONE);
         }
@@ -177,12 +205,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         textView.setText("");
         if (changeAt != null && isNext) {
             textView.setVisibility(View.VISIBLE);
-            String timer;
-            if (changeAt.after(timePoint)) {
-                timer = TimeUtils.formatDurationUntil(changeAt.minus(timePoint.asMillis()).asMillis());
-            } else {
-                timer = TimeUtils.formatDurationSince(timePoint.minus(changeAt.asMillis()).asMillis());
-            }
+            String timer = TimeUtils.formatDuration(now, changeAt);
             textView.setText(timer.replace("-", ""));
             if (flagType == UPPER_FLAG) {
                 if (isDisplayed) {
@@ -226,6 +249,11 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private class FlagsCache {
+        private TimePoint mChange;
+        private int nextFlag = 0;
 
+        public FlagsCache(TimePoint change) {
+            mChange = change;
+        }
     }
 }
