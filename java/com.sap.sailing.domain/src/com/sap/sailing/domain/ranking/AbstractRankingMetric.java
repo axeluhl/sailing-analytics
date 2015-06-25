@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -605,33 +606,39 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         } else {
             Distance d = Distance.NULL;
             boolean count = false; // start counting only once the "from" waypoint has been found
-            for (final TrackedLeg trackedLeg : getTrackedRace().getTrackedLegs()) {
-                count = count || trackedLeg.getLeg().getFrom() == from;
-                if (count) {
-                    final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
-                    if (trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
-                        if (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)) {
-                            // partial distance sailed:
-                            final Position estimatedPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
-                            if (estimatedPosition != null) {
-                                final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(estimatedPosition, cache);
-                                final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
-                                if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
-                                    d = d.add(legWindwardDistance);
-                                } else {
-                                    // if the competitor is currently at the mark rounding, the windward distance within the leg may
-                                    // be negative; don't reduce the distance in this case
-                                    if (windwardDistanceFromLegStart.getMeters() > 0) {
-                                        d = d.add(windwardDistanceFromLegStart);
+            final Course course = getTrackedRace().getRace().getCourse();
+            course.lockForRead();
+            try {
+                for (final TrackedLeg trackedLeg : getTrackedRace().getTrackedLegs()) {
+                    count = count || trackedLeg.getLeg().getFrom() == from;
+                    if (count) {
+                        final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
+                        if (trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
+                            if (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)) {
+                                // partial distance sailed:
+                                final Position estimatedPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
+                                if (estimatedPosition != null) {
+                                    final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(estimatedPosition, cache);
+                                    final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
+                                    if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
+                                        d = d.add(legWindwardDistance);
+                                    } else {
+                                        // if the competitor is currently at the mark rounding, the windward distance within the leg may
+                                        // be negative; don't reduce the distance in this case
+                                        if (windwardDistanceFromLegStart.getMeters() > 0) {
+                                            d = d.add(windwardDistanceFromLegStart);
+                                        }
                                     }
                                 }
+                                break;
+                            } else {
+                                d = d.add(trackedLeg.getWindwardDistance(cache));
                             }
-                            break;
-                        } else {
-                            d = d.add(trackedLeg.getWindwardDistance(cache));
                         }
                     }
                 }
+            } finally {
+                course.unlockAfterRead();
             }
             result = d;
         }
