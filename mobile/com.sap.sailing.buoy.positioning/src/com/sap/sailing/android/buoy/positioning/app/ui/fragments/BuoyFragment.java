@@ -1,7 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import java.text.DecimalFormat;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +15,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -27,6 +24,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.buoy.positioning.app.util.PingHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.PingServerReplyCallback;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -36,7 +34,10 @@ import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
+import java.text.DecimalFormat;
+
 public class BuoyFragment extends BaseFragment implements LocationListener {
+    private static final String TAG = BuoyFragment.class.getName();
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
     private OpenSansTextView markHeaderTextView;
@@ -241,6 +242,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     }
 
+    public void handleSuccessfulResponse(){
+        Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
+    }
+
     public void setPingListener(pingListener listener) {
         pingListener = listener;
     }
@@ -274,13 +279,13 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                         MarkInfo mark = positioningActivity.getMarkInfo();
                         LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
                         helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
-                        helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark);
+                        helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark, PingServerReplyCallback.class);
                         ((PositioningActivity) getActivity()).updatePing();
                         savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                         pingListener.updatePing();
                         setUpTextUI(lastKnownLocation);
                         updateMap();
-                        Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }
@@ -297,12 +302,16 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private class IntentReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(this.getClass().getName(), "Ui will be updated");
             String action = intent.getAction();
+            Log.d(TAG, "Action: " + action);
             if(action.equals(getString(R.string.database_changed))) {
                 positioningActivity.loadDataFromDatabase();
                 setUpTextUI(lastKnownLocation);
                 updateMap();
+            }
+            if (action.equals(getString(R.string.ping_reached_server))){
+                Log.d(TAG, "Response reached Buoy Fragment");
+                handleSuccessfulResponse();
             }
         }
     }
