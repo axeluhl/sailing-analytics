@@ -117,6 +117,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.regatta_menu, menu);
         return true;
@@ -144,7 +145,8 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.regatta_menu;
+        // Set to 0 to avoid redundant menu inflation
+        return 0;
     }
 
     @Override

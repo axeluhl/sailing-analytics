@@ -74,7 +74,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.about_menu, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -84,6 +84,9 @@ public class PositioningActivity extends BaseActivity implements pingListener {
             AboutDialog aboutDialog = new AboutDialog(this);
             aboutDialog.show();
             return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -91,7 +94,8 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.about_menu;
+        // Set to 0 to avoid redundant menu inflation
+        return 0;
     }
 
     public void setPingFromDatabase(String markerID) {

@@ -285,12 +285,12 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                         LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
                         helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
                         helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark, PingServerReplyCallback.class);
+                        //Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
                         ((PositioningActivity) getActivity()).updatePing();
                         savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                         pingListener.updatePing();
                         setUpTextUI(lastKnownLocation);
                         updateMap();
-                        //Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }
