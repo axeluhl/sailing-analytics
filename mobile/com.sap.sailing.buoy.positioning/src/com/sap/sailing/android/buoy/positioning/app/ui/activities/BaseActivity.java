@@ -20,13 +20,6 @@ public class BaseActivity extends AbstractBaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.about_menu, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         default:
@@ -36,6 +29,6 @@ public class BaseActivity extends AbstractBaseActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.about_menu;
+        return 0;
     }
 }

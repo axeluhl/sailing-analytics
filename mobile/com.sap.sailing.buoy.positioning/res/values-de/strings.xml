@@ -16,7 +16,7 @@
     <string name="action_settings">Einstellungen</string>
     <string name="settings">Einstellungen</string>
 
-    <string name="server">Server</string>
-    <string name="server_sync_settings">Server Synchronisations Intervall in Sekunden</string>
+    <string name="server">Polling Einstellungen</string>
+    <string name="server_sync_settings">Abfrage Intervall (Sekunden)</string>
 
 </resources>

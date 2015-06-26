@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="database_changed" translatable="false">database_changed</string>
+    <string name="ping_reached_server" translatable="false">ping_reached_server</string>
 </resources>
