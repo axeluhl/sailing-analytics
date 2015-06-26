@@ -134,6 +134,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
@@ -3225,9 +3226,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final Map<Competitor, Distance> windwardDistanceSailedPerCompetitor = new HashMap<>();
         for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
             result.add(competitor);
-            windwardDistanceSailedPerCompetitor.put(competitor, rankingInfo.getCompetitorRankingInfo().apply(competitor).getWindwardDistanceSailed());
+            final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
+            windwardDistanceSailedPerCompetitor.put(competitor, competitorRankingInfo == null ? null : competitorRankingInfo.getWindwardDistanceSailed());
         }
-        result.sort((c1, c2) -> windwardDistanceSailedPerCompetitor.get(c2).compareTo(
+        final Comparator<Distance> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
+        result.sort((c1, c2) -> durationComparatorNullsLast.compare(windwardDistanceSailedPerCompetitor.get(c2),
                                 windwardDistanceSailedPerCompetitor.get(c1)));
         return result;
     }
