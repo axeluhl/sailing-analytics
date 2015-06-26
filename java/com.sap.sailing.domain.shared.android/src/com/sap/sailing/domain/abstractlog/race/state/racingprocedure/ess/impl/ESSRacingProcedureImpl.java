@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -37,8 +38,8 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     private final ESSConfiguration configuration;
     
     public ESSRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, ESSConfiguration configuration) {
-        super(raceLog, author, factory, configuration);
+            RaceLogEventFactory factory, ESSConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, factory, configuration, raceLogResolver);
         this.configuration = configuration;
         update();
     }

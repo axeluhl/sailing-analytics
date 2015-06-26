@@ -59,6 +59,8 @@ public interface ThemeResources extends ClientBundle {
         String spacermarginbottommedium();
         String spacermarginbottommediumbig();
         String spacermarginbottombig();
+        String spacermarginonlyonsmall();
+        String spacermarginonlyonlarge();
         String stickyheader();
         String slideto();
         String slidetonav();

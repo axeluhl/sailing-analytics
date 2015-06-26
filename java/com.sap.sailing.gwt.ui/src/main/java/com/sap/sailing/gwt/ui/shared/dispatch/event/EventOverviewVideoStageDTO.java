@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class EventOverviewVideoStageDTO implements EventOverviewStageContentDTO {
     public enum Type {
@@ -8,31 +8,23 @@ public class EventOverviewVideoStageDTO implements EventOverviewStageContentDTO 
     }
     
     private Type type;
-    
-    private MimeType mimeType;
-    
-    private String source;
+    private VideoDTO video;
     
     @SuppressWarnings("unused")
     private EventOverviewVideoStageDTO() {
     }
 
-    public EventOverviewVideoStageDTO(Type type, MimeType mimeType, String source) {
+    public EventOverviewVideoStageDTO(Type type, VideoDTO video) {
         super();
         this.type = type;
-        this.mimeType = mimeType;
-        this.source = source;
+        this.video = video;
     }
     
     public Type getType() {
         return type;
     }
     
-    public MimeType getMimeType() {
-        return mimeType;
-    }
-    
-    public String getSource() {
-        return source;
+    public VideoDTO getVideo() {
+        return video;
     }
 }

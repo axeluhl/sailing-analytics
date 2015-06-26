@@ -7,10 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
@@ -35,7 +36,6 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
@@ -185,12 +185,13 @@ public class PositioningFragment extends RaceDialogFragment {
                     @Override
                     public void onLoadFailed(Exception reason) {
                         getActivity().setProgressBarIndeterminateVisibility(false);
-                        Toast.makeText(getActivity(), String.format("Competitors: %s", reason.toString()),
+                        String toastText = getString(R.string.competitor_load_error);
+                        Toast.makeText(getActivity(), String.format(toastText, reason.toString()),
                                 Toast.LENGTH_LONG).show();
                     }
 
                     @Override
-                    public void onLoadSucceded(Collection<Competitor> data, boolean isCached) {
+                    public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
                         if (!isCached) {
                             getActivity().setProgressBarIndeterminateVisibility(false);
                         }
@@ -239,7 +240,7 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private void createMaxPointsReasonSelectionDialog(final com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
         builder.setTitle(R.string.select_penalty_reason).setItems(maxPointsReasons,
                 new DialogInterface.OnClickListener() {
@@ -247,8 +248,7 @@ public class PositioningFragment extends RaceDialogFragment {
                         setMaxPointsReasonForItem(item, maxPointsReasons[position]);
                     }
                 });
-        builder.create();
-        builder.show();
+        builder.create().show();
     }
 
     private CharSequence[] getAllMaxPointsReasons() {

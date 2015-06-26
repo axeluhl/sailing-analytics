@@ -306,11 +306,6 @@ public class LeaderboardCacheManager {
                     }
 
                     @Override
-                    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-                        return true;
-                    }
-
-                    @Override
                     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
                         removeFromCache(leaderboard);
                     }
