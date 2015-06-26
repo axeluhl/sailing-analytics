@@ -176,6 +176,9 @@ public class DistanceCache {
             for (Iterator<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>> i=toRemove.iterator(); i.hasNext(); ) {
                 Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> entryToRemove = i.next();
                 assert entryToRemove.getA().compareTo(timePoint) >= 0;
+                for (Pair<TimePoint, Distance> fromAndDistance : entryToRemove.getB()) {
+                    lruCache.remove(new Util.Pair<>(fromAndDistance.getA(), entryToRemove.getA()));
+                }
                 i.remove();
             }
         } finally {
