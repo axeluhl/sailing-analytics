@@ -43,14 +43,37 @@ public class TimeUtils {
         return DateFormat.format(format, timePoint.asDate()).toString();
     }
 
+    public static String formatDuration(TimePoint now, TimePoint timePoint) {
+        return formatDuration(now, timePoint, true);
+    }
+
+    public static String formatDuration(TimePoint now, TimePoint timePoint, boolean inclSign) {
+        String duration;
+        if (timePoint.after(now)) {
+            String sign = (inclSign) ? "-" : "";
+            duration = sign + TimeUtils.formatDurationUntil(timePoint.minus(now.asMillis()).asMillis(), false);
+        } else {
+            duration = TimeUtils.formatDurationSince(now.minus(timePoint.asMillis()).asMillis(), false);
+        }
+        return duration;
+    }
+
     public static String formatDurationSince(long milliseconds) {
+        return formatDurationSince(milliseconds, true);
+    }
+
+    public static String formatDurationSince(long milliseconds, boolean emptyHours) {
         int secondsTillStart = (int) Math.floor(milliseconds / 1000f);
-        return formatDuration(secondsTillStart);
+        return formatDuration(secondsTillStart, emptyHours);
     }
 
     public static String formatDurationUntil(long milliseconds) {
+        return formatDurationUntil(milliseconds, true);
+    }
+
+    public static String formatDurationUntil(long milliseconds, boolean emptyHours) {
         int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
-        return formatDuration(secondsTillStart);
+        return formatDuration(secondsTillStart, emptyHours);
     }
 
     public static String calcDuration(Calendar from, Calendar to) {
@@ -106,15 +129,16 @@ public class TimeUtils {
         }
     }
 
-    private static String formatDuration(int secondsTillStart) {
+    private static String formatDuration(int secondsTillStart, boolean emptyHours) {
         int hours = secondsTillStart / 3600;
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);
         boolean negative = (hours < 0 || minutes < 0 || seconds < 0);
-        String timePattern = ((negative) ? "-" : "") + "%s:%s:%s";
+        String timePattern = ((negative) ? "-" : "") + "%s%s:%s";
         String secondsString = seconds < 10 ? "0" + Math.abs(seconds) : "" + Math.abs(seconds);
         String minutesString = minutes < 10 ? "0" + Math.abs(minutes) : "" + Math.abs(minutes);
         String hoursString = hours < 10 ? "0" + Math.abs(hours) : "" + Math.abs(hours);
+        hoursString = !emptyHours && hoursString.equals("00") ? "" : hoursString + ":";
         return String.format(timePattern, hoursString, minutesString, secondsString);
     }
 
@@ -139,13 +163,13 @@ public class TimeUtils {
             dates.add(context.getString(R.string.tomorrow));
             calendar.add(Calendar.DAY_OF_MONTH, 3);
         } else {
-            for (int i = 0; i < 3; i++) {
+            for (int i = (pastDays == 0 ? pastDays : -1); i < (futureDays < 2 ? futureDays + 1 : 2); i++) {
                 dates.add(dateFormat.format(calendar.getTime()));
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
             }
         }
         // Future
-        for (int i = 3; i <= futureDays + 1; i++) {
+        for (int i = 2; i <= futureDays; i++) {
             dates.add(dateFormat.format(calendar.getTime()));
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }

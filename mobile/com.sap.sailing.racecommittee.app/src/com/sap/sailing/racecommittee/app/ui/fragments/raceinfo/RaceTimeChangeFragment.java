@@ -26,12 +26,15 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
     public final static int FINISHING_TIME_MODE = 1;
     public final static int FINISHED_TIME_MODE = 2;
     private final static String START_MODE = "startMode";
-    private static final int FUTURE_DAYS = 3;
-    private static final int PAST_DAYS = -3;
+    private static final int FUTURE_DAYS_DEFAULT = 3;
+    private static final int PAST_DAYS_DEFAULT = -3;
 
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
     private NumberPicker mSecondPicker;
+
+    private int mFutureDays = FUTURE_DAYS_DEFAULT;
+    private int mPastDays = PAST_DAYS_DEFAULT;
 
     public static RaceTimeChangeFragment newInstance(int mode) {
         RaceTimeChangeFragment fragment = new RaceTimeChangeFragment();
@@ -81,10 +84,37 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
         mDatePicker = (NumberPicker) layout.findViewById(R.id.date_picker);
         if (mDatePicker != null) {
+            Calendar start = (Calendar) calendar.clone();
+            Calendar finishing = (Calendar) calendar.clone();
+            Calendar finished = (Calendar) calendar.clone();
+            switch (getArguments().getInt(START_MODE, 0)) {
+            case START_TIME_MODE:
+                finishing.setTime(getRaceState().getFinishingTime().asDate());
+                mFutureDays = TimeUtils.daysBetween(finishing, calendar);
+                break;
+
+            case FINISHING_TIME_MODE:
+                start.setTime(getRaceState().getStartTime().asDate());
+                mPastDays = TimeUtils.daysBetween(calendar, start);
+                finished.setTime(getRaceState().getFinishedTime().asDate());
+                mFutureDays = TimeUtils.daysBetween(finished, calendar);
+                break;
+
+            case FINISHED_TIME_MODE:
+                finishing.setTime(getRaceState().getFinishingTime().asDate());
+                mPastDays = TimeUtils.daysBetween(finishing, calendar);
+                break;
+
+            default:
+                // use default values
+            }
             ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
-            TimeUtils.initDatePicker(getActivity(), mDatePicker, calendar, PAST_DAYS, FUTURE_DAYS, false);
-            mDatePicker.setValue(Math.abs(PAST_DAYS));
+            TimeUtils.initDatePicker(getActivity(), mDatePicker, calendar, mPastDays, mFutureDays, false);
+            mDatePicker.setValue(Math.abs(mPastDays));
             mDatePicker.setTag(calendar);
+            if (mDatePicker.getMinValue() == mDatePicker.getMaxValue()) {
+                mDatePicker.setVisibility(View.GONE);
+            }
         }
 
         mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
@@ -174,7 +204,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
     private TimePoint getPickerTime() {
         Calendar calendar = (Calendar) mDatePicker.getTag();
-        calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
+        calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + mPastDays);
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
         calendar.set(Calendar.SECOND, mSecondPicker.getValue());

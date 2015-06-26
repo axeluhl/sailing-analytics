@@ -323,7 +323,7 @@
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
     <string name="wind_sensor"><![CDATA[at #AT# / from #FROM#° / #SPEED# kn]]></string>
-    <string name="wind_panel"><![CDATA[from #FROM#°\n#SPEED# kn]]></string>
+    <string name="wind_panel"><![CDATA[from %1$.0f°\n%2$.1f kn]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
@@ -426,7 +426,7 @@
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
     <string name="url_refresh_message">Please logout from the current event to load the data from the new server.</string>
-    <string name="until_xray_removed">XRAY will be removed in #TIME#</string>
+    <string name="until_xray_removed">XRAY will be removed in %s</string>
     <string name="send_photos">Send Photos</string>
     <string name="error_wrong_degree_value_title">Error</string>
     <string name="error_wrong_degree_value_message">Please provide a value between 0 and 360</string>

@@ -331,7 +331,7 @@
     <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #FROM#° / #SPEED# kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
-    <string name="wind_panel"><![CDATA[von #FROM#°\n#SPEED# kn]]></string>
+    <string name="wind_panel"><![CDATA[von %1$.0f°\n%2$.1f kn]]></string>
     <string name="settings_category_developer">Entwickler Optionen</string>
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
@@ -405,7 +405,7 @@
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>
     <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
-    <string name="until_xray_removed">XRAY wird eingeholt in #TIME#</string>
+    <string name="until_xray_removed">XRAY wird eingeholt in %s</string>
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
     <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
