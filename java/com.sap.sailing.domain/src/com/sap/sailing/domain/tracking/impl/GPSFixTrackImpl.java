@@ -554,7 +554,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             } finally {
                 unlockAfterRead();
             }
-            getDistanceCache().cache(from, to, result);
+            if (recursionDepth == 0) {
+                getDistanceCache().cache(from, to, result);
+            }
         }
         return result;
     }
