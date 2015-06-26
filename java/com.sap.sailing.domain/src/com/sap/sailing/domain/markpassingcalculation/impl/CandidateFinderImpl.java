@@ -40,7 +40,7 @@ import com.sap.sse.common.Util;
  * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
  * every time a competitor passes the crossing-bearing of a waypoint, a candidate is created using linear interpolation
  * to estimate the exact time the bearing was crossed. Secondly, all local distance minima to a waypoint are candidates.
- * The probability of a candidate depends on its distance , whether it is on the right side and if it passes in the
+ * The probability of a candidate depends on its distance, whether it is on the right side and if it passes in the
  * right direction of its waypoint.
  * 
  * @author Nicolas Klose
@@ -50,7 +50,9 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     // TODO Parallelization?
 
-    private final int strictnessOfDistanceBasedProbability = 8;
+    private final int strictnessOfDistanceBasedProbability = 8; //The higher this is, the closer the fixes have to be to waypoint to become a Candidate
+    // All of the penalties are multiplied onto the propability of a Candidate. A value of 0 exludes Candidates that do
+    // not fit, a value of 1 imposes no penalty on each criteria
     private final double penaltyForWrongSide = 0.7;
     private final double penaltyForWrongDirection = 0.7;
     private final double penaltyForDistanceCandidates = 0.7;

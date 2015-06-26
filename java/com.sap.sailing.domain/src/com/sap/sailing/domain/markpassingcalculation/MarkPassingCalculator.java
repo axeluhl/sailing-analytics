@@ -77,9 +77,10 @@ public class MarkPassingCalculator {
     }
 
     /**
-     * Waits until an object is in the queue, then drains it entirely. After that, the fixes are sorted by the object
-     * they are tracking in <code>competitorFixes</code> and <code>markFixes</code>. Finally, if <code>suspended</code>
-     * is false, new passing are computed.
+     * Waits until an object is in the queue, then drains it entirely. After that the information is sorted depending on
+     * whether it is a fix, an updated waypoint or an updated fixed markpassing. Finally, if <code>suspended</code> is
+     * false, new passing are computed. First new wayponts are evaluated, than new fixed markpassings. Than the
+     * markpassings are computed using mark and competitor fixes.
      * 
      * @author Nicolas Klose
      * 
@@ -138,6 +139,7 @@ public class MarkPassingCalculator {
                     markFixes.clear();
                     addedWaypoints.clear();
                     removedWaypoints.clear();
+                    smallestChangedWaypointIndex = null;
                     fixedMarkPassings.clear();
                     removedFixedMarkPassings.clear();
                     suppressedMarkPassings.clear();
@@ -167,10 +169,10 @@ public class MarkPassingCalculator {
 
         /**
          * The calculation has two steps. For every mark with new fixes those competitor fixes are calculated that may
-         * have changed their status as {@link Candidate} (see {@code FixesAffectedByNewMarkFixes}). Then, the
-         * {@link CandidateFinder} uses those fixes along with any new competitor fixes to calculate any new or wrong
-         * Candidates. These are passed to the {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see
-         * {@link ComputeMarkPassings}).
+         * have changed their status as a {@link Candidate} (see {@code FixesAffectedByNewMarkFixes}). These fixes,
+         * along with any new competitor fixes, are passed into the executor, one task per competitor. The
+         * {@link CandidateFinder} uses the fixes to calculate any new or wrong Candidates. These are passed to the
+         * {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see {@link ComputeMarkPassings}).
          * 
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,
