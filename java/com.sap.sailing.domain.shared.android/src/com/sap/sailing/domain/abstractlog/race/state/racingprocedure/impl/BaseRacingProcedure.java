@@ -16,6 +16,8 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IndividualRecallRe
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsFinishedAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsInFinishingPhaseAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
@@ -60,9 +62,13 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     /**
      * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
+     * 
+     * @param raceLogResolver
+     *            is required for a {@link StartTimeFinder} in order to make individual recall timeouts depend on start
+     *            time rather than the time the individual recall was issued
      */
     public BaseRacingProcedure(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
-            RacingProcedureConfiguration configuration) {
+            RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
         if (configuration == null) {
             throw new IllegalArgumentException("configuration must not be null");
         }
@@ -78,6 +84,8 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
+        // Use the following in order to initialize a start time finder once it's needed for start time-dependent individual recall timeouts
+        //        this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);

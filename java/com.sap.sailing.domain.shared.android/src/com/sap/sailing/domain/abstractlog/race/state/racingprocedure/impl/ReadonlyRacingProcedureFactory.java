@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.NoAddingRaceLogWrapper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
@@ -37,32 +38,32 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
     }
 
     protected ReadonlyRacingProcedure createProcedure(RacingProcedureType type, RaceLog raceLog,
-            AbstractLogEventAuthor author, RaceLogEventFactory factory) {
+            AbstractLogEventAuthor author, RaceLogEventFactory factory, RaceLogResolver raceLogResolver) {
         RegattaConfiguration loadedConfiguration = configuration.load();
         switch (type) {
         case ESS:
-            return new ESSRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getESSConfiguration());
+            return new ESSRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getESSConfiguration(), raceLogResolver);
         case GateStart:
             return new GateStartRacingProcedureImpl(raceLog, author, factory,
-                    loadedConfiguration.getGateStartConfiguration());
+                    loadedConfiguration.getGateStartConfiguration(), raceLogResolver);
         case RRS26:
-            return new RRS26RacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getRRS26Configuration());
+            return new RRS26RacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getRRS26Configuration(), raceLogResolver);
         case BASIC:
-            return new BasicRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getBasicConfiguration());
+            return new BasicRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getBasicConfiguration(), raceLogResolver);
         case LEAGUE:
-            return new LeagueRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getLeagueConfiguration());
+            return new LeagueRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getLeagueConfiguration(), raceLogResolver);
         default:
             throw new UnsupportedOperationException("Unknown racing procedure " + type.toString());
         }
     }
 
     @Override
-    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog) {
+    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog, RaceLogResolver raceLogResolver) {
         // Just a mock author since we will never add anything to the racelog
         AbstractLogEventAuthor author = new LogEventAuthorImpl("Illegal Author", 128);
         // Wrap the racelog to disable adding...
         RaceLog wrappedRaceLog = new NoAddingRaceLogWrapper(raceLog);
-        return createProcedure(type, wrappedRaceLog, author, RaceLogEventFactory.INSTANCE);
+        return createProcedure(type, wrappedRaceLog, author, RaceLogEventFactory.INSTANCE, raceLogResolver);
     }
 
 }

@@ -104,6 +104,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.updatesbox_item_live {
+  color: red;
+}
 .updatesbox_item_content_text_boatclass {
   display: none;
 }

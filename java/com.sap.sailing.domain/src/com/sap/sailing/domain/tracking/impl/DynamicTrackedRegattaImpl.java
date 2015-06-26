@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
@@ -35,8 +36,8 @@ public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements Dyn
     @Override
     public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
     		GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
         return (DynamicTrackedRace) super.createTrackedRace(raceDefinition, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate, useMarkPassingCalculator);
+                millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
     }
 }
