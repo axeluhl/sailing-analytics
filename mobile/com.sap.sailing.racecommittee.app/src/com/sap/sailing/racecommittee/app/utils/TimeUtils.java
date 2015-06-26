@@ -43,14 +43,37 @@ public class TimeUtils {
         return DateFormat.format(format, timePoint.asDate()).toString();
     }
 
+    public static String formatDuration(TimePoint now, TimePoint timePoint) {
+        return formatDuration(now, timePoint, true);
+    }
+
+    public static String formatDuration(TimePoint now, TimePoint timePoint, boolean inclSign) {
+        String duration;
+        if (timePoint.after(now)) {
+            String sign = (inclSign) ? "-" : "";
+            duration = sign + TimeUtils.formatDurationUntil(timePoint.minus(now.asMillis()).asMillis(), false);
+        } else {
+            duration = TimeUtils.formatDurationSince(now.minus(timePoint.asMillis()).asMillis(), false);
+        }
+        return duration;
+    }
+
     public static String formatDurationSince(long milliseconds) {
+        return formatDurationSince(milliseconds, true);
+    }
+
+    public static String formatDurationSince(long milliseconds, boolean emptyHours) {
         int secondsTillStart = (int) Math.floor(milliseconds / 1000f);
-        return formatDuration(secondsTillStart);
+        return formatDuration(secondsTillStart, emptyHours);
     }
 
     public static String formatDurationUntil(long milliseconds) {
+        return formatDurationUntil(milliseconds, true);
+    }
+
+    public static String formatDurationUntil(long milliseconds, boolean emptyHours) {
         int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
-        return formatDuration(secondsTillStart);
+        return formatDuration(secondsTillStart, emptyHours);
     }
 
     public static String calcDuration(Calendar from, Calendar to) {
@@ -106,15 +129,16 @@ public class TimeUtils {
         }
     }
 
-    private static String formatDuration(int secondsTillStart) {
+    private static String formatDuration(int secondsTillStart, boolean emptyHours) {
         int hours = secondsTillStart / 3600;
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);
         boolean negative = (hours < 0 || minutes < 0 || seconds < 0);
-        String timePattern = ((negative) ? "-" : "") + "%s:%s:%s";
+        String timePattern = ((negative) ? "-" : "") + "%s%s:%s";
         String secondsString = seconds < 10 ? "0" + Math.abs(seconds) : "" + Math.abs(seconds);
         String minutesString = minutes < 10 ? "0" + Math.abs(minutes) : "" + Math.abs(minutes);
         String hoursString = hours < 10 ? "0" + Math.abs(hours) : "" + Math.abs(hours);
+        hoursString = !emptyHours && hoursString.equals("00") ? "" : hoursString + ":";
         return String.format(timePattern, hoursString, minutesString, secondsString);
     }
 

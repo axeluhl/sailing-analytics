@@ -405,7 +405,7 @@
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>
     <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
-    <string name="until_xray_removed">XRAY wird eingeholt in #TIME#</string>
+    <string name="until_xray_removed">XRAY wird eingeholt in %s</string>
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
     <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
