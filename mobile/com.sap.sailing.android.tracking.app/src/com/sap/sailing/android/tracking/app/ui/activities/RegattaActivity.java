@@ -287,7 +287,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
      */
     private Bitmap getStoredImage(String fileName) {
         File pictureFile = getImageFile(fileName);
-        if (pictureFile == null) {
+        if (pictureFile == null || !pictureFile.exists()) {
             return null;
         }
 
