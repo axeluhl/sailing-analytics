@@ -27,7 +27,7 @@ public class MarshallingObjectOutputStreamsTest {
         String[][] strings = new String[100][];
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         for (int stream = 0; stream < strings.length; stream++) {
-            final int count = random.nextInt(10000);
+            final int count = random.nextInt(100);
             strings[stream] = createRandomArrayOfStrings(count);
             {
                 ObjectOutputStream oos1 = new ObjectOutputStream(bos);
