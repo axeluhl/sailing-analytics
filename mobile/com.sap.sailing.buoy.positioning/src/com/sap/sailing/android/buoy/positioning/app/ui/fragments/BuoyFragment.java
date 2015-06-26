@@ -32,6 +32,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 import java.text.DecimalFormat;
@@ -55,29 +56,33 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private boolean initialLocationUpdate;
     private IntentReceiver mReceiver;
     private PositioningActivity positioningActivity;
+    private LocalBroadcastManager mBroadcastManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
+        View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
-        markHeaderTextView = (OpenSansTextView) view.findViewById(R.id.mark_header);
-        latitudeTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_latitude);
-        longitudeTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_longitude);
-        accuracyTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_accuracy);
+        markHeaderTextView = ViewHolder.get(layout, R.id.mark_header);
+        latitudeTextView = ViewHolder.get(layout, R.id.marker_gps_latitude);
+        longitudeTextView = ViewHolder.get(layout, R.id.marker_gps_longitude);
+        accuracyTextView = ViewHolder.get(layout, R.id.marker_gps_accuracy);
         ClickListener clickListener = new ClickListener();
 
-        setPositionButton = (OpenSansButton) view.findViewById(R.id.marker_set_position_button);
+        setPositionButton = ViewHolder.get(layout, R.id.marker_set_position_button);
         setPositionButton.setVisibility(View.GONE);
         setPositionButton.setOnClickListener(clickListener);
 
-        resetPositionButton = (OpenSansButton) view.findViewById(R.id.marker_reset_position_button);
+        resetPositionButton = ViewHolder.get(layout, R.id.marker_reset_position_button);
         resetPositionButton.setOnClickListener(clickListener);
         resetPositionButton.setVisibility(View.GONE);
 
-        signalQualityIndicatorView = (SignalQualityIndicatorView) view.findViewById(R.id.signal_quality_indicator);
+        signalQualityIndicatorView = ViewHolder.get(layout, R.id.signal_quality_indicator);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
-        return view;
+
+        mReceiver = new IntentReceiver();
+        mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
+        return layout;
     }
 
     @Override
@@ -104,10 +109,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     private void initMarkerReceiver() {
-        mReceiver = new IntentReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(getString(R.string.database_changed));
-        LocalBroadcastManager.getInstance(positioningActivity.getApplicationContext()).registerReceiver(mReceiver, filter);
+        filter.addAction(getString(R.string.ping_reached_server));
+        mBroadcastManager.registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onPause();
         // Unsubscribe location updates for power saving
         locationManager.removeUpdates(this);
-        LocalBroadcastManager.getInstance(positioningActivity.getApplicationContext()).unregisterReceiver(mReceiver);
+        mBroadcastManager.unregisterReceiver(mReceiver);
     }
 
     public void setUpTextUI(Location location) {
