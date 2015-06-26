@@ -331,7 +331,7 @@
     <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #FROM#° / #SPEED# kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
-    <string name="wind_panel"><![CDATA[von #FROM#°\n#SPEED# kn]]></string>
+    <string name="wind_panel"><![CDATA[von %1$.0f°\n%2$.1f kn]]></string>
     <string name="settings_category_developer">Entwickler Optionen</string>
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
