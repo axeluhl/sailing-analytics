@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +88,7 @@ public class RacePositionsCallback implements ServerReplyCallback {
         return ret;
     }
 
-    private void addPositions(Context context, Serializable raceId,
+    private void addPositions(Context context, String raceId,
                               ReadonlyDataManager dataManager, List<MapMarker> markersToAdd) {
         if (markersToAdd.isEmpty()) {
             ExLog.i(context, TAG, "No server-side markers to add for race "

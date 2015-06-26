@@ -50,6 +50,36 @@ public class RaceSummaryFragment extends BaseFragment {
         mRegionWind = ViewHolder.get(layout, R.id.region_wind);
         mRegionRecall = ViewHolder.get(layout, R.id.region_individual_recalls);
 
+        View editStartTime = ViewHolder.get(layout, R.id.edit_race_start_time);
+        if (editStartTime != null) {
+            editStartTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.START_TIME_MODE), R.id.finished_content);
+                }
+            });
+        }
+
+        View editFinishingTime = ViewHolder.get(layout, R.id.edit_race_finish_begin_time);
+        if (editFinishingTime != null) {
+            editFinishingTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), R.id.finished_content);
+                }
+            });
+        }
+
+        View editFinishedTime = ViewHolder.get(layout, R.id.edit_race_finish_end_time);
+        if (editFinishedTime != null) {
+            editFinishedTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), R.id.finished_content);
+                }
+            });
+        }
+
         return layout;
     }
 

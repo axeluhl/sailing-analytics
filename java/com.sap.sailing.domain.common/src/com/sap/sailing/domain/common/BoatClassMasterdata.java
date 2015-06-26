@@ -59,7 +59,13 @@ public enum BoatClassMasterdata {
     FLYING_DUTCHMAN ("Flying Dutchman", true, 6.10, 1.80, BoatHullType.MONOHULL, true),
     DYAS("Dyas", true, 7.15, 1.95, BoatHullType.MONOHULL, true),
     INTERNATIONAL_14("International 14", true, 4.27, 1.83, BoatHullType.MONOHULL, true, "I14"),
-    OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC");
+    OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC"),
+    
+    // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass
+    ORC ("ORC", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+    ORC_CLUB ("ORC Club", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+    ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int.");
+
 
     private final String displayName;
     private final String[] alternativeNames;

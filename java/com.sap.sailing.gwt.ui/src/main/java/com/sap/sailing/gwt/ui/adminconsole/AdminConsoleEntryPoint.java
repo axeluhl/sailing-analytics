@@ -189,7 +189,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
-                getStringMessages().structureImportUrls(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
+                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
 
         /* ADVANCED */
         

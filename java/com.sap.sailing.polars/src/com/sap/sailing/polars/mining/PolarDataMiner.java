@@ -3,11 +3,13 @@ package com.sap.sailing.polars.mining;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -40,6 +42,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -64,6 +67,8 @@ public class PolarDataMiner {
     private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
     
     private static final Logger logger = Logger.getLogger(PolarDataMiner.class.getSimpleName());
+    
+    private final ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
 
     private ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
@@ -135,7 +140,7 @@ public class PolarDataMiner {
                 GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, parameterizedDimensions);
         
 
-        cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
+        cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor(listeners);
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerCourseGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerCourseGrouperResultReceivers.add(cubicRegressionPerCourseProcessor);
 
@@ -147,7 +152,7 @@ public class PolarDataMiner {
                 GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, parameterizedDimensionsForCubicRegression);
         
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
-        speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
+        speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup, listeners);
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerAngleClusterGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerAngleClusterGrouperResultReceivers.add(speedRegressionPerAngleClusterProcessor);
 
@@ -434,6 +439,23 @@ public class PolarDataMiner {
             for (GPSFixMovingWithOriginInfo fix : fixes) {
                 processFix(race, fix);
             }
+        }
+    }
+
+    public void registerListener(BoatClass boatClass, PolarsChangedListener listener) {
+        Set<PolarsChangedListener> listenersForBoatClass = listeners.get(boatClass);
+        if (listenersForBoatClass == null) {
+            Map<PolarsChangedListener, Boolean> mapForConcurrency = new ConcurrentHashMap<>();
+            listenersForBoatClass = Collections.newSetFromMap(mapForConcurrency);
+            listeners.put(boatClass, listenersForBoatClass);
+        }
+        listenersForBoatClass.add(listener);
+    }
+
+    public void unregisterListener(BoatClass boatClass, PolarsChangedListener listener) {
+        Set<PolarsChangedListener> listenersForBoatClass = listeners.get(boatClass);
+        if (listenersForBoatClass != null) {
+            listenersForBoatClass.remove(listener);
         }
     }
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -42,6 +44,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -275,6 +278,27 @@ public interface TrackedRace extends Serializable {
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    
+    /**
+     * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
+     * for wind recording. If, based on a {@link RaceExecutionOrderProvider}, there is no previous race that takes the
+     * wind fix, an extended time range lead (see
+     * {@link TrackedRaceImpl#EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS}) is used to record wind even a long
+     * time before the race start.
+     * <p>
+     * 
+     * A race does not record wind when both, {@link #getStartOfTracking()} and {@link #getStartOfRace()} are
+     * <code>null</code>. Wind is not recorded when it is after the later of {@link #getEndOfRace()} and
+     * {@link #getEndOfTracking()} and one of the two is not <code>null</code>.
+     * <p>
+     * 
+     * This default implementation returns true which may be useful for tests and mocked implementations; however, real
+     * implementations shall override this and provide a meaningful implementation according to the specification given
+     * above.
+     */
+    default boolean takesWindFix(Wind wind) {
+        return true;
+    }
 
     /**
      * Same as {@link #getWind(Position, TimePoint, Set) getWind(p, at, Collections.emptyList())}
@@ -652,9 +676,9 @@ public interface TrackedRace extends Serializable {
     void detachRaceLog(Serializable identifier);
     
     /**
-     * Detaches all {@link RaceLog} instances from this race
+     * Detaches the link {@link RaceExecutionOrderProvider}
      */
-    void detachAllRaceLogs();
+    void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
@@ -673,6 +697,12 @@ public interface TrackedRace extends Serializable {
      * This also causes fixes from the {@link GPSFixStore} to be loaded (see {@link #attachRaceLog} for details).
      */
     void attachRegattaLog(RegattaLog regattaLog);
+    
+    /**
+     * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware
+     * which races are scheduled around it in the execution order of a {@link Regatta}.
+     * */
+    void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
      * Returns the attached race log event track for this race if any.
@@ -823,4 +853,8 @@ public interface TrackedRace extends Serializable {
     Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
+
+    default RaceLogResolver getRaceLogResolver() {
+        return null;
+    }
 }

@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,13 +34,12 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
     public static ProtestTimeDialogFragment newInstance(List<ManagedRace> races) {
-        ArrayList<Serializable> raceIds = new ArrayList<>();
+        ArrayList<String> raceIds = new ArrayList<>();
         for (ManagedRace race : races) {
             raceIds.add(race.getId());
         }
         Bundle args = new Bundle();
-        args.putSerializable(ARGS_RACE_IDS, raceIds);
-
+        args.putStringArrayList(ARGS_RACE_IDS, raceIds);
         ProtestTimeDialogFragment fragment = new ProtestTimeDialogFragment();
         fragment.setArguments(args);
         return fragment;
@@ -196,11 +194,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         if (args == null) {
             throw new IllegalStateException("Arguments needed!");
         }
-
         ReadonlyDataManager manager = DataManager.create(getActivity());
-        @SuppressWarnings("unchecked")
-        ArrayList<Serializable> raceIds = (ArrayList<Serializable>) args.getSerializable(ARGS_RACE_IDS);
-        for (Serializable id : raceIds) {
+        ArrayList<String> raceIds = args.getStringArrayList(ARGS_RACE_IDS);
+        for (String id : raceIds) {
             races.add(manager.getDataStore().getRace(id));
         }
     }

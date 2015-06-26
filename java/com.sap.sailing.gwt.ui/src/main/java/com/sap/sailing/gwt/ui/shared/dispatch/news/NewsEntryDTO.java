@@ -8,7 +8,9 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
 public abstract class NewsEntryDTO implements DTO {
     
-    private Date timestamp;
+    private Date newsTimestamp;
+    
+    private Date currentTimestamp;
     
     private String title;
 
@@ -18,14 +20,15 @@ public abstract class NewsEntryDTO implements DTO {
     }
     
     @GwtIncompatible
-    public NewsEntryDTO(String title, Date timestamp, URL externalURL) {
-        this(title, timestamp, externalURL == null ? null : externalURL.toString());
+    public NewsEntryDTO(String title, Date timestamp, Date currentTimestamp, URL externalURL) {
+        this(title, timestamp, currentTimestamp, externalURL == null ? null : externalURL.toString());
     }
     
     @GwtIncompatible
-    private NewsEntryDTO(String title, Date timestamp, String externalURL) {
+    private NewsEntryDTO(String title, Date newsTimestamp, Date currentTimestamp, String externalURL) {
         this.title = title;
-        this.timestamp = timestamp;
+        this.newsTimestamp = newsTimestamp;
+        this.currentTimestamp = currentTimestamp;
         this.externalURL = externalURL;
     }
 
@@ -38,10 +41,14 @@ public abstract class NewsEntryDTO implements DTO {
     public abstract String getBoatClass();
     
     public Date getTimestamp() {
-        return timestamp;
+        return newsTimestamp;
     }
     
     public String getExternalURL() {
         return externalURL;
+    }
+
+    public Date getCurrentTimestamp() {
+        return currentTimestamp;
     }
 }

@@ -141,7 +141,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
             zoomTypes.add(ZoomTypes.BUOYS);
         } else {
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
-            zoomTypes.add(ZoomTypes.TAILS);
+            zoomTypes.add(ZoomTypes.BOATS);
         }
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,

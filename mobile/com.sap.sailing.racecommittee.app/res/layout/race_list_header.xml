@@ -27,7 +27,7 @@
         android:layout_margin="@dimen/default_margin"
         android:background="@drawable/round_button"
         android:padding="10dp"
-        android:src="@drawable/ic_assignment_white_48dp" />
+        android:src="@drawable/ic_power_settings_new_white_48dp" />
 
     <TextView
         android:id="@+id/regatta_data"

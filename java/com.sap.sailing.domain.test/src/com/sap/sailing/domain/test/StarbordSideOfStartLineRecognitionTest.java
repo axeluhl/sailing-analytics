@@ -12,6 +12,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -87,7 +88,8 @@ public class StarbordSideOfStartLineRecognitionTest {
         private static final long serialVersionUID = -8007932232555073829L;
 
         public MockedTrackedRaceImpl() {
-            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0, false, OneDesignRankingMetric::new);
+            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0, false, OneDesignRankingMetric::new,
+                    mock(RaceLogResolver.class));
         }
         
         @Override

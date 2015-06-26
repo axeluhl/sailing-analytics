@@ -2,6 +2,7 @@ package com.sap.sailing.domain.ranking;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -59,7 +61,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
     private DynamicTrackedRace trackedRace;
     private Competitor c1, c2;
     
-    private void setUp(Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
+    private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         c1 = TrackBasedTest.createCompetitor("FastBoat");
         c2 = TrackBasedTest.createCompetitor("SlowBoat");
         trackedRace = createTrackedRace(Arrays.asList(c1, c2), timeOnTimeFactors, timeOnDistanceFactors);
@@ -68,7 +70,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         assertSame(RankingMetrics.TIME_ON_TIME_AND_DISTANCE, trackedRace.getTrackedRegatta().getRegatta().getRankingMetricType());
     }
     
-    private DynamicTrackedRace createTrackedRace(Iterable<Competitor> competitors, Function<Competitor, Double> timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
+    private DynamicTrackedRace createTrackedRace(Iterable<Competitor> competitors, TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
         final TimePoint timePointForFixes = MillisecondsTimePoint.now();
         BoatClassImpl boatClass = new BoatClassImpl("Some Handicap Boat Class", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
@@ -91,7 +93,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
                 tr->new TimeOnTimeAndDistanceRankingMetric(tr,
                         timeOnTimeFactors, // time-on-time
-                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))));
+                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))), mock(RaceLogResolver.class));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(1, 0);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(0, -0.000001), timePointForFixes));

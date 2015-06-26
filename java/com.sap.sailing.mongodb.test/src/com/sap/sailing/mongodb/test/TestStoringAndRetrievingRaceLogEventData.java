@@ -91,5 +91,4 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
             assertEquals(rcEvent.getLowerFlag(), readRcEvent.getLowerFlag());
         }
     }
-
 }

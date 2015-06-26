@@ -19,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -31,7 +32,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     
     @Override
     protected RaceStatusAnalyzer createAnalyzer(RaceLog raceLog) {
-        return new RaceStatusAnalyzer(raceLog, racingProcedure);
+        return new RaceStatusAnalyzer(mock(RaceLogResolver.class), raceLog, racingProcedure);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     @Test
     public void testClock() {
         final TimePoint startTime = MillisecondsTimePoint.now(); 
-        analyzer = new RaceStatusAnalyzer(raceLog, new RaceStatusAnalyzer.Clock() {
+        analyzer = new RaceStatusAnalyzer(mock(RaceLogResolver.class), raceLog, new RaceStatusAnalyzer.Clock() {
             @Override
             public TimePoint now() {
                 return startTime.minus(1);

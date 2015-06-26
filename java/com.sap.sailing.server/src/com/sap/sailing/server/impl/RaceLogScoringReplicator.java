@@ -63,11 +63,6 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     @Override
-    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-        return true;
-    }
-
-    @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
     }
 
