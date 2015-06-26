@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
@@ -220,9 +221,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         ImageView imageView = (ImageView) findViewById(R.id.userImage);
         Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
         if (storedImage == null) {
-            if (event.imageUrl != null) {
-                new DownloadLeaderboardImageTask(imageView).execute(event.imageUrl);
-            }
+            askServerAboutTeamImageUrl(imageView);
         } else {
             imageView.setImageBitmap(storedImage);
             userImageUpdated();
@@ -237,6 +236,43 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             new DownloadFlagImageTask(flagImageView, competitor.countryCode).execute(urlStr);
         } else {
             flagImageView.setImageBitmap(storedFlagImage);
+        }
+    }
+
+    public void askServerAboutTeamImageUrl(final ImageView imageView){
+        try {
+            URL url = new URL(checkinUrl.urlString);
+            StringBuilder sb = new StringBuilder("http://");
+            sb.append(url.getHost());
+            sb.append(":");
+            sb.append((url.getPort() == -1) ? 80 : url.getPort());
+            sb.append(prefs.getServerCompetiorTeamPath(competitor.id));
+
+            HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(new URL(sb.toString()), this);
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
+                @Override
+                public void performAction(JSONObject response) {
+                    try {
+                        String teamImageUri = response.getString("imageUri");
+                        if (teamImageUri != null) {
+                            new DownloadLeaderboardImageTask(imageView).execute(teamImageUri);
+                        }
+                    }
+                    catch (JSONException e) {
+                        ExLog.e(getApplicationContext(), TAG, "Error: Failed to get teamImageURL: " + e.getMessage());
+                    }
+                }
+            }, new NetworkHelperFailureListener() {
+                @Override
+                public void performAction(NetworkHelperError e) {
+                    ExLog.e(getApplicationContext(), TAG,
+                        "Error: Failed to get teamImageURL: " + e.getMessage());
+                }
+            });
+
+        } catch (MalformedURLException e) {
+            ExLog.e(this, TAG,
+                "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
 
