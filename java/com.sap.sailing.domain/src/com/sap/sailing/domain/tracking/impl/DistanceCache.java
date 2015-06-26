@@ -71,7 +71,7 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * @author Axel Uhl (D043530)
  */
 public class DistanceCache {
-    private static final int MAX_SIZE = 100;
+    public static final int MAX_SIZE = 100;
     
     private final NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>> distanceCache;
     
@@ -120,6 +120,10 @@ public class DistanceCache {
                 return expunge;
             }
         };
+    }
+    
+    public int size() {
+        return lruCache.size();
     }
     
     private void removeCacheEntry(TimePoint from, TimePoint to) {

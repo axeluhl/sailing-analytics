@@ -917,7 +917,14 @@ public class TrackTest {
         final Duration raceDuration = Duration.ONE_HOUR.times(48);
         final Speed speed = new KnotSpeedImpl(12);
         final Distance distancePerSample = speed.travel(fixTime, fixTime.plus(samplingInterval));
-        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache");
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
         while (fixTime.before(start.plus(raceDuration))) {
             for (int i=0; i<transmissionInterval.divide(samplingInterval); i++) {
                 // produce a bulk of fixes
@@ -935,7 +942,7 @@ public class TrackTest {
                 queryTime = queryTime.plus(queryInterval);
             }
         }
-        System.out.println();
+        assertTrue(distanceCache.size() <= DistanceCache.MAX_SIZE);
     }
     
     @Test
