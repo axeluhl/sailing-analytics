@@ -2,12 +2,15 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -68,7 +71,29 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * @author Axel Uhl (D043530)
  */
 public class DistanceCache {
+    private static final int MAX_SIZE = 100;
+    
     private final NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>> distanceCache;
+    
+    /**
+     * The cache is to have limited size. Eviction shall happen based on a least-recently-used strategy. Usage is
+     * defined as having been returned by {@link #getEarliestFromAndDistanceAtOrAfterFrom(TimePoint, TimePoint)} or
+     * having been added by {@link #cache(TimePoint, TimePoint, Distance)}.
+     * <p>
+     * 
+     * When an eldest entry is asked to be expunged from this map and the map has more than {@link #MAX_SIZE} elements,
+     * the expunging will be admitted, and the entry is removed from the {@link #distanceCache} core structure. Reading
+     * and writing this structure must happen under the {@link #lock write lock} because also reading the linked hash
+     * map that counts access as "use" has a modifying effect on its internal structures.
+     * <p>
+     * 
+     * The key pairs are from/to pairs. Note that this is in some sense "the opposite direction" compared to the
+     * alignment of the {@link #distanceCache} structure which has as its outer keys the "to" time point.<p>
+     * 
+     * Read access is to be <code>synchronized<code> using this field's mutex; write access only happens under the
+     * {@link #lock write lock} and therefore will have no contenders.
+     */
+    private final LinkedHashMap<Util.Pair<TimePoint, TimePoint>, Void> lruCache;
     
     private final NamedReentrantReadWriteLock lock;
     
@@ -82,6 +107,33 @@ public class DistanceCache {
     public DistanceCache(String nameForLockLogging) {
         lock = new NamedReentrantReadWriteLock("lock for DistanceCache for "+nameForLockLogging, /* fair */ true);
         this.distanceCache = new ArrayListNavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>>(timePointInPairComparator);
+        this.lruCache = new LinkedHashMap<Util.Pair<TimePoint, TimePoint>, Void>(/* initial capacity */ 10, /* load factor */ 0.75f,
+                /* access-based ordering */ true) {
+            private static final long serialVersionUID = -6568235517111733193L;
+
+            @Override
+            protected boolean removeEldestEntry(Entry<Pair<TimePoint, TimePoint>, Void> eldest) {
+                final boolean expunge = size() > MAX_SIZE;
+                if (expunge) {
+                    removeCacheEntry(eldest.getKey().getA(), eldest.getKey().getB());
+                }
+                return expunge;
+            }
+        };
+    }
+    
+    private void removeCacheEntry(TimePoint from, TimePoint to) {
+        assert lock.getWriteHoldCount() == 1; // we can be sure we are alone here; this only happens when adding a new entry, holding the write lock
+        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(createDummy(to));
+        if (entryForTo.getA().equals(to)) {
+            Pair<TimePoint, Distance> entryForFrom = entryForTo.getB().ceiling(new Util.Pair<TimePoint, Distance>(from, null));
+            if (entryForFrom.getA().equals(from)) {
+                entryForTo.getB().remove(entryForFrom);
+                if (entryForTo.getB().isEmpty()) {
+                    distanceCache.remove(entryForTo);
+                }
+            }
+        }
     }
     
     /**
@@ -100,6 +152,12 @@ public class DistanceCache {
                 if (fromCeiling != null) {
                     result = new Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>>(entryForTo.getA(), fromCeiling);
                 }
+            }
+            // no writer can be active because we're holding the read lock; read access on the lruCache is synchronized using
+            // the lruCache's mutex; this is necessary because we're using access-based LRU pinging where even getting an entry
+            // modifies the internal parts of the data structure which is not thread safe.
+            synchronized (lruCache) {
+                lruCache.get(new Util.Pair<TimePoint, TimePoint>(from, to));
             }
             return result;
         } finally {
@@ -146,6 +204,7 @@ public class DistanceCache {
                 distanceCache.add(pairForTo);
             }
             entryForTo.add(new Util.Pair<TimePoint, Distance>(from, distance));
+            lruCache.put(new Util.Pair<TimePoint, TimePoint>(from, to), null);
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
