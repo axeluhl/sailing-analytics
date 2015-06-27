@@ -124,10 +124,10 @@ public class RaceFlagViewerFragment extends BaseFragment {
                     for (FlagPole flagPole : currentState) {
                         size++;
                         flag = flagPole.getUpperFlag();
-                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
                         if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
                             flag = flagPole.getLowerFlag();
-                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, false, LOWER_FLAG));
+                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, false, LOWER_FLAG));
                         }
                     }
                 } else {
@@ -135,7 +135,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
                         for (int i = 0; i < mLayout.getChildCount(); i++) {
                             ImageView flagImage = ViewHolder.get(mLayout.getChildAt(i), R.id.flag);
                             Flags flags = (Flags) flagImage.getTag();
-                            if (flags != null && flags.equals(mFlagCache.nextPole.getUpperFlag())) {
+                            if (isNextFlag(mFlagCache.nextPole, flags)) {
                                 updateFlagView(now, mLayout.getChildAt(i));
                             }
                         }
@@ -153,8 +153,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
         }
     }
 
-    private boolean isNextFlag(Flags flag, FlagPole pole) {
-        return pole != null && flag.equals(pole.getUpperFlag());
+    private boolean isNextFlag(FlagPole flagPole, Flags flags) {
+        return flagPole != null && flags.equals(flagPole.getUpperFlag());
     }
 
     private View updateFlagView(TimePoint now, View flagView) {
