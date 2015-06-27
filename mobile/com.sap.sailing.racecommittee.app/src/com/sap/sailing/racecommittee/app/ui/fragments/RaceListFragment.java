@@ -67,7 +67,7 @@ public class RaceListFragment
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
     private ListView mListView;
-    private HashMap<Serializable, ManagedRace> mManagedRacesById;
+    private LinkedHashMap<String, ManagedRace> mManagedRacesById;
     private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
@@ -93,7 +93,7 @@ public class RaceListFragment
     public RaceListFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
-        mManagedRacesById = new HashMap<>();
+        mManagedRacesById = new LinkedHashMap<>();
         mRacesByGroup = new TreeMap<>(new RegattaSeriesFleetComparator());
         mViewItems = new ArrayList<>();
     }
@@ -420,7 +420,6 @@ public class RaceListFragment
             mViewItems.add(new RaceListDataTypeHeader(key));
 
             List<ManagedRace> races = mRacesByGroup.get(key);
-            Collections.sort(races, new NaturalNamedComparator());
             for (ManagedRace race : races) {
                 // ... and add the race view!
                 mViewItems.add(new RaceListDataTypeRace(race));
