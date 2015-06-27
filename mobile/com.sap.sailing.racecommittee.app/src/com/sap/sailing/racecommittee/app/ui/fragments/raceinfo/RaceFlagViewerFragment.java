@@ -118,32 +118,24 @@ public class RaceFlagViewerFragment extends BaseFragment {
                     List<FlagPole> currentState = poleState.getCurrentState();
                     List<FlagPole> upcoming = poleState.computeUpcomingChanges();
                     FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
-                    mFlagCache = new FlagsCache(poleState.getNextStateValidFrom());
+                    mFlagCache = new FlagsCache(poleState.getNextStateValidFrom(), nextPole);
                     int size = 0;
                     Flags flag;
-                    boolean nextFlag;
                     for (FlagPole flagPole : currentState) {
                         size++;
                         flag = flagPole.getUpperFlag();
-                        nextFlag = isNextFlag(flag, nextPole);
-                        if (nextFlag) {
-                            mFlagCache.nextFlag = size;
-                        }
-                        mLayout.addView(createFlagView(now, poleState, flag, nextFlag, currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
                         if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
                             flag = flagPole.getLowerFlag();
-                            nextFlag = isNextFlag(flag, nextPole);
-                            if (nextFlag) {
-                                mFlagCache.nextFlag = size;
-                            }
-                            mLayout.addView(createFlagView(now, poleState, flag, nextFlag, currentState.size() == size, false, LOWER_FLAG));
+                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, false, LOWER_FLAG));
                         }
                     }
                 } else {
-                    if (mLayout != null) {
-                        int nextFlag = 0;
+                    if (mLayout != null && mFlagCache.nextPole != null) {
                         for (int i = 0; i < mLayout.getChildCount(); i++) {
-                            if (mFlagCache.nextFlag == ++nextFlag) {
+                            ImageView flagImage = ViewHolder.get(mLayout.getChildAt(i), R.id.flag);
+                            Flags flags = (Flags) flagImage.getTag();
+                            if (isNextFlag(mFlagCache.nextPole, flags)) {
                                 updateFlagView(now, mLayout.getChildAt(i));
                             }
                         }
@@ -161,8 +153,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
         }
     }
 
-    private boolean isNextFlag(Flags flag, FlagPole pole) {
-        return pole != null && flag.equals(pole.getUpperFlag());
+    private boolean isNextFlag(FlagPole flagPole, Flags flags) {
+        return flagPole != null && flags.equals(flagPole.getUpperFlag());
     }
 
     private View updateFlagView(TimePoint now, View flagView) {
@@ -192,6 +184,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         }
 
         flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), 96));
+        flagView.setTag(flag);
         if (flag == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());
         }
@@ -250,10 +243,11 @@ public class RaceFlagViewerFragment extends BaseFragment {
 
     private class FlagsCache {
         private TimePoint mChange;
-        private int nextFlag = 0;
+        public FlagPole nextPole;
 
-        public FlagsCache(TimePoint change) {
+        public FlagsCache(TimePoint change, FlagPole pole) {
             mChange = change;
+            nextPole = pole;
         }
     }
 }
