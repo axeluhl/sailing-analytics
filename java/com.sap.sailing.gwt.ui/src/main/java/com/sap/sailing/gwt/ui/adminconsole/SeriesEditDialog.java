@@ -133,7 +133,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
         return new SeriesDescriptor(selectedSeries, seriesNameTextBox.getValue(), races, isMedalCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
-                        : null, startWithZeroScoreCheckbox.getValue(),
+                        : new int[0], startWithZeroScoreCheckbox.getValue(),
                 firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue());
     }
 
