@@ -527,9 +527,9 @@ public class ReplicationServiceImpl implements ReplicationService {
                 }
                 logger.info("Done receiving initial load for "+replicable.getId());
             }
+        } finally {
             logger.info("Resuming replicator to apply queues");
             replicator.setSuspended(false); // apply queued operations
-        } finally {
             // delete initial load queue
             DeleteOk deleteOk = consumer.getChannel().queueDelete(queueName);
             logger.info("Deleted queue " + queueName + " used for initial load: " + deleteOk.toString());
