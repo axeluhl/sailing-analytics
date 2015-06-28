@@ -41,14 +41,12 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RegattaSeriesFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.*;
 import com.sap.sse.common.TimePoint;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class RaceListFragment
