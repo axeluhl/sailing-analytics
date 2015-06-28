@@ -504,7 +504,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         replicator = new ReplicationReceiver(master, replicablesProvider, /* startSuspended */true, consumer);
         // clear Replicable state here, before starting to receive and de-serialized operations which builds up
         // new state, e.g., in competitor store
-        for (Replicable<?, ?> r : getReplicables()) {
+        for (Replicable<?, ?> r : replicables) {
             r.clearReplicaState();
             r.startedReplicatingFrom(master);
         }
