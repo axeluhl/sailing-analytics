@@ -129,7 +129,8 @@ public class Activator implements BundleActivator {
             new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
                 @Override
                 public void run() {
-                    logger.info("Waiting for Replicables " + replicableIdsAsStrings + " before firing up replication automatically...");
+                    logger.info("Waiting for Replicables " + Arrays.toString(replicableIdsAsStrings) +
+                            " before firing up replication automatically...");
                     for (String replicableIdAsString : replicableIdsAsStrings) {
                         replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
                         logger.info("Obtained Replicable " + replicableIdAsString);
