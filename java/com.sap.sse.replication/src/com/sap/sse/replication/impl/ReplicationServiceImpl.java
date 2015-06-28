@@ -497,7 +497,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             throw ex;
         }
         logger.info("Connection to exchange successful.");
-        final Iterable<Replicable<?, ?>> replicables = replicablesProvider.getReplicables();
+        final Iterable<Replicable<?, ?>> replicables = getReplicables();
         URL initialLoadURL = master.getInitialLoadURL(replicables);
         logger.info("Initial load URL is "+initialLoadURL);
         // start receiving messages already now, but start in suspended mode
@@ -517,7 +517,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
         try {
             final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
-            for (Replicable<?, ?> replicable : getReplicables()) {
+            for (Replicable<?, ?> replicable : replicables) { // absolutely make sure to use the same sequence of replicables as for URL (bug 3015)
                 logger.info("Starting to receive initial load for "+replicable.getId());
                 try {
                     replicable.initiallyFillFrom(gzipInputStream);
