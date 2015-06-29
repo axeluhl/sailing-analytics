@@ -41,14 +41,12 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RegattaSeriesFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.*;
 import com.sap.sse.common.TimePoint;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class RaceListFragment
@@ -67,7 +65,7 @@ public class RaceListFragment
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
     private ListView mListView;
-    private HashMap<Serializable, ManagedRace> mManagedRacesById;
+    private LinkedHashMap<String, ManagedRace> mManagedRacesById;
     private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
@@ -93,7 +91,7 @@ public class RaceListFragment
     public RaceListFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
-        mManagedRacesById = new HashMap<>();
+        mManagedRacesById = new LinkedHashMap<>();
         mRacesByGroup = new TreeMap<>(new RegattaSeriesFleetComparator());
         mViewItems = new ArrayList<>();
     }
@@ -420,7 +418,6 @@ public class RaceListFragment
             mViewItems.add(new RaceListDataTypeHeader(key));
 
             List<ManagedRace> races = mRacesByGroup.get(key);
-            Collections.sort(races, new NaturalNamedComparator());
             for (ManagedRace race : races) {
                 // ... and add the race view!
                 mViewItems.add(new RaceListDataTypeRace(race));

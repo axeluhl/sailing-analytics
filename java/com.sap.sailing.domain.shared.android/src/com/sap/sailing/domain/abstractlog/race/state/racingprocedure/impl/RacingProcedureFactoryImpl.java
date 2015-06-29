@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
@@ -22,7 +23,7 @@ public class RacingProcedureFactoryImpl extends ReadonlyRacingProcedureFactory i
     }
     
     @Override
-    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog) {
-        return createProcedure(type, raceLog, author, factory);
+    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog, RaceLogResolver raceLogResolver) {
+        return createProcedure(type, raceLog, author, factory, raceLogResolver);
     }
 }

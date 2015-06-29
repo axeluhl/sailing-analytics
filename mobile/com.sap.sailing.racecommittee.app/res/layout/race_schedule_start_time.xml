@@ -89,59 +89,12 @@
         android:id="@+id/line_top"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
-        android:layout_below="@+id/buttonBar"
+        android:layout_below="@id/buttonBar"
         android:background="?black"/>
 
-    <RelativeLayout
+    <include
+        layout="@layout/race_time_picker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/buttonBar"
-        android:background="?sap_gray_black_30">
-
-        <LinearLayout
-            android:id="@+id/start_picker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:scaleX="@integer/picker_scale"
-            android:scaleY="@integer/picker_scale">
-
-            <NumberPicker
-                android:id="@+id/start_date_picker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:descendantFocusability="blocksDescendants"/>
-
-            <include
-                android:id="@+id/start_time_picker"
-                layout="@layout/time_picker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/set_start_time"
-            style="?attr/buttonSolidSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerInParent="true"
-            android:layout_margin="@dimen/default_margin_twice"
-            android:maxWidth="200dp"
-            android:text="@string/race_set_start"/>
-
-        <TextView
-            android:id="@+id/debug_time"
-            style="?textSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:visibility="gone"
-            tools:text="12:12:12"/>
-    </RelativeLayout>
+        android:layout_below="@id/buttonBar"/>
 </RelativeLayout>

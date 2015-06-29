@@ -1,15 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,10 +14,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -32,11 +28,17 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterS
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
+    private final static String TAG = ManagedRaceListAdapter.class.getName();
+    private final static int FLAG_SIZE = 48;
     private final Object mLockObject = new Object();
     private List<RaceListDataType> mAllViewItems;
     private RaceFilter mFilter;
@@ -70,60 +72,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         dateFormat = new SimpleDateFormat("HH:mm", getContext().getResources().getConfiguration().locale);
     }
 
-    public String fill2(int value) {
-        String erg = String.valueOf(value);
-
-        if (erg.length() < 2) {
-            erg = "0" + erg;
-        }
-        return erg;
-    }
-
     @Override
     public int getCount() {
         synchronized (mLockObject) {
             return mShownViewItems != null ? mShownViewItems.size() : 0;
         }
-    }
-
-    public String getDuration(Date date1, Date date2) {
-        TimeUnit timeUnit = TimeUnit.SECONDS;
-
-        long diffInMilli = date2.getTime() - date1.getTime();
-        long s = timeUnit.convert(diffInMilli, TimeUnit.MILLISECONDS);
-
-        long days = s / (24 * 60 * 60);
-        long rest = s - (days * 24 * 60 * 60);
-        long hrs = rest / (60 * 60);
-        long rest1 = rest - (hrs * 60 * 60);
-        long min = rest1 / 60;
-        long sec = s % 60;
-
-        String dates = "";
-        if (days < 0 || hrs < 0 || min < 0 || sec < 0) {
-            dates += "-";
-            if (days < 0) {
-                days *= -1;
-            }
-            if (hrs < 0) {
-                hrs *= -1;
-            }
-            if (min < 0) {
-                min *= -1;
-            }
-            if (sec < 0) {
-                sec *= -1;
-            }
-        }
-        if (days != 0) {
-            dates = days + ":";
-        }
-
-        dates += (days != 0 || hrs != 0) ? fill2((int) hrs) + ":" : "";
-        dates += fill2((int) min) + ":";
-        dates += fill2((int) sec);
-
-        return dates;
     }
 
     @Override
@@ -156,6 +109,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         raceListElement = getItem(position);
 
         int type = getItemViewType(position);
+        TimePoint now = MillisecondsTimePoint.now();
 
         if (convertView == null) {
             if (type == ViewType.HEADER.index) {
@@ -185,7 +139,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 fleetSeries += header.getSeries().getName();
             }
             fleet_series.setText(fleetSeries);
-            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), 48));
+            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), FLAG_SIZE));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -219,7 +173,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     String startTime = mResources.getString(startRes, dateFormat.format(state.getStartTime().asDate()));
                     race_started.setText(startTime);
                     if (state.getFinishedTime() == null) {
-                        String duration = getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime());
+                        String duration = TimeUtils.formatDuration(now, state.getStartTime());
                         time.setText(duration);
                         float textSize = getContext().getResources().getDimension(R.dimen.textSize_40);
                         if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
@@ -247,7 +201,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 update_badge.setVisibility(View.VISIBLE);
             }
 
-            updateFlag(race.getRace());
+            updateFlag(race.getRace(), now);
         }
         return convertView;
     }
@@ -321,30 +275,86 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         }
     }
 
-    private void updateFlag(ManagedRace race) {
+    private void updateFlag(ManagedRace race, TimePoint now) {
         RaceState state = race.getState();
         if (state == null || state.getStartTime() == null) {
             return;
         }
-        FlagPoleState flagPoleState = state.getTypedRacingProcedure().getActiveFlags(state.getStartTime(), MillisecondsTimePoint.now());
-        List<FlagPole> flagChanges = flagPoleState.computeUpcomingChanges();
-        if (!flagChanges.isEmpty()) {
-            TimePoint changeAt = flagPoleState.getNextStateValidFrom();
-            FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
-            if (changeAt != null) {
-                current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
-                String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
-                flag_timer.setText(text.replace("-", ""));
-                Drawable arrow;
-                if (changePole.isDisplayed()) {
-                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                } else {
-                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
+        RacingProcedure procedure = state.getTypedRacingProcedure();
+        LayerDrawable flag = null;
+        Drawable arrow = null;
+        String timer = null;
+        if (!procedure.isIndividualRecallDisplayed()) {
+            FlagPoleState poleState = state.getRacingProcedure().getActiveFlags(state.getStartTime(), now);
+            List<FlagPole> currentState = poleState.getCurrentState();
+            List<FlagPole> upcoming = poleState.computeUpcomingChanges();
+            FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
+            TimePoint change = poleState.getNextStateValidFrom();
+            Flags currentFlag;
+
+            if (change != null) {
+                for (FlagPole pole : currentState) {
+                    int isNext = 0;
+
+                    currentFlag = pole.getUpperFlag();
+                    if (isNextFlag(currentFlag, nextPole)) {
+                        isNext = 1;
+                    } else {
+                        currentFlag = pole.getLowerFlag();
+                        if (!Flags.NONE.equals(currentFlag)) {
+                            if (isNextFlag(currentFlag, nextPole)) {
+                                isNext = 2;
+                            }
+                        }
+                    }
+
+                    if (isNext != 0) {
+                        flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), FLAG_SIZE);
+                        switch (isNext) {
+                        case 1:
+                            if (nextPole.isDisplayed()) {
+                                arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
+                            } else {
+                                arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
+                            }
+                            break;
+
+                        case 2:
+                            arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
+                            break;
+
+                        default:
+                            ExLog.i(getContext(), TAG, "unknown flag");
+                        }
+                        timer = TimeUtils.formatDuration(now, poleState.getNextStateValidFrom());
+                    }
                 }
-                flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
-                race_flag.setVisibility(View.VISIBLE);
             }
+        } else {
+            TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
+            if (now.before(flagDown)) {
+                flag = FlagsResources.getFlagDrawable(getContext(), Flags.XRAY.name(), FLAG_SIZE);
+                arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
+                timer = TimeUtils.formatDuration(now, flagDown);
+            }
+        }
+        if (timer != null) {
+            timer = timer.replace("-", "");
+        }
+        showFlag(flag, arrow, timer);
+    }
+
+    private boolean isNextFlag(Flags flag, FlagPole pole) {
+        return pole != null && flag.equals(pole.getUpperFlag());
+    }
+
+    private void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
+        if (flag != null && arrow != null && timer != null) {
+            current_flag.setImageDrawable(flag);
+            arrow_direction.setImageDrawable(arrow);
+            flag_timer.setText(timer);
+            race_flag.setVisibility(View.VISIBLE);
         }
     }
 

@@ -15,9 +15,9 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
  */
 public class BaseActivity extends SendingServiceAwareActivity {
     private static final String TAG = BaseActivity.class.getName();
-    
+
     protected AppPreferences preferences;
-    
+
     @Override
     protected int getOptionsMenuResId() {
         return R.menu.options_menu;
@@ -32,30 +32,25 @@ public class BaseActivity extends SendingServiceAwareActivity {
         super.onCreate(savedInstanceState);
         this.preferences = AppPreferences.on(getApplicationContext());
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS");
-                intent = new Intent(this, PreferenceActivity.class);
-                startActivity(intent);
-                return true;
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS");
+            intent = new Intent(this, PreferenceActivity.class);
+            startActivity(intent);
+            return true;
 
-            case R.id.options_menu_reload:
-                ExLog.i(this, TAG, "Clicked RESET");
-                final boolean result = onReset();
-                return result;
+        case R.id.options_menu_info:
+            ExLog.i(this, TAG, "Clicked INFO");
+            intent = new Intent(this, SystemInformationActivity.class);
+            startActivity(intent);
+            return true;
 
-            case R.id.options_menu_info:
-                ExLog.i(this, TAG, "Clicked INFO");
-                intent = new Intent(this, SystemInformationActivity.class);
-                startActivity(intent);
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -64,10 +59,10 @@ public class BaseActivity extends SendingServiceAwareActivity {
         super.onPause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
-    
+
     /**
      * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then
-     * fades this activity. 
+     * fades this activity.
      */
     protected boolean onReset() {
         resetDataManager();
@@ -83,7 +78,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
     @Override
     public void onResume() {
         super.onResume();
-        
+
         preferences = AppPreferences.on(this);
         if (preferences.wakelockEnabled()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
