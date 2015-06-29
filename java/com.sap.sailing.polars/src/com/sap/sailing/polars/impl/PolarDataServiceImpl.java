@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
@@ -204,6 +205,16 @@ public class PolarDataServiceImpl implements PolarDataService {
                 competitorPositionChanged(fix, competitor, trackedRace);
             }
         }
+    }
+
+    @Override
+    public void registerListener(BoatClass boatClass, PolarsChangedListener listener) {
+        polarDataMiner.registerListener(boatClass, listener);
+    }
+
+    @Override
+    public void unregisterListener(BoatClass boatClass, PolarsChangedListener listener) {
+        polarDataMiner.unregisterListener(boatClass, listener);
     }
 
 }

@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@GwtIncompatible
 public class NextRaceFinder implements RaceCallback {
     
     private final TimePoint now = MillisecondsTimePoint.now();

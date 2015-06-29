@@ -15,6 +15,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -105,23 +106,28 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      * tracker by calling {@link #receivedTimingData(String, String, List)}.
      */
     private final TMDMessageQueue tmdMessageQueue;
+
+    private final RaceLogResolver raceLogResolver;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String raceName, String raceDescription, BoatClass boatClass,
             String hostname, int port, StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, raceID,
                 boatClass, trackedRegattaRegistry), raceID, raceName,
                 raceDescription, boatClass, hostname, port, startList, windStore, gpsFixStore, domainFactory, factory, trackedRegattaRegistry,
-                delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+                raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
     }
 
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList,
-            WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription,
+            BoatClass boatClass, String hostname, int port, StartList startList, WindStore windStore,
+            GPSFixStore gpsFixStore, DomainFactory domainFactory, SwissTimingFactory factory,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException, UnknownHostException, IOException,
+            ParseException {
         super();
+        this.raceLogResolver = raceLogResolver;
         this.tmdMessageQueue = new TMDMessageQueue(this);
         this.regatta = regatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceName, raceDescription, boatClass);
@@ -475,7 +481,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         // we already know our single RaceDefinition
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
-                }, useInternalMarkPassingAlgorithm);
+                }, useInternalMarkPassingAlgorithm, raceLogResolver);
         logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
     }
     

@@ -84,7 +84,14 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
-        this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore) {
+            private static final long serialVersionUID = 4082392360832548953L;
+
+            @Override
+            public RaceColumn getRaceColumnByName(String raceColumnName) {
+                return getRaceColumnByName(raceColumnName);
+            }
+        };
         this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
     }
 
@@ -172,6 +179,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (raceColumn != null) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 raceLogStore.removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                if (raceColumn.getTrackedRace(fleet) != null) {
+                    raceColumn.getTrackedRace(fleet).detachRaceExecutionOrderProvider(raceExecutionOrderProvider);
+                }
             }
             races.remove(raceColumn);
             getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);

@@ -11,6 +11,7 @@ import com.sap.sse.gwt.client.DefaultRule_1_0n;
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
+    String manage2Sail();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
@@ -1082,6 +1083,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String photos();
     String videos();
     String image();
+    String images();
     String video();
     String flagImageURL();
     String imageURLs();
@@ -1163,7 +1165,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     @Override
     String errorCommunicatingWithServer();
     String userManagement();
-    String structureImportUrls();
+    String regattaStructureImport();
     String filteredBy();
     String filterBy();
     String editSeries();
@@ -1297,6 +1299,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceIsCanceled();
     String raceIsPostponed();
     String startingInMinutes(@PluralCount(DefaultRule_0_1_n.class) int minutes);
+    String latestNews();
     String showCompetitorTimeOnTimeFactorColumn();
     String showCompetitorTimeOnDistanceAllowanceColumn();
     String rankingMetric();
@@ -1316,4 +1319,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
+    String resultsUpdate();
+    String competitorWonRace(String competitorName);
+    String now();
+    String minutesAgo(String minutes);
+    String hoursAgo(String hours);
 }

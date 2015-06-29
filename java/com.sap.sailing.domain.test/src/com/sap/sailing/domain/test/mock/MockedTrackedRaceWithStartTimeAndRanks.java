@@ -646,9 +646,4 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
     }
-
-    @Override
-    public boolean takesWindFix(Wind wind) {
-        return false;
-    }
 }

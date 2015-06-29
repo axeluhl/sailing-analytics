@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,18 +17,21 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
@@ -48,7 +50,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class StructureImportManagementPanel extends FlowPanel implements RegattaStructureProvider {
+public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -58,7 +60,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
     private final BusyIndicator busyIndicator;
     private TextBox jsonURLTextBox;
     private TextBox eventIDTextBox;
-
+    private CaptionPanel regattaImportPanel;
     private Button listRegattasButton;
     private Button importDetailsButton;
     private VerticalPanel editSeriesPanel;
@@ -104,7 +106,12 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         this.regattaListComposite = new StructureImportListComposite(this.sailingService, new RegattaSelectionModel(
                 true), this.regattaRefresher, this, this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
-        createUI();
+
+        VerticalPanel mainPanel = new VerticalPanel();
+        setWidget(mainPanel);
+        mainPanel.setWidth("100%");
+
+        createUI(mainPanel);
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -115,12 +122,10 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         regattaStructureGrid = new FlexTable();
     }
 
-    private void createUI() {
+    private void createUI(VerticalPanel mainPanel) {        
         final Panel progressPanel = new FlowPanel();
         progressPanel.add(busyIndicator);
-        Grid URLgrid = new Grid(2, 2);
-        Label eventIDLabel = new Label(stringMessages.event() + ":");
-        Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
+
         eventIDTextBox = new TextBox();
         eventIDTextBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -160,33 +165,39 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                 listRegattasAndTheirStructures();
             }
         });
-        VerticalPanel vp = new VerticalPanel();
 
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        URLgrid.setWidget(0, 0, eventIDLabel);
-        URLgrid.setWidget(0, 1, eventIDTextBox);
-        URLgrid.setWidget(1, 0, jsonURLLabel);
-        URLgrid.setWidget(1, 1, jsonURLTextBox);
-        vp.add(URLgrid);
-        vp.add(buttonPanel);
-        buttonPanel.add(listRegattasButton);
-        buttonPanel.add(importDetailsButton);
-        Grid grid = new Grid(1, 1);
-        vp.add(grid);
+        Grid eventURLGrid = new Grid(3, 2);
+        eventURLGrid.setWidget(0, 0, new Label(stringMessages.manage2Sail() + " " + stringMessages.event() + " " + stringMessages.id() + ":"));
+        eventURLGrid.setWidget(0, 1, eventIDTextBox);
+        eventURLGrid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
+        eventURLGrid.setWidget(1, 1, jsonURLTextBox);
+        eventURLGrid.setWidget(2, 1, listRegattasButton);
 
-        grid.setWidget(0, 0, regattaListComposite);
-        grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
-        grid.getColumnFormatter().getElement(0/** 1 */).getStyle().setPaddingTop(2.0, Unit.EM);
+        mainPanel.add(progressPanel);
+        mainPanel.add(eventURLGrid);
+        
+        regattaImportPanel = new CaptionPanel(stringMessages.manage2Sail() + " " + stringMessages.event());
+        mainPanel.add(regattaImportPanel);
+        VerticalPanel regattaImportContentPanel = new VerticalPanel();
+        regattaImportPanel.setContentWidget(regattaImportContentPanel);
+
         editSeriesPanel = new VerticalPanel();
-        add(progressPanel);
-        add(vp);
-        add(editSeriesPanel);
+
+        HorizontalPanel hPanel = new HorizontalPanel();
+        hPanel.setSpacing(10);
+        hPanel.add(regattaListComposite);
+        hPanel.setCellWidth(regattaListComposite, "50%");
+        hPanel.add(editSeriesPanel);
+        hPanel.setCellWidth(editSeriesPanel, "50%");
+        
+        regattaImportContentPanel.add(hPanel);
+        regattaImportContentPanel.add(importDetailsButton);
     }
 
     /**
      * Adds an event selector and a "create new event" button to the {@link #editSeriesPanel} in its first row
      */
-    private void createEventSelectionAndCreateEventButtonUI() {
+    private Widget createEventSelectionAndCreateEventButtonUI() {
         Grid grid = new Grid(1, 2);
         sailingEventsListBox = new ListBox();
         sailingEventsListBox.setMultipleSelect(false);
@@ -222,7 +233,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                 }
             }
         });
-
+        return grid;
     }
 
     private void openEventCreateDialog() {
@@ -246,9 +257,9 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
             courseAreaNames.add(courseAreaDTO.getName());
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
-                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), 
+                newEvent.getImages(), newEvent.getVideos(),
+                new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(stringMessages.errorTryingToCreateNewEvent(newEvent.getName(), t.getMessage()));
@@ -324,6 +335,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
         result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length in meters */ 5);
         result.series = regatta.series;
+        result.rankingMetricType = RankingMetrics.ONE_DESIGN;
         return result;
     }
 

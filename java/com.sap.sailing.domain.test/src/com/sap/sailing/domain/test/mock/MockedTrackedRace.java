@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -462,6 +464,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
                         return null;
                     }
+
+                    @Override
+                    public RaceColumn getRaceColumnByName(String raceColumnName) {
+                        return null;
+                    }
                 };
             }
 
@@ -510,7 +517,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
                     WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator) {
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator, RaceLogResolver raceLogResolver) {
                 return null;
             }
 
@@ -978,10 +985,5 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public RankingMetric getRankingMetric() {
         return null;
-    }
-
-    @Override
-    public boolean takesWindFix(Wind wind) {
-        return false;
     }
 }

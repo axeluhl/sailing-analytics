@@ -135,6 +135,9 @@
   color: #ccc;
   font-weight: 700;
 }
+.eventregattarace_racetime {
+  white-space: nowrap;
+}
 .eventregattarace_flag {
   display: none;
   width: 9%;

@@ -7,6 +7,7 @@ import java.util.Collections;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -33,8 +34,8 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     private final static Flags startmodeFlag = Flags.PAPA;
     
     public LeagueRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, LeagueConfiguration configuration) {
-        super(raceLog, author, factory, configuration);
+            RaceLogEventFactory factory, LeagueConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, factory, configuration, raceLogResolver);
         update();
     }
 

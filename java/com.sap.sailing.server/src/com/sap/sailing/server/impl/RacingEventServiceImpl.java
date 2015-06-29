@@ -51,6 +51,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -87,6 +88,7 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -132,8 +134,10 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -155,6 +159,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
@@ -207,7 +212,11 @@ import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
@@ -538,7 +547,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        loadStoredEvents();
+        
+        final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
@@ -546,6 +556,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
+
+        // Stores all events which run through a data migration 
+        // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
+        for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
+            if (eventAndRequireStoreFlag.getB()) {
+                mongoObjectFactory.storeEvent(eventAndRequireStoreFlag.getA());
+            }
+        }
     }
 
     @Override
@@ -632,13 +650,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
-    private void loadStoredEvents() {
-        for (Event event : domainObjectFactory.loadAllEvents()) {
+    private Iterable<Pair<Event, Boolean>> loadStoredEvents() {
+        Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = domainObjectFactory.loadAllEvents(); 
+        for (Pair<Event, Boolean> eventAndFlag : loadedEventsWithRequireStoreFlag) {
+            Event event = eventAndFlag.getA();
             if (event.getId() != null)
                 eventsById.put(event.getId(), event);
         }
+        return loadedEventsWithRequireStoreFlag;
     }
-
+    
     private void loadLinksFromEventsToLeaderboardGroups() {
         domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */this, /* leaderboardGroupResolver */
                 this);
@@ -1317,10 +1338,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
-                    tracker = params.createRaceTracker(this, windStore, gpsFixStore);
+                    tracker = params.createRaceTracker(this, windStore, gpsFixStore, /* raceLogResolver */ this);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
-                    tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore);
+                    tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore, /* raceLogResolver */ this);
                     assert tracker.getRegatta() == regatta;
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
@@ -1463,7 +1484,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator);
+                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -2355,18 +2376,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
 
-        logger.info("Serializing events...");
-        oos.writeObject(eventsById);
-        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
-        for (Event event : eventsById.values()) {
-            logoutput.append(String.format("%3s\n", event.toString()));
-        }
-
         logger.info("Serializing regattas...");
         oos.writeObject(regattasByName);
         logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        logger.info("Serializing events...");
+        oos.writeObject(eventsById);
+        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
 
         logger.info("Serializing regattas observed...");
@@ -2422,18 +2443,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // de-serialization; this will cause all classes to be visible that this bundle
         // (com.sap.sailing.server) can see
         StringBuffer logoutput = new StringBuffer();
-        logger.info("Reading all events...");
-        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
-        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
-        for (Event event : eventsById.values()) {
-            logoutput.append(String.format("%3s\n", event.toString()));
-        }
-
         logger.info("Reading all regattas...");
         regattasByName.putAll((Map<String, Regatta>) ois.readObject());
         logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+
+        logger.info("Reading all events...");
+        eventsById.putAll((Map<Serializable, Event>) ois.readObject());
+        logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
         }
 
         // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
@@ -2485,6 +2506,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Reading competitors...");
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
+            // the following should actually be redundant because during de-serialization the Competitor objects,
+            // whose classes implement IsManagedByCache, should already have been got/created from/in the
+            // competitor store
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
                     dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                     dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
@@ -2511,6 +2535,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
             regattaImpl.addRaceColumnListener(raceLogReplicator);
+        }
+        // re-establish RaceLogResolver references to this RacingEventService in all TrackedRace instances
+        for (DynamicTrackedRegatta trackedRegatta : regattaTrackingCache.values()) {
+            trackedRegatta.lockTrackedRacesForRead();
+            try {
+                for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                    ((TrackedRaceImpl) trackedRace).setRaceLogResolver(this);
+                }
+            } finally {
+                trackedRegatta.unlockTrackedRacesAfterRead();
+            }
         }
         logger.info(logoutput.toString());
     }
@@ -2572,13 +2607,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
-                id, /* imageURLs */Collections.<URL> emptyList(),
-                /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(), /* logoImageURL */
-                null, /* officialWebsiteURL */null);
-        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, /* imageURLs */
-        id, Collections.<URL> emptyList(),
-        /* videoURLs */Collections.<URL> emptyList(), /* sponsorImageURLs */Collections.<URL> emptyList(),
-        /* logoimageURL */null, /* officialWebsiteURLAsString */null));
+                id, /* officialWebsiteURL */null, /* images */Collections.<ImageDescriptor> emptyList(),
+                /* videos */Collections.<VideoDescriptor> emptyList());
+        replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, id,
+                /* officialWebsiteURLAsString */null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
         return result;
     }
 
@@ -2589,16 +2621,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, Iterable<URL> imageURLs,
-            Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL) {
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Iterable<ImageDescriptor> images,
+            Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
-        result.setImageURLs(imageURLs);
-        result.setVideoURLs(videoURLs);
-        result.setSponsorImageURLs(sponsorImageURLs);
-        result.setLogoImageURL(logoImageURL);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setImages(images);
+        result.setVideos(videos);
         return result;
     }
 
@@ -2614,7 +2644,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
-            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2637,10 +2667,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setLogoImageURL(logoImageURL);
-        event.setImageURLs(imageURLs);
-        event.setVideoURLs(videoURLs);
-        event.setSponsorImageURLs(sponsorImageURLs);
+        event.setImages(images);
+        event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         // to keep changes minimial
         mongoObjectFactory.storeEvent(event);
@@ -2904,16 +2932,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             String authorName, int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime,
             RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null) {
-            RaceState state = RaceStateImpl.create(raceLog, new LogEventAuthorImpl(authorName, authorPriority));
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final TimePoint result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            RaceState state = RaceStateImpl.create(/* race log resolver */ this, raceLog, new LogEventAuthorImpl(authorName, authorPriority));
             if (passId > raceLog.getCurrentPassId()) {
                 state.setAdvancePass(logicalTimePoint);
             }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
             state.forceNewStartTime(logicalTimePoint, startTime);
-            return state.getStartTime();
+            result = state.getStartTime();
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
@@ -2932,12 +2964,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(
             String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            return new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
-                    raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Triple<TimePoint, Integer, RacingProcedureType> result;
+        if (leaderboard instanceof HasRegattaLike && raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
+            result = new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
+                raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     private Iterable<WindTrackerFactory> getWindTrackerFactories() {
@@ -3187,9 +3223,57 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
         final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
         final List<Competitor> result = new ArrayList<>();
-        Util.addAll(trackedRace.getRace().getCompetitors(), result);
-        result.sort((c1, c2) -> rankingInfo.getCompetitorRankingInfo().apply(c2).getWindwardDistanceSailed().compareTo(
-                rankingInfo.getCompetitorRankingInfo().apply(c1).getWindwardDistanceSailed()));
+        final Map<Competitor, Distance> windwardDistanceSailedPerCompetitor = new HashMap<>();
+        for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            result.add(competitor);
+            final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
+            windwardDistanceSailedPerCompetitor.put(competitor, competitorRankingInfo == null ? null : competitorRankingInfo.getWindwardDistanceSailed());
+        }
+        final Comparator<Distance> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
+        result.sort((c1, c2) -> durationComparatorNullsLast.compare(windwardDistanceSailedPerCompetitor.get(c2),
+                                windwardDistanceSailedPerCompetitor.get(c1)));
+        return result;
+    }
+
+    /**
+     * A {@link SimpleRaceLogIdentifier} in particular has a {@link SimpleRaceLogIdentifier#getRegattaLikeParentName()}
+     * which identifies either a regatta by name or a flexible leaderboard by name. Here is why this can luckily be
+     * resolved unanimously: A regatta leaderboard always uses as its name the regatta name (see
+     * {@link RegattaImpl#getName()}). Trying to {@link RegattaLeaderboardImpl#setName(String) set} the regatta leaderboard's
+     * name can only update its {@link Leaderboard#getDisplayName() display name}. Therefore, regatta leaderboards are always
+     * keyed in {@link #leaderboardsByName} by their regatta's name. Thus, no flexible leaderboard can have a regatta's name
+     * as its name, and therefore leaderboard names <em>and</em> regatta names are unitedly unique.
+     */
+    @Override
+    public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
+        final RaceLog result;
+        final IsRegattaLike regattaLike;
+        final Regatta regatta = regattasByName.get(identifier.getRegattaLikeParentName());
+        if (regatta != null) {
+            regattaLike = regatta;
+        } else {
+            final Leaderboard leaderboard = leaderboardsByName.get(identifier.getRegattaLikeParentName());
+            if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
+                regattaLike = (FlexibleLeaderboard) leaderboard;
+            } else {
+                regattaLike = null;
+            }
+        }
+        if (regattaLike != null) {
+            final RaceColumn raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
+                if (fleet != null) {
+                    result = raceColumn.getRaceLog(fleet);
+                } else {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
         return result;
     }
 }

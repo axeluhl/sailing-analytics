@@ -33,6 +33,7 @@ public interface EventRegattaRacesResources extends ClientBundle {
         String eventregattarace_details();
         String eventregattarace_name();
         String eventregattarace_nameshort();
+        String eventregattarace_racetime();
         String eventregattarace_flag();
         String eventregattarace_wind();
         String eventregattarace_wind_strength();

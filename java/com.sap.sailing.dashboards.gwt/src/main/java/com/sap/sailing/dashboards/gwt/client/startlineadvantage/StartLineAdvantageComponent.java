@@ -30,7 +30,6 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
         this.header.setInnerText(stringConstants.dashboardStartlineAdvantageByGeometry());
         this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_header());
-        
         liveAveragePanel.getElement().addClassName(
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_liveAveragePanel());
         livePanel.getElement().addClassName(

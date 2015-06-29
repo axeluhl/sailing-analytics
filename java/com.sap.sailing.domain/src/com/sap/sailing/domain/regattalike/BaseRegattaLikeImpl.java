@@ -14,7 +14,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sse.common.Duration;
 
-public class BaseRegattaLikeImpl implements IsRegattaLike {
+public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
     private static final long serialVersionUID = -5629172342837950344L;
     private final RegattaLog regattaLog;
     private final RegattaLikeIdentifier identifier;

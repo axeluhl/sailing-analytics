@@ -22,6 +22,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
@@ -104,6 +105,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -112,6 +114,8 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
@@ -514,6 +518,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         serverCollection.remove(query);
     }
     
+    /**
+     * StoreEvent() uses some deprecated methods of event to keep backward compatibility.
+     */
+    @SuppressWarnings("deprecation")
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
@@ -546,6 +554,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             sponsorImageURLs.add(sponsorImageURL.toString());
         }
         eventDBObject.put(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name(), sponsorImageURLs);
+        BasicDBList images = new BasicDBList();
+        for (ImageDescriptor image : event.getImages()) {
+            DBObject imageObject = createImageObject(image);
+            images.add(imageObject);
+        }
+        eventDBObject.put(FieldNames.EVENT_IMAGES.name(), images);
+        BasicDBList videos = new BasicDBList();
+        for (VideoDescriptor video: event.getVideos()) {
+            DBObject videoObject = createVideoObject(video);
+            videos.add(videoObject);
+        }
+        eventDBObject.put(FieldNames.EVENT_VIDEOS.name(), videos);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
         // now store the links to the leaderboard groups
         DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
@@ -1071,6 +1091,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPassChangeEvent.class.getSimpleName());
         return result;
     }
+    
+    private DBObject storeRaceLogDependentStartTimeEvent(RaceLogDependentStartTimeEvent dependentStartTimeEvent) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(dependentStartTimeEvent, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDependentStartTimeEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_REGATTALIKE.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getRegattaLikeParentName());
+        result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_RACECOLUMN.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getRaceColumnName());
+        result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_FLEET.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getFleetName());
+        storeDuration(dependentStartTimeEvent.getStartTimeDifference(), result, FieldNames.RACE_LOG_START_TIME_DIFFERENCE_IN_MS);
+        result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), dependentStartTimeEvent.getNextStatus().name());
+        return result;
+    }
+
+    private void storeDuration(Duration duration, DBObject result, FieldNames fieldName) {
+        if (duration != null) {
+            result.put(fieldName.name(), duration.asMillis());
+        }
+    }
 
     private DBObject storeRaceLogRaceStatusEvent(RaceLogRaceStatusEvent raceStatusEvent) {
         DBObject result = new BasicDBObject();
@@ -1208,7 +1246,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject entry = (DBObject) JSON.parse(json.toString());
         collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
-    
+
     @Override
     public void removeAllCompetitors() {
         logger.info("Removing all persistent competitor info");
@@ -1393,7 +1431,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         result.put(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name(), event.getTimeOnTimeFactor());
-        storeRegattaLogEvent(regattaLikeId, result);
+    }
+    
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDependentStartTimeEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDependentStartTimeEvent(event));
+        return result;
     }
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event) {
@@ -1402,5 +1446,42 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         result.put(FieldNames.REGATTA_LOG_TIME_ON_DISTANCE_SECONDS_ALLOWANCE_PER_NAUTICAL_MILE.name(), event.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         storeRegattaLogEvent(regattaLikeId, result);
+    }
+    
+    private DBObject createImageObject(ImageDescriptor image) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.IMAGE_URL.name(), image.getURL().toString());
+        result.put(FieldNames.IMAGE_LOCALE.name(), image.getLocale() != null ? image.getLocale().toLanguageTag() : null);
+        result.put(FieldNames.IMAGE_TITLE.name(), image.getTitle());
+        result.put(FieldNames.IMAGE_SUBTITLE.name(), image.getSubtitle());
+        result.put(FieldNames.IMAGE_COPYRIGHT.name(), image.getCopyright());
+        result.put(FieldNames.IMAGE_WIDTH_IN_PX.name(), image.getWidthInPx());
+        result.put(FieldNames.IMAGE_HEIGHT_IN_PX.name(), image.getHeightInPx());
+        storeTimePoint(image.getCreatedAtDate(), result, FieldNames.IMAGE_CREATEDATDATE);
+        BasicDBList tags = new BasicDBList();
+        for (String tag : image.getTags()) {
+            tags.add(tag);
+        }
+        result.put(FieldNames.IMAGE_TAGS.name(), tags);
+        return result;
+    }
+
+    private DBObject createVideoObject(VideoDescriptor video) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.VIDEO_URL.name(), video.getURL().toString());
+        result.put(FieldNames.VIDEO_LOCALE.name(), video.getLocale() != null ? video.getLocale().toLanguageTag() : null);
+        result.put(FieldNames.VIDEO_THUMBNAIL_URL.name(), video.getThumbnailURL() != null ? video.getThumbnailURL().toString() : null);
+        result.put(FieldNames.VIDEO_TITLE.name(), video.getTitle());
+        result.put(FieldNames.VIDEO_SUBTITLE.name(), video.getSubtitle());
+        result.put(FieldNames.VIDEO_MIMETYPE.name(), video.getMimeType() != null ? video.getMimeType().name() : null);
+        result.put(FieldNames.VIDEO_COPYRIGHT.name(), video.getCopyright());
+        result.put(FieldNames.VIDEO_LENGTH_IN_SECONDS.name(), video.getLengthInSeconds());
+        storeTimePoint(video.getCreatedAtDate(), result, FieldNames.VIDEO_CREATEDATDATE);
+        BasicDBList tags = new BasicDBList();
+        for (String tag : video.getTags()) {
+            tags.add(tag);
+        }
+        result.put(FieldNames.VIDEO_TAGS.name(), tags);
+        return result;
     }
 }

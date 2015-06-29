@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -89,6 +90,12 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.ImageDescriptorImpl;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.common.media.VideoDescriptorImpl;
 
 public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest {
     private static final Logger logger = Logger.getLogger(TestStoringAndLoadingEventsAndRegattas.class.getName());
@@ -137,14 +144,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg1);
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
-        event.addImageURL(new URL("http://some.host/with/some/file1.jpg"));
-        event.addImageURL(new URL("http://some.host/with/some/file2.jpg"));
-        event.addVideoURL(new URL("http://some.host/with/some/file1.mp4"));
-        event.addVideoURL(new URL("http://some.host/with/some/file2.mp4"));
-        event.addSponsorImageURL(new URL("http://some.host/with/some/file4.mp4"));
-        event.addSponsorImageURL(new URL("http://some.host/with/some/file5.mp4"));
         event.setOfficialWebsiteURL(new URL("http://official.website.com"));
-        event.setLogoImageURL(new URL("http://official.logo.com"));
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -169,7 +169,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(eventName, loadedEvent.getName());
         assertEquals(eventDescription, loadedEvent.getDescription());
         assertEquals(event.getOfficialWebsiteURL(), loadedEvent.getOfficialWebsiteURL());
-        assertEquals(event.getLogoImageURL(), loadedEvent.getLogoImageURL());
         assertEquals(2, Util.size(loadedEvent.getLeaderboardGroups()));
         Iterator<LeaderboardGroup> lgIter = loadedEvent.getLeaderboardGroups().iterator();
         assertSame(lg1, lgIter.next());
@@ -182,9 +181,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         for (CourseArea loadedCourseArea : loadedVenue.getCourseAreas()) {
             assertEquals(courseAreaNames[i++], loadedCourseArea.getName());
         }
-        assertTrue("image URLs "+loadedEvent.getImageURLs()+" but expected "+event.getImageURLs(), Util.equals(event.getImageURLs(), loadedEvent.getImageURLs()));
-        assertTrue("video URLs "+loadedEvent.getVideoURLs()+" but expected "+event.getVideoURLs(), Util.equals(event.getVideoURLs(), loadedEvent.getVideoURLs()));
-        assertTrue("sponsor image URLs "+loadedEvent.getSponsorImageURLs()+" but expected "+event.getSponsorImageURLs(), Util.equals(event.getSponsorImageURLs(), loadedEvent.getSponsorImageURLs()));
     }
     
     @Test
@@ -218,6 +214,155 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(loadedRegatta.getEndDate(), regattaEndDate);
     }
 
+    @Test
+    public void testLoadStoreSimpleEventWithImages() throws MalformedURLException {
+        final URL imageURL = new URL("http://some.host/with/some/file2.jpg");
+        final String copyright = "copyright by Alex";
+        final String imageTitle = "My image title";
+        final String imageSubtitle = "My image subtitle";
+        final Integer imageWidth = 500;
+        final Integer imageHeight = 300;
+        final TimePoint createdAt = MillisecondsTimePoint.now(); 
+        final String eventName = "Event Name";
+        final String venueName = "Venue Name";
+        final String courseAreaName = "Alpha";
+        final Venue venue = new VenueImpl(venueName);
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
+        venue.addCourseArea(courseArea);
+
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
+        
+        ImageDescriptor image1 = new ImageDescriptorImpl(imageURL, createdAt);
+        image1.setCopyright(copyright);
+        image1.setSize(imageWidth, imageHeight);
+        image1.setTitle(imageTitle);
+        image1.setSubtitle(imageSubtitle);
+        image1.addTag("Tag1");
+        image1.addTag("Tag2");
+        image1.addTag("Tag3");
+        event.addImage(image1);
+
+        ImageDescriptor image2 = new ImageDescriptorImpl(new URL("http://some.host/with/some/file2.jpg"), MillisecondsTimePoint.now());
+        image2.setCopyright("copyright");
+        event.addImage(image2);
+
+        mof.storeEvent(event);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        final Event loadedEvent = dof.loadEvent(eventName);
+        assertEquals(2, Util.size(loadedEvent.getImages()));
+        ImageDescriptor loadedImage1 = loadedEvent.getImages().iterator().next();
+        assertNotNull(loadedImage1);
+        assertEquals(imageURL, loadedImage1.getURL());
+        assertEquals(copyright, loadedImage1.getCopyright());
+        assertEquals(copyright, loadedImage1.getCopyright());
+        assertEquals(imageTitle, loadedImage1.getTitle());
+        assertEquals(imageSubtitle, loadedImage1.getSubtitle());
+        assertEquals(createdAt, loadedImage1.getCreatedAtDate());
+        assertEquals(imageWidth, loadedImage1.getWidthInPx());
+        assertEquals(imageHeight, loadedImage1.getHeightInPx());
+        assertEquals(3, Util.size(loadedImage1.getTags()));
+    }
+
+    @Test
+    public void testLoadStoreSimpleEventWithVideos() throws MalformedURLException {
+        final URL videoURL = new URL("http://some.host/with/some/video.mpg");
+        final URL videoThumbnailURL = new URL("http://some.host/with/some/video_thumbnail.jpg");
+        final Locale locale = Locale.GERMAN;
+        final Integer videoLengthInSeconds = 2  * 60 * 60 * 1000; // 2h 
+        final MimeType mimeType = MimeType.mp4;
+        final String copyright = "copyright by Don";
+        final String videoTitle = "My video title";
+        final String videoSubtitle = "My video subtitle";
+        final TimePoint createdAt = MillisecondsTimePoint.now(); 
+        final String eventName = "Event Name";
+        final String venueName = "Venue Name";
+        final String courseAreaName = "Alpha";
+        final Venue venue = new VenueImpl(venueName);
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
+        venue.addCourseArea(courseArea);
+
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
+        
+        VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, mimeType, createdAt);
+        video1.setCopyright(copyright);
+        video1.setTitle(videoTitle);
+        video1.setLocale(locale);
+        video1.setSubtitle(videoSubtitle);
+        video1.setThumbnailURL(videoThumbnailURL);
+        video1.setLengthInSeconds(videoLengthInSeconds);
+        video1.addTag("Tag1");
+        video1.addTag("Tag2");
+        video1.addTag("Tag3");
+        event.addVideo(video1);
+
+        VideoDescriptor video2 = new VideoDescriptorImpl(new URL("http://some.host/with/some/file2.ogg"), MimeType.ogg, MillisecondsTimePoint.now());
+        video2.setCopyright("copyright");
+        event.addVideo(video2);
+
+        mof.storeEvent(event);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        final Event loadedEvent = dof.loadEvent(eventName);
+        assertEquals(2, Util.size(loadedEvent.getVideos()));
+        VideoDescriptor loadedVideo1 = loadedEvent.getVideos().iterator().next();
+        assertNotNull(loadedVideo1);
+        assertEquals(videoURL, loadedVideo1.getURL());
+        assertEquals(videoThumbnailURL, loadedVideo1.getThumbnailURL());
+        assertEquals(videoLengthInSeconds, loadedVideo1.getLengthInSeconds());
+        assertEquals(copyright, loadedVideo1.getCopyright());
+        assertEquals(locale, loadedVideo1.getLocale());
+        assertEquals(videoTitle, loadedVideo1.getTitle());
+        assertEquals(videoSubtitle, loadedVideo1.getSubtitle());
+        assertEquals(createdAt, loadedVideo1.getCreatedAtDate());
+        assertEquals(3, Util.size(loadedVideo1.getTags()));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    /**
+     * We expected that the migration code creates also an image URL for each image we create.
+     * Images with the 'Sponsor' tag should create a corresponding sponsor image URL 
+     * Videos should create a video URL.
+     */
+    public void testLoadStoreSimpleEventWithImageAndVideoURLMigration() throws MalformedURLException {
+        final URL imageURL = new URL("http://some.host/with/some/bla.jpg");
+        final URL sponsorImageURL = new URL("http://some.host/with/some/sponsor.jpg");
+        final URL videoURL = new URL("http://some.host/with/some/video.mpg");
+        final TimePoint createdAt = MillisecondsTimePoint.now(); 
+        final String eventName = "Event Name";
+        final Venue venue = new VenueImpl("My Venue");
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alfa");
+        venue.addCourseArea(courseArea);
+
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
+        
+        ImageDescriptor image1 = new ImageDescriptorImpl(imageURL, createdAt);
+        image1.addTag(MediaTagConstants.GALLERY);
+        event.addImage(image1);
+
+        ImageDescriptor image2 = new ImageDescriptorImpl(sponsorImageURL, createdAt);
+        event.addImage(image2);
+        image2.addTag(MediaTagConstants.SPONSOR);
+
+        VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, MimeType.mp4, createdAt);
+        event.addVideo(video1);
+
+        mof.storeEvent(event);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        final Event loadedEvent = dof.loadEvent(eventName);
+        assertEquals(2, Util.size(loadedEvent.getImages()));
+        assertEquals(1, Util.size(loadedEvent.getVideos()));
+        assertEquals(1, Util.size(loadedEvent.getImageURLs()));
+        assertEquals(1, Util.size(loadedEvent.getSponsorImageURLs()));
+        assertEquals(1, Util.size(loadedEvent.getVideoURLs()));
+    }
+    
+    
     @Test
     public void testLoadStoreRegattaConfiguration() {
         

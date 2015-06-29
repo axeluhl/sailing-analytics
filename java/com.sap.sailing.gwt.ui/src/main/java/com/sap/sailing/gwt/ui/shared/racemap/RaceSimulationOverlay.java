@@ -288,6 +288,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta, boolean visible) {
         double offset = 3.0;
+        double crossOffset = 5.0;
         context2d.setFont(textFont);
         if (color != null) {
             drawRectangle(context2d, x, y, color);
@@ -297,12 +298,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             context2d.setLineWidth(3.0);
             context2d.setStrokeStyle("white");
             context2d.beginPath();
-            context2d.moveTo(x + 4.0,y + 4.0);
-            context2d.lineTo(x + rectWidth - 4.0, y + rectHeight - 4.0);
+            context2d.moveTo(x + crossOffset,y + crossOffset);
+            context2d.lineTo(x + rectWidth - crossOffset, y + rectHeight - crossOffset);
             context2d.stroke();
             context2d.beginPath();
-            context2d.moveTo(x + 4.0, y + rectHeight - 4.0);
-            context2d.lineTo(x + rectWidth - 4.0,y + 4.0);
+            context2d.moveTo(x + crossOffset, y + rectHeight - crossOffset);
+            context2d.lineTo(x + rectWidth - crossOffset,y + crossOffset);
             context2d.stroke();
             context2d.setStrokeStyle("black");            
         }

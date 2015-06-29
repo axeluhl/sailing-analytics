@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -10,12 +11,14 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.gwt.ui.shared.media.MediaUtils;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
+    private static final Collection<String> rankedTags = Arrays.asList(MediaTagConstants.LIVESTREAM, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
+    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
+    
     private UUID eventId;
     
     public GetEventOverviewStageAction() {
@@ -40,24 +43,21 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         }
         
         // TODO get correct message
-        return new ResultWithTTL<>(ttl, new EventOverviewStageDTO(null, getStageContent(context, event, state, now)));
+        EventOverviewStageDTO stage = new EventOverviewStageDTO(null, getStageContent(context, event, state, now));
+        return new ResultWithTTL<>(ttl, stage);
     }
 
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, MillisecondsTimePoint now) {
         // Simple solution:
-        // P1: Show the last video if available
+        // P1: Show the best matching video if available
         // P2: Show Countdown for upcoming events
         // P3: Show Stage image without Countdown
         
-        Iterable<URL> videoURLs = event.getVideoURLs();
-        for (int i = Util.size(videoURLs) - 1; i >= 0; i--) {
-            // TODO fmittag/pgt: implement locale specific live stream using context.getClientLocaleName() or context.getClientLocale()
-            String videoUrl = Util.get(videoURLs, i).toString();
-            MimeType type = MediaUtils.detectMimeTypeFromUrl(videoUrl);
-            if (type == MimeType.youtube || type == MimeType.vimeo || type == MimeType.mp4) {
-                return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, type, videoUrl);
-            }
+        Collection<String> tags = state == EventState.FINISHED ? rankedTagsFinished : rankedTags;
+        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), tags, true);
+        if(stageVideo != null) {
+            return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, HomeServiceUtil.toVideoDTO(stageVideo));
         }
         String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {

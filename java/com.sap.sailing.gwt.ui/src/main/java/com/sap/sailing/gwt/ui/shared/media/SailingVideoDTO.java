@@ -4,16 +4,14 @@ import java.util.Date;
 
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.common.media.VideoMetadataDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
-public class SailingVideoDTO extends VideoMetadataDTO {
+public class SailingVideoDTO extends VideoDTO {
     
-    private static final long serialVersionUID = 1L;
-
     private EventReferenceDTO eventRef;
 
-    @SuppressWarnings("unused")
-    private SailingVideoDTO() {
+    /** for GWT */
+    protected SailingVideoDTO() {
     }
 
     public SailingVideoDTO(EventReferenceDTO eventRef, String srcReference, MimeType mimeType, Date createdAtDate) {
