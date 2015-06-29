@@ -24,4 +24,6 @@
     <string name="server">Polling</string>
     <string name="server_sync_settings">Polling Interval (seconds)</string>
 
+    <string name="options_menu_checkout">Checkout</string>
+
 </resources>

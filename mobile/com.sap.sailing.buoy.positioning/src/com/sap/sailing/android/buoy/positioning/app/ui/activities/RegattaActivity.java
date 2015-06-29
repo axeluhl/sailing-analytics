@@ -131,6 +131,9 @@ public class RegattaActivity extends AbstractRegattaActivity {
             CheckinManager manager = new CheckinManager(checkinUrl, this);
             manager.callServerAndGenerateCheckinData();
             return true;
+        case R.id.check_out:
+            checkOut();
+            return true;
         case R.id.about:
             AboutDialog aboutDialog = new AboutDialog(this);
             aboutDialog.show();
@@ -166,6 +169,11 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
+    }
+
+    private void checkOut(){
+        DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+        finish();
     }
 
     public String getCheckinDigest() {
