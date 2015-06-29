@@ -26,7 +26,6 @@ public class PingHelper {
             fixJson.put("timestamp", location.getTime());
             fixJson.put("longitude", location.getLongitude());
             fixJson.put("latitude", location.getLatitude());
-            storePingInDatabase(context, location, mark);
 
             String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId());
 
@@ -35,19 +34,21 @@ public class PingHelper {
 
         } catch (JSONException ex) {
             ExLog.i(context, TAG, "Error while building ping json " + ex.getMessage());
-        } catch (GeneralDatabaseHelperException e) {
-            e.printStackTrace();
         }
     }
 
-    public void storePingInDatabase(Context context, Location location, MarkInfo mark)
-            throws GeneralDatabaseHelperException {
+    public Boolean storePingInDatabase(Context context, Location location, MarkInfo mark) {
         MarkPingInfo pingInfo = new MarkPingInfo();
         pingInfo.setMarkId(mark.getId());
         pingInfo.setLatitude("" + location.getLatitude());
         pingInfo.setLongitude("" + location.getLongitude());
         pingInfo.setAccuracy(location.getAccuracy());
         pingInfo.setTimestamp((int) location.getTime());
-        DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
+        try {
+            DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
+        } catch (GeneralDatabaseHelperException e) {
+            return false;
+        }
+        return true;
     }
 }

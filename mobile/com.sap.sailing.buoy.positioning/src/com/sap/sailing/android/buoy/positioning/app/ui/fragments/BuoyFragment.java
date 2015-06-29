@@ -279,23 +279,18 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             int id = v.getId();
             if (id == R.id.marker_set_position_button) {
                 PingHelper helper = new PingHelper();
-                try {
-                    if (lastKnownLocation != null) {
-                        MarkInfo mark = positioningActivity.getMarkInfo();
-                        LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
-                        helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
-                        helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark, PingServerReplyCallback.class);
-                        //Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
-                        ((PositioningActivity) getActivity()).updatePing();
-                        savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                        pingListener.updatePing();
-                        setUpTextUI(lastKnownLocation);
-                        updateMap();
-                    } else {
-                        Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
-                    }
-                } catch (GeneralDatabaseHelperException e) {
-                    e.printStackTrace();
+                if (lastKnownLocation != null) {
+                    MarkInfo mark = positioningActivity.getMarkInfo();
+                    LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
+                    helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
+                    helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark, PingServerReplyCallback.class);
+                    ((PositioningActivity) getActivity()).updatePing();
+                    savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                    pingListener.updatePing();
+                    setUpTextUI(lastKnownLocation);
+                    updateMap();
+                } else {
+                    Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                 }
             } else if (id == R.id.marker_reset_position_button) {
                 // Reset position
