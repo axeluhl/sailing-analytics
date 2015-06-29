@@ -100,7 +100,7 @@ public class CheckinManager {
                 urlData.getCompetitorUrl = urlData.hostWithPort + prefs.getServerCompetitorPath(urlData.competitorId);
             }
         } catch (Exception e) {
-
+            urlData = null;
         }
         return urlData;
     }
