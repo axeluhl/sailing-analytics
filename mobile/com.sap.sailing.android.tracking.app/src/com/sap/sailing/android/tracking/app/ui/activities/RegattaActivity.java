@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -186,7 +188,6 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
 
     @Override
     protected void onResume() {
-        setUpView();
         RegattaFragment regattaFragment = getRegattaFragment();
         if (regattaFragment != null) {
             regattaFragment.setFragmentWatcher(this);
@@ -255,7 +256,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                     try {
                         String teamImageUri = response.getString("imageUri");
                         if (teamImageUri != null) {
-                            new DownloadLeaderboardImageTask(imageView).execute(teamImageUri);
+                            new DownloadLeaderboardImageTask(imageView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,teamImageUri);
                         }
                     }
                     catch (JSONException e) {
@@ -304,7 +305,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         }
         try {
             FileOutputStream fos = new FileOutputStream(pictureFile);
-            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            image.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();
             if (sendToServer) {
                 sendTeamImageToServer(pictureFile);
@@ -480,9 +481,18 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
         String downloadUrl;
+        ProgressDialog dialog;
 
         public DownloadLeaderboardImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(bmImage.getContext(), R.style.Base_Theme_AppCompat_Dialog);
+            dialog.setMessage(getString(R.string.download_team_image_message));
+            dialog.show();
         }
 
         protected Bitmap doInBackground(String... urls) {
@@ -506,6 +516,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             } else {
                 ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
             }
+            dialog.cancel();
         }
     }
 
