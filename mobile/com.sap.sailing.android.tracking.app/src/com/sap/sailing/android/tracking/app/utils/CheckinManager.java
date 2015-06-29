@@ -85,6 +85,7 @@ public class CheckinManager {
             } catch (NullPointerException e) {
                 ExLog.e(activity, TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
                 Toast.makeText(activity, activity.getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
+                prefs.setLastScannedQRCode(null);
                 urlData = null;
             }
             if (urlData != null) {
