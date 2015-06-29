@@ -31,6 +31,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.about_menu, menu);
         return true;
@@ -53,7 +54,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.about_menu;
+        return 0;
     }
 
     public AbstractHomeFragment getHomeFragment() {
