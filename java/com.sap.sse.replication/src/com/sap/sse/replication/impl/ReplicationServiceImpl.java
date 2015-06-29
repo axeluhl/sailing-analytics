@@ -476,7 +476,14 @@ public class ReplicationServiceImpl implements ReplicationService {
      */
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException {
-        logger.info("Starting to replicate from "+master);
+        final Iterable<Replicable<?, ?>> replicables = getReplicables();
+        startToReplicateFrom(master, replicables);
+    }
+    
+    @Override
+    public void startToReplicateFrom(ReplicationMasterDescriptor master, Iterable<Replicable<?, ?>> replicables)
+            throws IOException, ClassNotFoundException, InterruptedException {
+        logger.info("Starting to replicate from " + master);
         try {
             registerReplicaWithMaster(master);
         } catch (Exception ex) {
@@ -497,7 +504,6 @@ public class ReplicationServiceImpl implements ReplicationService {
             throw ex;
         }
         logger.info("Connection to exchange successful.");
-        final Iterable<Replicable<?, ?>> replicables = getReplicables();
         URL initialLoadURL = master.getInitialLoadURL(replicables);
         logger.info("Initial load URL is "+initialLoadURL);
         // start receiving messages already now, but start in suspended mode
