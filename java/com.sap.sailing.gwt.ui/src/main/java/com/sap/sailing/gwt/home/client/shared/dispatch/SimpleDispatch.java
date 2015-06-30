@@ -42,7 +42,8 @@ public class SimpleDispatch implements DispatchAsync {
             public void onSuccess(ResultWrapper<R> result) {
                 long clientTimeOnRequestEnd = System.currentTimeMillis();
                 long latency = (clientTimeOnRequestEnd - clientTimeOnRequestStart) / 2;
-                clientServerOffset = result.getCurrentServerTime().getTime() - clientTimeOnRequestEnd - latency;
+                long currentServerTime = result.getCurrentServerTime().getTime() + latency;
+                clientServerOffset = currentServerTime - clientTimeOnRequestEnd;
                 callback.onSuccess(result.getResult());
             }
         });
