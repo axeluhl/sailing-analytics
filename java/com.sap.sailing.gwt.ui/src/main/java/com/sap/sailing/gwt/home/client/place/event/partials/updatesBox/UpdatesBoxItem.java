@@ -36,7 +36,7 @@ public class UpdatesBoxItem extends Widget {
     @UiField DivElement messageUi;
     @UiField DivElement timestampUi;
     
-    public UpdatesBoxItem(NewsEntryDTO entry, EventView.Presenter presenter) {
+    public UpdatesBoxItem(NewsEntryDTO entry, Date currentTimestamp, EventView.Presenter presenter) {
         UpdatesBoxResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
@@ -55,7 +55,6 @@ public class UpdatesBoxItem extends Widget {
         }
         
         Date newsTimestamp = entry.getTimestamp();
-        Date currentTimestamp = entry.getCurrentTimestamp();
         if(newsTimestamp == null || currentTimestamp == null) {
             timestampUi.removeFromParent();
         } else {

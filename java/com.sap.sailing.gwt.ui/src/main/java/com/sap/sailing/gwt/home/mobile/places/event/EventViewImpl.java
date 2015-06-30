@@ -86,7 +86,7 @@ public class EventViewImpl extends Composite implements EventView {
     }
     
     private void setupUpdateBox(UUID eventId) {
-        updatesBoxUi = new UpdatesBox(currentPresenter);
+        updatesBoxUi = new UpdatesBox(currentPresenter, refreshManager);
         if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
             refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(eventId, 2));
         } else {
