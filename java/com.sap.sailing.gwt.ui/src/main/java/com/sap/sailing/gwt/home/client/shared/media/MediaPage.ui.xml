@@ -60,6 +60,7 @@
 	.videoPlayerBox {
 		position: relative;
 		padding-top: 56.25% !important;
+		height: 0px;
 	}
 	.videoPlayer {
 		position: absolute;
@@ -79,8 +80,10 @@
 						</h3>
 					</header>
 				</div>
-				<div ui:field="videoDisplayOuterBoxUi" class="{res.mediaCss.columns} {style.videoPlayerBox}">
-					<g:SimplePanel ui:field="videoDisplayHolderUi" addStyleNames="{style.videoPlayer}" />
+				<div ui:field="videoDisplayOuterBoxUi" class="{res.mediaCss.columns}">
+					<div class="{style.videoPlayerBox}">
+						<g:SimplePanel ui:field="videoDisplayHolderUi" addStyleNames="{style.videoPlayer}" />
+					</div>
 				</div>
 				<div ui:field="videoListOuterBoxUi" class=" {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="videosListUi" styleName="{style.videoList}"/>
