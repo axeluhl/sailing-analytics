@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.client.shared.dispatch;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -21,9 +19,7 @@ public class SimpleDispatch implements DispatchAsync {
     
 //    private final SailingClientFactory clientFactory;
     
-    private Date lastServerTime;
-    
-    private Date lastClientTime;
+    private long clientServerOffset = 0;
     
     public SimpleDispatch(SailingClientFactory clientFactory) {
 //        this.clientFactory = clientFactory;
@@ -33,7 +29,9 @@ public class SimpleDispatch implements DispatchAsync {
 
     @Override
     public <R extends Result, A extends Action<R>> void execute(A action, final AsyncCallback<R> callback) {
-        dispatchRPC.execute(new RequestWrapper<R, A>(action, LocaleInfo.getCurrentLocale().getLocaleName()), new AsyncCallback<ResultWrapper<R>>() {
+        RequestWrapper<R, A> requestWrapper = new RequestWrapper<R, A>(action, LocaleInfo.getCurrentLocale().getLocaleName());
+        final long clientTimeOnRequestStart = System.currentTimeMillis();
+        dispatchRPC.execute(requestWrapper, new AsyncCallback<ResultWrapper<R>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -42,18 +40,15 @@ public class SimpleDispatch implements DispatchAsync {
 
             @Override
             public void onSuccess(ResultWrapper<R> result) {
-                lastClientTime = new Date();
-                lastServerTime = result.getCurrentServerTime();
+                long clientTimeOnRequestEnd = System.currentTimeMillis();
+                long latency = (clientTimeOnRequestEnd - clientTimeOnRequestStart) / 2;
+                clientServerOffset = result.getCurrentServerTime().getTime() - clientTimeOnRequestEnd - latency;
                 callback.onSuccess(result.getResult());
             }
         });
     }
 
-    public Date getLastClientTime() {
-        return lastClientTime;
-    }
-    
-    public Date getLastServerTime() {
-        return lastServerTime;
+    public long getClientServerOffset() {
+        return clientServerOffset;
     }
 }
