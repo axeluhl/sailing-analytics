@@ -58,11 +58,11 @@ public class GetEventViewAction implements Action<EventViewDTO> {
         
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                    continue;
+                }
                 if(leaderboard instanceof RegattaLeaderboard) {
                     Regatta regatta = context.getRacingEventService().getRegattaByName(leaderboard.getName());
-                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                        continue;
-                    }
                     
                     RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
                     regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
