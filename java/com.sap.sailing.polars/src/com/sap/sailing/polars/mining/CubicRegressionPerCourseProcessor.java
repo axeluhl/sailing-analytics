@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
@@ -25,7 +27,13 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
+
+    private ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
     
+    public CubicRegressionPerCourseProcessor(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
+
     @Override
     public boolean canProcessElements() {
         // TODO Auto-generated method stub
@@ -46,6 +54,12 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
                 }
             }
             regression.addData(fix.getWind(), fix.getAbsoluteAngleToTheWind(), fix.getBoatSpeed());
+            Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
+            if (listenersForBoatClass != null) {
+                for (PolarsChangedListener listener : listenersForBoatClass) {
+                    listener.polarsChanged();
+                }
+            }
         }
     }
     

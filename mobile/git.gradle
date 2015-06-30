@@ -33,6 +33,10 @@ preBuild.doLast {
         git_branch_or_tag = git_tag.toString().trim()
     }
 
+    if (git_branch_or_tag.size() == 0) {
+        git_branch_or_tag = "HEAD"
+    }
+
     def build_time = new Date().toString()
 
     // save the combined build info into assets/build.info file

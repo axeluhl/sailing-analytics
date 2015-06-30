@@ -286,7 +286,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key,
                 R.integer.preference_messageResendIntervalMillis_default);
         if (!success) {
-            ExLog.i(this, "MS", "success");
+            ExLog.i(this, "MS", "!success");
             reportApiConnectivity(APIConnectivity.transmissionError);
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             try {
@@ -302,7 +302,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             reportUnsentGPSFixesCount();
             serviceLogger.onMessageSentFailed();
         } else {
-            ExLog.i(this, "MS", "!success");
+            ExLog.i(this, "MS", "success");
             reportApiConnectivity(APIConnectivity.transmissionSuccess);
             ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {

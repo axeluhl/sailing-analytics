@@ -1,15 +1,17 @@
 package com.sap.sailing.racecommittee.app.domain;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     
@@ -80,4 +82,20 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      *            the retrieved list of mapItems for this race
      */
     void setMapMarkers(List<MapMarker> markers);
+
+    /**
+     * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error message
+     *
+     * @param finishedTime finished time
+     * @return result object
+     */
+    Result setFinishedTime(TimePoint finishedTime);
+
+    /**
+     * sets the finishing time, if the finishing time is after the start time; check the {@link Result} for error message
+     *
+     * @param finishingTime finishing time
+     * @return result object
+     */
+    Result setFinishingTime(TimePoint finishingTime);
 }

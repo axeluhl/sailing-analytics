@@ -1,10 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -12,9 +10,17 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
@@ -119,4 +125,39 @@ public class ManagedRaceImpl implements ManagedRace {
         this.mapMarkers = markers;
     }
 
+    @Override
+    public Result setFinishedTime(TimePoint finishedTime) {
+        Result result = new Result();
+        FinishingTimeFinder ftf = new FinishingTimeFinder(getRaceLog());
+        if (ftf.analyze() != null) {
+            if (finishedTime.after(MillisecondsTimePoint.now())) {
+                result.setError(R.string.error_time_in_future);
+            } else {
+                if (ftf.analyze().before(finishedTime)) {
+                    getState().setFinishedTime(finishedTime);
+                } else {
+                    result.setError(R.string.error_finished_time);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Result setFinishingTime(TimePoint finishingTime) {
+        Result result = new Result();
+        StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRaceLog());
+        if (stf.analyze() != null) {
+            if (finishingTime.after(MillisecondsTimePoint.now())) {
+                result.setError(R.string.error_time_in_future);
+            } else {
+                if (stf.analyze().getStartTime().before(finishingTime)) {
+                    getState().setFinishingTime(finishingTime);
+                } else {
+                    result.setError(R.string.error_finishing_time);
+                }
+            }
+        }
+        return result;
+    }
 }
