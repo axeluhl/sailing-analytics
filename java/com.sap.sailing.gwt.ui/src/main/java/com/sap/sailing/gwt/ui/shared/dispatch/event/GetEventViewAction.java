@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
@@ -25,9 +27,12 @@ import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 
 public class GetEventViewAction implements Action<EventViewDTO> {
+    private static final Logger logger = Logger.getLogger(GetEventViewAction.class.getName());
+
     private UUID eventId;
     
-    public GetEventViewAction() {
+    @SuppressWarnings("unused")
+    private GetEventViewAction() {
     }
 
     public GetEventViewAction(UUID eventId) {
@@ -57,25 +62,29 @@ public class GetEventViewAction implements Action<EventViewDTO> {
         
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if(leaderboard instanceof RegattaLeaderboard) {
-                    Regatta regatta = context.getRacingEventService().getRegattaByName(leaderboard.getName());
-                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, regatta)) {
+                try {
+                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                         continue;
                     }
-                    
-                    RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
-                    regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
-                    regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
-                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
-                    dto.getRegattas().add(regattaDTO);
-                    
-                } else if(leaderboard instanceof FlexibleLeaderboard) {
-                    RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
-                    
-                    regattaDTO.setStartDate(null);
-                    regattaDTO.setEndDate(null);
-                    regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
-                    dto.getRegattas().add(regattaDTO);
+                    if(leaderboard instanceof RegattaLeaderboard) {
+                        Regatta regatta = context.getRacingEventService().getRegattaByName(leaderboard.getName());
+                        
+                        RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                        regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
+                        regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
+                        regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
+                        dto.getRegattas().add(regattaDTO);
+                        
+                    } else if(leaderboard instanceof FlexibleLeaderboard) {
+                        RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                        
+                        regattaDTO.setStartDate(null);
+                        regattaDTO.setEndDate(null);
+                        regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
+                        dto.getRegattas().add(regattaDTO);
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);
                 }
             }
         }
@@ -116,17 +125,5 @@ public class GetEventViewAction implements Action<EventViewDTO> {
         }
 
         return dto;
-    }
-
-    @GwtIncompatible
-    private RegattaMetadataDTO createRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
-        regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
-        regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
-        regattaDTO.setTrackedRacesCount(HomeServiceUtil.calculateTrackedRaceCount(leaderboard));
-        regattaDTO.setBoatClass(HomeServiceUtil.calculateBoatClass(leaderboard));
-        
-        return regattaDTO;
     }
 }

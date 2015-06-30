@@ -30,7 +30,7 @@ public class SimpleRaceLogIdentifierImpl implements SimpleRaceLogIdentifier {
 
     @Override
     public String toString() {
-        return "SimpleRaceLogIdentifier [regattaLikeParentName=" + regattaLikeParentName + ", raceCloumnName=" + raceColumnName
+        return "SimpleRaceLogIdentifier [regattaLikeParentName=" + regattaLikeParentName + ", raceColumnName=" + raceColumnName
                 + ", fleetName=" + fleetName + "]";
     }
 

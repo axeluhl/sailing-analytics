@@ -1,18 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,8 @@ import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
@@ -64,8 +67,6 @@ public class LoginActivity extends BaseActivity
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
-
-    private final int RQS_GooglePlayServices = 1;
 
     private final PositionListFragment positionFragment;
     private View backdrop;
@@ -82,10 +83,8 @@ public class LoginActivity extends BaseActivity
     private UUID mSelectedCourseAreaUUID;
 
     private IntentReceiver mReceiver;
-
-    private ProgressDialog progressDialog;
-
     private ReadonlyDataManager dataManager;
+    private View progressSpinner;
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
@@ -156,7 +155,7 @@ public class LoginActivity extends BaseActivity
         switchToRacingActivity();
     }
 
-    private void switchToRacingActivity(){
+    private void switchToRacingActivity() {
         Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
         intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
         intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
@@ -327,7 +326,6 @@ public class LoginActivity extends BaseActivity
         updateSignInButtonState();
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -336,15 +334,14 @@ public class LoginActivity extends BaseActivity
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        Intent intent = new Intent();
-        intent.setAction(AppConstants.INTENT_ACTION_RESET);
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
         if (!BuildConfig.DEBUG) {
             if (resultCode != ConnectionResult.SUCCESS) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
     }
@@ -359,11 +356,11 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onStop() {
         super.onStop();
-        dismissProgressDialog();
+        dismissProgressSpinner();
     }
 
     private void setupDataManager() {
-        showProgressDialog();
+        showProgressSpinner();
 
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
             .getDeviceIdentifier());
@@ -372,7 +369,8 @@ public class LoginActivity extends BaseActivity
 
             @Override
             public void onLoadFailed(Exception reason) {
-                dismissProgressDialog();
+                dismissProgressSpinner();
+
                 if (reason instanceof FileNotFoundException) {
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
                     ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
@@ -381,21 +379,17 @@ public class LoginActivity extends BaseActivity
                     ExLog.ex(LoginActivity.this, TAG, reason);
                 }
 
-                // Slide up, if events are available
-                if (!dataManager.getDataStore().getEvents().isEmpty()) {
-                    slideUpBackdropDelayed();
-                }
+                slideUpBackdropDelayed();
             }
 
             @Override
             public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                dismissProgressDialog();
+                dismissProgressSpinner();
 
                 // this is our 'global' configuration, let's store it in app preferences
                 PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
 
                 Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
-                // showCourseAreaListFragment(eventId);
                 slideUpBackdropDelayed();
             }
         });
@@ -404,23 +398,22 @@ public class LoginActivity extends BaseActivity
             // always reload the configuration...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
-            dismissProgressDialog();
+            dismissProgressSpinner();
         }
     }
 
-    private void showProgressDialog() {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage(getString(R.string.loading_configuration));
-            progressDialog.setCancelable(false);
-            progressDialog.setIndeterminate(true);
+    private void showProgressSpinner() {
+        if (progressSpinner == null) {
+            progressSpinner = findViewById(R.id.progress_spinner);
         }
-        progressDialog.show();
+        if (progressSpinner != null) {
+            progressSpinner.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void dismissProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
+    private void dismissProgressSpinner() {
+        if (progressSpinner != null && progressSpinner.getVisibility() == View.VISIBLE) {
+            progressSpinner.setVisibility(View.GONE);
         }
     }
 
@@ -450,26 +443,13 @@ public class LoginActivity extends BaseActivity
         if (backdrop.getY() != 0) {
             return;
         }
-        long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
-        final View bottomView = findViewById(R.id.login_listview);
-
-        View title = findViewById(R.id.backdrop_title);
-        View subTitle = findViewById(R.id.backdrop_subtitle);
-        View info = findViewById(R.id.technical_info);
-        View settings = findViewById(R.id.settings_button);
-
-        subTitle.setAlpha(0f);
 
         ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -backdrop.getHeight() + (backdrop.getHeight() / 5));
-        ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
-        ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
-        ObjectAnimator infoAnimation = ObjectAnimator.ofFloat(info, "alpha", 0f, 1f);
-        ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
-
         ValueAnimator heightAnimation = ValueAnimator.ofInt(0, backdrop.getHeight() - (backdrop.getHeight() / 5));
         heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                View bottomView = findViewById(R.id.login_listview);
                 int val = (Integer) valueAnimator.getAnimatedValue();
                 ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
                 layoutParams.height = val;
@@ -477,11 +457,28 @@ public class LoginActivity extends BaseActivity
             }
         });
 
+        Collection<Animator> animators = new ArrayList<>();
+        animators.add(heightAnimation);
+        animators.add(frameAnimation);
+        animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
+        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_subtitle)));
+        animators.add(getAlphaAnimator(findViewById(R.id.refresh_data)));
+        animators.add(getAlphaAnimator(findViewById(R.id.technical_info)));
+        animators.add(getAlphaAnimator(findViewById(R.id.settings_button)));
+
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, infoAnimation, settingsAnimation);
-        animatorSet.setDuration(aniTime);
+        animatorSet.playTogether(animators);
+        animatorSet.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
         animatorSet.start();
+    }
+
+    private ObjectAnimator getAlphaAnimator(@Nullable Object target) {
+        return ObjectAnimator.ofFloat(target, "alpha", 0f, 1f);
+    }
+
+    private ObjectAnimator getAlphaRevAnimator(@Nullable Object target) {
+        return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
     private class BackdropClick implements View.OnClickListener {
