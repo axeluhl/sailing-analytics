@@ -42,7 +42,7 @@ public class MainMediaVideo extends Composite {
         // youtubeUrl += "&showinfo=0";
         // }
 
-        vJs.setVideo(video, false);
+        vJs.setVideo(video.getMimeType(), video.getSourceRef());
         videoHolderUi.clear();
         videoHolderUi.add(vJs);
         String eventName = video.getTitle();
@@ -63,9 +63,4 @@ public class MainMediaVideo extends Composite {
         // }, MouseOverEvent.getType());
 
     }
-
-    public void show(SailingVideoDTO video) {
-        vJs.setVideo(video, false);
-    }
-    
 }

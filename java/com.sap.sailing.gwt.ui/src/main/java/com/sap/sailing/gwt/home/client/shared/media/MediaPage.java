@@ -12,10 +12,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.client.place.event.partials.lowerThird.VideoWithLowerThird;
 import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
-import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
@@ -48,7 +48,7 @@ public class MediaPage extends Composite {
     @UiField
     StringMessages i18n;
     private final SimplePanel contentPanel;
-    private VideoJSPlayer videoDisplayUi;
+    private VideoWithLowerThird videoDisplayUi;
 
     public MediaPage() {
         MediaPageResources.INSTANCE.css().ensureInjected();
@@ -138,8 +138,8 @@ public class MediaPage extends Composite {
     }
 
     private void putVideoOnDisplay(final SailingVideoDTO video, boolean autoplay) {
-        videoDisplayUi = new VideoJSPlayer(true, autoplay);
-        videoDisplayUi.setVideo(video, true);
+        videoDisplayUi = new VideoWithLowerThird(true, autoplay);
+        videoDisplayUi.setVideo(video);
         videoDisplayHolderUi.setWidget(videoDisplayUi);
     }
 }

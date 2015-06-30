@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.video;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
+import com.sap.sailing.gwt.home.client.place.event.partials.lowerThird.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
 
 public class Video extends Composite {
@@ -17,20 +16,18 @@ public class Video extends Composite {
     }
     
     private String source;
-    @UiField(provided = true) VideoJSPlayer videoPlayer = new VideoJSPlayer(false, false);
-    private final boolean showTitle;
+    @UiField(provided = true) VideoWithLowerThird videoPlayer = new VideoWithLowerThird(false, false);
 
-    public Video(boolean showTitle) {
-        this.showTitle = showTitle;
+    public Video() {
         VideoResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        videoPlayer.getVideoElement().addClassName(VideoResources.INSTANCE.css().videoplaceholder_image());
-        videoPlayer.getVideoElement().getStyle().setPaddingTop(0, Unit.PX);
+//        videoPlayer.getVideoElement().addClassName(VideoResources.INSTANCE.css().videoplaceholder_image());
+//        videoPlayer.getVideoElement().getStyle().setPaddingTop(0, Unit.PX);
     }
 
     public void setData(EventOverviewVideoStageDTO data) {
         source = data.getVideo().getSourceRef();
-        videoPlayer.setVideo(data.getVideo(), showTitle);
+        videoPlayer.setVideo(data.getVideo());
     }
     
     public boolean shouldBeReplaced(String newSource) {
