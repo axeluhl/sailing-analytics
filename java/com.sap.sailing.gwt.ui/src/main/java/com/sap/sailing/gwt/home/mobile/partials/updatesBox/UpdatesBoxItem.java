@@ -30,7 +30,7 @@ public class UpdatesBoxItem extends Widget {
     @UiField DivElement messageUi;
     @UiField DivElement timestampUi;
     
-    public UpdatesBoxItem(NewsEntryDTO entry, NewsItemLinkProvider provider) {
+    public UpdatesBoxItem(NewsEntryDTO entry, Date currentTimestamp, NewsItemLinkProvider provider) {
         setElement(uiBinder.createAndBindUi(this));
         
         titleUi.setInnerText(entry.getTitle());
@@ -42,7 +42,6 @@ public class UpdatesBoxItem extends Widget {
         }
         
         Date newsTimestamp = entry.getTimestamp();
-        Date currentTimestamp = entry.getCurrentTimestamp();
         if(newsTimestamp == null || currentTimestamp == null) {
             timestampUi.removeFromParent();
         } else {

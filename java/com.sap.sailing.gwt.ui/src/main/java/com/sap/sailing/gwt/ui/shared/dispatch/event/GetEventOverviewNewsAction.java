@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,13 +50,12 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
             newsItems = newsItems.subList(0, limit);
         }
         List<NewsEntryDTO> news = new ArrayList<>(newsItems.size());
-        Date currentTimestamp = new Date();
         for(EventNewsItem newsItem: newsItems) {
             if(newsItem instanceof InfoEventNewsItem) {
-                news.add(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem, dispatchContext.getClientLocale(), currentTimestamp));
+                news.add(new InfoNewsEntryDTO((InfoEventNewsItem) newsItem, dispatchContext.getClientLocale()));
             }
             if(newsItem instanceof LeaderboardUpdateNewsItem) {
-                news.add(new LeaderboardNewsEntryDTO((LeaderboardUpdateNewsItem) newsItem, currentTimestamp));
+                news.add(new LeaderboardNewsEntryDTO((LeaderboardUpdateNewsItem) newsItem));
             }
         }
         return news;
