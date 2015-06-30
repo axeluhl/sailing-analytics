@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
@@ -34,17 +35,27 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     public MinileaderboardBox() {
         initWidget(uiBinder.createAndBindUi(this));
-    }
-
-    @Override
-    public void setData(final GetMiniLeaderboardDTO data, long nextUpdate, int updateNo) {
-        setData(data);
         headerUi.setInfoText(StringMessages.INSTANCE.details());
         headerUi.setClickAction(new Command() {
             @Override
             public void execute() {
                 String link = "HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash();
                 Window.Location.assign(link);
+            }
+        });
+    }
+
+    @Override
+    public void setData(final GetMiniLeaderboardDTO data, long nextUpdate, int updateNo) {
+        setData(data);
+    }
+    
+    public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
+        headerUi.setInfoText(infoText);
+        headerUi.setClickAction(new Command() {
+            @Override
+            public void execute() {
+                placeNavigation.goToPlace();
             }
         });
     }

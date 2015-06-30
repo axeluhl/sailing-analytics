@@ -74,14 +74,16 @@ public class EventViewImpl extends Composite implements EventView {
     }
     
     private void setupListContent(EventViewDTO event) {
+        String regattaId = currentPresenter.getCtx().getRegattaId();
         if (event.getType() == EventType.MULTI_REGATTA) {
             RegattaStatus regattaStatus = new RegattaStatus(currentPresenter);
             listContentUi.add(regattaStatus);
             refreshManager.add(regattaStatus, new GetRegattasAndLiveRacesForEventAction(event.getId()));
         } else {
             MinileaderboardBox miniLeaderboard = new MinileaderboardBox();
+            miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaLeaderboardNavigation(regattaId));
             listContentUi.add(miniLeaderboard);
-            refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(event.getId(), currentPresenter.getCtx().getRegattaId()));
+            refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(event.getId(), regattaId, 3));
         }
     }
     
