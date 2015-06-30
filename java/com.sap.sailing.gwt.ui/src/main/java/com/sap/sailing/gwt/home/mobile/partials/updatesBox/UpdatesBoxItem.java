@@ -12,7 +12,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
-import com.sap.sailing.gwt.home.client.place.event.partials.updatesBox.UpdatesBoxResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
@@ -46,7 +45,7 @@ public class UpdatesBoxItem extends Widget {
             timestampUi.removeFromParent();
         } else {
             timestampUi.setInnerText(ConditionalDateTimeFormatter.format(newsTimestamp, currentTimestamp, StringMessages.INSTANCE));
-            if (currentTimestamp.getTime() - 600000 < newsTimestamp.getTime()) {
+            if (currentTimestamp.getTime() - 600_000 < newsTimestamp.getTime()) {
                 timestampUi.addClassName(UpdatesBoxResources.INSTANCE.css().updatesbox_item_live());
             }
         }
