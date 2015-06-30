@@ -85,7 +85,7 @@ public class SimulationServiceImpl implements SimulationService {
                         public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
                             logger.info("Simulation Started: \"" + key.toString() + "\"");
                             SimulationResults results = computeSimulationResults(key);
-                            logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.hashCode()));
+                            logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.getVersion().asMillis()));
                             return results;
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
@@ -260,10 +260,10 @@ public class SimulationServiceImpl implements SimulationService {
     }
 
     @Override
-    public int getSimulationResultsVersion(LegIdentifier legIdentifier) {
+    public long getSimulationResultsVersion(LegIdentifier legIdentifier) {
         SimulationResults result = cache.get(legIdentifier, false);
-        int version = (result == null ? 0 : result.hashCode());
-        logger.fine("Simulation Results-Version: " + + version);
+        long version = (result == null ? 0 : result.getVersion().asMillis());
+        logger.fine("Simulation Results-Version: " + version);
         return version;
     }
 
@@ -418,7 +418,7 @@ public class SimulationServiceImpl implements SimulationService {
             }
             // prepare simulator-results
             result = new SimulationResults(startTimePoint.asDate(), timeStep.asMillis(), legDuration, startPosition,
-                    endPosition, paths, null);
+                    endPosition, paths, null, MillisecondsTimePoint.now());
         }
         return result;
     }

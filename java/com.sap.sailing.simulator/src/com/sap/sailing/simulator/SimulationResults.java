@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Position;
+import com.sap.sse.common.TimePoint;
 
 public class SimulationResults {
 
@@ -14,6 +15,7 @@ public class SimulationResults {
     private Position endPosition;
     private Map<PathType, Path> paths;
     private String notificationMessage;
+    private TimePoint version;
 
     public SimulationResults(){
         this.startTime = null;
@@ -23,7 +25,7 @@ public class SimulationResults {
         this.notificationMessage = "";
     }
 
-    public SimulationResults(final Date startTime, final long timeStep, final long legDuration, final Position startPosition, final Position endPosition, final Map<PathType, Path> paths, final String notificationMessage) {
+    public SimulationResults(final Date startTime, final long timeStep, final long legDuration, final Position startPosition, final Position endPosition, final Map<PathType, Path> paths, final String notificationMessage, final TimePoint version) {
         this.startTime = startTime;
         this.timeStep = timeStep;
         this.legDuration = legDuration;
@@ -31,6 +33,7 @@ public class SimulationResults {
         this.endPosition = endPosition;
         this.paths = paths;
         this.notificationMessage = notificationMessage;
+        this.version = version;
     }
     
     public Date getStartTime() {
@@ -87,5 +90,9 @@ public class SimulationResults {
 
     public void setNotificationMessage(final String notificationMessage) {
         this.notificationMessage = notificationMessage;
+    }
+    
+    public TimePoint getVersion() {
+        return this.version;
     }
 }
