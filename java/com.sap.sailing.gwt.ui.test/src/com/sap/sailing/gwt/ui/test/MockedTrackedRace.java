@@ -9,8 +9,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
@@ -274,11 +274,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass) {
-                return null;
-            }
-
-            @Override
             public void addTrackedRace(TrackedRace trackedRace) {
             }
 
@@ -313,7 +308,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
                     GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
                     long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-                    boolean useMarkPassingCalculator) {
+                    boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
                 return null;
             }
 
@@ -331,6 +326,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public void unlockTrackedRacesAfterWrite() {
+            }
+
+            @Override
+            public void removeRaceListener(RaceListener listener) {
             }
         };
     }

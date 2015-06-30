@@ -816,15 +816,15 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
         @Override
         public int compare(Bearing o1, Bearing o2) {
-            Double d1 = o1.getDegrees();
+            double d1 = o1.getDegrees();
             if (d1 < 0) {
                 d1 = 360 + d1;
             }
-            Double d2 = o2.getDegrees();
+            double d2 = o2.getDegrees();
             if (d2 < 0) {
                 d2 = 360 + d2;
             }
-            return d1.compareTo(d2);
+            return d1 < d2 ? -1 : d1 == d2 ? 0 : 1;
         }
 
     };

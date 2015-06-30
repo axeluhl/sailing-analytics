@@ -25,8 +25,9 @@ public class RaceLogFixedMarkPassingEventDeserializer extends BaseRaceLogEventDe
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
         TimePoint ofPassing = new MillisecondsTimePoint(
                 (Long) object.get(RaceLogFixedMarkPassingEventSerializer.FIELD_TIMEPOINT_OF_MARKPASSING));
-        Integer zeroBasedIndexOfPassedWaypoint = (Integer) object
+        Number zeroBasedIndexOfPassedWaypointObj = (Number) object
                 .get(RaceLogFixedMarkPassingEventSerializer.FIELD_INDEX_OF_PASSED_WAYPOINT);
+        Integer zeroBasedIndexOfPassedWaypoint = zeroBasedIndexOfPassedWaypointObj != null ? zeroBasedIndexOfPassedWaypointObj.intValue() : null;
         return factory.createFixedMarkPassingEvent(timePoint, author, id, competitors, passId, ofPassing,
                 zeroBasedIndexOfPassedWaypoint);
     }

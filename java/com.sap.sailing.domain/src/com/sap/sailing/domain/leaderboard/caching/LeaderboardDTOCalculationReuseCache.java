@@ -50,7 +50,6 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      */
     final ConcurrentHashMap<Leg, LegType> legTypeCache;
     
-    
     /**
      * the wind at competitor's position at timePoint; <code>null</code> values are represented by {@link #NULL_WIND}.
      */
@@ -60,9 +59,11 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
             /* time point */ MillisecondsTimePoint.now(), /* windSpeedWithBearing */ new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
     
     /**
-     * the leg's bearing at timePoint
+     * the leg's bearing at timePoint; <code>null</code> values are represented by {@link #NULL_BEARING}.
      */
     final ConcurrentHashMap<Leg, Bearing> legBearingCache;
+    
+    private static final Bearing NULL_BEARING = new DegreeBearingImpl(0);
 
     public LeaderboardDTOCalculationReuseCache(TimePoint timePoint) {
         legTypeCache = new ConcurrentHashMap<>();
@@ -91,7 +92,9 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
             result = legBearingCache.get(trackedLeg.getLeg());
             if (result == null) {
                 result = trackedLeg.getLegBearing(timePoint);
-                legBearingCache.put(trackedLeg.getLeg(), result);
+                legBearingCache.put(trackedLeg.getLeg(), result == null ? NULL_BEARING : result);
+            } else if (result == NULL_BEARING) {
+                result = null;
             }
         } else {
             result = trackedLeg.getLegBearing(timePoint); // different time point; don't cache

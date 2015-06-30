@@ -43,7 +43,7 @@
     <string name="flag_ap">AP</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
-    <string name="label_login_events">Event</string>
+    <string name="label_login_events">Regatta</string>
     <string name="label_login_course_area">Area</string>
     <string name="label_login_position">Position</string>
     <string name="login_type_officer_on_start_vessel">Login as race officer on the selected course\'s start vessel.</string>
@@ -110,7 +110,6 @@
     <string name="availableFinishingCompetitors">Competitors</string>
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
-    <string name="options_menu_reload">Reload</string>
     <string name="options_menu_settings">Settings</string>
     <string name="results_capturing_title">Race Results</string>
     <string name="results_capturing_view_subject">Mail subject</string>
@@ -249,7 +248,7 @@
     <string name="race_start_in_1_minute">1 Minute</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
-    <string name="race_set_start">Set Start Time</string>
+    <string name="race_set_time">Set Time</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
     <string name="toggle_group_race_mode">Group Race?</string>
@@ -292,7 +291,7 @@
     <string name="loading_events_succeded">Events loaded.</string>
 
     <string name="login_text">Welcome to SAP Sailing\nRace Committee App</string>
-    <string name="login_sub_text">Where are you?</string>
+    <string name="login_sub_text">Please select a regatta</string>
     <string name="sign_up">Sign Me Up</string>
     <string name="wind_display">dd</string>
     <string name="flags_abandon">Abandon</string>
@@ -324,7 +323,7 @@
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
     <string name="wind_sensor"><![CDATA[at #AT# / from #FROM#° / #SPEED# kn]]></string>
-    <string name="wind_panel"><![CDATA[from #FROM#°\n#SPEED# kn]]></string>
+    <string name="wind_panel"><![CDATA[from %1$.0f°\n%2$.1f kn]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
@@ -370,7 +369,8 @@
     <string name="race_summary_individual_recalls">Individual Recalls</string>
     <string name="race_summary_time" translatable="false">%s min</string>
     <string name="record_voice">Record Voice</string>
-    <string name="finishing_started">First vessel in finish at #TIME#</string>
+    <string name="finishing_started">First vessel in finish at %s</string>
+    <string name="finishing_started_since">(%s)</string>
     <string name="finishing_done">Down now</string>
 
     <string name="finished_recording">Recording</string>
@@ -426,7 +426,7 @@
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
     <string name="url_refresh_message">Please logout from the current event to load the data from the new server.</string>
-    <string name="until_xray_removed">XRAY will be removed in #TIME#</string>
+    <string name="until_xray_removed">XRAY will be removed in %s</string>
     <string name="send_photos">Send Photos</string>
     <string name="error_wrong_degree_value_title">Error</string>
     <string name="error_wrong_degree_value_message">Please provide a value between 0 and 360</string>
@@ -443,5 +443,9 @@
     <string name="send_mail">Send mail...</string>
     <string name="data_reload_title">Data has changed externally</string>
     <string name="data_reload_message">Data have to be reloaded. Possible data loss is possible.</string>
+    <string name="error_finished_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
+    <string name="error_finishing_time">The selected time is before the race start.</string>
+    <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
+    <string name="error_wrong_race_state">The RaceState isn\'t in the correct state (needed: %1$s - current: %2$s)</string>
 
 </resources>

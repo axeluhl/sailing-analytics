@@ -14,8 +14,8 @@ public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
     }
 
     @GwtIncompatible
-    public AbstractRaceNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp) {
-        super(raceTitle, timestamp, null);
+    public AbstractRaceNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp, Date currentTimestamp) {
+        super(raceTitle, timestamp, currentTimestamp, null);
         this.regattaName = regattaName;
         this.trackedRaceName = trackedRaceName;
         this.boatClass = boatClass;

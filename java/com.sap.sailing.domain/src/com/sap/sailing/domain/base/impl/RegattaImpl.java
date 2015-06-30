@@ -196,7 +196,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.scoringScheme = scoringScheme;
         this.defaultCourseArea = courseArea;
         this.configuration = null;
-        this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore);
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore) {
+            private static final long serialVersionUID = 8546222568682770206L;
+
+            @Override
+            public RaceColumn getRaceColumnByName(String raceColumnName) {
+                for (final Series series : getSeries()) {
+                    for (final RaceColumn raceColumn : series.getRaceColumns()) {
+                        if (raceColumn.getName().equals(raceColumnName)) {
+                            return raceColumn;
+                        }
+                    }
+                }
+                return null;
+            }
+        };
         this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
 
@@ -676,5 +690,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             }
             return result;
         }
+    }
+
+    @Override
+    public RaceColumn getRaceColumnByName(String raceColumnName) {
+        return regattaLikeHelper.getRaceColumnByName(raceColumnName);
     }
 }

@@ -36,8 +36,11 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -103,7 +106,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.analyzing.ServerSideRaceLogResolver;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -315,7 +318,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
-    private final GPSFixStore gpsFixStore;
+    private transient GPSFixStore gpsFixStore;
     
     /**
      * Wind and loading is started in a background thread during object construction. If a client needs to
@@ -347,6 +350,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * certificate.
      */
     private final RankingMetric rankingMetric;
+    
+    /**
+     * Required in particular to resolve {@link SimpleRaceLogIdentifier}s that appear in
+     * {@link RaceLogDependentStartTimeEvent}s. The usual implementation on the server side is
+     * provided by <code>RacingEventService</code> which is not serializable. Therefore, the reference
+     * must be established again after de-serialization by invoking {@link #setRaceLogResolver}.
+     */
+    private transient RaceLogResolver raceLogResolver;
 
     /**
      * Constructs the tracked race with one-design ranking.
@@ -355,15 +366,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm) {
+            boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver) {
         this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForWindEstimationCacheInvalidation, useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new);
+                delayForWindEstimationCacheInvalidation, useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver);
     }
     
     /**
      * Constructs the tracked race with a configurable ranking metric.
-     * 
      * @param rankingMetricConstructor
      *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
@@ -373,8 +383,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor) {
+            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
+            RaceLogResolver raceLogResolver) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        this.raceLogResolver = raceLogResolver;
         rankingMetric = rankingMetricConstructor.apply(this);
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
@@ -585,6 +597,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
+        gpsFixStore = EmptyGPSFixStore.INSTANCE;
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
@@ -728,9 +741,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                
-                //FIXME: how to get the HasRegattaLike?
-                startTime = new StartTimeFinder(new ServerSideRaceLogResolver(null), raceLog).analyze().getStartTime();
+                startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (startTime != null) {
                     break;
                 }
@@ -1013,7 +1024,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // competitor has finished race at or before the requested time point; use time point of crossing the finish line
                     end = markPassings.last().getTimePoint();
                 } else if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
-                        (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)
+                        (!trackedLegOfCompetitor.hasFinishedLeg(getEndOfTracking())
                         && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
                                 || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
                     // If the race is no longer tracking and hence no more data can be expected, and the competitor
@@ -3138,8 +3149,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (raceStates) {
             result = raceStates.get(raceLog);
             if (result == null) {
-                //FIXME: how to get the corresponding RegattaLike?
-                result = RaceStateImpl.create(new ServerSideRaceLogResolver(null), raceLog);
+                result = RaceStateImpl.create(raceLogResolver, raceLog);
                 raceStates.put(raceLog, result);
             }
         }
@@ -3670,5 +3680,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
+    }
+
+    /**
+     * Obtains the {@link #raceLogResolver}.
+     */
+    @Override
+    public RaceLogResolver getRaceLogResolver() {
+        return raceLogResolver;
+    }
+
+    public void setRaceLogResolver(RaceLogResolver raceLogResolver) {
+        this.raceLogResolver = raceLogResolver;
     }
 }
