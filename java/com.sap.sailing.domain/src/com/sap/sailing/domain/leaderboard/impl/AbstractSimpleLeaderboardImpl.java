@@ -68,6 +68,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -1067,7 +1068,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
         Distance result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
-            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+            TimePoint startOfRace;
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor) &&
+                    (startOfRace=trackedRace.getStartOfRace()) != null &&
+                    !startOfRace.after(timePoint)) {
                 Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
                 if (distanceSailedInRace != null) {
                     if (result == null) {
@@ -1617,10 +1621,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 // without wind information, use null meaning "unknown"
                 averageSignedCrossTrackError = null;
             }
+            final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
                     trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint),
-                    rankingInfo.getCompetitorRankingInfo().apply(competitor).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
+                    competitorRankingInfo == null ? null : competitorRankingInfo.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
         } finally {
             course.unlockAfterRead();
         }

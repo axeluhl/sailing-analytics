@@ -5,13 +5,13 @@ def packageName = "com.sap.sailing.buoy.positioning.app"
 def verCode = 1
 
 android {
-    buildToolsVersion "22.0.1"
-    compileSdkVersion 22
+    buildToolsVersion rootProject.ext.buildTools
+    compileSdkVersion rootProject.ext.compileSdk
 
     defaultConfig {
         applicationId packageName
-        minSdkVersion 14
-        targetSdkVersion 22
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
         versionCode verCode
         versionName "$verCode - Altitude"
         useJack false // not working on Windows yet
@@ -26,9 +26,13 @@ android {
         }
 
         androidTest {
-            java.srcDirs = ["tests/src"]
-            res.srcDirs = ["tests/res"]
-            assets.srcDirs = ["tests/assets"]
+            java.srcDirs = ["tests-ui/src"]
+            res.srcDirs = ["tests-ui/res"]
+            assets.srcDirs = ["tests-ui/assets"]
+        }
+
+        test {
+            java.srcDirs = ["tests-jvm/src"]
         }
     }
 
@@ -65,16 +69,28 @@ android {
 
 dependencies {
     /* support libraries */
-    compile "com.android.support:appcompat-v7:22.1.1"
+    compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:7.3.0"
+    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
 
-    /* all local jar-libs */
-//    compile fileTree(dir: "libs", include: ["*.jar"])
+    /* JVM tests */
+    testCompile "junit:junit:${rootProject.ext.junit}"
+    testCompile "org.mockito:mockito-core:${rootProject.ext.mockito}"
+
+    /* UI testing with espresso */
+    androidTestCompile "com.android.support:support-annotations:${rootProject.ext.support}"
+    androidTestCompile "com.android.support.test:runner:${rootProject.ext.test}"
+    androidTestCompile "com.android.support.test:rules:${rootProject.ext.test}"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:${rootProject.ext.espresso}"
+    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:${rootProject.ext.espresso}") {
+        exclude group: "com.android.support", module: "appcompat"
+        exclude group: "com.android.support", module: "support-v4"
+        exclude module: "recyclerview-v7"
+    }
 }
 
 // Custom tasks

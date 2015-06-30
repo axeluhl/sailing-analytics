@@ -30,4 +30,9 @@ public class RaceLogProtestStartTimeEventImpl extends RaceLogEventImpl implement
         return protestStartTime;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "protestStartTime=" + protestStartTime;
+    }
+
 }

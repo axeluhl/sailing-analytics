@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -235,7 +234,7 @@ public final class HomeServiceUtil {
         return !Util.isEmpty(event.getVideos());
     }
 
-    public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
+    public static boolean isPartOfEvent(Event event, Leaderboard regattaEntity) {
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
                 return true;
@@ -404,8 +403,7 @@ public final class HomeServiceUtil {
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
             if(leaderboard instanceof RegattaLeaderboard) {
-                Regatta regattaEntity = service.getRegattaByName(leaderboard.getName());
-                if(!HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                     continue;
                 }
             }
