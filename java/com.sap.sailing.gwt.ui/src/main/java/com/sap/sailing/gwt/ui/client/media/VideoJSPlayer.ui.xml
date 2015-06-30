@@ -19,8 +19,12 @@
 		.caption {
 			padding: 5px;
 		} 
+		.player {
+			width: 100%;
+			height: 100%;
+		}
 	</ui:style>
-	<div>
-		<video class="video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
+	<div class="{style.player}">
+		<video class="{style.player} video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
 	</div>
 </ui:UiBinder>

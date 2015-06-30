@@ -11,6 +11,7 @@ public interface VideoWithLowerThirdResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String videoWithLowerThird();
         String video();
     }
 }

@@ -7,7 +7,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
@@ -23,8 +23,7 @@ public class MainMediaVideo extends Composite {
 
     @UiField SpanElement videoTitle;
     @UiField Element videoTitleWrapper;
-    @UiField
-    HTMLPanel videoHolderUi;
+    @UiField SimplePanel videoHolderUi;
     
     final VideoJSPlayer vJs = new VideoJSPlayer();
 
@@ -43,8 +42,8 @@ public class MainMediaVideo extends Composite {
         // }
 
         vJs.setVideo(video.getMimeType(), video.getSourceRef());
-        videoHolderUi.clear();
-        videoHolderUi.add(vJs);
+        vJs.addStyleName(MainMediaResources.INSTANCE.css().videopreview_videocontainer_video());
+        videoHolderUi.setWidget(vJs);
         String eventName = video.getTitle();
         if(eventName == null || eventName.isEmpty()) {
             videoTitleWrapper.removeFromParent();

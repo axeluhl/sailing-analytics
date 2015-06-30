@@ -18,6 +18,7 @@ public class VideoWithLowerThird extends Composite {
     public VideoWithLowerThird(boolean fullHeightWidth, boolean autoplay) {
         style.ensureInjected();
         FlowPanel panel = new FlowPanel();
+        panel.addStyleName(style.videoWithLowerThird());
         videoJSPlayer = new VideoJSPlayer();
         panel.add(videoJSPlayer);
         lowerThird = new LowerThird();

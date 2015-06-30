@@ -21,8 +21,6 @@ public class Video extends Composite {
     public Video() {
         VideoResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-//        videoPlayer.getVideoElement().addClassName(VideoResources.INSTANCE.css().videoplaceholder_image());
-//        videoPlayer.getVideoElement().getStyle().setPaddingTop(0, Unit.PX);
     }
 
     public void setData(EventOverviewVideoStageDTO data) {
