@@ -60,7 +60,7 @@ public class GetEventViewAction implements Action<EventViewDTO> {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if(leaderboard instanceof RegattaLeaderboard) {
                     Regatta regatta = context.getRacingEventService().getRegattaByName(leaderboard.getName());
-                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, regatta)) {
+                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                         continue;
                     }
                     
