@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.sectionHeader;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
@@ -11,16 +12,17 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class SectionHeaderContent extends Widget {
     
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
-    interface MyBinder extends UiBinder<DivElement, SectionHeaderContent> {
+    interface MyBinder extends UiBinder<AnchorElement, SectionHeaderContent> {
     }
 
-    @UiField DivElement headerMainUi;
+    @UiField AnchorElement headerMainUi;
     @UiField DivElement headerLeftUi; 
     @UiField DivElement titleAndLabelContainerUi;
     @UiField HeadingElement titleUi;
@@ -35,7 +37,7 @@ public class SectionHeaderContent extends Widget {
     public SectionHeaderContent() {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        sinkEvents(Event.ONCLICK);
+//        sinkEvents(Event.ONCLICK);
     }
     
     public void setSectionTitle(String sectionHeaderTitle) {
@@ -67,6 +69,12 @@ public class SectionHeaderContent extends Widget {
         headerRightUi.getStyle().clearDisplay();
         infoTextUi.getStyle().clearDisplay();
         infoTextUi.setInnerText(infoText);
+    }
+    
+    public void setClickAction(final PlaceNavigation<?> placeNavigation) {
+        placeNavigation.configureAnchorElement(headerMainUi);
+        headerRightUi.getStyle().clearDisplay();
+        actionArrowUi.getStyle().clearDisplay();
     }
     
     public void setClickAction(final Command command) {
