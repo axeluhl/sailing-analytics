@@ -175,9 +175,14 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/layout_map"
+                android:id="@+id/layout_position"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/default_margin"
+                android:layout_marginLeft="@dimen/default_margin"
+                android:layout_marginRight="@dimen/default_margin"
+                android:layout_marginStart="@dimen/default_margin"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/position_header"
@@ -189,9 +194,66 @@
                     android:textAppearance="?textSmall"/>
 
                 <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/position_header">
+
+                    <TextView
+                        android:id="@+id/position_latitude"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/default_margin"
+                        android:text="Lat:"
+                        android:textAppearance="?textSmall"/>
+
+                    <TextView
+                        android:id="@+id/position_longitude"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/default_margin"
+                        android:layout_below="@+id/position_latitude"
+                        android:text="Lon:"
+                        android:textAppearance="?textSmall"/>
+
+                    <TextView
+                        android:id="@+id/position_accuracy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/default_margin"
+                        android:layout_below="@+id/position_longitude"
+                        android:text="Acc:"
+                        android:textAppearance="?textSmall"/>
+
+                    <Button
+                        style="?attr/buttonSolidNormal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/position_accuracy"
+                        android:layout_centerHorizontal="true"
+                        android:text="Show on map"/>
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <!--<RelativeLayout
+                android:id="@+id/layout_map"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/position_header_old"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/position_header">
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="@dimen/default_margin"
+                    android:text="@string/wind_position"
+                    android:textAppearance="?textSmall"/>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/position_header_old">
 
                     <FrameLayout
                         android:id="@+id/windMap"
@@ -259,7 +321,7 @@
                             android:textColor="?white"/>
                     </RelativeLayout>
                 </RelativeLayout>
-            </RelativeLayout>
+            </RelativeLayout>-->
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
