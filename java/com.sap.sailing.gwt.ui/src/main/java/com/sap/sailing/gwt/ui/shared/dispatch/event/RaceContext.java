@@ -11,7 +11,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
@@ -35,6 +34,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
@@ -73,7 +73,7 @@ public class RaceContext {
         return !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName());
     }
 
-    private String getRegattaName() {
+    public String getRegattaName() {
         if (leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
             return regatta.getName();
@@ -197,28 +197,6 @@ public class RaceContext {
         return regatta;
     }
     
-    private String getBoatClassName() {
-        BoatClass boatClass = getBoatClass();
-        return boatClass == null ? null : boatClass.getName();
-    }
-
-    private BoatClass getBoatClass() {
-        final BoatClass boatClass;
-        if (getRegatta() != null) {
-            boatClass = getRegatta().getBoatClass();
-        } else {
-            boatClass = getBoatClassFromTrackedRaces();
-        }
-        return boatClass;
-    }
-
-    private BoatClass getBoatClassFromTrackedRaces() {
-        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            return trackedRace.getRace().getBoatClass();
-        }
-        return null;
-    }
-
     private String getCourseAreaOrNull() {
         /** The course area will not be shown if there is only one course area defined for the event */
         if(Util.size(event.getVenue().getCourseAreas()) <= 1) {
@@ -277,9 +255,16 @@ public class RaceContext {
     }
 
     public void addLiveRace(LiveRacesDTO result) {
+        LiveRaceDTO liveRaceDTO = getLiveRaceOrNull();
+        if(liveRaceDTO != null) {
+            result.addRace(liveRaceDTO);        
+        }
+    }
+    
+    public LiveRaceDTO getLiveRaceOrNull() {
         TimePoint startTime = getStartTime();
         TimePoint finishTime = getFinishTime();
-            // a race is of 'public interest' of a race is a combination of it's 'live' state
+        // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
         if(isLiveOrOfPublicInterest(startTime, finishTime)) {
             // the start time is always given for live races
@@ -290,15 +275,16 @@ public class RaceContext {
             liveRaceDTO.setTrackingState(getRaceTrackingState());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());
             liveRaceDTO.setStart(startTime == null ? null : startTime.asDate());
-            liveRaceDTO.setBoatClass(getBoatClassName());
+            liveRaceDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
             liveRaceDTO.setCourseArea(getCourseAreaOrNull());
             liveRaceDTO.setCourse(getCourseNameOrNull());
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
             liveRaceDTO.setWind(getWindOrNull());
             
-            result.addRace(liveRaceDTO);        
+            return liveRaceDTO;
         }
+        return null;
     }
     
     private boolean isLiveOrOfPublicInterest(TimePoint startTime, TimePoint finishTime) {

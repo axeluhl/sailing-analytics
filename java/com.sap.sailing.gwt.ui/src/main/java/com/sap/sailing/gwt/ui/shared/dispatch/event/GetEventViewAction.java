@@ -27,7 +27,8 @@ import com.sap.sse.common.media.MediaTagConstants;
 public class GetEventViewAction implements Action<EventViewDTO> {
     private UUID eventId;
     
-    public GetEventViewAction() {
+    @SuppressWarnings("unused")
+    private GetEventViewAction() {
     }
 
     public GetEventViewAction(UUID eventId) {
@@ -63,14 +64,14 @@ public class GetEventViewAction implements Action<EventViewDTO> {
                         continue;
                     }
                     
-                    RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
                     regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
                     regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
                     regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
                     dto.getRegattas().add(regattaDTO);
                     
                 } else if(leaderboard instanceof FlexibleLeaderboard) {
-                    RegattaMetadataDTO regattaDTO = createRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
                     
                     regattaDTO.setStartDate(null);
                     regattaDTO.setEndDate(null);
@@ -116,17 +117,5 @@ public class GetEventViewAction implements Action<EventViewDTO> {
         }
 
         return dto;
-    }
-
-    @GwtIncompatible
-    private RegattaMetadataDTO createRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
-        regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
-        regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
-        regattaDTO.setTrackedRacesCount(HomeServiceUtil.calculateTrackedRaceCount(leaderboard));
-        regattaDTO.setBoatClass(HomeServiceUtil.calculateBoatClass(leaderboard));
-        
-        return regattaDTO;
     }
 }
