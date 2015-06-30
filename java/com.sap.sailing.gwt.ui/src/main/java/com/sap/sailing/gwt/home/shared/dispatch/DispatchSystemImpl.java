@@ -37,6 +37,6 @@ public class DispatchSystemImpl implements DispatchSystem {
 
     @Override
     public Date getCurrentServerTime() {
-        return new Date(new Date().getTime() - simpleDispatch.getLastClientTime().getTime() + simpleDispatch.getLastServerTime().getTime());
+        return new Date(System.currentTimeMillis() + simpleDispatch.getClientServerOffset());
     }
 }
