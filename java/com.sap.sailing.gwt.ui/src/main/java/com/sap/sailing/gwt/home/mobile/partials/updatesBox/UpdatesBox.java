@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
@@ -62,12 +61,7 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
                 itemContainerUi.addContent(new UpdatesBoxItem(newsEntryDTO, refreshManager.getDispatchSystem().getCurrentServerTime(), presenter));
             }
             if (!dontDrillDown) {
-                headerUi.setClickAction(new Command() {
-                    @Override
-                    public void execute() {
-                        presenter.gotoNewsPlace(data);
-                    }
-                });
+                headerUi.setClickAction(presenter.getNewsPlaceNavigation(data));
             }
         }
     }

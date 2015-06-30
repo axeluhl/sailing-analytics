@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -36,13 +35,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     public MinileaderboardBox() {
         initWidget(uiBinder.createAndBindUi(this));
         headerUi.setInfoText(StringMessages.INSTANCE.details());
-        headerUi.setClickAction(new Command() {
-            @Override
-            public void execute() {
-                String link = "HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash();
-                Window.Location.assign(link);
-            }
-        });
+        headerUi.setClickAction("HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash());
     }
 
     @Override
@@ -52,12 +45,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
-        headerUi.setClickAction(new Command() {
-            @Override
-            public void execute() {
-                placeNavigation.goToPlace();
-            }
-        });
+        headerUi.setClickAction(placeNavigation);
     }
 
     public void setData(final GetMiniLeaderboardDTO data) {

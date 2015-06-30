@@ -6,7 +6,8 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public interface NewsItemLinkProvider {
-    void gotoNewsPlace(List<NewsEntryDTO> values);
-
+    
+    PlaceNavigation<?> getNewsPlaceNavigation(List<NewsEntryDTO> values);
+    
     PlaceNavigation<?> getNewsEntryPlaceNavigation(NewsEntryDTO newsEntry);
 }

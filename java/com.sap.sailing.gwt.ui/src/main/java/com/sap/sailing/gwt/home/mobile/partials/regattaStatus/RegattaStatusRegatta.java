@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
@@ -49,12 +48,7 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection {
     private void initRegattaHeader(RegattaMetadataDTO regatta, final PlaceNavigation<?> placeNavigation) {
         headerUi.setImageUrl(getBootClassIcon(regatta.getBoatClass()).getSafeUri().asString());
         headerUi.setSectionTitle(regatta.getDisplayName());
-        headerUi.setClickAction(new Command() {
-            @Override
-            public void execute() {
-                placeNavigation.goToPlace();
-            }
-        });
+        headerUi.setClickAction(placeNavigation);
     }
     
     private ImageResource getBootClassIcon(String bootClass) {

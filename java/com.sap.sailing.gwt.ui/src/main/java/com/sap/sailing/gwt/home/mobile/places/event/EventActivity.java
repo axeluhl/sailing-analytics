@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
-import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -151,8 +150,8 @@ public class EventActivity extends AbstractActivity implements Presenter {
     }
 
     @Override
-    public void gotoNewsPlace(List<NewsEntryDTO> values) {
-        clientFactory.getPlaceController().goTo(new LatestNewsPlace(place.getCtx(), values));
+    public PlaceNavigation<?> getNewsPlaceNavigation(List<NewsEntryDTO> values) {
+        return clientFactory.getNavigator().getEventLastestNewsNavigation(getCtx(), values, null, false);
     }
 
 

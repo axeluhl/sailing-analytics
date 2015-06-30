@@ -8,8 +8,6 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -32,12 +30,10 @@ public class SectionHeaderContent extends Widget {
     @UiField DivElement headerRightUi;
     @UiField DivElement infoTextUi;
     @UiField ImageElement actionArrowUi;
-    private Command command;
 
     public SectionHeaderContent() {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-//        sinkEvents(Event.ONCLICK);
     }
     
     public void setSectionTitle(String sectionHeaderTitle) {
@@ -77,19 +73,10 @@ public class SectionHeaderContent extends Widget {
         actionArrowUi.getStyle().clearDisplay();
     }
     
-    public void setClickAction(final Command command) {
-        this.command = command;
+    public void setClickAction(final String url) {
+        headerMainUi.setHref(url);
         headerRightUi.getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
-    }
-
-    @Override
-    public void onBrowserEvent(Event event) {
-        if (command != null && event.getTypeInt() == Event.ONCLICK) {
-            command.execute();
-            return;
-        }
-        super.onBrowserEvent(event);
     }
     
 }

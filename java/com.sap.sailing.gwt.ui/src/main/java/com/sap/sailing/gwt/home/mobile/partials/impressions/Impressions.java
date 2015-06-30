@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
@@ -36,13 +35,7 @@ public class Impressions extends Composite {
     }
 
     public void setClickDestinaton(final PlaceNavigation<?> placeNavigation) {
-
-        headerUi.setClickAction(new Command() {
-            @Override
-            public void execute() {
-                placeNavigation.goToPlace();
-            }
-        });
+        headerUi.setClickAction(placeNavigation);
     }
 
     public void setStatistis(int nrOfImages, int nrOfVideos) {
