@@ -5,7 +5,7 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.lowerThird.LowerThirdResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.lowerThird.LowerThirdResources" />
   <div class="{res.mediaCss.grid}">
     <div class="{local_res.css.video_content_item_info} {local_res.css.info}">
       <div ui:field="titleWrapperUi" class="{local_res.css.video_content_item_info_text} {res.mediaCss.columns} {res.mediaCss.small12}">
