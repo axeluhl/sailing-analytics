@@ -60,9 +60,6 @@ public class Footer extends Composite {
     });
     
     @UiField AnchorElement mobileUi;
-    
-    private final String mobileBaseUrl;
-    
     private String otherLanguage;
     private final LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
 
@@ -75,7 +72,6 @@ public class Footer extends Composite {
         releaseNotesNavigation = navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
 
         initWidget(uiBinder.createAndBindUi(this));
-        mobileBaseUrl = mobileUi.getHref();
         
         updateUI();
         DOM.sinkEvents(mobileUi, Event.ONCLICK);
