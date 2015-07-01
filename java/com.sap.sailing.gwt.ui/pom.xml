@@ -124,8 +124,7 @@
             <configuration>
               <!-- <userAgents>chrome</userAgents> -->
               <modules>
-                <module>com.sap.sailing.gwt.home.Desktop</module>
-                <module>com.sap.sailing.gwt.home.Mobile</module>
+                <module>com.sap.sailing.gwt.home.Home</module>
                 <module>com.sap.sailing.gwt.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
