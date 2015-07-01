@@ -4,14 +4,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-public interface VideoWithLowerThirdResources extends ClientBundle {
-    public static final VideoWithLowerThirdResources INSTANCE = GWT.create(VideoWithLowerThirdResources.class);
+public interface VideoPlayerResources extends ClientBundle {
+    public static final VideoPlayerResources INSTANCE = GWT.create(VideoPlayerResources.class);
 
-    @Source("VideoWithLowerThird.gss")
+    @Source("VideoPlayer.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
-        String videoWithLowerThird();
-        String video();
+        String videoPlayer();
     }
 }

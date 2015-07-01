@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
-import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
+import com.sap.sailing.gwt.home.client.shared.videoPlayer.VideoPlayer;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 
 public class MainMediaVideo extends Composite {
@@ -25,7 +25,7 @@ public class MainMediaVideo extends Composite {
     @UiField Element videoTitleWrapper;
     @UiField SimplePanel videoHolderUi;
     
-    final VideoJSPlayer vJs = new VideoJSPlayer();
+    final VideoPlayer vJs = new VideoPlayer();
 
     public MainMediaVideo(SailingVideoDTO video) {
         this(video, false);
@@ -41,7 +41,7 @@ public class MainMediaVideo extends Composite {
         // youtubeUrl += "&showinfo=0";
         // }
 
-        vJs.setVideo(video.getMimeType(), video.getSourceRef());
+        vJs.setVideo(video);
         vJs.addStyleName(MainMediaResources.INSTANCE.css().videopreview_videocontainer_video());
         videoHolderUi.setWidget(vJs);
         String eventName = video.getTitle();

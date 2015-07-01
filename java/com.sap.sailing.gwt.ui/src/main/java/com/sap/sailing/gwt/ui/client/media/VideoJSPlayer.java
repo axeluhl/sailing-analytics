@@ -104,12 +104,19 @@ public class VideoJSPlayer extends Widget {
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
     
+    public native void play() /*-{
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.play();
+    }-*/;
+    
     /**
      * Check whether or not the player is running in full screen mode
      * 
      * @return <code>true</code> if the player is running in full screen mode, <code>false</code> otherwise
      */
     public native boolean isFullscreen() /*-{
+        if(this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
+            return false;
+        }
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.isFullscreen();
     }-*/;
 
@@ -119,6 +126,9 @@ public class VideoJSPlayer extends Widget {
      * @return <code>true</code> if the player is paused, <code>false</code> if it is playing
      */
     public native boolean paused() /*-{
+        if(this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
+            return true;
+        }
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.paused();
     }-*/;
     
