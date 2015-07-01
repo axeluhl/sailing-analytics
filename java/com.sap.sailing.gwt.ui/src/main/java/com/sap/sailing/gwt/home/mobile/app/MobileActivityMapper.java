@@ -2,7 +2,10 @@ package com.sap.sailing.gwt.home.mobile.app;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
@@ -12,7 +15,6 @@ import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivityProxy;
-import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 
@@ -27,8 +29,12 @@ public class MobileActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place place) {
         if (!(place instanceof HasMobileVersion)) {
-
-            SwitchingEntryPoint.switchToDesktop();
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    Window.Location.reload();
+                }
+            });
             return null;
         }
         if (place instanceof StartPlace) {

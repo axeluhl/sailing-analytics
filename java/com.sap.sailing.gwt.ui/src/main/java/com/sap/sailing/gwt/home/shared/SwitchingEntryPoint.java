@@ -9,6 +9,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MetaElement;
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
@@ -17,19 +19,30 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.home.desktop.DesktopEntryPoint;
 import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
+import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class SwitchingEntryPoint implements EntryPoint {
     private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";
     private static final RegExp isMobileRegExp = RegExp.compile(
             "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini", "i");
+    private PlaceHistoryMapper hisMap = GWT.create(ApplicationHistoryMapper.class);
 
     @Override
     public void onModuleLoad() {
         String startMobileCookie = Cookies.getCookie(SAPSAILING_MOBILE);
-        if (startMobileCookie != null) {
+        String hash = Window.Location.getHash();
+        if (hash != null && hash.startsWith("#")) {
+            hash = hash.substring(1);
+        }
+        Place place = hisMap.getPlace(hash);
+        GWT.log("Hash: " + hash);
+        if (place != null && !(place instanceof HasMobileVersion)) {
+            startDesktop();
+        } else if (startMobileCookie != null) {
             // use user defined preferences
-            if (Boolean.valueOf(startMobileCookie)) {
+            if (Boolean.parseBoolean(startMobileCookie)) {
                 LOG.info("Switching to mobile by stored cookie");
                 startMobile();
             } else {
@@ -65,6 +78,11 @@ public class SwitchingEntryPoint implements EntryPoint {
      */
     public static boolean isDesktop() {
         return !isMobile();
+    }
+
+    public static boolean isForcedDesktop() {
+        String startMobileCookie = Cookies.getCookie(SAPSAILING_MOBILE);
+        return (startMobileCookie != null && !Boolean.parseBoolean(startMobileCookie));
     }
 
     public static void switchToDesktop() {
@@ -143,4 +161,6 @@ public class SwitchingEntryPoint implements EntryPoint {
         metaElement.setContent(content);
         Document.get().getHead().appendChild(metaElement);
     }
+
+
 }

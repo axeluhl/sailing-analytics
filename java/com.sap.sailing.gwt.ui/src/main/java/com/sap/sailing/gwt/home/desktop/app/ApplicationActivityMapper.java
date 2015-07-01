@@ -2,7 +2,10 @@ package com.sap.sailing.gwt.home.desktop.app;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactActivityProxy;
@@ -42,6 +45,8 @@ import com.sap.sailing.gwt.home.client.place.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class ApplicationActivityMapper implements ActivityMapper {
     private final ApplicationClientFactory clientFactory;
@@ -53,6 +58,15 @@ public class ApplicationActivityMapper implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
+        if (place instanceof HasMobileVersion && !SwitchingEntryPoint.isForcedDesktop()) {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    Window.Location.reload();
+                }
+            });
+            return null;
+        }
         if (place instanceof AboutUsPlace) {
             return new AboutUsActivityProxy((AboutUsPlace) place, clientFactory);
         } else if (place instanceof ErrorPlace) {
