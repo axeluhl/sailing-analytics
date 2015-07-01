@@ -159,7 +159,7 @@ public class VideoJSPlayer extends Widget {
                   that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
                 });
                 this.on('pause', function() {
-                  that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
+                  that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPause()();
                 });
                 
                 console.log("play: " + autoplay);
