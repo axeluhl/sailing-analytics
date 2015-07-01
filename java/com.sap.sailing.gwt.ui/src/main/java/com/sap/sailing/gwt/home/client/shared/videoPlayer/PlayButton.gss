@@ -10,5 +10,13 @@
   background-color: transparent;
   background-repeat: no-repeat; 
   background-position: center;
+  background-size: contain;
   cursor: pointer;
+}
+@media (max-width: 45em) {
+  .playButton {
+    margin: -20px 0px 0px -20px;
+    width: 40px;
+    height: 40px;
+  }
 }
