@@ -6,19 +6,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Anchor;
@@ -28,8 +28,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
@@ -45,7 +45,7 @@ public class Footer extends Composite {
     @UiField DivElement languageSelectionDiv;
     @UiField AnchorElement desktopUi;
     
-    private final String desktopBaseUrl;
+    // private final String desktopBaseUrl;
 
     @UiField(provided = true) ValueListBox<Pair<String, String>> changeLanguageList = new ValueListBox<Pair<String,String>>(new Renderer<Pair<String, String>>() {
         @Override
@@ -70,28 +70,21 @@ public class Footer extends Composite {
         FooterResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
-        desktopBaseUrl = desktopUi.getHref();
         
         updateUI();
-        
-        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
+        DOM.sinkEvents(desktopUi, Event.ONCLICK);
+        DOM.setEventListener(desktopUi, new EventListener() {
             @Override
-            public void onPlaceChanged(PlaceChangedEvent event) {
-                updateDesktopLink(event.getNewPlace());
+            public void onBrowserEvent(Event event) {
+                if (event.getTypeInt() == Event.ONCLICK) {
+                    event.preventDefault();
+                    SwitchingEntryPoint.switchToDesktop();
+                }
             }
         });
-        updateDesktopLink(null);
+
     }
-    
-    protected void updateDesktopLink(final Place place) {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                String link = desktopBaseUrl + Window.Location.getQueryString() + Window.Location.getHash();
-                desktopUi.setHref(link);
-            }
-        });
-    }
+
 
     @UiHandler("changeLanguageLink")
     public void changeLanguage(ClickEvent e) {
