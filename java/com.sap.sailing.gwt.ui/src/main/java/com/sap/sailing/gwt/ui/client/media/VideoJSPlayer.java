@@ -9,19 +9,12 @@ import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
 
 public class VideoJSPlayer extends Widget {
-    
-    private static final String PLAY_EVENT_NAME = "play";
-    private static final String PAUSE_EVENT_NAME = "pause";
-
     private static VideoJSPlayerUiBinder uiBinder = GWT.create(VideoJSPlayerUiBinder.class);
 
     interface VideoJSPlayerUiBinder extends UiBinder<Element, VideoJSPlayer> {
@@ -35,19 +28,6 @@ public class VideoJSPlayer extends Widget {
 
     public VideoJSPlayer() {
         this(true, false);
-        DOM.sinkBitlessEvent(videoElement, PLAY_EVENT_NAME);
-        DOM.sinkBitlessEvent(videoElement, PAUSE_EVENT_NAME);
-        DOM.setEventListener(videoElement, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                if(PLAY_EVENT_NAME.equals(event.getType())) {
-                    fireEvent(new PlayEvent());
-                }
-                if(PAUSE_EVENT_NAME.equals(event.getType())) {
-                    fireEvent(new PauseEvent());
-                }
-            }
-        });
     }
 
     public HandlerRegistration addPlayHandler(PlayEvent.Handler handler) {
@@ -142,12 +122,21 @@ public class VideoJSPlayer extends Widget {
         return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.paused();
     }-*/;
     
+    private void onPlay() {
+        fireEvent(new PlayEvent());
+    }
+    
+    private void onPause() {
+        fireEvent(new PauseEvent());
+    }
+    
     /**
      * JSNI wrapper that does setup the video player
      *
      * @param uniqueId
      */
     native void _onLoad(boolean autoplay) /*-{
+        var that = this;
         var player = $wnd.videojs(
             this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId,
             {
@@ -155,8 +144,14 @@ public class VideoJSPlayer extends Widget {
                 "height" : "auto",
                 "playsInline" : true,
                 "customControlsOnMobile" : true
-            }, 
-            function() {
+            }).ready(function() {
+                this.on('play', function() {
+                  that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
+                });
+                this.on('pause', function() {
+                  that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
+                });
+                
                 console.log("play: " + autoplay);
                 if (autoplay) {
                     this.play();
