@@ -86,7 +86,7 @@ public class EventOverviewStage extends Composite {
         EventOverviewStageContentDTO data = stageData.getStageContent();
         if(data instanceof EventOverviewVideoStageDTO) {
             if(!(lastContent instanceof Video) || ((Video) lastContent).shouldBeReplaced(((EventOverviewVideoStageDTO) data).getVideo().getSourceRef())) {
-                lastContent = new Video(false);
+                lastContent = new Video();
                 ((Video)lastContent).setData((EventOverviewVideoStageDTO) data);
             } 
         } else if (data instanceof EventOverviewTickerStageDTO) {
