@@ -19,7 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsInFinishingPhase
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -79,12 +79,10 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         if (configuration == null) {
             throw new IllegalArgumentException("configuration must not be null");
         }
-        
         this.raceLog = raceLog;
         this.author = author;
         this.factory = factory;
         this.configuration = configuration;
-
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
         this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
@@ -92,10 +90,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
         this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
-
-        this.raceLogListener = new RaceLogChangedVisitor(this);
-        this.raceLog.addListener(raceLogListener);
-
+        this.raceLogListener = new WeakRaceLogChangedVisitor(this.raceLog, this);
         this.cachedIsIndividualRecallDisplayed = false;
     }
     

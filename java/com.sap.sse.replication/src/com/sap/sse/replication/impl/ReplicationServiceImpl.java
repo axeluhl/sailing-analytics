@@ -476,7 +476,14 @@ public class ReplicationServiceImpl implements ReplicationService {
      */
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException {
-        logger.info("Starting to replicate from "+master);
+        final Iterable<Replicable<?, ?>> replicables = getReplicables();
+        startToReplicateFrom(master, replicables);
+    }
+    
+    @Override
+    public void startToReplicateFrom(ReplicationMasterDescriptor master, Iterable<Replicable<?, ?>> replicables)
+            throws IOException, ClassNotFoundException, InterruptedException {
+        logger.info("Starting to replicate from " + master);
         try {
             registerReplicaWithMaster(master);
         } catch (Exception ex) {
@@ -497,14 +504,13 @@ public class ReplicationServiceImpl implements ReplicationService {
             throw ex;
         }
         logger.info("Connection to exchange successful.");
-        final Iterable<Replicable<?, ?>> replicables = replicablesProvider.getReplicables();
         URL initialLoadURL = master.getInitialLoadURL(replicables);
         logger.info("Initial load URL is "+initialLoadURL);
         // start receiving messages already now, but start in suspended mode
         replicator = new ReplicationReceiver(master, replicablesProvider, /* startSuspended */true, consumer);
         // clear Replicable state here, before starting to receive and de-serialized operations which builds up
         // new state, e.g., in competitor store
-        for (Replicable<?, ?> r : getReplicables()) {
+        for (Replicable<?, ?> r : replicables) {
             r.clearReplicaState();
             r.startedReplicatingFrom(master);
         }
@@ -517,7 +523,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
         try {
             final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
-            for (Replicable<?, ?> replicable : getReplicables()) {
+            for (Replicable<?, ?> replicable : replicables) { // absolutely make sure to use the same sequence of replicables as for URL (bug 3015)
                 logger.info("Starting to receive initial load for "+replicable.getId());
                 try {
                     replicable.initiallyFillFrom(gzipInputStream);
@@ -527,9 +533,9 @@ public class ReplicationServiceImpl implements ReplicationService {
                 }
                 logger.info("Done receiving initial load for "+replicable.getId());
             }
+        } finally {
             logger.info("Resuming replicator to apply queues");
             replicator.setSuspended(false); // apply queued operations
-        } finally {
             // delete initial load queue
             DeleteOk deleteOk = consumer.getChannel().queueDelete(queueName);
             logger.info("Deleted queue " + queueName + " used for initial load: " + deleteOk.toString());
