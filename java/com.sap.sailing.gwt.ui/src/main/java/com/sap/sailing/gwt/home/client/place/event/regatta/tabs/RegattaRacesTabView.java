@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,6 +16,10 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
+import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel;
+import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.ListNavigationAction;
+import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.SelectionCallback;
+import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.client.place.event.partials.regattaraces.EventRegattaRaces;
@@ -35,6 +40,27 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
+    
+    private enum Navigation implements ListNavigationAction {
+        LATEST_UPDATE("Latest update TODO", false),
+        CHRONOLOGICALLY("Chronologically TODO", false),
+        COMPETITION_FORMAT("Competition Format TODO", true);
+        private final String displayName;
+        private final boolean showAdditionalWidget;
+        private Navigation(String displayName, boolean showAdditionalWidget) {
+            this.displayName = displayName;
+            this.showAdditionalWidget = showAdditionalWidget;
+        }
+        @Override
+        public String getDisplayName() {
+            return displayName;
+        }
+        
+        @Override
+        public boolean isShowAdditionalWidget() {
+            return showAdditionalWidget;
+        }
+    }
 
     interface MyBinder extends UiBinder<HTMLPanel, RegattaRacesTabView> {
     }
@@ -43,11 +69,17 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
 
     private Presenter currentPresenter;
 
+    @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
     @UiField FlowPanel latestUpdateContainer;
     @UiField SimplePanel oldContentContainer;
 
     public RegattaRacesTabView() {
+        listNavigationPanelUi = new ListNavigationPanel<Navigation>(new RegattaRacesTabViewNavigationSelectionCallback());
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
+        listNavigationPanelUi.setAdditionalWidget(new RaceStateLegend());
+        listNavigationPanelUi.addAction(Navigation.LATEST_UPDATE, true);
+        listNavigationPanelUi.addAction(Navigation.CHRONOLOGICALLY, false);
+        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
     }
 
     @Override
@@ -129,6 +161,14 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }
         }
         return result;
+    }
+    
+    private class RegattaRacesTabViewNavigationSelectionCallback implements SelectionCallback<Navigation> {
+        @Override
+        public void onSelectAction(Navigation action) {
+            Display displayStyle = action == Navigation.LATEST_UPDATE ? Display.BLOCK : Display.NONE;
+            latestUpdateContainer.getElement().getStyle().setDisplay(displayStyle);
+        }        
     }
     
     private class RaceListFinishedRaces extends AbstractRaceList<LiveRaceDTO> {
