@@ -36,16 +36,23 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         Event event = context.getRacingEventService().getEvent(eventId);
         final Map<String, RegattaMetadataDTO> regattas = mapRegattas(event);
         final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
+        EventState eventState = HomeServiceUtil.calculateEventState(event);
         
-        EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
-            @Override
-            public void doForRace(RaceContext context) {
-                LiveRaceDTO liveRace = context.getLiveRaceOrNull();
-                if(liveRace != null) {
-                    ensureRegatta(context, regattas, regattasWithRaces).add(liveRace);
+        final long ttl;
+        if(eventState == EventState.RUNNING) {
+            EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
+                @Override
+                public void doForRace(RaceContext context) {
+                    LiveRaceDTO liveRace = context.getLiveRaceOrNull();
+                    if(liveRace != null) {
+                        ensureRegatta(context, regattas, regattasWithRaces).add(liveRace);
+                    }
                 }
-            }
-        });
+            });
+            ttl = 1000 * 60 * 2;
+        } else {
+            ttl = EventActionUtil.calculateTtlForNonLiveEvent(event, eventState);
+        }
         
         final TreeSet<RegattaMetadataDTO> regattasWithoutRaces = new TreeSet<>();
         for(RegattaMetadataDTO regatta : regattas.values()) {
@@ -54,13 +61,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
             }
         }
         
-        RegattasAndLiveRacesDTO result = new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces);
-        long ttl = 1000 * 60 * 7;
-        EventState eventState = HomeServiceUtil.calculateEventState(event);
-        if(eventState == EventState.RUNNING) {
-            ttl = 1000 * 60 * 2;
-        }
-        return new ResultWithTTL<RegattasAndLiveRacesDTO>(ttl, result);
+        return new ResultWithTTL<RegattasAndLiveRacesDTO>(ttl, new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces));
     }
 
     @GwtIncompatible
