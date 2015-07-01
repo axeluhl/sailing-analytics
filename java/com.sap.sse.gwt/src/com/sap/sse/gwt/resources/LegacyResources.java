@@ -18,4 +18,10 @@ public interface LegacyResources extends ClientBundle {
 
     @Source("highcharts/js/themes/grid.js")
     TextResource highchartsThemeGrid();
+
+    @Source("highcharts/js/modules/exporting.js")
+    TextResource highchartsModuleExport();
+
+    @Source("highcharts/js/highcharts-more.js")
+    TextResource highchartsMore();
 }
