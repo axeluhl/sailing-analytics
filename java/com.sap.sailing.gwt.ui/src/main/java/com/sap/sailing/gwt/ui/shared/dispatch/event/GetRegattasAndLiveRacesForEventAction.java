@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 
@@ -37,7 +37,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         final Map<String, RegattaMetadataDTO> regattas = mapRegattas(event);
         final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
         
-        RacesActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
+        EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
             @Override
             public void doForRace(RaceContext context) {
                 LiveRaceDTO liveRace = context.getLiveRaceOrNull();

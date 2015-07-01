@@ -105,7 +105,7 @@ public class EventOverviewStage extends Composite {
             setStageData(new EventOverviewStageDTO(null, new EventOverviewTickerStageDTO(null, null, null)));
         }
         
-        if(news.isEmpty()) {
+        if(news == null || news.isEmpty()) {
             updatesWrapperUi.getStyle().setDisplay(Display.NONE);
             stage.removeStyleName(mediaCss.medium7());
             stage.removeStyleName(mediaCss.large8());
