@@ -7,6 +7,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MetaElement;
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
@@ -15,10 +17,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.home.desktop.DesktopEntryPoint;
 import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
+import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 
 public class SwitchingEntryPoint implements EntryPoint {
     private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
-
+    private static final PlaceHistoryMapper appHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";
     private static final RegExp isMobileRegExp = RegExp.compile(
             "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini", "i");
@@ -128,5 +131,18 @@ public class SwitchingEntryPoint implements EntryPoint {
         metaElement.setName(name);
         metaElement.setContent(content);
         Document.get().getHead().appendChild(metaElement);
+    }
+
+
+    public static void switchToDesktop(Place desktopPlace) {
+        String destinationInDesktop = Window.Location.createUrlBuilder()
+                .setHash(appHistoryMapper.getToken(desktopPlace)).buildString();
+        if (isMobile()) {
+            Cookies.setCookie(SAPSAILING_MOBILE, "false");
+        } else {
+            Cookies.removeCookie(SAPSAILING_MOBILE);
+        }
+        Window.Location.assign(destinationInDesktop);
+        ;
     }
 }

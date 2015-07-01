@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -14,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -35,7 +35,13 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     public MinileaderboardBox() {
         initWidget(uiBinder.createAndBindUi(this));
         headerUi.setInfoText(StringMessages.INSTANCE.details());
-        headerUi.setClickAction("HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash());
+
+        headerUi.setClickAction(new Runnable() {
+            @Override
+            public void run() {
+                SwitchingEntryPoint.switchToDesktop();
+            }
+        });
     }
 
     @Override

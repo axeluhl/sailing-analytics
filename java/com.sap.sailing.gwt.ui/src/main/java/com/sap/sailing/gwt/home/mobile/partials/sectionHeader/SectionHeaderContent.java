@@ -8,7 +8,12 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
@@ -75,8 +80,20 @@ public class SectionHeaderContent extends Widget {
     
     public void setClickAction(final String url) {
         headerMainUi.setHref(url);
+        DOM.setEventListener(headerMainUi, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+            }
+        });
         headerRightUi.getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
+    }
+
+    public void setClickAction(final Runnable commandToExecute) {
+        headerMainUi.setHref(Window.Location.getHref());
+        headerRightUi.getStyle().clearDisplay();
+        actionArrowUi.getStyle().clearDisplay();
+        LinkUtil.configureForAction(headerMainUi, commandToExecute);
     }
     
 }

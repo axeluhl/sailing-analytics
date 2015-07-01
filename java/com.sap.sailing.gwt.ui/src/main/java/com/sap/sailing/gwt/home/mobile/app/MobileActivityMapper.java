@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.notmobile.NotMobileActivityProxy;
+import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 
@@ -29,7 +29,8 @@ public class MobileActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place place) {
         if (!(place instanceof HasMobileVersion)) {
-            return new NotMobileActivityProxy(lastVisitedPlace, place, clientFactory);
+            SwitchingEntryPoint.switchToDesktop(place);
+            return null;
         }
         if (place instanceof StartPlace) {
             // going to events place
