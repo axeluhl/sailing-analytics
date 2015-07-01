@@ -94,7 +94,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      */
     @Override
     default void serializeForInitialReplication(OutputStream os) throws IOException {
-        serializeForInitialReplicationInternal(new ObjectOutputStream(os));
+        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
+        serializeForInitialReplicationInternal(objectOutputStream);
+        objectOutputStream.flush();
     }
     
     @Override

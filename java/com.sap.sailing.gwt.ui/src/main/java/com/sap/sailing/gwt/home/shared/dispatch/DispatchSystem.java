@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.dispatch;
 
-public interface DispatchSystem extends DispatchAsync {
+import java.util.Date;
 
+public interface DispatchSystem extends DispatchAsync {
+    Date getCurrentServerTime();
 }

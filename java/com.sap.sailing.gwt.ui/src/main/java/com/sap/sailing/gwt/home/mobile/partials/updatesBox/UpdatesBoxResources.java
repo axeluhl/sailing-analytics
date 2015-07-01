@@ -17,6 +17,7 @@ public interface UpdatesBoxResources extends ClientBundle {
         String box_content_item();
         String updatesbox();
         String updatesbox_item();
+        String updatesbox_item_live();
         String updatesbox_itemlink();
         String updatesbox_item_icon();
         String updatesbox_item_content();

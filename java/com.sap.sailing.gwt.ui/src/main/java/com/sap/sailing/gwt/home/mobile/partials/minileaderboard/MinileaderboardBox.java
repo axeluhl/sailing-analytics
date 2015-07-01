@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -15,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
@@ -34,19 +34,18 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     public MinileaderboardBox() {
         initWidget(uiBinder.createAndBindUi(this));
+        headerUi.setInfoText(StringMessages.INSTANCE.details());
+        headerUi.setClickAction("HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash());
     }
 
     @Override
     public void setData(final GetMiniLeaderboardDTO data, long nextUpdate, int updateNo) {
         setData(data);
-        headerUi.setInfoText(StringMessages.INSTANCE.details());
-        headerUi.setClickAction(new Command() {
-            @Override
-            public void execute() {
-                String link = "HomeDesktop.html" + Window.Location.getQueryString() + Window.Location.getHash();
-                Window.Location.assign(link);
-            }
-        });
+    }
+    
+    public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
+        headerUi.setInfoText(infoText);
+        headerUi.setClickAction(placeNavigation);
     }
 
     public void setData(final GetMiniLeaderboardDTO data) {

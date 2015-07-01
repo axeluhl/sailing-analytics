@@ -11,9 +11,7 @@
 		<div
 			class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
 			<figure class="{local_res.css.videopreview}">
-				<g:HTMLPanel styleName="{local_res.css.videopreview_videocontainer}" ui:field="videoHolderUi">
-					
-				</g:HTMLPanel>
+				<g:SimplePanel styleName="{local_res.css.videopreview_videocontainer}" ui:field="videoHolderUi" />
 				<figcaption ui:field="videoTitleWrapper">
 					<span ui:field="videoTitle" class="{local_res.css.videopreview_title}" />
 				</figcaption>

@@ -10,8 +10,6 @@ public abstract class NewsEntryDTO implements DTO {
     
     private Date newsTimestamp;
     
-    private Date currentTimestamp;
-    
     private String title;
 
     private String externalURL;
@@ -20,15 +18,14 @@ public abstract class NewsEntryDTO implements DTO {
     }
     
     @GwtIncompatible
-    public NewsEntryDTO(String title, Date timestamp, Date currentTimestamp, URL externalURL) {
-        this(title, timestamp, currentTimestamp, externalURL == null ? null : externalURL.toString());
+    public NewsEntryDTO(String title, Date timestamp, URL externalURL) {
+        this(title, timestamp, externalURL == null ? null : externalURL.toString());
     }
     
     @GwtIncompatible
-    private NewsEntryDTO(String title, Date newsTimestamp, Date currentTimestamp, String externalURL) {
+    private NewsEntryDTO(String title, Date newsTimestamp, String externalURL) {
         this.title = title;
         this.newsTimestamp = newsTimestamp;
-        this.currentTimestamp = currentTimestamp;
         this.externalURL = externalURL;
     }
 
@@ -46,9 +43,5 @@ public abstract class NewsEntryDTO implements DTO {
     
     public String getExternalURL() {
         return externalURL;
-    }
-
-    public Date getCurrentTimestamp() {
-        return currentTimestamp;
     }
 }

@@ -1024,7 +1024,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // competitor has finished race at or before the requested time point; use time point of crossing the finish line
                     end = markPassings.last().getTimePoint();
                 } else if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
-                        (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)
+                        (!trackedLegOfCompetitor.hasFinishedLeg(getEndOfTracking())
                         && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
                                 || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
                     // If the race is no longer tracking and hence no more data can be expected, and the competitor

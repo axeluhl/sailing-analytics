@@ -56,11 +56,12 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
         return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
     }
 
-    @Override
-    public void gotoNewsPlace(List<NewsEntryDTO> values) {
-        clientFactory.getPlaceController().goTo(new LatestNewsPlace(place.getCtx(), values));
-    }
 
+    @Override
+    public PlaceNavigation<?> getNewsPlaceNavigation(List<NewsEntryDTO> values) {
+        return clientFactory.getNavigator().getEventLastestNewsNavigation(getCtx(), values, null, false);
+    }
+    
     @Override
     public EventContext getCtx() {
         return place.getCtx();

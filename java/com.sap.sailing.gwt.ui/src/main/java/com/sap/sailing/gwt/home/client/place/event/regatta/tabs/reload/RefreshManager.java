@@ -11,7 +11,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.ActionProvider.DefaultActionProvider;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchAsync;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
@@ -28,11 +28,11 @@ public class RefreshManager {
         }
     };
 
-    private final DispatchAsync actionExecutor;
+    private final DispatchSystem actionExecutor;
 
     private Widget container;
 
-    public RefreshManager(Widget container, DispatchAsync actionExecutor) {
+    public RefreshManager(Widget container, DispatchSystem actionExecutor) {
         this.container = container;
         this.actionExecutor = actionExecutor;
         container.addAttachHandler(new Handler() {
@@ -122,6 +122,10 @@ public class RefreshManager {
 
     public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<D> widget, A action) {
         add(widget, new DefaultActionProvider<>(action));
+    }
+    
+    public DispatchSystem getDispatchSystem() {
+        return actionExecutor;
     }
 
     private static class RefreshHolder<D extends DTO, A extends Action<ResultWithTTL<D>>> {

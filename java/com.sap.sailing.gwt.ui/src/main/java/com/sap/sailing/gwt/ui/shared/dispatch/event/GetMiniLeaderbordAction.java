@@ -26,14 +26,20 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
     @SuppressWarnings("unused")
     private UUID eventId;
     private String leaderboardName;
+    private int limit = 0;
 
     @SuppressWarnings("unused")
     private GetMiniLeaderbordAction() {
     }
 
     public GetMiniLeaderbordAction(UUID eventId, String leaderboardName) {
+        this(eventId, leaderboardName, 0);
+    }
+    
+    public GetMiniLeaderbordAction(UUID eventId, String leaderboardName, int limit) {
         this.eventId = eventId;
         this.leaderboardName = leaderboardName;
+        this.limit = limit;
     }
 
     @Override
@@ -61,6 +67,7 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
                 rank++;
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 result.addItem(new MiniLeaderboardItemDTO(competitor, rank, row.totalPoints));
+                if (limit > 0 && rank >= limit) break;
             }
             int ttl = isLive ? 1000 * 60 : 1000 * 60 * 2;
             return new ResultWithTTL<>(ttl, result);

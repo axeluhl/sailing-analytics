@@ -30,7 +30,7 @@ public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
                 while (true) {
                     try {
                         Reference<?> ref = queue.remove();
-                        WeakRaceLogChangedVisitor visitor = referenceToVisitor.get(ref);
+                        WeakRaceLogChangedVisitor visitor = referenceToVisitor.remove(ref);
                         visitor.removeListener();
                     } catch (InterruptedException e) {
                         logger.log(Level.SEVERE, "Error trying to clean weak reference", e);

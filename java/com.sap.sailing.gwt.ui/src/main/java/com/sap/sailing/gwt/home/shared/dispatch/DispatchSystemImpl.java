@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.dispatch;
 
+import java.util.Date;
+
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
@@ -33,4 +35,8 @@ public class DispatchSystemImpl implements DispatchSystem {
         dispatch.execute(action, wrappedCallback);
     }
 
+    @Override
+    public Date getCurrentServerTime() {
+        return new Date(System.currentTimeMillis() + simpleDispatch.getClientServerOffset());
+    }
 }

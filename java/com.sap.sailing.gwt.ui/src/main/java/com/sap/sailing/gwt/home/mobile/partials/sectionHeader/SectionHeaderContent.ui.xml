@@ -4,7 +4,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
-	<div ui:field="headerMainUi">
+	<a style="display:block;" ui:field="headerMainUi">
 		<div class="{local_res.css.sectionheader_item}" ui:field="headerLeftUi">
 			<div class="{local_res.css.sectionheader_item_image}" style="display:none;" ui:field="imageUi">
 	        	<div class="{local_res.css.sectionheader_item_image_seperator}"></div>
@@ -20,5 +20,5 @@
 			<img src="images/mobile/arrow-grey-right.png" alt="" class="{local_res.css.sectionheader_item_arrow}"
 				style="display:none;" ui:field="actionArrowUi"></img>
 		</div>
-	</div>
+	</a>
 </ui:UiBinder>

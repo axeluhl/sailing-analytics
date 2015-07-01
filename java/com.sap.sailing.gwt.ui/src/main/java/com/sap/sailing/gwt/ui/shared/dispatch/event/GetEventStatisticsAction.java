@@ -64,9 +64,12 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
         Triple<Competitor, Speed, TimePoint> maxSpeed = null;
         final TimePoint now = MillisecondsTimePoint.now();
         final Set<Leaderboard> leaderboards = new HashSet<>();
+        final boolean series = HomeServiceUtil.isFakeSeries(event);
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                leaderboards.add(leaderboard);
+                if(!series || HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                    leaderboards.add(leaderboard);
+                }
             }
         }
         for (Leaderboard leaderboard : leaderboards) {

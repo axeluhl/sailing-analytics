@@ -6,9 +6,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
@@ -29,9 +29,11 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
     private boolean dontDrillDown = false;
     private boolean dontHide = false;
     private NewsItemLinkProvider presenter;
+    private final RefreshManager refreshManager;
 
-    public UpdatesBox(NewsItemLinkProvider presenter) {
+    public UpdatesBox(NewsItemLinkProvider presenter, RefreshManager refreshManager) {
         this.presenter = presenter;
+        this.refreshManager = refreshManager;
         UpdatesBoxResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         if (!dontHide) {
@@ -56,15 +58,10 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
             getElement().getStyle().clearDisplay();
             itemContainerUi.clearContent();
             for (NewsEntryDTO newsEntryDTO : data) {
-                itemContainerUi.addContent(new UpdatesBoxItem(newsEntryDTO, presenter));
+                itemContainerUi.addContent(new UpdatesBoxItem(newsEntryDTO, refreshManager.getDispatchSystem().getCurrentServerTime(), presenter));
             }
             if (!dontDrillDown) {
-                headerUi.setClickAction(new Command() {
-                    @Override
-                    public void execute() {
-                        presenter.gotoNewsPlace(data);
-                    }
-                });
+                headerUi.setClickAction(presenter.getNewsPlaceNavigation(data));
             }
         }
     }

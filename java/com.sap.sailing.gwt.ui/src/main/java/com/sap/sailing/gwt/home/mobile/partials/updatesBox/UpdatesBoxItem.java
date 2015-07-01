@@ -8,14 +8,14 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.util.ConditionalDateTimeFormatter;
 
 public class UpdatesBoxItem extends Widget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -29,7 +29,7 @@ public class UpdatesBoxItem extends Widget {
     @UiField DivElement messageUi;
     @UiField DivElement timestampUi;
     
-    public UpdatesBoxItem(NewsEntryDTO entry, NewsItemLinkProvider provider) {
+    public UpdatesBoxItem(NewsEntryDTO entry, Date currentTimestamp, NewsItemLinkProvider provider) {
         setElement(uiBinder.createAndBindUi(this));
         
         titleUi.setInnerText(entry.getTitle());
@@ -40,11 +40,14 @@ public class UpdatesBoxItem extends Widget {
             icon.getStyle().setBackgroundImage("url(\"" + BoatClassImageResolver.getBoatClassIconResource(boatClass).getSafeUri().asString() + "\")");
         }
         
-        Date timestamp = entry.getTimestamp();
-        if(timestamp == null) {
+        Date newsTimestamp = entry.getTimestamp();
+        if(newsTimestamp == null || currentTimestamp == null) {
             timestampUi.removeFromParent();
         } else {
-            timestampUi.setInnerText(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(timestamp));
+            timestampUi.setInnerText(ConditionalDateTimeFormatter.format(newsTimestamp, currentTimestamp, StringMessages.INSTANCE));
+            if (currentTimestamp.getTime() - 600_000 < newsTimestamp.getTime()) {
+                timestampUi.addClassName(UpdatesBoxResources.INSTANCE.css().updatesbox_item_live());
+            }
         }
         
         String directLink = entry.getExternalURL();

@@ -110,3 +110,6 @@
     display: inline;
   }
 }
+.updatesbox_item_live {
+  color: red;
+}
