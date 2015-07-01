@@ -431,4 +431,7 @@
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
 
+    <string name="dependent_races_absolute">Absolute Startzeit</string>
+    <string name="dependent_races_relative">Relative Startzeit</string>
+    <string name="minutes_after">Minuten nach</string>
 </resources>

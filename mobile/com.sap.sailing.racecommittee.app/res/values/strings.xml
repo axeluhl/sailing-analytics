@@ -450,5 +450,8 @@
     <string name="error_finishing_time">The selected time is before the race start.</string>
     <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
     <string name="error_wrong_race_state">The RaceState isn\'t in the correct state (needed: %1$s - current: %2$s)</string>
+    <string name="dependent_races_absolute">Absolute Start Time</string>
+    <string name="dependent_races_relative">Relative Start Time</string>
+    <string name="minutes_after">Minutes after</string>
 
 </resources>

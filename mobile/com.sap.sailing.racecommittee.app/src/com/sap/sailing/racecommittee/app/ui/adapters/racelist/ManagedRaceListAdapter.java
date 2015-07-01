@@ -69,7 +69,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mShownViewItems = viewItems;
         mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
-        dateFormat = new SimpleDateFormat("HH:mm", getContext().getResources().getConfiguration().locale);
+        dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
     }
 
     @Override

@@ -6,11 +6,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.TimePicker;
+import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -20,6 +18,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -32,8 +31,15 @@ public class StartTimeFragment extends BaseFragment
     private static final String START_MODE = "startMode";
     private static final int FUTURE_DAYS = 25;
     private static final int PAST_DAYS = -3;
+    private static final int MAX_DIFF_MIN = 60;
+
+    private View mSelect;
+    private View mRelative;
+    private View mAbsolute;
+    private ToggleButton mToggle;
 
     private NumberPicker mDatePicker;
+    private NumberPicker mTimeOffset;
     private TimePicker mTimePicker;
     private TextView mCountdown;
     private TextView mDebugTime;
@@ -75,6 +81,14 @@ public class StartTimeFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
+        mSelect = ViewHolder.get(layout, R.id.time_select);
+        mRelative = ViewHolder.get(layout, R.id.time_relative);
+        mAbsolute = ViewHolder.get(layout, R.id.time_absolute);
+
+        if (preferences.isDependentRacesAllowed()) {
+            mSelect.setVisibility(View.VISIBLE);
+        }
+
         mCountdown = ViewHolder.get(layout, R.id.start_countdown);
         mMinuteInc = ViewHolder.get(layout, R.id.minute_inc);
         if (mMinuteInc != null) {
@@ -86,13 +100,22 @@ public class StartTimeFragment extends BaseFragment
             mMinuteDec.setOnClickListener(this);
         }
 
-        Button setStart = ViewHolder.get(layout, R.id.set_date_time);
+        Button setStart = ViewHolder.get(layout, R.id.set_start_time_absolute);
         if (setStart != null) {
             setStart.setOnClickListener(this);
         }
 
-        mDebugTime = ViewHolder.get(layout, R.id.debug_time);
+        mToggle = ViewHolder.get(layout, R.id.switch_start_time);
+        if (mToggle != null) {
+            mToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    showInputView(isChecked);
+                }
+            });
+        }
 
+        mDebugTime = ViewHolder.get(layout, R.id.debug_time);
         return layout;
     }
 
@@ -170,14 +193,14 @@ public class StartTimeFragment extends BaseFragment
                 }
             }
 
-            mDatePicker = ViewHolder.get(getView(), R.id.date_picker);
+            mDatePicker = ViewHolder.get(getView(), R.id.start_date_picker);
             if (mDatePicker != null) {
                 ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mDatePicker.setOnValueChangedListener(this);
                 TimeUtils.initDatePicker(getActivity(), mDatePicker, time, PAST_DAYS, FUTURE_DAYS);
                 mDatePicker.setValue(Math.abs(PAST_DAYS));
             }
-            mTimePicker = ViewHolder.get(getView(), R.id.time_picker);
+            mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
                 ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
                 mTimePicker.setOnTimeChangedListener(this);
@@ -199,7 +222,18 @@ public class StartTimeFragment extends BaseFragment
                 mTimePicker.setCurrentMinute(minutes);
                 mTimePicker.setTag(time.get(Calendar.SECOND));
             }
+
+            mTimeOffset = ViewHolder.get(getView(), R.id.time_offset);
+            if (mTimeOffset != null) {
+                ThemeHelper.setPickerTextColor(getActivity(), mTimeOffset, ThemeHelper.getColor(getActivity(), R.attr.white));
+                mTimeOffset.setMinValue(0);
+                mTimeOffset.setMaxValue(MAX_DIFF_MIN);
+                mTimeOffset.setWrapSelectorWheel(false);
+                mTimeOffset.setValue(preferences.getDependentRacesOffset());
+            }
         }
+
+        showInputView(mToggle.isChecked());
     }
 
     @Override
@@ -265,6 +299,16 @@ public class StartTimeFragment extends BaseFragment
         }
     }
 
+    private void showInputView(boolean isChecked) {
+        if (isChecked) {
+            mAbsolute.setVisibility(View.GONE);
+            mRelative.setVisibility(View.VISIBLE);
+        } else {
+            mAbsolute.setVisibility(View.VISIBLE);
+            mRelative.setVisibility(View.GONE);
+        }
+    }
+
     private void setButtonTime(TimePoint timePoint, boolean reverse) {
         mCalendar.setTime(timePoint.asDate());
         mTimeLeft = getNewTime(mCalendar, (reverse) ? 1 : 0);
@@ -315,8 +359,12 @@ public class StartTimeFragment extends BaseFragment
             setPickerTime();
             break;
 
-        case R.id.set_date_time:
+        case R.id.set_start_time_absolute:
             changeFragment(mStartTime);
+            break;
+
+        case R.id.set_start_time_relative:
+
             break;
 
         case R.id.header_text:
@@ -351,34 +399,53 @@ public class StartTimeFragment extends BaseFragment
 
         int days = TimeUtils.daysBetween(today, newTime) + Math.abs(PAST_DAYS);
 
-        mDatePicker.setValue(days);
-        mTimePicker.setCurrentHour(newTime.get(Calendar.HOUR_OF_DAY));
-        mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
+        if (mDatePicker != null) {
+            mDatePicker.setValue(days);
+        }
+        if (mTimePicker != null) {
+            mTimePicker.setCurrentHour(newTime.get(Calendar.HOUR_OF_DAY));
+            mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
+        }
     }
 
     private TimePoint getPickerTime() {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
-        calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
-        calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
+        if (mDatePicker != null) {
+            calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
+        }
+        if (mTimePicker != null) {
+            calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
+            calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
+        }
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return new MillisecondsTimePoint(calendar.getTime());
     }
 
     private void changeFragment() {
-        changeFragment(null);
+        changeFragment(null, null, null);
     }
 
     private void changeFragment(TimePoint startTime) {
+        changeFragment(startTime, null, null);
+    }
+
+    private void changeFragment(TimePoint startTime, Duration startTimeDiff, SimpleRaceLogIdentifier dependentRace) {
         int viewId = R.id.racing_view_container;
+        TimePoint now = MillisecondsTimePoint.now();
         RaceFragment fragment = MainScheduleFragment.newInstance();
         Bundle args = getRecentArguments();
         RacingProcedureType procedureType = getRaceState().getTypedRacingProcedure().getType();
-        getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
+        getRaceState().setRacingProcedure(now, procedureType);
         if (getArguments() != null && startTime != null) {
             if (getArguments().getInt(START_MODE, 0) != 0) {
-                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), startTime);
+                if (startTimeDiff == null && dependentRace == null) {
+                    // absolute start time
+                    getRaceState().forceNewStartTime(now, startTime);
+                } else {
+                    // relative start time
+                    getRaceState().forceNewDependentStartTime(now, startTimeDiff, dependentRace);
+                }
                 fragment = RaceFlagViewerFragment.newInstance();
                 viewId = R.id.race_frame;
             }
