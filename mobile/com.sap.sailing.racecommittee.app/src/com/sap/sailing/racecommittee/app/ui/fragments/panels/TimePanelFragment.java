@@ -112,7 +112,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
             TimePoint startTime = getRace().getState().getStartTime();
 
             if (mTimeStart != null && startTime != null) {
-                mTimeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
+                mTimeStart.setText(getString(R.string.time_start, dateFormat.format(startTime.asDate())));
             }
 
             if (mTimeFinish != null) {
@@ -129,7 +129,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                     resId = R.string.race_start_time_ago;
                     time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
                 }
-                mHeaderTime.setText(getString(resId).replace("#TIME#", time));
+                mHeaderTime.setText(getString(resId, time));
             }
         }
     }

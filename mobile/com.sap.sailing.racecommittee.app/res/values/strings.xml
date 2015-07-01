@@ -246,8 +246,8 @@
     <string name="race_start_in_4_minutes">4 Minutes</string>
     <string name="race_start_in_2_minutes">2 Minutes</string>
     <string name="race_start_in_1_minute">1 Minute</string>
-    <string name="race_start_time_in">-#TIME#</string>
-    <string name="race_start_time_ago">#TIME#</string>
+    <string name="race_start_time_in">-%s</string>
+    <string name="race_start_time_ago">%s</string>
     <string name="race_set_time">Set Time</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
@@ -328,7 +328,7 @@
 
     <string name="time_up">Up in #TIME#</string>
     <string name="time_down">Down in #TIME#</string>
-    <string name="time_start">Start #TIME#</string>
+    <string name="time_start">Start %s</string>
     <string name="time_finish">Finish N/A</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Set Signal</string>

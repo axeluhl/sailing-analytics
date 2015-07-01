@@ -239,13 +239,13 @@ public class StartTimeFragment extends BaseFragment
         }
 
         if (mCountdown != null) {
-            String countdown = getString(resId).replace("#TIME#", time);
+            String countdown = getString(resId, time);
             mCountdown.setText(countdown);
             mCountdown.setTag(resId);
         }
 
         if (mMinuteDec != null) {
-            String countdown = getString(resId).replace("#TIME#", timeLeft);
+            String countdown = getString(resId, timeLeft);
             if (countdown.equals("-00:00:00")) {
                 countdown = "00:00:00";
             }
@@ -253,7 +253,7 @@ public class StartTimeFragment extends BaseFragment
         }
 
         if (mMinuteInc != null) {
-            String countdown = getString(resId).replace("#TIME#", timeRight);
+            String countdown = getString(resId, timeRight);
             if (countdown.equals("-00:00:00")) {
                 countdown = "00:00:00";
             }
