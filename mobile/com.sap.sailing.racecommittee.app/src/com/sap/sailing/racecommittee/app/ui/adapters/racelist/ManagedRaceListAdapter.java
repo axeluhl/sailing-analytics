@@ -352,8 +352,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
         if (flag != null && arrow != null && timer != null) {
             current_flag.setImageDrawable(flag);
-            arrow_direction.setImageDrawable(arrow);
             flag_timer.setText(timer);
+            flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
             race_flag.setVisibility(View.VISIBLE);
         }
     }
