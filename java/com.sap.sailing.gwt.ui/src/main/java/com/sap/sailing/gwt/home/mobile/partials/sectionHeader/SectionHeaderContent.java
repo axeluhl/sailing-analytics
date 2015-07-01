@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.partials.sectionHeader;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -22,7 +23,7 @@ public class SectionHeaderContent extends Widget {
     
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
-    interface MyBinder extends UiBinder<AnchorElement, SectionHeaderContent> {
+    interface MyBinder extends UiBinder<Element, SectionHeaderContent> {
     }
 
     @UiField AnchorElement headerMainUi;
