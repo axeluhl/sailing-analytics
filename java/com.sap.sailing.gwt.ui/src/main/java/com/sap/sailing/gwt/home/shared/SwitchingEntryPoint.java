@@ -17,14 +17,18 @@ import com.sap.sailing.gwt.home.desktop.DesktopEntryPoint;
 import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
 
 public class SwitchingEntryPoint implements EntryPoint {
-    private Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
+    private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
+
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";
+    private static final RegExp isMobileRegExp = RegExp.compile(
+            "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini", "i");
+
     @Override
     public void onModuleLoad() {
-        String startMobile = Cookies.getCookie(SAPSAILING_MOBILE);
-        if (startMobile != null) {
+        String startMobileCookie = Cookies.getCookie(SAPSAILING_MOBILE);
+        if (startMobileCookie != null) {
             // use user defined preferences
-            if (Boolean.valueOf(startMobile)) {
+            if (Boolean.valueOf(startMobileCookie)) {
                 LOG.info("Switching to mobile by stored cookie");
                 startMobile();
             } else {
@@ -32,12 +36,7 @@ public class SwitchingEntryPoint implements EntryPoint {
                 startDesktop();
             }
         } else {
-            RegExp regExp = RegExp.compile("Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini", "i");
-            // if( .test(navigator.userAgent) ) 
-            LOG.info("User agent: " + Navigator.getUserAgent());
-            boolean matches = regExp.test(Navigator.getUserAgent());
-            LOG.info("Matches?" + matches);
-            if (matches) {
+            if (isMobile()) {
                 LOG.info("Identified mobile browser by user agent");
                 startMobile();
             } else {
@@ -45,16 +44,45 @@ public class SwitchingEntryPoint implements EntryPoint {
                 startDesktop();
             }
         }
-        
+    }
+
+    /**
+     * Uses regular expression and user agent to detect mobile device.
+     * 
+     * @return
+     */
+    public static boolean isMobile() {
+        boolean isMobile = isMobileRegExp.test(Navigator.getUserAgent());
+        LOG.info("Navigator user agent matched mobile regex: " + isMobile);
+        return isMobile;
     }
     
+    /**
+     * Convinience method
+     * 
+     * @return
+     */
+    public static boolean isDesktop() {
+        return !isMobile();
+    }
+
     public static void switchToDesktop() {
-        Cookies.setCookie(SAPSAILING_MOBILE, "false");
+        if (isDesktop()) {
+            Cookies.removeCookie(SAPSAILING_MOBILE);
+        } else {
+            // only force "not mobile" on mobile devices
+            Cookies.setCookie(SAPSAILING_MOBILE, "false");
+        }
         Window.Location.reload();
     }
 
     public static void switchToMobile() {
-        Cookies.setCookie(SAPSAILING_MOBILE, "true");
+        if (isMobile()) {
+            Cookies.removeCookie(SAPSAILING_MOBILE);
+        } else {
+            // only force mobile version on desktop
+            Cookies.setCookie(SAPSAILING_MOBILE, "true");
+        }
         Window.Location.reload();
     }
 
