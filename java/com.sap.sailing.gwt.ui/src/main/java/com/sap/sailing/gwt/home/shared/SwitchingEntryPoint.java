@@ -38,7 +38,8 @@ public class SwitchingEntryPoint implements EntryPoint {
         if (hash != null && hash.startsWith("#")) {
             hash = hash.substring(1);
         }
-        Place place = placeUpdater.getRealPlace(hisMap.getPlace(hash));
+        Place rawPlace = hisMap.getPlace(hash);
+        Place place = placeUpdater.getRealPlace(rawPlace);
         GWT.log("Hash: " + hash);
         if (place != null && !(place instanceof HasMobileVersion)) {
             startDesktop();
