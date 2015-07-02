@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.home.desktop.DesktopEntryPoint;
 import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class SwitchingEntryPoint implements EntryPoint {
@@ -27,7 +28,8 @@ public class SwitchingEntryPoint implements EntryPoint {
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";
     private static final RegExp isMobileRegExp = RegExp.compile(
             "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini", "i");
-    private PlaceHistoryMapper hisMap = GWT.create(ApplicationHistoryMapper.class);
+    private final PlaceHistoryMapper hisMap = GWT.create(ApplicationHistoryMapper.class);
+    private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
     @Override
     public void onModuleLoad() {
@@ -36,7 +38,7 @@ public class SwitchingEntryPoint implements EntryPoint {
         if (hash != null && hash.startsWith("#")) {
             hash = hash.substring(1);
         }
-        Place place = hisMap.getPlace(hash);
+        Place place = placeUpdater.getRealPlace(hisMap.getPlace(hash));
         GWT.log("Hash: " + hash);
         if (place != null && !(place instanceof HasMobileVersion)) {
             startDesktop();

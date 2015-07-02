@@ -14,27 +14,9 @@ import com.sap.sailing.gwt.home.client.place.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventActivityProxy;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
-import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivityProxy;
@@ -46,10 +28,12 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
+import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class ApplicationActivityMapper implements ActivityMapper {
     private final ApplicationClientFactory clientFactory;
+    private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
     public ApplicationActivityMapper(ApplicationClientFactory clientFactory) {
         super();
@@ -57,7 +41,8 @@ public class ApplicationActivityMapper implements ActivityMapper {
     }
 
     @Override
-    public Activity getActivity(Place place) {
+    public Activity getActivity(Place rawPlace) {
+        Place place = placeUpdater.getRealPlace(rawPlace);
         if (place instanceof HasMobileVersion && !SwitchingEntryPoint.isForcedDesktop()) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
@@ -73,10 +58,6 @@ public class ApplicationActivityMapper implements ActivityMapper {
             return new ErrorActivityProxy((ErrorPlace) place, clientFactory);
         } else if (place instanceof ContactPlace) {
             return new ContactActivityProxy((ContactPlace) place, clientFactory);
-        } else if (place instanceof EventPlace) {
-            // return new EventActivityProxy((EventPlace) place, clientFactory);
-            // rerouting old place to new place to make bookmarked URLs to work with the new interface.
-            return getActivity(getRealEventPlace((EventPlace) place));
         } else if (place instanceof AbstractEventPlace) {
             AbstractEventPlace eventPlace = (AbstractEventPlace) place;
             return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());
@@ -92,94 +73,10 @@ public class ApplicationActivityMapper implements ActivityMapper {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
         } else if (place instanceof WhatsNewPlace) {
             return new WhatsNewActivityProxy((WhatsNewPlace) place, clientFactory);
-        } else if (place instanceof RegattaPlace) {
-//            return new RegattaActivityProxy((RegattaPlace) place, clientFactory);
-            // rerouting old place to new place to make bookmarked URLs to work with the new interface.
-            return getActivity(getRealRegattaPlace((RegattaPlace) place));
-        } else if (place instanceof SeriesPlace) {
-//            return new SeriesActivityProxy((SeriesPlace) place, clientFactory);
-            // rerouting old place to new place to make bookmarked URLs to work with the new interface.
-            return getActivity(getRealSeriesPlace((SeriesPlace) place));
         } else if (place instanceof SearchResultPlace) {
             return new SearchResultActivityProxy((SearchResultPlace) place, clientFactory);
         } else {
             return null;
         }
-    }
-
-    private Place getRealRegattaPlace(RegattaPlace place) {
-        String eventId = place.getEventUuidAsString();
-        if(eventId == null || eventId.isEmpty()) {
-            return new EventsPlace();
-        }
-        EventContext eventContext = new EventContext().withId(eventId);
-        String regattaId = place.getLeaderboardIdAsNameString();
-        boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
-        
-        // TODO evaluate additional parameters
-        
-        if(hasRegattaId) {
-            switch (place.getNavigationTab()) {
-            case CompetitorAnalytics:
-                return new RegattaCompetitorAnalyticsPlace(eventContext);
-            case Leaderboard:
-                return new RegattaLeaderboardPlace(eventContext);
-            }
-        }
-        return new EventDefaultPlace(eventContext);
-    }
-
-    @SuppressWarnings("incomplete-switch")
-    private Place getRealEventPlace(EventPlace place) {
-        String eventId = place.getEventUuidAsString();
-        if(eventId == null || eventId.isEmpty()) {
-            return new EventsPlace();
-        }
-        EventContext eventContext = new EventContext().withId(eventId);
-        String regattaId = place.getLeaderboardIdAsNameString();
-        boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
-        if(hasRegattaId) {
-            eventContext.withRegattaId(regattaId);
-            
-            switch (place.getNavigationTab()) {
-            case Media:
-                return new RegattaMediaPlace(eventContext);
-            case Overview:
-                return new RegattaOverviewPlace(eventContext);
-            case Regatta:
-                return new RegattaRacesPlace(eventContext);
-            }
-        } else {
-            switch (place.getNavigationTab()) {
-            // TODO some places aren't implemented yet 
-            case Media:
-                return new MultiregattaMediaPlace(eventContext);
-            case Overview:
-                return new MultiregattaOverviewPlace(eventContext);
-            case Schedule:
-                // Schedule not implemented yet -> using race list
-            case Regattas:
-                return new MultiregattaRegattasPlace(eventContext);
-            }
-        }
-        
-        return new EventDefaultPlace(eventContext);
-    }
-    
-    private Place getRealSeriesPlace(SeriesPlace place) {
-        String seriesId = place.getEventUuidAsString();
-        SeriesContext context = new SeriesContext().withId(seriesId);
-        
-        // TODO evaluate additional parameters
-        
-        switch (place.getNavigationTab()) {
-            case OverallLeaderboard:
-                return new EventSeriesOverallLeaderboardPlace(context);
-            case RegattaLeaderboards:
-                return new EventSeriesLeaderboardsPlace(context);
-            case CompetitorAnalytics:
-                return new EventSeriesCompetitorAnalyticsPlace(context);
-        }
-        return new SeriesDefaultPlace(context);
     }
 }

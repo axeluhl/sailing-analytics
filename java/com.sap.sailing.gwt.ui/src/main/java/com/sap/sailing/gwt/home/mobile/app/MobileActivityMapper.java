@@ -15,11 +15,13 @@ import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivityProxy;
+import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
+    private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
     public MobileActivityMapper(MobileApplicationClientFactory clientFactory) {
         super();
@@ -27,7 +29,8 @@ public class MobileActivityMapper implements ActivityMapper {
     }
 
     @Override
-    public Activity getActivity(Place place) {
+    public Activity getActivity(Place rawPlace) {
+        Place place = placeUpdater.getRealPlace(rawPlace);
         if (!(place instanceof HasMobileVersion)) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
