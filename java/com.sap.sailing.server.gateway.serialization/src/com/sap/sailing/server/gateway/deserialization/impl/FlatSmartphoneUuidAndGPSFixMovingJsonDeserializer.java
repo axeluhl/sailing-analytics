@@ -8,11 +8,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
+import com.sap.sailing.domain.common.tracking.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sse.common.Util.Pair;
 
 /**

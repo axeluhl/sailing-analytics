@@ -2,11 +2,11 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.tracking.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 public class FlatGPSFixJsonDeserializer implements
         JsonDeserializer<GPSFix> {
