@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
@@ -86,7 +85,7 @@ public class ApplicationPlaceUpdater {
             case Media:
                 return new MultiregattaMediaPlace(eventContext);
             case Overview:
-                return new MultiregattaOverviewPlace(eventContext);
+                return new EventDefaultPlace(eventContext);
             case Schedule:
                 // Schedule not implemented yet -> using race list
             case Regattas:
