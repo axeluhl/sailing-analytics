@@ -340,10 +340,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
             final Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, /* extrapolate */false);
             if (endPos != null) {
-                Distance d = getTrackedLeg().getAbsoluteWindwardDistance(
-                        getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false),
-                        endPos, to, WindPositionMode.EXACT, cache);
-                result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
+                final Position startPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false);
+                if (startPos != null) {
+                    Distance d = getTrackedLeg().getAbsoluteWindwardDistance(startPos, endPos, to,
+                            WindPositionMode.EXACT, cache);
+                    result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
+                }
             }
         }
         return result;
