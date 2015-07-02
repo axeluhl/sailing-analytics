@@ -440,7 +440,7 @@
     <string name="change_cancel">Cancel</string>
     <string name="change_message">According to the racing rules this data is not changeable in the current\nrace state. You may proceed nevertheless to correct wrong inputs.</string>
     <string name="change_title">Warning</string>
-    <string name="send_mail">Send mail...</string>
+    <string name="send_mail">Send mail…</string>
     <string name="data_reload_title">Data has changed externally</string>
     <string name="data_reload_message">Data have to be reloaded. Possible data loss is possible.</string>
     <string name="preference_allow_dependent_races_header">Relative Start Time (Minutes)</string>
@@ -452,6 +452,7 @@
     <string name="error_wrong_race_state">The RaceState isn\'t in the correct state (needed: %1$s - current: %2$s)</string>
     <string name="dependent_races_absolute">Absolute Start Time</string>
     <string name="dependent_races_relative">Relative Start Time</string>
+    <string name="dependent_races_prompt">Please select the race</string>
     <string name="minutes_after">Minutes after</string>
 
 </resources>

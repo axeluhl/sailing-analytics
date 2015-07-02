@@ -419,7 +419,7 @@
     <string name="change_cancel">Abbrechen</string>
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>
-    <string name="send_mail">Sende Email...</string>
+    <string name="send_mail">Sende Email…</string>
 
     <string name="data_reload_title">Daten wurden extern verändert</string>
     <string name="data_reload_message">Daten müssen neu geladen werden. Eventueller Datenverlust ist möglich.</string>
@@ -430,8 +430,9 @@
     <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
-
     <string name="dependent_races_absolute">Absolute Startzeit</string>
     <string name="dependent_races_relative">Relative Startzeit</string>
+    <string name="dependent_races_prompt">Bitte Rennen auswählen</string>
     <string name="minutes_after">Minuten nach</string>
+
 </resources>

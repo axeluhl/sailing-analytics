@@ -32,6 +32,7 @@ import java.util.Locale;
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
     public static final String START_TIME = "startTime";
+    public static final String DEPENDENT_RACE = "dependendRace";
     private static final String TAG = MainScheduleFragment.class.getName();
 
     private TextView mStartTimeTextView;

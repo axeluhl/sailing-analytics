@@ -204,7 +204,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                 break;
 
             case 1:
-                replaceFragment(StartTimeFragment.newInstance(2));
+                replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
                 break;
 
             default:
