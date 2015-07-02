@@ -12,9 +12,7 @@
         <p:listNavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
     	<div class="{res.mediaCss.grid}">
     		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi" />
-    		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">
-    			<g:Label>COMPETITION FORMAT</g:Label>
-    		</g:FlowPanel>
+    		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
 		</div>
     </g:HTMLPanel>
 </ui:UiBinder>

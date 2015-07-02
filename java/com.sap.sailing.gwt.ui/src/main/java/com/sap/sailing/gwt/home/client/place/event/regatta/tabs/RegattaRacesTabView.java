@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -16,6 +18,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListN
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceCompetition.RegattaCompetitionSeries;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
@@ -23,8 +26,8 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Pres
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRaceListViewAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListViewDTO;
 
 /**
@@ -79,7 +82,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     public void setPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
         listFormatContainerUi.add(liveRacesList = new RacesListLive(currentPresenter, false));
-        RaceListContainer<LiveRaceDTO> container = new RaceListContainer<LiveRaceDTO>("Finished Races TODO", finishedRacesList = new RaceListFinishedRaces(currentPresenter));
+        RaceListContainer<RaceListRaceDTO> container = new RaceListContainer<>("Finished Races TODO", finishedRacesList = new RaceListFinishedRaces(currentPresenter));
         container.setInfoText("Das ist eine Info!!");
         listFormatContainerUi.add(container);
     }
@@ -103,6 +106,9 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             public void onSuccess(ResultWithTTL<RaceListViewDTO> result) {
                 liveRacesList.setData(result.getDto().getLiveRaces(), 0, 0);
                 finishedRacesList.setListData(result.getDto().getAllRaces());
+                for (RaceListSeriesDTO series : result.getDto().getRacesForCompetitionFormat()) {
+                    compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
+                }
                 contentArea.setWidget(RegattaRacesTabView.this);
             }
         });
@@ -134,19 +140,19 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
     
-    private class RaceListFinishedRaces extends AbstractRaceList<LiveRaceDTO> {
+    private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> {
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
         }
 
-        public void setListData(LiveRacesDTO data) {
+        public void setListData(List<RaceListRaceDTO> data) {
 //            boolean hasFleets = data.hasFleets();
 //            this.fleetCornerColumn.setShowDetails(hasFleets);
 //            this.fleetNameColumn.setShowDetails(hasFleets);
 //            boolean hasWind = data.hasWind();
 //            this.windSpeedColumn.setShowDetails(hasWind);
 //            this.windDirectionColumn.setShowDetails(hasWind);
-            setTableData(data.getRaces());
+            setTableData(data);
         }
 
         @Override
