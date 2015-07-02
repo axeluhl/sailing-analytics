@@ -43,7 +43,7 @@ public class ApplicationActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place rawPlace) {
         Place place = placeUpdater.getRealPlace(rawPlace);
-        if (place instanceof HasMobileVersion && !SwitchingEntryPoint.isForcedDesktop()) {
+        if (place instanceof HasMobileVersion && SwitchingEntryPoint.isMobile() && !SwitchingEntryPoint.isForcedDesktop()) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
