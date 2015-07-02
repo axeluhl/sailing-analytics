@@ -284,11 +284,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 // as fallback in the absence of wind information, project to leg bearing
                 projectToBearing = cache.getLegBearing(getTrackedLeg(), at);
             }
-            double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
-            if (cos < 0) {
-                projectToBearing = projectToBearing.reverse();
+            if (speed.getBearing() != null && projectToBearing != null) {
+                double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
+                if (cos < 0) {
+                    projectToBearing = projectToBearing.reverse();
+                }
+                result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
             }
-            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
         }
         return result;
     }
