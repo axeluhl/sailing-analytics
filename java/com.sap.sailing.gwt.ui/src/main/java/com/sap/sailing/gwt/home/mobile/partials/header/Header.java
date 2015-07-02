@@ -70,7 +70,6 @@ public class Header extends Composite {
             
             @Override
             public void onClick(ClickEvent event) {
-                GWT.debugger();
                 if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
                     event.preventDefault();
                     placeNavigation.goToPlace();
