@@ -15,6 +15,10 @@ public class RaceListViewDTO implements DTO {
         // TODO implement based on race.getStart();
     }
     
+    public void setLiveRaces(LiveRacesDTO liveRaces) {
+        this.liveRaces = liveRaces;
+    }
+    
     public LiveRacesDTO getLiveRaces() {
         return liveRaces;
     }

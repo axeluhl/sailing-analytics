@@ -8,16 +8,21 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
 public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewDTO>> {
+    
+    private UUID eventId;
+
     public GetRaceListViewAction() {
     }
 
     public GetRaceListViewAction(UUID eventId) {
+        this.eventId = eventId;
     }
 
     @Override
     @GwtIncompatible
     public ResultWithTTL<RaceListViewDTO> execute(DispatchContext context) {
         final RaceListViewDTO result = new RaceListViewDTO();
+        result.setLiveRaces(new GetLiveRacesForEventAction(eventId).execute(context).getDto());
         
 //        RacesActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
 //            @Override
