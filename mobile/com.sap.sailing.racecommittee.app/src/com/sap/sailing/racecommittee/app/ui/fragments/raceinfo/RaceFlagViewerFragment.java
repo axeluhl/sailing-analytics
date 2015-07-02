@@ -9,6 +9,8 @@ import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
@@ -32,8 +34,12 @@ public class RaceFlagViewerFragment extends BaseFragment {
     private TextView mXrayCountdown;
     private Button mXrayButton;
 
-    public RaceFlagViewerFragment() {
+    private ProcedureChangedListener mProcedureListener;
+    private FlagsCache mFlagCache;
 
+    public RaceFlagViewerFragment() {
+        mProcedureListener = new ProcedureChangedListener();
+        mFlagCache = null;
     }
 
     public static RaceFlagViewerFragment newInstance() {
@@ -70,13 +76,27 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        getRaceState().getRacingProcedure().addChangedListener(mProcedureListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        getRaceState().getRacingProcedure().removeChangedListener(mProcedureListener);
+    }
+
+    @Override
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
         updateFlags(now);
     }
 
-    private void updateFlags(TimePoint timePoint) {
+    private void updateFlags(TimePoint now) {
         if (getRace() == null || getRaceState() == null || getRaceState().getStartTime() == null) {
             return;
         }
@@ -87,65 +107,84 @@ public class RaceFlagViewerFragment extends BaseFragment {
         if (mRecall != null) {
             mRecall.setVisibility(View.GONE);
         }
+
         RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
         if (!procedure.isIndividualRecallDisplayed()) {
             if (mLayout != null) {
                 mLayout.setVisibility(View.VISIBLE);
-            }
-            FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(), timePoint);
-            List<FlagPole> currentState = poleState.getCurrentState();
-            List<FlagPole> upcoming = poleState.computeUpcomingChanges();
-            FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
-            mLayout.removeAllViews();
-            int size = 0;
-            Flags flag;
-            for (FlagPole flagPole : currentState) {
-                size++;
-                flag = flagPole.getUpperFlag();
-                mLayout.addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
-                if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
-                    flag = flagPole.getLowerFlag();
-                    mLayout.addView(renderFlag(timePoint, poleState, flag, isNextFlag(flag, nextPole), currentState.size() == size, false, LOWER_FLAG));
+                if (mFlagCache == null) {
+                    mLayout.removeAllViews();
+                    FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(), now);
+                    List<FlagPole> currentState = poleState.getCurrentState();
+                    List<FlagPole> upcoming = poleState.computeUpcomingChanges();
+                    FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
+                    mFlagCache = new FlagsCache(poleState.getNextStateValidFrom(), nextPole);
+                    int size = 0;
+                    Flags flag;
+                    for (FlagPole flagPole : currentState) {
+                        size++;
+                        flag = flagPole.getUpperFlag();
+                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                        if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
+                            flag = flagPole.getLowerFlag();
+                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, false, LOWER_FLAG));
+                        }
+                    }
+                } else {
+                    if (mLayout != null && mFlagCache.nextPole != null) {
+                        for (int i = 0; i < mLayout.getChildCount(); i++) {
+                            ImageView flagImage = ViewHolder.get(mLayout.getChildAt(i), R.id.flag);
+                            Flags flags = (Flags) flagImage.getTag();
+                            if (isNextFlag(mFlagCache.nextPole, flags)) {
+                                updateFlagView(now, mLayout.getChildAt(i));
+                            }
+                        }
+                    }
                 }
             }
         } else {
-            String time = getString(R.string.until_xray_removed);
-            if (mXrayCountdown != null) {
+            if (mXrayCountdown != null && mRecall != null) {
                 TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
-                if (timePoint.before(flagDown)) {
-                    time = time.replace("#TIME#", TimeUtils.formatDurationUntil(flagDown.minus(timePoint.asMillis()).asMillis()).replace("-", ""));
-                    mXrayCountdown.setText(time);
-                } else {
-                    procedure.removeIndividualRecall(timePoint);
+                if (now.before(flagDown)) {
+                    mRecall.setVisibility(View.VISIBLE);
+                    mXrayCountdown.setText(getString(R.string.until_xray_removed, TimeUtils.formatDuration(now, flagDown, false)));
                 }
-            }
-
-            if (mRecall != null) {
-                mRecall.setVisibility(View.VISIBLE);
             }
         }
     }
 
-    private boolean isNextFlag(Flags flag, FlagPole pole) {
-        return pole != null && flag.equals(pole.getUpperFlag());
+    private boolean isNextFlag(FlagPole flagPole, Flags flags) {
+        return flagPole != null && flags.equals(flagPole.getUpperFlag());
     }
 
-    private RelativeLayout renderFlag(TimePoint timePoint, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry, boolean isDisplayed, int flagType) {
+    private View updateFlagView(TimePoint now, View flagView) {
+        TimePoint change = mFlagCache.mChange;
+        if (change != null) {
+            TextView flag_text = ViewHolder.get(flagView, R.id.flag_text);
+            String timer = TimeUtils.formatDuration(now, change, false);
+            flag_text.setText(timer);
+        }
+        return flagView;
+    }
+
+    private RelativeLayout createFlagView(TimePoint now, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry,
+        boolean isDisplayed, int flagType) {
         RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
-        ImageView flagView = (ImageView) layout.findViewById(R.id.flag);
-        TextView textView = (TextView) layout.findViewById(R.id.flag_text);
-        View downView = layout.findViewById(R.id.arrow_down);
-        View upView = layout.findViewById(R.id.arrow_up);
-        View line = layout.findViewById(R.id.line);
+        ImageView flagView = ViewHolder.get(layout, R.id.flag);
+        TextView textView = ViewHolder.get(layout, R.id.flag_text);
+        View downView = ViewHolder.get(layout, R.id.arrow_down);
+        View upView = ViewHolder.get(layout, R.id.arrow_up);
+        View line = ViewHolder.get(layout, R.id.line);
         if (lastEntry) {
             line.setVisibility(View.GONE);
         }
 
         flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), 96));
+        flagView.setTag(flag);
         if (flag == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());
         }
@@ -159,12 +198,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         textView.setText("");
         if (changeAt != null && isNext) {
             textView.setVisibility(View.VISIBLE);
-            String timer;
-            if (changeAt.after(timePoint)) {
-                timer = TimeUtils.formatDurationUntil(changeAt.minus(timePoint.asMillis()).asMillis());
-            } else {
-                timer = TimeUtils.formatDurationSince(timePoint.minus(changeAt.asMillis()).asMillis());
-            }
+            String timer = TimeUtils.formatDuration(now, changeAt);
             textView.setText(timer.replace("-", ""));
             if (flagType == UPPER_FLAG) {
                 if (isDisplayed) {
@@ -192,7 +226,28 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private int getFleetColorId() {
-        Util.Triple<Integer, Integer, Integer> rgb = getRace().getFleet().getColor() == null ? new Util.Triple<>(0, 0, 0) : getRace().getFleet().getColor().getAsRGB();
+        Util.Triple<Integer, Integer, Integer> rgb =
+            getRace().getFleet().getColor() == null ? new Util.Triple<>(0, 0, 0) : getRace().getFleet().getColor().getAsRGB();
         return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
+    }
+
+    private class ProcedureChangedListener extends BaseRacingProcedureChangedListener {
+
+        @Override
+        public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
+            super.onActiveFlagsChanged(racingProcedure);
+
+            mFlagCache = null;
+        }
+    }
+
+    private class FlagsCache {
+        private TimePoint mChange;
+        public FlagPole nextPole;
+
+        public FlagsCache(TimePoint change, FlagPole pole) {
+            mChange = change;
+            nextPole = pole;
+        }
     }
 }

@@ -246,12 +246,16 @@ if [[ $OPERATION == "auto-install" ]]; then
         activate_user_data
         # then download and install environment and append to env.sh
         install_environment
-	    # finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
-	    append_user_data_to_envsh
+	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+	append_user_data_to_envsh
 
         # make sure to reload data
         source `pwd`/env.sh
 
+	# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
+        APACHE_CONFIG_DIR=/etc/httpd/conf.d
+	echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
+	echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
 
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
             echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"

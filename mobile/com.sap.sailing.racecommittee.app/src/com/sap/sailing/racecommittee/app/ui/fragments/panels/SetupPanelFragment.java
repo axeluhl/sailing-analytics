@@ -154,9 +154,7 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         Wind wind = getRaceState().getWindFix();
         if (mWindValue != null && wind != null) {
-            String sensorData = getString(R.string.wind_panel);
-            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
-            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
+            String sensorData = getString(R.string.wind_panel, wind.getFrom().getDegrees(), wind.getKnots());
             mWindValue.setText(sensorData);
         }
     }
