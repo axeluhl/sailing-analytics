@@ -1068,7 +1068,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
         Distance result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
-            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+            TimePoint startOfRace;
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor) &&
+                    (startOfRace=trackedRace.getStartOfRace()) != null &&
+                    !startOfRace.after(timePoint)) {
                 Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
                 if (distanceSailedInRace != null) {
                     if (result == null) {

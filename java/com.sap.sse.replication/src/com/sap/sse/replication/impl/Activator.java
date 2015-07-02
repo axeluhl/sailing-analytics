@@ -1,12 +1,15 @@
 package com.sap.sse.replication.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 
@@ -129,12 +132,16 @@ public class Activator implements BundleActivator {
             new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
                 @Override
                 public void run() {
-                    logger.info("Waiting for Replicables " + replicableIdsAsStrings + " before firing up replication automatically...");
+                    logger.info("Waiting for Replicables " + Arrays.toString(replicableIdsAsStrings) +
+                            " before firing up replication automatically...");
+                    final List<Replicable<?, ?>> replicables = new ArrayList<>();
                     for (String replicableIdAsString : replicableIdsAsStrings) {
-                        replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
+                        Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
                         logger.info("Obtained Replicable " + replicableIdAsString);
+                        replicables.add(replicable);
                     }
-                    logger.info("Configuration requested automatic replication. Starting it up...");
+                    logger.info("Configuration requested automatic replication for replicables "+
+                            Arrays.toString(replicableIdsAsStrings)+". Starting it up...");
                     String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
                     if (replicateFromExchangeName == null) {
                         replicateFromExchangeName = masterExchangeName;
@@ -147,8 +154,8 @@ public class Activator implements BundleActivator {
                             System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
                             Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()));
                     try {
-                        // TODO pass on the replicables to wait for
-                        serverReplicationMasterService.startToReplicateFrom(master);
+                        // TODO pass on the replicables to wait for; failure to do so can cause the symptoms of bug 3015
+                        serverReplicationMasterService.startToReplicateFrom(master, replicables);
                         logger.info("Automatic replication has been started.");
                     } catch (ClassNotFoundException | IOException | InterruptedException e) {
                         e.printStackTrace();
