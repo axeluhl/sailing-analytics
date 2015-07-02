@@ -1,9 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,28 +9,23 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
-import com.sap.sailing.gwt.home.client.place.event.partials.regattaraces.EventRegattaRaces;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRaceListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
-import com.sap.sse.common.Util.Triple;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListViewDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -42,15 +33,17 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
     
     private enum Navigation implements ListNavigationAction {
-        LATEST_UPDATE("Latest update TODO", false),
-        CHRONOLOGICALLY("Chronologically TODO", false),
+        SORT_LIST_FORMAT("Sortable list Format TODO", false),
         COMPETITION_FORMAT("Competition Format TODO", true);
+        
         private final String displayName;
         private final boolean showAdditionalWidget;
+        
         private Navigation(String displayName, boolean showAdditionalWidget) {
             this.displayName = displayName;
             this.showAdditionalWidget = showAdditionalWidget;
         }
+        
         @Override
         public String getDisplayName() {
             return displayName;
@@ -70,21 +63,25 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private Presenter currentPresenter;
 
     @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
-    @UiField FlowPanel latestUpdateContainer;
-    @UiField SimplePanel oldContentContainer;
+    @UiField FlowPanel listFormatContainerUi;
+    @UiField FlowPanel compFormatContainerUi;
+
+    private RacesListLive liveRacesList;
+    private RaceListFinishedRaces finishedRacesList;
 
     public RegattaRacesTabView() {
         listNavigationPanelUi = new ListNavigationPanel<Navigation>(new RegattaRacesTabViewNavigationSelectionCallback());
-        initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
         listNavigationPanelUi.setAdditionalWidget(new RaceStateLegend());
-        listNavigationPanelUi.addAction(Navigation.LATEST_UPDATE, true);
-        listNavigationPanelUi.addAction(Navigation.CHRONOLOGICALLY, false);
-        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
+        initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
     }
-
+    
     @Override
     public void setPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
+        listFormatContainerUi.add(liveRacesList = new RacesListLive(currentPresenter, false));
+        RaceListContainer<LiveRaceDTO> container = new RaceListContainer<LiveRaceDTO>("Finished Races TODO", finishedRacesList = new RaceListFinishedRaces(currentPresenter));
+        container.setInfoText("Das ist eine Info!!");
+        listFormatContainerUi.add(container);
     }
     
     @Override
@@ -94,40 +91,23 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
-        final String selectedRegattaId = myPlace.getCtx().getRegattaId();
+        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
+        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
         
-        currentPresenter.getDispatch().execute(new GetLiveRacesForRegattaAction(myPlace.getCtx().getEventDTO().getId(),
-                selectedRegattaId), new AsyncCallback<ResultWithTTL<LiveRacesDTO>>() {
+        GetRaceListViewAction action = new GetRaceListViewAction(myPlace.getCtx().getEventDTO().getId());
+        currentPresenter.getDispatch().execute(action, new AsyncCallback<ResultWithTTL<RaceListViewDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
             }
-
             @Override
-            public void onSuccess(ResultWithTTL<LiveRacesDTO> result) {
-                String date = DateAndTimeFormatterUtil.longDateFormatter.render(MillisecondsTimePoint.now().asDate());
-                RaceListFinishedRaces raceList = new RaceListFinishedRaces(currentPresenter);
-                latestUpdateContainer.add(new RaceListContainer<LiveRaceDTO>(date, raceList));;
-                raceList.setListData(result.getDto());
-            }
-        });
-        
-        currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
-            @Override
-            public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                if (raceGroups.size() > 0) {
-                    Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> rs = getRegattaStructure();
-                    Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = rs .get(selectedRegattaId);
-                    EventRegattaRaces regattaRaces = new EventRegattaRaces(currentPresenter);
-                    oldContentContainer.setWidget(regattaRaces);
-                    regattaRaces.setRaces(selectedRegatta.getC(), false, selectedRegatta.getB(), selectedRegatta.getA());
-                    contentArea.setWidget(RegattaRacesTabView.this);
-                } else {
-                    
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
+            public void onSuccess(ResultWithTTL<RaceListViewDTO> result) {
+                LiveRacesDTO dummy = new LiveRacesDTO();
+                dummy.addRace(result.getDto().getLiveRaces().getRaces().get(0));
+                dummy.addRace(result.getDto().getLiveRaces().getRaces().get(1));
+                dummy.addRace(result.getDto().getLiveRaces().getRaces().get(2));
+                liveRacesList.setData(dummy, 0, 0);
+                finishedRacesList.setListData(result.getDto().getLiveRaces());
+                contentArea.setWidget(RegattaRacesTabView.this);
             }
         });
     }
@@ -146,33 +126,19 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         return RegattaRacesPlace.class;
     }
 
-    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure() {
-        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
-        Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
-        for (RaceGroupDTO raceGroup : currentPresenter.getCtx().getRaceGroups()) {
-            raceGroupsMap.put(raceGroup.getName(), raceGroup);
-        }
-
-        for (LeaderboardGroupDTO leaderboardGroup : currentPresenter.getCtx().getLeaderboardGroups()) {
-            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                String leaderboardName = leaderboard.name;
-                result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(
-                        raceGroupsMap.get(leaderboardName), leaderboard, leaderboardGroup));
-            }
-        }
-        return result;
-    }
-    
     private class RegattaRacesTabViewNavigationSelectionCallback implements SelectionCallback<Navigation> {
         @Override
         public void onSelectAction(Navigation action) {
-            Display displayStyle = action == Navigation.LATEST_UPDATE ? Display.BLOCK : Display.NONE;
-            latestUpdateContainer.getElement().getStyle().setDisplay(displayStyle);
-        }        
+            showWidget(listFormatContainerUi, action == Navigation.SORT_LIST_FORMAT);
+            showWidget(compFormatContainerUi, action == Navigation.COMPETITION_FORMAT);
+        }
+        
+        private void showWidget(Widget widget, boolean show) {
+            widget.getElement().getStyle().setDisplay(show ? Display.BLOCK : Display.NONE);
+        }
     }
     
     private class RaceListFinishedRaces extends AbstractRaceList<LiveRaceDTO> {
-
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
         }
