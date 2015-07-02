@@ -25,7 +25,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="?chevron_left_24dp"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <ImageView
                 android:id="@+id/header_flag"
