@@ -615,7 +615,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) {
         return getVelocityMadeGood(at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
     }
     
