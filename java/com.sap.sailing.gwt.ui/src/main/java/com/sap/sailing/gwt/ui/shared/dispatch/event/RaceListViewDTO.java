@@ -20,6 +20,15 @@ public class RaceListViewDTO implements DTO {
     }
     
     public LiveRacesDTO getLiveRaces() {
+        LiveRacesDTO liveRaces = new LiveRacesDTO();
+        for (int i = 0; i < this.liveRaces.getRaces().size(); i++) {
+            if (i == 3) break;
+            liveRaces.addRace(this.liveRaces.getRaces().get(i));
+        }
+        return liveRaces ;
+    }
+    
+    public LiveRacesDTO getAllRaces() {
         return liveRaces;
     }
     

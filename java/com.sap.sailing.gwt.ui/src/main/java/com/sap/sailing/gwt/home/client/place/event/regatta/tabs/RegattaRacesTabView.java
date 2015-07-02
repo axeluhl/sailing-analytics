@@ -101,12 +101,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }
             @Override
             public void onSuccess(ResultWithTTL<RaceListViewDTO> result) {
-                LiveRacesDTO dummy = new LiveRacesDTO();
-                dummy.addRace(result.getDto().getLiveRaces().getRaces().get(0));
-                dummy.addRace(result.getDto().getLiveRaces().getRaces().get(1));
-                dummy.addRace(result.getDto().getLiveRaces().getRaces().get(2));
-                liveRacesList.setData(dummy, 0, 0);
-                finishedRacesList.setListData(result.getDto().getLiveRaces());
+                liveRacesList.setData(result.getDto().getLiveRaces(), 0, 0);
+                finishedRacesList.setListData(result.getDto().getAllRaces());
                 contentArea.setWidget(RegattaRacesTabView.this);
             }
         });
