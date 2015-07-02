@@ -60,7 +60,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     }
     
     private RegattaStatusRegatta addRegatta(MobileSection container, RegattaMetadataDTO regatta) {
-        PlaceNavigation<?> placeNavigation = presenter.getRegattaLeaderboardNavigation(regatta.getId());
+        PlaceNavigation<?> placeNavigation = presenter.getRegattaMiniLeaderboardNavigation(regatta.getId());
         RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, placeNavigation);
         container.addContent(regattaWidget);
         return regattaWidget;

@@ -18,34 +18,35 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
 public class MiniLeaderboardActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
-    private final RegattaLeaderboardPlace place;
+    private final MiniLeaderboardPlace place;
 
-    public MiniLeaderboardActivity(RegattaLeaderboardPlace place, MobileApplicationClientFactory clientFactory) {
+    public MiniLeaderboardActivity(MiniLeaderboardPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.place = place;
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        if(place.getCtx().getEventDTO() == null) {
+        if (place.getCtx().getEventDTO() == null) {
             UUID currentEventUUId = UUID.fromString(place.getCtx().getEventId());
-            
-            clientFactory.getDispatch().execute(new GetEventViewAction(currentEventUUId), new AsyncCallback<EventViewDTO>() {
-                @Override
-                public void onSuccess(final EventViewDTO event) {
-                    place.getCtx().updateContext(event);
-                    initUi(panel, eventBus);
-                }
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
-                    // TODO @FM: reload sinnvoll hier?
-                    errorPlace.setComingFrom(place);
-                    clientFactory.getPlaceController().goTo(errorPlace);
-                }
-            });
+            clientFactory.getDispatch().execute(new GetEventViewAction(currentEventUUId),
+                    new AsyncCallback<EventViewDTO>() {
+                        @Override
+                        public void onSuccess(final EventViewDTO event) {
+                            place.getCtx().updateContext(event);
+                            initUi(panel, eventBus);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO @FM: extract text?
+                            ErrorPlace errorPlace = new ErrorPlace(
+                                    "Error while loading the event with service getEventViewById()");
+                            // TODO @FM: reload sinnvoll hier?
+                            errorPlace.setComingFrom(place);
+                            clientFactory.getPlaceController().goTo(errorPlace);
+                        }
+                    });
         } else {
             initUi(panel, eventBus);
         }
@@ -72,4 +73,11 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
     public DispatchSystem getDispatch() {
         return clientFactory.getDispatch();
     }
+
+    @Override
+    public PlaceNavigation<?> getRegattaMiniLeaderboardNavigation(String leaderboardName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(ctx), null, false);
+    }
+
 }

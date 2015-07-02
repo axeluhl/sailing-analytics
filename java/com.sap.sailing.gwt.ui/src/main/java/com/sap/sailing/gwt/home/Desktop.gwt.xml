@@ -23,23 +23,7 @@
   	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
   	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 
-  	
-	<!-- Default is Tablet/Desktop -->
-	<replace-with
-		class="com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory">
-		<when-type-is class="com.sap.sailing.gwt.home.desktop.app.ApplicationClientFactory" />
-	</replace-with>
-
-	<replace-with class="com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory">
-		<when-type-is class="com.sap.sailing.gwt.home.desktop.app.ApplicationClientFactory" />
-		<when-property-is name="formfactor" value="tablet" />
-	</replace-with>
-
-	<replace-with class="com.sap.sailing.gwt.home.desktop.app.SmartphoneApplicationClientFactory">
-		<when-type-is class="com.sap.sailing.gwt.home.desktop.app.ApplicationClientFactory" />
-		<when-property-is name="formfactor" value="mobile" />
-	</replace-with>
-
+	
 	<extend-property name="locale" values="en,de,zh,ru" />
     <set-property name="locale" value="en,de,zh,ru" />
 	<set-property-fallback name="locale" value="en"/>

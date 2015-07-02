@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 
 
-public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements ApplicationClientFactory {
+public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements DesktopClientFactory {
     private final DispatchSystem dispatch = new DispatchSystemImpl();
     
     public TabletAndDesktopApplicationClientFactory() {

@@ -51,6 +51,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         EventContext ctx = presenter.getCtx();
         UUID uuid = UUID.fromString(ctx.getEventId());
         refreshManager.add(minileaderboardUi, new GetMiniLeaderbordAction(uuid, presenter.getCtx().getRegattaId()));
+        minileaderboardUi.setAction(MSG.details(), presenter.getRegattaLeaderboardNavigation(regatta.getId()));
         buttonsUi.removeFromParent();
     }
 

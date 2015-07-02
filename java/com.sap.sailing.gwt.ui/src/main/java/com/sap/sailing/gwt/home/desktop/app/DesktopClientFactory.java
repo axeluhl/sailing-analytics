@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringClientFactory;
 import com.sap.sailing.gwt.home.client.place.start.StartClientFactory;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewClientFactory;
 
-public interface ApplicationClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
+public interface DesktopClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
     EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory, SearchResultClientFactory,
  WhatsNewClientFactory, SeriesClientFactory, ErrorClientFactory {
     DesktopPlacesNavigator getHomePlacesNavigator();

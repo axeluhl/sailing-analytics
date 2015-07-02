@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
-import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -36,12 +35,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         initWidget(uiBinder.createAndBindUi(this));
         headerUi.setInfoText(StringMessages.INSTANCE.details());
 
-        headerUi.setClickAction(new Runnable() {
-            @Override
-            public void run() {
-                SwitchingEntryPoint.switchToDesktop();
-            }
-        });
+
     }
 
     @Override

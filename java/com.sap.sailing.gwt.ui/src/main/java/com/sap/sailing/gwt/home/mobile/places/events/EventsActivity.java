@@ -27,24 +27,17 @@ public class EventsActivity extends AbstractActivity implements Presenter {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
-
-
         // TODO: create mobile placeholder
         panel.setWidget(new Placeholder());
-
         Window.setTitle(TextMessages.INSTANCE.events());
-        
         final EventsView view = new EventsViewImpl(this);
-
         clientFactory.getHomeService().getEventListView(new AsyncCallback<EventListViewDTO>() {
             @Override
             public void onSuccess(EventListViewDTO eventListView) {
                 panel.setWidget(view.asWidget());
                 Window.setTitle(place.getTitle());
-                
                 view.setEvents(eventListView);
             }
-            
             @Override
             public void onFailure(Throwable caught) {
                 // TODO: create mobile error view
@@ -55,9 +48,6 @@ public class EventsActivity extends AbstractActivity implements Presenter {
                 // panel.setWidget(view.asWidget());
             }
         });
-        
-        
-
     }
 
     @Override

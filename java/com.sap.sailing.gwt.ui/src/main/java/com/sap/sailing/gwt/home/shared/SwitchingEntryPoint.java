@@ -31,18 +31,19 @@ public class SwitchingEntryPoint implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
-        String startMobileCookie = Cookies.getCookie(SAPSAILING_MOBILE);
+        LOG.info("Start switching entry point");
         String hash = Window.Location.getHash();
         if (hash != null && hash.startsWith("#")) {
             hash = hash.substring(1);
         }
         Place place = hisMap.getPlace(hash);
-        GWT.log("Hash: " + hash);
+        String userWantsMobileUi = Cookies.getCookie(SAPSAILING_MOBILE);
         if (place != null && !(place instanceof HasMobileVersion)) {
+            LOG.info("We have a dedicated desktop place: " + hash);
             startDesktop();
-        } else if (startMobileCookie != null) {
+        } else if (userWantsMobileUi != null) {
             // use user defined preferences
-            if (Boolean.parseBoolean(startMobileCookie)) {
+            if (Boolean.parseBoolean(userWantsMobileUi)) {
                 LOG.info("Switching to mobile by stored cookie");
                 startMobile();
             } else {
@@ -80,9 +81,9 @@ public class SwitchingEntryPoint implements EntryPoint {
         return !isMobile();
     }
 
-    public static boolean isForcedDesktop() {
-        String startMobileCookie = Cookies.getCookie(SAPSAILING_MOBILE);
-        return (startMobileCookie != null && !Boolean.parseBoolean(startMobileCookie));
+    public static boolean viewIsLockedToDesktop() {
+        String userWantsMobileUi = Cookies.getCookie(SAPSAILING_MOBILE);
+        return (userWantsMobileUi != null && !Boolean.parseBoolean(userWantsMobileUi));
     }
 
     public static void switchToDesktop() {
@@ -162,5 +163,13 @@ public class SwitchingEntryPoint implements EntryPoint {
         Document.get().getHead().appendChild(metaElement);
     }
 
+    public static void reloadApp() {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                Window.Location.reload();
+            }
+        });
+    }
 
 }

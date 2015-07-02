@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
 public abstract class AbstractApplicationClientFactory extends
-        SecureClientFactoryImpl implements ApplicationClientFactory {
+        SecureClientFactoryImpl implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final HomeServiceAsync homeService;
     private final MediaServiceAsync mediaService;

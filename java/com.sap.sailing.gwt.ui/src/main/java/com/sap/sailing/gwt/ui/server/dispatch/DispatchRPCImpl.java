@@ -41,8 +41,9 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
         long start = System.currentTimeMillis();
         try {
             R executionResult = action.execute(
-                    new DispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(),
-                            eventNewsServiceTracker.getService(), request.getClientLocaleName()));
+                    new DispatchContextImpl(request.getCurrentClientTime(),
+                    racingEventServiceTracker.getService(), eventNewsServiceTracker.getService(), request
+                            .getClientLocaleName()));
             return new ResultWrapper<R>(executionResult);
         } catch (DispatchException d) {
             logger.log(Level.WARNING, "Server exception", d);

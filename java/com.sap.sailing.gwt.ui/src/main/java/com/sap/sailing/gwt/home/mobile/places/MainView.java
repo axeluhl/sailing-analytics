@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
@@ -39,11 +38,11 @@ public class MainView extends Composite {
     @UiField
     SimplePanel mainContentPanel;
 
-    public MainView(MobileApplicationClientFactory appContext, EventBus eventBus) {
-        headerPanel = new Header(appContext);
-        footerPanel = new Footer(appContext, eventBus);
+    public MainView(MobileApplicationClientFactory clientFactory) {
+        headerPanel = new Header(clientFactory);
+        footerPanel = new Footer(clientFactory);
         initWidget(uiBinder.createAndBindUi(this));
-        eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
+        clientFactory.getEventBus().addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
             @Override
             public void onPlaceChange(PlaceChangeEvent event) {
                 Place newPlace = event.getNewPlace();

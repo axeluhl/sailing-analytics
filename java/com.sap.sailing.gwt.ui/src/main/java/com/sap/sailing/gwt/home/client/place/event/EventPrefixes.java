@@ -10,6 +10,7 @@ public class EventPrefixes {
     public static final String RegattaOverview = "/regatta/overview/";
     public static final String RegattaRaces = "/regatta/races/";
     public static final String RegattaLeaderboard = "/regatta/leaderboard/";
+    public static final String RegattaMiniLeaderboard = "/regatta/minileaderboard/";
     public static final String RegattaCompetitorAnalytics = "/regatta/competitoranalytics/";
     public static final String RegattaMedia = "/regatta/media/";
     public static final String SeriesDefault = "/series/";

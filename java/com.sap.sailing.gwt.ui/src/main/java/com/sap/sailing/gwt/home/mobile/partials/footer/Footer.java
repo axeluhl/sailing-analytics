@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
@@ -65,7 +64,7 @@ public class Footer extends Composite {
         }
     });
 
-    public Footer(final MobileApplicationClientFactory appContext, EventBus eventBus) {
+    public Footer(final MobileApplicationClientFactory appContext) {
         this.appContext = appContext;
         FooterResources.INSTANCE.css().ensureInjected();
 

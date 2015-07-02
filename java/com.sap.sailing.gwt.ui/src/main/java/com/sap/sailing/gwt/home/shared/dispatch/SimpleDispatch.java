@@ -16,15 +16,11 @@ import com.sap.sailing.gwt.ui.shared.dispatch.rpc.DispatchRPCAsync;
 public class SimpleDispatch implements DispatchAsync {
     
     private static final DispatchRPCAsync dispatchRPC = GWT.create(DispatchRPC.class);
-    
-//    private final SailingClientFactory clientFactory;
-    
+
     private long clientServerOffset = 0;
     
     public SimpleDispatch(SailingClientFactory clientFactory) {
-//        this.clientFactory = clientFactory;
         ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(RemoteServiceMappingConstants.dispatchServiceRemotePath);
-        
     }
 
     @Override

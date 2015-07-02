@@ -26,12 +26,8 @@ public interface EventView {
 
     public interface Presenter extends NewsItemLinkProvider, RegattaLeaderboardNavigationProvider {
         EventContext getCtx();
-
         DispatchSystem getDispatch();
-
-
         String getRaceViewerURL(String regattaName, String trackedRaceName);
-
         PlaceNavigation<?> getMediaPageNavigation();
     }
 }
