@@ -287,14 +287,10 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                                 jsonCompetitorInLeg.put("distanceTraveledOverGroundInMeters",
                                         distanceTraveled.getMeters());
                             }
-                            try {
-                                Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
-                                if (velocityMadeGood != null) {
-                                    jsonCompetitorInLeg.put("velocityMadeGoodInKnots", velocityMadeGood.getKnots());
-                                    jsonCompetitorInLeg.put("velocityMadeGoodInMetersPerSecond", velocityMadeGood.getMetersPerSecond());
-                                }
-                            } catch (NoWindException e) {
-                                // well, we don't know the wind direction... then no VMG will be shown...
+                            Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
+                            if (velocityMadeGood != null) {
+                                jsonCompetitorInLeg.put("velocityMadeGoodInKnots", velocityMadeGood.getKnots());
+                                jsonCompetitorInLeg.put("velocityMadeGoodInMetersPerSecond", velocityMadeGood.getMetersPerSecond());
                             }
                             Speed averageVelocityMadeGood = trackedLegOfCompetitor
                                     .getAverageVelocityMadeGood(timePoint);

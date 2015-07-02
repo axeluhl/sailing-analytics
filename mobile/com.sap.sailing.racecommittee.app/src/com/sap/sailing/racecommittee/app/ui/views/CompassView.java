@@ -86,6 +86,9 @@ public class CompassView extends RelativeLayout {
                 return false;
             }
         });
+
+        setFocusable(true);
+        setFocusableInTouchMode(true);
     }
 
     private void generateAndShowAlert() {
@@ -166,7 +169,7 @@ public class CompassView extends RelativeLayout {
             if (Math.abs(degree) == 360) {
                 degree = 0;
             }
-            degreeView.clearFocus();
+            requestFocus();
             changeListener.onDirectionChanged(degree);
         }
     }
