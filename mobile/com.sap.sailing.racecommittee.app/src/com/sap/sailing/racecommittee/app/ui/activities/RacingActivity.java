@@ -493,7 +493,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             setProgressSpinnerVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
-                .setIcon(R.drawable.ic_warning_grey600_36dp).setCancelable(true)
+                .setIcon(R.drawable.ic_warning_grey_600_36dp).setCancelable(true)
                 .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         setProgressSpinnerVisibility(true);
