@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.serialization.impl;
+package com.sap.sailing.domain.common.tracking;
 
 /**
  * So far only holds the constants required to assemble a JSON object properly. The challenge for this serializer is
