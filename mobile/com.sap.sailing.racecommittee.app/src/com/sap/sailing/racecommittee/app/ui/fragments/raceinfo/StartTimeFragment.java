@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +13,16 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -26,6 +34,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
@@ -40,12 +51,9 @@ public class StartTimeFragment extends BaseFragment
     private static final int MAX_DIFF_MIN = 60;
     private static final String ZERO_TIME = "-00:00:00";
 
-    private View mRelative;
     private View mAbsolute;
 
     private NumberPicker mDatePicker;
-    private NumberPicker mTimeOffset;
-    private Spinner mDependentRace;
     private TimePicker mTimePicker;
     private TextView mCountdown;
     private TextView mDebugTime;
@@ -55,6 +63,7 @@ public class StartTimeFragment extends BaseFragment
     private Calendar mTimeLeft;
     private Calendar mTimeRight;
     private Calendar mCalendar;
+    private TabHost mTabHost;
     private boolean mListenerIgnore = true;
 
     /**
@@ -87,30 +96,30 @@ public class StartTimeFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
-        mRelative = ViewHolder.get(layout, R.id.time_relative);
         mAbsolute = ViewHolder.get(layout, R.id.time_absolute);
 
         if (preferences.isDependentRacesAllowed()) {
-            final TabHost tabHost = ViewHolder.get(layout, android.R.id.tabhost);
-            if (tabHost != null) {
-                tabHost.setup();
+            mTabHost = ViewHolder.get(layout, android.R.id.tabhost);
+            if (mTabHost != null) {
+                mTabHost.setup();
 
-                tabHost.addTab(tabHost.newTabSpec(getString(R.string.dependent_races_absolute))
+                mTabHost.addTab(mTabHost.newTabSpec(getString(R.string.dependent_races_absolute))
                     .setIndicator(getString(R.string.dependent_races_absolute)).setContent(R.id.time_absolute));
-                tabHost.addTab(tabHost.newTabSpec(getString(R.string.dependent_races_relative)).setIndicator(getString(R.string.dependent_races_relative)).setContent(R.id.time_relative));
+                mTabHost.addTab(mTabHost.newTabSpec(getString(R.string.dependent_races_relative))
+                    .setIndicator(getString(R.string.dependent_races_relative)).setContent(R.id.time_relative));
 
-                for (int i = 0; i < tabHost.getTabWidget().getChildCount(); i++) {
-                    BitmapHelper.setBackground(tabHost.getTabWidget().getChildAt(i), BitmapHelper.getAttrDrawable(getActivity(), R.attr.tab_widget));
+                for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
+                    BitmapHelper.setBackground(mTabHost.getTabWidget().getChildAt(i), BitmapHelper.getAttrDrawable(getActivity(), R.attr.tab_widget));
                 }
 
-                tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+                mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
                     @Override
                     public void onTabChanged(String tabId) {
-                        setTabTextColor(tabHost);
+                        setTabTextColor();
                     }
                 });
-                setTabTextColor(tabHost);
-                tabHost.setCurrentTab(0);
+                setTabTextColor();
+                mTabHost.setCurrentTab(0);
             }
         }
 
@@ -224,22 +233,42 @@ public class StartTimeFragment extends BaseFragment
                 mTimePicker.setTag(time.get(Calendar.SECOND));
             }
 
-            mTimeOffset = ViewHolder.get(getView(), R.id.time_offset);
-            if (mTimeOffset != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), mTimeOffset, ThemeHelper.getColor(getActivity(), R.attr.white));
-                mTimeOffset.setMinValue(0);
-                mTimeOffset.setMaxValue(MAX_DIFF_MIN);
-                mTimeOffset.setWrapSelectorWheel(false);
-                mTimeOffset.setValue(preferences.getDependentRacesOffset());
+            NumberPicker timeOffset = ViewHolder.get(getView(), R.id.time_offset);
+            if (timeOffset != null) {
+                ThemeHelper.setPickerTextColor(getActivity(), timeOffset, ThemeHelper.getColor(getActivity(), R.attr.white));
+                timeOffset.setMinValue(0);
+                timeOffset.setMaxValue(MAX_DIFF_MIN);
+                timeOffset.setWrapSelectorWheel(false);
+                timeOffset.setValue(preferences.getDependentRacesOffset());
             }
 
-            mDependentRace = ViewHolder.get(getView(), R.id.dependent_race);
-            if (mDependentRace != null) {
+            Spinner dependentRace = ViewHolder.get(getView(), R.id.dependent_race);
+            if (dependentRace != null) {
                 DependentRaceSpinnerAdapter adapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
-                for (int i = 0; i < 100; i++) {
-                    adapter.add("Position: " + i);
+                DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
+                LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mGroupHeaders = new LinkedHashMap<>();
+
+                for (ManagedRace race : manager.getRaces()) {
+                    RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
+
+                    if (!mGroupHeaders.containsKey(container)) {
+                        mGroupHeaders.put(container, new LinkedList<ManagedRace>());
+                    }
+                    mGroupHeaders.get(container).add(race);
                 }
-                mDependentRace.setAdapter(adapter);
+
+                for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
+                    DependentRaceSpinnerAdapter.RaceData header = new DependentRaceSpinnerAdapter.RaceData(getRegattaName(races
+                        .getRaceGroup()), getFleetSeries(races.getFleet(), races.getSeries()), null);
+                    adapter.add(header);
+
+                    for (ManagedRace race : mGroupHeaders.get(races)) {
+                        DependentRaceSpinnerAdapter.RaceData items = new DependentRaceSpinnerAdapter.RaceData(race.getRaceName(), null, race);
+                        adapter.add(items);
+                    }
+                }
+
+                dependentRace.setAdapter(adapter);
             }
         }
     }
@@ -309,12 +338,34 @@ public class StartTimeFragment extends BaseFragment
         }
     }
 
-    private void setTabTextColor(TabHost tabHost) {
-        for (int i = 0; i < tabHost.getTabWidget().getTabCount(); i++) {
-            View view = tabHost.getTabWidget().getChildTabViewAt(i);
+    private String getRegattaName(RaceGroup raceGroup) {
+        String regatta = raceGroup.getDisplayName();
+        if (TextUtils.isEmpty(regatta)) {
+            regatta = raceGroup.getName();
+        }
+        return regatta;
+    }
+
+    private String getFleetSeries(Fleet fleet, SeriesBase series) {
+        String fleetSeries = "";
+        if (fleet != null && fleet.getName().equals(AppConstants.DEFAULT)) {
+            fleetSeries += fleet.getName();
+        }
+        if (series != null && !series.getName().equals(AppConstants.DEFAULT)) {
+            if (!TextUtils.isEmpty(fleetSeries)) {
+                fleetSeries += " - ";
+            }
+            fleetSeries += series.getName();
+        }
+        return fleetSeries;
+    }
+
+    private void setTabTextColor() {
+        for (int i = 0; i < mTabHost.getTabWidget().getTabCount(); i++) {
+            View view = mTabHost.getTabWidget().getChildTabViewAt(i);
             if (view != null) {
                 TextView textView = (TextView) view.findViewById(android.R.id.title);
-                textView.setTextColor(ThemeHelper.getColor(getActivity(), (i == tabHost.getCurrentTab()) ? R.attr.white : R.attr.sap_light_gray));
+                textView.setTextColor(ThemeHelper.getColor(getActivity(), (i == mTabHost.getCurrentTab()) ? R.attr.white : R.attr.sap_light_gray));
             }
         }
     }

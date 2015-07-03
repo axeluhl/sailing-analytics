@@ -9,8 +9,7 @@ import android.view.ViewGroup;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 import java.util.ArrayList;
 
@@ -22,7 +21,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
     private Context mContext;
     private int mLayout;
 
-    private ArrayList<String> mData;
+    private ArrayList<RaceData> mData;
 
     public DependentRaceSpinnerAdapter(Context context, @LayoutRes int layout) {
         mContext = context;
@@ -39,17 +38,22 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
         TextView mainText = ViewHolder.get(layout, android.R.id.text1);
         if (mainText != null) {
-            mainText.setText(mData.get(position));
+            mainText.setText(mData.get(position).getMainText());
         }
 
-        TextView subText = ViewHolder.get(layout, android.R.id.text2);
-        if (subText != null) {
+        TextView subTextView = ViewHolder.get(layout, android.R.id.text2);
+        String subText = mData.get(position).getSubText();
+        if (subTextView != null) {
             if (getItemViewType(position) == HEADER) {
-                subText.setText("SubText");
-                subText.setVisibility(View.VISIBLE);
+                if (subText != null) {
+                    subTextView.setText(subText);
+                    subTextView.setVisibility(View.VISIBLE);
+                } else {
+                    subTextView.setVisibility(View.GONE);
+                }
                 layout.setClickable(true);
             } else {
-                subText.setVisibility(View.GONE);
+                subTextView.setVisibility(View.GONE);
                 layout.setClickable(false);
             }
         }
@@ -95,8 +99,8 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         }
 
         TextView text = ViewHolder.get(layout, android.R.id.text1);
-        if (text != null) {
-            text.setText("- " + mData.get(position) + " -");
+        if (text != null && mData.get(position).getRace() != null) {
+            text.setText(mData.get(position).getRace().getName());
         }
 
         return layout;
@@ -104,7 +108,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (position % 10 == 0) {
+        if (mData.get(position).getRace() == null) {
             return HEADER;
         }
         return DATA;
@@ -120,7 +124,31 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         return (mData.size() == 0);
     }
 
-    public void add(String data) {
+    public void add(RaceData data) {
         mData.add(data);
+    }
+
+    public static class RaceData {
+        private String mText1;
+        private String mText2;
+        private ManagedRace mRace;
+
+        public RaceData(String mainText, String subText, ManagedRace race) {
+            mText1 = mainText;
+            mText2 = subText;
+            mRace = race;
+        }
+
+        public String getMainText() {
+            return mText1;
+        }
+
+        public String getSubText() {
+            return mText2;
+        }
+
+        public ManagedRace getRace() {
+            return mRace;
+        }
     }
 }

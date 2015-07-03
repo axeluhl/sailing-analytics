@@ -13,6 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?textLarge"
+        android:maxWidth="450dp"
+        android:singleLine="true"
         tools:text="Singapore"/>
 
     <TextView
