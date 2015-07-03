@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import android.text.TextUtils;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -24,6 +23,10 @@ public class RaceGroupSeriesFleet {
 
         seriesOrder = getSeriesIndex(race, series);
         fleetOrder = getFleetIndex(series.getFleets(), race.getFleet());
+    }
+
+    private static int getSeriesIndex(ManagedRace race, SeriesBase series) {
+        return Util.indexOf(race.getRaceGroup().getSeries(), series);
     }
 
     public RaceGroup getRaceGroup() {
@@ -129,9 +132,5 @@ public class RaceGroupSeriesFleet {
 
     private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
         return Util.indexOf(fleets, fleet);
-    }
-
-    private static int getSeriesIndex(ManagedRace race, SeriesBase series) {
-        return Util.indexOf(race.getRaceGroup().getSeries(), series);
     }
 }

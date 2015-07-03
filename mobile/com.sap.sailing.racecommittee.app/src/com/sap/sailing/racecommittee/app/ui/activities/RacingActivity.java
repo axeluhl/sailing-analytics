@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -69,7 +70,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private Wind mWind;
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
-    private CourseArea mCourseArea;
     private TimePoint startTime;
 
     private Serializable getCourseAreaIdFromIntent() {
@@ -153,7 +153,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             throw new IllegalStateException("There was no course area id transmitted...");
         }
         ExLog.i(this, this.getClass().toString(), "trying to load courseArea via id: " + courseAreaId);
-        mCourseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
+        CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
 
         Serializable eventId = getEventIdFromIntent();
         if (eventId == null) {
@@ -167,14 +167,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             startActivity(intent);
             finish();
         } else {
-            if (mCourseArea != null) {
-                loadRaces(mCourseArea);
+            if (courseArea != null) {
+                loadRaces(courseArea);
                 ExLog.i(this, this.getClass().toString(), "did load courseArea!");
             } else {
                 ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
-            loadNavDrawer(mCourseArea);
+            loadNavDrawer(courseArea);
             loadWelcomeFragment();
         }
     }
@@ -254,7 +254,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
         mWind = (Wind) savedInstanceState.getSerializable(WIND);
@@ -385,7 +385,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         builder.setPositiveButton(getString(R.string.race_reset_confirm), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId().toString());
+                ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId());
                 ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
             }
@@ -394,7 +394,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (mSelectedRace != null) {
-                    ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_NO, mSelectedRace.getId().toString());
+                    ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_NO, mSelectedRace.getId());
                 }
                 dialog.cancel();
             }
@@ -417,7 +417,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             @Override
             public void onGlobalLayout() {
                 // Find the overflow button
-                final ArrayList<View> outViews = new ArrayList<View>();
+                final ArrayList<View> outViews = new ArrayList<>();
                 decorView.findViewsWithText(outViews, overflowDescription, View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
                 if (outViews.isEmpty()) {
                     return;
