@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 
@@ -59,10 +59,10 @@ public class RaceGroupSeriesFleet {
         if (!useDisplayName || TextUtils.isEmpty(name)) {
             name = raceGroup.getName();
         }
-        if (series != null && !series.getName().equals(AppConstants.DEFAULT)) {
+        if (series != null && !series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
             name += " - " + series.getName();
         }
-        if (fleet != null && !fleet.getName().equals(AppConstants.DEFAULT)) {
+        if (fleet != null && !fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             name += " - " + fleet.getName();
         }
         return name;

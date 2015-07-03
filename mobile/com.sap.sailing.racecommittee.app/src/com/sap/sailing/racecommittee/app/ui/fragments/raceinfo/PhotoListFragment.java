@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.FinishListPhotoAdapter;
@@ -192,11 +192,11 @@ public class PhotoListFragment extends BaseFragment {
             name = getRace().getRaceGroup().getName();
         }
 
-        if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
+        if (!getRace().getSeries().getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
             name += " - " + getRace().getSeries().getName();
         }
 
-        if (!getRace().getFleet().getName().equals(AppConstants.DEFAULT)) {
+        if (!getRace().getFleet().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             name += " - " + getRace().getFleet().getName();
         }
 

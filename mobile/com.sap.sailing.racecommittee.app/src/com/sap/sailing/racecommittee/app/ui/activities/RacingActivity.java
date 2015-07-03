@@ -23,6 +23,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -363,10 +364,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (TextUtils.isEmpty(title)) {
             title = race.getRaceGroup().getName();
         }
-        if (race.getSeries() != null && !race.getSeries().getName().equals(AppConstants.DEFAULT)) {
+        if (race.getSeries() != null && !race.getSeries().getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
             title += " / " + race.getSeries().getName();
         }
-        if (race.getFleet() != null && !race.getFleet().getName().equals(AppConstants.DEFAULT)) {
+        if (race.getFleet() != null && !race.getFleet().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             title += " / " + race.getFleet().getName();
         }
         title += " / " + race.getRaceName();

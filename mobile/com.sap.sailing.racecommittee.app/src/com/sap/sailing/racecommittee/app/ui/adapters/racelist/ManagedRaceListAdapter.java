@@ -19,6 +19,7 @@ import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -129,10 +130,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             boat_class.setText(regatta);
             String fleetSeries = "";
-            if (header.getFleet() != null && !header.getFleet().getName().equals(AppConstants.DEFAULT)) {
+            if (header.getFleet() != null && !header.getFleet().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
                 fleetSeries += header.getFleet().getName();
             }
-            if (header.getSeries() != null && !header.getSeries().getName().equals(AppConstants.DEFAULT)) {
+            if (header.getSeries() != null && !header.getSeries().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
                 if (!TextUtils.isEmpty(fleetSeries)) {
                     fleetSeries += " - ";
                 }

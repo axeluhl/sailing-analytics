@@ -16,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -348,10 +349,10 @@ public class StartTimeFragment extends BaseFragment
 
     private String getFleetSeries(Fleet fleet, SeriesBase series) {
         String fleetSeries = "";
-        if (fleet != null && fleet.getName().equals(AppConstants.DEFAULT)) {
+        if (fleet != null && fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             fleetSeries += fleet.getName();
         }
-        if (series != null && !series.getName().equals(AppConstants.DEFAULT)) {
+        if (series != null && !series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
             if (!TextUtils.isEmpty(fleetSeries)) {
                 fleetSeries += " - ";
             }
