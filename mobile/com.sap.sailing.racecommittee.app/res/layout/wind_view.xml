@@ -10,7 +10,7 @@
     android:orientation="vertical">
 
     <RelativeLayout
-        android:id="@+id/header"
+        android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
         android:background="?sap_gray">
@@ -84,9 +84,10 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/content_layout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_below="@id/header"
+        android:layout_below="@id/header_layout"
         android:background="?sap_gray_black_30"
         android:orientation="vertical"
         android:paddingLeft="@dimen/default_padding"
@@ -225,103 +226,42 @@
                         android:textAppearance="?textSmall"/>
 
                     <Button
+                        android:id="@+id/position_show"
                         style="?attr/buttonSolidNormal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/position_accuracy"
                         android:layout_centerHorizontal="true"
-                        android:text="Show on map"/>
+                        android:text="show on map"/>
 
                 </RelativeLayout>
-
             </RelativeLayout>
-
-            <!--<RelativeLayout
-                android:id="@+id/layout_map"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/position_header_old"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_margin="@dimen/default_margin"
-                    android:text="@string/wind_position"
-                    android:textAppearance="?textSmall"/>
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/position_header_old">
-
-                    <FrameLayout
-                        android:id="@+id/windMap"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:layout="@layout/welcome"/>
-
-                    <RelativeLayout
-                        android:id="@+id/address"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/default_margin"
-                        android:background="?white"
-                        android:orientation="horizontal"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <ImageButton
-                            android:id="@+id/address_search"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:background="@android:color/transparent"
-                            android:padding="@dimen/default_padding_half"
-                            android:src="?search_24dp_invert"/>
-
-                        <EditText
-                            android:id="@+id/address_input"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/default_margin_half"
-                            android:layout_marginStart="@dimen/default_margin_half"
-                            android:layout_toLeftOf="@id/address_search"
-                            android:layout_toStartOf="@id/address_search"
-                            android:hint="@string/wind_address_hint"
-                            android:padding="@dimen/default_padding_half"
-                            android:singleLine="true"
-                            android:textAppearance="?textNormal"
-                            android:textColor="?white_invert"
-                            android:textColorHint="?sap_light_gray"/>
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/dark_layer"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/constant_black_transparent"/>
-
-                        <Button
-                            android:id="@+id/enter_position"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:background="@drawable/button_border_light"
-                            android:padding="@dimen/default_padding"
-                            android:text="@string/wind_enter_position"
-                            android:textAllCaps="true"
-                            android:textAppearance="?textNormal"
-                            android:textColor="?white"/>
-                    </RelativeLayout>
-                </RelativeLayout>
-            </RelativeLayout>-->
         </LinearLayout>
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/footer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/content_layout"
+        android:visibility="gone">
+
+        <WebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </WebView>
+
+        <Button
+            android:id="@+id/position_hide"
+            style="?attr/buttonSolidNormal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="hide map"/>
+
+    </RelativeLayout>
+
 </RelativeLayout>
