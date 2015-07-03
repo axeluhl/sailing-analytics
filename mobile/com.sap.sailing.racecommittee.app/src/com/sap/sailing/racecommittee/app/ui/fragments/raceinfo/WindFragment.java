@@ -8,6 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -37,6 +40,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -76,6 +80,7 @@ public class WindFragment extends BaseFragment
     private TextView mPositionAccuracy;
     private Button mPositionShow;
     private Button mPositionHide;
+    private WebView mWebView;
 
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
@@ -138,6 +143,7 @@ public class WindFragment extends BaseFragment
         mPositionAccuracy = (TextView) layout.findViewById(R.id.position_accuracy);
         mPositionShow = (Button) layout.findViewById(R.id.position_show);
         mPositionHide = (Button) layout.findViewById(R.id.position_hide);
+        mWebView = (WebView) layout.findViewById(R.id.web_view);
 
         return layout;
     }
@@ -416,6 +422,11 @@ public class WindFragment extends BaseFragment
             mContentLayout.setVisibility(show ? View.GONE : View.VISIBLE);
         }
         if (mFooterLayout != null) {
+            WebSettings settings = mWebView.getSettings();
+            //settings.setBuiltInZoomControls(false);
+            //settings.setSupportZoom(false);
+            settings.setJavaScriptEnabled(true);
+            mWebView.loadUrl("http://kielerwoche2015.sapsailing.com/gwt/RaceBoard.html?eventId=a9d6c5d5-cac3-47f2-9b5c-506e441819a1&leaderboardName=KW%202015%20Olympic%20-%20Finn&raceName=R1%20%28Finn%29&viewShowMapControls=false&viewShowNavigationPanel=false&regattaName=KW%202015%20Olympic%20-%20Finn");
             mFooterLayout.setVisibility(show ? View.VISIBLE : View.GONE);
         }
 
