@@ -391,20 +391,17 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
-        if (trackedRace == null)
-            return;
-
-        CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
-        List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
-
-        for (Waypoint waypoint : base.getWaypoints()) {
-            update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
-        }
-
-        try {
-            trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
-        } catch (PatchFailedException e) {
-            logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+        if (trackedRace != null) {
+            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+            List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+            for (Waypoint waypoint : base.getWaypoints()) {
+                update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            }
+            try {
+                trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
+            } catch (PatchFailedException e) {
+                logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+            }
         }
     }
 
