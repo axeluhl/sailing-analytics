@@ -43,12 +43,10 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
-import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;
-    private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
     public DesktopActivityMapper(DesktopClientFactory clientFactory) {
         super();
