@@ -92,8 +92,7 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
             } finally {
                 trackedRace.unlockAfterRead(o2MarkPassings);
             }
-            result = o2MarkPassingsBeforeTimePointSize - o1MarkPassingsBeforeTimePointSize; // inverted: more legs means
-                                                                                            // smaller rank
+            result = o1Leg == null ? o2Leg == null ? 0 : 1 : o2Leg == null ? -1 : o2Leg.getLeg().compareTo(o1Leg.getLeg()); // don't compare mark passing sizes! bug 2976
             if (result == 0 && o1MarkPassingsBeforeTimePointSize > 0) {
                 // Competitors are on same leg and both have already started the first leg.
                 // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
