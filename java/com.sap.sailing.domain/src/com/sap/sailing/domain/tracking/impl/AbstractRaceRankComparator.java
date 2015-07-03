@@ -2,11 +2,14 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -35,6 +38,7 @@ import com.sap.sse.common.TimePoint;
  * 
  */
 public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implements Comparator<Competitor> {
+    private static final Logger logger = Logger.getLogger(AbstractRaceRankComparator.class.getName());
     private final TrackedRace trackedRace;
     private final TimePoint timePoint;
     private final DummyMarkPassingWithTimePointOnly markPassingWithTimePoint;
@@ -59,6 +63,7 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         if (o1 == o2) {
             result = 0;
         } else {
+            final Course course = trackedRace.getRace().getCourse();
             NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1);
             NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint;
             MarkPassing o1LastMarkPassingBeforeTimePoint = null;
@@ -92,31 +97,43 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
             } finally {
                 trackedRace.unlockAfterRead(o2MarkPassings);
             }
-            result = o1Leg == null ? o2Leg == null ? 0 : 1 : o2Leg == null ? -1 : o2Leg.getLeg().compareTo(o1Leg.getLeg()); // don't compare mark passing sizes! bug 2976
+            final List<Leg> legs = course.getLegs();
+            result = o1LastMarkPassingBeforeTimePoint == null
+                  ? o2LastMarkPassingBeforeTimePoint == null ? 0  // both haven't started yet
+                                                             : 1  // only o2 has started; o1 is worse ("greater") than o2
+                  : o2LastMarkPassingBeforeTimePoint == null ? -1 // only o1 has started; o1 is better ("less") than o2
+                  /* both have started; any difference */    : course.getIndexOfWaypoint(o2LastMarkPassingBeforeTimePoint.getWaypoint()) -
+                  /* in last waypoint passed?          */      course.getIndexOfWaypoint(o1LastMarkPassingBeforeTimePoint.getWaypoint());
             if (result == 0 && o1MarkPassingsBeforeTimePointSize > 0) {
+                assert o2LastMarkPassingBeforeTimePoint != null;
                 // Competitors are on same leg and both have already started the first leg.
                 // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
                 // in case we have the final leg, so both competitors finished the race.
                 if (o1Leg == null) {
                     // both must already have finished race; sort by race finish time: earlier time means smaller
                     // (better) rank
+                    assert o2Leg == null;
                     result = o1LastMarkPassingBeforeTimePoint.getTimePoint().compareTo(
                             o2LastMarkPassingBeforeTimePoint.getTimePoint());
                 } else {
-                    if (o2Leg == null) {
-                        result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
+                    assert o2Leg != null; // otherwise, o1Leg!=null && o2Leg==null, but then o1 would have a finish mark passing and o2 not
+                    if (o1Leg.getLeg() != o2Leg.getLeg()) {
+                        logger.finest("Warning: competitors "+o1+" and "+o2+" in different legs ("+
+                              o1Leg.getLeg()+" and "+o2Leg.getLeg()+", respectively) although based on their last mark passings before "+
+                                timePoint+" ("+o1LastMarkPassingBeforeTimePoint+" and "+o2LastMarkPassingBeforeTimePoint+", respectively) "+
+                                "they should be in the same leg");
+                        // strange: both have the same number of mark passings but are in different legs; something is
+                        // broken, but we can only try our best:
+                        logger.finest("Warning: competitors "+o1+" and "+o2+" in different legs ("+
+                                o1Leg.getLeg()+" and "+o2Leg.getLeg()+", respectively) although based on their last mark passings before "+
+                                  timePoint+" ("+o1LastMarkPassingBeforeTimePoint+" and "+o2LastMarkPassingBeforeTimePoint+", respectively) "+
+                                  "they should be in the same leg");
+                        result = legs.indexOf(o1Leg.getLeg()) - legs.indexOf(o2Leg.getLeg());
                     } else {
-                        if (o1Leg.getLeg() != o2Leg.getLeg()) {
-                            // strange: both have the same number of mark passings but are in different legs; something is
-                            // broken, but we can only try our best:
-                            result = trackedRace.getRace().getCourse().getLegs().indexOf(o1Leg.getLeg()) -
-                                    trackedRace.getRace().getCourse().getLegs().indexOf(o2Leg.getLeg());
-                        } else {
-                            // competitors are in same leg; compare their windward distance to go
-                            final C wwdtgO1 = getComparisonValueForSameLeg(o1);
-                            final C wwdtgO2 = getComparisonValueForSameLeg(o2);
-                            result = wwdtgO1==null?wwdtgO2==null?0:-1:wwdtgO2==null?1:(lessIsBetter?1:-1)*wwdtgO1.compareTo(wwdtgO2);
-                        }
+                        // competitors are in same leg; compare their windward distance to go
+                        final C wwdtgO1 = getComparisonValueForSameLeg(o1);
+                        final C wwdtgO2 = getComparisonValueForSameLeg(o2);
+                        result = wwdtgO1==null?wwdtgO2==null?0:-1:wwdtgO2==null?1:(lessIsBetter?1:-1)*wwdtgO1.compareTo(wwdtgO2);
                     }
                 }
             }
