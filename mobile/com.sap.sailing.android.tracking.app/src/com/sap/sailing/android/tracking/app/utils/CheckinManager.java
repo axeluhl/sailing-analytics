@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -13,8 +14,10 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonSerializer;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -194,11 +197,11 @@ public class CheckinManager {
                     activity.dismissProgressDialog();
 
                     try {
-                        urlData.competitorName = response.getString("name");
-                        urlData.competitorId = response.getString("id");
-                        urlData.competitorSailId = response.getString("sailID");
-                        urlData.competitorNationality = response.getString("nationality");
-                        urlData.competitorCountryCode = response.getString("countryCode");
+                        urlData.competitorName = response.getString(CompetitorJsonSerializer.COMPETITOR_NAME);
+                        urlData.competitorId = response.getString(CompetitorJsonSerializer.COMPETITOR_ID);
+                        urlData.competitorSailId = response.getString(CompetitorJsonSerializer.COMPETITOR_SAIL_ID);
+                        urlData.competitorNationality = response.getString(CompetitorJsonSerializer.COMPETITOR_NATIONALITY);
+                        urlData.competitorCountryCode = response.getString(CompetitorJsonSerializer.COMPETITOR_COUNTRY_CODE);
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();

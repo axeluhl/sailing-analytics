@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -47,11 +48,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public static JSONObject getCompetitorJSON(Competitor competitor) {
         // see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
         JSONObject json = new JSONObject();
-        json.put("id", competitor.getId().toString());
-        json.put("name", competitor.getName());
-        json.put("sailID", competitor.getBoat().getSailID());
-        json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
+        json.put(CompetitorJsonSerializer.COMPETITOR_ID, competitor.getId().toString());
+        json.put(CompetitorJsonSerializer.COMPETITOR_NAME, competitor.getName());
+        json.put(CompetitorJsonSerializer.COMPETITOR_SAIL_ID, competitor.getBoat().getSailID());
+        json.put(CompetitorJsonSerializer.COMPETITOR_NATIONALITY, competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+        json.put(CompetitorJsonSerializer.COMPETITOR_COUNTRY_CODE, competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
         json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
         json.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
         if(competitor.getFlagImage() != null) {
