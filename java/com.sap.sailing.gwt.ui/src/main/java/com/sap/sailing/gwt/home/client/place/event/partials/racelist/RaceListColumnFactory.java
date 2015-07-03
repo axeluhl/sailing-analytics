@@ -17,7 +17,10 @@ import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
@@ -28,8 +31,10 @@ import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesLi
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
@@ -65,6 +70,12 @@ public class RaceListColumnFactory {
 
         @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
         SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
+        
+        @Template("<img src=\"{2}\" class=\"{0}\" /><span class=\"{1}\">{3}</span>")
+        SafeHtml winner(String styleNamesFlag, String styleNamesText, String flagImageURL, String name);
+        
+        @Template("<img src=\"{2}\" class=\"{0}\" /><span class=\"{1}\">{3}</span>")
+        SafeHtml winner(String styleNamesFlag, String styleNamesText, SafeUri flagImageURL, String name);
     }
     
     public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, FleetMetadataDTO> getFleetCornerColumn() {
@@ -378,6 +389,50 @@ public class RaceListColumnFactory {
             @Override
             public T getValue(T object) {
                 return object;
+            }
+        };
+    }
+    
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, CompetitorDTO> getWinnerColumn() {
+        Cell<CompetitorDTO> cell = new AbstractCell<CompetitorDTO>() {
+            @Override
+            public void render(Context context, CompetitorDTO value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    final SafeUri flagImageUri;
+                    if (value.getFlagImageURL() == null || value.getFlagImageURL().isEmpty()) {
+                        String twoLetterIsoCountryCode = value.getTwoLetterIsoCountryCode();
+                        if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                            flagImageUri = FlagImageResolver.getEmptyFlagImageResource().getSafeUri();
+                        } else {
+                            flagImageUri = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode).getSafeUri();
+                        }
+                    } else {
+                        flagImageUri = UriUtils.fromTrustedString(value.getFlagImageURL());
+                    }
+                    sb.append(TEMPLATE.winner(CSS.race_item_flag(), CSS.race_item_winner(), flagImageUri, value.getName()));
+                }
+            }
+        };
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+            @Override
+            protected String getComparisonValue(T object) {
+                return object.getWinner() != null ? object.getWinner().getName() : null;
+            }
+        };
+        return new SortableRaceListColumn<T, CompetitorDTO>(I18N.winner(), cell, comparator) {
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+            
+            @Override
+            public String getColumnStyle() {
+                return getStyleNamesString(CSS.race_item(), CSS.race_itemwinner());
+            }
+            
+            @Override
+            public CompetitorDTO getValue(T object) {
+                return object.getWinner();
             }
         };
     }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
@@ -57,6 +58,8 @@ public class RaceListViewDTO implements DTO {
         raceListRace.setTrackingState(liveRace.getTrackingState());
         raceListRace.setViewState(liveRace.getViewState());
         raceListRace.setWind(liveRace.getWind());
+        raceListRace.setWinner(new CompetitorDTOImpl("Ingmar Pedersen", null, null, "de", 
+                null, null, null, null, null, null, null, null, null));
         return raceListRace;
     }
 }

@@ -20,7 +20,9 @@ import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListN
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
@@ -139,6 +141,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     }
     
     private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> {
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
         }
@@ -161,6 +165,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             add(startTimeColumn);
             add(windSpeedColumn);
             add(windDirectionColumn);
+            add(winnerColumn);
             add(raceViewerButtonColumn);
         }
     }
