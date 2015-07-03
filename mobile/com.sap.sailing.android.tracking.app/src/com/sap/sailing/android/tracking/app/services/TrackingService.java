@@ -114,6 +114,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         locationUpdateRequested = true;
 
         ExLog.i(this, TAG, "Started Tracking");
+        // Useful code for Bug 3048. Will stay commented for now.
         // showNotification();
 
         prefs.setTrackerIsTracking(true);
@@ -209,12 +210,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         } catch (JSONException ex) {
             ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
         }
-
-        // DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
-        // location.getLongitude(), location.getSpeed(),
-        // location.getBearing(), location.getProvider(),
-        // location.getTime(), eventRowId);
-        // ensureTransmittingServiceIsRunning();
     }
 
     /**
@@ -262,17 +257,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         return batteryPct;
     }
 
-    /**
-     * start transmitting service when a new fix arrives, because it ends itself, if there's no data to send.
-     */
-    // private void ensureTransmittingServiceIsRunning() {
-    // if (BuildConfig.DEBUG) {
-    // ExLog.i(this, TAG,
-    // "ensureTransmittingServiceIsRunning, starting TransmittingService");
-    // }
-    //
-    // ServiceHelper.getInstance().startTransmittingService(this);
-    // }
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -284,6 +268,8 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         notificationManager.cancel(NOTIFICATION_ID);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
+    
+    // Useful code for Bug 3048. Will stay commented for now.
 
     // private void showNotification() {
     // Intent intent = new Intent(this, RegattaActivity.class);
