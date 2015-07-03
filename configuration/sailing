@@ -12,6 +12,9 @@ RETVAL=0
 
 JAVA_START_INSTANCES="server"
 GIT_REPOSITORY=/home/sailing/code
+APACHE_CONFIG_DIR=/etc/httpd/conf.d
+rm /var/log/sailing.out
+rm /var/log/sailing.err
 
 start_tmux() {
 	su - sailing -c "/home/sailing/bin/tmuxConsole.sh unattended"
@@ -29,9 +32,14 @@ start_servers() {
 		(
 			# execute env.sh in a subshell which now has the same set of variables that the server will see
 			source /home/sailing/servers/$conf/env.sh
+
+			# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
+			echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
+			echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
+
 			launch_httpd
 			echo "Starting Java server $conf"
-			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>/var/log/sailing.err >/var/log/sailing.out
+			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
 			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
 		)
 		RETVAL=$?
@@ -50,16 +58,14 @@ stop_servers() {
 
 # launch_httpd(server_name, port, event_id)
 launch_httpd() {
-	if [ "$REPLICATE_ON_START" != "" ]; then
-		echo "REPLICATE_ON_START is $REPLICATE_ON_START. Will try to launch httpd so this replica can work with an ELB easily."
-		if [ -x /etc/init.d/httpd ]; then
-			server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
-			echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>/etc/httpd/conf.d/001-events.conf
-			echo "Launching httpd to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..."
-			service httpd start
-		else
-			echo Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd
-		fi
+	echo "Will try to launch httpd so this replica can work with an ELB easily."
+	if [ -x /etc/init.d/httpd ]; then
+		server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
+		echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
+		echo "Launching httpd to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..."
+		service httpd start
+	else
+		echo Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd
 	fi
 }
 
