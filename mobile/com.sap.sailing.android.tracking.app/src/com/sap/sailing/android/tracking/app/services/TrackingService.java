@@ -1,10 +1,13 @@
 package com.sap.sailing.android.tracking.app.services;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.hardware.GeomagneticField;
 import android.location.Location;
 import android.os.BatteryManager;
@@ -12,6 +15,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -23,6 +27,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
@@ -114,7 +119,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         locationUpdateRequested = true;
 
         ExLog.i(this, TAG, "Started Tracking");
-        // showNotification();
+        showNotification();
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
@@ -285,19 +290,20 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
 
-    // private void showNotification() {
-    // Intent intent = new Intent(this, RegattaActivity.class);
-    // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-    // | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    // PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-    // CharSequence text = getText(R.string.tracker_started);
-    // Notification notification = new NotificationCompat.Builder(this)
-    // .setContentTitle(getText(R.string.app_name))
-    // .setContentText(text).setContentIntent(pi)
-    // .setSmallIcon(R.drawable.icon).build();
-    // notification.flags |= Notification.FLAG_NO_CLEAR;
-    // startForeground(NOTIFICATION_ID, notification);
-    // }
+     private void showNotification() {
+     Intent intent = new Intent(this, TrackingActivity.class);
+     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+     PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+     Notification notification = new NotificationCompat.Builder(this)
+     .setContentTitle(getText(R.string.app_name))
+     .setContentText(event.name).setContentIntent(pi)
+     .setSmallIcon(R.drawable.ic_launcher).
+             setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+         .setOngoing(true).build();
+     notification.flags |= Notification.FLAG_NO_CLEAR;
+     startForeground(NOTIFICATION_ID, notification);
+     }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {
         gpsQualityListener = listener;
