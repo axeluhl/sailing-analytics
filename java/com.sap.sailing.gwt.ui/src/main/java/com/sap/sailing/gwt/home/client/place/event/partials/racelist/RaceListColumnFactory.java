@@ -351,29 +351,29 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Long> getWindFixesCountColumn() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getWindFixesCountColumn() {
         return new DataCountColumn<T>(DataCountColumn.ICON_WIND) {
             @Override
-            public Long getValue(T object) {
-                return null; // TODO
+            public Number getValue(T object) {
+                return object.getWindFixesCount();
             }
         };
     }
     
-    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Long> getVideoCountColumn() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getVideoCountColumn() {
         return new DataCountColumn<T>(DataCountColumn.ICON_VIDEO) {
             @Override
-            public Long getValue(T object) {
-                return null; // TODO
+            public Number getValue(T object) {
+                return object.getVideoCount();
             }
         };
     }
     
-    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Long> getAudioCountColumn() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getAudioCountColumn() {
         return new DataCountColumn<T>(DataCountColumn.ICON_AUDIO) {
             @Override
-            public Long getValue(T object) {
-                return null; // TODO
+            public Number getValue(T object) {
+                return object.getAudioCount();
             }
         };
     }
@@ -508,17 +508,17 @@ public class RaceListColumnFactory {
         };
     }
     
-    private static abstract class DataCountColumn<T extends RaceListRaceDTO> extends SortableRaceListColumn<T, Long> {
+    private static abstract class DataCountColumn<T extends RaceListRaceDTO> extends SortableRaceListColumn<T, Number> {
         private static final SafeUri ICON_WIND = UriUtils.fromTrustedString("images/home/icon-wind.png"); 
         private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
         private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
         
         private DataCountColumn(final SafeUri imageUri) {
-            super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Long>() {
+            super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Number>() {
                 @Override
-                public void render(Context context, Long value, SafeHtmlBuilder sb) {
-                    if (value != null && value > 0) {
-                        sb.append(value);
+                public void render(Context context, Number value, SafeHtmlBuilder sb) {
+                    if (value != null && value.longValue() > 0) {
+                        sb.append(value.longValue());
                     } else {
                         sb.appendHtmlConstant("&mdash;");
                     }

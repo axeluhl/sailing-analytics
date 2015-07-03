@@ -8,7 +8,9 @@ public class RaceListRaceDTO extends RaceMetadataDTO {
     
     private Duration duration;
     private CompetitorDTO winner;
-    // TODO: fields for wind(!?), video and audio counters
+    private int windFixesCount;
+    private int videoCount;
+    private int audioCount;
 
     @SuppressWarnings("unused")
     private RaceListRaceDTO() {
@@ -30,5 +32,22 @@ public class RaceListRaceDTO extends RaceMetadataDTO {
     public void setWinner(CompetitorDTO winner) {
         this.winner = winner;
     }
-    
+    public int getWindFixesCount() {
+        return windFixesCount;
+    }
+    public void setWindFixesCount(int windFixesCount) {
+        this.windFixesCount = windFixesCount;
+    }
+    public int getVideoCount() {
+        return videoCount;
+    }
+    public void setVideoCount(int videoCount) {
+        this.videoCount = videoCount;
+    }
+    public int getAudioCount() {
+        return audioCount;
+    }
+    public void setAudioCount(int audioCount) {
+        this.audioCount = audioCount;
+    }
 }
