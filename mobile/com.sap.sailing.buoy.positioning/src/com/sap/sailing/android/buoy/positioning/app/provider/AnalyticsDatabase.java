@@ -4,7 +4,13 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.*;
+
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUriColumns;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.LeaderboardColumns;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Mark;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkColums;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPingColumns;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
