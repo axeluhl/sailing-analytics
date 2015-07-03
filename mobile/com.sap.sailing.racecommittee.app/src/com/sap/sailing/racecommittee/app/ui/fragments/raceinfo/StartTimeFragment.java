@@ -15,10 +15,9 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
@@ -39,10 +38,10 @@ public class StartTimeFragment extends BaseFragment
     private static final int FUTURE_DAYS = 25;
     private static final int PAST_DAYS = -3;
     private static final int MAX_DIFF_MIN = 60;
+    private static final String ZERO_TIME = "-00:00:00";
 
     private View mRelative;
     private View mAbsolute;
-    private ToggleButton mToggle;
 
     private NumberPicker mDatePicker;
     private NumberPicker mTimeOffset;
@@ -92,9 +91,26 @@ public class StartTimeFragment extends BaseFragment
         mAbsolute = ViewHolder.get(layout, R.id.time_absolute);
 
         if (preferences.isDependentRacesAllowed()) {
-            View select = ViewHolder.get(layout, R.id.time_select);
-            if (select != null) {
-                select.setVisibility(View.VISIBLE);
+            final TabHost tabHost = ViewHolder.get(layout, android.R.id.tabhost);
+            if (tabHost != null) {
+                tabHost.setup();
+
+                tabHost.addTab(tabHost.newTabSpec(getString(R.string.dependent_races_absolute))
+                    .setIndicator(getString(R.string.dependent_races_absolute)).setContent(R.id.time_absolute));
+                tabHost.addTab(tabHost.newTabSpec(getString(R.string.dependent_races_relative)).setIndicator(getString(R.string.dependent_races_relative)).setContent(R.id.time_relative));
+
+                for (int i = 0; i < tabHost.getTabWidget().getChildCount(); i++) {
+                    BitmapHelper.setBackground(tabHost.getTabWidget().getChildAt(i), BitmapHelper.getAttrDrawable(getActivity(), R.attr.tab_widget));
+                }
+
+                tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+                    @Override
+                    public void onTabChanged(String tabId) {
+                        setTabTextColor(tabHost);
+                    }
+                });
+                setTabTextColor(tabHost);
+                tabHost.setCurrentTab(0);
             }
         }
 
@@ -112,16 +128,6 @@ public class StartTimeFragment extends BaseFragment
         View setStart = ViewHolder.get(layout, R.id.set_start_time_absolute);
         if (setStart != null) {
             setStart.setOnClickListener(this);
-        }
-
-        mToggle = ViewHolder.get(layout, R.id.switch_start_time);
-        if (mToggle != null) {
-            mToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    showInputView(isChecked);
-                }
-            });
         }
 
         mDebugTime = ViewHolder.get(layout, R.id.debug_time);
@@ -236,8 +242,6 @@ public class StartTimeFragment extends BaseFragment
                 mDependentRace.setAdapter(adapter);
             }
         }
-
-        showInputView(mToggle.isChecked());
     }
 
     @Override
@@ -285,16 +289,16 @@ public class StartTimeFragment extends BaseFragment
 
             if (mMinuteDec != null) {
                 String countdown = getString(resId, timeLeft);
-                if (countdown.equals("-00:00:00")) {
-                    countdown = "00:00:00";
+                if (ZERO_TIME.equals(countdown)) {
+                    countdown = countdown.substring(1);
                 }
                 mMinuteDec.setText(countdown);
             }
 
             if (mMinuteInc != null) {
                 String countdown = getString(resId, timeRight);
-                if (countdown.equals("-00:00:00")) {
-                    countdown = "00:00:00";
+                if (ZERO_TIME.equals(countdown)) {
+                    countdown = countdown.substring(1);
                 }
                 mMinuteInc.setText(countdown);
             }
@@ -305,13 +309,13 @@ public class StartTimeFragment extends BaseFragment
         }
     }
 
-    private void showInputView(boolean isChecked) {
-        if (isChecked) {
-            mAbsolute.setVisibility(View.GONE);
-            mRelative.setVisibility(View.VISIBLE);
-        } else {
-            mAbsolute.setVisibility(View.VISIBLE);
-            mRelative.setVisibility(View.GONE);
+    private void setTabTextColor(TabHost tabHost) {
+        for (int i = 0; i < tabHost.getTabWidget().getTabCount(); i++) {
+            View view = tabHost.getTabWidget().getChildTabViewAt(i);
+            if (view != null) {
+                TextView textView = (TextView) view.findViewById(android.R.id.title);
+                textView.setTextColor(ThemeHelper.getColor(getActivity(), (i == tabHost.getCurrentTab()) ? R.attr.white : R.attr.sap_light_gray));
+            }
         }
     }
 
@@ -370,7 +374,7 @@ public class StartTimeFragment extends BaseFragment
             break;
 
         case R.id.set_start_time_relative:
-
+            //TODO
             break;
 
         case R.id.header_text:

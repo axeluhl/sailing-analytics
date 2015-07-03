@@ -7,6 +7,7 @@
     <style name="AppTheme.Light.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
+        <item name="android:tabWidgetStyle">@style/AppTheme.Light.TabWidget</item>
 
         <item name="colorPrimary">@color/light_colorPrimary</item>
         <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
@@ -37,6 +38,7 @@
         <item name="buttonSolidXSmall">@style/AppTheme.Light.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
+        <item name="text">@style/AppTheme.Light.Text</item>
         <item name="textXXSmall">@style/AppTheme.Light.Text.XXSmall</item>
         <item name="textXSmall">@style/AppTheme.Light.Text.XSmall</item>
         <item name="textSmall">@style/AppTheme.Light.Text.Small</item>
@@ -81,6 +83,7 @@
         <item name="swipe_idle">@drawable/swipe_idle_light</item>
         <item name="swipe_left">@drawable/swipe_left_light</item>
         <item name="swipe_right">@drawable/swipe_right_light</item>
+        <item name="tab_widget">@drawable/tabwidget_light</item>
         <item name="value_next">@drawable/value_next_light</item>
         <item name="value_prev">@drawable/value_prev_light</item>
         <item name="wind_off">@drawable/wind_off_light</item>
@@ -180,6 +183,15 @@
         <item name="android:textColorSecondary">@color/dialog_color_text</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="AppTheme.Light.TabWidget" parent="@android:style/Widget.TabWidget">
+        <item name="android:textAppearance">@style/AppTheme.Light.TabWidgetText</item>
+    </style>
+
+    <style name="AppTheme.Light.TabWidgetText" parent="@android:style/TextAppearance.Widget.TabWidget">
+        <item name="android:textSize">@dimen/textSize_32</item>
+        <item name="android:textColor">?white</item>
     </style>
 
 </resources>
