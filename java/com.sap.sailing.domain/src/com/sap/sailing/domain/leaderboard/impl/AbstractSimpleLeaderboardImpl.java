@@ -1140,10 +1140,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 suppressedCompetitors.remove(competitor);
             }
-            getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
         } finally {
             LockUtil.unlockAfterWrite(suppressedCompetitorsLock);
         }
+        getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
     }
 
     @Override
