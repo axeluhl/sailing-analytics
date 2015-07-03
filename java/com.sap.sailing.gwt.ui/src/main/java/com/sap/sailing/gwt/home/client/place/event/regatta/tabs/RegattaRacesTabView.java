@@ -142,6 +142,9 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> {
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> windfixesCountColumn = RaceListColumnFactory.getWindFixesCountColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
         
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
@@ -165,6 +168,9 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             add(startTimeColumn);
             add(windSpeedColumn);
             add(windDirectionColumn);
+            add(windfixesCountColumn);
+            add(videoCountColumn);
+            add(audioCountColumn);
             add(winnerColumn);
             add(raceViewerButtonColumn);
         }

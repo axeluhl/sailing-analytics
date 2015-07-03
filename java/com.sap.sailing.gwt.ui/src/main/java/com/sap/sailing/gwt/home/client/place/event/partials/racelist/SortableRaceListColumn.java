@@ -9,14 +9,19 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.common.Util;
 
 public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> {
-    private final String headerText;
+    
+    private final Header<?> header;
     private final InvertibleComparator<T> comparator;
     
     private boolean showDetails = true;
 
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
+        this(new TextHeader(headerText), cell, comparator);
+    }
+    
+    protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
         super(cell, SortingOrder.ASCENDING);
-        this.headerText = headerText;
+        this.header = header;
         this.comparator = comparator;
     }
 
@@ -27,7 +32,7 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
 
     @Override
     public final Header<?> getHeader() {
-        return new TextHeader(headerText);
+        return header;
     }
     
     public void setShowDetails(boolean showDetails) {
@@ -37,7 +42,7 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
     public boolean isShowDetails() {
         return showDetails;
     }
-
+    
     protected final String getStyleNamesString(String... styleNames) {
         return Util.join(" ", styleNames);
     }

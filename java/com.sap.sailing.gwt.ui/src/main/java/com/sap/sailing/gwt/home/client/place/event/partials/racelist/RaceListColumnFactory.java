@@ -19,6 +19,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
@@ -72,10 +73,10 @@ public class RaceListColumnFactory {
         SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
         
         @Template("<img src=\"{2}\" class=\"{0}\" /><span class=\"{1}\">{3}</span>")
-        SafeHtml winner(String styleNamesFlag, String styleNamesText, String flagImageURL, String name);
-        
-        @Template("<img src=\"{2}\" class=\"{0}\" /><span class=\"{1}\">{3}</span>")
         SafeHtml winner(String styleNamesFlag, String styleNamesText, SafeUri flagImageURL, String name);
+        
+        @Template("<img src=\"{1}\" class=\"{0}\" />")
+        SafeHtml imageHeader(String styleNames, SafeUri imageURL);
     }
     
     public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, FleetMetadataDTO> getFleetCornerColumn() {
@@ -182,7 +183,7 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, Date> getStartTimeColumn() {
         Cell<Date> cell = new DateCell(DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE));
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>( new NullSafeComparableComparator<Date>()) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>()) {
             @Override
             protected Date getComparisonValue(T object) {
                 return object.getStart();
@@ -350,6 +351,33 @@ public class RaceListColumnFactory {
         };
     }
     
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Long> getWindFixesCountColumn() {
+        return new DataCountColumn<T>(DataCountColumn.ICON_WIND) {
+            @Override
+            public Long getValue(T object) {
+                return null; // TODO
+            }
+        };
+    }
+    
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Long> getVideoCountColumn() {
+        return new DataCountColumn<T>(DataCountColumn.ICON_VIDEO) {
+            @Override
+            public Long getValue(T object) {
+                return null; // TODO
+            }
+        };
+    }
+    
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Long> getAudioCountColumn() {
+        return new DataCountColumn<T>(DataCountColumn.ICON_AUDIO) {
+            @Override
+            public Long getValue(T object) {
+                return null; // TODO
+            }
+        };
+    }
+    
     public static <T extends LiveRaceDTO> SortableRaceListColumn<T, T> getRaceViewStateColumn() {
         Cell<T> cell = new AbstractCell<T>() {
             @Override
@@ -478,5 +506,34 @@ public class RaceListColumnFactory {
                 return object;
             }
         };
+    }
+    
+    private static abstract class DataCountColumn<T extends RaceListRaceDTO> extends SortableRaceListColumn<T, Long> {
+        private static final SafeUri ICON_WIND = UriUtils.fromTrustedString("images/home/icon-wind.png"); 
+        private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
+        private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
+        
+        private DataCountColumn(final SafeUri imageUri) {
+            super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Long>() {
+                @Override
+                public void render(Context context, Long value, SafeHtmlBuilder sb) {
+                    if (value != null && value > 0) {
+                        sb.append(value);
+                    } else {
+                        sb.appendHtmlConstant("&mdash;");
+                    }
+                }
+            }, null);
+        }
+        
+        @Override
+        public String getHeaderStyle() {
+            return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itemcenter(), MEDIA_CSS.showonlarge());
+        }
+        
+        @Override
+        public String getColumnStyle() {
+            return getStyleNamesString(CSS.race_item(), CSS.race_itemcenter(), MEDIA_CSS.showonlarge());
+        }
     }
 }
