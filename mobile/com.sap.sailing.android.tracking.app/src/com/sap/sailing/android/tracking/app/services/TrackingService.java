@@ -26,6 +26,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.tracking.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -191,16 +192,16 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             JSONArray jsonArray = new JSONArray();
             JSONObject fixJson = new JSONObject();
 
-            fixJson.put("course", location.getBearing());
-            fixJson.put("timestamp", location.getTime());
-            fixJson.put("speed", location.getSpeed());
-            fixJson.put("longitude", location.getLongitude());
-            fixJson.put("latitude", location.getLatitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
 
             jsonArray.put(fixJson);
 
-            json.put("fixes", jsonArray);
-            json.put("deviceUuid", prefs.getDeviceIdentifier());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, jsonArray);
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
 
             String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
 
