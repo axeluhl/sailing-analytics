@@ -478,11 +478,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass) {
-                return null;
-            }
-
-            @Override
             public void addTrackedRace(TrackedRace trackedRace) {
             }
 
@@ -535,6 +530,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public void unlockTrackedRacesAfterWrite() {
+            }
+
+            @Override
+            public void removeRaceListener(RaceListener listener) {
             }
         };
     }

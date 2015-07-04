@@ -3132,7 +3132,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData);
                 groupDTO.leaderboards.add(leaderboardDTO);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);
+                logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
         }
         Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();

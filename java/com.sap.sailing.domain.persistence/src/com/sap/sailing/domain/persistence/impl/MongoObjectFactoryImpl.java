@@ -1289,7 +1289,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
-        collection.remove(query);
+        collection.remove(query, WriteConcern.SAFE);
     }
     
     @Override
