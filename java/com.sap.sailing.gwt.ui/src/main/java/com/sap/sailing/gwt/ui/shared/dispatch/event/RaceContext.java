@@ -65,6 +65,7 @@ public class RaceContext {
     private boolean startTimeCalculated = false;
     private TimePoint finishTime;
     private boolean finishTimeCalculated = false;
+    private RaceViewState raceViewState;
     
     public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.event = event;
@@ -346,6 +347,13 @@ public class RaceContext {
     }
     
     private RaceViewState getLiveRaceViewState() {
+        if(raceViewState == null) {
+            raceViewState = calculateLiveRaceViewState();
+        }
+        return raceViewState;
+    }
+    
+    private RaceViewState calculateLiveRaceViewState() {
         TimePoint startTime = getStartTime();
         TimePoint finishTime = getFinishTime();
         RaceViewState raceState = RaceViewState.RUNNING;
