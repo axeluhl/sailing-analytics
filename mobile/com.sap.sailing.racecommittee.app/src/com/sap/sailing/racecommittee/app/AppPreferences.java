@@ -251,6 +251,17 @@ public class AppPreferences {
         if (value.equals("")) {
             return "http://localhost:8889";
         }
+
+        // add missing protocol
+        if (!value.startsWith("http://") && !value.startsWith("https://")) {
+            value = "http://" + value;
+        }
+
+        // remove trailing slash
+        if (value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
+        }
+
         return value;
     }
 
