@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -240,6 +241,11 @@ public class RaceContext {
         return null;
     }
     
+    public Date getStartTimeAsDate() {
+        TimePoint startTime = getStartTime();
+        return startTime == null ? null : startTime.asDate();
+    }
+    
     public TimePoint getStartTime() {
         if(!startTimeCalculated) {
             if (trackedRace != null) {
@@ -277,14 +283,13 @@ public class RaceContext {
         // and special flags states indicating how the postponed/canceled races will be continued
         if(isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
-            TimePoint startTime = getStartTime();
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
             liveRaceDTO.setViewState(getLiveRaceViewState());
             liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());
-            liveRaceDTO.setStart(startTime == null ? null : startTime.asDate());
+            liveRaceDTO.setStart(getStartTimeAsDate());
             liveRaceDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
             liveRaceDTO.setCourseArea(getCourseAreaOrNull());
             liveRaceDTO.setCourse(getCourseNameOrNull());
