@@ -33,10 +33,6 @@ start_servers() {
 			# execute env.sh in a subshell which now has the same set of variables that the server will see
 			source /home/sailing/servers/$conf/env.sh
 
-			# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
-			echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
-			echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
-
 			launch_httpd
 			echo "Starting Java server $conf"
 			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
@@ -46,6 +42,7 @@ start_servers() {
 		[ $RETVAL -eq 0 ] && success || failure
 	done
 	# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
+	INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
 	echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
 	echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
 
