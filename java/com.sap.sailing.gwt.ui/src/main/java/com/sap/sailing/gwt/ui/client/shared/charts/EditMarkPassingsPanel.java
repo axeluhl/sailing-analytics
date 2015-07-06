@@ -291,11 +291,13 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     }
 
     private void processCompetitorSelectionChange() {
-        waypointSelectionModel.clear();
-        if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
-            refillList();
-        } else {
-            disableEditing();
+        if (isVisible()) {
+            waypointSelectionModel.clear();
+            if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+                refillList();
+            } else {
+                disableEditing();
+            }
         }
     }
 
