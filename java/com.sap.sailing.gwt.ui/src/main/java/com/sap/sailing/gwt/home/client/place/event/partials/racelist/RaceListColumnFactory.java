@@ -454,7 +454,7 @@ public class RaceListColumnFactory {
             @Override
             public void render(Context context, SimpleCompetitorDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    SafeUri flagImageUri = FlagImageResolver.getFlagImageResource(value.getFlagImageURL(), value.getTwoLetterIsoCountryCode());
+                    SafeUri flagImageUri = FlagImageResolver.getFlagImageUri(value.getFlagImageURL(), value.getTwoLetterIsoCountryCode());
                     sb.append(TEMPLATE.winner(CSS.race_item_flag(), CSS.race_item_winner(), flagImageUri, value.getName()));
                 }
             }
