@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -302,8 +303,18 @@ public class RaceContext {
             // the start time is always given for live races
             RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getRegattaName(), raceColumn.getName());
             fillRaceData(liveRaceDTO);
+            liveRaceDTO.setDuration(getDurationOrNull());
             
             return liveRaceDTO;
+        }
+        return null;
+    }
+    
+    private Duration getDurationOrNull() {
+        TimePoint startTime = getStartTime();
+        TimePoint finishTime = getFinishTime();
+        if(startTime != null && finishTime != null) {
+            return startTime.until(finishTime);
         }
         return null;
     }
