@@ -30,6 +30,7 @@ public class Simulator {
     
     private DynamicTrackedRace trackedRace;
     private final WindStore windStore;
+    private boolean stopped;
     private long advanceInMillis = -1;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
     
@@ -76,11 +77,15 @@ public class Simulator {
                     windTrack.lockForRead();
                     try {
                         for (Wind wind : windTrack.getRawFixes()) {
+                            if (stopped) {
+                                break;
+                            }
                             trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
                         }
                     } finally {
                         windTrack.unlockAfterRead();
                     }
+                    logger.info("Wind Track Simulator for race "+trackedRace.getRace().getName()+" finished. stopped="+stopped);
                 }
             }.start();
         }
@@ -97,15 +102,11 @@ public class Simulator {
      */
     private synchronized long getAdvanceInMillis() {
         while (!isAdvanceInMillisSet()) {
-            if (trackedRace.getStartOfRace() != null) {
-                setAdvanceInMillis(System.currentTimeMillis() - trackedRace.getStartOfRace().asMillis());
-            } else {
-                try {
-                    wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
-                } catch (InterruptedException e) {
-                    logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
-                    // ignore; try again
-                }
+            try {
+                wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
+            } catch (InterruptedException e) {
+                logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
+                // ignore; try again
             }
         }
         return advanceInMillis;
@@ -244,5 +245,11 @@ public class Simulator {
                 }
             }, transformedTimepoint.asDate());
         }
+    }
+
+    public void stop() {
+        logger.info("Stopping simulator for race "+trackedRace.getRace().getName());
+        timer.cancel();
+        stopped = true;
     }
 }
