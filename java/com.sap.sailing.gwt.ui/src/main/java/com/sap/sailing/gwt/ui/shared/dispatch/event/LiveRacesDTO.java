@@ -16,39 +16,4 @@ public class LiveRacesDTO implements DTO {
         this.races.add(race);
     }
     
-    public boolean hasFleets() {
-        for(LiveRaceDTO race : races) {
-            if(race.getFleet() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean hasCourseAreas() {
-        for (LiveRaceDTO race : races) {
-            if (race.getCourseArea() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean hasCourses() {
-        for (LiveRaceDTO race : races) {
-            if (race.getCourse() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean hasWind() {
-        for (LiveRaceDTO race : races) {
-            if (race.getWind() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
