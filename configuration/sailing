@@ -28,12 +28,10 @@ start_servers() {
 	for conf in $JAVA_START_INSTANCES; do
 		echo "Checking for amazon update..."
 		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>/home/sailing/servers/$conf/env.sh
-		su - sailing -c "cd /home/sailing/servers/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>/var/log/sailing.err >/var/log/sailing.out
+		su - sailing -c "cd /home/sailing/servers/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.out
 		(
 			# execute env.sh in a subshell which now has the same set of variables that the server will see
 			source /home/sailing/servers/$conf/env.sh
-
-			launch_httpd
 			echo "Starting Java server $conf"
 			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
 			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
@@ -41,11 +39,7 @@ start_servers() {
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done
-	# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
-	INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
-	echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
-	echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
-
+	launch_httpd
 }
 
 stop_servers() {
@@ -63,7 +57,11 @@ launch_httpd() {
 	if [ -x /etc/init.d/httpd ]; then
 		server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
 		echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-		echo "Launching httpd to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..."
+		# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
+		INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
+		echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf" >>/var/log/sailing.out
+		echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
+		echo "Launching httpd to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
 		service httpd start
 	else
 		echo Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd
