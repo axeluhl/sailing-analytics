@@ -8,9 +8,10 @@ import java.util.TreeSet;
 import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.general.HasLogo;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class EventViewDTO extends EventMetadataDTO implements Result {
+public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
 
     public enum EventType {
         SINGLE_REGATTA, MULTI_REGATTA, SERIES_EVENT

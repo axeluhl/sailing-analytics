@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.sap.sailing.gwt.home.client.place.event.partials.header.EventHeaderResources;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.general.HasLogo;
 
 /**
  * Utility class to set logo url on UI elements using a default logo as fallback if no logo is provided.
@@ -19,7 +20,7 @@ public abstract class LogoUtil {
      * @param eventLogoUi {@link Element} where the logo is set
      * @param event {@link EventViewDTO} providing data
      */
-    public static void setEventLogo(Element eventLogoUi, EventViewDTO event) {
+    public static void setEventLogo(Element eventLogoUi, HasLogo event) {
         String logoUrl = event.getLogoImage() != null ? event.getLogoImage().getSourceRef() : DEFAULT_EVENT_LOGO.asString();
         setLogoAndTitle(eventLogoUi, logoUrl, event.getDisplayName());
     }
