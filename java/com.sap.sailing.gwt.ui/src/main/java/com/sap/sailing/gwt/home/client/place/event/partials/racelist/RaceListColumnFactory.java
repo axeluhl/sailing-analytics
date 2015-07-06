@@ -21,7 +21,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.SimpleCompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
@@ -421,10 +421,10 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, CompetitorDTO> getWinnerColumn() {
-        Cell<CompetitorDTO> cell = new AbstractCell<CompetitorDTO>() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, SimpleCompetitorDTO> getWinnerColumn() {
+        Cell<SimpleCompetitorDTO> cell = new AbstractCell<SimpleCompetitorDTO>() {
             @Override
-            public void render(Context context, CompetitorDTO value, SafeHtmlBuilder sb) {
+            public void render(Context context, SimpleCompetitorDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
                     final SafeUri flagImageUri;
                     if (value.getFlagImageURL() == null || value.getFlagImageURL().isEmpty()) {
@@ -447,7 +447,7 @@ public class RaceListColumnFactory {
                 return object.getWinner() != null ? object.getWinner().getName() : null;
             }
         };
-        return new SortableRaceListColumn<T, CompetitorDTO>(I18N.winner(), cell, comparator) {
+        return new SortableRaceListColumn<T, SimpleCompetitorDTO>(I18N.winner(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -459,7 +459,7 @@ public class RaceListColumnFactory {
             }
             
             @Override
-            public CompetitorDTO getValue(T object) {
+            public SimpleCompetitorDTO getValue(T object) {
                 return object.getWinner();
             }
         };

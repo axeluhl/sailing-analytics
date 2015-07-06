@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sse.common.Duration;
 
 public class RaceListRaceDTO extends RaceMetadataDTO {
     
     private Duration duration;
-    private CompetitorDTO winner;
+    private SimpleCompetitorDTO winner;
     private int windFixesCount;
     private int videoCount;
     private int audioCount;
@@ -26,10 +26,10 @@ public class RaceListRaceDTO extends RaceMetadataDTO {
     public void setDuration(Duration duration) {
         this.duration = duration;
     }
-    public CompetitorDTO getWinner() {
+    public SimpleCompetitorDTO getWinner() {
         return winner;
     }
-    public void setWinner(CompetitorDTO winner) {
+    public void setWinner(SimpleCompetitorDTO winner) {
         this.winner = winner;
     }
     public int getWindFixesCount() {
