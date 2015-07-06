@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -236,7 +235,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initTableColumns();
-        this.cellTable.setList(new ArrayList<>(data));
+        this.cellTable.setList(data);
         if (sortColumn != null && this.cellTable.getColumnIndex(sortColumn) >= 0) {
             this.cellTable.sortColumn(sortColumn);
         }
