@@ -60,6 +60,11 @@ public class RaceContext {
     private final ReadonlyRaceState state;
     private final Event event;
     
+    private TimePoint startTime;
+    private boolean startTimeCalculated = false;
+    private TimePoint finishTime;
+    private boolean finishTimeCalculated = false;
+    
     public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.event = event;
         this.leaderboard = leaderboard;
@@ -236,23 +241,27 @@ public class RaceContext {
     }
     
     public TimePoint getStartTime() {
-        TimePoint startTime = null;
-        if (trackedRace != null) {
-            startTime = trackedRace.getStartOfRace();
-        }
-        if (startTime == null && state != null) {
-            startTime = state.getStartTime();
+        if(!startTimeCalculated) {
+            if (trackedRace != null) {
+                startTime = trackedRace.getStartOfRace();
+            }
+            if (startTime == null && state != null) {
+                startTime = state.getStartTime();
+            }
+            startTimeCalculated = true;
         }
         return startTime;
     }
 
     private TimePoint getFinishTime() {
-        TimePoint finishTime = null;
-        if (trackedRace != null) {
-            finishTime = trackedRace.getEndOfRace();
-        } else if (state != null) {
-            finishTime = state.getFinishedTime();
-        } 
+        if(!finishTimeCalculated) {
+            if (trackedRace != null) {
+                finishTime = trackedRace.getEndOfRace();
+            } else if (state != null) {
+                finishTime = state.getFinishedTime();
+            }
+            finishTimeCalculated = true;
+        }
         return finishTime;
     }
 
@@ -268,7 +277,7 @@ public class RaceContext {
         TimePoint finishTime = getFinishTime();
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
-        if(isLiveOrOfPublicInterest(startTime, finishTime)) {
+        if(isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
             liveRaceDTO.setViewState(getLiveRaceViewState(startTime, finishTime));
@@ -289,7 +298,9 @@ public class RaceContext {
         return null;
     }
     
-    private boolean isLiveOrOfPublicInterest(TimePoint startTime, TimePoint finishTime) {
+    private boolean isLiveOrOfPublicInterest() {
+        TimePoint startTime = getStartTime();
+        TimePoint finishTime = getFinishTime();
         boolean result = false;
         if(startTime != null) {
             if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
