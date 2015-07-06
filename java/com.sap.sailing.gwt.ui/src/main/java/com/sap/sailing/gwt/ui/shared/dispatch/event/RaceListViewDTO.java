@@ -5,12 +5,27 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
 public class RaceListViewDTO implements DTO {
     
     private TreeSet<LiveRaceDTO> liveRaces = new TreeSet<>();
     
     private TreeSet<RaceListRaceDTO> finishedRaces = new TreeSet<>();
+    
+    public void add(LiveRaceDTO liveRace) {
+        add(liveRaces, liveRace);
+    }
+    
+    public void add(RaceListRaceDTO finishedRace) {
+        add(finishedRaces, finishedRace);
+    }
+    
+    private <T extends RaceMetadataDTO> void add(TreeSet<T> set, T race) {
+        if (race != null) {
+            set.add(race);
+        }
+    }
     
     public Collection<LiveRaceDTO> getLiveRaces() {
         return liveRaces;

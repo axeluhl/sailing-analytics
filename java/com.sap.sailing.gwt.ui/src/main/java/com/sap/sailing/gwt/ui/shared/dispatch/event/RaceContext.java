@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -276,13 +275,6 @@ public class RaceContext {
         return finishTime;
     }
 
-    public void addLiveRace(Collection<LiveRaceDTO> result) {
-        LiveRaceDTO liveRaceDTO = getLiveRaceOrNull();
-        if(liveRaceDTO != null) {
-            result.add(liveRaceDTO);        
-        }
-    }
-    
     public LiveRaceDTO getLiveRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued

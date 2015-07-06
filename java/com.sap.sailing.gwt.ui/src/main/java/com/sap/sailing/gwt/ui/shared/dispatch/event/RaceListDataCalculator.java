@@ -11,12 +11,8 @@ public class RaceListDataCalculator implements RaceCallback {
 
     @Override
     public void doForRace(RaceContext context) {
-        context.addLiveRace(result.getLiveRaces());
-        
-        RaceListRaceDTO finishedRace = context.getFinishedRaceOrNull();
-        if(finishedRace != null) {
-            result.getFinishedRaces().add(finishedRace);
-        }
+        result.add(context.getLiveRaceOrNull());
+        result.add(context.getFinishedRaceOrNull());
     }
     
     public ResultWithTTL<RaceListViewDTO> getResult() {
