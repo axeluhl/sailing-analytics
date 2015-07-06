@@ -122,13 +122,13 @@ public interface RaceLogEventFactory {
     RaceLogCloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId,
             Serializable deviceMappingEventId, TimePoint closingTimePoint);
     
-    RaceLogEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
+    RaceLogFixedMarkPassingEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint);
 
     RaceLogAdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id, AbstractLogEventAuthor author, int currentPassId,
             AdditionalScoringInformationType informationType);
 
-    RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
+    RaceLogSuppressedMarkPassingsEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint);
 
     RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
@@ -137,4 +137,12 @@ public interface RaceLogEventFactory {
 
     RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference);
+
+    RaceLogStartOfTrackingEvent createStartOfTrackingEvent(TimePoint startOfTracking, AbstractLogEventAuthor author,
+            Serializable id, List<Competitor> competitors, Integer passId);
+
+    RaceLogEndOfTrackingEvent createEndOfTrackingEvent(TimePoint endOfTracking, AbstractLogEventAuthor author,
+            Serializable id, List<Competitor> competitors, Integer passId);
+
+
 }
