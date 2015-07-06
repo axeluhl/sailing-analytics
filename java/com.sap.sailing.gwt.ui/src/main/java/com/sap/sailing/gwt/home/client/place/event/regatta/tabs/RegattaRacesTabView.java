@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -105,7 +106,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             @Override
             public void onSuccess(ResultWithTTL<RaceListViewDTO> result) {
                 liveRacesList.setData(result.getDto().getLiveRaces(), 0, 0);
-                finishedRacesList.setListData(result.getDto().getAllRaces());
+                // TODO change setListData to use Collection
+                finishedRacesList.setListData(new ArrayList<RaceListRaceDTO>(result.getDto().getAllRaces()));
 //                for (RaceListSeriesDTO series : result.getDto().getRacesForCompetitionFormat()) {
 //                    compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
 //                }
