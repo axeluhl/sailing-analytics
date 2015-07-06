@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlac
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -133,6 +134,13 @@ public class EventActivityProxy extends AbstractActivityProxy {
         if(place instanceof RegattaMediaPlace && ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
             // The media page for multi regatta events is on event level only but not on regatta level
             return new MultiregattaMediaPlace(new EventContext(ctx).withRegattaId(null));
+        }
+        
+        if(place instanceof LatestNewsPlace) {
+            if(ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+                return new MultiregattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+            }
+            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
         }
         
         if(place instanceof MiniLeaderboardPlace) {
