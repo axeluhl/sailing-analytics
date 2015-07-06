@@ -83,6 +83,7 @@ public class EventContext {
     }
 
     public RegattaMetadataDTO getRegatta() {
+        String regattaId = getRegattaId();
         if(regattaId == null || eventDTO == null) {
             return null;
         }

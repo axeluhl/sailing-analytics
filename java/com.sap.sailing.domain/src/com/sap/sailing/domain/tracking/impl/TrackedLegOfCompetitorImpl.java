@@ -284,11 +284,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 // as fallback in the absence of wind information, project to leg bearing
                 projectToBearing = cache.getLegBearing(getTrackedLeg(), at);
             }
-            double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
-            if (cos < 0) {
-                projectToBearing = projectToBearing.reverse();
+            if (speed.getBearing() != null && projectToBearing != null) {
+                double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
+                if (cos < 0) {
+                    projectToBearing = projectToBearing.reverse();
+                }
+                result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
             }
-            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
         }
         return result;
     }
@@ -338,10 +340,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
             final Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, /* extrapolate */false);
             if (endPos != null) {
-                Distance d = getTrackedLeg().getAbsoluteWindwardDistance(
-                        getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false),
-                        endPos, to, WindPositionMode.EXACT, cache);
-                result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
+                final Position startPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false);
+                if (startPos != null) {
+                    Distance d = getTrackedLeg().getAbsoluteWindwardDistance(startPos, endPos, to,
+                            WindPositionMode.EXACT, cache);
+                    result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
+                }
             }
         }
         return result;
@@ -613,7 +617,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) {
         return getVelocityMadeGood(at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
     }
     

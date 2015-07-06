@@ -49,6 +49,8 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer;
     private JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer;
     private JsonSerializer<RaceLogEvent> dependentStartTimeEventSerializer;
+    private JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
+    private JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
 
     private RaceLogEventFactory factory;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
@@ -81,6 +83,8 @@ public class RaceLogEventSerializerTest {
         fixedMarkPassingEventSerializer = mock(JsonSerializer.class);
         suppressedMarkPassingsSerializer = mock(JsonSerializer.class);
         dependentStartTimeEventSerializer = mock(JsonSerializer.class);
+        startOfTrackingEventSerializer = mock(JsonSerializer.class);
+        endOfTrackingEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
@@ -92,7 +96,7 @@ public class RaceLogEventSerializerTest {
                 registerCompetitorEventSerializer, defineMarkEventSerializer,
                 closeOpenEndedDeviceMappingEventSerializer, fixedMarkPassingEventSerializer,
                 suppressedMarkPassingsSerializer, additionalScoringInformationSerializer,
-                dependentStartTimeEventSerializer);
+                dependentStartTimeEventSerializer, startOfTrackingEventSerializer, endOfTrackingEventSerializer);
 
         factory = RaceLogEventFactory.INSTANCE;
     }

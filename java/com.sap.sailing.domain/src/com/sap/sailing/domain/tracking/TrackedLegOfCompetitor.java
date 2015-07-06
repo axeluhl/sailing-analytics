@@ -195,7 +195,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * <code>timePoint</code>, returns the VMG value for this time point. If the competitor has already finished the
      * leg, the VMG at the time when the competitor finished the leg is returned.
      */
-    Speed getVelocityMadeGood(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Speed getVelocityMadeGood(TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
      * Same as {@link #getVelocityMadeGood(TimePoint, WindPositionMode)}, only that a cache for wind data and leg type and bearing
@@ -212,7 +212,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Same as {@link #getEstimatedTimeToNextMark(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
      */
-    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
