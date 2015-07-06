@@ -27,7 +27,7 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
     public ResultWithTTL<RaceListViewDTO> execute(DispatchContext context) {
         long start = System.currentTimeMillis();
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
-        RacesActionUtil.forRacesOfEvent(context, eventId, raceListDataCalculator);
+        EventActionUtil.forRacesOfEvent(context, eventId, raceListDataCalculator);
         ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult();
         
         long duration = System.currentTimeMillis() - start;

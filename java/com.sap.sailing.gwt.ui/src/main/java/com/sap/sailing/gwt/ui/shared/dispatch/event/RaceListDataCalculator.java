@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RacesActionUtil.RaceCallback;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 
 @GwtIncompatible
 public class RaceListDataCalculator implements RaceCallback {
