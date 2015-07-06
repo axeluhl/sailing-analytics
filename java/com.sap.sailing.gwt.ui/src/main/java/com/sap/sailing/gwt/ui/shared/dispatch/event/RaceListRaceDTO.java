@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import com.sap.sailing.domain.common.dto.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sse.common.Duration;
 
