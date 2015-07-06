@@ -21,6 +21,7 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
 
     public GetRaceListViewAction(UUID eventId, String regattaId) {
         this.eventId = eventId;
+        this.regattaId = regattaId;
     }
 
     @Override
