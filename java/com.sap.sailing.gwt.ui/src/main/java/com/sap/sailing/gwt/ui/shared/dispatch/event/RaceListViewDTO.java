@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
 public class RaceListViewDTO implements DTO {
     
-    private LiveRacesDTO liveRaces;
+    private LiveRacesDTO liveRaces = new LiveRacesDTO();
     
     private ArrayList<RaceListRaceDTO> allRaces = new ArrayList<>();
     
@@ -19,21 +19,16 @@ public class RaceListViewDTO implements DTO {
         // TODO implement based on race.getStart();
     }
     
-    public void setLiveRaces(LiveRacesDTO liveRaces) {
-        this.liveRaces = new LiveRacesDTO();
-        for (int i = 0; i < liveRaces.getRaces().size(); i++) {
-            LiveRaceDTO liveRace = liveRaces.getRaces().get(i);
-            if (i < 3) this.liveRaces.addRace(liveRace);
-            allRaces.add(convert(liveRace));
-        }
-    }
-    
     public LiveRacesDTO getLiveRaces() {
         return liveRaces;
     }
     
     public List<RaceListRaceDTO> getAllRaces() {
-        return allRaces;
+        ArrayList<RaceListRaceDTO> list = new ArrayList<RaceListRaceDTO>(liveRaces.getRaces().size());
+        for (LiveRaceDTO liveRace : liveRaces.getRaces()) {
+            list.add(convert(liveRace));
+        }
+        return list;
     }
     
     public Collection<RaceListSeriesDTO> getRacesForCompetitionFormat() {

@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
@@ -9,8 +11,10 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
 public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewDTO>> {
     
+    private static final Logger logger = Logger.getLogger(GetRaceListViewAction.class.getName());
+    
     private UUID eventId;
-
+    
     public GetRaceListViewAction() {
     }
 
@@ -21,20 +25,13 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
     @Override
     @GwtIncompatible
     public ResultWithTTL<RaceListViewDTO> execute(DispatchContext context) {
-        final RaceListViewDTO result = new RaceListViewDTO();
-        result.setLiveRaces(new GetLiveRacesForEventAction(eventId).execute(context).getDto());
+        long start = System.currentTimeMillis();
+        RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
+        RacesActionUtil.forRacesOfEvent(context, eventId, raceListDataCalculator);
+        ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult();
         
-//        RacesActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
-//            @Override
-//            public void doForRace(RaceContext rc) {
-//                // TODO better condition after Frank implemented race state stuff
-//                if(!rc.isRaceDefinitionAvailable() || !rc.isRaceLogAvailable() || !rc.isLive() || !rc.isStartTimeAvailable()) {
-//                    return;
-//                }
-//                
-//                result.addRace(rc.getLiveRaceDTO());
-//            }
-//        });
-        return new ResultWithTTL<>(5000, result);
+        long duration = System.currentTimeMillis() - start;
+        logger.log(Level.INFO, "Calculating race list for event "+ eventId + " took: "+ duration + "ms");
+        return result;
     }
 }
