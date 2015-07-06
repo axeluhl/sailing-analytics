@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListCon
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRaceListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
@@ -34,6 +35,8 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListViewDTO;
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
+    
+    private static final StringMessages I18N = StringMessages.INSTANCE;
     
     private enum Navigation implements ListNavigationAction {
         SORT_LIST_FORMAT("Sortable list Format TODO", false),
@@ -82,9 +85,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     public void setPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
         listFormatContainerUi.add(liveRacesList = new RacesListLive(currentPresenter, false));
-        RaceListContainer<RaceListRaceDTO> container = new RaceListContainer<>("Finished Races TODO", finishedRacesList = new RaceListFinishedRaces(currentPresenter));
-        container.setInfoText("Info text");
-        listFormatContainerUi.add(container);
+        listFormatContainerUi.add(new RaceListContainer<>(I18N.finishedRaces(), finishedRacesList = new RaceListFinishedRaces(currentPresenter)));
     }
     
     @Override
@@ -141,10 +142,11 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     }
     
     private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> {
-        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> durationColumn = RaceListColumnFactory.getDurationColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windfixesCountColumn = RaceListColumnFactory.getWindFixesCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
         
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
@@ -166,6 +168,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             add(raceNameColumn);
             add(fleetNameColumn);
             add(startTimeColumn);
+            add(durationColumn);
             add(windSpeedColumn);
             add(windDirectionColumn);
             add(windfixesCountColumn);

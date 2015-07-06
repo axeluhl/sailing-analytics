@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
@@ -44,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -203,6 +205,32 @@ public class RaceListColumnFactory {
             @Override
             public Date getValue(T object) {
                 return object.getStart();
+            }
+        };
+    }
+    
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getDurationColumn() {
+        Cell<String> cell = new TextCell();
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Duration>(new NullSafeComparableComparator<Duration>(false)) {
+            @Override
+            protected Duration getComparisonValue(T object) {
+                return object.getDuration();
+            }
+        };
+        return new SortableRaceListColumn<T, String>(I18N.durationPlain(), cell, comparator) {
+            @Override
+            public String getHeaderStyle() {
+                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+            }
+            
+            @Override
+            public String getColumnStyle() {
+                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+            }
+            
+            @Override
+            public String getValue(T object) {
+                return object.getDuration() != null ? DateAndTimeFormatterUtil.formatElapsedTime(object.getDuration().asMillis()) : null;
             }
         };
     }
