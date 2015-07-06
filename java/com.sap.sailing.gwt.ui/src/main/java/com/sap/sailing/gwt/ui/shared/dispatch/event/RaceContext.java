@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
@@ -304,12 +305,27 @@ public class RaceContext {
             RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getRegattaName(), raceColumn.getName());
             fillRaceData(liveRaceDTO);
             liveRaceDTO.setDuration(getDurationOrNull());
+            liveRaceDTO.setWinner(getWinnerOrNull());
             
             return liveRaceDTO;
         }
         return null;
     }
     
+    private SimpleCompetitorDTO getWinnerOrNull() {
+        if(trackedRace != null) {
+            TimePoint time = getFinishTime();
+            if(time == null) {
+                time = MillisecondsTimePoint.now();
+            }
+            List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(time);
+            if(competitorsFromBestToWorst != null && !competitorsFromBestToWorst.isEmpty()) {
+                return new SimpleCompetitorDTO(competitorsFromBestToWorst.get(0));
+            }
+        }
+        return null;
+    }
+
     private Duration getDurationOrNull() {
         TimePoint startTime = getStartTime();
         TimePoint finishTime = getFinishTime();
