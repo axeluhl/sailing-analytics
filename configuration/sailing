@@ -33,7 +33,7 @@ start_servers() {
 			# execute env.sh in a subshell which now has the same set of variables that the server will see
 			source /home/sailing/servers/$conf/env.sh
 
-			# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
+			# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
 			echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
 			echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
 
@@ -45,6 +45,10 @@ start_servers() {
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done
+	# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
+	echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
+	echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
+
 }
 
 stop_servers() {
