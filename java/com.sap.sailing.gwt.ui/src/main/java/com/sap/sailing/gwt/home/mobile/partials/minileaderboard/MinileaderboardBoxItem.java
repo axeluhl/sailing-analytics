@@ -37,10 +37,9 @@ public class MinileaderboardBoxItem extends Widget {
         competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getPoints()));
         
         SimpleCompetitorDTO competitor = entry.getCompetitor();
-        SafeUri imageUri = FlagImageResolver.getFlagImageResource(competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode());
+        String flagImageURL = competitor.getFlagImageURL();
+        String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+        SafeUri imageUri = FlagImageResolver.getFlagImageResource(flagImageURL, twoLetterIsoCountryCode);
         competitorFlagUi.setSrc(imageUri.asString());
-        
     }
-
-
 }
