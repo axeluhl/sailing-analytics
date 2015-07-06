@@ -1,6 +1,8 @@
-package com.sap.sailing.domain.common.dto;
+package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.io.Serializable;
+
+import com.sap.sailing.domain.common.dto.NamedDTO;
 
 public class SimpleCompetitorDTO extends NamedDTO implements Serializable {
 
