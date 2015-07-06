@@ -2,7 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="475dp"
     android:layout_height="wrap_content"
     android:background="?sap_gray_black_30"
     android:padding="@dimen/default_padding_half"
@@ -12,8 +12,8 @@
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?textLarge"
         android:maxWidth="450dp"
+        android:textAppearance="?textLarge"
         android:singleLine="true"
         tools:text="Singapore"/>
 

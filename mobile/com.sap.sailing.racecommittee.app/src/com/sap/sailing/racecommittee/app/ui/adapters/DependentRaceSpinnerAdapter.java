@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.annotation.LayoutRes;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 
 import java.util.ArrayList;
 
@@ -100,7 +102,16 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
         TextView text = ViewHolder.get(layout, android.R.id.text1);
         if (text != null && mData.get(position).getRace() != null) {
-            text.setText(mData.get(position).getRace().getName());
+            String raceName = mData.get(position).getRace().getName();
+            String additional = RaceHelper.getFleetSeries(mData.get(position).getRace());
+            if (!TextUtils.isEmpty(additional)) {
+                additional += " - ";
+            }
+            additional += RaceHelper.getRaceGroupName(mData.get(position).getRace());
+            if (!TextUtils.isEmpty(additional)) {
+                raceName += " (" + additional + ")";
+            }
+            text.setText(raceName);
         }
 
         return layout;

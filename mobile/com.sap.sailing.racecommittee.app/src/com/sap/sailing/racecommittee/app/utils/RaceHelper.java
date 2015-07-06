@@ -19,16 +19,34 @@ public class RaceHelper {
 
         String raceName = "";
         if (race != null) {
-            raceName = race.getRaceGroup().getDisplayName();
-            if (TextUtils.isEmpty(raceName)) {
-                raceName = race.getRaceGroup().getName();
-            }
-
+            raceName = getRaceGroupName(race);
             raceName += getSeriesName(race.getSeries(), delimiter);
             raceName += getFleetName(race.getFleet(), delimiter);
             raceName += delimiter + race.getRaceName();
         }
+
         return raceName;
+    }
+
+    public static String getRaceGroupName(@Nullable ManagedRace race) {
+        String raceGroupName = "";
+        if (race != null) {
+            raceGroupName = race.getRaceGroup().getDisplayName();
+            if (TextUtils.isEmpty(raceGroupName)) {
+                raceGroupName = race.getRaceGroup().getName();
+            }
+        }
+
+        return raceGroupName;
+    }
+
+    public static String getFleetSeries(@Nullable ManagedRace race) {
+        String fleetSeries = "";
+        if (race != null) {
+            fleetSeries = getFleetSeries(race.getFleet(), race.getSeries());
+        }
+
+        return fleetSeries;
     }
 
     public static String getFleetSeries(@Nullable Fleet fleet, @Nullable SeriesBase series) {
@@ -63,6 +81,7 @@ public class RaceHelper {
         if (series != null && !LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(series.getName())) {
             seriesName = delimiter + series.getName();
         }
+
         return seriesName;
     }
 
@@ -79,6 +98,7 @@ public class RaceHelper {
         if (fleet != null && !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())) {
             fleetName = delimiter + fleet.getName();
         }
+
         return fleetName;
     }
 }
