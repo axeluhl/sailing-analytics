@@ -297,7 +297,7 @@ public class RaceContext {
         return null;
     }
     
-    private boolean isLiveOrOfPublicInterest() {
+    public boolean isLiveOrOfPublicInterest() {
         TimePoint startTime = getStartTime();
         boolean result = false;
         if(startTime != null) {
