@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesLi
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
@@ -153,12 +154,16 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
 
         public void setListData(Collection<RaceListRaceDTO> data) {
-//            boolean hasFleets = data.hasFleets();
-//            this.fleetCornerColumn.setShowDetails(hasFleets);
-//            this.fleetNameColumn.setShowDetails(hasFleets);
-//            boolean hasWind = data.hasWind();
-//            this.windSpeedColumn.setShowDetails(hasWind);
-//            this.windDirectionColumn.setShowDetails(hasWind);
+            boolean hasFleets = RaceListDataUtil.hasFleets(data);
+            this.fleetCornerColumn.setShowDetails(hasFleets);
+            this.fleetNameColumn.setShowDetails(hasFleets);
+            this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
+            boolean hasWind = RaceListDataUtil.hasWind(data);
+            this.windSpeedColumn.setShowDetails(hasWind);
+            this.windDirectionColumn.setShowDetails(hasWind);
+            this.windfixesCountColumn.setShowDetails(RaceListDataUtil.hasWindFixes(data));
+            this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
+            this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
             setTableData(data);
         }
 

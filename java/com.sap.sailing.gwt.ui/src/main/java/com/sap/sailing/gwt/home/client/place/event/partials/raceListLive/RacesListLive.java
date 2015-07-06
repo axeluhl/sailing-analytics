@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
 
+import java.util.Collection;
+
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -28,12 +31,11 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
             getElement().getStyle().setDisplay(Display.NONE);
         } else {
             getElement().getStyle().clearDisplay();
-            raceList.setListData(data);
+            raceList.setListData(data.getRaces());
         }
     }
     
     private class RaceListLiveRaces extends AbstractRaceList<LiveRaceDTO> {
-
         private final SortableRaceListColumn<LiveRaceDTO, ?> regattaNameColumn = RaceListColumnFactory.getRegattaNameColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> flagsColumn = RaceListColumnFactory.getFlagsColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> courseAreaColumn = RaceListColumnFactory.getCourseAreaColumn();
@@ -45,16 +47,16 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
             this.regattaNameColumn.setShowDetails(showRegattaDetails);
         }
 
-        public void setListData(LiveRacesDTO data) {
-            boolean hasFleets = data.hasFleets();
+        public void setListData(Collection<LiveRaceDTO> data) {
+            boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);
             this.fleetNameColumn.setShowDetails(hasFleets);
-            this.courseAreaColumn.setShowDetails(data.hasCourseAreas());
-            this.courseColumn.setShowDetails(data.hasCourses());
-            boolean hasWind = data.hasWind();
+            this.courseAreaColumn.setShowDetails(RaceListDataUtil.hasCourseAreas(data));
+            this.courseColumn.setShowDetails(RaceListDataUtil.hasCourses(data));
+            boolean hasWind = RaceListDataUtil.hasWind(data);
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
-            setTableData(data.getRaces());
+            setTableData(data);
         }
 
         @Override
