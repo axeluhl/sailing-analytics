@@ -295,6 +295,19 @@ public class RaceContext {
         return null;
     }
     
+    public RaceListRaceDTO getFinishedRaceOrNull() {
+        // a race is of 'public interest' of a race is a combination of it's 'live' state
+        // and special flags states indicating how the postponed/canceled races will be continued
+        if(getLiveRaceViewState() == RaceViewState.FINISHED) {
+            // the start time is always given for live races
+            RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getRegattaName(), raceColumn.getName());
+            fillRaceData(liveRaceDTO);
+            
+            return liveRaceDTO;
+        }
+        return null;
+    }
+
     private void fillRaceData(RaceMetadataDTO dto) {
         dto.setViewState(getLiveRaceViewState());
         dto.setRegattaDisplayName(getRegattaDisplayName());
