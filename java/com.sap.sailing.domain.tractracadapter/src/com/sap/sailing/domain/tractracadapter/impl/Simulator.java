@@ -18,6 +18,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -47,8 +49,20 @@ public class Simulator {
         return EmptyWindStore.INSTANCE;
     }
 
-    public synchronized void setTrackedRace(DynamicTrackedRace trackedRace) {
+    public synchronized void setTrackedRace(final DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
+        trackedRace.getTrackedRegatta().addRaceListener(new RaceListener() {
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+            }
+
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+                if (trackedRace == Simulator.this.trackedRace) {
+                    stop(); // stop simulator when tracked race is removed from its regatta
+                }
+            }
+        });
         startWindPlayer();
     }
     
