@@ -116,6 +116,7 @@ public class CheckinManager {
                     final String leaderboardName;
 
                     try {
+                        //TODO use constants
                         leaderboardName = response.getString("name");
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.leaderboardUrl + ", Error: " + e.getMessage());
@@ -149,6 +150,7 @@ public class CheckinManager {
             public void performAction(JSONObject response) {
 
                 try {
+                    //TODO use constants
                     urlData.eventId = response.getString("id");
                     urlData.eventName = response.getString("name");
                     urlData.eventStartDateStr = response.getString("startDate");
@@ -197,6 +199,7 @@ public class CheckinManager {
                     activity.dismissProgressDialog();
 
                     try {
+                        // TODO review constants
                         urlData.competitorName = response.getString(CompetitorJsonSerializer.COMPETITOR_NAME);
                         urlData.competitorId = response.getString(CompetitorJsonSerializer.COMPETITOR_ID);
                         urlData.competitorSailId = response.getString(CompetitorJsonSerializer.COMPETITOR_SAIL_ID);
