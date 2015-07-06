@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
@@ -285,22 +286,26 @@ public class RaceContext {
         if(isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
-            liveRaceDTO.setViewState(getLiveRaceViewState());
-            liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
-            liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
-            liveRaceDTO.setTrackingState(getRaceTrackingState());
-            liveRaceDTO.setFleet(getFleetMetadataOrNull());
-            liveRaceDTO.setStart(getStartTimeAsDate());
-            liveRaceDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
-            liveRaceDTO.setCourseArea(getCourseAreaOrNull());
-            liveRaceDTO.setCourse(getCourseNameOrNull());
+            fillRaceData(liveRaceDTO);
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
-            liveRaceDTO.setWind(getWindOrNull());
             
             return liveRaceDTO;
         }
         return null;
+    }
+    
+    private void fillRaceData(RaceMetadataDTO dto) {
+        dto.setViewState(getLiveRaceViewState());
+        dto.setRegattaDisplayName(getRegattaDisplayName());
+        dto.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
+        dto.setTrackingState(getRaceTrackingState());
+        dto.setFleet(getFleetMetadataOrNull());
+        dto.setStart(getStartTimeAsDate());
+        dto.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
+        dto.setCourseArea(getCourseAreaOrNull());
+        dto.setCourse(getCourseNameOrNull());
+        dto.setWind(getWindOrNull());
     }
     
     public boolean isLiveOrOfPublicInterest() {
