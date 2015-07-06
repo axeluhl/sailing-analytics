@@ -218,7 +218,7 @@
 
                 <Spinner
                     android:id="@+id/dependent_race"
-                    android:layout_width="wrap_content"
+                    android:layout_width="470dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:dropDownWidth="wrap_content"
