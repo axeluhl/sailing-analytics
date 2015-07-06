@@ -8,26 +8,22 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
 public class RaceListViewDTO implements DTO {
     
-    private LiveRacesDTO liveRaces = new LiveRacesDTO();
+    private TreeSet<LiveRaceDTO> liveRaces = new TreeSet<>();
     
-    private TreeSet<RaceListRaceDTO> allRaces = new TreeSet<>();
+    private TreeSet<RaceListRaceDTO> finishedRaces = new TreeSet<>();
     
-    public void addRace(RaceListRaceDTO race) {
-        allRaces.add(race);
-    }
-    
-    public LiveRacesDTO getLiveRaces() {
+    public Collection<LiveRaceDTO> getLiveRaces() {
         return liveRaces;
     }
     
-    public Collection<RaceListRaceDTO> getAllRaces() {
-        return allRaces;
+    public Collection<RaceListRaceDTO> getFinishedRaces() {
+        return finishedRaces;
     }
     
     public Collection<RaceListSeriesDTO> getRacesForCompetitionFormat() {
         RaceListSeriesDTO withFleets = new RaceListSeriesDTO("Fleets");
         RaceListSeriesDTO noFleets = new RaceListSeriesDTO("");
-        for (RaceListRaceDTO race : allRaces) {
+        for (RaceListRaceDTO race : finishedRaces) {
             RaceListSeriesDTO series = race.getFleet() == null ? noFleets : withFleets;
             series.addRace(race);
         }

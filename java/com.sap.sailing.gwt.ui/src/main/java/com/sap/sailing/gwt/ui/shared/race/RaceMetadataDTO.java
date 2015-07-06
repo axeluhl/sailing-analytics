@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.ui.shared.race;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sse.common.Util;
 
-public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataDTO> {
+public class RaceMetadataDTO implements DTO, Comparable<RaceMetadataDTO> {
     
     public enum RaceViewState {
         PLANNED {       // no start time set

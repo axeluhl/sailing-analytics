@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -275,10 +276,10 @@ public class RaceContext {
         return finishTime;
     }
 
-    public void addLiveRace(LiveRacesDTO result) {
+    public void addLiveRace(Collection<LiveRaceDTO> result) {
         LiveRaceDTO liveRaceDTO = getLiveRaceOrNull();
         if(liveRaceDTO != null) {
-            result.addRace(liveRaceDTO);        
+            result.add(liveRaceDTO);        
         }
     }
     

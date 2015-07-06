@@ -7,9 +7,10 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.CalculationWithEvent;
 
-public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRacesDTO>> {
+public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<SortedSetResult<LiveRaceDTO>>> {
     private UUID eventId;
     private String regattaName;
     
@@ -23,10 +24,10 @@ public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRa
 
     @Override
     @GwtIncompatible
-    public ResultWithTTL<LiveRacesDTO> execute(final DispatchContext context) {
-        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<LiveRacesDTO>() {
+    public ResultWithTTL<SortedSetResult<LiveRaceDTO>> execute(final DispatchContext context) {
+        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<SortedSetResult<LiveRaceDTO>>() {
             @Override
-            public ResultWithTTL<LiveRacesDTO> calculateWithEvent(Event event) {
+            public ResultWithTTL<SortedSetResult<LiveRaceDTO>> calculateWithEvent(Event event) {
                 LiveRaceCalculator liveRaceCalculator = new LiveRaceCalculator();
                 EventActionUtil.forRacesOfRegatta(context, eventId, regattaName, liveRaceCalculator);
                 return liveRaceCalculator.getResult();

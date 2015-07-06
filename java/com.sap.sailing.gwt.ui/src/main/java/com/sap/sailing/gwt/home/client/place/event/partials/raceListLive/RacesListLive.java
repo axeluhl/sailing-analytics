@@ -12,10 +12,10 @@ import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDat
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
 
-public class RacesListLive extends Composite implements RefreshableWidget<LiveRacesDTO> {
+public class RacesListLive extends Composite implements RefreshableWidget<SortedSetResult<LiveRaceDTO>> {
 
     private final RaceListLiveRaces raceList;
     
@@ -26,12 +26,16 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
     }
 
     @Override
-    public void setData(LiveRacesDTO data, long nextUpdate, int updateNo) {
-        if(data == null || data.getRaces().isEmpty()) {
+    public void setData(SortedSetResult<LiveRaceDTO> data, long nextUpdate, int updateNo) {
+        this.setListData(data.getValues());
+    }
+    
+    public void setListData(Collection<LiveRaceDTO> data) {
+        if(data == null || data.isEmpty()) {
             getElement().getStyle().setDisplay(Display.NONE);
         } else {
             getElement().getStyle().clearDisplay();
-            raceList.setListData(data.getRaces());
+            raceList.setListData(data);
         }
     }
     

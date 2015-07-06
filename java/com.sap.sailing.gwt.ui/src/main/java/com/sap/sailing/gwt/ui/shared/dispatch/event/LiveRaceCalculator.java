@@ -1,23 +1,26 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.TreeSet;
+
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
 final class LiveRaceCalculator implements RaceCallback {
-    private final LiveRacesDTO result = new LiveRacesDTO();
+    private final TreeSet<LiveRaceDTO> resultSet = new TreeSet<LiveRaceDTO>();
 
     @Override
     public void doForRace(RaceContext rc) {
-        rc.addLiveRace(result);
+        rc.addLiveRace(resultSet);
     }
 
-    public ResultWithTTL<LiveRacesDTO> getResult() {
+    public ResultWithTTL<SortedSetResult<LiveRaceDTO>> getResult() {
         long ttl = 1000 * 60 * 2;
-        for(LiveRaceDTO race : result.getRaces()) {
+        for(LiveRaceDTO race : resultSet) {
             if(race.getViewState() == RaceViewState.RUNNING) {
                 ttl = Math.min(ttl, 1000 * 30);
             } else if(race.getViewState() == RaceViewState.SCHEDULED) {
@@ -27,6 +30,6 @@ final class LiveRaceCalculator implements RaceCallback {
                 ttl = Math.min(ttl, 1000 * 60);
             }
         }
-        return new ResultWithTTL<LiveRacesDTO>(ttl, result);
+        return new ResultWithTTL<SortedSetResult<LiveRaceDTO>>(ttl, new SortedSetResult<>(resultSet));
     }
 }

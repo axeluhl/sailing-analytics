@@ -15,7 +15,7 @@ public class RaceListDataCalculator implements RaceCallback {
         
         RaceListRaceDTO finishedRace = context.getFinishedRaceOrNull();
         if(finishedRace != null) {
-            result.addRace(finishedRace);
+            result.getFinishedRaces().add(finishedRace);
         }
     }
     
