@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
@@ -31,9 +32,18 @@ public class RaceHelper {
     public static String getRaceGroupName(@Nullable ManagedRace race) {
         String raceGroupName = "";
         if (race != null) {
-            raceGroupName = race.getRaceGroup().getDisplayName();
+            raceGroupName = getRaceGroupName(race.getRaceGroup());
+        }
+
+        return raceGroupName;
+    }
+
+    public static String getRaceGroupName(@Nullable RaceGroup raceGroup) {
+        String raceGroupName = "";
+        if (raceGroup != null) {
+            raceGroupName = raceGroup.getDisplayName();
             if (TextUtils.isEmpty(raceGroupName)) {
-                raceGroupName = race.getRaceGroup().getName();
+                raceGroupName = raceGroup.getName();
             }
         }
 

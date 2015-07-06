@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +13,9 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
@@ -49,8 +49,13 @@ public class StartTimeFragment extends BaseFragment
     private static final int PAST_DAYS = -3;
     private static final int MAX_DIFF_MIN = 60;
     private static final String ZERO_TIME = "-00:00:00";
+    private static final int ABSOLUTE = 0;
+    private static final int RELATIVE = 1;
 
     private View mAbsolute;
+    private View mRelative;
+    private Button mAbsoluteButton;
+    private Button mRelativeButton;
 
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
@@ -62,7 +67,6 @@ public class StartTimeFragment extends BaseFragment
     private Calendar mTimeLeft;
     private Calendar mTimeRight;
     private Calendar mCalendar;
-    private TabHost mTabHost;
     private boolean mListenerIgnore = true;
 
     /**
@@ -96,29 +100,32 @@ public class StartTimeFragment extends BaseFragment
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
         mAbsolute = ViewHolder.get(layout, R.id.time_absolute);
+        mRelative = ViewHolder.get(layout, R.id.time_relative);
 
         if (preferences.isDependentRacesAllowed()) {
-            mTabHost = ViewHolder.get(layout, android.R.id.tabhost);
-            if (mTabHost != null) {
-                mTabHost.setup();
+            View view = ViewHolder.get(layout, R.id.tab_button);
+            if (view != null) {
+                view.setVisibility(View.VISIBLE);
+            }
 
-                mTabHost.addTab(mTabHost.newTabSpec(getString(R.string.dependent_races_absolute))
-                    .setIndicator(getString(R.string.dependent_races_absolute)).setContent(R.id.time_absolute));
-                mTabHost.addTab(mTabHost.newTabSpec(getString(R.string.dependent_races_relative))
-                    .setIndicator(getString(R.string.dependent_races_relative)).setContent(R.id.time_relative));
-
-                for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
-                    BitmapHelper.setBackground(mTabHost.getTabWidget().getChildAt(i), BitmapHelper.getAttrDrawable(getActivity(), R.attr.tab_widget));
-                }
-
-                mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            mAbsoluteButton = ViewHolder.get(layout, R.id.absolute);
+            if (mAbsoluteButton != null) {
+                mAbsoluteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onTabChanged(String tabId) {
-                        setTabTextColor();
+                    public void onClick(View v) {
+                        showTab(ABSOLUTE);
                     }
                 });
-                setTabTextColor();
-                mTabHost.setCurrentTab(0);
+            }
+
+            mRelativeButton = ViewHolder.get(layout, R.id.relative);
+            if (mRelativeButton != null) {
+                mRelativeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showTab(RELATIVE);
+                    }
+                });
             }
         }
 
@@ -137,6 +144,8 @@ public class StartTimeFragment extends BaseFragment
         if (setStart != null) {
             setStart.setOnClickListener(this);
         }
+
+        showTab(ABSOLUTE);
 
         mDebugTime = ViewHolder.get(layout, R.id.debug_time);
         return layout;
@@ -257,8 +266,8 @@ public class StartTimeFragment extends BaseFragment
                 }
 
                 for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
-                    DependentRaceSpinnerAdapter.RaceData header = new DependentRaceSpinnerAdapter.RaceData(getRegattaName(races
-                        .getRaceGroup()), RaceHelper.getFleetSeries(races.getFleet(), races.getSeries()), null);
+                    DependentRaceSpinnerAdapter.RaceData header = new DependentRaceSpinnerAdapter.RaceData(RaceHelper
+                        .getRaceGroupName(races.getRaceGroup()), RaceHelper.getFleetSeries(races.getFleet(), races.getSeries()), null);
                     adapter.add(header);
 
                     for (ManagedRace race : mGroupHeaders.get(races)) {
@@ -337,21 +346,36 @@ public class StartTimeFragment extends BaseFragment
         }
     }
 
-    private String getRegattaName(RaceGroup raceGroup) {
-        String regatta = raceGroup.getDisplayName();
-        if (TextUtils.isEmpty(regatta)) {
-            regatta = raceGroup.getName();
-        }
-        return regatta;
-    }
+    private void showTab(int tab) {
+        int colorGrey = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+        int colorOrange = ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1);
 
-    private void setTabTextColor() {
-        for (int i = 0; i < mTabHost.getTabWidget().getTabCount(); i++) {
-            View view = mTabHost.getTabWidget().getChildTabViewAt(i);
-            if (view != null) {
-                TextView textView = (TextView) view.findViewById(android.R.id.title);
-                textView.setTextColor(ThemeHelper.getColor(getActivity(), (i == mTabHost.getCurrentTab()) ? R.attr.white : R.attr.sap_light_gray));
-            }
+        mAbsolute.setVisibility(View.GONE);
+        mRelative.setVisibility(View.GONE);
+        mAbsoluteButton.setTextColor(colorGrey);
+        mRelativeButton.setTextColor(colorGrey);
+        BitmapHelper.setBackground(mAbsoluteButton, null);
+        BitmapHelper.setBackground(mRelativeButton, null);
+
+        int id;
+        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
+            id = R.drawable.nav_drawer_tab_button_light;
+        } else {
+            id = R.drawable.nav_drawer_tab_button_dark;
+        }
+        Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
+        switch (tab) {
+        case RELATIVE:
+            mRelativeButton.setTextColor(colorOrange);
+            BitmapHelper.setBackground(mRelativeButton, drawable);
+            mRelative.setVisibility(View.VISIBLE);
+            break;
+
+        default: // ABSOLUTE
+            mAbsoluteButton.setTextColor(colorOrange);
+            BitmapHelper.setBackground(mAbsoluteButton, drawable);
+            mAbsolute.setVisibility(View.VISIBLE);
+            break;
         }
     }
 
