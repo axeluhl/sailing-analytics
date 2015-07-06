@@ -313,6 +313,7 @@ public class RaceContext {
     }
     
     private SimpleCompetitorDTO getWinnerOrNull() {
+        // TODO calculate winner from score correction
         if(trackedRace != null) {
             TimePoint time = getFinishTime();
             if(time == null) {
