@@ -47,6 +47,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
 public class RaceContext {
+    private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
+    private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
+    
     private final TimePoint now = MillisecondsTimePoint.now();
     private final Leaderboard leaderboard;
     private final RaceColumn raceColumn;
@@ -56,8 +59,6 @@ public class RaceContext {
     private final RaceLog raceLog;
     private final ReadonlyRaceState state;
     private final Event event;
-    private final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
-    private final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
     
     public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.event = event;
