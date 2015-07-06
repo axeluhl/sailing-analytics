@@ -212,14 +212,16 @@ public class StartTimeFragment extends BaseFragment
 
             mDatePicker = ViewHolder.get(getView(), R.id.start_date_picker);
             if (mDatePicker != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+                ThemeHelper.setPickerColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                    .getColor(getActivity(), R.attr.sap_yellow_1));
                 mDatePicker.setOnValueChangedListener(this);
                 TimeUtils.initDatePicker(getActivity(), mDatePicker, time, PAST_DAYS, FUTURE_DAYS);
                 mDatePicker.setValue(Math.abs(PAST_DAYS));
             }
             mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+                ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                    .getColor(getActivity(), R.attr.sap_yellow_1));
                 mTimePicker.setOnTimeChangedListener(this);
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);
@@ -242,7 +244,8 @@ public class StartTimeFragment extends BaseFragment
 
             NumberPicker timeOffset = ViewHolder.get(getView(), R.id.time_offset);
             if (timeOffset != null) {
-                ThemeHelper.setPickerTextColor(getActivity(), timeOffset, ThemeHelper.getColor(getActivity(), R.attr.white));
+                ThemeHelper.setPickerColor(getActivity(), timeOffset, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                    .getColor(getActivity(), R.attr.sap_yellow_1));
                 timeOffset.setMinValue(0);
                 timeOffset.setMaxValue(MAX_DIFF_MIN);
                 timeOffset.setWrapSelectorWheel(false);
@@ -356,12 +359,20 @@ public class StartTimeFragment extends BaseFragment
         int colorGrey = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
         int colorOrange = ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1);
 
-        mAbsolute.setVisibility(View.GONE);
-        mRelative.setVisibility(View.GONE);
-        mAbsoluteButton.setTextColor(colorGrey);
-        mRelativeButton.setTextColor(colorGrey);
-        BitmapHelper.setBackground(mAbsoluteButton, null);
-        BitmapHelper.setBackground(mRelativeButton, null);
+        if (mAbsolute != null) {
+            mAbsolute.setVisibility(View.GONE);
+        }
+        if (mRelative != null) {
+            mRelative.setVisibility(View.GONE);
+        }
+        if (mAbsoluteButton != null) {
+            mAbsoluteButton.setTextColor(colorGrey);
+            BitmapHelper.setBackground(mAbsoluteButton, null);
+        }
+        if (mRelativeButton != null) {
+            mRelativeButton.setTextColor(colorGrey);
+            BitmapHelper.setBackground(mRelativeButton, null);
+        }
 
         int id;
         if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
@@ -372,15 +383,23 @@ public class StartTimeFragment extends BaseFragment
         Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
         switch (tab) {
         case RELATIVE:
-            mRelativeButton.setTextColor(colorOrange);
-            BitmapHelper.setBackground(mRelativeButton, drawable);
-            mRelative.setVisibility(View.VISIBLE);
+            if (mRelative != null) {
+                mRelative.setVisibility(View.VISIBLE);
+            }
+            if (mRelativeButton != null) {
+                mRelativeButton.setTextColor(colorOrange);
+                BitmapHelper.setBackground(mRelativeButton, drawable);
+            }
             break;
 
         default: // ABSOLUTE
-            mAbsoluteButton.setTextColor(colorOrange);
-            BitmapHelper.setBackground(mAbsoluteButton, drawable);
-            mAbsolute.setVisibility(View.VISIBLE);
+            if (mAbsolute != null) {
+                mAbsolute.setVisibility(View.VISIBLE);
+            }
+            if (mAbsoluteButton != null) {
+                mAbsoluteButton.setTextColor(colorOrange);
+                BitmapHelper.setBackground(mAbsoluteButton, drawable);
+            }
             break;
         }
     }
