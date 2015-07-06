@@ -7,10 +7,10 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 
 public class MinileaderboardBoxItem extends Widget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -36,7 +36,7 @@ public class MinileaderboardBoxItem extends Widget {
         competitorRankUi.setInnerText(String.valueOf(entry.getRank()) + ".");
         competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getPoints()));
         
-        CompetitorDTO competitor = entry.getCompetitor();
+        SimpleCompetitorDTO competitor = entry.getCompetitor();
         String flagImageURL = competitor.getFlagImageURL();
 
         if (flagImageURL == null || flagImageURL.isEmpty()) {

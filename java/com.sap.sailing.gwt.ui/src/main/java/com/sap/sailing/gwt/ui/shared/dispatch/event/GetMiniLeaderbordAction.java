@@ -66,7 +66,7 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
-                result.addItem(new MiniLeaderboardItemDTO(competitor, rank, row.totalPoints));
+                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints));
                 if (limit > 0 && rank >= limit) break;
             }
             int ttl = isLive ? 1000 * 60 : 1000 * 60 * 2;
