@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 
@@ -55,6 +56,8 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
         EventSeriesOverallLeaderboardPlace.Tokenizer.class,
         EventSeriesLeaderboardsPlace.Tokenizer.class,
         SeriesMediaPlace.Tokenizer.class,
+        // Mobile only places:
+        LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class
 
