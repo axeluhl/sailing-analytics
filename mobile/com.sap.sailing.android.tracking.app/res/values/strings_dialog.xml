@@ -7,4 +7,5 @@
     <string name="confirm_data_is_correct">OK</string>
     <string name="decline_data_is_incorrect">That\'s not me!</string>
     <string name="confirm_delete_checkin">Do you really want to delete this checkin?</string>
+    <string name="download_team_image_message">Downloading team image...</string>
 </resources>

@@ -6,5 +6,6 @@
     <string name="confirm_data_is_correct">OK</string>
     <string name="decline_data_is_incorrect">Das bin nicht ich!</string>
     <string name="confirm_delete_checkin">Möchten Sie den Checkin wirklich löschen?</string>
+    <string name="download_team_image_message">Team Bild wird geladen...</string>
 
 </resources>
