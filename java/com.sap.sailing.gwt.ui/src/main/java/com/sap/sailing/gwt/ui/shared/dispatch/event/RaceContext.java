@@ -47,7 +47,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
 public class RaceContext {
-    private final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+    private final TimePoint now = MillisecondsTimePoint.now();
     private final Leaderboard leaderboard;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
