@@ -38,6 +38,7 @@ public class EventsOverviewRecentYearEvent extends Widget {
 
     public EventsOverviewRecentYearEvent(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event,
             LabelType labelType, boolean isTeaserEvent) {
+        EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         eventNameUi.setInnerText(event.getDisplayName());
         if (isTeaserEvent) {

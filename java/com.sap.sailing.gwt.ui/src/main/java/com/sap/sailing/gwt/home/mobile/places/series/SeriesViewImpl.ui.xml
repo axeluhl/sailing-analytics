@@ -19,6 +19,7 @@
    		<div class="{style.headerWrapper}">
    			<mp:seriesheader.SeriesHeader ui:field="eventHeaderUi" />
    		</div>
+   		<g:FlowPanel ui:field="eventsUi" />
 		<mp:minileaderboard.MinileaderboardBox ui:field="leaderboardUi"/>
 		<!-- <mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" /> -->
 	</g:HTMLPanel>

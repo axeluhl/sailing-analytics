@@ -4,13 +4,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
+import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class SeriesViewImpl extends Composite implements SeriesView {
     private static final StringMessages MSG = StringMessages.INSTANCE;
@@ -21,6 +25,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
 
     @UiField(provided = true) SeriesHeader eventHeaderUi;
     @UiField MinileaderboardBox leaderboardUi;
+    @UiField FlowPanel eventsUi;
 //    @UiField(provided = true) StatisticsBox statisticsBoxUi;
 
     private final Presenter currentPresenter;
@@ -29,13 +34,27 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     public SeriesViewImpl(SeriesView.Presenter presenter) {
         this.currentPresenter = presenter;
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        EventSeriesViewDTO event = currentPresenter.getCtx().getSeriesDTO();
-        eventHeaderUi = new SeriesHeader(event);
+        EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
+        eventHeaderUi = new SeriesHeader(series);
 //        this.setupStatisticsBox(event);
         initWidget(uiBinder.createAndBindUi(this));
-        this.setupListContent(event);
+        this.setupListContent(series);
+        this.setupEventListContent(series);
     }
     
+    private void setupEventListContent(EventSeriesViewDTO series) {
+        boolean first = true;
+        for(EventMetadataDTO eventOfSeries : series.getEvents()) {
+            if(eventOfSeries.getState() == EventState.PLANNED) {
+                continue;
+            }
+            boolean teaser = first || eventOfSeries.getState() == EventState.UPCOMING || eventOfSeries.getState() == EventState.RUNNING;
+            EventsOverviewRecentYearEvent eventTeaser = new EventsOverviewRecentYearEvent(currentPresenter.getEventNavigation(eventOfSeries.getId().toString()), eventOfSeries, eventOfSeries.getState().getStateMarker(), teaser );
+            eventsUi.add(eventTeaser);
+            first = false;
+        }
+    }
+
     private void setupListContent(EventSeriesViewDTO event) {
         leaderboardUi.setAction(MSG.showAll(), currentPresenter.getMiniOverallLeaderboardNavigation());
         refreshManager.add(leaderboardUi, new GetMiniOverallLeaderbordAction(event.getId(), 3));

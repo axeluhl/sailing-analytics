@@ -74,4 +74,9 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
         return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(getCtx()), null, false);
     }
+
+    @Override
+    public PlaceNavigation<?> getEventNavigation(String eventId) {
+        return clientFactory.getNavigator().getEventNavigation(eventId, null, false);
+    }
 }
