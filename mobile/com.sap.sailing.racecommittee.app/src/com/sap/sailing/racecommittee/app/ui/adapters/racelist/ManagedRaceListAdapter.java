@@ -19,7 +19,6 @@ import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -28,6 +27,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -129,17 +129,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 regatta = header.getRaceGroup().getName();
             }
             boat_class.setText(regatta);
-            String fleetSeries = "";
-            if (header.getFleet() != null && !header.getFleet().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-                fleetSeries += header.getFleet().getName();
-            }
-            if (header.getSeries() != null && !header.getSeries().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-                if (!TextUtils.isEmpty(fleetSeries)) {
-                    fleetSeries += " - ";
-                }
-                fleetSeries += header.getSeries().getName();
-            }
-            fleet_series.setText(fleetSeries);
+            fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), FLAG_SIZE));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override

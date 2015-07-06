@@ -27,7 +27,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -106,12 +105,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public static void showProtest(Context context, ManagedRace race) {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
         String extra = race.getRaceGroup().getName();
-        if (!race.getSeries().getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
-            extra += " - " + race.getSeries().getName();
-        }
-        if (!race.getFleet().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-            extra += " - " + race.getFleet().getName();
-        }
+        extra += RaceHelper.getSeriesName(race.getSeries());
+        extra += RaceHelper.getFleetName(race.getFleet());
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }

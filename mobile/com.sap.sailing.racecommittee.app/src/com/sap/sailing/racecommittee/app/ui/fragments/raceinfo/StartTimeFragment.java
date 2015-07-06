@@ -13,10 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -27,6 +24,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
@@ -260,7 +258,7 @@ public class StartTimeFragment extends BaseFragment
 
                 for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
                     DependentRaceSpinnerAdapter.RaceData header = new DependentRaceSpinnerAdapter.RaceData(getRegattaName(races
-                        .getRaceGroup()), getFleetSeries(races.getFleet(), races.getSeries()), null);
+                        .getRaceGroup()), RaceHelper.getFleetSeries(races.getFleet(), races.getSeries()), null);
                     adapter.add(header);
 
                     for (ManagedRace race : mGroupHeaders.get(races)) {
@@ -345,20 +343,6 @@ public class StartTimeFragment extends BaseFragment
             regatta = raceGroup.getName();
         }
         return regatta;
-    }
-
-    private String getFleetSeries(Fleet fleet, SeriesBase series) {
-        String fleetSeries = "";
-        if (fleet != null && fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-            fleetSeries += fleet.getName();
-        }
-        if (series != null && !series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
-            if (!TextUtils.isEmpty(fleetSeries)) {
-                fleetSeries += " - ";
-            }
-            fleetSeries += series.getName();
-        }
-        return fleetSeries;
     }
 
     private void setTabTextColor() {

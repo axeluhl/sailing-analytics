@@ -15,7 +15,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.*;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,7 +23,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -48,6 +46,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFra
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -360,20 +359,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     private void setupActionBar(ManagedRace race) {
-        String title = race.getRaceGroup().getDisplayName();
-        if (TextUtils.isEmpty(title)) {
-            title = race.getRaceGroup().getName();
-        }
-        if (race.getSeries() != null && !race.getSeries().getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
-            title += " / " + race.getSeries().getName();
-        }
-        if (race.getFleet() != null && !race.getFleet().getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-            title += " / " + race.getFleet().getName();
-        }
-        title += " / " + race.getRaceName();
-
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(title);
+            getSupportActionBar().setTitle(RaceHelper.getRaceName(race, " / "));
         }
     }
 
