@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.tracking;
+package com.sap.sailing.domain.common.tracking.impl;
 
 /**
  * So far only holds the constants required to assemble a JSON object properly. The challenge for this serializer is
