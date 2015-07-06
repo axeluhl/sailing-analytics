@@ -279,7 +279,7 @@ public class RaceContext {
             // the start time is always given for live races
             TimePoint startTime = getStartTime();
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
-            liveRaceDTO.setViewState(getLiveRaceViewState(startTime, getFinishTime()));
+            liveRaceDTO.setViewState(getLiveRaceViewState());
             liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
@@ -340,7 +340,9 @@ public class RaceContext {
         return trackingState;
     }
     
-    private RaceViewState getLiveRaceViewState(TimePoint startTime, TimePoint finishTime) {
+    private RaceViewState getLiveRaceViewState() {
+        TimePoint startTime = getStartTime();
+        TimePoint finishTime = getFinishTime();
         RaceViewState raceState = RaceViewState.RUNNING;
         if (startTime != null && now.before(startTime)) {
             raceState = RaceViewState.SCHEDULED;
