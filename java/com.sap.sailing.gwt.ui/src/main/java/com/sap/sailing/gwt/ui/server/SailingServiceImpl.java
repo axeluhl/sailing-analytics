@@ -5527,12 +5527,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    public void setStartOfTracking(String leaderboardName, RaceColumnDTO raceColumn, FleetDTO fleet, TimePoint startOfTracking) {
-        
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumn.getName(), fleet.getName());
-        
-    }
-
     @Override
     public void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
