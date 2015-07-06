@@ -239,7 +239,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         final String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
         DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.Base_Theme_AppCompat_Dialog_Alert);
-        builder.setMessage("Test");
+        builder.setMessage(getString(R.string.confirm_delete_checkin));
         builder.setCancelable(true);
         builder.setNegativeButton(getString(R.string.no), null);
         builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
