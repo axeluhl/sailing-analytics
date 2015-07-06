@@ -273,14 +273,13 @@ public class RaceContext {
     }
     
     public LiveRaceDTO getLiveRaceOrNull() {
-        TimePoint startTime = getStartTime();
-        TimePoint finishTime = getFinishTime();
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
         if(isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
+            TimePoint startTime = getStartTime();
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
-            liveRaceDTO.setViewState(getLiveRaceViewState(startTime, finishTime));
+            liveRaceDTO.setViewState(getLiveRaceViewState(startTime, getFinishTime()));
             liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
@@ -300,12 +299,12 @@ public class RaceContext {
     
     private boolean isLiveOrOfPublicInterest() {
         TimePoint startTime = getStartTime();
-        TimePoint finishTime = getFinishTime();
         boolean result = false;
         if(startTime != null) {
             if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                 result = trackedRace.isLive(now);
             } else {
+                TimePoint finishTime = getFinishTime();
                 // no data from tracking but maybe a manual setting of the start and finish time
                 TimePoint startOfLivePeriod = startTime.minus(TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE);
                 TimePoint endOfLivePeriod = finishTime != null ? finishTime.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) : null; 
