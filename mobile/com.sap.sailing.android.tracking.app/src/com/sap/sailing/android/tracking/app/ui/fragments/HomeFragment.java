@@ -233,6 +233,32 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         }
     }
 
+    private boolean showDeleteConfirmationDialog(int position) {
+        // -1, because there's a header row
+        Cursor cursor = (Cursor) adapter.getItem(position - 1);
+        final String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
+        DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.Base_Theme_AppCompat_Dialog_Alert);
+        builder.setMessage("Test");
+        builder.setCancelable(true);
+        builder.setNegativeButton(getString(R.string.no), null);
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteRegatta(checkinDigest);
+            }
+        });
+        builder.show();
+
+        return true;
+    }
+
+    private void deleteRegatta(String checkinDigest) {
+        DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
+        adapter.swapCursor(null);
+        adapter.notifyDataSetInvalidated();
+    }
+
     private class ItemClickListener implements OnItemClickListener {
 
         @Override
@@ -259,27 +285,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             {
                 return false;
             }
-
-            // -1, because there's a header row
-            Cursor cursor = (Cursor) adapter.getItem(position - 1);
-            final String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
-            DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.Base_Theme_AppCompat_Dialog_Alert);
-            builder.setMessage("Test");
-            builder.setCancelable(true);
-            builder.setNegativeButton(getString(R.string.no), null);
-            builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
-                    adapter.swapCursor(null);
-                    adapter.notifyDataSetInvalidated();
-                }
-            });
-            builder.show();
-
-            return true;
+            return showDeleteConfirmationDialog(position);
         }
+
     }
 
     private class CheckinListener implements NetworkHelperSuccessListener {
