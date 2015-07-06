@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
+import android.widget.AdapterView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,7 +21,7 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -64,6 +65,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             adapter = new RegattaAdapter(getActivity(), R.layout.ragatta_listview_row, null, 0);
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new ItemClickListener());
+            listView.setOnItemLongClickListener(new LongItemClickListener());
         }
 
         getLoaderManager().initLoader(REGATTA_LOADER, null, this);
@@ -246,6 +248,37 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
             String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
             startRegatta(checkinDigest);
+        }
+    }
+
+    private class LongItemClickListener implements OnItemLongClickListener {
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            if (position < 1) // tapped header
+            {
+                return false;
+            }
+
+            // -1, because there's a header row
+            Cursor cursor = (Cursor) adapter.getItem(position - 1);
+            final String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
+            DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.Base_Theme_AppCompat_Dialog_Alert);
+            builder.setMessage("Test");
+            builder.setCancelable(true);
+            builder.setNegativeButton(getString(R.string.no), null);
+            builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
+                    adapter.swapCursor(null);
+                    adapter.notifyDataSetInvalidated();
+                }
+            });
+            builder.show();
+
+            return true;
         }
     }
 
