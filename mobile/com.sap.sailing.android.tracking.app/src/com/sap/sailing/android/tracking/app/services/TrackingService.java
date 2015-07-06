@@ -298,11 +298,11 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
      Notification notification = new NotificationCompat.Builder(this)
      .setContentTitle(getText(R.string.app_name))
      .setContentText(event.name).setContentIntent(pi)
-     .setSmallIcon(R.drawable.ic_launcher).
-             setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+         .setSubText(event.server)
+         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+         .setSmallIcon(R.drawable.ic_launcher)
          .setOngoing(true).build();
-     notification.flags |= Notification.FLAG_NO_CLEAR;
-     startForeground(NOTIFICATION_ID, notification);
+         notificationManager.notify(NOTIFICATION_ID, notification);
      }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {
