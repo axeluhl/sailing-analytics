@@ -426,17 +426,7 @@ public class RaceListColumnFactory {
             @Override
             public void render(Context context, SimpleCompetitorDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    final SafeUri flagImageUri;
-                    if (value.getFlagImageURL() == null || value.getFlagImageURL().isEmpty()) {
-                        String twoLetterIsoCountryCode = value.getTwoLetterIsoCountryCode();
-                        if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                            flagImageUri = FlagImageResolver.getEmptyFlagImageResource().getSafeUri();
-                        } else {
-                            flagImageUri = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode).getSafeUri();
-                        }
-                    } else {
-                        flagImageUri = UriUtils.fromTrustedString(value.getFlagImageURL());
-                    }
+                    SafeUri flagImageUri = FlagImageResolver.getFlagImageResource(value.getFlagImageURL(), value.getTwoLetterIsoCountryCode());
                     sb.append(TEMPLATE.winner(CSS.race_item_flag(), CSS.race_item_winner(), flagImageUri, value.getName()));
                 }
             }
