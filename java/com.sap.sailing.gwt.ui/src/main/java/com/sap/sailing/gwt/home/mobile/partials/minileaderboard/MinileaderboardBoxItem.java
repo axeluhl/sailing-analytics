@@ -39,7 +39,7 @@ public class MinileaderboardBoxItem extends Widget {
         SimpleCompetitorDTO competitor = entry.getCompetitor();
         String flagImageURL = competitor.getFlagImageURL();
         String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-        SafeUri imageUri = FlagImageResolver.getFlagImageResource(flagImageURL, twoLetterIsoCountryCode);
+        SafeUri imageUri = FlagImageResolver.getFlagImageUri(flagImageURL, twoLetterIsoCountryCode);
         competitorFlagUi.setSrc(imageUri.asString());
     }
 }
