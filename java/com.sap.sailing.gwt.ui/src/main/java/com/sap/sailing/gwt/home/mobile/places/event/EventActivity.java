@@ -134,7 +134,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
     public PlaceNavigation<?> getNewsEntryPlaceNavigation(NewsEntryDTO entry) {
         if(entry instanceof LeaderboardNewsEntryDTO) {
             final LeaderboardNewsEntryDTO dto = (LeaderboardNewsEntryDTO) entry;
-            return getRegattaLeaderboardNavigation(dto.getLeaderboardName());
+            return getRegattaMiniLeaderboardNavigation(dto.getLeaderboardName());
         } 
         return null;
     }

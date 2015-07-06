@@ -37,7 +37,7 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
             @Override
             public void onBrowserEvent(Event event) {
                 OptionElement oe = event.getEventTarget().cast();
-                presenter.getRegattaLeaderboardNavigation(oe.getValue()).goToPlace();
+                presenter.getRegattaMiniLeaderboardNavigation(oe.getValue()).goToPlace();
             }
         });        
     }
