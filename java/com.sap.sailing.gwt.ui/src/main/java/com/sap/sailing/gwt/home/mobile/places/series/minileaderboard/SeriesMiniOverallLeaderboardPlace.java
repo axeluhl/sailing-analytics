@@ -8,12 +8,12 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class SeriesMiniLeaderboardPlace extends AbstractSeriesPlace implements HasLocationTitle, HasMobileVersion {
-    public SeriesMiniLeaderboardPlace(String id) {
+public class SeriesMiniOverallLeaderboardPlace extends AbstractSeriesPlace implements HasLocationTitle, HasMobileVersion {
+    public SeriesMiniOverallLeaderboardPlace(String id) {
         super(id);
     }
     
-    public SeriesMiniLeaderboardPlace(SeriesContext context) {
+    public SeriesMiniOverallLeaderboardPlace(SeriesContext context) {
         super(context);
     }
 
@@ -22,11 +22,11 @@ public class SeriesMiniLeaderboardPlace extends AbstractSeriesPlace implements H
         return TextMessages.INSTANCE.series();
     }
 
-    @Prefix(EventPrefixes.RegattaMiniLeaderboard)
-    public static class Tokenizer extends AbstractSeriesPlace.Tokenizer<SeriesMiniLeaderboardPlace> {
+    @Prefix(EventPrefixes.EventSeriesMiniOverallLeaderboard)
+    public static class Tokenizer extends AbstractSeriesPlace.Tokenizer<SeriesMiniOverallLeaderboardPlace> {
         @Override
-        protected SeriesMiniLeaderboardPlace getRealPlace(SeriesContext context) {
-            return new SeriesMiniLeaderboardPlace(context);
+        protected SeriesMiniOverallLeaderboardPlace getRealPlace(SeriesContext context) {
+            return new SeriesMiniOverallLeaderboardPlace(context);
         }
     }
 }

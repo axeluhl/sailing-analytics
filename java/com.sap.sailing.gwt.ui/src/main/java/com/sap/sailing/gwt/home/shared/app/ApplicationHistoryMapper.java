@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
         EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, WhatsNewPlace.Tokenizer.class,
@@ -54,7 +55,8 @@ import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPla
         EventSeriesOverallLeaderboardPlace.Tokenizer.class,
         EventSeriesLeaderboardsPlace.Tokenizer.class,
         SeriesMediaPlace.Tokenizer.class,
-        MiniLeaderboardPlace.Tokenizer.class
+        MiniLeaderboardPlace.Tokenizer.class,
+        SeriesMiniOverallLeaderboardPlace.Tokenizer.class
 
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {

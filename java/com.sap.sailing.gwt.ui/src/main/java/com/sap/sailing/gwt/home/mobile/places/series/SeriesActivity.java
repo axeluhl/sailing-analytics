@@ -9,14 +9,16 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractSeriesPlace place;
-    private UUID currentEventUUId;
     
     public SeriesActivity(AbstractSeriesPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
@@ -63,15 +65,13 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
         return clientFactory.getDispatch();
     }
     
-//    @Override
-//    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
-//        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-//        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
-//    }
-//
-//    @Override
-//    public PlaceNavigation<?> getRegattaMiniLeaderboardNavigation(String leaderboardName) {
-//        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-//        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(ctx), null, false);
-//    }
+    @Override
+    public PlaceNavigation<?> getOverallLeaderboardNavigation() {
+        return clientFactory.getNavigator().getSeriesNavigation(new EventSeriesOverallLeaderboardPlace(getCtx()), null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
+        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(getCtx()), null, false);
+    }
 }
