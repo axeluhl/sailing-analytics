@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -31,7 +31,7 @@ public class RaceListContainer<T extends RaceMetadataDTO> extends Composite {
         this.titleUi.setInnerText(title);
     }
     
-    public void setRaceListData(List<T> data) {
+    public void setRaceListData(Collection<T> data) {
         this.raceListUi.setTableData(data);
     }
     
