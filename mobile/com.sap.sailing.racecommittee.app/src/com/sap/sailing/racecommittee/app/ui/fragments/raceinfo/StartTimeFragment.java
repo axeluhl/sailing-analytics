@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -22,6 +23,7 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter.RaceData;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -32,10 +34,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
@@ -254,9 +253,16 @@ public class StartTimeFragment extends BaseFragment
             if (dependentRace != null) {
                 DependentRaceSpinnerAdapter adapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
                 DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
-                LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mGroupHeaders = new LinkedHashMap<>();
+                Map<RaceGroupSeriesFleet, List<ManagedRace>> mGroupHeaders = new LinkedHashMap<>();
+                List<ManagedRace> sortedRaces = new ArrayList<>(manager.getRaces());
+                Collections.sort(sortedRaces, new Comparator<ManagedRace>() {
+                    @Override
+                    public int compare(ManagedRace lhs, ManagedRace rhs) {
+                        return new NaturalComparator().compare(lhs.getId(), rhs.getId());
+                    }
+                });
 
-                for (ManagedRace race : manager.getRaces()) {
+                for (ManagedRace race : sortedRaces) {
                     RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
 
                     if (!mGroupHeaders.containsKey(container)) {
@@ -266,12 +272,12 @@ public class StartTimeFragment extends BaseFragment
                 }
 
                 for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
-                    DependentRaceSpinnerAdapter.RaceData header = new DependentRaceSpinnerAdapter.RaceData(RaceHelper
-                        .getRaceGroupName(races.getRaceGroup()), RaceHelper.getFleetSeries(races.getFleet(), races.getSeries()), null);
+                    RaceData header = new RaceData(RaceHelper.getRaceGroupName(races.getRaceGroup()), RaceHelper
+                        .getFleetSeries(races.getFleet(), races.getSeries()), null);
                     adapter.add(header);
 
                     for (ManagedRace race : mGroupHeaders.get(races)) {
-                        DependentRaceSpinnerAdapter.RaceData items = new DependentRaceSpinnerAdapter.RaceData(race.getRaceName(), null, race);
+                        RaceData items = new RaceData(race.getRaceName(), null, race);
                         adapter.add(items);
                     }
                 }

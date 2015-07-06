@@ -2,19 +2,19 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="475dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?sap_gray_black_30"
-    android:padding="@dimen/default_padding_half"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="@dimen/default_padding_half">
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxWidth="450dp"
-        android:textAppearance="?textLarge"
         android:singleLine="true"
+        android:textAppearance="?textLarge"
         tools:text="Singapore"/>
 
     <TextView

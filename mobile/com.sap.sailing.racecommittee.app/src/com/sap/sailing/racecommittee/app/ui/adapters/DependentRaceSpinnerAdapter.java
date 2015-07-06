@@ -10,8 +10,10 @@ import android.view.ViewGroup;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import java.util.ArrayList;
 
@@ -47,16 +49,25 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         String subText = mData.get(position).getSubText();
         if (subTextView != null) {
             if (getItemViewType(position) == HEADER) {
+                layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_20));
                 if (subText != null) {
+                    subTextView.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
                     subTextView.setText(subText);
                     subTextView.setVisibility(View.VISIBLE);
                 } else {
                     subTextView.setVisibility(View.GONE);
                 }
                 layout.setClickable(true);
+                if (mainText != null) {
+                    mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
+                }
             } else {
+                layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
                 subTextView.setVisibility(View.GONE);
                 layout.setClickable(false);
+                if (mainText != null) {
+                    mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.white));
+                }
             }
         }
 
