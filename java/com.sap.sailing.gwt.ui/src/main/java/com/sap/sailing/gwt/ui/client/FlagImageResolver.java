@@ -292,12 +292,12 @@ public class FlagImageResolver {
         return flagImagesMap.get(NONE);
     }
     
-    public static SafeUri getFlagImageResource(String flagImageUrl, String twoLetterIsoCountryCode) {
+    public static SafeUri getFlagImageUri(String flagImageUrl, String twoLetterIsoCountryCode) {
         if (flagImageUrl == null || flagImageUrl.isEmpty()) {
-            if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                return FlagImageResolver.getEmptyFlagImageResource().getSafeUri();
+            if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty() || getFlagImageResource(twoLetterIsoCountryCode) == null) {
+                return getEmptyFlagImageResource().getSafeUri();
             }
-            return  FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode).getSafeUri();
+            return getFlagImageResource(twoLetterIsoCountryCode).getSafeUri();
         }
         return UriUtils.fromTrustedString(flagImageUrl);
     }
