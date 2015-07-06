@@ -98,7 +98,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
 //        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
         
-        GetRaceListViewAction action = new GetRaceListViewAction(myPlace.getCtx().getEventDTO().getId());
+        GetRaceListViewAction action = new GetRaceListViewAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId());
         currentPresenter.getDispatch().execute(action, new AsyncCallback<ResultWithTTL<RaceListViewDTO>>() {
             @Override
             public void onFailure(Throwable caught) {

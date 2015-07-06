@@ -14,11 +14,12 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
     private static final Logger logger = Logger.getLogger(GetRaceListViewAction.class.getName());
     
     private UUID eventId;
+    private String regattaId;
     
     public GetRaceListViewAction() {
     }
 
-    public GetRaceListViewAction(UUID eventId) {
+    public GetRaceListViewAction(UUID eventId, String regattaId) {
         this.eventId = eventId;
     }
 
@@ -27,7 +28,7 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
     public ResultWithTTL<RaceListViewDTO> execute(DispatchContext context) {
         long start = System.currentTimeMillis();
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
-        EventActionUtil.forRacesOfEvent(context, eventId, raceListDataCalculator);
+        EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
         ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult();
         
         long duration = System.currentTimeMillis() - start;
