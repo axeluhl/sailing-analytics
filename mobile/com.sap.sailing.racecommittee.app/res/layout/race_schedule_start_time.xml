@@ -60,6 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/dependent_races_absolute"
+            android:textAllCaps="true"
             android:textColor="?sap_yellow_1"
             android:textSize="@dimen/textSize_26"/>
 
@@ -70,6 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/dependent_races_relative"
+            android:textAllCaps="true"
             android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_26"/>
     </LinearLayout>
