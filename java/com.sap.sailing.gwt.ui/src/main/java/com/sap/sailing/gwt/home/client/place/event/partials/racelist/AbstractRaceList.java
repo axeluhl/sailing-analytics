@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
@@ -37,13 +38,14 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         this.initWidget(cellTableContainer);
     }
 
-    protected void setTableData(List<T> data) {
+    protected void setTableData(Collection<T> data) {
         Column<T, ?> sortColumn = (this.cellTable == null ? null : this.cellTable.getCurrentlySortedColumn());
         this.cellTable = new SortedCellTable<T>(data.size(), CleanCellTableResources.INSTANCE);
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initTableColumns();
-        this.cellTable.setList(data);
+        // TODO change setList to use Collection
+        this.cellTable.setList(new ArrayList<T>(data));
         if (sortColumn != null && this.cellTable.getColumnIndex(sortColumn) >= 0) {
             this.cellTable.sortColumn(sortColumn);
         }

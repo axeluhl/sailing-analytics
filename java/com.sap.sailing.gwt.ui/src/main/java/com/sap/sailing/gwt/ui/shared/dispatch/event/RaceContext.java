@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -47,7 +48,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
 public class RaceContext {
-    private final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+    private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
+    private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
+    
+    private final TimePoint now = MillisecondsTimePoint.now();
     private final Leaderboard leaderboard;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
@@ -56,8 +60,12 @@ public class RaceContext {
     private final RaceLog raceLog;
     private final ReadonlyRaceState state;
     private final Event event;
-    private final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
-    private final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
+    
+    private TimePoint startTime;
+    private boolean startTimeCalculated = false;
+    private TimePoint finishTime;
+    private boolean finishTimeCalculated = false;
+    private RaceViewState raceViewState;
     
     public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.event = event;
@@ -234,24 +242,33 @@ public class RaceContext {
         return null;
     }
     
+    public Date getStartTimeAsDate() {
+        TimePoint startTime = getStartTime();
+        return startTime == null ? null : startTime.asDate();
+    }
+    
     public TimePoint getStartTime() {
-        TimePoint startTime = null;
-        if (trackedRace != null) {
-            startTime = trackedRace.getStartOfRace();
-        }
-        if (startTime == null && state != null) {
-            startTime = state.getStartTime();
+        if(!startTimeCalculated) {
+            if (trackedRace != null) {
+                startTime = trackedRace.getStartOfRace();
+            }
+            if (startTime == null && state != null) {
+                startTime = state.getStartTime();
+            }
+            startTimeCalculated = true;
         }
         return startTime;
     }
 
     private TimePoint getFinishTime() {
-        TimePoint finishTime = null;
-        if (trackedRace != null) {
-            finishTime = trackedRace.getEndOfRace();
-        } else if (state != null) {
-            finishTime = state.getFinishedTime();
-        } 
+        if(!finishTimeCalculated) {
+            if (trackedRace != null) {
+                finishTime = trackedRace.getEndOfRace();
+            } else if (state != null) {
+                finishTime = state.getFinishedTime();
+            }
+            finishTimeCalculated = true;
+        }
         return finishTime;
     }
 
@@ -263,19 +280,17 @@ public class RaceContext {
     }
     
     public LiveRaceDTO getLiveRaceOrNull() {
-        TimePoint startTime = getStartTime();
-        TimePoint finishTime = getFinishTime();
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
-        if(isLiveOrOfPublicInterest(startTime, finishTime)) {
+        if(isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
-            liveRaceDTO.setViewState(getLiveRaceViewState(startTime, finishTime));
+            liveRaceDTO.setViewState(getLiveRaceViewState());
             liveRaceDTO.setRegattaDisplayName(getRegattaDisplayName());
             liveRaceDTO.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
             liveRaceDTO.setTrackingState(getRaceTrackingState());
             liveRaceDTO.setFleet(getFleetMetadataOrNull());
-            liveRaceDTO.setStart(startTime == null ? null : startTime.asDate());
+            liveRaceDTO.setStart(getStartTimeAsDate());
             liveRaceDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
             liveRaceDTO.setCourseArea(getCourseAreaOrNull());
             liveRaceDTO.setCourse(getCourseNameOrNull());
@@ -288,12 +303,14 @@ public class RaceContext {
         return null;
     }
     
-    private boolean isLiveOrOfPublicInterest(TimePoint startTime, TimePoint finishTime) {
+    public boolean isLiveOrOfPublicInterest() {
+        TimePoint startTime = getStartTime();
         boolean result = false;
         if(startTime != null) {
             if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                 result = trackedRace.isLive(now);
             } else {
+                TimePoint finishTime = getFinishTime();
                 // no data from tracking but maybe a manual setting of the start and finish time
                 TimePoint startOfLivePeriod = startTime.minus(TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE);
                 TimePoint endOfLivePeriod = finishTime != null ? finishTime.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) : null; 
@@ -329,7 +346,16 @@ public class RaceContext {
         return trackingState;
     }
     
-    private RaceViewState getLiveRaceViewState(TimePoint startTime, TimePoint finishTime) {
+    private RaceViewState getLiveRaceViewState() {
+        if(raceViewState == null) {
+            raceViewState = calculateLiveRaceViewState();
+        }
+        return raceViewState;
+    }
+    
+    private RaceViewState calculateLiveRaceViewState() {
+        TimePoint startTime = getStartTime();
+        TimePoint finishTime = getFinishTime();
         RaceViewState raceState = RaceViewState.RUNNING;
         if (startTime != null && now.before(startTime)) {
             raceState = RaceViewState.SCHEDULED;
