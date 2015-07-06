@@ -26,14 +26,8 @@
 						<div ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo}"> </div>
 						<!-- IF END -->
 						<div class="{local_res.css.eventheader_info_subtitle_info}">
-							<!-- IF (event.name || event.date) -->
-							<div ui:field="eventDateUi" class="{local_res.css.eventheader_info_subtitle_info_date}">
-								<!-- event.date -->
+							<div ui:field="locationsUi" class="{local_res.css.eventheader_info_subtitle_info_location}">
 							</div>
-							<div ui:field="eventLocationUi" class="{local_res.css.eventheader_info_subtitle_info_location}">
-								<!-- event.venue.name -->, <!-- event.venue.country -->
-							</div>
-							<!-- IF END -->
 						</div>
 					</div>
 				</div>

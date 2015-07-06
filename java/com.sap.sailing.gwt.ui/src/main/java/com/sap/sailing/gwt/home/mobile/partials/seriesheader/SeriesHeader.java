@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHe
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 
 public class SeriesHeader extends Composite {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -21,8 +22,7 @@ public class SeriesHeader extends Composite {
     @UiField SpanElement eventNameUi;
     @UiField DivElement eventStateUi;
     @UiField DivElement eventLogoUi;
-    @UiField DivElement eventDateUi;
-    @UiField DivElement eventLocationUi;
+    @UiField DivElement locationsUi;
 
     public SeriesHeader(EventSeriesViewDTO event) {
         SeriesHeaderResources.INSTANCE.css().ensureInjected();
@@ -35,8 +35,15 @@ public class SeriesHeader extends Composite {
         LogoUtil.setEventLogo(eventLogoUi, event);
         eventNameUi.setInnerText(event.getDisplayName());
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
-//        eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
-//        eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());
-        // TODO show e.g. event count
+        StringBuilder locationsBuilder = new StringBuilder();
+        boolean first = true;
+        for (EventMetadataDTO eventOfSeries : event.getEvents()) {
+            if(!first) {
+                locationsBuilder.append(", ");
+            }
+            locationsBuilder.append(eventOfSeries.getLocation());
+            first = false;
+        }
+        locationsUi.setInnerText(locationsBuilder.toString());
     }
 }
