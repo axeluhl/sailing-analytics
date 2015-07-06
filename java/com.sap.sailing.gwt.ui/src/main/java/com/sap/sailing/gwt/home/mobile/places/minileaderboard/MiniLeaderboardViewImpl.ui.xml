@@ -12,19 +12,6 @@
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 
 	<ui:style>
-		.fullWidthButton {
-			width: 100%;
-			margin-bottom: 1rem;
-			text-align: center;		
-		}
-		.holder {
-			padding: 1rem;
-		}
-		.notAvailableMessage {
-			font-size: 1.5em;
-			margin: 1em 0em;
-			line-height: 1.4em;
-		}
 		.headerWrapper {
 			background-color: #f2f2f2;
 			padding-bottom: 10px;
@@ -38,10 +25,6 @@
 			<!-- 
 			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
 			-->
-		</div>
-		<div ui:field="buttonsUi" class="{style.holder}">
-			<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="leaderboardLinkUi"><ui:text from="{i18n.openLeaderboard}" /></a>
-			<a class="{res.mainCss.button} {res.mainCss.buttonprimary} {style.fullWidthButton}" ui:field="dektopLinkUi"><ui:text from="{i18n.gotoDesktop}" /></a>
 		</div>
 		<mp:minileaderboard.MinileaderboardBox ui:field="minileaderboardUi"/>
 	</g:HTMLPanel>	

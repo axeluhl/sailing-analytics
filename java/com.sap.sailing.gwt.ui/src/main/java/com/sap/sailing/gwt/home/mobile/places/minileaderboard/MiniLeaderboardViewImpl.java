@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,12 +29,6 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
     EventHeader eventHeaderUi;
     @UiField
     MinileaderboardBox minileaderboardUi;
-    @UiField
-    DivElement buttonsUi;
-    @UiField
-    AnchorElement leaderboardLinkUi;
-    @UiField
-    AnchorElement dektopLinkUi;
     @UiField(provided = true)
     Quickfinder quickFinderUi;
 
@@ -52,7 +44,6 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         UUID uuid = UUID.fromString(ctx.getEventId());
         refreshManager.add(minileaderboardUi, new GetMiniLeaderbordAction(uuid, presenter.getCtx().getRegattaId()));
         minileaderboardUi.setAction(MSG.details(), presenter.getRegattaLeaderboardNavigation(regatta.getId()));
-        buttonsUi.removeFromParent();
     }
 
     @Override
