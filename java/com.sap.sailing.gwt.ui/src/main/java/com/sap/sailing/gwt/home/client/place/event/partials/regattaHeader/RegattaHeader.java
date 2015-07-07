@@ -16,16 +16,15 @@ public class RegattaHeader extends Composite {
     interface RegattaHeaderUiBinder extends UiBinder<Widget, RegattaHeader> {
     }
     
-    @UiField protected AnchorElement headerBodyUi;
-    @UiField protected AnchorElement headerArrowUi;
+    @UiField AnchorElement headerBodyUi;
+    @UiField AnchorElement headerArrowUi;
 
-    public RegattaHeader(RegattaMetadataDTO regattaMetadata, PlaceNavigation<?> placeNavigation) {
+    public RegattaHeader(RegattaMetadataDTO regattaMetadata) {
         initWidget(uiBinder.createAndBindUi(this));
         headerBodyUi.appendChild(new RegattaHeaderBody(regattaMetadata).getElement());
-        initNavigation(placeNavigation);
     }
     
-    private void initNavigation(PlaceNavigation<?> placeNavigation) {
+    public void setRegattaNavigation(PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(headerBodyUi);
         placeNavigation.configureAnchorElement(headerArrowUi);
     }
