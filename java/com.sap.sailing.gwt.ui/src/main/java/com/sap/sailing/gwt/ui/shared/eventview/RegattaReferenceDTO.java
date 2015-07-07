@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.eventview;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
-public class RegattaReferenceDTO implements IsSerializable, Comparable<RegattaReferenceDTO> {
+public class RegattaReferenceDTO implements DTO, Comparable<RegattaReferenceDTO> {
     private String id;
     private String displayName;
     
