@@ -20,6 +20,7 @@
 	<g:HTMLPanel>
 		<div class="{style.headerWrapper}">
 			<mp:seriesheader.SeriesHeader ui:field="eventHeaderUi" />
+			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
 		</div>
 		<mp:minileaderboard.MinileaderboardBox ui:field="minileaderboardUi"/>
 	</g:HTMLPanel>	
