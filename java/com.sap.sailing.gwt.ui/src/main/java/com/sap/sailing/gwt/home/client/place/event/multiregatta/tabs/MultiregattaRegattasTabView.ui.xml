@@ -12,8 +12,8 @@
       <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <r:RacesListLive ui:field="racesListLive" addStyleNames="{style.space-top}" />
+          <g:FlowPanel ui:field="regattasContainerUi"/>
         </div>
       </div>
-      <g:SimplePanel ui:field="content" addStyleNames="{style.space-top}" />
     </g:HTMLPanel>
 </ui:UiBinder>
