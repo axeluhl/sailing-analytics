@@ -18,6 +18,9 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -34,6 +37,7 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -433,5 +437,16 @@ public final class HomeServiceUtil {
         regattaDTO.setBoatClass(getBoatClassName(leaderboard));
         
         return regattaDTO;
+    }
+    
+    public static boolean hasLiveRace(LeaderboardDTO leaderboard) {
+        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(getLiveTimePointInMillis());
+        return !liveRaces.isEmpty();
+    }
+    
+    private static long getLiveTimePointInMillis() {
+        // TODO better solution
+        long livePlayDelayInMillis = 15_000;
+        return System.currentTimeMillis() - livePlayDelayInMillis;
     }
 }

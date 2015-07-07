@@ -20,9 +20,13 @@ import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 
 public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResult<NewsEntryDTO>>> {
     private UUID eventId;
+    /**
+     * This is number of items to deliver
+     */
     private int limit = 0;
     
-    public GetEventOverviewNewsAction() {
+    @SuppressWarnings("unused")
+    private GetEventOverviewNewsAction() {
     }
 
     public GetEventOverviewNewsAction(UUID eventId) {
@@ -40,6 +44,7 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
         return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<ListResult<NewsEntryDTO>>() {
             @Override
             public ResultWithTTL<ListResult<NewsEntryDTO>> calculateWithEvent(Event event) {
+                        // TODO (pgt): use duration
                 long ttl = 1000 * 60 * 2;
                 return new ResultWithTTL<>(ttl, new ListResult<NewsEntryDTO>(getNews(context, event)));
             }

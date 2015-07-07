@@ -13,7 +13,8 @@ public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<LiveRa
     private UUID eventId;
     private String regattaName;
     
-    public GetLiveRacesForRegattaAction() {
+    @SuppressWarnings("unused")
+    private GetLiveRacesForRegattaAction() {
     }
 
     public GetLiveRacesForRegattaAction(UUID eventId, String regattaName) {

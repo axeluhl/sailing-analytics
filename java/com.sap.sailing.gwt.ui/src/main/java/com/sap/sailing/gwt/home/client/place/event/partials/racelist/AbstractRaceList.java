@@ -235,7 +235,6 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO> extends Compos
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initTableColumns();
-        // TODO change setList to use Collection
         this.cellTable.setList(data);
         if (sortColumn != null && this.cellTable.getColumnIndex(sortColumn) >= 0) {
             this.cellTable.sortColumn(sortColumn);
