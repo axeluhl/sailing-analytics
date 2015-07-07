@@ -4,13 +4,14 @@ import java.util.Collection;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.mobile.partials.quickfinder.QuickfinderNavigationHandler;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public interface MiniLeaderboardView {
 
-    public interface Presenter extends RegattaLeaderboardNavigationProvider {
+    public interface Presenter extends RegattaLeaderboardNavigationProvider, QuickfinderNavigationHandler {
 
         DispatchSystem getDispatch();
 

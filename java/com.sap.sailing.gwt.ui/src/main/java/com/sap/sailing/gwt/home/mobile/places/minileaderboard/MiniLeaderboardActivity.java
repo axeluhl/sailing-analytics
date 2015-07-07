@@ -62,6 +62,11 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
     public EventContext getCtx() {
         return place.getCtx();
     }
+    
+    @Override
+    public void navigate(String regattaId) {
+        getRegattaMiniLeaderboardNavigation(regattaId).goToPlace();
+    }
 
     @Override
     public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {

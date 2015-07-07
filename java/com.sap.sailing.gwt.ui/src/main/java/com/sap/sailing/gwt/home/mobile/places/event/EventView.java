@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.mobile.partials.quickfinder.QuickfinderNavigationHandler;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -24,7 +25,7 @@ public interface EventView {
 
     void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images);
 
-    public interface Presenter extends NewsItemLinkProvider, RegattaLeaderboardNavigationProvider {
+    public interface Presenter extends NewsItemLinkProvider, RegattaLeaderboardNavigationProvider, QuickfinderNavigationHandler {
         EventContext getCtx();
         DispatchSystem getDispatch();
         String getRaceViewerURL(String regattaName, String trackedRaceName);

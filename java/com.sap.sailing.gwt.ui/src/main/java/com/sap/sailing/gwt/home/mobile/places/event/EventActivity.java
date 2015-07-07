@@ -143,6 +143,11 @@ public class EventActivity extends AbstractActivity implements Presenter {
     public String getRaceViewerURL(String regattaName, String trackedRaceName) {
         return null;
     }
+    
+    @Override
+    public void navigate(String regattaId) {
+        getRegattaMiniLeaderboardNavigation(regattaId).goToPlace();
+    }
 
     @Override
     public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
