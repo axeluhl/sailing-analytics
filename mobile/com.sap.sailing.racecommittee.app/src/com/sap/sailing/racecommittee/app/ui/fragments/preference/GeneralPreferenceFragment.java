@@ -88,8 +88,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupServerUrlBox();
         setupSyncQRCodeButton();
         setupForceUpdateButton();
-
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
     }
 
     private void setupIdentifierBox() {
