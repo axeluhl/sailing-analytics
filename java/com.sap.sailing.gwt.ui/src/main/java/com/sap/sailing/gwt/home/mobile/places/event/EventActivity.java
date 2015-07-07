@@ -18,9 +18,11 @@ import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -80,7 +82,13 @@ public class EventActivity extends AbstractActivity implements Presenter {
             view.setSeriesNavigation(event.getSeriesName(),
                     clientFactory.getNavigator().getEventSeriesNavigation(event.getSeriesIdAsString(), null, false));
         }
-        view.setQuickFinderValues(event.getType() == EventType.MULTI_REGATTA ? getSortedQuickFinderValues() : null);
+        if(event.getType() == EventType.MULTI_REGATTA) {
+            view.setQuickFinderValues(getSortedQuickFinderValues());
+        } else if(event.getType() == EventType.SERIES_EVENT) {
+            view.setQuickFinderValues(event.getSeriesName(), event.getEventsOfSeries());
+        } else {
+            view.hideQuickfinder();
+        }
         if (getCtx().getEventDTO().isHasMedia()) {
             clientFactory.getHomeService().getMediaForEvent(currentEventUUId, new AsyncCallback<MediaDTO>() {
                 @Override
@@ -143,11 +151,6 @@ public class EventActivity extends AbstractActivity implements Presenter {
     public String getRaceViewerURL(String regattaName, String trackedRaceName) {
         return null;
     }
-    
-    @Override
-    public void navigate(String regattaId) {
-        getRegattaMiniLeaderboardNavigation(regattaId).goToPlace();
-    }
 
     @Override
     public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
@@ -166,5 +169,13 @@ public class EventActivity extends AbstractActivity implements Presenter {
         return clientFactory.getNavigator().getEventLastestNewsNavigation(getCtx(), values, null, false);
     }
 
-
+    @Override
+    public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
+        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext().withId(getCtx().getEventId())), null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
+        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    }
 }

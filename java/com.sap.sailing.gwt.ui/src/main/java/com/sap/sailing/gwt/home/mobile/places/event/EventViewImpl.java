@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
+import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,6 +33,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEv
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
@@ -43,7 +45,7 @@ public class EventViewImpl extends Composite implements EventView {
     }
 
     @UiField(provided = true) EventHeader eventHeaderUi;
-    @UiField(provided = true) Quickfinder quickFinderUi;
+    @UiField Quickfinder quickFinderUi;
     @UiField SimpleInfoBlock simpleInfoUi;
     @UiField(provided = true) EventOverviewStage overviewStageUi;
     @UiField SimplePanel listContentUi;
@@ -59,7 +61,6 @@ public class EventViewImpl extends Composite implements EventView {
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventViewDTO event = currentPresenter.getCtx().getEventDTO();
         eventHeaderUi = new EventHeader(event);
-        quickFinderUi = new Quickfinder(currentPresenter);
         this.setupOverviewStage(event.getId());
         this.setupUpdateBox(event.getId());
         this.setupStatisticsBox(event);
@@ -114,14 +115,17 @@ public class EventViewImpl extends Composite implements EventView {
     
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        if (regattaMetadatas == null) {
-            quickFinderUi.removeFromParent();
-            return;
-        }
-        quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
-        for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
-            quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), regattaMetadata.getId());
-        }
+        new QuickfinderPresenter(quickFinderUi, currentPresenter, regattaMetadatas);
+    }
+    
+    @Override
+    public void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+    }
+    
+    @Override
+    public void hideQuickfinder() {
+        quickFinderUi.removeFromParent();
     }
     
     @Override

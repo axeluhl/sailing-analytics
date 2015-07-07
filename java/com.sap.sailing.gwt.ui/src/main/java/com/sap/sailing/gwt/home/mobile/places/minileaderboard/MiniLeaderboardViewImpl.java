@@ -13,9 +13,11 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
+import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
 public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboardView {
     private static final StringMessages MSG = StringMessages.INSTANCE;
@@ -29,7 +31,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
     EventHeader eventHeaderUi;
     @UiField
     MinileaderboardBox minileaderboardUi;
-    @UiField(provided = true)
+    @UiField
     Quickfinder quickFinderUi;
 
     public MiniLeaderboardViewImpl(Presenter presenter) {
@@ -37,7 +39,6 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         RegattaMetadataDTO regatta = presenter.getCtx().getRegatta();
         // TODO check if regatta is valid!
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regatta.getDisplayName());
-        quickFinderUi = new Quickfinder(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventContext ctx = presenter.getCtx();
@@ -48,10 +49,16 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
 
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
-        for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
-            quickFinderUi.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(),
-                    regattaMetadata.getId());
-        }
+        new QuickfinderPresenter(quickFinderUi, currentPresenter, regattaMetadatas);
+    }
+    
+    @Override
+    public void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+    }
+    
+    @Override
+    public void hideQuickfinder() {
+        quickFinderUi.removeFromParent();
     }
 }

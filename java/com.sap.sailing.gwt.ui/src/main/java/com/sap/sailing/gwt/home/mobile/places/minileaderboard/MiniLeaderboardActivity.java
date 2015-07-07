@@ -9,12 +9,15 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardView.Presenter;
+import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
 public class MiniLeaderboardActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
@@ -54,18 +57,20 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
 
     private void initUi(AcceptsOneWidget panel, EventBus eventBus) {
         final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this);
-        view.setQuickFinderValues(place.getCtx().getEventDTO().getRegattas());
+        EventViewDTO event = place.getCtx().getEventDTO();
+        if(event.getType() == EventType.MULTI_REGATTA) {
+            view.setQuickFinderValues(event.getRegattas());
+        } else if(event.getType() == EventType.SERIES_EVENT) {
+            view.setQuickFinderValues(event.getSeriesName(), event.getEventsOfSeries());
+        } else {
+            view.hideQuickfinder();
+        }
         panel.setWidget(view.asWidget());
     }
 
     @Override
     public EventContext getCtx() {
         return place.getCtx();
-    }
-    
-    @Override
-    public void navigate(String regattaId) {
-        getRegattaMiniLeaderboardNavigation(regattaId).goToPlace();
     }
 
     @Override
@@ -85,4 +90,13 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
         return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(ctx), null, false);
     }
 
+    @Override
+    public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
+        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext().withId(getCtx().getEventId())), null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
+        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    }
 }

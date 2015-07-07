@@ -69,12 +69,8 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     }
     
     @Override
-    public void navigate(String eventId) {
-        if(eventId == null || eventId.isEmpty()) {
-            getMiniOverallLeaderboardNavigation().goToPlace();
-            return;
-        }
-        clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId, null), null, false).goToPlace();
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
+        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
     }
     
     @Override

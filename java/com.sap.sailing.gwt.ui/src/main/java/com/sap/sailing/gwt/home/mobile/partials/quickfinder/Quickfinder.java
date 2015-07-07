@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.partials.quickfinder;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -17,6 +19,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 
 public class Quickfinder extends Widget implements HasSelectionHandlers<String> {
     private static QuickfinderUiBinder uiBinder = GWT.create(QuickfinderUiBinder.class);
@@ -29,14 +32,20 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
     @UiField
     protected SelectElement selectUi;
     
-    public Quickfinder(final QuickfinderNavigationHandler presenter) {
+    private int counter = 0;
+    private final Map<String, PlaceNavigation<?>> navigations = new HashMap<>();
+    
+    public Quickfinder() {
         setElement(uiBinder.createAndBindUi(this));
         Event.sinkEvents(selectUi, Event.ONCHANGE);
         Event.setEventListener(selectUi, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
                 OptionElement oe = event.getEventTarget().cast();
-                presenter.navigate(oe.getValue());
+                PlaceNavigation<?> propertyObject = navigations.get(oe.getValue());
+                if(propertyObject != null) {
+                    propertyObject.goToPlace();
+                }
             }
         });
     }
@@ -46,17 +55,17 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
         return addHandler(handler, SelectionEvent.getType());
     }
 
-    public void addPlaceholderItem(String label, String value) {
-        addItemToElement(selectUi, label, value, true, true);
+    public void addPlaceholderItem(String label) {
+        addItemToElement(selectUi, label, null, true, true);
     }
 
-    public void addItem(String label, String value) {
-        addItemToElement(selectUi, label, value, false, false);
+    public void addItem(String label, PlaceNavigation<?> navigation) {
+        addItemToElement(selectUi, label, navigation, false, false);
     }
 
-    public void addItemToGroup(String groupLabel, String itemLabel, String value) {
+    public void addItemToGroup(String groupLabel, String itemLabel, PlaceNavigation<?> navigation) {
         OptGroupElement oge = createorFindGroup(groupLabel);
-        addItemToElement(oge, itemLabel, value, false, false);
+        addItemToElement(oge, itemLabel, navigation, false, false);
     }
 
     public void addGroup(String label) {
@@ -77,13 +86,14 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
         return oge;
     }
     
-    private void addItemToElement(Element parent, String label, String value, boolean selected, boolean disabled) {
+    private void addItemToElement(Element parent, String label, PlaceNavigation<?> navigation, boolean selected, boolean disabled) {
         OptionElement oe = Document.get().createOptionElement();
         oe.setLabel(label);
-        oe.setValue(value);
         oe.setDefaultSelected(selected);
         oe.setDisabled(disabled);
         parent.appendChild(oe);
+        String value = "" + counter++;
+        oe.setValue(value);
+        navigations.put(value, navigation);
     }
-
 }

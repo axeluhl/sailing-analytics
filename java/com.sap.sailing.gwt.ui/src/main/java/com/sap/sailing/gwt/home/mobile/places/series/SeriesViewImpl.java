@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardB
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
+import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -27,7 +28,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     }
 
     @UiField(provided = true) SeriesHeader eventHeaderUi;
-    @UiField(provided = true) Quickfinder quickFinderUi;
+    @UiField Quickfinder quickFinderUi;
     @UiField MinileaderboardBox leaderboardUi;
     @UiField FlowPanel eventsUi;
 //    @UiField(provided = true) StatisticsBox statisticsBoxUi;
@@ -40,7 +41,6 @@ public class SeriesViewImpl extends Composite implements SeriesView {
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
-        quickFinderUi = new Quickfinder(currentPresenter);
 //        this.setupStatisticsBox(event);
         initWidget(uiBinder.createAndBindUi(this));
         this.setupListContent(series);
@@ -62,15 +62,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
-        if (eventsOfSeries == null) {
-            quickFinderUi.removeFromParent();
-            return;
-        }
-        quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
-        quickFinderUi.addItemToGroup(seriesName, MSG.overallLeaderboardSelection(), "");
-        for (EventMetadataDTO eventOfSeries : eventsOfSeries) {
-            quickFinderUi.addItemToGroup(seriesName, eventOfSeries.getLocationOrDisplayName(), eventOfSeries.getId().toString());
-        }
+        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
     }
 
     private void setupListContent(EventSeriesViewDTO event) {
