@@ -30,6 +30,10 @@ public final class EventActionUtil {
         void doForRace(RaceContext context);
     }
     
+    protected interface LeaderboardCallback {
+        void doForLeaderboard(LeaderboardContext context);
+    }
+    
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(DispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
@@ -60,6 +64,15 @@ public final class EventActionUtil {
         return 0;
     }
 
+    public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {
+        Event event = context.getRacingEventService().getEvent(eventId);
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            for (Leaderboard leaderboard : lg.getLeaderboards()) {
+                callback.doForLeaderboard(new LeaderboardContext(event, leaderboard));
+            }
+        }
+    }
+    
     public static void forRacesOfEvent(DispatchContext context, UUID eventId, RaceCallback callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
