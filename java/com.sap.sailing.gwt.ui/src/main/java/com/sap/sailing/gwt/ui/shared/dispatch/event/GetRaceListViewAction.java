@@ -16,7 +16,8 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
     private UUID eventId;
     private String regattaId;
     
-    public GetRaceListViewAction() {
+    @SuppressWarnings("unused")
+    private GetRaceListViewAction() {
     }
 
     public GetRaceListViewAction(UUID eventId, String regattaId) {

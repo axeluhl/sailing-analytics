@@ -1,0 +1,24 @@
+.sitefooter {
+  font-size: 0.8rem;
+  background: #333;
+  padding: 2.5em;
+  margin-top: -13.916666666666666em;
+  color: #fff;
+  text-align: center;
+}
+.sitefooter a {
+  color: #fff;
+}
+.sitefooter_language {
+  display: block;
+}
+a.sitefooter_language_link {
+  color: #fff;
+}
+a.sitefooter_language_linkactive {
+  color: #efaa00;
+}
+.sitefooter_links {
+  font-weight: 600;
+  padding: 2.083333333333333em 0;
+}

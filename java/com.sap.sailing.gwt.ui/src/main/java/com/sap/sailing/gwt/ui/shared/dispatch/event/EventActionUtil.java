@@ -31,26 +31,33 @@ public final class EventActionUtil {
     }
     
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(DispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
-        TimePoint now = MillisecondsTimePoint.now();
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
+        if(eventState != EventState.RUNNING) {
+            return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), null);
+        }
+        return callback.calculateWithEvent(event);
+    }
+
+    public static long calculateTtlForNonLiveEvent(Event event, EventState eventState) {
+        TimePoint now = MillisecondsTimePoint.now();
         if(eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
             Duration tillStart = now.until(event.getStartDate());
             double hoursTillStart = tillStart.asHours();
             long ttl = 1000 * 60 * 60;
-            if(hoursTillStart < 24) {
+            if(hoursTillStart < 36) {
                 ttl = 1000 * 60 * 30;
             }
-            if(hoursTillStart < 2) {
+            if(hoursTillStart < 3) {
                 ttl = 1000 * 60 * 15;
             }
             ttl = Math.min(ttl, tillStart.asMillis());
-            return new ResultWithTTL<T>(ttl, null);
+            return ttl;
         }
         if(eventState == EventState.FINISHED) {
-            return new ResultWithTTL<T>(1000 * 60 * 60 * 12, null);
+            return 1000 * 60 * 60 * 12;
         }
-        return callback.calculateWithEvent(event);
+        return 0;
     }
 
     public static void forRacesOfEvent(DispatchContext context, UUID eventId, RaceCallback callback) {
