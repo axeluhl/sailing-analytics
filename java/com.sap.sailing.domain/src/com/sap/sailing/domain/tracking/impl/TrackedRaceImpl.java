@@ -452,7 +452,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         markPassingsForWaypoint = new ConcurrentHashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
-                    MarkPassingByTimeComparator.INSTANCE));
+                    MarkPassingsByTimeAndCompetitorIdComparator.INSTANCE));
         }
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         loadingFromWindStoreState = LoadingFromStoresState.NOT_STARTED;
@@ -697,7 +697,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected NavigableSet<MarkPassing> createMarkPassingsCollectionForWaypoint(Waypoint waypoint) {
         final ConcurrentSkipListSet<MarkPassing> result = new ConcurrentSkipListSet<MarkPassing>(
-                MarkPassingByTimeComparator.INSTANCE);
+                MarkPassingsByTimeAndCompetitorIdComparator.INSTANCE);
         LockUtil.lockForRead(getSerializationLock());
         try {
             markPassingsForWaypoint.put(waypoint, result);

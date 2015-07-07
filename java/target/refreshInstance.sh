@@ -252,11 +252,6 @@ if [[ $OPERATION == "auto-install" ]]; then
         # make sure to reload data
         source `pwd`/env.sh
 
-	# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
-        APACHE_CONFIG_DIR=/etc/httpd/conf.d
-	echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
-	echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
-
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
             echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
             exit 1
