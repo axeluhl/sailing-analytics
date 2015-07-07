@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -435,6 +436,12 @@ public final class HomeServiceUtil {
         regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
         regattaDTO.setTrackedRacesCount(calculateTrackedRaceCount(leaderboard));
         regattaDTO.setBoatClass(getBoatClassName(leaderboard));
+        if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
+            regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
+        }
+        regattaDTO.setState(calculateRegattaState(regattaDTO));
         
         return regattaDTO;
     }
