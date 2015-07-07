@@ -4,14 +4,19 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.FontStyle;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
@@ -44,19 +49,21 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
 
     @Override
     public void setData(final ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
-        setData(data.getValues());
+        setData(data == null ? null :data.getValues());
     }
 
     public void setData(final List<NewsEntryDTO> data) {
-        int nrOfNews = data.size();
+        int nrOfNews = data == null ? 0 : data.size();
         GWT.log("Nr of news items: " + nrOfNews);
+        itemContainerUi.clearContent();
         if (nrOfNews == 0) {
             if (!dontHide) {
                 getElement().getStyle().setDisplay(Display.NONE);
+            } else {
+                itemContainerUi.addContent(getNoNewsInfoWidget());
             }
         } else {
             getElement().getStyle().clearDisplay();
-            itemContainerUi.clearContent();
             for (NewsEntryDTO newsEntryDTO : data) {
                 itemContainerUi.addContent(new UpdatesBoxItem(newsEntryDTO, refreshManager.getDispatchSystem().getCurrentServerTime(), presenter));
             }
@@ -64,6 +71,14 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
                 headerUi.setClickAction(presenter.getNewsPlaceNavigation(data));
             }
         }
+    }
+    
+    private Widget getNoNewsInfoWidget() {
+        Label label = new Label(StringMessages.INSTANCE.noNews());
+        label.getElement().getStyle().setPadding(1, Unit.EM);
+        label.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        label.getElement().getStyle().setFontStyle(FontStyle.ITALIC);
+        return label;
     }
 
     public void setDontDrillDown(boolean dontDrillDown) {
