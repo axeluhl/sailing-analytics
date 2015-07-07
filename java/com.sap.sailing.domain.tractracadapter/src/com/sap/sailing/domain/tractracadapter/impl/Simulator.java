@@ -18,6 +18,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -30,6 +32,7 @@ public class Simulator {
     
     private DynamicTrackedRace trackedRace;
     private final WindStore windStore;
+    private boolean stopped;
     private long advanceInMillis = -1;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
     
@@ -46,8 +49,20 @@ public class Simulator {
         return EmptyWindStore.INSTANCE;
     }
 
-    public synchronized void setTrackedRace(DynamicTrackedRace trackedRace) {
+    public synchronized void setTrackedRace(final DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
+        trackedRace.getTrackedRegatta().addRaceListener(new RaceListener() {
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+            }
+
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+                if (trackedRace == Simulator.this.trackedRace) {
+                    stop(); // stop simulator when tracked race is removed from its regatta
+                }
+            }
+        });
         startWindPlayer();
     }
     
@@ -76,11 +91,15 @@ public class Simulator {
                     windTrack.lockForRead();
                     try {
                         for (Wind wind : windTrack.getRawFixes()) {
+                            if (stopped) {
+                                break;
+                            }
                             trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
                         }
                     } finally {
                         windTrack.unlockAfterRead();
                     }
+                    logger.info("Wind Track Simulator for race "+trackedRace.getRace().getName()+" finished. stopped="+stopped);
                 }
             }.start();
         }
@@ -97,15 +116,11 @@ public class Simulator {
      */
     private synchronized long getAdvanceInMillis() {
         while (!isAdvanceInMillisSet()) {
-            if (trackedRace.getStartOfRace() != null) {
-                setAdvanceInMillis(System.currentTimeMillis() - trackedRace.getStartOfRace().asMillis());
-            } else {
-                try {
-                    wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
-                } catch (InterruptedException e) {
-                    logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
-                    // ignore; try again
-                }
+            try {
+                wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
+            } catch (InterruptedException e) {
+                logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
+                // ignore; try again
             }
         }
         return advanceInMillis;
@@ -244,5 +259,11 @@ public class Simulator {
                 }
             }, transformedTimepoint.asDate());
         }
+    }
+
+    public void stop() {
+        logger.info("Stopping simulator for race "+trackedRace.getRace().getName());
+        timer.cancel();
+        stopped = true;
     }
 }
