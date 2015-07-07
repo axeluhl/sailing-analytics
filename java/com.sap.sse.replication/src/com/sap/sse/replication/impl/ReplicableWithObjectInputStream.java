@@ -197,9 +197,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     }
 
     /**
-     * Checks whether this replicable is a replica. If yes, the operation is not executed locally but instead sent to
-     * the master server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes
-     * and replicates the operation immediately.
+     * Checks whether this replicable is a replica. If yes, the operation is executed locally and sent to the master
+     * server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes and
+     * replicates the operation immediately.
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
         boolean needToRemoveThreadLocal = false;
