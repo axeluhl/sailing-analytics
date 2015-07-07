@@ -430,7 +430,16 @@ public final class HomeServiceUtil {
     }
     
     public static RegattaMetadataDTO toRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();
+        fillRegattaFields(leaderboardGroup, leaderboard, regattaDTO);
+        
+        return regattaDTO;
+    }
+
+    public static void fillRegattaFields(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
+            RegattaMetadataDTO regattaDTO) {
+        regattaDTO.setId(leaderboard.getName());
+        regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
         regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
@@ -442,8 +451,6 @@ public final class HomeServiceUtil {
             regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
         }
         regattaDTO.setState(calculateRegattaState(regattaDTO));
-        
-        return regattaDTO;
     }
     
     public static boolean hasLiveRace(LeaderboardDTO leaderboard) {
