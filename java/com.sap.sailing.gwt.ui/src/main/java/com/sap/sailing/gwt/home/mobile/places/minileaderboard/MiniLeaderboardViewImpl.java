@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
 public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboardView {
@@ -36,15 +37,17 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
 
     public MiniLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
-        RegattaMetadataDTO regatta = presenter.getCtx().getRegatta();
-        // TODO check if regatta is valid!
-        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regatta.getDisplayName());
+        String regattaDisplayName = null;
+        if(presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            regattaDisplayName = presenter.getCtx().getRegatta().getDisplayName();
+        }
+        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regattaDisplayName);
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventContext ctx = presenter.getCtx();
         UUID uuid = UUID.fromString(ctx.getEventId());
         refreshManager.add(minileaderboardUi, new GetMiniLeaderbordAction(uuid, presenter.getCtx().getRegattaId()));
-        minileaderboardUi.setAction(MSG.details(), presenter.getRegattaLeaderboardNavigation(regatta.getId()));
+        minileaderboardUi.setAction(MSG.details(), presenter.getRegattaLeaderboardNavigation(presenter.getCtx().getRegattaId()));
     }
 
     @Override
