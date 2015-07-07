@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -103,9 +104,7 @@ public class ThemeHelper {
         setPickerDividerColor(context, numberPicker, dividerColor);
     }
 
-    public static
-    @ColorRes
-    int getColor(Context context, @AttrRes int colorId) {
+    public static @ColorRes int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();
@@ -118,14 +117,12 @@ public class ThemeHelper {
     private static NumberPicker getHourPicker(TimePicker timePicker) {
         Resources system = Resources.getSystem();
         int hourId = system.getIdentifier("hour", "id", "android");
-        NumberPicker hourPicker = (NumberPicker) timePicker.findViewById(hourId);
-        return hourPicker;
+        return ViewHolder.get(timePicker, hourId);
     }
 
     private static NumberPicker getMinutePicker(TimePicker timePicker) {
         Resources system = Resources.getSystem();
         int minuteId = system.getIdentifier("minute", "id", "android");
-        NumberPicker minutePicker = (NumberPicker) timePicker.findViewById(minuteId);
-        return minutePicker;
+        return ViewHolder.get(timePicker, minuteId);
     }
 }
