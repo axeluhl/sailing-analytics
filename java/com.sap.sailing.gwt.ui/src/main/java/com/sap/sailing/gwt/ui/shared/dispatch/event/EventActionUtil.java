@@ -64,9 +64,9 @@ public final class EventActionUtil {
 
     public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
-        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                callback.doForLeaderboard(new LeaderboardContext(event, leaderboard));
+        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                callback.doForLeaderboard(new LeaderboardContext(event, leaderboardGroup, leaderboard));
             }
         }
     }
@@ -84,6 +84,6 @@ public final class EventActionUtil {
         Event event = context.getRacingEventService().getEvent(eventId);
         // TODO check that the leaderboard is part of the event
         Leaderboard leaderboard = context.getRacingEventService().getLeaderboardByName(regattaName);
-        new LeaderboardContext(event, leaderboard).forRaces(context, callback);
+        new LeaderboardContext(event, null, leaderboard).forRaces(context, callback);
     }
 }
