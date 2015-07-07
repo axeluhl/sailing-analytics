@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -429,14 +430,27 @@ public final class HomeServiceUtil {
     }
     
     public static RegattaMetadataDTO toRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();
+        fillRegattaFields(leaderboardGroup, leaderboard, regattaDTO);
+        
+        return regattaDTO;
+    }
+
+    public static void fillRegattaFields(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
+            RegattaMetadataDTO regattaDTO) {
+        regattaDTO.setId(leaderboard.getName());
+        regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
         regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
         regattaDTO.setTrackedRacesCount(calculateTrackedRaceCount(leaderboard));
         regattaDTO.setBoatClass(getBoatClassName(leaderboard));
-        
-        return regattaDTO;
+        if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
+            regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
+        }
+        regattaDTO.setState(calculateRegattaState(regattaDTO));
     }
     
     public static boolean hasLiveRace(LeaderboardDTO leaderboard) {

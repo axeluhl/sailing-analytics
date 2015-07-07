@@ -4,8 +4,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -28,6 +26,10 @@ public final class EventActionUtil {
     
     protected interface RaceCallback {
         void doForRace(RaceContext context);
+    }
+    
+    protected interface LeaderboardCallback {
+        void doForLeaderboard(LeaderboardContext context);
     }
     
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(DispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
@@ -60,27 +62,28 @@ public final class EventActionUtil {
         return 0;
     }
 
-    public static void forRacesOfEvent(DispatchContext context, UUID eventId, RaceCallback callback) {
+    public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
-        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            for (Leaderboard lb : lg.getLeaderboards()) {
-                forRacesOfLeaderboard(context, event, lb, callback);
+        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                callback.doForLeaderboard(new LeaderboardContext(event, leaderboardGroup, leaderboard));
             }
         }
+    }
+    
+    public static void forRacesOfEvent(final DispatchContext context, UUID eventId, final RaceCallback callback) {
+        forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
+            @Override
+            public void doForLeaderboard(LeaderboardContext leaderboardContext) {
+                leaderboardContext.forRaces(context, callback);
+            }
+        });
     }
     
     public static void forRacesOfRegatta(DispatchContext context, UUID eventId, String regattaName, RaceCallback callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
         // TODO check that the leaderboard is part of the event
-        Leaderboard lb = context.getRacingEventService().getLeaderboardByName(regattaName);
-        forRacesOfLeaderboard(context, event, lb, callback);
-    }
-
-    private static void forRacesOfLeaderboard(DispatchContext context, Event event, Leaderboard lb, RaceCallback callback) {
-        for(RaceColumn raceColumn : lb.getRaceColumns()) {
-            for(Fleet fleet : raceColumn.getFleets()) {
-                callback.doForRace(new RaceContext(event, lb, raceColumn, fleet, context.getRacingEventService()));
-            }
-        }
+        Leaderboard leaderboard = context.getRacingEventService().getLeaderboardByName(regattaName);
+        new LeaderboardContext(event, null, leaderboard).forRaces(context, callback);
     }
 }

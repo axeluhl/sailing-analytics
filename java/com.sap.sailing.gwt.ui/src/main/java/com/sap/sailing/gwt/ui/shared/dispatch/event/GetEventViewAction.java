@@ -11,11 +11,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
@@ -66,23 +63,8 @@ public class GetEventViewAction implements Action<EventViewDTO> {
                     if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                         continue;
                     }
-                    if(leaderboard instanceof RegattaLeaderboard) {
-                        Regatta regatta = context.getRacingEventService().getRegattaByName(leaderboard.getName());
-                        
-                        RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
-                        regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
-                        regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
-                        regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
-                        dto.getRegattas().add(regattaDTO);
-                        
-                    } else if(leaderboard instanceof FlexibleLeaderboard) {
-                        RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
-                        
-                        regattaDTO.setStartDate(null);
-                        regattaDTO.setEndDate(null);
-                        regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
-                        dto.getRegattas().add(regattaDTO);
-                    }
+                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                    dto.getRegattas().add(regattaDTO);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);
                 }
