@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
 public class RaceListViewDTO implements DTO {
@@ -12,6 +13,8 @@ public class RaceListViewDTO implements DTO {
     private TreeSet<LiveRaceDTO> liveRaces = new TreeSet<>();
     
     private TreeSet<RaceListRaceDTO> finishedRaces = new TreeSet<>();
+    
+    private RegattaProgressDTO progress;
     
     public void add(LiveRaceDTO liveRace) {
         add(liveRaces, liveRace);
@@ -43,5 +46,13 @@ public class RaceListViewDTO implements DTO {
             series.addRace(race);
         }
         return Arrays.asList(withFleets, noFleets);
+    }
+
+    public RegattaProgressDTO getProgress() {
+        return progress;
+    }
+
+    public void setProgress(RegattaProgressDTO progress) {
+        this.progress = progress;
     }
 }

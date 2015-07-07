@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -105,6 +106,10 @@ public class RaceContext {
         if (!isShowFleetData()) {
             return null;
         }
+        return getFleetMetadata();
+    }
+
+    public FleetMetadataDTO getFleetMetadata() {
         return new FleetMetadataDTO(fleet.getName(), fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
     }
 
@@ -447,5 +452,24 @@ public class RaceContext {
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
         return trackedRace.getRaceIdentifier();
+    }
+    
+    public String getSeriesName() {
+        if(raceColumn instanceof RaceColumnInSeries) {
+            return ((RaceColumnInSeries) raceColumn).getSeries().getName();
+        }
+        return "";
+    }
+
+    public String getRaceName() {
+        return raceColumn.getName();
+    }
+
+    public String getFleetName() {
+        return fleet.getName();
+    }
+
+    public boolean isFinished() {
+        return state.getStatus() == RaceLogRaceStatus.FINISHED;
     }
 }
