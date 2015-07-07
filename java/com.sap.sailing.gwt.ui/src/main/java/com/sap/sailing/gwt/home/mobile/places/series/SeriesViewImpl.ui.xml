@@ -18,6 +18,7 @@
    	<g:HTMLPanel>
    		<div class="{style.headerWrapper}">
    			<mp:seriesheader.SeriesHeader ui:field="eventHeaderUi" />
+   			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
    		</div>
    		<g:FlowPanel ui:field="eventsUi" />
 		<mp:minileaderboard.MinileaderboardBox ui:field="leaderboardUi"/>

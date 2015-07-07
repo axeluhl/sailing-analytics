@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
@@ -53,6 +54,8 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
         final SeriesView view = new SeriesViewImpl(this);
+        EventSeriesViewDTO series = getCtx().getSeriesDTO();
+        view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
         panel.setWidget(view.asWidget());
     }
     
@@ -63,6 +66,15 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
 
     public DispatchSystem getDispatch() {
         return clientFactory.getDispatch();
+    }
+    
+    @Override
+    public void navigate(String eventId) {
+        if(eventId == null || eventId.isEmpty()) {
+            getMiniOverallLeaderboardNavigation().goToPlace();
+            return;
+        }
+        clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId, null), null, false).goToPlace();
     }
     
     @Override

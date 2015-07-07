@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.series;
 
+import java.util.Collection;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -8,6 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
+import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,6 +27,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     }
 
     @UiField(provided = true) SeriesHeader eventHeaderUi;
+    @UiField(provided = true) Quickfinder quickFinderUi;
     @UiField MinileaderboardBox leaderboardUi;
     @UiField FlowPanel eventsUi;
 //    @UiField(provided = true) StatisticsBox statisticsBoxUi;
@@ -36,6 +40,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
+        quickFinderUi = new Quickfinder(currentPresenter);
 //        this.setupStatisticsBox(event);
         initWidget(uiBinder.createAndBindUi(this));
         this.setupListContent(series);
@@ -52,6 +57,19 @@ public class SeriesViewImpl extends Composite implements SeriesView {
             EventsOverviewRecentYearEvent eventTeaser = new EventsOverviewRecentYearEvent(currentPresenter.getEventNavigation(eventOfSeries.getId().toString()), eventOfSeries, eventOfSeries.getState().getStateMarker(), teaser );
             eventsUi.add(eventTeaser);
             first = false;
+        }
+    }
+    
+    @Override
+    public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
+        if (eventsOfSeries == null) {
+            quickFinderUi.removeFromParent();
+            return;
+        }
+        quickFinderUi.addPlaceholderItem(MSG.resultsQuickfinder(), null);
+        quickFinderUi.addItemToGroup(seriesName, MSG.overallLeaderboardSelection(), "");
+        for (EventMetadataDTO eventOfSeries : eventsOfSeries) {
+            quickFinderUi.addItemToGroup(seriesName, eventOfSeries.getLocationOrDisplayName(), eventOfSeries.getId().toString());
         }
     }
 
