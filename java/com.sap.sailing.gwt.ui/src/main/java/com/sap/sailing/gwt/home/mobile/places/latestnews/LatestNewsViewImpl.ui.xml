@@ -5,11 +5,17 @@
     xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	>
-	<ui:with 
-		field="res" 
-		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
-	
-	<mp:updatesBox.UpdatesBox dontHide="true" dontDrillDown="true" ui:field="updatesBoxUi"/>
-	
-   	
+	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:style>
+		.headerWrapper {
+			background-color: #f2f2f2;
+			padding-bottom: 10px;
+		}
+	</ui:style>		
+   	<g:HTMLPanel>
+   		<div class="{style.headerWrapper}">
+   			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
+   		</div>
+		<mp:updatesBox.UpdatesBox dontHide="true" dontDrillDown="true" ui:field="updatesBoxUi"/>
+	</g:HTMLPanel>
 </ui:UiBinder>    
