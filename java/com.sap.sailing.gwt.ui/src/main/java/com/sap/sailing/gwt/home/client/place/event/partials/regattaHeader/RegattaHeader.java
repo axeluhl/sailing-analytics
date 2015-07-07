@@ -1,26 +1,33 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.regattaHeader;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class RegattaHeader extends Composite {
-    private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
 
-    interface EventHeaderUiBinder extends UiBinder<Widget, RegattaHeader> {
+    private static RegattaHeaderUiBinder uiBinder = GWT.create(RegattaHeaderUiBinder.class);
+
+    interface RegattaHeaderUiBinder extends UiBinder<Widget, RegattaHeader> {
     }
     
-    @UiField StringMessages i18n;
-    
-    
-    public RegattaHeader(RegattaReferenceDTO regattaRefDTO) {
-        
-        RegattaHeaderResources.INSTANCE.css().ensureInjected();
+    @UiField protected AnchorElement headerBodyUi;
+    @UiField protected AnchorElement headerArrowUi;
+
+    public RegattaHeader(RegattaMetadataDTO regattaMetadata, PlaceNavigation<?> placeNavigation) {
         initWidget(uiBinder.createAndBindUi(this));
+        headerBodyUi.appendChild(new RegattaHeaderBody(regattaMetadata).getElement());
+        initNavigation(placeNavigation);
     }
-
+    
+    private void initNavigation(PlaceNavigation<?> placeNavigation) {
+        placeNavigation.configureAnchorElement(headerBodyUi);
+        placeNavigation.configureAnchorElement(headerArrowUi);
+    }
+    
 }

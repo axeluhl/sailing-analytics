@@ -1,0 +1,53 @@
+package com.sap.sailing.gwt.home.client.place.event.partials.regattaHeader;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+
+public class RegattaHeaderBody extends UIObject {
+
+    private static RegattaHeaderBodyUiBinder uiBinder = GWT.create(RegattaHeaderBodyUiBinder.class);
+
+    interface RegattaHeaderBodyUiBinder extends UiBinder<Element, RegattaHeaderBody> {
+    }
+    
+    @UiField protected DivElement logoUi;
+    @UiField protected SpanElement nameUi;
+    @UiField protected DivElement labelUi;
+    @UiField protected DivElement detailsItemContainerUi;
+
+    public RegattaHeaderBody(RegattaMetadataDTO regattaMetadata) {
+        RegattaHeaderResources.INSTANCE.css().ensureInjected();
+        setElement(uiBinder.createAndBindUi(this));
+        ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(regattaMetadata.getBoatClass());
+        logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
+        nameUi.setInnerText(regattaMetadata.getDisplayName());
+        LabelTypeUtil.renderLabelTypeOrHide(labelUi, regattaMetadata.getState().getStateMarker());
+        addDetailsItem(regattaMetadata.getCompetitorsCount(), StringMessages.INSTANCE.competitors());
+        addDetailsItem(regattaMetadata.getRaceCount(), StringMessages.INSTANCE.races());
+        addDetailsItem(regattaMetadata.getTrackedRacesCount(), StringMessages.INSTANCE.trackedRaces());
+        addDetailsItem(regattaMetadata.getBoatCategory());
+    }
+    
+    private void addDetailsItem(int count, String text) {
+        addDetailsItem(count + " " + text);
+    }
+    
+    private void addDetailsItem(String text) {
+        DivElement detailsItem = DOM.createDiv().cast();
+        detailsItem.addClassName(RegattaHeaderResources.INSTANCE.css().regattaheader_content_details_item());
+        detailsItem.setInnerText(text);
+        detailsItemContainerUi.appendChild(detailsItem);
+    }
+
+}
