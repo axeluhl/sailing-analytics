@@ -1,0 +1,262 @@
+/**
+ * A list of regattas to an event
+ */
+.race {
+  color: #333;
+  font-size: 1rem;
+  overflow: hidden;
+}
+.race:last-of-type .race_item {
+  border: none;
+}
+.race_fleetcorner {
+  width: 1em;
+  vertical-align: top;
+  border-bottom: 1px solid #ebebeb;
+}
+.race_fleetcorner_icon {
+  width: 1em;
+  margin-right: -2.333333333333333em;
+  position: relative;
+  top: 1px;
+  left: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 1em 1em 0 0;
+}
+.race_item {
+  text-align: left;
+  vertical-align: baseline;
+  border-bottom: 1px solid #ebebeb;
+  white-space: nowrap;
+  padding: 1.4em 0.666666666666667em 0.733333333333333em 1.333333333333333em;
+}
+.race_item .button {
+  white-space: nowrap;
+}
+.race_item:first-of-type {
+  padding-left: 2em;
+}
+.race_itemrank:after {
+  content: '.';
+}
+.race_itemshort {
+  width: 5em;
+}
+.race_itemlong {
+  width: 32.5%;
+}
+.race_itemwind {
+  white-space: nowrap;
+}
+.race_itemwindflag {
+  padding: 1.066666666666667em 0.666666666666667em 0.4em 1.333333333333333em;
+}
+img.race_item_windflag {
+  max-width: 2.4em;
+  max-height: 2.4em;
+  vertical-align: middle;
+}
+.race_itemname {
+  font-weight: 600;
+}
+.race_itemwinner {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  min-width: 13.333333333333334em;
+  max-width: 16.666666666666668em;
+}
+.race_item_flag {
+  max-width: 1.6em;
+  max-height: 1.6em;
+  vertical-align: middle;
+}
+.race_item_position {
+  margin-right: 0.333333333333333em;
+}
+.race_item_winner {
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.race_itemwinner {
+  padding: 0.733333333333333em 1.333333333333333em;
+}
+.race_itemcenter {
+  text-align: center;
+}
+.race_itemright {
+  text-align: right;
+  vertical-align: middle;
+  padding-left: 0;
+  padding-right: 0.666666666666667em;
+  padding-top: 0.666666666666667em;
+}
+.race_itemright_button {
+  padding: 0.666666666666667em;
+}
+.race_itemstatus {
+  position: relative;
+}
+.race_itemstatus:first-letter {
+  text-transform: capitalize;
+}
+.race_itemstatus_container {
+  min-width: 5.333333333333333em;
+  display: inline-block;
+}
+.race_itemstatus_container_text {
+  clip: auto;
+}
+.race_itemstatus_container_progressbar {
+  height: 0.2em;
+  position: relative;
+  top: 0.2em;
+  width: 100%;
+  background-color: #dedede;
+}
+.race_itemstatus_container_progressbar_progress {
+  height: 100%;
+  background-color: #efaa00;
+}
+.racewinners .race_item {
+  padding: 1.2em 0.666666666666667em 1.2em 1.333333333333333em;
+}
+.racewinners .race_item:nth-last-child(1) {
+  display: none;
+}
+@media (min-width: 61em) {
+  .racewinners .race_item:nth-last-child(1) {
+    display: inline-block;
+  }
+}
+.racewinners .race_itemname {
+  vertical-align: middle;
+}
+.race_fleetcornerblue:before {
+  border-top-color: #00f;
+}
+.race_fleetcornerred:before {
+  border-top-color: #f00;
+}
+.race_fleetcornersilver:before {
+  border-top-color: #c0c0c0;
+}
+.race_fleetcornergold:before {
+  border-top-color: #ffd700;
+}
+.race_fleetcorneryellow:before {
+  border-top-color: #ff0;
+}
+.regattalistitem {
+  font-size: 1rem;
+  float: left;
+  width: 100%;
+  margin-top: 2em;
+  border: 1px solid #ddd;
+  border-radius: 0.333333333333333em;
+  overflow: hidden;
+}
+.regattalistitem div:last-child {
+  border-bottom: none;
+}
+.regattalistitem_table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: separate;
+  border-bottom: 1px solid #ddd;
+}
+.regattalistitem_table:last-of-type {
+  border-bottom: none;
+}
+.regattalistitem_tableborderTop {
+  border-top: 1px solid #ebebeb;
+}
+.regattalistitem_steps {
+  border-bottom: 1px solid #ddd;
+  overflow: hidden;
+}
+.regattalistitem_steps_step {
+  float: left;
+  position: relative;
+  height: 4em;
+  line-height: 4em;
+  text-transform: uppercase;
+  padding: 0 0.666666666666667em 0 1.333333333333333em;
+}
+.regattalistitem_steps_stepinactive {
+  color: #ddd;
+}
+.regattalistitem_steps_step:first-of-type {
+  padding-left: 2em;
+}
+.regattalistitem_steps_step_check {
+  display: inline-block;
+  vertical-align: middle;
+  width: 2.133333333333333em;
+  height: 2.133333333333333em;
+  margin-left: -0.333333333333333em;
+  background-image: url("../images/home/icon/icon-green-check.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+.regattalistitem_steps_step_text {
+  margin-right: 2.4em;
+  display: inline-block;
+  font-size: 0;
+}
+.regattalistitem_steps_step_text::first-letter {
+  font-size: 1rem;
+  padding-right: 2.666666666666667em;
+}
+@media (min-width: 49.0625em) {
+  .regattalistitem_steps_step_text {
+    font-size: 1em;
+  }
+  .regattalistitem_steps_step_text::first-letter {
+    padding-right: 0;
+  }
+}
+.regattalistitem_steps_step_count {
+  position: absolute;
+  top: 50%;
+  right: 1.333333333333333em;
+  font-size: 0.8em;
+  line-height: 1.6em;
+  width: 1.6em;
+  height: 1.6em;
+  text-align: center;
+  background-color: #eee;
+  border: 1px solid #ddd;
+  border-radius: 0.2em;
+  -webkit-transform: translateY(-50%);
+     -moz-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+.regattalistitem_steps_step:after {
+  content: '';
+  position: absolute;
+  top: 0.333333333333333em;
+  left: 100%;
+  display: block;
+  width: 3.333333333333333em;
+  height: 3.333333333333333em;
+  margin-left: -3.333333333333333em;
+  border: 1px solid transparent;
+  border-top-color: #ddd;
+  border-right-color: #ddd;
+  -webkit-transform: rotate(45deg);
+     -moz-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+          transform: rotate(45deg);
+}
+.regattalistitem_steps_button {
+  height: 100%;
+  padding: 0.666666666666667em;
+  text-align: right;
+}
+.regattalistitem_steps_button .button {
+  margin-left: 0.8em;
+}
