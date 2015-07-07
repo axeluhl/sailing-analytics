@@ -16,4 +16,13 @@ public class LeaderboardContext {
         this.event = event;
         this.leaderboard = leaderboard;
     }
+    
+    public void forRaces(DispatchContext context, RaceCallback callback) {
+        for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for(Fleet fleet : raceColumn.getFleets()) {
+                callback.doForRace(new RaceContext(event, leaderboard, raceColumn, fleet, context.getRacingEventService()));
+            }
+        }
+    }
+
 }
