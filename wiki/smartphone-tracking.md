@@ -3,6 +3,8 @@
 With the development of [RaceLogTracking](racelog-tracking) and the [Tracking App](tracking-app) it is now possible to track races using only smartphones. This can be set up following the following steps.
 
 1. Create Event, Regatta, Leaderboard,... as always.
+
+Note: Make sure to have a LeaderboardGroup and have it attached to the event.
  
 2. Go to the Connectors/RaceLog Tracking tab in the AdminConsole and click the "Denote For RaceLog Tracking" symbol in the Actions bar (Green arrow pointing right). 
 
@@ -24,4 +26,6 @@ Note: If using the Race Committee App, make sure to only use the ByMarks Course 
 
 
 - Um Tracking-Intervalle zu inspizieren, im Tab RaceLog Tracking unten links bei den einzelnen Rennen aus der Action Bar auf "Map Devices to Competitors and Marks". Dort siehst Du die Zuordnungstabelle und kannst zum einen Zuordnungen ganz entfernen, neue Zuordnungen manuell anlegen (da muss man dann allerdings mit der DeviceID 'rummachen; eher unpraktisch, aber fuer Notfaelle vielleicht irgendwann mal praktisch) und noch offene Tracking-Intervalle abschliessen. By default siehst Du da nur die Competitor-Zuordnungen; mit der Checkbox "Show Mappings for pinged Marks" kannst Du auch die Tonnen sehen
+
+
 
