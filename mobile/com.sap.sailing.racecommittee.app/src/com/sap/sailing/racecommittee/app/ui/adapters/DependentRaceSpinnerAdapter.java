@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.annotation.LayoutRes;
@@ -9,13 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.ArrayList;
 
 public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
@@ -24,6 +25,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
     private Context mContext;
     private int mLayout;
+    private int mSelectedItem = -1;
 
     private ArrayList<RaceData> mData;
 
@@ -62,7 +64,11 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
                     mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
                 }
             } else {
-                layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+                if (mSelectedItem == position) {
+                    layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
+                } else {
+                    layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+                }
                 subTextView.setVisibility(View.GONE);
                 layout.setClickable(false);
                 if (mainText != null) {
@@ -148,6 +154,14 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
     public void add(RaceData data) {
         mData.add(data);
+    }
+
+    public void setSelected(int position) {
+        mSelectedItem = position;
+    }
+
+    public ManagedRace getRaceAtPosition(int position) {
+        return mData.get(position).getRace();
     }
 
     public static class RaceData {
