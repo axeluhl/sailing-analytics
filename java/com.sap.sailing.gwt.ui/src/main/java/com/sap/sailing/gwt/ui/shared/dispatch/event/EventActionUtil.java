@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
@@ -31,6 +32,16 @@ public final class EventActionUtil {
     
     protected interface LeaderboardCallback {
         void doForLeaderboard(LeaderboardContext context);
+    }
+    
+    public static LeaderboardContext getOverallLeaderboardContext(DispatchContext context, UUID eventId) {
+        Event event = context.getRacingEventService().getEvent(eventId);
+        if(!HomeServiceUtil.isFakeSeries(event)) {
+            throw new DispatchException("The given event is not a series event.");
+        }
+        LeaderboardGroup leaderboardGroup = Util.get(event.getLeaderboardGroups(), 0);
+        Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+        return new LeaderboardContext(event, leaderboardGroup, overallLeaderboard);
     }
     
     public static LeaderboardContext getLeaderboardContext(DispatchContext context, UUID eventId, String leaderboardId) {
