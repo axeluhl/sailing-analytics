@@ -49,7 +49,7 @@ public class WindFragment extends BaseFragment
     private View mContentLayout;
     private View mMapLayout;
 
-    private View mHeaderBack;
+    private TextView mHeaderText;
 //    private View mWindOn;
 //    private View mWindOff;
     private View mSetData;
@@ -111,7 +111,7 @@ public class WindFragment extends BaseFragment
         mContentLayout = layout.findViewById(R.id.content_layout);
         mMapLayout = layout.findViewById(R.id.map_layout);
 
-        mHeaderBack = layout.findViewById(R.id.header_text);
+        mHeaderText = (TextView) layout.findViewById(R.id.header_text);
         // disabled, because of bug #2871
         // mWindOff = layout.findViewById(R.id.wind_off);
         // mWindOn = layout.findViewById(R.id.wind_on);
@@ -174,8 +174,8 @@ public class WindFragment extends BaseFragment
      * configures all the buttons in the view
      */
     public void setupButtons() {
-        if (mHeaderBack != null) {
-            mHeaderBack.setOnClickListener(new View.OnClickListener() {
+        if (mHeaderText != null) {
+            mHeaderText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {openMainScheduleFragment(); }
             });
