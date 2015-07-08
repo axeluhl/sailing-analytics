@@ -25,6 +25,7 @@ public class MultiRegattaListItem extends Composite {
         regattaStepsUi = new MultiRegattaListSteps(regattaWithProgress.getProgress());
         initWidget(uiBinder.createAndBindUi(this));
         regattaHeaderUi.setRegattaNavigation(presenter.getRegattaNavigation(regattaWithProgress.getId()));
+        regattaStepsUi.setLeaderboardNavigation(presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId()));
     }
 
 }
