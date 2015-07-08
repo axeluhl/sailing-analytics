@@ -238,17 +238,13 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         super.notifyTick(now);
 
         if (mStartTimeTextView != null && !TextUtils.isEmpty(mStartTimeString)) {
-            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString)
-                .replace("#COUNTDOWN#", calcCountdown(now));
+            String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
             mStartTimeTextView.setText(startTimeValue);
         }
 
         if (mWindValue != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
-            String sensorData = getString(R.string.wind_sensor);
             Wind wind = getRaceState().getWindFix();
-            sensorData = sensorData.replace("#AT#", mDateFormat.format(wind.getTimePoint().asDate()));
-            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
-            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
+            String sensorData = getString(R.string.wind_sensor, mDateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind.getKnots());
             mWindValue.setText(sensorData);
         }
     }
