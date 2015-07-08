@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Composite;
@@ -27,7 +28,7 @@ public class RacesListLive extends Composite implements RefreshableWidget<Sorted
 
     @Override
     public void setData(SortedSetResult<LiveRaceDTO> data, long nextUpdate, int updateNo) {
-        this.setListData(data.getValues());
+        this.setListData(data == null ? Collections.<LiveRaceDTO>emptySet() : data.getValues());
     }
     
     public void setListData(Collection<LiveRaceDTO> data) {
