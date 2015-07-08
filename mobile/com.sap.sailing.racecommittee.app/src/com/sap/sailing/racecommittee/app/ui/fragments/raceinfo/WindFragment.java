@@ -362,6 +362,7 @@ public class WindFragment extends BaseFragment
         mPositionLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
         mPositionLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
         mPositionAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getLatitude(), location.getTime()));
+        mSetData.setEnabled(true);
     }
 
     @Override
