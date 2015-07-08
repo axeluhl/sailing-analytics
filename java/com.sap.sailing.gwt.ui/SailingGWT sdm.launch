@@ -6,6 +6,7 @@
 <booleanAttribute key="com.google.gwt.eclipse.core.CODE_SERVER_PORT_AUTO" value="true"/>
 <listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
 <listEntry value="com.sap.sailing.gwt.ui.RaceBoard"/>
+<listEntry value="com.sap.sailing.gwt.ui.EmbeddedMapAndWindChart"/>
 <listEntry value="com.sap.sailing.gwt.ui.DataMining"/>
 <listEntry value="com.sap.sailing.gwt.ui.LeaderboardEditing"/>
 <listEntry value="com.sap.sailing.gwt.ui.Spectator"/>
