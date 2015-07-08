@@ -39,7 +39,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class EmbeddedMapAndWindChart extends AbstractSailingEntryPoint {
+public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint {
     private RaceDTO selectedRace;
 
     // TODO obtain event ID in order to enable showing all marks from all course areas if requested
@@ -194,7 +194,7 @@ public class EmbeddedMapAndWindChart extends AbstractSailingEntryPoint {
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor, timer, raceSelectionModel,
-                leaderboardName, leaderboardGroupName, event, raceboardViewConfig, EmbeddedMapAndWindChart.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
+                leaderboardName, leaderboardGroupName, event, raceboardViewConfig, EmbeddedMapAndWindChartEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
