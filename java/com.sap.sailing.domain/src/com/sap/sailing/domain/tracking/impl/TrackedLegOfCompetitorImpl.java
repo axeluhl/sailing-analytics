@@ -228,9 +228,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned. A
      * cache for wind and leg type / bearing can be passed to avoid their redundant calculation during a single
-     * round-trip.<p>
+     * round-trip.
+     * <p>
      * 
      * If no wind information is available, again the true geometrical distance to <code>mark</code> is returned.
+     * <p>
+     * 
+     * If the competitor's position or the mark's position cannot be determined, <code>null</code> is returned.
+     * <code>null</code> is also returned if the leg's bearing cannot be determined because for at least one of its two
+     * waypoints no mark has a known position.
      */
     private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);

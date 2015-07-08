@@ -9,10 +9,12 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
+import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
@@ -30,6 +32,28 @@ public final class EventActionUtil {
     
     protected interface LeaderboardCallback {
         void doForLeaderboard(LeaderboardContext context);
+    }
+    
+    public static LeaderboardContext getOverallLeaderboardContext(DispatchContext context, UUID eventId) {
+        Event event = context.getRacingEventService().getEvent(eventId);
+        if(!HomeServiceUtil.isFakeSeries(event)) {
+            throw new DispatchException("The given event is not a series event.");
+        }
+        LeaderboardGroup leaderboardGroup = Util.get(event.getLeaderboardGroups(), 0);
+        Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+        return new LeaderboardContext(event, leaderboardGroup, overallLeaderboard);
+    }
+    
+    public static LeaderboardContext getLeaderboardContext(DispatchContext context, UUID eventId, String leaderboardId) {
+        Event event = context.getRacingEventService().getEvent(eventId);
+        for(LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+            for(Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if(leaderboard.getName().equals(leaderboardId)) {
+                    return new LeaderboardContext(event, leaderboardGroup, leaderboard);
+                }
+            }
+        }
+        throw new DispatchException("The leaderboard is not part of the given event.");
     }
     
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(DispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
@@ -81,9 +105,6 @@ public final class EventActionUtil {
     }
     
     public static void forRacesOfRegatta(DispatchContext context, UUID eventId, String regattaName, RaceCallback callback) {
-        Event event = context.getRacingEventService().getEvent(eventId);
-        // TODO check that the leaderboard is part of the event
-        Leaderboard leaderboard = context.getRacingEventService().getLeaderboardByName(regattaName);
-        new LeaderboardContext(event, null, leaderboard).forRaces(context, callback);
+        getLeaderboardContext(context, eventId, regattaName).forRaces(context, callback);
     }
 }
