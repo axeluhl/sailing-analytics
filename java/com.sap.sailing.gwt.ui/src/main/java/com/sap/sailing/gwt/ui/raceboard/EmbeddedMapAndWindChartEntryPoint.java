@@ -30,9 +30,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -42,14 +40,11 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint {
     private RaceDTO selectedRace;
 
-    // TODO obtain event ID in order to enable showing all marks from all course areas if requested
-    private static final String PARAM_REGATTA_NAME = "regattaName";
-    private static final String PARAM_RACE_NAME = "raceName";
-    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
-    private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
+    private static final String PARAM_REGATTA_LIKE_NAME = "regattaLikeName";
+    private static final String PARAM_RACE_COLUMN_NAME = "raceColumnName";
     private static final String PARAM_EVENT_ID = "eventId";
     
-    private String regattaName;
+    private String regattaLikeName;
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
@@ -60,56 +55,38 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
 
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         // read mandatory parameters
-        regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
-        raceName = Window.Location.getParameter(PARAM_RACE_NAME);
-        String leaderboardNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
-        String leaderboardGroupNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
-        if (leaderboardNameParamValue != null && !leaderboardNameParamValue.isEmpty()) {
-            leaderboardName = leaderboardNameParamValue;
-        }
-        if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
-            leaderboardGroupName = leaderboardGroupNameParamValue; 
-        }
+        regattaLikeName = Window.Location.getParameter(PARAM_REGATTA_LIKE_NAME);
+        raceName = Window.Location.getParameter(PARAM_RACE_COLUMN_NAME);
         String eventIdParamValue = Window.Location.getParameter(PARAM_EVENT_ID);
         if (eventIdParamValue != null && !eventIdParamValue.isEmpty()) {
             eventId = UUID.fromString(eventIdParamValue);
         }
-        if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
-            leaderboardGroupName = leaderboardGroupNameParamValue; 
-        }
-        if (regattaName == null || regattaName.isEmpty() || raceName == null || raceName.isEmpty() ||
+        if (regattaLikeName == null || regattaLikeName.isEmpty() || raceName == null || raceName.isEmpty() ||
                 leaderboardName == null || leaderboardName.isEmpty()) {
             createErrorPage("This page requires a valid regatta name, race name and leaderboard name.");
             return;
         }
         
         // read optional parameters 
-        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
         boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
         boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
         boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
         boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
+        // TODO could this be used to configure a "selection" filter with no competitor selected?
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
-        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
-        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
-        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewSimulation, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
+        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, /* showLeaderboard */ false,
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewSimulation,
+                /* canReplayWhileLiveIsPossible */ false, /* autoSelectMedia */ false, /* defaultMedia */ null);
 
-        final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();
-        final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();
         final ParallelExecutionCallback<EventDTO> getEventByIdCallback = new ParallelExecutionCallback<EventDTO>();
         List<ParallelExecutionCallback<?>> callbacks = new ArrayList<>();
-        callbacks.add(getLeaderboardNamesCallback);
         callbacks.add(getRegattasCallback);
-        if (leaderboardGroupName != null) {
-            callbacks.add(getLeaderboardGroupByNameCallback);
-        }
         if (eventId != null) {
             callbacks.add(getEventByIdCallback);
         }
@@ -117,9 +94,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         new ParallelExecutionHolder(callbackArray) {
             @Override
             public void handleSuccess() {
-                checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                        leaderboardGroupName == null ? null : getLeaderboardGroupByNameCallback.getData(),
-                        canReplayWhileLiveIsPossible, getRegattasCallback.getData(), eventId == null ? null : getEventByIdCallback.getData(),
+                checkUrlParameters(getRegattasCallback.getData(),
+                        eventId == null ? null : getEventByIdCallback.getData(),
                         showMapControls);
             }
 
@@ -129,12 +105,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             }
         };
         sailingService.getRegattas(getRegattasCallback);
-        sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if (eventId != null) {
             sailingService.getEventById(eventId, /* withStatisticalData */ false, getEventByIdCallback);
-        }
-        if (leaderboardGroupName != null) {
-            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, false /*withGeoLocationData*/, getLeaderboardGroupByNameCallback);
         }
     }
     
@@ -145,45 +117,14 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         RootPanel.get().add(new Label(message));
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup,
-            boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, EventDTO event,
-            boolean showMapControls) {
-        if (!leaderboardNames.contains(leaderboardName)) {
-            createErrorPage(getStringMessages().noSuchLeaderboard());
-            return;
-        }
+    private void checkUrlParameters(List<RegattaDTO> regattas, EventDTO event, boolean showMapControls) {
         if (eventId != null && event == null) {
             createErrorPage(getStringMessages().noSuchEvent());
         }
-        if (leaderboardGroupName != null && leaderboardGroup != null) {
-            boolean foundLeaderboard = false;
-            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.leaderboards) {
-                if (leaderboard.name.equals(leaderboardName)) {
-                    foundLeaderboard = true;
-                    break;
-                }
-            }
-            if (!foundLeaderboard) {
-                createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
-                return;
-            }
-            if (event != null) {
-                boolean foundLeaderboardGroupInEvent = false;
-                for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
-                    if (lg.getId().equals(leaderboardGroup.getId())) {
-                        foundLeaderboardGroupInEvent = true;
-                        break;
-                    }
-                }
-                if (!foundLeaderboardGroupInEvent) {
-                    createErrorPage(getStringMessages().leaderboardGroupNotContainedInEvent(leaderboardGroupName, event.getName()));
-                }
-            }
-        }
-        RaceDTO race = findRace(regattaName, raceName, regattas);
+        RaceDTO race = findRace(regattaLikeName, raceName, regattas);
         selectedRace = race;
         if (selectedRace == null) {
-            createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
+            createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaLikeName);
             return;
         }
         Window.setTitle(selectedRace.getName());
