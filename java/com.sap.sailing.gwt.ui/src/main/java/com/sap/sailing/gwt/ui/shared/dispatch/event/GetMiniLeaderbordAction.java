@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -20,8 +19,6 @@ import com.sap.sailing.server.RacingEventService;
 
 public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLeaderboardDTO>> {
     private static final Logger logger = Logger.getLogger(GetMiniLeaderbordAction.class.getName());
-    // Replace the leaderboard name with {0} and the leaderboard display name with {1} when changing the link
-    private static final String urlTemplate = "Leaderboard.html?name={0}&displayName={1}&embedded=true&hideToolbar=true&refreshIntervalMillis=3000&legDetail=AVERAGE_SPEED_OVER_GROUND_IN_KNOTS&legDetail=DISTANCE_TRAVELED&legDetail=RANK_GAIN&overallDetail=REGATTA_RANK&maneuverDetail=TACK&maneuverDetail=JIBE&maneuverDetail=PENALTY_CIRCLE&lastN=1&showAddedScores=false";
 
     @SuppressWarnings("unused")
     private UUID eventId;
@@ -51,8 +48,6 @@ public class GetMiniLeaderbordAction implements Action<ResultWithTTL<GetMiniLead
         if (leaderboard == null) {
             return new ResultWithTTL<>(1000 * 60 * 5, result);
         }
-        result.setLeaderboardDetailsURL(MessageFormat.format(urlTemplate, leaderboardName, leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName()));
-        
         try {
             LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
                     service, service.getBaseDomainFactory(), false);
