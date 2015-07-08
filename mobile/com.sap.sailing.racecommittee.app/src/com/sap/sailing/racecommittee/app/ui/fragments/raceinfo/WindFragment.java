@@ -1,14 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.content.Context;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.*;
@@ -29,20 +25,10 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
-import com.sap.sailing.racecommittee.app.ui.fragments.maps.WindMap;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -59,16 +45,11 @@ public class WindFragment extends BaseFragment
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
 
-    private Context mContext;
-
     private View mHeaderLayout;
     private View mContentLayout;
     private View mFooterLayout;
 
     private View mHeader;
-    private View mLayoutDirection;
-    private View mLayoutSpeed;
-    private View mPositionHeader;
 //    private View mWindOn;
 //    private View mWindOff;
     private View mSetData;
@@ -97,9 +78,9 @@ public class WindFragment extends BaseFragment
     }
 
     /**
-     * creates the string array that represents the numbers in the windspeed numberpicker
+     * creates the string array that represents the numbers in the wind speed number picker
      *
-     * @return
+     * @return numbers for wind speed number picker
      */
     private String[] generateNumbers() {
         ArrayList<String> numbers = new ArrayList<>();
@@ -113,6 +94,7 @@ public class WindFragment extends BaseFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
             .addOnConnectionFailedListener(this).build();
     }
@@ -121,16 +103,15 @@ public class WindFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.wind_view, container, false);
 
-        mContext = inflater.getContext();
-
+        // The fragment is divided into three layouts
+        // Header layout is optional and is used for back navigation
+        // Content layout holds wind direction, wind speed and location controls
+        // Footer layout holds a lazy web view for map presentation
         mHeaderLayout = layout.findViewById(R.id.header_layout);
         mContentLayout = layout.findViewById(R.id.content_layout);
         mFooterLayout = layout.findViewById(R.id.footer_layout);
 
         mHeader = layout.findViewById(R.id.header_text);
-        mLayoutDirection = layout.findViewById(R.id.layout_direction);
-        mLayoutSpeed = layout.findViewById(R.id.layout_speed);
-        mPositionHeader = layout.findViewById(R.id.position_header);
         // disabled, because of bug #2871
         // mWindOff = layout.findViewById(R.id.wind_off);
         // mWindOn = layout.findViewById(R.id.wind_on);
@@ -152,19 +133,19 @@ public class WindFragment extends BaseFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getArguments() != null) {
-            switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
-                if (getView() != null) {
-                    View header = getView().findViewById(R.id.header_layout);
-                    header.setVisibility(View.GONE);
-                }
-                break;
-
-            default:
-                break;
-            }
-        }
+//        if (getArguments() != null) {
+//            switch (getArguments().getInt(START_MODE, 0)) {
+//            case 1:
+//                if (getView() != null) {
+//                    View header = getView().findViewById(R.id.header_layout);
+//                    header.setVisibility(View.GONE);
+//                }
+//                break;
+//
+//            default:
+//                break;
+//            }
+//        }
 
         if (mWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             String sensorData = getString(R.string.wind_sensor);
@@ -175,8 +156,10 @@ public class WindFragment extends BaseFragment
             sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
             mWindSensor.setText(sensorData);
         }
+
         setupButtons();
         setupWindSpeedPicker();
+        setupLayouts(false);
 
         setInstanceState(savedInstanceState);
     }
@@ -197,7 +180,7 @@ public class WindFragment extends BaseFragment
      */
     public void setupButtons() {
         if (mHeader != null) {
-            mHeader.setOnClickListener(new OnClickListener() {
+            mHeader.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openMainScheduleFragment();
@@ -205,7 +188,7 @@ public class WindFragment extends BaseFragment
             });
         }
         if (mSetData != null) {
-            mSetData.setOnClickListener(new OnClickListener() {
+            mSetData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onSendClick();
@@ -213,25 +196,25 @@ public class WindFragment extends BaseFragment
             });
         }
         if (mPositionShow != null) {
-            mPositionShow.setOnClickListener(new OnClickListener() {
+            mPositionShow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showMap(true);
+                    setupLayouts(true);
                 }
             });
         }
         if (mPositionHide != null) {
-            mPositionHide.setOnClickListener(new OnClickListener() {
+            mPositionHide.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showMap(false);
+                    setupLayouts(false);
                 }
             });
         }
     }
 
     /**
-     * configures the windspeedpicker views and attaches all relevant listener functions to them
+     * configures the wind speed picker views and attaches all relevant listener functions to them
      */
     public void setupWindSpeedPicker() {
         String nums[] = generateNumbers();
@@ -266,26 +249,32 @@ public class WindFragment extends BaseFragment
         ExLog.i(getActivity(), TAG, "registering race " + getRace().getRaceName());
     }
 
+    private void setupLayouts(boolean showMap) {
+        if (mHeaderLayout != null) {
+            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 1) {
+                mHeaderLayout.setVisibility(View.GONE);
+            } else {
+                mHeaderLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
+            }
+        }
+        if (mContentLayout != null) {
+            mContentLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
+        }
+        if (mFooterLayout != null) {
+            WebSettings settings = mWebView.getSettings();
+            settings.setJavaScriptEnabled(true);
+            mWebView.loadUrl("http://kielerwoche2015.sapsailing.com/gwt/RaceBoard.html?eventId=a9d6c5d5-cac3-47f2-9b5c-506e441819a1&leaderboardName=KW%202015%20Olympic%20-%20Finn&raceName=R1%20%28Finn%29&viewShowMapControls=false&viewShowNavigationPanel=false&regattaName=KW%202015%20Olympic%20-%20Finn");
+            mFooterLayout.setVisibility(showMap ? View.VISIBLE : View.GONE);
+        }
+    }
+
     /**
      * function to restore the instanceState via savedInstanceState bundle
      *
      * @param savedInstanceState said bundle
      */
-    public void setInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-//            bigMap = savedInstanceState.getBoolean("bigMap", false);
-//            double markerLat = savedInstanceState.getDouble("markerLat", -1);
-//
-//            if (bigMap) {
-//                showBigMap();
-//                if (mWindMap != null && savedInstanceState.getDouble("lat", -1) != -1) {
-//                    mWindMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"), savedInstanceState.getFloat("zoom"));
-//                    if (markerLat != -1) {
-//                        mWindMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
-//                    }
-//                }
-//            }
-        }
+    private void setInstanceState(Bundle savedInstanceState) {
+
     }
 
     @Override
@@ -299,20 +288,15 @@ public class WindFragment extends BaseFragment
     public void onPause() {
         super.onPause();
 
+        // Disconnect googleApiClient
         if (apiClient.isConnected()) {
             apiClient.unregisterConnectionFailedListener(this);
             apiClient.unregisterConnectionCallbacks(this);
         }
         apiClient.disconnect();
 
+        // Unregister position poller
         positionPoller.unregisterAllAndStop();
-
-//        Fragment fragment = getFragmentManager().findFragmentById(R.id.windMap);
-//        if (fragment != null) {
-//            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//            transaction.remove(fragment);
-//            transaction.commit();
-//        }
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
@@ -323,7 +307,7 @@ public class WindFragment extends BaseFragment
 
         setupPositionPoller();
         setupLocationClient();
-//        initialMapFragment();
+
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
@@ -363,96 +347,6 @@ public class WindFragment extends BaseFragment
         }
     }
 
-//    /**
-//     * saves the boat position for later sendage of the entered windData
-//     */
-//    private void onPositionSetClick() {
-//        bigMap = false;
-//
-//        if (mWindMap != null && mWindMap.windMarker != null) { // && mGoogleMap != null) {
-//            mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
-//            mCurrentLocation = new Location("manual");
-//            mCurrentLocation.setLatitude(mWindMap.windMarker.getPosition().latitude);
-//            mCurrentLocation.setLongitude(mWindMap.windMarker.getPosition().longitude);
-//            preferences.setWindPosition(mWindMap.windMarker.getPosition());
-//            mWindMap.windMarker.setDraggable(false);
-//            mWindMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-//        }
-//        showElements(true);
-//    }
-
-//    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-//    private void initialMapFragment() {
-//        mWindMap = WindMap.newInstance(mContext, this);
-//        FragmentManager manager;
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-//            manager = getChildFragmentManager();
-//        } else {
-//            manager = getFragmentManager();
-//        }
-//        if (manager.findFragmentByTag("googleMap") == null) {
-//            FragmentTransaction ft = manager.beginTransaction();
-//            ft.replace(R.id.windMap, mWindMap, "googleMap").commit();
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-//                manager.executePendingTransactions();
-//                mWindMap.getMapAsync(this);
-//            }
-//        }
-//    }
-
-//    /**
-//     * expands the windMap , hides views where the map is supposed to go
-//     */
-//    private void showBigMap() {
-//        showElements(false);
-//        if (mWindMap != null && mGoogleMap != null) {
-//            mGoogleMap.getUiSettings().setAllGesturesEnabled(true);
-//            if (mWindMap.windMarker != null) {
-//                mWindMap.windMarker.setDraggable(true);
-//            }
-//        }
-//        bigMap = true;
-//    }
-
-    private void showMap(boolean show) {
-        if (mHeaderLayout != null) {
-            mHeaderLayout.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-        if (mContentLayout != null) {
-            mContentLayout.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-        if (mFooterLayout != null) {
-            WebSettings settings = mWebView.getSettings();
-            //settings.setBuiltInZoomControls(false);
-            //settings.setSupportZoom(false);
-            settings.setJavaScriptEnabled(true);
-            mWebView.loadUrl("http://kielerwoche2015.sapsailing.com/gwt/RaceBoard.html?eventId=a9d6c5d5-cac3-47f2-9b5c-506e441819a1&leaderboardName=KW%202015%20Olympic%20-%20Finn&raceName=R1%20%28Finn%29&viewShowMapControls=false&viewShowNavigationPanel=false&regattaName=KW%202015%20Olympic%20-%20Finn");
-            mFooterLayout.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-
-//        if (mSetData != null) {
-//            mSetData.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-//            // TODO check location
-//            mSetData
-//                .setEnabled(mWindMap != null && mWindMap.windMarker != null && mWindMap.windMarker.getPosition() != null && mCurrentLocation != null);
-//        }
-//        if (mLayoutDirection != null) {
-//            mLayoutDirection.setVisibility(show ? View.VISIBLE : View.GONE);
-//        }
-//        if (mLayoutSpeed != null) {
-//            mLayoutSpeed.setVisibility(show ? View.VISIBLE : View.GONE);
-//        }
-//        if (mPositionHeader != null) {
-//            mPositionHeader.setVisibility(show ? View.VISIBLE : View.GONE);
-//        }
-//        if (mDarkLayer != null) {
-//            mDarkLayer.setVisibility(show ? View.VISIBLE : View.GONE);
-//        }
-//        if (mLayoutAddress != null) {
-//            mLayoutAddress.setVisibility(show ? View.GONE : View.VISIBLE);
-//        }
-    }
-
 //    private void setWind(boolean on) {
 //        if (mWindOn != null) {
 //            mWindOn.setVisibility(on ? View.VISIBLE : View.GONE);
@@ -468,10 +362,6 @@ public class WindFragment extends BaseFragment
         mPositionLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
         mPositionLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
         mPositionAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getLatitude(), location.getTime()));
-//        showElements(true);
-//        if (mDarkLayer != null) {
-//            mDarkLayer.setVisibility(View.GONE);
-//        }
     }
 
     @Override
@@ -512,54 +402,4 @@ public class WindFragment extends BaseFragment
         preferences.setWindSpeed(wind.getKnots());
     }
 
-    /**
-     * Async call to googles geocoder web api
-     */
-    private class GeoCodeTask extends AsyncTask<String, String, JSONObject> {
-        String location = "";
-
-        protected JSONObject doInBackground(String... urls) {
-            location = urls[0];
-            StringBuilder responseBody = new StringBuilder();
-            JSONObject locJSON = null;
-            try {
-                URL website = new URL(getString(R.string.url_google_geocoder) + URLEncoder.encode(location, "UTF-8")
-                    + getString(R.string.urlpart_google_geocoder_sensor));
-                ExLog.i(getActivity(), TAG, website.toString());
-                HttpURLConnection urlConnection = (HttpURLConnection) website.openConnection();
-                BufferedReader in;
-                try {
-                    in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        responseBody.append(line);
-                    }
-                    JSONObject jObject = new JSONObject(responseBody + "");
-                    locJSON = jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
-                } finally {
-                    urlConnection.disconnect();
-                }
-            } catch (Exception e) {
-                ExLog.ex(WindFragment.this.getActivity(), TAG, e);
-            }
-
-            return (locJSON);
-        }
-
-        protected void onPostExecute(JSONObject locJSON) {
-            if (locJSON == null) {
-                ExLog.i(getActivity(), TAG, "No Location found for " + location);
-                Toast.makeText(getActivity(), R.string.no_location_found, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            try {
-                ExLog.i(getActivity(), TAG, "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng"));
-//                if (mWindMap != null) {
-//                    mWindMap.centerMap(locJSON.getDouble("lat"), locJSON.getDouble("lng"));
-//                }
-            } catch (JSONException e) {
-                ExLog.ex(WindFragment.this.getActivity(), TAG, e);
-            }
-        }
-    }
 }
