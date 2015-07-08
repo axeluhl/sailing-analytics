@@ -17,37 +17,41 @@ import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RegattaNavigationResources.LocalCss;
 import com.sap.sailing.gwt.home.client.shared.DropdownHandler;
 
-public class ListDropdownFilter<T> extends Composite {
+public class DropdownFilter<T> extends Composite {
 
     private static final LocalCss CSS = RegattaNavigationResources.INSTANCE.css();
     private static ListDropdownFilterUiBinder uiBinder = GWT.create(ListDropdownFilterUiBinder.class);
 
-    interface ListDropdownFilterUiBinder extends UiBinder<Widget, ListDropdownFilter<?>> {
+    interface ListDropdownFilterUiBinder extends UiBinder<Widget, DropdownFilter<?>> {
     }
     
     @UiField DivElement dropdownContainerUi;
     @UiField DivElement currentValueUi;
     @UiField FlowPanel filterItemContainerUi;
-    private final SelectionCallback<T> selectionCallback;
+    private final DropdownFilterList<T> filterList;
     private final DropdownHandler dropdownHandler;
 
-    public ListDropdownFilter(T defaultValue, SelectionCallback<T> selectionCallback) {
-        this.selectionCallback = selectionCallback;
+    public DropdownFilter(DropdownFilterList<T> filterList) {
+        this.filterList = filterList;
         CSS.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.dropdownHandler = new ListFilterDropdownHandler();
-        ListDropdownFilterItem filterItem = new ListDropdownFilterItem(defaultValue);
-        filterItemContainerUi.add(filterItem);
-        filterItem.select(defaultValue);
-    }
-
-    public void setSelectableValues(Collection<T> selectableValues) {
-        for (T value : selectableValues) {
-            filterItemContainerUi.add(new ListDropdownFilterItem(value));
+        
+        this.addFilterValue(filterList.getDefaultValues()).select();
+        for (T value : filterList.getSelectableValues()) {
+            addFilterValue(value);
         }
     }
     
-    public interface SelectionCallback<T> {
+    private ListDropdownFilterItem addFilterValue(T value) {
+        ListDropdownFilterItem filterItem = new ListDropdownFilterItem(value);
+        filterItemContainerUi.add(filterItem);
+        return filterItem;
+    }
+
+    public interface DropdownFilterList<T> {
+        T getDefaultValues();
+        Collection<T> getSelectableValues();
         void onSelectFilter(T value);
     }
     
@@ -63,29 +67,31 @@ public class ListDropdownFilter<T> extends Composite {
     }
     
     private class ListDropdownFilterItem extends Widget {
+        private final T value;
         private ListDropdownFilterItem(T value) {
+            this.value = value;
             DivElement element = DOM.createDiv().<DivElement>cast();
             element.setInnerText(String.valueOf(value));
             this.setElement(element);
             this.addStyleName(CSS.regattanavigation_filter_dropdown_link());
-            this.initClickHandler(value);
+            this.initClickHandler();
         }
         
-        private void initClickHandler(final T value) {
+        private void initClickHandler() {
             this.addDomHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
                         event.preventDefault();
                         dropdownHandler.setVisible(false);
-                        ListDropdownFilterItem.this.select(value);
-                        selectionCallback.onSelectFilter(value);
+                        ListDropdownFilterItem.this.select();
+                        filterList.onSelectFilter(value);
                     }
                 }
             }, ClickEvent.getType());
         }
         
-        private void select(T value) {
+        private void select() {
             currentValueUi.setInnerText(String.valueOf(value));
             for (int i=0; i < filterItemContainerUi.getWidgetCount(); i++) {
                 filterItemContainerUi.getWidget(i).removeStyleName(CSS.regattanavigation_filter_dropdown_linkactive());
