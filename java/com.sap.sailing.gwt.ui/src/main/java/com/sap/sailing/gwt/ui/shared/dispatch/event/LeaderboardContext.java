@@ -58,7 +58,8 @@ public class LeaderboardContext {
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
-                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints));
+                int raceCount = row.fieldsByRaceColumnName == null ? 0 : row.fieldsByRaceColumnName.size();
+                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
             int ttl = isLive ? 1000 * 60 : 1000 * 60 * 2;
