@@ -54,8 +54,9 @@
             android:src="?wind_on"
             android:visibility="gone"/>
 
-        <LinearLayout
+        <TextView
             android:id="@+id/header_text"
+            android:drawableLeft="?chevron_left_24dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -65,22 +66,11 @@
             android:layout_marginStart="@dimen/default_margin"
             android:layout_toLeftOf="@id/wind_off"
             android:layout_toStartOf="@id/wind_off"
-            android:orientation="horizontal">
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:text="@string/wind"
+            android:textAppearance="?textNormal" />
 
-            <ImageView
-                android:id="@+id/header_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="?chevron_left_24dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@string/wind"
-                android:textAppearance="?textNormal"/>
-        </LinearLayout>
     </RelativeLayout>
 
     <RelativeLayout
@@ -141,7 +131,7 @@
                     android:visibility="visible"/>
 
                 <com.sap.sailing.racecommittee.app.ui.views.CompassView
-                    android:id="@+id/compassView"
+                    android:id="@+id/compass_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"/>
@@ -240,7 +230,7 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/footer_layout"
+        android:id="@+id/map_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/content_layout"
