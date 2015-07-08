@@ -38,7 +38,7 @@ public class StartTimeFinderResult {
         if (racesDependingOn == null) {
             return false;
         }
-        return Util.isEmpty(racesDependingOn);
+        return !Util.isEmpty(racesDependingOn);
     }
 
     @Override
