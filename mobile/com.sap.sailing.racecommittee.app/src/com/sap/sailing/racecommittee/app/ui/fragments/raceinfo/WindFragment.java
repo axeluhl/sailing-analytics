@@ -50,18 +50,18 @@ public class WindFragment extends BaseFragment
     private View mMapLayout;
 
     private TextView mHeaderText;
+    private TextView mHeaderWindSensor;
 //    private View mWindOn;
 //    private View mWindOff;
-    private View mSetData;
-    private CompassView mCompassView;
-    private NumberPicker mWindSpeed;
-    private TextView mWindSensor;
-    private TextView mPositionLatitude;
-    private TextView mPositionLongitude;
-    private TextView mPositionAccuracy;
-    private Button mPositionShow;
-    private Button mPositionHide;
+    private Button mContentSetData;
+    private CompassView mContentCompassView;
+    private NumberPicker mContentWindSpeed;
+    private TextView mContentLatitude;
+    private TextView mContentLongitude;
+    private TextView mContentAccuracy;
+    private Button mContentMapShow;
     private WebView mMapWebView;
+    private Button mMapHide;
 
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
@@ -112,19 +112,19 @@ public class WindFragment extends BaseFragment
         mMapLayout = layout.findViewById(R.id.map_layout);
 
         mHeaderText = (TextView) layout.findViewById(R.id.header_text);
+        mHeaderWindSensor = (TextView) layout.findViewById(R.id.wind_sensor);
         // disabled, because of bug #2871
         // mWindOff = layout.findViewById(R.id.wind_off);
         // mWindOn = layout.findViewById(R.id.wind_on);
-        mSetData = layout.findViewById(R.id.set_data);
-        mCompassView = (CompassView) layout.findViewById(R.id.compass_view);
-        mWindSpeed = (NumberPicker) layout.findViewById(R.id.wind_speed);
-        mWindSensor = (TextView) layout.findViewById(R.id.wind_sensor);
-        mPositionLatitude = (TextView) layout.findViewById(R.id.position_latitude);
-        mPositionLongitude = (TextView) layout.findViewById(R.id.position_longitude);
-        mPositionAccuracy = (TextView) layout.findViewById(R.id.position_accuracy);
-        mPositionShow = (Button) layout.findViewById(R.id.position_show);
-        mPositionHide = (Button) layout.findViewById(R.id.position_hide);
+        mContentSetData = (Button) layout.findViewById(R.id.set_data);
+        mContentCompassView = (CompassView) layout.findViewById(R.id.compass_view);
+        mContentWindSpeed = (NumberPicker) layout.findViewById(R.id.wind_speed);
+        mContentLatitude = (TextView) layout.findViewById(R.id.position_latitude);
+        mContentLongitude = (TextView) layout.findViewById(R.id.position_longitude);
+        mContentAccuracy = (TextView) layout.findViewById(R.id.position_accuracy);
+        mContentMapShow = (Button) layout.findViewById(R.id.position_show);
         mMapWebView = (WebView) layout.findViewById(R.id.web_view);
+        mMapHide = (Button) layout.findViewById(R.id.position_hide);
 
         return layout;
     }
@@ -133,14 +133,14 @@ public class WindFragment extends BaseFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (mWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
+        if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             String sensorData = getString(R.string.wind_sensor);
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
             sensorData = sensorData.replace("#AT#", dateFormat.format(wind.getTimePoint().asDate()));
             sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
             sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
-            mWindSensor.setText(sensorData);
+            mHeaderWindSensor.setText(sensorData);
         }
 
         setupButtons();
@@ -180,24 +180,24 @@ public class WindFragment extends BaseFragment
                 public void onClick(View v) {openMainScheduleFragment(); }
             });
         }
-        if (mSetData != null) {
-            mSetData.setOnClickListener(new View.OnClickListener() {
+        if (mContentSetData != null) {
+            mContentSetData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onSendClick();
                 }
             });
         }
-        if (mPositionShow != null) {
-            mPositionShow.setOnClickListener(new View.OnClickListener() {
+        if (mContentMapShow != null) {
+            mContentMapShow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     setupLayouts(true);
                 }
             });
         }
-        if (mPositionHide != null) {
-            mPositionHide.setOnClickListener(new View.OnClickListener() {
+        if (mMapHide != null) {
+            mMapHide.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     setupLayouts(false);
@@ -211,12 +211,12 @@ public class WindFragment extends BaseFragment
      */
     public void setupWindSpeedPicker() {
         String nums[] = generateNumbers();
-        ThemeHelper.setPickerTextColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
-        mWindSpeed.setMaxValue(nums.length - 1);
-        mWindSpeed.setMinValue(0);
-        mWindSpeed.setWrapSelectorWheel(false);
-        mWindSpeed.setDisplayedValues(nums);
-        mWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        ThemeHelper.setPickerTextColor(getActivity(), mContentWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
+        mContentWindSpeed.setMaxValue(nums.length - 1);
+        mContentWindSpeed.setMinValue(0);
+        mContentWindSpeed.setWrapSelectorWheel(false);
+        mContentWindSpeed.setDisplayedValues(nums);
+        mContentWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
         double enteredWindSpeed = preferences.getWindSpeed();
         double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
@@ -229,8 +229,8 @@ public class WindFragment extends BaseFragment
             }
         }
 
-        mCompassView.setDirection((float) enteredWindBearingFrom);
-        mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
+        mContentCompassView.setDirection((float) enteredWindBearingFrom);
+        mContentWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
     }
 
     /**
@@ -265,7 +265,7 @@ public class WindFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        mCompassView.setDirectionListener(this);
+        mContentCompassView.setDirectionListener(this);
     }
 
     @Override
@@ -325,10 +325,10 @@ public class WindFragment extends BaseFragment
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        mPositionLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
-        mPositionLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
-        mPositionAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getLatitude(), location.getTime()));
-        mSetData.setEnabled(true);
+        mContentLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
+        mContentLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
+        mContentAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getLatitude(), location.getTime()));
+        mContentSetData.setEnabled(true);
     }
 
     @Override
@@ -351,8 +351,8 @@ public class WindFragment extends BaseFragment
 
     private Wind getResultingWindFix() throws NumberFormatException {
         Position currentPosition = new DegreePosition(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        double windSpeed = mWindSpeed.getValue() / 2 + MIN_KTS;
-        double windBearing = mCompassView.getDirection();
+        double windSpeed = mContentWindSpeed.getValue() / 2 + MIN_KTS;
+        double windBearing = mContentCompassView.getDirection();
         Bearing bearing_from = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
