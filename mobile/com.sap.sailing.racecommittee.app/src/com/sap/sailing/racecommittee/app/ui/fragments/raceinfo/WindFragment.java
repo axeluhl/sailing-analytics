@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
@@ -177,7 +178,9 @@ public class WindFragment extends BaseFragment
         if (mHeaderText != null) {
             mHeaderText.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {openMainScheduleFragment(); }
+                public void onClick(View v) {
+                    openMainScheduleFragment();
+                }
             });
         }
         if (mContentSetData != null) {
@@ -255,10 +258,40 @@ public class WindFragment extends BaseFragment
         }
         if (mMapLayout != null) {
             WebSettings settings = mMapWebView.getSettings();
-            settings.setJavaScriptEnabled(true);
-            mMapWebView.loadUrl("http://kielerwoche2015.sapsailing.com/gwt/RaceBoard.html?eventId=a9d6c5d5-cac3-47f2-9b5c-506e441819a1&leaderboardName=KW%202015%20Olympic%20-%20Finn&raceName=R1%20%28Finn%29&viewShowMapControls=false&viewShowNavigationPanel=false&regattaName=KW%202015%20Olympic%20-%20Finn");
-            mMapLayout.setVisibility(showMap ? View.VISIBLE : View.GONE);
+            if (showMap) {
+                settings.setJavaScriptEnabled(true);
+                loadRaceMap();
+                mMapLayout.setVisibility(View.VISIBLE);
+            } else {
+                settings.setJavaScriptEnabled(false);
+                mMapLayout.setVisibility(View.GONE);
+            }
         }
+    }
+
+    private boolean loadRaceMap() {
+        ManagedRace race = getRace();
+        if (race != null) {
+            StringBuilder sb = new StringBuilder("http://kielerwoche2015.sapsailing.com/gwt/RaceBoard.html?");
+            sb.append("eventId=");
+            sb.append("a9d6c5d5-cac3-47f2-9b5c-506e441819a1");
+            sb.append("&");
+            sb.append("leaderboardName=");
+            sb.append("KW%202015%20Olympic%20-%20Finn");
+            sb.append("&");
+            sb.append("raceName=");
+            sb.append("R1%20%28Finn%29");
+            sb.append("&");
+            sb.append("viewShowMapControls=false");
+            sb.append("&");
+            sb.append("viewShowNavigationPanel=false");
+            sb.append("&");
+            sb.append("regattaName=");
+            sb.append("KW%202015%20Olympic%20-%20Finn");
+            mMapWebView.loadUrl(sb.toString());
+            return true;
+        }
+        return false;
     }
 
     @Override
