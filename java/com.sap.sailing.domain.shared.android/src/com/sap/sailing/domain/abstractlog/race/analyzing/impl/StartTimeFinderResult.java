@@ -35,10 +35,7 @@ public class StartTimeFinderResult {
     }
 
     public boolean isDependentStartTime() {
-        if (racesDependingOn == null) {
-            return false;
-        }
-        return !Util.isEmpty(racesDependingOn);
+        return racesDependingOn != null && !Util.isEmpty(racesDependingOn);
     }
 
     @Override
