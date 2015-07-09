@@ -146,8 +146,16 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
                     setMarker(1 - getLevel());
                     convertView.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20));
+
+                    if (race.isUpdateIndicatorVisible()) {
+                        race.setUpdateIndicatorVisible(false);
+                    }
                 } else {
                     convertView.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray));
+
+                    if (race.isUpdateIndicatorVisible()) {
+                        update_badge.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -186,10 +194,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                     }
                 }
-            }
-
-            if (race.isUpdateIndicatorVisible()) {
-                update_badge.setVisibility(View.VISIBLE);
             }
 
             updateFlag(race.getRace(), now);
