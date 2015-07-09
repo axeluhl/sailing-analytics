@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.services;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
@@ -259,11 +261,16 @@ public class RaceStateService extends Service {
         intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, event);
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
-    
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void setAlarm(ManagedRace race, RaceStateEvent event) {
         PendingIntent intent = createAlarmPendingIntent(race, event);
         managedIntents.get(race.getId()).add(Pair.create(intent, event.getEventName()));
-        alarmManager.set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
+        }
         ExLog.i(this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
     }
 

@@ -86,6 +86,20 @@
         android:src="@drawable/ic_info_outline_white_48dp"
         tools:alpha="1"/>
 
+    <ImageView
+        android:id="@+id/refresh_data"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin_half"
+        android:layout_toLeftOf="@id/technical_info"
+        android:alpha="0"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:src="@drawable/ic_refresh_white_48dp"
+        tools:alpha="1"/>
+
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"

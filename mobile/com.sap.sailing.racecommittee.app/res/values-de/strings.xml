@@ -34,7 +34,7 @@
     <string name="flag_ap">AP</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
-    <string name="label_login_events">Event</string>
+    <string name="label_login_events">Regatta</string>
     <string name="label_login_course_area">Bahn</string>
     <string name="label_login_position">Position</string>
     <string name="login_type_viewer">Im Demo-Modus anmelden</string>
@@ -101,7 +101,6 @@
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>
-    <string name="options_menu_reload">Neuladen</string>
     <string name="options_menu_settings">Einstellungen</string>
     <string name="results_capturing_title">Ergebnislisten</string>
     <string name="results_capturing_view_subject">E-Mail Betreff</string>
@@ -269,7 +268,7 @@
     <string name="course">Kurs</string>
     <string name="confirm_start_time">Startzeit Bestätigen</string>
     <string name="confirm_start_mode">Startmodus Bestätigen</string>
-    <string name="login_sub_text">Wo halten Sie sich auf?</string>
+    <string name="login_sub_text">Bitte wählen Sie eine Regatta aus</string>
     <string name="login_text">Willkommen in der SAP Sailing\nRace Committee App</string>
     <string name="nav_drawer_close">Navigation-Drawer schließen</string>
     <string name="nav_drawer_open">Navigation-Drawer öffnen</string>
@@ -323,7 +322,7 @@
     <string name="race_reset_confirm">Rennen zurücksetzen</string>
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden!</string>
-    <string name="race_set_start">Startzeit setzen</string>
+    <string name="race_set_time">Zeit setzen</string>
     <string name="race_start_time_in">-#TIME#</string>
     <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
@@ -332,7 +331,7 @@
     <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
     <string name="wind_sensor"><![CDATA[um #AT# / von #FROM#° / #SPEED# kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
-    <string name="wind_panel"><![CDATA[von #FROM#°\n#SPEED# kn]]></string>
+    <string name="wind_panel"><![CDATA[von %1$.0f°\n%2$.1f kn]]></string>
     <string name="settings_category_developer">Entwickler Optionen</string>
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
@@ -406,7 +405,7 @@
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>
     <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
-    <string name="until_xray_removed">XRAY wird eingeholt in #TIME#</string>
+    <string name="until_xray_removed">XRAY wird eingeholt in %s</string>
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
     <string name="error_wrong_degree_value_message">Bitte geben Sie einen Wert zwischen 0 und 360 an.</string>
@@ -421,6 +420,12 @@
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>
     <string name="send_mail">Sende Email...</string>
+
     <string name="data_reload_title">Daten wurden extern verändert</string>
     <string name="data_reload_message">Daten müssen neu geladen werden. Eventueller Datenverlust ist möglich.</string>
+    <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
+    <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
+    <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
+    <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
+
 </resources>

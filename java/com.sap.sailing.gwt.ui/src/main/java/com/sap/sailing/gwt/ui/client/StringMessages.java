@@ -11,6 +11,7 @@ import com.sap.sse.gwt.client.DefaultRule_1_0n;
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
+    String manage2Sail();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
@@ -1164,7 +1165,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     @Override
     String errorCommunicatingWithServer();
     String userManagement();
-    String structureImportUrls();
+    String regattaStructureImport();
     String filteredBy();
     String filterBy();
     String editSeries();
@@ -1316,4 +1317,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String now();
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
+    String selectCompetitor();
 }

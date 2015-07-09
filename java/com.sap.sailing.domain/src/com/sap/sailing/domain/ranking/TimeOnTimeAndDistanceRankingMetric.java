@@ -94,8 +94,14 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final RankingMetric.RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
         final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
-        return (c1, c2) -> durationComparatorNullsLast.compare(rankingInfo.getCompetitorRankingInfo().apply(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead(),
-                rankingInfo.getCompetitorRankingInfo().apply(c2).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
+        return (c1, c2) -> {
+            final CompetitorRankingInfo c1CompetitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(c1);
+            final CompetitorRankingInfo c2CompetitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(c2);
+            return
+                    durationComparatorNullsLast.compare(
+                            c1CompetitorRankingInfo == null ? null : c1CompetitorRankingInfo.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead(),
+                            c2CompetitorRankingInfo == null ? null : c2CompetitorRankingInfo.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
+        };
     }
 
     @Override
@@ -142,7 +148,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 if (competitorLeg != null && competitorLeg.hasStartedLeg(timePoint)) {
                     final Duration timeToReachFastest = getPredictedDurationToEndOfLegOrTo(timePoint,
                             competitorLeg, trackedLegOfFastestCompetitorInLeg, cache);
-                    final Duration totalDurationSinceRaceStart = timeToReachFastest == null ? null :
+                    final Duration totalDurationSinceRaceStart = timeToReachFastest == null ? null : startOfRace == null ? null :
                         startOfRace.until(timePoint).plus(timeToReachFastest);
                     correctedTime = getCalculatedTime(competitor, () -> trackedLeg.getLeg(),
                             () -> positionOfFastestBoatInLegAtTimePointOrLegEnd, totalDurationSinceRaceStart,
