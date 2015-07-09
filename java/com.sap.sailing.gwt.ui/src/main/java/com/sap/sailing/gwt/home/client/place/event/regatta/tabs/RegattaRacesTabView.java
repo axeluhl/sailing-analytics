@@ -101,7 +101,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
-        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
+        listNavigationPanelUi.removeFromParent(); // TODO temporary removed
+//        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
 //        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
         
         GetRaceListViewAction action = new GetRaceListViewAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId());
