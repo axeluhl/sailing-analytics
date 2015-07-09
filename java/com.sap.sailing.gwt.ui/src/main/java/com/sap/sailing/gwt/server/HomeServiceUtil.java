@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
 
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
@@ -19,6 +19,9 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -35,6 +38,7 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -196,22 +200,27 @@ public final class HomeServiceUtil {
         return count;
     }
     
-    public static String calculateBoatClass(Leaderboard leaderboard) {
-        String boatClass = null;
-        String boatClassDisplayName = null;
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            if(competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
-                if(boatClass == null) {
-                    boatClass = competitor.getBoat().getBoatClass().getName();
-                    boatClassDisplayName = competitor.getBoat().getBoatClass().getDisplayName();
-                } else if(competitor.getBoat().getBoatClass().getName() != null && !boatClass.equals(competitor.getBoat().getBoatClass().getName())) {
-                    // more than one boatClass
-                    return null;
-                }
-                
+    public static String getBoatClassName(Leaderboard leaderboard) {
+        BoatClass boatClass = getBoatClass(leaderboard);
+        return boatClass == null ? null : boatClass.getName();
+    }
+
+    private static BoatClass getBoatClass(Leaderboard leaderboard) {
+        if(leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            BoatClass boatClassFromRegatta = regattaLeaderboard.getRegatta().getBoatClass();
+            if(boatClassFromRegatta != null) {
+                return boatClassFromRegatta;
             }
         }
-        return boatClassDisplayName != null ? boatClassDisplayName : boatClass;
+        return getBoatClassFromTrackedRaces(leaderboard);
+    }
+
+    private static BoatClass getBoatClassFromTrackedRaces(Leaderboard leaderboard) {
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            return trackedRace.getRace().getBoatClass();
+        }
+        return null;
     }
 
     public static boolean hasMedia(Event event) {
@@ -226,7 +235,7 @@ public final class HomeServiceUtil {
         return !Util.isEmpty(event.getVideos());
     }
 
-    public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
+    public static boolean isPartOfEvent(Event event, Leaderboard regattaEntity) {
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
                 return true;
@@ -395,8 +404,7 @@ public final class HomeServiceUtil {
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
             if(leaderboard instanceof RegattaLeaderboard) {
-                Regatta regattaEntity = service.getRegattaByName(leaderboard.getName());
-                if(!HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                     continue;
                 }
             }
@@ -419,5 +427,40 @@ public final class HomeServiceUtil {
         }
         result.setTags(tags);
         return result;
+    }
+    
+    public static RegattaMetadataDTO toRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();
+        fillRegattaFields(leaderboardGroup, leaderboard, regattaDTO);
+        
+        return regattaDTO;
+    }
+
+    public static void fillRegattaFields(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
+            RegattaMetadataDTO regattaDTO) {
+        regattaDTO.setId(leaderboard.getName());
+        regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
+        regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+        regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
+        regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
+        regattaDTO.setTrackedRacesCount(calculateTrackedRaceCount(leaderboard));
+        regattaDTO.setBoatClass(getBoatClassName(leaderboard));
+        if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
+            regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
+        }
+        regattaDTO.setState(calculateRegattaState(regattaDTO));
+    }
+    
+    public static boolean hasLiveRace(LeaderboardDTO leaderboard) {
+        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(getLiveTimePointInMillis());
+        return !liveRaces.isEmpty();
+    }
+    
+    private static long getLiveTimePointInMillis() {
+        // TODO better solution
+        long livePlayDelayInMillis = 15_000;
+        return System.currentTimeMillis() - livePlayDelayInMillis;
     }
 }

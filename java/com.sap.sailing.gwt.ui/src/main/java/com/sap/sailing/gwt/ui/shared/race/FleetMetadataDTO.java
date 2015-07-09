@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared.race;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class FleetMetadataDTO implements IsSerializable {
+public class FleetMetadataDTO implements IsSerializable, Comparable<FleetMetadataDTO> {
 
     private String fleetName;
     private String fleetColor;
@@ -23,5 +23,10 @@ public class FleetMetadataDTO implements IsSerializable {
 
     public String getFleetColor() {
         return fleetColor;
+    }
+
+    @Override
+    public int compareTo(FleetMetadataDTO o) {
+        return fleetName.compareTo(o.fleetName);
     }
 }

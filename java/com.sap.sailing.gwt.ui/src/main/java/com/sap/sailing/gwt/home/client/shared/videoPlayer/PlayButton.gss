@@ -1,0 +1,22 @@
+.playButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -40px 0px 0px -40px;
+  padding: 0;
+  width: 80px;
+  height: 80px;
+  background-image: url("images/home/play.png");
+  background-color: transparent;
+  background-repeat: no-repeat; 
+  background-position: center;
+  background-size: contain;
+  cursor: pointer;
+}
+@media (max-width: 45em) {
+  .playButton {
+    margin: -20px 0px 0px -20px;
+    width: 40px;
+    height: 40px;
+  }
+}

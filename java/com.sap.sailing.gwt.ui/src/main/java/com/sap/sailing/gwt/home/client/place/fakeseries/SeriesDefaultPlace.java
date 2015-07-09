@@ -2,9 +2,10 @@ package com.sap.sailing.gwt.home.client.place.fakeseries;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 
-public class SeriesDefaultPlace extends AbstractSeriesPlace {
+public class SeriesDefaultPlace extends AbstractSeriesPlace implements HasMobileVersion {
 
     public SeriesDefaultPlace(SeriesContext ctx) {
         super(ctx);

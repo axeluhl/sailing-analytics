@@ -11,10 +11,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public abstract class StageTeaserBand extends Composite {
@@ -29,11 +29,11 @@ public abstract class StageTeaserBand extends Composite {
     @UiField Anchor actionLink;
     @UiField DivElement isLiveDiv;
 
-    private final HomePlacesNavigator placeNavigator;
+    private final DesktopPlacesNavigator placeNavigator;
     private final EventStageDTO event;
     private final PlaceNavigation<EventDefaultPlace> eventNavigation;
     
-    public StageTeaserBand(EventStageDTO event, HomePlacesNavigator placeNavigator) {
+    public StageTeaserBand(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         

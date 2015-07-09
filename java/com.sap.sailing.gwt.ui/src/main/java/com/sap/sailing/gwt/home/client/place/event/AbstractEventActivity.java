@@ -14,9 +14,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
@@ -24,8 +21,11 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -52,11 +52,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     private final Timer timerForClientServerOffset;
 
-    protected final HomePlacesNavigator homePlacesNavigator;
+    protected final DesktopPlacesNavigator homePlacesNavigator;
 
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
-    public AbstractEventActivity(PLACE place, EventClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
+    public AbstractEventActivity(PLACE place, EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.homePlacesNavigator = homePlacesNavigator;
         this.ctx = new EventContext(place.getCtx());
