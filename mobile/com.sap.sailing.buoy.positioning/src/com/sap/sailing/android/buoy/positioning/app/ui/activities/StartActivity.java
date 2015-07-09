@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
@@ -19,10 +18,6 @@ public class StartActivity extends AbstractStartActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(getString(R.string.title_activity_start));
-            OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
-            toolbar.hideSubtitle();
-            toolbar.setTitleSize(20);
             getSupportActionBar().setTitle(getString(R.string.title_activity_start));
             getSupportActionBar().setHomeButtonEnabled(false);
         }
