@@ -21,6 +21,8 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.TimePanel;
+import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -71,7 +73,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             return;
         }
         
-        // read optional parameters 
+        // read optional parameters
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, true /* default*/);
         final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
         final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
@@ -128,9 +130,15 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
                     final List<RegattaAndRaceIdentifier> raceList = Collections.singletonList(selectedRaceIdentifier);
                     raceSelectionModel.setSelection(raceList);
-                    final Timer timer = new Timer(PlayModes.Live, Duration.ONE_SECOND.times(3).asMillis());
+                    final long refreshInterval = Duration.ONE_SECOND.times(3).asMillis();
+                    final Timer timer = new Timer(PlayModes.Live);
                     AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
                     final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
+                    // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed
+                    final TimePanel<TimePanelSettings> timePanel = new TimePanel<>(timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false);
+                    final TimePanelSettings timePanelSettings = timePanel.getSettings();
+                    timePanelSettings.setRefreshInterval(refreshInterval);
+                    timePanel.updateSettings(timePanelSettings);
                     raceMapResources.combinedWindPanelStyle().ensureInjected();
                     final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
@@ -146,6 +154,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                                 timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
                                 asyncActionsExecutor, /* errorReporter */
                                 EmbeddedMapAndWindChartEntryPoint.this, /* compactChart */ true);
+                        windChart.onRaceSelectionChange(raceList);
                     } else {
                         windChart = null;
                     }
