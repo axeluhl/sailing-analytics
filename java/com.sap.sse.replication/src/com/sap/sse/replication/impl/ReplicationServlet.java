@@ -162,6 +162,8 @@ public class ReplicationServlet extends AbstractHttpServlet {
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
         OperationWithResult<S, ?> operation = replicable.readOperation(is);
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
+        logger.info("Applying operation of type " + operation.getClass().getName()
+                + " received from replica to replicable " + replicable.toString());
         replicable.apply(operation);
     }
 
