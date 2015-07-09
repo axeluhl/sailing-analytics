@@ -25,6 +25,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAr
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDefineMarkEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDenoteForTrackingEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDependentStartTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceCompetitorMappingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceMarkMappingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEndOfTrackingEventSerializer;
@@ -183,6 +184,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return flagEventDeserializer;
         } else if (type.equals(RaceLogStartTimeEventSerializer.VALUE_CLASS)) {
             return startTimeEventDeserializer;
+        } else if (type.equals(RaceLogDependentStartTimeEventSerializer.VALUE_CLASS)) {
+            return dependentStartTimeEventDeserializer;
         } else if (type.equals(RaceLogRaceStatusEventSerializer.VALUE_CLASS)) {
             return raceStatusEventDeserializer;
         } else if (type.equals(RaceLogPassChangeEventSerializer.VALUE_CLASS)) {
