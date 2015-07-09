@@ -30,27 +30,35 @@ public class DropdownFilter<T> extends Composite {
     @UiField FlowPanel filterItemContainerUi;
     private final DropdownFilterList<T> filterList;
     private final DropdownHandler dropdownHandler;
+    private final String nullValueLabel;
+    private T selectedFilterValue = null;
 
-    public DropdownFilter(DropdownFilterList<T> filterList) {
+    public DropdownFilter(String nullValueLabel, DropdownFilterList<T> filterList) {
+        this.nullValueLabel = nullValueLabel;
         this.filterList = filterList;
         CSS.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.dropdownHandler = new ListFilterDropdownHandler();
-        
-        this.addFilterValue(filterList.getDefaultValues()).select();
-        for (T value : filterList.getSelectableValues()) {
-            addFilterValue(value);
-        }
     }
     
-    private ListDropdownFilterItem addFilterValue(T value) {
-        ListDropdownFilterItem filterItem = new ListDropdownFilterItem(value);
+    public void updateFilterValues() {
+        filterItemContainerUi.clear();
+        DropdownFilterItem filterItemToSelect = addFilterValue(null, nullValueLabel);
+        for (T value : filterList.getSelectableValues()) {
+            DropdownFilterItem newFilterItem = addFilterValue(value, String.valueOf(value));
+            filterItemToSelect = value.equals(selectedFilterValue) ? newFilterItem : filterItemToSelect;
+        }
+        filterItemToSelect.select();
+        setVisible(filterList.getSelectableValues().size() > 1);
+    }
+    
+    private DropdownFilterItem addFilterValue(T value, String label) {
+        DropdownFilterItem filterItem = new DropdownFilterItem(value, label);
         filterItemContainerUi.add(filterItem);
         return filterItem;
     }
 
     public interface DropdownFilterList<T> {
-        T getDefaultValues();
         Collection<T> getSelectableValues();
         void onSelectFilter(T value);
     }
@@ -66,13 +74,14 @@ public class DropdownFilter<T> extends Composite {
         }
     }
     
-    private class ListDropdownFilterItem extends Widget {
+    private class DropdownFilterItem extends Widget {
         private final T value;
-        private ListDropdownFilterItem(T value) {
+        private final String label;
+        private DropdownFilterItem(T value, String label) {
             this.value = value;
-            DivElement element = DOM.createDiv().<DivElement>cast();
-            element.setInnerText(String.valueOf(value));
-            this.setElement(element);
+            this.label = label;
+            this.setElement(DOM.createDiv().<DivElement>cast());
+            this.getElement().setInnerText(label);
             this.addStyleName(CSS.regattanavigation_filter_dropdown_link());
             this.initClickHandler();
         }
@@ -83,20 +92,21 @@ public class DropdownFilter<T> extends Composite {
                 public void onClick(ClickEvent event) {
                     if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
                         event.preventDefault();
-                        dropdownHandler.setVisible(false);
-                        ListDropdownFilterItem.this.select();
-                        filterList.onSelectFilter(value);
+                        DropdownFilterItem.this.select();
+                        DropdownFilter.this.dropdownHandler.setVisible(false);
                     }
                 }
             }, ClickEvent.getType());
         }
         
         private void select() {
-            currentValueUi.setInnerText(String.valueOf(value));
+            DropdownFilter.this.selectedFilterValue = value;
+            DropdownFilter.this.currentValueUi.setInnerText(label);
             for (int i=0; i < filterItemContainerUi.getWidgetCount(); i++) {
                 filterItemContainerUi.getWidget(i).removeStyleName(CSS.regattanavigation_filter_dropdown_linkactive());
             }
             this.addStyleName(CSS.regattanavigation_filter_dropdown_linkactive());
+            DropdownFilter.this.filterList.onSelectFilter(value);
         }
     }
 }
