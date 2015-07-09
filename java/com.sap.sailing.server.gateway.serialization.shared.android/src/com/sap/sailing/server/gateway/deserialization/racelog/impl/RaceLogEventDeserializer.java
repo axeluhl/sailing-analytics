@@ -61,6 +61,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(competitorDeserializer),
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 
+                new RaceLogDependentStartTimeEventDeserializer(competitorDeserializer),
                 new RaceLogRaceStatusEventDeserializer(competitorDeserializer),
                 new RaceLogCourseAreaChangedEventDeserializer(competitorDeserializer),
                 new RaceLogCourseDesignChangedEventDeserializer(competitorDeserializer,
@@ -89,12 +90,12 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogAdditionalScoringInformationEventDeserializer(competitorDeserializer),
                 new RaceLogFixedMarkPassingEventDeserializer(competitorDeserializer),
                 new RaceLogSuppressedMarkPassingsEventDeserializer(competitorDeserializer),
-                new RaceLogStartOfTrackingEventDeserializer(competitorDeserializer),
-                new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer));
+                new RaceLogStartOfTrackingEventDeserializer(competitorDeserializer), new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> dependentStartTimeEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer;
@@ -122,6 +123,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
+            JsonDeserializer<RaceLogEvent> dependentStartTimeEventDeserializer,
             JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer,
             JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer,
             JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer,
@@ -140,14 +142,14 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> revokeEventDeserializer,
             JsonDeserializer<RaceLogEvent> registerCompetitorEventDeserializer,
             JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer,
-            JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer,
-            JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer, 
+            JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer, 
+            JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer,
             JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer,
             JsonDeserializer<RaceLogEvent> suppressedMarkPassingsEventDeserializer,
-            JsonDeserializer<RaceLogEvent> startOfTrackingEventDeserializer,
-            JsonDeserializer<RaceLogEvent> endOfTrackingEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> startOfTrackingEventDeserializer, JsonDeserializer<RaceLogEvent> endOfTrackingEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
+        this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
         this.courseAreaChangedEventDeserializer = courseAreaChangedEventDeserializer;
         this.courseDesignChangedEventDeserializer = courseDesignChangedEventDeserializer;

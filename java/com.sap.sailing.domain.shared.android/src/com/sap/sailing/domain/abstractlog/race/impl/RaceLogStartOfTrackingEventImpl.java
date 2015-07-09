@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogStartOfTrackingEventImpl extends RaceLogEventImpl implements RaceLogStartOfTrackingEvent {
+    private static final long serialVersionUID = -4134608549471817247L;
 
     public RaceLogStartOfTrackingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint startOfTracking, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
@@ -21,5 +22,4 @@ public class RaceLogStartOfTrackingEventImpl extends RaceLogEventImpl implements
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
     }
-
 }
