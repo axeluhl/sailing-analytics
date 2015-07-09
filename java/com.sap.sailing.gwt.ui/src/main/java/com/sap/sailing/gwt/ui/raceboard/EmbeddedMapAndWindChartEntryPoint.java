@@ -51,6 +51,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     private UUID eventId;
     
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
+    private static final int DEFAULT_WIND_CHART_HEIGHT = 200;
 
     @Override
     protected void doOnModuleLoad() {
@@ -71,7 +72,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         
         // read optional parameters 
-        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
+        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, true /* default*/);
         final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
         final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
@@ -167,10 +168,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     private void createRaceBoardInOneScreenMode(final RaceMap raceMap, final WindChart windChart) {
         final TouchSplitLayoutPanel p = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /* vertical splitter height */ 25);
         RootLayoutPanel.get().add(p);
-        p.insert(raceMap.getEntryWidget(), raceMap, Direction.CENTER, 400);
         if (windChart != null) {
-            p.insert(windChart.getEntryWidget(), windChart, Direction.SOUTH, 200);
+            windChart.setVisible(true);
+            p.insert(windChart.getEntryWidget(), windChart, Direction.SOUTH, DEFAULT_WIND_CHART_HEIGHT);
+            p.setWidgetVisibility(windChart.getEntryWidget(), windChart, /* hidden */ false, DEFAULT_WIND_CHART_HEIGHT);
         }
+        p.insert(raceMap.getEntryWidget(), raceMap, Direction.CENTER, 400);
         p.addStyleName("dockLayoutPanel");
     }
 }

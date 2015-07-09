@@ -521,38 +521,35 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
      */
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        if(!isVisible()) {
-            return;
-        }
-
-        updateTimePlotLine(newTime);
-        
-        switch(timer.getPlayMode()) {
-            case Live:
-            {
-                // is date before first cache entry or is cache empty?
-                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
-                    loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
-                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
-                    loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
-                }
-                // otherwise the cache spans across date and so we don't need to load anything
-                break;
-            }
-            case Replay:
-            {
-                if (timeOfLatestRequestInMillis == null) {
-                    // pure replay mode
-                    loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
-                } else {
-                    // replay mode during live play
+        if (isVisible()) {
+            updateTimePlotLine(newTime);
+            switch (timer.getPlayMode()) {
+                case Live:
+                {
+                    // is date before first cache entry or is cache empty?
                     if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
                         loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
                     } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
-                        loadData(new Date(timeOfLatestRequestInMillis), newTime, /* append */true);
-                    }                    
+                        loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                    }
+                    // otherwise the cache spans across date and so we don't need to load anything
+                    break;
                 }
-                break;
+                case Replay:
+                {
+                    if (timeOfLatestRequestInMillis == null) {
+                        // pure replay mode
+                        loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
+                    } else {
+                        // replay mode during live play
+                        if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                            loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
+                        } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
+                            loadData(new Date(timeOfLatestRequestInMillis), newTime, /* append */true);
+                        }                    
+                    }
+                    break;
+                }
             }
         }
      }
