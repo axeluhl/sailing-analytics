@@ -1,6 +1,7 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +13,9 @@ import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -24,6 +25,9 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.filter.Filter;
@@ -36,8 +40,6 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint {
-    private RaceDTO selectedRace;
-
     private static final String PARAM_REGATTA_LIKE_NAME = "regattaLikeName";
     private static final String PARAM_RACE_COLUMN_NAME = "raceColumnName";
     private static final String PARAM_FLEET_NAME = "fleetName";
@@ -114,11 +116,18 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 if (selectedRaceIdentifier == null) {
                     createErrorPage("Could not obtain a race with name " + raceColumnName + " for fleet "+fleetName+" for a regatta with name " + regattaLikeName);
                 } else {
-                    Window.setTitle(selectedRace.getName());
-                    RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-                    List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRaceIdentifier);
-                    raceSelectionModel.setSelection(singletonList);
-                    Timer timer = new Timer(PlayModes.Live, Duration.ONE_SECOND.times(3).asMillis());
+                    final StringBuilder title = new StringBuilder(regattaLikeName);
+                    title.append('/');
+                    title.append(raceColumnName);
+                    if (!fleetName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
+                        title.append('/');
+                        title.append(fleetName);
+                    }
+                    Window.setTitle(title.toString());
+                    final RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
+                    final List<RegattaAndRaceIdentifier> raceList = Collections.singletonList(selectedRaceIdentifier);
+                    raceSelectionModel.setSelection(raceList);
+                    final Timer timer = new Timer(PlayModes.Live, Duration.ONE_SECOND.times(3).asMillis());
                     AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
                     final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
                     raceMapResources.combinedWindPanelStyle().ensureInjected();
@@ -126,11 +135,16 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                             competitorSelection, getStringMessages(), showMapControls, showViewStreamlets,
                             showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle());
+                    final RaceMapSettings mapSettings = raceMap.getSettings();
+                    mapSettings.setZoomSettings(new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false));
+                    raceMap.updateSettings(mapSettings);
+                    raceMap.onRaceSelectionChange(raceList);
                     final WindChart windChart;
                     if (showWindChart) {
                         windChart = new WindChart(sailingService, raceSelectionModel, timer,
-                        timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
-                        asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, /* compactChart */ true);
+                                timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
+                                asyncActionsExecutor, /* errorReporter */
+                                EmbeddedMapAndWindChartEntryPoint.this, /* compactChart */ true);
                     } else {
                         windChart = null;
                     }
