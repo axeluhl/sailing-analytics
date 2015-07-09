@@ -434,5 +434,6 @@
     <string name="dependent_races_relative">Relative Startzeit</string>
     <string name="dependent_races_prompt">Bitte Rennen auswählen</string>
     <string name="minutes_after">Minuten nach</string>
+    <string name="minutes_after_long">%1$.0f Minuten nach %2$s</string>
 
 </resources>

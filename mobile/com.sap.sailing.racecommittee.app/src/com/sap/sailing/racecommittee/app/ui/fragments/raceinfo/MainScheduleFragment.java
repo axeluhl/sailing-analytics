@@ -24,11 +24,14 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -188,6 +191,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
         mRaceId = (String) getArguments().getSerializable(DEPENDENT_RACE);
+
+        if (mRaceId != null && mStartTimeDiff != null) {
+            ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
+            mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(), RaceHelper.getRaceName(race, " / "));
+        }
     }
 
     @Override
@@ -257,13 +265,18 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         super.notifyTick(now);
 
         if (mStartTimeTextView != null && !TextUtils.isEmpty(mStartTimeString)) {
-            String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
-            mStartTimeTextView.setText(startTimeValue);
+            if (mRaceId == null && mStartTimeDiff == null) {
+                String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
+                mStartTimeTextView.setText(startTimeValue);
+            } else {
+                mStartTimeTextView.setText(mStartTimeString);
+            }
         }
 
         if (mWindValue != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             Wind wind = getRaceState().getWindFix();
-            String sensorData = getString(R.string.wind_sensor, mDateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind.getKnots());
+            String sensorData = getString(R.string.wind_sensor, mDateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+                .getKnots());
             mWindValue.setText(sensorData);
         }
     }

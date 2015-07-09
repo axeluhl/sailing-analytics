@@ -454,5 +454,6 @@
     <string name="dependent_races_relative">Relative Start Time</string>
     <string name="dependent_races_prompt">Please select the race</string>
     <string name="minutes_after">Minutes after</string>
+    <string name="minutes_after_long">%1$.0f Minutes after %2$s</string>
 
 </resources>
