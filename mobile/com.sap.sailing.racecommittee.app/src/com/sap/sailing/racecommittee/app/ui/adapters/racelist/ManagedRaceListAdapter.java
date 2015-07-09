@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -14,8 +17,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -23,6 +29,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -32,9 +39,6 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
 
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
@@ -60,6 +64,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView boat_class;
     private TextView fleet_series;
     private ImageView protest_image;
+    private ImageView has_dependent_races;
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
 
@@ -180,6 +185,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         }
                         time.setTextSize(textSize);
                     }
+                    StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), race.getRace().getRaceLog());
+                    StartTimeFinderResult result = stf.analyze();
+                    if (result != null && result.isDependentStartTime()) {
+                        has_dependent_races.setVisibility(View.VISIBLE);
+                    }
                 }
                 if (state.getFinishedTime() != null) {
                     time.setVisibility(View.GONE);
@@ -223,25 +233,26 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mSelectedRace = id;
     }
 
-    private void findViews(View convertView) {
-        marker = ViewHolder.get(convertView, R.id.race_marker);
-        current_flag = ViewHolder.get(convertView, R.id.current_flag);
-        update_badge = ViewHolder.get(convertView, R.id.update_badge);
-        race_flag = ViewHolder.get(convertView, R.id.race_flag);
-        time = ViewHolder.get(convertView, R.id.time);
-        race_name = ViewHolder.get(convertView, R.id.race_name);
-        race_finished = ViewHolder.get(convertView, R.id.race_finshed);
-        race_started = ViewHolder.get(convertView, R.id.race_started);
-        race_scheduled = ViewHolder.get(convertView, R.id.race_scheduled);
-        race_unscheduled = ViewHolder.get(convertView, R.id.race_unscheduled);
-        flag_timer = ViewHolder.get(convertView, R.id.flag_timer);
-        protest_image = ViewHolder.get(convertView, R.id.protest_image);
-        boat_class = ViewHolder.get(convertView, R.id.boat_class);
-        fleet_series = ViewHolder.get(convertView, R.id.fleet_series);
+    private void findViews(View layout) {
+        marker = ViewHolder.get(layout, R.id.race_marker);
+        current_flag = ViewHolder.get(layout, R.id.current_flag);
+        update_badge = ViewHolder.get(layout, R.id.update_badge);
+        race_flag = ViewHolder.get(layout, R.id.race_flag);
+        time = ViewHolder.get(layout, R.id.time);
+        race_name = ViewHolder.get(layout, R.id.race_name);
+        race_finished = ViewHolder.get(layout, R.id.race_finshed);
+        race_started = ViewHolder.get(layout, R.id.race_started);
+        race_scheduled = ViewHolder.get(layout, R.id.race_scheduled);
+        race_unscheduled = ViewHolder.get(layout, R.id.race_unscheduled);
+        flag_timer = ViewHolder.get(layout, R.id.flag_timer);
+        protest_image = ViewHolder.get(layout, R.id.protest_image);
+        boat_class = ViewHolder.get(layout, R.id.boat_class);
+        fleet_series = ViewHolder.get(layout, R.id.fleet_series);
+        has_dependent_races = ViewHolder.get(layout, R.id.has_dependent_races);
     }
 
-    private void resetValues(View convertView) {
-        if (convertView != null) {
+    private void resetValues(View layout) {
+        if (layout != null) {
             if (update_badge != null) {
                 update_badge.setVisibility(View.GONE);
             }
@@ -265,6 +276,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             if (race_name != null) {
                 race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+            }
+            if (has_dependent_races != null) {
+                has_dependent_races.setVisibility(View.GONE);
             }
             setMarker(0);
         }
