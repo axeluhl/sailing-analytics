@@ -33,7 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -43,16 +42,12 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private NotificationManager notificationManager;
     private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
-    // TODO Remove unused
-    private ScheduledExecutorService scheduler;
 
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
 
     private static final String TAG = TrackingService.class.getName();
 
-    // TODO Remove unused
-    public static final String WEB_SERVICE_PATH = "/sailingserver/api/v1/gps_fixes";
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
@@ -130,10 +125,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         }
         googleApiClient.disconnect();
         locationUpdateRequested = false;
-
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
 
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
