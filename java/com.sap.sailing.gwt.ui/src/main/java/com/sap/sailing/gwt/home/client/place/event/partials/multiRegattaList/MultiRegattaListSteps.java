@@ -23,6 +23,7 @@ public class MultiRegattaListSteps extends Composite {
     @UiField AnchorElement leaderboardButtonUi;
     
     public MultiRegattaListSteps(RegattaProgressDTO regattaProgress) {
+        MultiRegattaListResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         for(RegattaProgressSeriesDTO seriesProgress : regattaProgress.getSeries()) {
             stepsContainerUi.insertBefore(new MultiRegattaListStepsBody(seriesProgress).getElement(), leaderboardButtonContainerUi);

@@ -22,7 +22,6 @@ public class MultiRegattaListItem extends Composite {
 
     public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress, Presenter presenter) {
         this.regattaWithProgress = regattaWithProgress;
-        MultiRegattaListResources.INSTANCE.css().ensureInjected();
         regattaHeaderUi = new RegattaHeader(regattaWithProgress); 
         regattaStepsUi = new MultiRegattaListSteps(regattaWithProgress.getProgress());
         initWidget(uiBinder.createAndBindUi(this));
