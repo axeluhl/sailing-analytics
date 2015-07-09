@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
@@ -18,6 +19,8 @@ import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListN
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
+import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListResources;
+import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListSteps;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
@@ -31,6 +34,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRaceListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListViewDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -69,6 +73,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
 
     private Presenter currentPresenter;
 
+    @UiField SimplePanel regattaInfoContainerUi;
     @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
     @UiField FlowPanel listFormatContainerUi;
     @UiField FlowPanel compFormatContainerUi;
@@ -106,6 +111,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }
             @Override
             public void onSuccess(ResultWithTTL<RaceListViewDTO> result) {
+                regattaInfoContainerUi.setWidget(getRegattaInformation(result.getDto().getProgress()));
                 liveRacesList.setListData(result.getDto().getLiveRaces());
                 finishedRacesList.setListData(result.getDto().getFinishedRaces());
 //                for (RaceListSeriesDTO series : result.getDto().getRacesForCompetitionFormat()) {
@@ -114,6 +120,12 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                 contentArea.setWidget(RegattaRacesTabView.this);
             }
         });
+    }
+    
+    private Widget getRegattaInformation(RegattaProgressDTO regattaProgress) {
+        MultiRegattaListSteps regattaProgressUi = new MultiRegattaListSteps(regattaProgress);
+        regattaProgressUi.addStyleName(MultiRegattaListResources.INSTANCE.css().regattalistitem());
+        return regattaProgressUi;
     }
 
     @Override
