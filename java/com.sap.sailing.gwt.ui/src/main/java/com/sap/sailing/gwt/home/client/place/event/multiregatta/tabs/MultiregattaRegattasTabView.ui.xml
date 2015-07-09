@@ -1,19 +1,20 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  			 xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event.partials">
-  	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  	<ui:style>
-  		.space-top {
-			margin-top: 2em;
-			margin-bottom: 2em;
-		}
-  	</ui:style>
-    <g:HTMLPanel>
-      <div class="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{style.space-top}" />
-          <p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
-        </div>
-      </div>
-    </g:HTMLPanel>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+		xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event.partials">
+	<ui:with field="res"
+		type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:style>
+	.space-top {
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
+	</ui:style>
+	<g:HTMLPanel>
+		<div class="{res.mediaCss.grid}">
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.space-top}">
+				<p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
+				<p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{style.space-top}" />
+				<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
+			</div>
+		</div>
+	</g:HTMLPanel>
 </ui:UiBinder>
