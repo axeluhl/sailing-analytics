@@ -16,5 +16,6 @@
     		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi" />
     		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
 		</div>
+		<g:SimplePanel ui:field="oldContentContainer"/>
     </g:HTMLPanel>
 </ui:UiBinder>
