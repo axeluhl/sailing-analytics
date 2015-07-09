@@ -232,6 +232,11 @@ public class StartTimeFragment extends BaseFragment
                     }
                     mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
                     mRaceId = (String) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
+
+                    View syncButtons = ViewHolder.get(getView(), R.id.buttonBar);
+                    if (syncButtons != null) {
+                        syncButtons.setVisibility(View.GONE);
+                    }
                     break;
                 }
             }
