@@ -45,7 +45,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     private static final String PARAM_EVENT_ID = "eventId";
     
     private String regattaLikeName;
-    private String raceName;
+    private String raceColumnName;
     private String leaderboardName;
     private String leaderboardGroupName;
     private UUID eventId;
@@ -60,12 +60,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         // read mandatory parameters
         regattaLikeName = Window.Location.getParameter(PARAM_REGATTA_LIKE_NAME);
-        raceName = Window.Location.getParameter(PARAM_RACE_COLUMN_NAME);
+        raceColumnName = Window.Location.getParameter(PARAM_RACE_COLUMN_NAME);
         String eventIdParamValue = Window.Location.getParameter(PARAM_EVENT_ID);
         if (eventIdParamValue != null && !eventIdParamValue.isEmpty()) {
             eventId = UUID.fromString(eventIdParamValue);
         }
-        if (regattaLikeName == null || regattaLikeName.isEmpty() || raceName == null || raceName.isEmpty() ||
+        if (regattaLikeName == null || regattaLikeName.isEmpty() || raceColumnName == null || raceColumnName.isEmpty() ||
                 leaderboardName == null || leaderboardName.isEmpty()) {
             createErrorPage("This page requires a valid regatta name, race name and leaderboard name.");
             return;
@@ -121,10 +121,10 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         if (eventId != null && event == null) {
             createErrorPage(getStringMessages().noSuchEvent());
         }
-        RaceDTO race = findRace(regattaLikeName, raceName, regattas);
+        RaceDTO race = findRace(regattaLikeName, raceColumnName, regattas);
         selectedRace = race;
         if (selectedRace == null) {
-            createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaLikeName);
+            createErrorPage("Could not obtain a race with name " + raceColumnName + " for a regatta with name " + regattaLikeName);
             return;
         }
         Window.setTitle(selectedRace.getName());
