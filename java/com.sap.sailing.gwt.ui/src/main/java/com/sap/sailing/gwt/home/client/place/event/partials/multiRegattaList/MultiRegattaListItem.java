@@ -18,14 +18,20 @@ public class MultiRegattaListItem extends Composite {
     
     @UiField(provided = true) RegattaHeader regattaHeaderUi;
     @UiField(provided = true) MultiRegattaListSteps regattaStepsUi;
+    private final RegattaWithProgressDTO regattaWithProgress;
 
     public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress, Presenter presenter) {
+        this.regattaWithProgress = regattaWithProgress;
         MultiRegattaListResources.INSTANCE.css().ensureInjected();
         regattaHeaderUi = new RegattaHeader(regattaWithProgress); 
         regattaStepsUi = new MultiRegattaListSteps(regattaWithProgress.getProgress());
         initWidget(uiBinder.createAndBindUi(this));
         regattaHeaderUi.setRegattaNavigation(presenter.getRegattaNavigation(regattaWithProgress.getId()));
         regattaStepsUi.setLeaderboardNavigation(presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId()));
+    }
+    
+    void setVisibilityDependingOnBoatCategory(String visibleBoatCategory) {
+        setVisible(visibleBoatCategory == null || visibleBoatCategory.equals(regattaWithProgress.getBoatCategory()));
     }
 
 }

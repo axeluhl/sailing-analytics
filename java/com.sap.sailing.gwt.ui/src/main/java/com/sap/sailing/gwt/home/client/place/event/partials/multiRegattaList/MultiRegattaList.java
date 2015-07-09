@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.TreeSet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,6 +24,7 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
 
     @UiField FlowPanel regattasContainerUi;
     private final Presenter currentPresenter;
+    private final Collection<String> selectableBoatCategories = new TreeSet<>();
 
     public MultiRegattaList(Presenter presenter) {
         this.currentPresenter = presenter;
@@ -36,8 +38,21 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
 
     public void setListData(Collection<RegattaWithProgressDTO> data) {
         regattasContainerUi.clear();
+        selectableBoatCategories.clear();
         for (RegattaWithProgressDTO regattaWithProgress : data) {
             regattasContainerUi.add(new MultiRegattaListItem(regattaWithProgress, currentPresenter));
+            selectableBoatCategories.add(regattaWithProgress.getBoatCategory());
+        }
+    }
+    
+    public Collection<String> getSelectableBoatCategories() {
+        return selectableBoatCategories;
+    }
+    
+    public void setVisibleBoatCategory(String visibleBoatCategory) {
+        for (int i=0; i < regattasContainerUi.getWidgetCount(); i++) {
+            MultiRegattaListItem item = (MultiRegattaListItem) regattasContainerUi.getWidget(i);
+            item.setVisibilityDependingOnBoatCategory(visibleBoatCategory);
         }
     }
 
