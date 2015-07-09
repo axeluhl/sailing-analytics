@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstans;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
@@ -46,19 +47,19 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
         try {
-            Class<?> idClass = Class.forName((String) object.get(CompetitorJsonSerializer.FIELD_ID_TYPE));
+            Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstans.FIELD_ID_TYPE));
             if (Number.class.isAssignableFrom(idClass)) {
                 Constructor<?> constructorFromString = idClass.getConstructor(String.class);
                 competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
             } else if (UUID.class.isAssignableFrom(idClass)) {
                 competitorId = Helpers.tryUuidConversion(competitorId);
             }
-            String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
-            String displayColorAsString = (String) object.get(CompetitorJsonSerializer.FIELD_DISPLAY_COLOR);
-            String email = (String) object.get(CompetitorJsonSerializer.FIELD_EMAIL);
+            String name = (String) object.get(CompetitorJsonConstans.FIELD_NAME);
+            String displayColorAsString = (String) object.get(CompetitorJsonConstans.FIELD_DISPLAY_COLOR);
+            String email = (String) object.get(CompetitorJsonConstans.FIELD_EMAIL);
             
             URI flagImageURI = null;
-            String flagImageURIAsString = (String) object.get(CompetitorJsonSerializer.FIELD_FLAG_IMAGE_URI);
+            String flagImageURIAsString = (String) object.get(CompetitorJsonConstans.FIELD_FLAG_IMAGE_URI);
             if (flagImageURIAsString != null) {
                 try {
                     flagImageURI = URI.create(flagImageURIAsString);
@@ -75,17 +76,17 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             }
             DynamicTeam team = null;
             DynamicBoat boat = null;
-            if (teamJsonDeserializer != null && object.get(CompetitorJsonSerializer.FIELD_TEAM) != null) {
+            if (teamJsonDeserializer != null && object.get(CompetitorJsonConstans.FIELD_TEAM) != null) {
                 team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                        CompetitorJsonSerializer.FIELD_TEAM));
+                        CompetitorJsonConstans.FIELD_TEAM));
             }
-            if (boatJsonDeserializer != null && object.get(CompetitorJsonSerializer.FIELD_BOAT) != null) {
+            if (boatJsonDeserializer != null && object.get(CompetitorJsonConstans.FIELD_BOAT) != null) {
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                        CompetitorJsonSerializer.FIELD_BOAT));
+                        CompetitorJsonConstans.FIELD_BOAT));
             }
-            final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonSerializer.FIELD_TIME_ON_TIME_FACTOR);
+            final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstans.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
-                    .get(CompetitorJsonSerializer.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
+                    .get(CompetitorJsonConstans.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
             Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email,
                     flagImageURI, team, boat, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :

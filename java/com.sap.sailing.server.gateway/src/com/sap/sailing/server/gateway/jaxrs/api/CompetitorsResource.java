@@ -27,7 +27,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonSerializer;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstans;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -48,15 +48,15 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public static JSONObject getCompetitorJSON(Competitor competitor) {
         // see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
         JSONObject json = new JSONObject();
-        json.put(CompetitorJsonSerializer.COMPETITOR_ID, competitor.getId().toString());
-        json.put(CompetitorJsonSerializer.COMPETITOR_NAME, competitor.getName());
-        json.put(CompetitorJsonSerializer.COMPETITOR_SAIL_ID, competitor.getBoat().getSailID());
-        json.put(CompetitorJsonSerializer.COMPETITOR_NATIONALITY, competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        json.put(CompetitorJsonSerializer.COMPETITOR_COUNTRY_CODE, competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
-        json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
-        json.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+        json.put(CompetitorJsonConstans.COMPETITOR_ID, competitor.getId().toString());
+        json.put(CompetitorJsonConstans.COMPETITOR_NAME, competitor.getName());
+        json.put(CompetitorJsonConstans.COMPETITOR_SAIL_ID, competitor.getBoat().getSailID());
+        json.put(CompetitorJsonConstans.COMPETITOR_NATIONALITY, competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+        json.put(CompetitorJsonConstans.COMPETITOR_COUNTRY_CODE, competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
+        json.put(CompetitorJsonConstans.COMPETITOR_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
+        json.put(CompetitorJsonConstans.COMPETITOR_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
         if(competitor.getFlagImage() != null) {
-            json.put("flagImage", competitor.getFlagImage().toString());
+            json.put(CompetitorJsonConstans.COMPETITOR_FLAG_IMAGE, competitor.getFlagImage().toString());
         }
         
         return json;
