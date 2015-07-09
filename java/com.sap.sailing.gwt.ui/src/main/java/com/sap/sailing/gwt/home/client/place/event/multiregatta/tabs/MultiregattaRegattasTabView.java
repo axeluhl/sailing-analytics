@@ -28,6 +28,11 @@ import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
  * Created by pgtaboada on 25.11.14.
  */
 public class MultiregattaRegattasTabView extends Composite implements MultiregattaTabView<MultiregattaRegattasPlace> {
+
+    interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
+    }
+
+    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) RacesListLive racesListLiveUi;
@@ -35,7 +40,6 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     private Presenter currentPresenter;
 
     public MultiregattaRegattasTabView() {
-
     }
 
     @Override
@@ -55,7 +59,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
 
     @Override
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
-        MultiRegattasTabViewRegattaFilterList regattaFilterList = new MultiRegattasTabViewRegattaFilterList();
+        MultiregattaRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
         racesListLiveUi = new RacesListLive(currentPresenter, true);
         regattaListUi = new MultiRegattaList(currentPresenter);
@@ -70,17 +74,13 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     public void stop() {
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
-    }
-
-    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
-
     @Override
     public MultiregattaRegattasPlace placeToFire() {
         return new MultiregattaRegattasPlace(currentPresenter.getCtx());
     }
     
-    private class MultiRegattasTabViewRegattaFilterList implements DropdownFilterList<String>, RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
+    private class MultiregattaRegattasTabViewRegattaFilterList implements 
+            DropdownFilterList<String>, RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
         
         @Override
         public void setData(SortedSetResult<RegattaWithProgressDTO> data, long nextUpdate, int updateNo) {
