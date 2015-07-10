@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -58,7 +59,14 @@ public class LeaderboardContext {
             for (CompetitorDTO competitor : leaderboardDTO.competitors) {
                 rank++;
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
-                int raceCount = row.fieldsByRaceColumnName == null ? 0 : row.fieldsByRaceColumnName.size();
+                int raceCount = 0;
+                if(row.fieldsByRaceColumnName != null) {
+                    for(LeaderboardEntryDTO lbEntry : row.fieldsByRaceColumnName.values()) {
+                        if(lbEntry.totalPoints != null) {
+                            raceCount++;
+                        }
+                    }
+                }
                 result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
