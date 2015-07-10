@@ -507,7 +507,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
               Image sapLogo = createSAPLogo();
-              RaceMap.this.add(sapLogo);
+              RaceMap.this.add(sapLogo); // FIXME how about adding the SAP logo as a control and this way pushing down the wind and north panels?
               map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
               combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
               map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
