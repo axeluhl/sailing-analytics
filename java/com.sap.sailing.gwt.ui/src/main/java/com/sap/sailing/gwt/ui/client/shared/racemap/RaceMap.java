@@ -483,8 +483,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void execute() {
                 if (map != null) {
                     map.setOptions(mapOptions);
-                    final LatLngBounds newBounds = getDefaultZoomBounds();
-                    zoomMapToNewBounds(newBounds);
+                    // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
+                    mapFirstZoomDone = false;
                     trueNorthIndicatorPanel.redraw();
                     orientationChangeInProgress = false;
                 }
