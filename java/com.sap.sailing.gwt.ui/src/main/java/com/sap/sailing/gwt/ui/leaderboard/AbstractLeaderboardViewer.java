@@ -48,6 +48,8 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         this.stringMessages = stringMessages;
         this.timer = timer;
         this.hideToolbar = hideToolbar;
+        
+        RES.css().ensureInjected();
     }
     
     public LeaderboardPanel getLeaderboardPanel() {
