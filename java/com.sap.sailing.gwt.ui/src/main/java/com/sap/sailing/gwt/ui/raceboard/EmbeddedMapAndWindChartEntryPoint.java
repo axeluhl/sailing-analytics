@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -96,10 +97,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     }
     
     private void createErrorPage(String message) {
+        final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        RootPanel.get().add(logoAndTitlePanel);
-        RootPanel.get().add(new Label(message));
+        RootLayoutPanel.get().add(vp);
+        vp.addNorth(logoAndTitlePanel, 100);
+        vp.add(new Label(message));
     }
 
     private void checkUrlParameters(final EventDTO event, final boolean showWindChart,
