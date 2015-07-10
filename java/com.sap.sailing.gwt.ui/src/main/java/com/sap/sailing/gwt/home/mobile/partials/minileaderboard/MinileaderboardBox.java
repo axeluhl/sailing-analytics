@@ -60,7 +60,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
             itemContainerUi.addContent(getScoreInformation(data));
         }
         
-        boolean showRaceCounts = false;// TODO temporary disabled   data.hasDifferentRaceCounts();
+        boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
         }
