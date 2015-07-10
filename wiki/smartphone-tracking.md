@@ -8,7 +8,7 @@ With the development of [RaceLogTracking](racelog-tracking) and the [Tracking Ap
 
 3. Register (or create) the competitors for the leaderboard using the symbol also in the Actions bar. It is also possible denote for RaceLog Tracking or register competitors to each race individually, but since                         this is usually the same for an entire event it is easier to do it for the whole leaderboard.
 
-4. Click the "Define Course Layout" symbol (Two flags/marks) on the Actions tab of the first race of the leaderboard. Create a course by defining first marks and than waypoints. Use the copy symbol (Two pieces of paper) to copy the course to other races.
+4. Click the "Define Course Layout" symbol (Two flags/marks) on the Actions tab of the first race of the leaderboard. Create a course by defining first marks and then waypoints. Use the copy symbol (Two pieces of paper) to copy the course to other races.
 Note: In the future it should be possible to do this for the entire leaderboard too, as the course does not change for many events.
 
 5. If not using the Buoy-Positioning App, it is possible to set the mark locations in the course layout panel, using the "Set Mark Location" symbol on the right of the mark list. If using the Race Committee App, make sure to only use the ByMarks Course Designer, as ByName can overwrite a manually created course with an empty one. 
