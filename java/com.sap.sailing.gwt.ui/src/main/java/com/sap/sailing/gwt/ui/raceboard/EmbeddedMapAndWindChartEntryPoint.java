@@ -8,8 +8,10 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Label;
@@ -139,6 +141,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
                     // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed
                     final TimePanel<TimePanelSettings> timePanel = new TimePanel<>(timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false);
+                    final Button backToLivePlayButton = timePanel.getBackToLiveButton();
                     final TimePanelSettings timePanelSettings = timePanel.getSettings();
                     timePanelSettings.setRefreshInterval(refreshInterval);
                     timePanel.updateSettings(timePanelSettings);
@@ -147,6 +150,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                             competitorSelection, getStringMessages(), showMapControls, showViewStreamlets,
                             showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false);
+//                    backToLivePlayButton.removeFromParent();
+//                    raceMap.getMap().setControls(ControlPosition.TOP_RIGHT, backToLivePlayButton);
                     final RaceMapSettings mapSettings = raceMap.getSettings();
                     mapSettings.setZoomSettings(new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false));
                     raceMap.updateSettings(mapSettings);

@@ -619,4 +619,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     public String getDependentCssClassName() {
         return "timePanel";
     }
+
+    public Button getBackToLiveButton() {
+        return backToLivePlayButton;
+    }
 }
