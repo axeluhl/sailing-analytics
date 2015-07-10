@@ -11,6 +11,7 @@
 RETVAL=0
 
 JAVA_START_INSTANCES="server"
+SERVERS_DIR=/home/sailing/servers
 GIT_REPOSITORY=/home/sailing/code
 APACHE_CONFIG_DIR=/etc/httpd/conf.d
 rm /var/log/sailing.out
@@ -27,30 +28,28 @@ start_servers() {
 	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
 	for conf in $JAVA_START_INSTANCES; do
 		echo "Checking for amazon update..."
-		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>/home/sailing/servers/$conf/env.sh
-		su - sailing -c "cd /home/sailing/servers/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>/var/log/sailing.err >/var/log/sailing.out
+		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>$SERVERS_DIR/$conf/env.sh
+		su - sailing -c "cd $SERVERS_DIR/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.out
 		(
 			# execute env.sh in a subshell which now has the same set of variables that the server will see
-			source /home/sailing/servers/$conf/env.sh
-
-			# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to /etc/httpd/conf.d/001-events.conf
-			echo "Appending macro usage for /internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf"
-			echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
-
-			launch_httpd
+			source $SERVERS_DIR/$conf/env.sh
 			echo "Starting Java server $conf"
-			su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
+			su - sailing -c "cd $SERVERS_DIR/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
+			server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
+			echo "Appending macro invocation to $APACHE_CONFIR_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
+			echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
 		)
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done
+	launch_httpd
 }
 
 stop_servers() {
 	for conf in $JAVA_START_INSTANCES; do
 		echo "Stopping Java server $conf"
-		su - sailing -c "cd /home/sailing/servers/$conf && ./stop"
+		su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
 	done
@@ -58,11 +57,14 @@ stop_servers() {
 
 # launch_httpd(server_name, port, event_id)
 launch_httpd() {
-	echo "Will try to launch httpd so this replica can work with an ELB easily."
+	echo "Will try to launch httpd so this replica can work with an ELB easily." >>/var/log/sailing.out
 	if [ -x /etc/init.d/httpd ]; then
-		server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
-		echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-		echo "Launching httpd to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..."
+		FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
+		source $SERVERS_DIR/$FIRST_SERVER/env.sh
+		# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
+		echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf" >>/var/log/sailing.out
+		echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
+		echo "Launching httpd..." >>/var/log/sailing.out
 		service httpd start
 	else
 		echo Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd
