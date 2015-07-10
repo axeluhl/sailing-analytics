@@ -70,7 +70,7 @@
     <string name="info_already_checked_in_this_qr_code">Bereits für diese Regatta eingecheckt</string>
     <string name="warning">Warnung</string>
     <string name="gps_turned_off">GPS ist nicht aktiviert. Bitte aktivieren Sie den Standortzugriff (GPS) in Ihren Android-Einstellungen!</string>
-    <string name="knots">Knoten</string>
+    <string name="knots">Kn</string>
     <string name="preferences">Einstellungen</string>
     <string name="tracking_notification_text">Tracking läuft für %s</string>
 
