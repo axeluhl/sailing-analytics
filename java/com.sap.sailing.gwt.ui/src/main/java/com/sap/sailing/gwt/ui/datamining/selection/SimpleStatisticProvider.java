@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -17,13 +18,14 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
-import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -35,21 +37,25 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final ErrorReporter errorReporter;
     private final Set<StatisticChangedListener> listeners;
     
-    private final ExtractionFunctionSet extractionFunctionSet;
+    private boolean isAwaitingReload;
+    private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
+    private final Collection<FunctionDTO> extractionFunctions;
     private final Collection<AggregationProcessorDefinitionDTO> aggregatorDefinitions;
     
     private final HorizontalPanel mainPanel;
-    private final ValueListBox<StrippedFunctionDTO> extractionFunctionListBox;
+    private final ValueListBox<FunctionDTO> extractionFunctionListBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
-    private final ValueListBox<String> baseDataTypeListBox;
 
-    public SimpleStatisticProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public SimpleStatisticProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+                                   DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<StatisticChangedListener>();
         
-        extractionFunctionSet = new ExtractionFunctionSet();
+        isAwaitingReload = false;
+        currentRetrieverChainDefinition = null;
+        extractionFunctions = new HashSet<>();
         aggregatorDefinitions = new HashSet<>();
         
         mainPanel = new HorizontalPanel();
@@ -62,40 +68,51 @@ public class SimpleStatisticProvider implements StatisticProvider {
         aggregatorListBox = createAggregatorListBox();
         HorizontalPanel aggregatorPanel = surroundAggregatorListBoxWithBraces(aggregatorListBox);
         mainPanel.add(aggregatorPanel);
-        
-        mainPanel.add(new Label(this.stringMessages.basedOn()));
-        baseDataTypeListBox = createBaseDataTypeListBox();
-        mainPanel.add(baseDataTypeListBox);
 
-        updateContent();
+        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
     }
     
     @Override
     public void awaitReloadComponents() {
-        // Nothing to do here.
+        isAwaitingReload = true;
+    }
+    
+    @Override
+    public boolean isAwatingReload() {
+        return isAwaitingReload;
     }
     
     @Override
     public void reloadComponents() {
+        isAwaitingReload = false;
         updateContent();
+    }
+    
+    @Override
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
+        if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
+            currentRetrieverChainDefinition = newRetrieverChainDefinition;
+            if (!isAwaitingReload && currentRetrieverChainDefinition != null) {
+                updateContent();
+            } else if (!isAwaitingReload) {
+                clearContent();
+            }
+        }
     }
 
     private void updateContent() {
-        dataMiningService.getAllStatistics(LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
-            
+        dataMiningService.getStatisticsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             @Override
-            public void onSuccess(Iterable<FunctionDTO> extractionFunctions) {
-                extractionFunctionSet.clear();
+            public void onSuccess(Iterable<FunctionDTO> functions) {
+                extractionFunctions.clear();
                 
-                if (extractionFunctions.iterator().hasNext()) {
-                    extractionFunctionSet.addAll(extractionFunctions);
+                if (functions.iterator().hasNext()) {
+                    for (FunctionDTO extractionFunction : functions) {
+                        extractionFunctions.add(extractionFunction);
+                    }
                     updateExtractionFunctionListBox();
-                    updateBaseDataTypeListBox();
-                    updateAggregators();
                 } else {
-                    clearListBox(extractionFunctionListBox);
-                    clearListBox(baseDataTypeListBox);
-                    clearListBox(aggregatorListBox);
+                    clearContent();
                 }
 
                 notifyListeners();
@@ -131,15 +148,9 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     private void updateExtractionFunctionListBox() {
-        List<StrippedFunctionDTO> acceptableFunctions = new ArrayList<>(extractionFunctionSet.getStrippedFunctionDTOs());
+        List<FunctionDTO> acceptableFunctions = new ArrayList<>(extractionFunctions);
         Collections.sort(acceptableFunctions);
         updateListBox(extractionFunctionListBox, acceptableFunctions);
-    }
-
-    private void updateBaseDataTypeListBox() {
-        List<String> acceptableBaseDataTypes = new ArrayList<>(extractionFunctionSet.getSourceTypeNames(extractionFunctionListBox.getValue()));
-        Collections.sort(acceptableBaseDataTypes);
-        updateListBox(baseDataTypeListBox, acceptableBaseDataTypes);
     }
     
     private void updateAggregatorListBox() {
@@ -152,8 +163,13 @@ public class SimpleStatisticProvider implements StatisticProvider {
         T currentValue = listBox.getValue();
         T valueToBeSelected = acceptableValues.contains(currentValue) ? currentValue : acceptableValues.iterator().next();
         
-        listBox.setValue(valueToBeSelected);
+        listBox.setValue(valueToBeSelected, true);
         listBox.setAcceptableValues(acceptableValues);
+    }
+    
+    private void clearContent() {
+        clearListBox(extractionFunctionListBox);
+        clearListBox(aggregatorListBox);
     }
 
     private <T> void clearListBox(ValueListBox<T> listBox) {
@@ -161,32 +177,21 @@ public class SimpleStatisticProvider implements StatisticProvider {
         listBox.setAcceptableValues(new ArrayList<T>());
     }
 
-    private ValueListBox<StrippedFunctionDTO> createExtractionFunctionListBox() {
-        ValueListBox<StrippedFunctionDTO> extractionFunctionListBox = new ValueListBox<>(new AbstractObjectRenderer<StrippedFunctionDTO>() {
+    private ValueListBox<FunctionDTO> createExtractionFunctionListBox() {
+        ValueListBox<FunctionDTO> extractionFunctionListBox = new ValueListBox<>(new AbstractObjectRenderer<FunctionDTO>() {
             @Override
-            protected String convertObjectToString(StrippedFunctionDTO function) {
+            protected String convertObjectToString(FunctionDTO function) {
                 return function.getDisplayName();
             }
         });
-        extractionFunctionListBox.addValueChangeHandler(new ValueChangeHandler<StrippedFunctionDTO>() {
+        extractionFunctionListBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             @Override
-            public void onValueChange(ValueChangeEvent<StrippedFunctionDTO> event) {
-                updateBaseDataTypeListBox();
+            public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
+                updateAggregators();
                 notifyListeners();
             }
         });
         return extractionFunctionListBox;
-    }
-
-    private ValueListBox<String> createBaseDataTypeListBox() {
-        ValueListBox<String> baseDataTypeListBox = new ValueListBox<>(new SimpleObjectRenderer<String>());
-        baseDataTypeListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                notifyListeners();
-            }
-        });
-        return baseDataTypeListBox;
     }
     
     private ValueListBox<AggregationProcessorDefinitionDTO> createAggregatorListBox() {
@@ -217,7 +222,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        extractionFunctionListBox.setValue(new StrippedFunctionDTO(queryDefinition.getStatisticToCalculate()), false);
+        extractionFunctionListBox.setValue(queryDefinition.getStatisticToCalculate());
         aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition(), false);
     }
 
@@ -234,7 +239,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
 
     @Override
     public FunctionDTO getStatisticToCalculate() {
-        return extractionFunctionSet.getFunctionDTO(extractionFunctionListBox.getValue(), baseDataTypeListBox.getValue());
+        return extractionFunctionListBox.getValue();
     }
 
     @Override

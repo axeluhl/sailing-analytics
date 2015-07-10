@@ -39,8 +39,9 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
     public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getByExtractedType(
             Class<ExtractedType> extractedType) {
         Collection<AggregationProcessorDefinition<? super ExtractedType, ?>> definitions = new HashSet<>();
-        Collection<Class<?>> typesToGet = Classes.getSupertypesOf(extractedType);
-        typesToGet.add(extractedType);
+        Class<?> cleanExtractedType = Classes.primitiveToWrapperType(extractedType);
+        Collection<Class<?>> typesToGet = Classes.getSupertypesOf(cleanExtractedType);
+        typesToGet.add(cleanExtractedType);
         typesToGet.add(Object.class);
         for (Class<?> type : typesToGet) {
             definitions.addAll(getByUnspecificTypeAsSpecificType(type));

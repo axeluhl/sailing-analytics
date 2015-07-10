@@ -41,6 +41,7 @@ public interface DataMiningServer {
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
 
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions();
     public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
             Class<DataSourceType> dataSourceType);
     public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(

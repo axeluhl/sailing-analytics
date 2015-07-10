@@ -72,6 +72,11 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     }
     
     @Override
+    public boolean isAwatingReload() {
+        return isAwaitingReload;
+    }
+    
+    @Override
     public void reloadComponents() {
         isAwaitingReload = false;
         updateAvailableDimensions();

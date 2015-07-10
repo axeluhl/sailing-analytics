@@ -74,6 +74,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
+    public Iterable<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName) {
+        Class<?> retrievedDataType = getDataMiningServer().getDataRetrieverChainDefinition(retrieverChainDefinition.getId()).getRetrievedDataType();
+        Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
+        return functionsAsFunctionDTOs(statistics, localeInfoName);
+    }
+    
+    @Override
     public Iterable<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName) {
         Class<?> returnType = getReturnType(extractionFunction);
         @SuppressWarnings("unchecked")
@@ -126,6 +133,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
             functionDTOs.add(dtoFactory.createFunctionDTO(function, ServerStringMessages, locale));
         }
         return functionDTOs;
+    }
+    
+    @Override
+    public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
+        Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = getDataMiningServer().getDataRetrieverChainDefinitions();
+        return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
     @Override

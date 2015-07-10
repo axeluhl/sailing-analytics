@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 
 public interface DataRetrieverChainDefinitionProvider {
+    
+    public Collection<DataRetrieverChainDefinition<?, ?>> getAll();
 
     public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(
             Class<DataSourceType> dataSourceType);

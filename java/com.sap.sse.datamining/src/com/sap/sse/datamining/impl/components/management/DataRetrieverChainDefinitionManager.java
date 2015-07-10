@@ -70,6 +70,11 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
         }
     }
     
+    @Override
+    public Collection<DataRetrieverChainDefinition<?, ?>> getAll() {
+        return new HashSet<>(chainDefinitionsMappedByID.values());
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(

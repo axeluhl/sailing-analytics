@@ -5,6 +5,34 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class Classes {
+    
+    public static Class<?> primitiveToWrapperType(Class<?> type) {
+        if (byte.class.equals(type)) {
+            return Byte.class;
+        }
+        if (short.class.equals(type)) {
+            return Short.class;
+        }
+        if (int.class.equals(type)) {
+            return Integer.class;
+        }
+        if (long.class.equals(type)) {
+            return Long.class;
+        }
+        if (float.class.equals(type)) {
+            return Float.class;
+        }
+        if (double.class.equals(type)) {
+            return Double.class;
+        }
+        if (boolean.class.equals(type)) {
+            return Boolean.class;
+        }
+        if (char.class.equals(type)) {
+            return Character.class;
+        }
+        return type;
+    }
 
     public static Collection<Class<?>> getSupertypesOf(Class<?> type) {
         Collection<Class<?>> supertypes = new HashSet<>();

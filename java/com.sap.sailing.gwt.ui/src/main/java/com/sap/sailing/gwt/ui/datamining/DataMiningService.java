@@ -20,12 +20,14 @@ public interface DataMiningService extends RemoteService {
     Date getComponentsChangedTimepoint();
 
     Iterable<FunctionDTO> getAllStatistics(String localeInfoName);
+    Iterable<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName);
 
     Iterable<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName);
     
     Iterable<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
     Iterable<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
 
+    Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeName);
     Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
 
     QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,

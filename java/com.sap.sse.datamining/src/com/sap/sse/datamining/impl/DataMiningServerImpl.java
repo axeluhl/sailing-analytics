@@ -187,6 +187,11 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+        return dataRetrieverChainDefinitionRegistry.getAll();
+    }
+    
+    @Override
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         boolean componentsChanged = dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
         if (componentsChanged) {

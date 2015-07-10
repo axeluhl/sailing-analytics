@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.datamining;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
-public interface DataRetrieverChainDefinitionProvider extends DataMiningComponentProvider, StatisticChangedListener {
+public interface DataRetrieverChainDefinitionProvider extends DataMiningComponentProvider {
     
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
 

@@ -105,6 +105,11 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     @Override
+    public boolean isAwatingReload() {
+        return isAwaitingReload;
+    }
+    
+    @Override
     public void reloadComponents() {
         updateRetrievalLevels();
         isAwaitingReload = false;

@@ -4,7 +4,7 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public interface StatisticProvider extends DataMiningComponentProvider {
+public interface StatisticProvider extends DataMiningComponentProvider, DataRetrieverChainDefinitionChangedListener {
 
     public FunctionDTO getStatisticToCalculate();
 
