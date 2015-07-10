@@ -30,8 +30,11 @@ import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class WindFragment extends BaseFragment
     implements CompassDirectionListener,
@@ -360,7 +363,10 @@ public class WindFragment extends BaseFragment
         mCurrentLocation = location;
         mContentLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
         mContentLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
-        mContentAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getLatitude(), location.getTime()));
+        Date time = new Date(location.getTime());
+        DateFormat formatter = new SimpleDateFormat("hh'h'mm'´´'ss'´'");
+        String timeFormatted = formatter.format(time);
+        mContentAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getAccuracy(), timeFormatted));
         mContentSetData.setEnabled(true);
     }
 
