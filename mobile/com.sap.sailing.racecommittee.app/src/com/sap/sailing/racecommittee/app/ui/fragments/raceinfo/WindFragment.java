@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,11 +48,13 @@ public class WindFragment extends BaseFragment
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
-    private final static int ONE_SEC = 1000;
+    private final static long ONE_SEC = 1000;
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
+    private final static float MAX_LOCATION_DRIFT_IN_METER = 10f;
+    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 30000;
 
     private View mHeaderLayout;
     private View mContentLayout;
@@ -128,13 +131,30 @@ public class WindFragment extends BaseFragment
      */
     private void refreshUI() {
         if (mCurrentLocation != null) {
-            mContentLatitude.setText(String.format("%s %.5f", "Lat: ", mCurrentLocation.getLatitude()));
-            mContentLongitude.setText(String.format("%s %.5f", "Lon: ", mCurrentLocation.getLongitude()));
-            Date time = new Date(System.currentTimeMillis() - mCurrentLocation.getTime());
+            double latitude = mCurrentLocation.getLatitude();
+            double longitude = mCurrentLocation.getLongitude();
+            float accuracy = mCurrentLocation.getAccuracy();
+            long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
+            mContentLatitude.setText(String.format("%s %.5f", "Lat: ", latitude));
+            mContentLatitude.setTextColor(Color.BLACK);
+            mContentLongitude.setText(String.format("%s %.5f", "Lon: ", longitude));
+            mContentLongitude.setTextColor(Color.BLACK);
+            Date time = new Date(timeDifference);
             DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'");
             timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
             String timeFormatted = timeFormatter.format(time);
             mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", mCurrentLocation.getAccuracy(), timeFormatted));
+            mContentSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
+
+            // highlight accuracy problem if location is invalid
+            mContentAccuracy.setTextColor(mContentSetData.isEnabled() ? Color.BLACK : Color.RED);
+        } else {
+            mContentSetData.setEnabled(false);
+
+            // highlight location problem if no location is available
+            mContentLatitude.setTextColor(Color.RED);
+            mContentLongitude.setTextColor(Color.RED);
+            mContentAccuracy.setTextColor(Color.RED);
         }
     }
 
@@ -418,7 +438,7 @@ public class WindFragment extends BaseFragment
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        mContentSetData.setEnabled(true);
+        refreshUI();
     }
 
     @Override
