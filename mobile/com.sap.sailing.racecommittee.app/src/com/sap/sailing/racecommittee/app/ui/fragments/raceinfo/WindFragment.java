@@ -35,6 +35,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class WindFragment extends BaseFragment
     implements CompassDirectionListener,
@@ -363,10 +364,11 @@ public class WindFragment extends BaseFragment
         mCurrentLocation = location;
         mContentLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
         mContentLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
-        Date time = new Date(location.getTime());
-        DateFormat formatter = new SimpleDateFormat("hh'h'mm'´´'ss'´'");
-        String timeFormatted = formatter.format(time);
-        mContentAccuracy.setText(String.format("%s ~ %.0f m (%s)", "Acc: ", location.getAccuracy(), timeFormatted));
+        Date time = new Date(System.currentTimeMillis() - location.getTime());
+        DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'");
+        timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String timeFormatted = timeFormatter.format(time);
+        mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", location.getAccuracy(), timeFormatted));
         mContentSetData.setEnabled(true);
     }
 
