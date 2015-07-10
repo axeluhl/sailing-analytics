@@ -109,8 +109,7 @@ public class WindFragment extends BaseFragment
         super.onCreate(savedInstanceState);
 
         // Initialize the googleApiClient for location requests
-        apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this).build();
+        apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
 
         // Refresh ui
         mRefreshUIRunnable = createUIRefreshRunnable();
@@ -228,12 +227,20 @@ public class WindFragment extends BaseFragment
     /**
      * starts the googleApiClient to get location updates
      */
-    public void setupLocationClient() {
+    private void tearUpApiClient() {
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(FIVE_SEC);
         locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
+        apiClient.registerConnectionCallbacks(this);
+        apiClient.registerConnectionFailedListener(this);
         apiClient.connect();
+    }
+
+    private void tearDownApiClient() {
+        apiClient.unregisterConnectionFailedListener(this);
+        apiClient.unregisterConnectionCallbacks(this);
+        apiClient.disconnect();
     }
 
     /**
@@ -376,11 +383,7 @@ public class WindFragment extends BaseFragment
         super.onPause();
 
         // Disconnect googleApiClient
-        if (apiClient.isConnected()) {
-            apiClient.unregisterConnectionFailedListener(this);
-            apiClient.unregisterConnectionCallbacks(this);
-        }
-        apiClient.disconnect();
+        tearDownApiClient();
 
         // Unregister position poller
         positionPoller.unregisterAllAndStop();
@@ -392,8 +395,10 @@ public class WindFragment extends BaseFragment
     public void onResume() {
         super.onResume();
 
+        // Connect googleApiClient
+        tearUpApiClient();
+
         setupPositionPoller();
-        setupLocationClient();
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
