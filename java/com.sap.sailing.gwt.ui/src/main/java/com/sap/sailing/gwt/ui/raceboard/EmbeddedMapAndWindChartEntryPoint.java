@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -139,8 +140,14 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final Timer timer = new Timer(PlayModes.Live);
                     AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
                     final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
-                    // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed
-                    final TimePanel<TimePanelSettings> timePanel = new TimePanel<>(timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false);
+                    // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed;
+                    // let the time panel always return to "live" mode if the user wants that
+                    final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(
+                            timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false) {
+                        protected boolean isLiveModeToBeMadePossible() {
+                            return true;
+                        }
+                    };
                     final Button backToLivePlayButton = timePanel.getBackToLiveButton();
                     final TimePanelSettings timePanelSettings = timePanel.getSettings();
                     timePanelSettings.setRefreshInterval(refreshInterval);
@@ -149,9 +156,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                             competitorSelection, getStringMessages(), showMapControls, showViewStreamlets,
-                            showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false);
-//                    backToLivePlayButton.removeFromParent();
-//                    raceMap.getMap().setControls(ControlPosition.TOP_RIGHT, backToLivePlayButton);
+                            showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false) {
+                        @Override
+                        protected void showAdditionalControls(MapWidget map) {
+                            backToLivePlayButton.removeFromParent();
+                            map.setControls(ControlPosition.TOP_RIGHT, backToLivePlayButton);
+                        }
+                    };
                     final RaceMapSettings mapSettings = raceMap.getSettings();
                     mapSettings.setZoomSettings(new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false));
                     raceMap.updateSettings(mapSettings);

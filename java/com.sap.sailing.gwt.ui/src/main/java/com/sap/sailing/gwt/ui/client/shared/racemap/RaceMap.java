@@ -603,10 +603,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
               trueNorthIndicatorPanel.redraw();
+              showAdditionalControls(map);
           }
         };
-
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+    }
+
+    /**
+     * Subclasses may define additional stuff to be shown on the map.
+     */
+    protected void showAdditionalControls(MapWidget map) {
     }
     
     private void setHasPolar() {
