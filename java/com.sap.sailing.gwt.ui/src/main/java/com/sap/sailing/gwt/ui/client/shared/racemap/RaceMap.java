@@ -382,7 +382,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
             StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle) {
+            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
@@ -414,7 +414,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
-        initializeData(showMapControls);
+        initializeData(showMapControls, showHeaderPanel);
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
@@ -492,7 +492,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         });
     }
 
-    private void loadMapsAPIV3(final boolean showMapControls) {
+    private void loadMapsAPIV3(final boolean showMapControls, boolean showHeaderPanel) {
         boolean sensor = true;
 
         // load all the libs for use in the maps
@@ -2358,8 +2358,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void initializeData(boolean showMapControls) {
-        loadMapsAPIV3(showMapControls);
+    public void initializeData(boolean showMapControls, boolean showHeaderPanel) {
+        loadMapsAPIV3(showMapControls, showHeaderPanel);
     }
 
     @Override

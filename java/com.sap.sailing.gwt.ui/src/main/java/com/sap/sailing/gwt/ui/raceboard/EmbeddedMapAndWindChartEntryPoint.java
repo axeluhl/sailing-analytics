@@ -146,7 +146,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                             competitorSelection, getStringMessages(), showMapControls, showViewStreamlets,
-                            showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle());
+                            showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false);
                     final RaceMapSettings mapSettings = raceMap.getSettings();
                     mapSettings.setZoomSettings(new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false));
                     raceMap.updateSettings(mapSettings);
