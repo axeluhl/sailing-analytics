@@ -11,7 +11,7 @@
 	  		font-size: 0.866666666666667em;
 	  		min-height: 4.5em;
 		}
-		.minileaderboard_item_rank, .minileaderboard_item_flag, .minileaderboard_item_name, .minileaderboard_item_points {
+		.minileaderboard_item_rank, .minileaderboard_item_flag, .minileaderboard_item_name, .minileaderboard_item_score {
 			position: absolute;
 			top: 50%;
 			-webkit-transform: translateY(-50%);
@@ -31,18 +31,23 @@
 		.minileaderboard_item_name {
 	     	margin: 0 5em;
 		}
-		.minileaderboard_item_name > span:FIRST-CHILD{
+		.minileaderboard_item_name > span:FIRST-CHILD {
 	     	font-weight: bold;
 		}
-		.minileaderboard_item_points {
+		.minileaderboard_item_score {
 			right: 1em;
 			width: 3.75em;
 			text-align: center;
 			padding: 0.230769230769231em 0;
 			background: #ebebeb;
 			border: 1px solid #dedede;
-			font-weight: bold;
 			border-radius: 0.384615384615385em;
+		}
+		.minileaderboard_item_points {
+			font-weight: bold;
+		}
+		.minileaderboard_item_racecount {
+			font-size: 0.866666666666667em;
 		}
 	</ui:style>
 
@@ -53,7 +58,10 @@
 			<span ui:field="competitorCountryNameUi" />
 			<span ui:field="competitorNameUi" />
 		</div>			
-		<div class="{style.minileaderboard_item_points}" ui:field="competitorPointsUi" />
+		<div class="{style.minileaderboard_item_score}">
+			<div class="{style.minileaderboard_item_points}" ui:field="competitorPointsUi" />
+			<div class="{style.minileaderboard_item_racecount}" ui:field="competitorRacesUi" />
+		</div>
 	</div>
 
 </ui:UiBinder>
