@@ -49,8 +49,8 @@ public class WindFragment extends BaseFragment
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
     private final static long ONE_SEC = 1000;
-    private final static int FIVE_SEC = 5000;
-    private final static int EVERY_POSITION_CHANGE = 0;
+    private final static long FIVE_SEC = 5000;
+    private final static long EVERY_POSITION_CHANGE = 0;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
     private final static float MAX_LOCATION_DRIFT_IN_METER = 10f;
