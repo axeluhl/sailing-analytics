@@ -13,7 +13,7 @@ Note: In the future it should be possible to do this for the entire leaderboard 
 
 5. If not using the Buoy-Positioning App, it is possible to set the mark locations in the course layout panel, using the "Set Mark Location" symbol on the right of the mark list. If using the Race Committee App, make sure to only use the ByMarks Course Designer, as ByName can overwrite a manually created course with an empty one. 
 
-6. Map the smartphones the the competitors using the "Map Devices to Competitors and Mark" tab of the Leaderboard Actions bar (or for each race, but going over the leaderboard is usually easier, as above). Select each Competitor and scan the QR-Code with the Tracking-App. Do not forget to press (or remind the sailors to press) start tracking before the races start. Mappings can be viewed (and deleted) in the "Map Devices to Competitors and Marks" window of each race.
+6. Map the smartphones to the competitors using the "Map Devices to Competitors and Mark" tab of the Leaderboard Actions bar (or for each race, but going over the leaderboard is usually easier, as above). Select each Competitor and scan the QR-Code with the Tracking-App. Do not forget to press (or remind the sailors to press) start tracking before the races start. Mappings can be viewed (and deleted) in the "Map Devices to Competitors and Marks" window of each race.
 
 7. To use the Buoy Positioning App click the "Invite Buoy Tenders" symbol in the Leaderboard Actions tab and send a QR-Code by email to be scanned using the App.
 
