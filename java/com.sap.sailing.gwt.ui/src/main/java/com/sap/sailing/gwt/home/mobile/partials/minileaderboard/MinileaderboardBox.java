@@ -64,6 +64,9 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
         }
+        if (showRaceCounts) {
+            itemContainerUi.addContent(new MinileaderboardBoxItemLegend());
+        }
     }
     
     private Widget getNoResultsInfoWidget() {
