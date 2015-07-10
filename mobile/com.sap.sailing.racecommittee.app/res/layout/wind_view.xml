@@ -250,11 +250,13 @@
                 android:layout_alignParentBottom="true"
                 android:layout_weight="1"/>
 
+            <!-- the following layout is for a future implementation -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <Button
                     style="?attr/buttonSolidNormal"

@@ -47,6 +47,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class WindFragment extends BaseFragment
@@ -150,7 +151,7 @@ public class WindFragment extends BaseFragment
             mContentLongitude.setText(String.format("%s %.5f", "Lon: ", longitude));
             mContentLongitude.setTextColor(Color.BLACK);
             Date time = new Date(timeDifference);
-            DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'");
+            DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'", Locale.getDefault());
             timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
             String timeFormatted = timeFormatter.format(time);
             mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", mCurrentLocation.getAccuracy(), timeFormatted));
@@ -362,25 +363,15 @@ public class WindFragment extends BaseFragment
             SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
 
             // build complete race map url
-            StringBuilder sb = new StringBuilder(serverBaseURL);
-            sb.append(GWT_MAP_AND_WIND_CHART_HTML);
-            sb.append("?regattaLikeName=");
-            sb.append(identifier.getRegattaLikeParentName());
-            sb.append("&raceColumnName=");
-            sb.append(identifier.getRaceColumnName());
-            sb.append("&fleetName=");
-            sb.append(identifier.getFleetName());
-            sb.append("&eventId=");
-            sb.append(dataStore.getEventUUID());
-            sb.append("&viewShowWindChart=");
-            sb.append(showWindCharts);
-            sb.append("&viewShowStreamlets=");
-            sb.append(showStreamlets);
-            sb.append("&viewShowSimulation=");
-            sb.append(showSimulation);
-            sb.append("&viewShowMapControls=");
-            sb.append(showMapControls);
-            mMapWebView.loadUrl(sb.toString());
+            mMapWebView.loadUrl(serverBaseURL + GWT_MAP_AND_WIND_CHART_HTML +
+                    "?regattaLikeName=" + identifier.getRegattaLikeParentName() +
+                    "&raceColumnName=" + identifier.getRaceColumnName() +
+                    "&fleetName=" + identifier.getFleetName() +
+                    "&eventId=" + dataStore.getEventUUID() +
+                    "&viewShowWindChart=" + showWindCharts +
+                    "&viewShowStreamlets=" + showStreamlets +
+                    "&viewShowSimulation=" + showSimulation +
+                    "&viewShowMapControls=" + showMapControls);
             return true;
         }
         return false;
