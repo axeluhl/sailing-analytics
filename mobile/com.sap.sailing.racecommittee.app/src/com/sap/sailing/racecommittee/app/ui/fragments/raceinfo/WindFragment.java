@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +47,7 @@ public class WindFragment extends BaseFragment
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
+    private final static int ONE_SEC = 1000;
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
     private final static int MIN_KTS = 3;
@@ -71,6 +74,9 @@ public class WindFragment extends BaseFragment
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
     private Location mCurrentLocation;
+
+    private Handler mRefreshUIHandler;
+    private Runnable mRefreshUIRunnable;
 
     private RacePositionsPoller positionPoller;
 
@@ -102,6 +108,34 @@ public class WindFragment extends BaseFragment
         // Initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
             .addOnConnectionFailedListener(this).build();
+
+        // Refresh ui
+        mRefreshUIRunnable = createUIRefreshRunnable();
+    }
+
+    private Runnable createUIRefreshRunnable() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                refreshUI();
+                mRefreshUIHandler.postDelayed(this, ONE_SEC);
+            }
+        };
+    }
+
+    /**
+     * refresh location information
+     */
+    private void refreshUI() {
+        if (mCurrentLocation != null) {
+            mContentLatitude.setText(String.format("%s %.5f", "Lat: ", mCurrentLocation.getLatitude()));
+            mContentLongitude.setText(String.format("%s %.5f", "Lon: ", mCurrentLocation.getLongitude()));
+            Date time = new Date(System.currentTimeMillis() - mCurrentLocation.getTime());
+            DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'");
+            timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String timeFormatted = timeFormatter.format(time);
+            mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", mCurrentLocation.getAccuracy(), timeFormatted));
+        }
     }
 
     @Override
@@ -153,6 +187,13 @@ public class WindFragment extends BaseFragment
         setupLayouts(false);
 
         setInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        mRefreshUIHandler = new Handler();
     }
 
     /**
@@ -303,6 +344,11 @@ public class WindFragment extends BaseFragment
         super.onStart();
 
         mContentCompassView.setDirectionListener(this);
+
+        // start ui refreshing
+        if (mRefreshUIHandler != null) {
+            mRefreshUIHandler.postDelayed(mRefreshUIRunnable, ONE_SEC);
+        };
     }
 
     @Override
@@ -330,6 +376,16 @@ public class WindFragment extends BaseFragment
         setupLocationClient();
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // stop refreshing ui
+        if (mRefreshUIHandler != null) {
+            mRefreshUIHandler.removeCallbacks(mRefreshUIRunnable);
+        };
     }
 
     /**
@@ -362,13 +418,6 @@ public class WindFragment extends BaseFragment
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        mContentLatitude.setText(String.format("%s %.5f", "Lat: ", location.getLatitude()));
-        mContentLongitude.setText(String.format("%s %.5f", "Lon: ", location.getLongitude()));
-        Date time = new Date(System.currentTimeMillis() - location.getTime());
-        DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'");
-        timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String timeFormatted = timeFormatter.format(time);
-        mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", location.getAccuracy(), timeFormatted));
         mContentSetData.setEnabled(true);
     }
 
