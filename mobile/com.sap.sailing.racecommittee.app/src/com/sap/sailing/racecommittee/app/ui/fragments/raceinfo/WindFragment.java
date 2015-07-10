@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Color;
 import android.location.Location;
@@ -320,6 +321,8 @@ public class WindFragment extends BaseFragment
         mContentWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
     }
 
+    // the map view needs java script
+    @SuppressLint("SetJavaScriptEnabled")
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
             if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 1) {
@@ -392,7 +395,7 @@ public class WindFragment extends BaseFragment
         // start ui refreshing
         if (mRefreshUIHandler != null) {
             mRefreshUIHandler.postDelayed(mRefreshUIRunnable, ONE_SEC);
-        };
+        }
     }
 
     @Override
@@ -424,7 +427,7 @@ public class WindFragment extends BaseFragment
         // stop refreshing ui
         if (mRefreshUIHandler != null) {
             mRefreshUIHandler.removeCallbacks(mRefreshUIRunnable);
-        };
+        }
     }
 
     /**
