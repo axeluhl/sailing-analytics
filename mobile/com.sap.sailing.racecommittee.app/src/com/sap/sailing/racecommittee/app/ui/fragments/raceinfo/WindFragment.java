@@ -29,6 +29,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
+import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -44,7 +45,8 @@ public class WindFragment extends BaseFragment
     implements CompassDirectionListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener,
+        OnRaceUpdatedListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
@@ -108,10 +110,10 @@ public class WindFragment extends BaseFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize the googleApiClient for location requests
+        // initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
 
-        // Refresh ui
+        // refresh ui
         mRefreshUIRunnable = createUIRefreshRunnable();
     }
 
@@ -161,10 +163,10 @@ public class WindFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.wind_view, container, false);
 
-        // The fragment is divided into three layouts
-        // Header layout is optional and is used for back navigation
-        // Content layout holds wind direction, wind speed and location controls
-        // Map layout holds a lazy web view for map presentation
+        // the fragment is divided into three layouts
+        // header layout is optional and is used for back navigation
+        // content layout holds wind direction, wind speed and location controls
+        // map layout holds a lazy web view for map presentation
         mHeaderLayout = layout.findViewById(R.id.header_layout);
         mContentLayout = layout.findViewById(R.id.content_layout);
         mMapLayout = layout.findViewById(R.id.map_layout);
@@ -244,6 +246,19 @@ public class WindFragment extends BaseFragment
     }
 
     /**
+     * adds the polling for buoy data to the polled races, also registers a callback
+     */
+    private void tearUpPositionPoller() {
+        positionPoller = new RacePositionsPoller(getActivity());
+        positionPoller.register(getRace(), this);
+        ExLog.i(getActivity(), TAG, "registering race " + getRace().getRaceName());
+    }
+
+    private void tearDownPositionPoller() {
+        positionPoller.unregisterAllAndStop();
+    }
+
+    /**
      * configures all the buttons in the view
      */
     public void setupButtons() {
@@ -306,15 +321,6 @@ public class WindFragment extends BaseFragment
 
         mContentCompassView.setDirection((float) enteredWindBearingFrom);
         mContentWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
-    }
-
-    /**
-     * adds the polling for buoy data to the polled races, also registers a callback
-     */
-    public void setupPositionPoller() {
-        positionPoller = new RacePositionsPoller(getActivity());
-//        positionPoller.register(getRace(), this);
-        ExLog.i(getActivity(), TAG, "registering race " + getRace().getRaceName());
     }
 
     private void setupLayouts(boolean showMap) {
@@ -382,11 +388,9 @@ public class WindFragment extends BaseFragment
     public void onPause() {
         super.onPause();
 
-        // Disconnect googleApiClient
+        // disconnect googleApiClient and unregister position poller
         tearDownApiClient();
-
-        // Unregister position poller
-        positionPoller.unregisterAllAndStop();
+        tearDownPositionPoller();
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
@@ -395,10 +399,9 @@ public class WindFragment extends BaseFragment
     public void onResume() {
         super.onResume();
 
-        // Connect googleApiClient
+        // connect googleApiClient and register position poller
         tearUpApiClient();
-
-        setupPositionPoller();
+        tearUpPositionPoller();
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
@@ -462,6 +465,10 @@ public class WindFragment extends BaseFragment
 
     @Override
     public void onDirectionChanged(float degree) {
+    }
+
+    @Override
+    public void OnRaceUpdated(ManagedRace race) {
     }
 
     private Wind getResultingWindFix() throws NumberFormatException {
