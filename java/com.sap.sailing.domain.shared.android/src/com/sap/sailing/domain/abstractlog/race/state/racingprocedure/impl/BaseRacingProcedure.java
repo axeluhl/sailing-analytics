@@ -91,6 +91,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
         this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
         this.raceLogListener = new WeakRaceLogChangedVisitor(this.raceLog, this);
+        this.raceLog.addListener(this.raceLogListener);
         this.cachedIsIndividualRecallDisplayed = false;
     }
     
@@ -223,7 +224,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     protected void update() {
         boolean isRecallDisplayed = isRecallDisplayedAnalyzer.analyze();
-        
         if (cachedIsIndividualRecallDisplayed != isRecallDisplayed) {
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
             if (cachedIsIndividualRecallDisplayed) {
@@ -233,8 +233,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
                 changedListeners.onIndividualRecallRemoved(this);
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
-        }    
-        
+        }
         // always call listeners for changed flag, as this does not only affect recall, but also
         // changes start procedure, for which some text elements need to be updated
         // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
