@@ -36,6 +36,7 @@ public abstract class EventBaseImpl implements EventBase {
     private TimePoint startDate;
     private TimePoint endDate;
     private URL officialWebsiteURL;
+    private URL sailorsInfoWebsiteURL;
     private ConcurrentLinkedQueue<ImageDescriptor> images;
     private ConcurrentLinkedQueue<VideoDescriptor> videos;
 
@@ -180,6 +181,16 @@ public abstract class EventBaseImpl implements EventBase {
     @Override
     public void setOfficialWebsiteURL(URL officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
+    }
+
+    @Override
+    public URL getSailorsInfoWebsiteURL() {
+        return sailorsInfoWebsiteURL;
+    }
+
+    @Override
+    public void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL) {
+        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
     }
 
     @Override
