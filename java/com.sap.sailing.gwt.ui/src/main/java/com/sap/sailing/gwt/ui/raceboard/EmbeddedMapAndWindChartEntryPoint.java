@@ -160,7 +160,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                         @Override
                         protected void showAdditionalControls(MapWidget map) {
                             backToLivePlayButton.removeFromParent();
-                            map.setControls(ControlPosition.TOP_RIGHT, backToLivePlayButton);
+                            map.setControls(ControlPosition.RIGHT_BOTTOM, backToLivePlayButton);
                         }
                     };
                     final RaceMapSettings mapSettings = raceMap.getSettings();
