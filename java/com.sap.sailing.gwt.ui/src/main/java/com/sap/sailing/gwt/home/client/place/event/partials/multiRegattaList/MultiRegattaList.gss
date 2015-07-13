@@ -197,10 +197,24 @@ img.race_item_windflag {
   white-space: nowrap;
 }
 .regattalistitem_steps_step_name {
-  font-size: 0.866666666666667em;
   font-weight: 600;
   display: inline-block;
   margin-right: 0.333333333333333em;
+  font-size: 0;
+}
+.regattalistitem_steps_step_name::first-letter {
+  font-size: 0.866666666666667rem;
+  margin-right: 0.333333333333333rem;
+}
+@media (min-width: 49.0625em) {
+  .regattalistitem_steps_step_name::first-letter {
+    margin-right: 0;
+  }
+}
+@media (min-width: 49.0625em) {
+  .regattalistitem_steps_step_name {
+    font-size: 0.866666666666667em;
+  }
 }
 .regattalistitem_steps_step_check {
   display: inline-block;
@@ -222,6 +236,9 @@ img.race_item_windflag {
   height: 1em;
   border: 1px solid #dedede;
   margin-top: 0.266666666666667em;
+}
+.regattalistitem_steps_step_fleets_fleet {
+  font-size: inherit;
 }
 .regattalistitem_steps_step_fleets_fleet_progress {
   height: 100%;
