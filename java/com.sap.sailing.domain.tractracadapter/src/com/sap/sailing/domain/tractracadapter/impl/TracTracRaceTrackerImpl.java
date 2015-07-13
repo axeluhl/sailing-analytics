@@ -215,6 +215,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
+    private final Simulator simulator;
+
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
      * data from there. Receiving continues until {@link #stop(boolean)} is called.
@@ -246,7 +248,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            available but loses track of the wind, e.g., during server restarts.
      * @param trackedRegattaRegistry
      *            used to create the {@link TrackedRegatta} for the domain event
-     * @param raceLogResolver TODO
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
@@ -278,7 +279,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * tracker is already known up-front, particularly if it has a specific configuration to use. Other constructors
      * may create a default {@link Regatta} with only a single default {@link Series} and {@link Fleet} which may not
      * always be what you want.
-     * @param raceLogResolver TODO
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
@@ -303,7 +303,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
      *            events received such that they seem to be sent in "real-time." So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
-     * @param raceLogResolver TODO
      */
     private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking,
@@ -322,7 +321,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
         this.lastProgressPerID = new HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>>();
-        final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
             // don't write the transformed wind fixes into the DB again... see also bug 1974 
@@ -527,6 +525,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 // queues contents were cleared preemptively; this means we're done with loading immediately
                 lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
+            }
+            if (stopReceiversPreemtively && simulator != null) {
+                simulator.stop();
             }
         }
     }

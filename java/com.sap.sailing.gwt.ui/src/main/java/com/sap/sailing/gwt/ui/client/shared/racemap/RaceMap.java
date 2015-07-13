@@ -382,7 +382,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
             StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle) {
+            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
@@ -414,7 +414,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
-        initializeData(showMapControls);
+        initializeData(showMapControls, showHeaderPanel);
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
@@ -483,8 +483,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void execute() {
                 if (map != null) {
                     map.setOptions(mapOptions);
-                    final LatLngBounds newBounds = getDefaultZoomBounds();
-                    zoomMapToNewBounds(newBounds);
+                    // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
+                    mapFirstZoomDone = false;
                     trueNorthIndicatorPanel.redraw();
                     orientationChangeInProgress = false;
                 }
@@ -492,7 +492,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         });
     }
 
-    private void loadMapsAPIV3(final boolean showMapControls) {
+    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
         boolean sensor = true;
 
         // load all the libs for use in the maps
@@ -506,8 +506,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
-              Image sapLogo = createSAPLogo();
-              RaceMap.this.add(sapLogo);
+              if (showHeaderPanel) {
+                  Image sapLogo = createSAPLogo();
+                  RaceMap.this.add(sapLogo);
+              }
               map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
               combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
               map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
@@ -592,18 +594,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   simulationOverlay.addToMap();
                   simulationOverlay.setVisible(false);
               }
-              
-              createHeaderPanel(map);
+              if (showHeaderPanel) {
+                  createHeaderPanel(map);
+              }
               createSettingsButton(map);
 
               // Data has been initialized
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
               trueNorthIndicatorPanel.redraw();
+              showAdditionalControls(map);
           }
         };
-
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+    }
+
+    /**
+     * Subclasses may define additional stuff to be shown on the map.
+     */
+    protected void showAdditionalControls(MapWidget map) {
     }
     
     private void setHasPolar() {
@@ -1610,7 +1619,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     || !BoundsUtil.contains((currentMapBounds = map.getBounds()), newBounds)
                     || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
-                List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+                Iterable<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 autoZoomLatLngBounds = newBounds;
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
@@ -2358,8 +2367,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void initializeData(boolean showMapControls) {
-        loadMapsAPIV3(showMapControls);
+    public void initializeData(boolean showMapControls, boolean showHeaderPanel) {
+        loadMapsAPIV3(showMapControls, showHeaderPanel);
     }
 
     @Override

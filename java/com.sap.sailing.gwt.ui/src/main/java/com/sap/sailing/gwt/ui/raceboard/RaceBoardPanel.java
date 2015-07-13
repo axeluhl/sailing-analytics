@@ -35,7 +35,6 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
@@ -54,7 +53,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -77,7 +75,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, LeaderboardUpdateListener, PopupPositionProvider {
+public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeListener, LeaderboardUpdateListener, PopupPositionProvider {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final EventDTO event;
@@ -85,11 +83,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final ErrorReporter errorReporter;
     private final RaceBoardViewConfiguration raceboardViewConfiguration;
     private String raceBoardName;
-    
-    /**
-     * Updated upon each {@link #fillRegattas(List)}
-     */
-    private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
     
     private final List<ComponentViewer> componentViewers;
     private RaceTimePanel timePanel;
@@ -146,7 +139,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.currentRaceHasBeenSelectedOnce = false;
         this.leaderboardName = leaderboardName;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -163,7 +155,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle());
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(),
+                selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
@@ -336,18 +329,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return errorReporter;
     }
     
-    @Override
-    public void fillRegattas(Iterable<RegattaDTO> regattas) {
-        racesByIdentifier.clear();
-        for (RegattaDTO regatta : regattas) {
-            for (RaceDTO race : regatta.races) {
-                if (race != null && race.getRaceIdentifier() != null) {
-                    racesByIdentifier.put(race.getRaceIdentifier(), race);
-                }
-            }
-        }
-    }
-
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
     }

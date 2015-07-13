@@ -61,16 +61,16 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
-import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
-import com.sap.sailing.domain.abstractlog.race.impl.FixedMarkPassingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -909,7 +909,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
                 TimePoint protestStartTime = state.getProtestTime();
                 if (protestStartTime != null) {
-                    long protestDuration = 90 * 60 * 1000; // 90 min protest duration
+                    final Duration protestDuration = Duration.ONE_MINUTE.times(90); // 90 min protest duration; see bug 3089 (make protest time variable)
                     raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
                     raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                     raceInfoDTO.lastLowerFlag = Flags.NONE;
@@ -3132,7 +3132,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData);
                 groupDTO.leaderboards.add(leaderboardDTO);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);
+                logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
         }
         Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
@@ -5504,10 +5504,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Date dateOfMarkPassing, CompetitorDTO competitorDTO) {
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         Competitor competitor = getCompetitor(competitorDTO);
-        FixedMarkPassingEvent oldFixedMarkPassingEvent = null;
+        RaceLogFixedMarkPassingEvent oldFixedMarkPassingEvent = null;
         for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
-            if (event instanceof FixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
-                FixedMarkPassingEvent fixedEvent = (FixedMarkPassingEvent) event;
+            if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
+                RaceLogFixedMarkPassingEvent fixedEvent = (RaceLogFixedMarkPassingEvent) event;
                 if (fixedEvent.getZeroBasedIndexOfPassedWaypoint() == indexOfWaypoint) {
                     oldFixedMarkPassingEvent = fixedEvent;
                 }
@@ -5526,21 +5526,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new MillisecondsTimePoint(dateOfMarkPassing), indexOfWaypoint));
         }
     }
-
+    
     @Override
     public void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
-        SuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
+        RaceLogSuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         Competitor competitor = getCompetitor(competitorDTO);
         NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
         for (RaceLogEvent event : unrevokedEvents) {
-            if (event instanceof SuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
-                oldSuppressedMarkPassingEvent = (SuppressedMarkPassingsEvent) event;
+            if (event instanceof RaceLogSuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
+                oldSuppressedMarkPassingEvent = (RaceLogSuppressedMarkPassingsEvent) event;
                 break;
             }
         }
-
+        
         final boolean create;
         final boolean revoke;
         if (oldSuppressedMarkPassingEvent == null) {
@@ -5759,5 +5759,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             return true;
         }
+    }
+
+    @Override
+    public RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName) {
+        RegattaAndRaceIdentifier result = null;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(regattaLikeName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        result = trackedRace.getRaceIdentifier();
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

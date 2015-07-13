@@ -25,6 +25,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.server.RacingEventService;
@@ -50,14 +51,14 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         json.put("id", competitor.getId().toString());
         json.put("name", competitor.getName());
         json.put("sailID", competitor.getBoat().getSailID());
-        json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
+        final Nationality nationality = competitor.getTeam().getNationality();
+        json.put("nationality", nationality==null?null:nationality.getThreeLetterIOCAcronym());
+        json.put("countryCode", nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
         json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
         json.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
         if(competitor.getFlagImage() != null) {
             json.put("flagImage", competitor.getFlagImage().toString());
         }
-        
         return json;
     }
 
