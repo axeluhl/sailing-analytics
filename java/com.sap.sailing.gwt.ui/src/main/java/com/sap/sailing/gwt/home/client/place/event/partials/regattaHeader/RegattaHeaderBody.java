@@ -40,7 +40,9 @@ public class RegattaHeaderBody extends UIObject {
     }
     
     private void addDetailsItem(int count, String text) {
-        addDetailsItem(count + " " + text);
+        if (count > 0) {
+            addDetailsItem(count + " " + text);
+        }
     }
     
     private void addDetailsItem(String text) {
