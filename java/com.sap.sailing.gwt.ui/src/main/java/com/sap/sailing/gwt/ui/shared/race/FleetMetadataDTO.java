@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class FleetMetadataDTO implements IsSerializable, Comparable<FleetMetadataDTO> {
 
+    private static final String DEFAULT_FLEET_COLOR = "#f0ab00";
     private String fleetName;
     private String fleetColor;
 
@@ -22,7 +23,7 @@ public class FleetMetadataDTO implements IsSerializable, Comparable<FleetMetadat
     }
 
     public String getFleetColor() {
-        return fleetColor;
+        return fleetColor == null || fleetColor.isEmpty() ? DEFAULT_FLEET_COLOR : fleetColor;
     }
 
     @Override
