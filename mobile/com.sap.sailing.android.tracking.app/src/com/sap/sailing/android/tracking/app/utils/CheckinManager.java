@@ -14,7 +14,7 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstans;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 
@@ -200,11 +200,11 @@ public class CheckinManager {
 
                     try {
                         // TODO review constants
-                        urlData.competitorName = response.getString(CompetitorJsonConstans.COMPETITOR_NAME);
-                        urlData.competitorId = response.getString(CompetitorJsonConstans.COMPETITOR_ID);
-                        urlData.competitorSailId = response.getString(CompetitorJsonConstans.COMPETITOR_SAIL_ID);
-                        urlData.competitorNationality = response.getString(CompetitorJsonConstans.COMPETITOR_NATIONALITY);
-                        urlData.competitorCountryCode = response.getString(CompetitorJsonConstans.COMPETITOR_COUNTRY_CODE);
+                        urlData.competitorName = response.getString(CompetitorJsonConstants.COMPETITOR_NAME);
+                        urlData.competitorId = response.getString(CompetitorJsonConstants.COMPETITOR_ID);
+                        urlData.competitorSailId = response.getString(CompetitorJsonConstants.COMPETITOR_SAIL_ID);
+                        urlData.competitorNationality = response.getString(CompetitorJsonConstants.COMPETITOR_NATIONALITY);
+                        urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.COMPETITOR_COUNTRY_CODE);
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();

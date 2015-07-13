@@ -5,7 +5,7 @@ package com.sap.sailing.domain.common.tracking.impl;
  * Used to assemble a compatible JSON string by themselves, using the constants from here.
  * Might need to be updated with additional constants.
  */
-public class CompetitorJsonConstans {
+public class CompetitorJsonConstants {
     public static final String COMPETITOR_ID = "id";
     public static final String COMPETITOR_NAME = "name";
     public static final String COMPETITOR_SAIL_ID = "sailID";

@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
-import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstans;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.CountryCode;
 
@@ -47,31 +47,31 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         // However, other, e.g., numeric, types used to encode a serializable ID must be preserved according to JSON semantics.
         // Also see the corresponding case distinction in the deserialized which first tries to parse a string as a UUID becore
         // returning the ID as is.
-        result.put(CompetitorJsonConstans.FIELD_ID_TYPE, competitor.getId().getClass().getName());
+        result.put(CompetitorJsonConstants.FIELD_ID_TYPE, competitor.getId().getClass().getName());
         Set<Entry<Object, Object>> entries = getCompetitorIdQuery(competitor).entrySet();
         for (Entry<Object, Object> idKeyAndValue : entries) {
             result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
         }
-        result.put(CompetitorJsonConstans.FIELD_NAME, competitor.getName());
-        result.put(CompetitorJsonConstans.FIELD_DISPLAY_COLOR, competitor.getColor() == null ? null : competitor.getColor().getAsHtml());
-        result.put(CompetitorJsonConstans.FIELD_EMAIL, competitor.getEmail());
-        result.put(CompetitorJsonConstans.FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
+        result.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
+        result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, competitor.getColor() == null ? null : competitor.getColor().getAsHtml());
+        result.put(CompetitorJsonConstants.FIELD_EMAIL, competitor.getEmail());
+        result.put(CompetitorJsonConstants.FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam() == null ? null : competitor.getTeam().getNationality();
-        result.put(CompetitorJsonConstans.FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
+        result.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-        result.put(CompetitorJsonConstans.FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());
-        result.put(CompetitorJsonConstans.FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
+        result.put(CompetitorJsonConstants.FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());
+        result.put(CompetitorJsonConstants.FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
         if (competitor.getFlagImage() != null) {
-            result.put(CompetitorJsonConstans.FIELD_FLAG_IMAGE_URI, competitor.getFlagImage().toString());
+            result.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI, competitor.getFlagImage().toString());
         }
         if (teamJsonSerializer != null) {
-            result.put(CompetitorJsonConstans.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
+            result.put(CompetitorJsonConstants.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
         if (boatJsonSerializer != null) {
-            result.put(CompetitorJsonConstans.FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
+            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
         }
-        result.put(CompetitorJsonConstans.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
-        result.put(CompetitorJsonConstans.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+        result.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
+        result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
                     competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         return result;
