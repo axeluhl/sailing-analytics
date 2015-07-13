@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.UUID;
+
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 
@@ -17,9 +20,9 @@ public class RaceListDataCalculator implements RaceCallback {
         result.add(context.getFinishedRaceOrNull());
     }
     
-    public ResultWithTTL<RaceListViewDTO> getResult() {
+    public ResultWithTTL<RaceListViewDTO> getResult(DispatchContext context, UUID eventId) {
         result.setProgress(progressCalculator.getResult());
-        return new ResultWithTTL<>(5000, result);
+        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 3 * 60 * 1000), result);
     }
 
 }

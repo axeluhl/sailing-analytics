@@ -31,7 +31,7 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
         long start = System.currentTimeMillis();
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
         EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
-        ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult();
+        ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult(context, eventId);
         
         long duration = System.currentTimeMillis() - start;
         logger.log(Level.INFO, "Calculating race list for event "+ eventId + " took: "+ duration + "ms");

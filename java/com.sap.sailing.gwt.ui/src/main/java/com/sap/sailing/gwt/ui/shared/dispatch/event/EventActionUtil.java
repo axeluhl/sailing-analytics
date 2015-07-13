@@ -59,6 +59,19 @@ public final class EventActionUtil {
         throw new DispatchException("The leaderboard is not part of the given event.");
     }
     
+    public static long getEventStateDependentTTL(DispatchContext context, UUID eventId, long liveTTL) {
+        Event event = context.getRacingEventService().getEvent(eventId);
+        return getEventStateDependentTTL(event, liveTTL);
+    }
+    
+    private static long getEventStateDependentTTL(Event event, long liveTTL) {
+        EventState eventState = HomeServiceUtil.calculateEventState(event);
+        if(eventState == EventState.RUNNING) {
+            return liveTTL;
+        }
+        return calculateTtlForNonLiveEvent(event, eventState);
+    }
+
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(DispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);

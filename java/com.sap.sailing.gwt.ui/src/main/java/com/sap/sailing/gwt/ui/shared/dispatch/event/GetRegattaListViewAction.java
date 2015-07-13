@@ -32,7 +32,7 @@ public class GetRegattaListViewAction implements Action<ResultWithTTL<SortedSetR
             public void doForLeaderboard(LeaderboardContext leaderboardContext) {
                 result.add(leaderboardContext.getRegattaWithProgress(context));
             }
-        });     
-        return new ResultWithTTL<>(5 * 1000, new SortedSetResult<>(result));
+        });
+        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 3 * 60 * 1000), new SortedSetResult<>(result));
     }
 }
