@@ -383,7 +383,7 @@ public class RaceListColumnFactory {
         return new DataCountColumn<T>(DataCountColumn.ICON_WIND) {
             @Override
             public Number getValue(T object) {
-                return object.getWindFixesCount();
+                return object.getWindSourcesCount();
             }
         };
     }

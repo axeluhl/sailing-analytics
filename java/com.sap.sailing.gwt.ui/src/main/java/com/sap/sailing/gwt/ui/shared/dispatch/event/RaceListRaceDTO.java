@@ -7,7 +7,7 @@ public class RaceListRaceDTO extends RaceMetadataDTO {
     
     private Duration duration;
     private SimpleCompetitorDTO winner;
-    private int windFixesCount;
+    private int windSourcesCount;
     private int videoCount;
     private int audioCount;
 
@@ -31,11 +31,11 @@ public class RaceListRaceDTO extends RaceMetadataDTO {
     public void setWinner(SimpleCompetitorDTO winner) {
         this.winner = winner;
     }
-    public int getWindFixesCount() {
-        return windFixesCount;
+    public int getWindSourcesCount() {
+        return windSourcesCount;
     }
-    public void setWindFixesCount(int windFixesCount) {
-        this.windFixesCount = windFixesCount;
+    public void setWindSourcesCount(int windFixesCount) {
+        this.windSourcesCount = windFixesCount;
     }
     public int getVideoCount() {
         return videoCount;

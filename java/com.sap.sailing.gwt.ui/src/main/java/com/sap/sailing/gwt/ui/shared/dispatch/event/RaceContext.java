@@ -304,12 +304,20 @@ public class RaceContext {
             fillRaceData(liveRaceDTO);
             liveRaceDTO.setDuration(getDurationOrNull());
             liveRaceDTO.setWinner(getWinnerOrNull());
+            liveRaceDTO.setWindSourcesCount(getWindSourceCount());
             
             return liveRaceDTO;
         }
         return null;
     }
     
+    private int getWindSourceCount() {
+        if(trackedRace != null) {
+            return trackedRace.getWindSources().size() - trackedRace.getWindSourcesToExclude().size();
+        }
+        return 0;
+    }
+
     private SimpleCompetitorDTO getWinnerOrNull() {
         // TODO calculate winner from score correction
         if(trackedRace != null) {

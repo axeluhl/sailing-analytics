@@ -64,7 +64,7 @@ public class RaceListDataUtil {
         return hasNumberValues(data, new ValueProvider<T, Number>() {
             @Override
             public Number getValue(T object) {
-                return object.getWindFixesCount();
+                return object.getWindSourcesCount();
             }
         });
     }
