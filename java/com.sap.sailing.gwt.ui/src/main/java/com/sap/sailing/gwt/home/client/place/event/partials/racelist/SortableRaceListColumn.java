@@ -20,7 +20,11 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
     }
     
     protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
-        super(cell, SortingOrder.ASCENDING);
+        this(header, cell, comparator, SortingOrder.ASCENDING);
+    }
+    
+    protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
+        super(cell, preferredSortingOrder);
         this.header = header;
         this.comparator = comparator;
     }

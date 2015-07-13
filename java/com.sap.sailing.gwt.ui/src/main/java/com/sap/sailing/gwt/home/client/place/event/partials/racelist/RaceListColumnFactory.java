@@ -21,6 +21,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
@@ -380,7 +381,13 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getWindFixesCountColumn() {
-        return new DataCountColumn<T>(DataCountColumn.ICON_WIND) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
+            @Override
+            protected Integer getComparisonValue(T object) {
+                return object.getWindSourcesCount();
+            }
+        };
+        return new DataCountColumn<T>(DataCountColumn.ICON_WIND, comparator) {
             @Override
             public Number getValue(T object) {
                 return object.getWindSourcesCount();
@@ -389,7 +396,13 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getVideoCountColumn() {
-        return new DataCountColumn<T>(DataCountColumn.ICON_VIDEO) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
+            @Override
+            protected Integer getComparisonValue(T object) {
+                return object.getVideoCount();
+            }
+        };
+        return new DataCountColumn<T>(DataCountColumn.ICON_VIDEO, comparator) {
             @Override
             public Number getValue(T object) {
                 return object.getVideoCount();
@@ -398,7 +411,13 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getAudioCountColumn() {
-        return new DataCountColumn<T>(DataCountColumn.ICON_AUDIO) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
+            @Override
+            protected Integer getComparisonValue(T object) {
+                return object.getAudioCount();
+            }
+        };
+        return new DataCountColumn<T>(DataCountColumn.ICON_AUDIO, comparator) {
             @Override
             public Number getValue(T object) {
                 return object.getAudioCount();
@@ -531,7 +550,7 @@ public class RaceListColumnFactory {
         private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
         private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
         
-        private DataCountColumn(final SafeUri imageUri) {
+        private DataCountColumn(final SafeUri imageUri, InvertibleComparator<T> comparator) {
             super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Number>() {
                 @Override
                 public void render(Context context, Number value, SafeHtmlBuilder sb) {
@@ -541,9 +560,9 @@ public class RaceListColumnFactory {
                         sb.appendHtmlConstant("&mdash;");
                     }
                 }
-            }, null);
+            }, comparator, SortingOrder.DESCENDING);
         }
-        
+
         @Override
         public String getHeaderStyle() {
             return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itemcenter(), MEDIA_CSS.showonlarge());
