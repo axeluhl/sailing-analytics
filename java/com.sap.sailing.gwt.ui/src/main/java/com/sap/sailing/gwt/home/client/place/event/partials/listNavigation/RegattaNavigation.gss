@@ -94,6 +94,9 @@
   text-align: left;
   padding: 0 2.307692307692307em 0 0.769230769230769em;
 }
+.regattanavigation_filter_dropdown_link:hover {
+  text-decoration: underline;
+}
 .regattanavigation_filter_dropdown_linkactive {
   background: url("images/home/dropdown__check@2x.png") no-repeat;
   background-position: 95%;
