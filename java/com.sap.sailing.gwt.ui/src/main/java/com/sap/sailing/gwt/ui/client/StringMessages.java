@@ -1338,4 +1338,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
     String selectCompetitor();
+    String points();
+    String numberOfRacesShort();
+    String miniLeeaderboardLegendText();
 }

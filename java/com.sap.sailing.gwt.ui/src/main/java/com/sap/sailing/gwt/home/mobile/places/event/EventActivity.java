@@ -75,7 +75,7 @@ public class EventActivity extends AbstractActivity implements Presenter {
         final EventView view = new EventViewImpl(this);
         panel.setWidget(view.asWidget());
         EventViewDTO event = getCtx().getEventDTO();
-        String sailorInfoUrl = event.getSailorsInfoURL();
+        String sailorInfoUrl = event.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
         } else if (event.getType() == EventType.SERIES_EVENT) {
