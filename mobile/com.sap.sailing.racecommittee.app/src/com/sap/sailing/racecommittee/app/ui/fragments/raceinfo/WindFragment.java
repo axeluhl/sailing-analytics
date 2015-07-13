@@ -59,7 +59,7 @@ public class WindFragment extends BaseFragment
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
-    private final static String GWT_MAP_AND_WIND_CHART_HTML = "gwt/EmbeddedMapAndWindChart.html";
+    private final static String GWT_MAP_AND_WIND_CHART_HTML = "/gwt/EmbeddedMapAndWindChart.html";
     private final static long ONE_SEC = 1000;
     private final static long FIVE_SEC = 5000;
     private final static long EVERY_POSITION_CHANGE = 0;
