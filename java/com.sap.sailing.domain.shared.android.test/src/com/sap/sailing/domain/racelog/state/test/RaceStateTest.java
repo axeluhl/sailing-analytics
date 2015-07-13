@@ -4,11 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -125,7 +129,18 @@ public class RaceStateTest {
         verify(listener).onStatusChanged(state);
         verifyNoMoreInteractions(listener);
     }
-    
+
+    /**
+     * See bug 3086: make sure that race log change events cause an update of the RacingProcedure
+     */
+    @Test
+    public void testSetIndividualRecall() {
+        assertFalse(state.getRacingProcedure().isIndividualRecallDisplayed());
+        raceLog.add(new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID
+                .randomUUID(), null, /* pass */0, Flags.XRAY, Flags.NONE, /* pIsDisplayed */true));
+        assertTrue(state.getRacingProcedure().isIndividualRecallDisplayed());
+    }
+
     @Test
     public void testAdvancePass() {
         state.addChangedListener(listener);

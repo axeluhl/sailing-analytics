@@ -61,16 +61,16 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
-import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
-import com.sap.sailing.domain.abstractlog.race.impl.FixedMarkPassingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -909,7 +909,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
                 TimePoint protestStartTime = state.getProtestTime();
                 if (protestStartTime != null) {
-                    long protestDuration = 90 * 60 * 1000; // 90 min protest duration
+                    final Duration protestDuration = Duration.ONE_MINUTE.times(90); // 90 min protest duration; see bug 3089 (make protest time variable)
                     raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
                     raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                     raceInfoDTO.lastLowerFlag = Flags.NONE;
@@ -3132,7 +3132,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData);
                 groupDTO.leaderboards.add(leaderboardDTO);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);
+                logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
         }
         Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
@@ -3300,22 +3300,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString, String sailorsInfoWebsiteURLString,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+        URL sailorsInfoWebsiteURL = sailorsInfoWebsiteURLString != null ? new URL(sailorsInfoWebsiteURLString) : null;
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
-                        isPublic, leaderboardGroupIds, officialWebsiteURL, eventImages, eventVideos));
+                        isPublic, leaderboardGroupIds, officialWebsiteURL, sailorsInfoWebsiteURL, eventImages, eventVideos));
         return getEventById(eventId, false);
     }
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, Iterable<ImageDTO> images, Iterable<VideoDTO> videos)
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String sailorsInfoWebsiteURLAsString,
+            Iterable<ImageDTO> images, Iterable<VideoDTO> videos)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
@@ -3324,7 +3326,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString), eventImages, eventVideos));
+                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString), new URL(sailorsInfoWebsiteURLAsString), eventImages, eventVideos));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3403,6 +3405,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
+        eventDTO.setSailorsInfoWebsiteURL(event.getSailorsInfoWebsiteURL() != null ? event.getSailorsInfoWebsiteURL().toString() : null);
         for(ImageDescriptor image: event.getImages()) {
             eventDTO.addImage(convertToImageDTO(image));
         }
@@ -4143,7 +4146,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
         updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
-                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(),
+                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(), newEvent.getSailorsInfoWebsiteURL(),
                 newEvent.getImages(), newEvent.getVideos());
     }
     
@@ -5504,10 +5507,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Date dateOfMarkPassing, CompetitorDTO competitorDTO) {
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         Competitor competitor = getCompetitor(competitorDTO);
-        FixedMarkPassingEvent oldFixedMarkPassingEvent = null;
+        RaceLogFixedMarkPassingEvent oldFixedMarkPassingEvent = null;
         for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
-            if (event instanceof FixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
-                FixedMarkPassingEvent fixedEvent = (FixedMarkPassingEvent) event;
+            if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
+                RaceLogFixedMarkPassingEvent fixedEvent = (RaceLogFixedMarkPassingEvent) event;
                 if (fixedEvent.getZeroBasedIndexOfPassedWaypoint() == indexOfWaypoint) {
                     oldFixedMarkPassingEvent = fixedEvent;
                 }
@@ -5526,21 +5529,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new MillisecondsTimePoint(dateOfMarkPassing), indexOfWaypoint));
         }
     }
-
+    
     @Override
     public void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
-        SuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
+        RaceLogSuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         Competitor competitor = getCompetitor(competitorDTO);
         NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
         for (RaceLogEvent event : unrevokedEvents) {
-            if (event instanceof SuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
-                oldSuppressedMarkPassingEvent = (SuppressedMarkPassingsEvent) event;
+            if (event instanceof RaceLogSuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
+                oldSuppressedMarkPassingEvent = (RaceLogSuppressedMarkPassingsEvent) event;
                 break;
             }
         }
-
+        
         final boolean create;
         final boolean revoke;
         if (oldSuppressedMarkPassingEvent == null) {

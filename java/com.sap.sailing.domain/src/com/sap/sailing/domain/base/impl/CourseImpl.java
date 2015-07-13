@@ -209,12 +209,16 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public Leg getFirstLeg() {
-        try {
-            return legs.get(0);
-        } catch (IndexOutOfBoundsException e) {
-            // yes, it's a bit clumsy, but this way it's still atomic without requiring a lock which is even more expensive
-            return null;
+        Leg result = null;
+        if (!legs.isEmpty()) {
+            try {
+                result = legs.get(0);
+            } catch (IndexOutOfBoundsException e) {
+                // The legs collection could have turned empty since the check; we don't want to have to lock here...
+                // Yes, it's a bit clumsy, but this way it's still atomic without requiring a lock which is even more expensives
+            }
         }
+        return result;
     }
 
     @Override
