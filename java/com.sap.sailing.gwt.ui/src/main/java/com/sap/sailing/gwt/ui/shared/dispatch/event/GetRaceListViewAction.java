@@ -26,7 +26,7 @@ public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewD
     public ResultWithTTL<RaceListViewDTO> execute(DispatchContext context) {
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
         EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
-        ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult(context, eventId);
+        ResultWithTTL<RaceListViewDTO> result = raceListDataCalculator.getResult(context, eventId, regattaId);
         
         return result;
     }

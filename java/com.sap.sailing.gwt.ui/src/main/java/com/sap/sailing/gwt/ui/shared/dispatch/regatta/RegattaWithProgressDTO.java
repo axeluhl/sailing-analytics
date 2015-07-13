@@ -5,8 +5,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 public class RegattaWithProgressDTO extends RegattaMetadataDTO {
     private RegattaProgressDTO progress;
     
-    @SuppressWarnings("unused")
-    private RegattaWithProgressDTO() {
+    public RegattaWithProgressDTO() {
     }
 
     public RegattaWithProgressDTO(RegattaProgressDTO progress) {
@@ -16,5 +15,9 @@ public class RegattaWithProgressDTO extends RegattaMetadataDTO {
     
     public RegattaProgressDTO getProgress() {
         return progress;
+    }
+    
+    public void setProgress(RegattaProgressDTO progress) {
+        this.progress = progress;
     }
 }
