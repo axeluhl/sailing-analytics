@@ -41,7 +41,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Alexander Ries (D062114)
  *
  */
-public class RibDashboardServiceImpl extends RemoteServiceServlet implements RibDashboardService {
+public class RibDashboardServiceImpl extends RemoteServiceServlet implements RibDashboardService, LiveTrackedRaceProvider {
 
     /**
      * 
@@ -283,5 +283,10 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             randomAdvantagesOnStartline.add(new Pair<Double, Double>(new Double(i), new Double((i+1)/2+(0 + (int)(Math.random()*5)))));
         }
         return randomAdvantagesOnStartline;
+    }
+
+    @Override
+    public void notifyLiveTrackedRaceListenerAboutLiveTrackedRaceChange(TrackedRace trackedRace) {
+        listener.forEach(listener -> listener.liveTrackedRaceDidChange(trackedRace));
     }
 }
