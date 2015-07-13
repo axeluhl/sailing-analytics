@@ -1,18 +1,19 @@
 package com.sap.sailing.android.buoy.positioning.app.service;
 
+import java.util.Calendar;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
-
-import java.util.Calendar;
 
 public class MarkerService extends Service implements  CheckinManager.DataChangedListner{
     private static String TAG = MarkerService.class.getName();
@@ -69,6 +70,8 @@ public class MarkerService extends Service implements  CheckinManager.DataChange
     }
 
     private class MarkerBinder extends Binder {
+        @SuppressWarnings("unused")
+        // Unused for now. Will be useful in case this service becomes a bound service.
         public MarkerService getService() {
             return MarkerService.this;
         }

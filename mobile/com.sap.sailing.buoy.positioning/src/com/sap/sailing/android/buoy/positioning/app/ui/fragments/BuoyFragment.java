@@ -1,5 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
+import java.text.DecimalFormat;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -22,7 +25,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
-import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.buoy.positioning.app.util.PingHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.PingServerReplyCallback;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
@@ -34,8 +36,6 @@ import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
-
-import java.text.DecimalFormat;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final String TAG = BuoyFragment.class.getName();

@@ -1,5 +1,8 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +12,7 @@ import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
@@ -24,9 +28,6 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RegattaActivity extends AbstractRegattaActivity {
 

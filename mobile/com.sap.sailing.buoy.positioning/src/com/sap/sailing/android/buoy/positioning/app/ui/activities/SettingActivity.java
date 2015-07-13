@@ -1,10 +1,9 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
+
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.GeneralPreferenceFragment;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;

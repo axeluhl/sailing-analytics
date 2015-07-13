@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -13,8 +14,10 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,6 +116,7 @@ public class CheckinManager {
                     final String leaderboardName;
 
                     try {
+                        //TODO use constants
                         leaderboardName = response.getString("name");
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.leaderboardUrl + ", Error: " + e.getMessage());
@@ -146,6 +150,7 @@ public class CheckinManager {
             public void performAction(JSONObject response) {
 
                 try {
+                    //TODO use constants
                     urlData.eventId = response.getString("id");
                     urlData.eventName = response.getString("name");
                     urlData.eventStartDateStr = response.getString("startDate");
@@ -194,11 +199,12 @@ public class CheckinManager {
                     activity.dismissProgressDialog();
 
                     try {
-                        urlData.competitorName = response.getString("name");
-                        urlData.competitorId = response.getString("id");
-                        urlData.competitorSailId = response.getString("sailID");
-                        urlData.competitorNationality = response.getString("nationality");
-                        urlData.competitorCountryCode = response.getString("countryCode");
+                        // TODO review constants
+                        urlData.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
+                        urlData.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
+                        urlData.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
+                        urlData.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
+                        urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();

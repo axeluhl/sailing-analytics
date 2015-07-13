@@ -31,13 +31,13 @@ import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -47,14 +47,12 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private NotificationManager notificationManager;
     private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
-    private ScheduledExecutorService scheduler;
 
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
 
     private static final String TAG = TrackingService.class.getName();
 
-    public static final String WEB_SERVICE_PATH = "/sailingserver/api/v1/gps_fixes";
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
@@ -132,10 +130,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         googleApiClient.disconnect();
         locationUpdateRequested = false;
 
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
-
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
 
@@ -195,16 +189,16 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             JSONArray jsonArray = new JSONArray();
             JSONObject fixJson = new JSONObject();
 
-            fixJson.put("course", location.getBearing());
-            fixJson.put("timestamp", location.getTime());
-            fixJson.put("speed", location.getSpeed());
-            fixJson.put("longitude", location.getLongitude());
-            fixJson.put("latitude", location.getLatitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
 
             jsonArray.put(fixJson);
 
-            json.put("fixes", jsonArray);
-            json.put("deviceUuid", prefs.getDeviceIdentifier());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, jsonArray);
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
 
             String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
 
@@ -214,12 +208,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         } catch (JSONException ex) {
             ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
         }
-
-        // DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
-        // location.getLongitude(), location.getSpeed(),
-        // location.getBearing(), location.getProvider(),
-        // location.getTime(), eventRowId);
-        // ensureTransmittingServiceIsRunning();
     }
 
     /**
@@ -267,17 +255,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         return batteryPct;
     }
 
-    /**
-     * start transmitting service when a new fix arrives, because it ends itself, if there's no data to send.
-     */
-    // private void ensureTransmittingServiceIsRunning() {
-    // if (BuildConfig.DEBUG) {
-    // ExLog.i(this, TAG,
-    // "ensureTransmittingServiceIsRunning, starting TransmittingService");
-    // }
-    //
-    // ServiceHelper.getInstance().startTransmittingService(this);
-    // }
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -289,6 +266,8 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         notificationManager.cancel(NOTIFICATION_ID);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
+    
+    // Useful code for Bug 3048. Will stay commented for now.
 
      private void showNotification() {
      Intent intent = new Intent(this, TrackingActivity.class);
