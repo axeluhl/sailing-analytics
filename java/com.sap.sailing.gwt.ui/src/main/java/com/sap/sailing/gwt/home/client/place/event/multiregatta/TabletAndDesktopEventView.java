@@ -58,7 +58,7 @@ public class TabletAndDesktopEventView extends Composite implements EventMultire
 
         initBreadCrumbs();
         
-        String sailorsInfoURL = currentPresenter.getCtx().getEventDTO().getSailorsInfoURL();
+        String sailorsInfoURL = currentPresenter.getCtx().getEventDTO().getSailorsInfoWebsiteURL();
         if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
             Label label = new Label();
             label.getElement().setInnerHTML(i18n.sailorInfoLongText().replace("\n", "<br />"));
