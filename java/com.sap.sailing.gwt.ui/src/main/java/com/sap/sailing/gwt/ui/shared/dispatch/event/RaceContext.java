@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -22,6 +24,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -55,6 +58,7 @@ import com.sap.sse.common.media.MediaType;
 
 @GwtIncompatible
 public class RaceContext {
+    private static final Logger logger = Logger.getLogger(RaceContext.class.getName());
     private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
     private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
     
@@ -74,6 +78,7 @@ public class RaceContext {
     private TimePoint finishTime;
     private boolean finishTimeCalculated = false;
     private RaceViewState raceViewState;
+    private List<Competitor> competitors;
     
     public RaceContext(RacingEventService service, Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.service = service;
@@ -346,16 +351,33 @@ public class RaceContext {
     }
 
     private SimpleCompetitorDTO getWinnerOrNull() {
-        // TODO calculate winner from score correction
-        if(trackedRace != null) {
-            TimePoint time = getFinishTime();
-            if(time == null) {
-                time = MillisecondsTimePoint.now();
+        if(getLiveRaceViewState() != RaceViewState.FINISHED) {
+            // We can't reliably calculate the winner for non finished races
+            return null;
+        }
+        // TODO do not calculate the winner if the blue flag is currently shown.
+        try {
+            competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, getFinishTime());
+            if(competitors == null || competitors.isEmpty()) {
+                return null;
             }
-            List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(time);
-            if(competitorsFromBestToWorst != null && !competitorsFromBestToWorst.isEmpty()) {
-                return new SimpleCompetitorDTO(competitorsFromBestToWorst.get(0));
+            if(Util.size(raceColumn.getFleets()) == 1) {
+                return new SimpleCompetitorDTO(competitors.get(0));
             }
+            if(trackedRace == null) {
+                return null;
+            }
+            for(Competitor competitor : competitors) {
+                Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+                if(fleetOfCompetitor == null) {
+                    continue;
+                }
+                if(Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName())) {
+                    return new SimpleCompetitorDTO(competitor);
+                }
+            }
+        } catch (NoWindException e) {
+            logger.log(Level.WARNING, "Error while calculating winner for race.", e);
         }
         return null;
     }
