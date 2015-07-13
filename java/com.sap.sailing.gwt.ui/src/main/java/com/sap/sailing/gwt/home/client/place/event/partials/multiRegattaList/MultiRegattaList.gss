@@ -158,7 +158,7 @@ img.race_item_windflag {
   border-radius: 0.333333333333333em;
   overflow: hidden;
 }
-.regattalistitem div:last-child {
+.regattalistitem > div:last-child {
   border-bottom: none;
 }
 .regattalistitem_table {
@@ -181,76 +181,56 @@ img.race_item_windflag {
   float: left;
   position: relative;
   height: 4em;
-  line-height: 4em;
   text-transform: uppercase;
-  padding: 0 0.666666666666667em 0 1.333333333333333em;
+  padding: 0 0.666666666666667em;
 }
 .regattalistitem_steps_stepinactive {
   color: #ddd;
 }
-.regattalistitem_steps_step:first-of-type {
-  padding-left: 2em;
-}
-.regattalistitem_steps_step_check {
-  display: inline-block;
-  vertical-align: middle;
-  width: 2.133333333333333em;
-  height: 2.133333333333333em;
-  margin-left: -0.333333333333333em;
-  background-image: url("../images/home/icon/icon-green-check.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-.regattalistitem_steps_step_text {
-  margin-right: 2.4em;
-  display: inline-block;
-  font-size: 0;
-}
-.regattalistitem_steps_step_text::first-letter {
-  font-size: 1rem;
-  padding-right: 2.666666666666667em;
-}
-@media (min-width: 49.0625em) {
-  .regattalistitem_steps_step_text {
-    font-size: 1em;
-  }
-  .regattalistitem_steps_step_text::first-letter {
-    padding-right: 0;
-  }
-}
-.regattalistitem_steps_step_count {
-  position: absolute;
+.regattalistitem_steps_step_infowrapper {
+  position: relative;
   top: 50%;
-  right: 1.333333333333333em;
-  font-size: 0.8em;
-  line-height: 1.6em;
-  width: 1.6em;
-  height: 1.6em;
-  text-align: center;
-  background-color: #eee;
-  border: 1px solid #ddd;
-  border-radius: 0.2em;
   -webkit-transform: translateY(-50%);
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
+  white-space: nowrap;
 }
-.regattalistitem_steps_step:after {
-  content: '';
-  position: absolute;
-  top: 0.333333333333333em;
-  left: 100%;
-  display: block;
-  width: 3.333333333333333em;
-  height: 3.333333333333333em;
-  margin-left: -3.333333333333333em;
-  border: 1px solid transparent;
-  border-top-color: #ddd;
-  border-right-color: #ddd;
-  -webkit-transform: rotate(45deg);
-     -moz-transform: rotate(45deg);
-      -ms-transform: rotate(45deg);
-          transform: rotate(45deg);
+.regattalistitem_steps_step_name {
+  font-size: 0.866666666666667em;
+  font-weight: 600;
+  display: inline-block;
+  margin-right: 0.333333333333333em;
+}
+.regattalistitem_steps_step_check {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.066666666666667em;
+  height: 1.066666666666667em;
+  background-image: url("images/home/icon-green-check.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  margin-right: 0.333333333333333em;
+}
+.regattalistitem_steps_step_progress {
+  display: inline-block;
+  font-size: 0.866666666666667em;
+  text-transform: none;
+}
+.regattalistitem_steps_step_fleets {
+  width: 100%;
+  height: 1em;
+  border: 1px solid #dedede;
+  margin-top: 0.266666666666667em;
+}
+.regattalistitem_steps_step_fleets_fleet {
+  border-bottom: 1px solid #dedede;
+}
+.regattalistitem_steps_step_fleets_fleet:last-child {
+  border-bottom: none;
+}
+.regattalistitem_steps_step_fleets_fleet_progress {
+  height: 100%;
 }
 .regattalistitem_steps_button {
   height: 100%;
