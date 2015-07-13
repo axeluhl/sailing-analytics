@@ -32,8 +32,17 @@ public class MultiRegattaListSteps extends Composite {
     public MultiRegattaListSteps(RegattaProgressDTO regattaProgress) {
         MultiRegattaListResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        double sumParts = 0;
         for(RegattaProgressSeriesDTO seriesProgress : regattaProgress.getSeries()) {
-            stepsContainerUi.appendChild(new MultiRegattaListStepsBody(seriesProgress).getElement());
+            double parts = Math.pow(seriesProgress.getTotalRaceCount(), 0.4);
+            sumParts += parts;
+        }
+        for(RegattaProgressSeriesDTO seriesProgress : regattaProgress.getSeries()) {
+            double parts = Math.pow(seriesProgress.getTotalRaceCount(), 0.4);
+            double percentage = 100.0 * parts / sumParts;
+            MultiRegattaListStepsBody stepsBody = new MultiRegattaListStepsBody(seriesProgress);
+            stepsBody.getElement().getStyle().setWidth(percentage, Unit.PCT);
+            stepsContainerUi.appendChild(stepsBody.getElement());
         }
     }
     
