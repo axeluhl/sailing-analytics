@@ -223,12 +223,6 @@ img.race_item_windflag {
   border: 1px solid #dedede;
   margin-top: 0.266666666666667em;
 }
-.regattalistitem_steps_step_fleets_fleet {
-  border-bottom: 1px solid #dedede;
-}
-.regattalistitem_steps_step_fleets_fleet:last-child {
-  border-bottom: none;
-}
 .regattalistitem_steps_step_fleets_fleet_progress {
   height: 100%;
 }
