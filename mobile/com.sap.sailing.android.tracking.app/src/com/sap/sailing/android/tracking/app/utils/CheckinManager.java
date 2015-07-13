@@ -200,11 +200,11 @@ public class CheckinManager {
 
                     try {
                         // TODO review constants
-                        urlData.competitorName = response.getString(CompetitorJsonConstants.COMPETITOR_NAME);
-                        urlData.competitorId = response.getString(CompetitorJsonConstants.COMPETITOR_ID);
-                        urlData.competitorSailId = response.getString(CompetitorJsonConstants.COMPETITOR_SAIL_ID);
-                        urlData.competitorNationality = response.getString(CompetitorJsonConstants.COMPETITOR_NATIONALITY);
-                        urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.COMPETITOR_COUNTRY_CODE);
+                        urlData.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
+                        urlData.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
+                        urlData.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
+                        urlData.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
+                        urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();

@@ -48,15 +48,15 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public static JSONObject getCompetitorJSON(Competitor competitor) {
         // see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
         JSONObject json = new JSONObject();
-        json.put(CompetitorJsonConstants.COMPETITOR_ID, competitor.getId().toString());
-        json.put(CompetitorJsonConstants.COMPETITOR_NAME, competitor.getName());
-        json.put(CompetitorJsonConstants.COMPETITOR_SAIL_ID, competitor.getBoat().getSailID());
-        json.put(CompetitorJsonConstants.COMPETITOR_NATIONALITY, competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        json.put(CompetitorJsonConstants.COMPETITOR_COUNTRY_CODE, competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
-        json.put(CompetitorJsonConstants.COMPETITOR_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
-        json.put(CompetitorJsonConstants.COMPETITOR_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+        json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
+        json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
+        json.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat().getSailID());
+        json.put(CompetitorJsonConstants.FIELD_NATIONALITY, competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+        json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
+        json.put(CompetitorJsonConstants.FIELD_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
+        json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
         if(competitor.getFlagImage() != null) {
-            json.put(CompetitorJsonConstants.COMPETITOR_FLAG_IMAGE, competitor.getFlagImage().toString());
+            json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
         }
         
         return json;
