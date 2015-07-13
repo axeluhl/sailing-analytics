@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -45,10 +46,12 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.MediaType;
 
 @GwtIncompatible
 public class RaceContext {
@@ -64,6 +67,7 @@ public class RaceContext {
     private final RaceLog raceLog;
     private final ReadonlyRaceState state;
     private final Event event;
+    private final RacingEventService service;
     
     private TimePoint startTime;
     private boolean startTimeCalculated = false;
@@ -71,7 +75,8 @@ public class RaceContext {
     private boolean finishTimeCalculated = false;
     private RaceViewState raceViewState;
     
-    public RaceContext(Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
+    public RaceContext(RacingEventService service, Event event, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
+        this.service = service;
         this.event = event;
         this.leaderboard = leaderboard;
         this.raceColumn = raceColumn;
@@ -305,12 +310,34 @@ public class RaceContext {
             liveRaceDTO.setDuration(getDurationOrNull());
             liveRaceDTO.setWinner(getWinnerOrNull());
             liveRaceDTO.setWindSourcesCount(getWindSourceCount());
+            liveRaceDTO.setVideoCount(getVideoCount());
+            liveRaceDTO.setAudioCount(getAudioCount());
             
             return liveRaceDTO;
         }
         return null;
     }
     
+    private int getAudioCount() {
+        return getMediaCount( MediaType.audio);
+    }
+
+    private int getVideoCount() {
+        return getMediaCount(MediaType.video);
+    }
+    
+    private int getMediaCount(MediaType mediaType) {
+        int mediaCount = 0;
+        if(trackedRace != null) {
+            for(MediaTrack mediaTrack : service.getMediaTracksForRace(trackedRace.getRaceIdentifier())) {
+                if(mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == mediaType) {
+                    mediaCount++;
+                }
+            }
+        }
+        return mediaCount;
+    }
+
     private int getWindSourceCount() {
         if(trackedRace != null) {
             return trackedRace.getWindSources().size() - trackedRace.getWindSourcesToExclude().size();

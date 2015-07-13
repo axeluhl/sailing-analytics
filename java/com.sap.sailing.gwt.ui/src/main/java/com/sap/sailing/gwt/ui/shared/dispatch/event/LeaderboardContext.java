@@ -27,8 +27,10 @@ public class LeaderboardContext {
     private final Event event;
     private final LeaderboardGroup leaderboardGroup;
     private final Leaderboard leaderboard;
+    private final RacingEventService service;
 
-    public LeaderboardContext(Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+    public LeaderboardContext(RacingEventService service, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+        this.service = service;
         this.event = event;
         this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;
@@ -37,7 +39,7 @@ public class LeaderboardContext {
     public void forRaces(DispatchContext context, RaceCallback callback) {
         for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for(Fleet fleet : raceColumn.getFleets()) {
-                callback.doForRace(new RaceContext(event, leaderboard, raceColumn, fleet, context.getRacingEventService()));
+                callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, context.getRacingEventService()));
             }
         }
     }
