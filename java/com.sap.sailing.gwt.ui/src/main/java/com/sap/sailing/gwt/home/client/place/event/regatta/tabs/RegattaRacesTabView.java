@@ -22,8 +22,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListN
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
-import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListResources;
-import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListSteps;
+import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
@@ -41,7 +40,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRaceListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListViewDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -123,7 +121,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                 }
                 @Override
                 public void onSuccess(ResultWithTTL<RaceListViewDTO> result) {
-                    regattaInfoContainerUi.setWidget(getRegattaInformation(result.getDto().getProgress()));
+                    regattaInfoContainerUi.setWidget(new MultiRegattaListItem(result.getDto().getProgress()));
                     liveRacesList.setListData(result.getDto().getLiveRaces());
                     finishedRacesList.setListData(result.getDto().getFinishedRaces());
     //                for (RaceListSeriesDTO series : result.getDto().getRacesForCompetitionFormat()) {
@@ -164,12 +162,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
     
-    private Widget getRegattaInformation(RegattaProgressDTO regattaProgress) {
-        MultiRegattaListSteps regattaProgressUi = new MultiRegattaListSteps(regattaProgress);
-        regattaProgressUi.addStyleName(MultiRegattaListResources.INSTANCE.css().regattalistitem());
-        return regattaProgressUi;
-    }
-
     @Override
     public void stop() {
     }

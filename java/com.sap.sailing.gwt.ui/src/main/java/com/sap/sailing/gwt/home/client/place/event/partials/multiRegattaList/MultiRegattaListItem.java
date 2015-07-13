@@ -20,12 +20,16 @@ public class MultiRegattaListItem extends Composite {
     @UiField(provided = true) RegattaHeader regattaHeaderUi;
     @UiField(provided = true) MultiRegattaListSteps regattaStepsUi;
     private final RegattaWithProgressDTO regattaWithProgress;
-
-    public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress, Presenter presenter) {
+    
+    public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress) {
         this.regattaWithProgress = regattaWithProgress;
         regattaHeaderUi = new RegattaHeader(regattaWithProgress); 
         regattaStepsUi = new MultiRegattaListSteps(regattaWithProgress.getProgress());
         initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress, Presenter presenter) {
+        this(regattaWithProgress);
         regattaHeaderUi.setRegattaNavigation(presenter.getRegattaNavigation(regattaWithProgress.getId()));
         PlaceNavigation<?> leaderboardNavigation = presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId());
         regattaStepsUi.setLeaderboardNavigation(regattaWithProgress.getState(), leaderboardNavigation);
