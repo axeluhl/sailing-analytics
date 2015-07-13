@@ -232,7 +232,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             boolean hasWind = RaceListDataUtil.hasWind(data);
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
-            this.windfixesCountColumn.setShowDetails(RaceListDataUtil.hasWindFixes(data));
+            this.windfixesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
             this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
             this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
             setTableData(data);

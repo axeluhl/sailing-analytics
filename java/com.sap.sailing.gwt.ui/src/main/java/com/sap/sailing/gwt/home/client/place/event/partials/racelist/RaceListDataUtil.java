@@ -60,7 +60,7 @@ public class RaceListDataUtil {
         });
     }
     
-    public static <T extends RaceListRaceDTO> boolean hasWindFixes(Collection<T> data) {
+    public static <T extends RaceListRaceDTO> boolean hasWindSources(Collection<T> data) {
         return hasNumberValues(data, new ValueProvider<T, Number>() {
             @Override
             public Number getValue(T object) {
