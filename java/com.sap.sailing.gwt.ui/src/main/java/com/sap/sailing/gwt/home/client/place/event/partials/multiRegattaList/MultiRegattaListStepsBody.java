@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList;
 
+import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
+
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -15,6 +17,7 @@ import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 
 public class MultiRegattaListStepsBody extends UIObject {
 
+    private static final StringMessages I18N = StringMessages.INSTANCE;
     private static MultiRegattaListStepsBodyUiBinder uiBinder = GWT.create(MultiRegattaListStepsBodyUiBinder.class);
 
     interface MultiRegattaListStepsBodyUiBinder extends UiBinder<Element, MultiRegattaListStepsBody> {
@@ -27,12 +30,12 @@ public class MultiRegattaListStepsBody extends UIObject {
 
     public MultiRegattaListStepsBody(RegattaProgressSeriesDTO seriesProgress) {
         setElement(uiBinder.createAndBindUi(this));
-        nameUi.setInnerText(seriesProgress.getName());
+        nameUi.setInnerText(DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName());
         if (seriesProgress.isCompleted()) {
             progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
         } else {
             checkUi.removeFromParent();
-            progressUi.setInnerText(StringMessages.INSTANCE.currentOfTotal(
+            progressUi.setInnerText(I18N.currentOfTotal(
                     seriesProgress.getProgressRaceCount(), seriesProgress.getTotalRaceCount()));
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
