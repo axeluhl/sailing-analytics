@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.partials.regattaHeader.RegattaHeader;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
 public class MultiRegattaListItem extends Composite {
@@ -26,7 +27,8 @@ public class MultiRegattaListItem extends Composite {
         regattaStepsUi = new MultiRegattaListSteps(regattaWithProgress.getProgress());
         initWidget(uiBinder.createAndBindUi(this));
         regattaHeaderUi.setRegattaNavigation(presenter.getRegattaNavigation(regattaWithProgress.getId()));
-        regattaStepsUi.setLeaderboardNavigation(presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId()));
+        PlaceNavigation<?> leaderboardNavigation = presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId());
+        regattaStepsUi.setLeaderboardNavigation(regattaWithProgress.getState(), leaderboardNavigation);
     }
     
     void setVisibilityDependingOnBoatCategory(String visibleBoatCategory) {

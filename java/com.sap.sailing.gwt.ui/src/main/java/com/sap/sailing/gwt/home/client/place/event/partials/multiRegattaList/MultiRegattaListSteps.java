@@ -10,9 +10,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 
 public class MultiRegattaListSteps extends Composite {
 
@@ -34,15 +36,24 @@ public class MultiRegattaListSteps extends Composite {
         }
     }
     
-    void setLeaderboardNavigation(PlaceNavigation<?> placeNavigation) {
+    void setLeaderboardNavigation(RegattaState regattaState, PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(leaderboardButtonUi);
         leaderboardButtonUi.getStyle().clearDisplay();
+        leaderboardButtonUi.addClassName(getLeaderboardButtonStyle(regattaState));
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 stepsContainerUi.getStyle().setMarginRight(leaderboardButtonUi.getOffsetWidth() + 20, Unit.PX);
             }
         });
+    }
+
+    private String getLeaderboardButtonStyle(RegattaState regattaState) {
+        switch (regattaState) {
+            case UPCOMING: return SharedResources.INSTANCE.mainCss().buttoninactive();
+            case RUNNING: return SharedResources.INSTANCE.mainCss().buttonred();
+            default: return SharedResources.INSTANCE.mainCss().buttonprimary();
+        }
     }
 
 }

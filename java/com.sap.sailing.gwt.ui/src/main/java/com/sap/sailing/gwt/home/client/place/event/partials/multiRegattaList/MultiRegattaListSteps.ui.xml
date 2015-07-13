@@ -8,7 +8,7 @@
 		<div class="{local_res.css.regattalistitem_steps}" ui:field="progressContainerUi">
 			<div ui:field="stepsContainerUi" />
 			<div class="{local_res.css.regattalistitem_steps_button}" ui:field="leaderboardButtonContainerUi">
-				<a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonprimary} {res.mainCss.buttonarrowrightwhite}" 
+				<a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
 						style="display:none;" ui:field="leaderboardButtonUi">
 					<ui:text from='{i18n.leaderboard}' />
 				</a>
