@@ -5,6 +5,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -40,9 +41,11 @@ public class MultiRegattaListSteps extends Composite {
         placeNavigation.configureAnchorElement(leaderboardButtonUi);
         leaderboardButtonUi.getStyle().clearDisplay();
         leaderboardButtonUi.addClassName(getLeaderboardButtonStyle(regattaState));
+        stepsContainerUi.getStyle().setDisplay(Display.NONE);
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
+                stepsContainerUi.getStyle().clearDisplay();
                 stepsContainerUi.getStyle().setMarginRight(leaderboardButtonUi.getOffsetWidth() + 20, Unit.PX);
             }
         });
