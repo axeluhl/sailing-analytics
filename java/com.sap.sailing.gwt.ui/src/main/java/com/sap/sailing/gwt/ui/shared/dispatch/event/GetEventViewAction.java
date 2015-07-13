@@ -49,6 +49,7 @@ public class GetEventViewAction implements Action<EventViewDTO> {
         ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
         dto.setLogoImage(logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null);
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
+        dto.setSailorsInfoWebsiteURL(event.getSailorsInfoWebsiteURL() == null ? null : event.getSailorsInfoWebsiteURL().toString());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));
@@ -101,9 +102,14 @@ public class GetEventViewAction implements Action<EventViewDTO> {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
         
-        // Special solution for Kieler Woche 2015
-        if("a9d6c5d5-cac3-47f2-9b5c-506e441819a1".equals(event.getId().toString())) {
-            dto.setSailorsInfoURL(Locale.GERMAN.equals(context.getClientLocale()) ? "http://sailorsinfo.kieler-woche.de/" : "http://sailorsinfo.kieler-woche.de/en");
+        // Special solution for localization of SailorsInfo URL
+        if(dto.getSailorsInfoWebsiteURL() != null && !Locale.GERMAN.equals(context.getClientLocale())) {
+            String localizedURL = dto.getSailorsInfoWebsiteURL();
+            if(!localizedURL.endsWith("/")) {
+                localizedURL += "/";
+            }
+            localizedURL += "en";
+            dto.setSailorsInfoWebsiteURL(localizedURL);
         }
 
         return dto;

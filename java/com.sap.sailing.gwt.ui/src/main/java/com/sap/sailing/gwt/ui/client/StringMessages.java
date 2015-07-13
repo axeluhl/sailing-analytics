@@ -1093,6 +1093,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String advancePassId();
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
+    String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
@@ -1341,4 +1342,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String finishedRaces();
     String selectCompetitor();
     String allBoatClasses();
+    String points();
+    String numberOfRacesShort();
+    String miniLeeaderboardLegendText();
 }

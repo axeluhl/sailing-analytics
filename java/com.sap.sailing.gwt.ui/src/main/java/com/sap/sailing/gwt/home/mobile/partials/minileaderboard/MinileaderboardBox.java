@@ -26,10 +26,8 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     interface MyUiBinder extends UiBinder<Widget, MinileaderboardBox> {
     }
 
-    @UiField
-    MobileSection itemContainerUi;
-    @UiField
-    SectionHeaderContent headerUi;
+    @UiField MobileSection itemContainerUi;
+    @UiField SectionHeaderContent headerUi;
 
     public MinileaderboardBox() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -62,8 +60,12 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
             itemContainerUi.addContent(getScoreInformation(data));
         }
         
+        boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
-            itemContainerUi.addContent(new MinileaderboardBoxItem(item));
+            itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
+        }
+        if (showRaceCounts) {
+            itemContainerUi.addContent(new MinileaderboardBoxItemLegend());
         }
     }
     

@@ -18,23 +18,22 @@ public class MinileaderboardBoxItem extends Widget {
     interface MyUiBinder extends UiBinder<Element, MinileaderboardBoxItem> {
     }
     
-    @UiField
-    Element competitorNameUi;
-    @UiField
-    Element competitorRankUi;
-    @UiField
-    Element competitorPointsUi;
-    @UiField
-    Element competitorCountryNameUi;
-    @UiField
-    ImageElement competitorFlagUi;
+    @UiField Element competitorNameUi;
+    @UiField Element competitorRankUi;
+    @UiField Element competitorPointsUi;
+    @UiField Element competitorRacesUi;
+    @UiField Element competitorCountryNameUi;
+    @UiField ImageElement competitorFlagUi;
     
-    public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry) {
+    public MinileaderboardBoxItem(MiniLeaderboardItemDTO entry, boolean showRaceCount) {
         setElement(uiBinder.createAndBindUi(this));
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
         competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getSailID()));
         competitorRankUi.setInnerText(String.valueOf(entry.getRank()) + ".");
         competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getPoints()));
+        if (showRaceCount) {
+            competitorRacesUi.setInnerText("(" + entry.getRaceCount() + ")");
+        }
         
         SimpleCompetitorDTO competitor = entry.getCompetitor();
         String flagImageURL = competitor.getFlagImageURL();

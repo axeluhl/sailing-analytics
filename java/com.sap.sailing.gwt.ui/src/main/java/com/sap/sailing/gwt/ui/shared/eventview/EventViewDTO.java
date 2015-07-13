@@ -26,7 +26,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String seriesName;
     private ImageDTO logoImage;
     private String officialWebsiteURL;
-    private String sailorsInfoURL;
+    private String sailorsInfoWebsiteURL;
 
     public EventViewDTO() {
     }
@@ -108,12 +108,12 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         return officialWebsiteURL;
     }
 
-    public String getSailorsInfoURL() {
-        return sailorsInfoURL;
+    public String getSailorsInfoWebsiteURL() {
+        return sailorsInfoWebsiteURL;
     }
 
-    public void setSailorsInfoURL(String sailorsInfoURL) {
-        this.sailorsInfoURL = sailorsInfoURL;
+    public void setSailorsInfoWebsiteURL(String sailorsInfoWebsiteURL) {
+        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
     }
     
     public String getLocationAndVenueAndCountry() {
