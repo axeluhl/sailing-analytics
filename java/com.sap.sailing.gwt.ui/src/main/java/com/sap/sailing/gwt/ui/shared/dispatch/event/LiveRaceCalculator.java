@@ -9,11 +9,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
 final class LiveRaceCalculator implements RaceCallback {
+    private final RaceRefreshCalculator refreshCalculator = new RaceRefreshCalculator();
     private final SortedSetResult<LiveRaceDTO> result = new SortedSetResult<LiveRaceDTO>();
 
     @Override
     public void doForRace(RaceContext rc) {
         result.addValue(rc.getLiveRaceOrNull());
+        refreshCalculator.doForRace(rc);
     }
 
     public ResultWithTTL<SortedSetResult<LiveRaceDTO>> getResult() {
@@ -28,6 +30,6 @@ final class LiveRaceCalculator implements RaceCallback {
                 ttl = Math.min(ttl, 1000 * 60);
             }
         }
-        return new ResultWithTTL<SortedSetResult<LiveRaceDTO>>(ttl, result);
+        return new ResultWithTTL<SortedSetResult<LiveRaceDTO>>(refreshCalculator.getTTL(), result);
     }
 }

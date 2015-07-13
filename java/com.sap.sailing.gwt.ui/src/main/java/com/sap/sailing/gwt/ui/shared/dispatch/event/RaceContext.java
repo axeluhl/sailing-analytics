@@ -425,7 +425,7 @@ public class RaceContext {
         return trackingState;
     }
     
-    private RaceViewState getLiveRaceViewState() {
+    public RaceViewState getLiveRaceViewState() {
         if(raceViewState == null) {
             raceViewState = calculateLiveRaceViewState();
         }

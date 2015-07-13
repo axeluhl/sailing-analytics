@@ -9,12 +9,13 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback
 
 @GwtIncompatible
 public class RaceListDataCalculator implements RaceCallback {
-    
+    private final RaceRefreshCalculator refreshCalculator = new RaceRefreshCalculator();
     private final RegattaProgressCalculator progressCalculator = new RegattaProgressCalculator();
     private final RaceListViewDTO result = new RaceListViewDTO();
 
     @Override
     public void doForRace(RaceContext context) {
+        refreshCalculator.doForRace(context);
         progressCalculator.doForRace(context);
         result.add(context.getLiveRaceOrNull());
         result.add(context.getFinishedRaceOrNull());
@@ -22,7 +23,7 @@ public class RaceListDataCalculator implements RaceCallback {
     
     public ResultWithTTL<RaceListViewDTO> getResult(DispatchContext context, UUID eventId) {
         result.setProgress(progressCalculator.getResult());
-        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 3 * 60 * 1000), result);
+        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, refreshCalculator.getTTL()), result);
     }
 
 }
