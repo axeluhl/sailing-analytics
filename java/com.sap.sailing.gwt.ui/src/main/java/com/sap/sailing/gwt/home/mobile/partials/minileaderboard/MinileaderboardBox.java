@@ -25,12 +25,15 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     interface MyUiBinder extends UiBinder<Widget, MinileaderboardBox> {
     }
+    
+    private final StringMessages I18N = StringMessages.INSTANCE;
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
 
-    public MinileaderboardBox() {
+    public MinileaderboardBox(boolean isOverall) {
         initWidget(uiBinder.createAndBindUi(this));
+        headerUi.setSectionTitle(isOverall ? I18N.overallStandings() : I18N.results());
         headerUi.setInfoText(StringMessages.INSTANCE.details());
 
 

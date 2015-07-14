@@ -125,7 +125,7 @@ public class EventHeader extends Composite {
                 hide(trackedRaces);
             }
             if(regattaMetadata.getDefaultCourseAreaName() != null) {
-                courseAreaUi.setInnerText(regattaMetadata.getDefaultCourseAreaName());
+                courseAreaUi.setInnerText(i18n.courseAreaName(regattaMetadata.getDefaultCourseAreaName()));
             } else {
                 hide(courseAreaUi);
             }

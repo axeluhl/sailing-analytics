@@ -30,7 +30,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
     private Presenter currentPresenter;
     @UiField(provided = true)
     EventHeader eventHeaderUi;
-    @UiField
+    @UiField(provided = true)
     MinileaderboardBox minileaderboardUi;
     @UiField
     Quickfinder quickFinderUi;
@@ -41,6 +41,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
         if(presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
             regattaDisplayName = presenter.getCtx().getRegatta().getDisplayName();
         }
+        minileaderboardUi = new MinileaderboardBox(false);
         eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regattaDisplayName);
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());

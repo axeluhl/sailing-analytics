@@ -1,13 +1,15 @@
 .sitefooter {
-  font-size: 0.8rem;
   background: #333;
-  padding: 2.5em;
+  padding: 5em 3em;
   margin-top: -13.916666666666666em;
   color: #fff;
   text-align: center;
+  font-size: 110%;
 }
 .sitefooter a {
   color: #fff;
+  line-height: 2;
+  padding: 5px; 
 }
 .sitefooter_language {
   display: block;
@@ -20,5 +22,5 @@ a.sitefooter_language_linkactive {
 }
 .sitefooter_links {
   font-weight: 600;
-  padding: 2.083333333333333em 0;
+  padding: 3em 0;
 }
