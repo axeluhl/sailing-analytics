@@ -24,8 +24,6 @@
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  -webkit-filter: grayscale(100%);
-          filter: grayscale(100%);
 }
 .regattaheader_logo img {
   display: inline-block;
