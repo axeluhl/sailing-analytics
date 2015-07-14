@@ -1493,7 +1493,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
             rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
             rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-            result = new SimulatorResultsDTO(simulationResults.hashCode(), simulationResults.getStartTime(), simulationResults.getTimeStep(),
+            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
                     simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
             }
         return result;
@@ -1577,7 +1577,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final QuickRanksDTO quickRanks = getQuickRanks(raceIdentifier, date);
-        int simulationResultVersion = 0;
+        long simulationResultVersion = 0;
         if (simulationLegIdentifier != null) {
             SimulationService simulationService = getService().getSimulationService();
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
