@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.Mul
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -39,8 +40,6 @@ import com.sap.sse.common.Util.Triple;
  */
 public class MultiregattaRegattasTabView extends Composite implements MultiregattaTabView<MultiregattaRegattasPlace> {
     
-    private static final boolean SHOW_NEW_REGATTA_LIST = true;
-
     interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
     }
 
@@ -81,7 +80,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         refreshManager.add(racesListLiveUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
-        if (SHOW_NEW_REGATTA_LIST) {
+        if (ExperimentalFeatures.SHOW_NEW_REGATTA_LIST) {
             refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
             content.removeFromParent();
         } else {

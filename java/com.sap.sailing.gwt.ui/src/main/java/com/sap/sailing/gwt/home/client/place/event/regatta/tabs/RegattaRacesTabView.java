@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Pres
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -50,7 +51,6 @@ import com.sap.sse.common.Util.Triple;
  */
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
     
-    private static final boolean SHOW_NEW_RACES_LIST = true;
     private static final StringMessages I18N = StringMessages.INSTANCE;
     
     private enum Navigation implements ListNavigationAction {
@@ -114,7 +114,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        if (SHOW_NEW_RACES_LIST) {
+        if (ExperimentalFeatures.SHOW_NEW_RACES_LIST) {
             listNavigationPanelUi.removeFromParent(); // TODO temporary removed
     //        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
     //        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
