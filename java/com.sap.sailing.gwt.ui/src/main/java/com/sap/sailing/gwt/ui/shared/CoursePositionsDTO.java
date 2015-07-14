@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 
 public class CoursePositionsDTO implements IsSerializable {
-    public List<RaceCourseDTO> course;
+    public RaceCourseDTO course;
     public List<Position> waypointPositions;
     public List<Position> startMarkPositions;
     public List<Position> finishMarkPositions;
