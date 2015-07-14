@@ -120,7 +120,7 @@ public class RaceContext {
     }
 
     public FleetMetadataDTO getFleetMetadata() {
-        return new FleetMetadataDTO(fleet.getName(), fleet.getColor() == null ? null : fleet.getColor().getAsHtml());
+        return new FleetMetadataDTO(fleet.getName(), fleet.getColor() == null ? null : fleet.getColor().getAsHtml(), fleet.getOrdering());
     }
 
     private SimpleWindDTO getWindOrNull() {
