@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 
@@ -41,10 +42,10 @@ public class MultiRegattaListStepsBody extends UIObject {
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
     }
     
-    private void addFleetProgresses(Map<FleetMetadataDTO, Integer> fleetStates, int totalRaceCount) {
+    private void addFleetProgresses(Map<FleetMetadataDTO, RegattaProgressFleetDTO> fleetStates, int totalRaceCount) {
         double height = fleetStates.isEmpty() ? 100.0 : 100.0 / fleetStates.size();
-        for (Entry<FleetMetadataDTO, Integer> fleetState : fleetStates.entrySet()) {
-            double fleetWidth = (fleetState.getValue() * 100.0) / totalRaceCount;
+        for (Entry<FleetMetadataDTO, RegattaProgressFleetDTO> fleetState : fleetStates.entrySet()) {
+            double fleetWidth = (fleetState.getValue().getFinishedRaceCount() * 100.0) / totalRaceCount;
             String fleetColor = fleetState.getKey().getFleetColor();
             MultiRegattaListStepsBodyFleet fleet = new MultiRegattaListStepsBodyFleet(fleetWidth, height, fleetColor);
             fleetsContainerUi.appendChild(fleet.getElement());

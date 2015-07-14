@@ -586,4 +586,8 @@ public class RaceContext {
     public boolean isFinished() {
         return getLiveRaceViewState() == RaceViewState.FINISHED;
     }
+    
+    public boolean isLive() {
+        return getLiveRaceViewState() == RaceViewState.RUNNING;
+    }
 }

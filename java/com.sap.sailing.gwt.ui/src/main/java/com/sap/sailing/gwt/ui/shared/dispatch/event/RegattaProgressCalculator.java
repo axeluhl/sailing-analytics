@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 
 public class RegattaProgressCalculator implements EventActionUtil.RaceCallback {
     private final Map<String, Set<String>> racesPerSeries = new LinkedHashMap<>();
     private final Map<String, Map<String, Set<String>>> racesPerSeriesAndFleet = new HashMap<>();
+    private final Map<String, Map<String, Set<String>>> liveRacesPerSeriesAndFleet = new HashMap<>();
     private final Map<String, FleetMetadataDTO> fleets = new HashMap<>();
 
     @Override
@@ -38,14 +40,26 @@ public class RegattaProgressCalculator implements EventActionUtil.RaceCallback {
             racesInFleet = new HashSet<>();
             racesInSeriesAndFleet.put(fleetName, racesInFleet);
         }
+        Map<String, Set<String>> liveRacesInSeriesAndFleet = liveRacesPerSeriesAndFleet.get(seriesName);
+        if(liveRacesInSeriesAndFleet == null) {
+            liveRacesInSeriesAndFleet = new LinkedHashMap<String, Set<String>>();
+            liveRacesPerSeriesAndFleet.put(seriesName, liveRacesInSeriesAndFleet);
+        }
+        Set<String> liveRacesInFleet = liveRacesInSeriesAndFleet.get(fleetName);
+        if(liveRacesInFleet == null) {
+            liveRacesInFleet = new HashSet<>();
+            liveRacesInSeriesAndFleet.put(fleetName, liveRacesInFleet);
+        }
         if(context.isFinished()) {
             racesInFleet.add(raceName);
+        }
+        if(context.isLive()) {
+            liveRacesInFleet.add(raceName);
         }
         
         if(!fleets.containsKey(fleetName)) {
             fleets.put(fleetName, context.getFleetMetadata());
         }
-        
     }
     
     public RegattaProgressDTO getResult() {
@@ -57,7 +71,8 @@ public class RegattaProgressCalculator implements EventActionUtil.RaceCallback {
             for(Map.Entry<String, Set<String>> racesInFleet : racesPerSeriesAndFleet.get(seriesName).entrySet()) {
                 String fleetName = racesInFleet.getKey();
                 int finishedRacesForFleet = racesInFleet.getValue().size();
-                regattaProgressOfSeries.addFleet(fleets.get(fleetName), finishedRacesForFleet);
+                int liveRacesForFleet = liveRacesPerSeriesAndFleet.get(seriesName).get(fleetName).size();
+                regattaProgressOfSeries.addFleet(fleets.get(fleetName), new RegattaProgressFleetDTO(finishedRacesForFleet, liveRacesForFleet));
             }
             progress.addSeries(regattaProgressOfSeries);
         }

@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 public class RegattaProgressSeriesDTO implements DTO {
     private String name;
     private int totalRaceCount;
-    private TreeMap<FleetMetadataDTO, Integer> fleetState = new TreeMap<>();
+    private TreeMap<FleetMetadataDTO, RegattaProgressFleetDTO> fleetState = new TreeMap<>();
     
     @SuppressWarnings("unused")
     private RegattaProgressSeriesDTO() {
@@ -28,17 +28,17 @@ public class RegattaProgressSeriesDTO implements DTO {
         return totalRaceCount;
     }
     
-    public Map<FleetMetadataDTO, Integer> getFleetState() {
+    public Map<FleetMetadataDTO, RegattaProgressFleetDTO> getFleetState() {
         return fleetState;
     }
     
-    public void addFleet(FleetMetadataDTO fleet, int raceCount) {
-        fleetState.put(fleet, raceCount);
+    public void addFleet(FleetMetadataDTO fleet, RegattaProgressFleetDTO stats) {
+        fleetState.put(fleet, stats);
     }
     
     public boolean isCompleted() {
-        for (Integer numberOfRace : fleetState.values()) {
-            if (numberOfRace < totalRaceCount) {
+        for (RegattaProgressFleetDTO stats : fleetState.values()) {
+            if (stats.getFinishedRaceCount() < totalRaceCount) {
                 return false;
             }
         }
@@ -47,8 +47,8 @@ public class RegattaProgressSeriesDTO implements DTO {
     
     public int getProgressRaceCount() {
         int progressRaceCount = 0;
-        for (Integer numberOfRace : fleetState.values()) {
-            progressRaceCount = Math.max(progressRaceCount, numberOfRace);
+        for (RegattaProgressFleetDTO stats : fleetState.values()) {
+            progressRaceCount = Math.max(progressRaceCount, stats.getFinishedRaceCount());
         }
         return progressRaceCount;
     }
