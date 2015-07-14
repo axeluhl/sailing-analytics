@@ -36,6 +36,7 @@ public class RegattaHeaderBody extends UIObject {
         addDetailsItem(regattaMetadata.getCompetitorsCount(), StringMessages.INSTANCE.competitors());
         addDetailsItem(regattaMetadata.getRaceCount(), StringMessages.INSTANCE.races());
         addDetailsItem(regattaMetadata.getTrackedRacesCount(), StringMessages.INSTANCE.trackedRaces());
+        addDetailsItem(regattaMetadata.getDefaultCourseAreaName());
         addDetailsItem(regattaMetadata.getBoatCategory());
     }
     

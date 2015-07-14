@@ -53,9 +53,8 @@
               <div ui:field="competitors" class="{local_res.css.eventheader_intro_details_item}" />
               <div ui:field="races" class="{local_res.css.eventheader_intro_details_item}" />
               <div ui:field="trackedRaces" class="{local_res.css.eventheader_intro_details_item}" />
-              <div ui:field="eventCategory" class="{local_res.css.eventheader_intro_details_item}">
-                <!-- event.category -->
-              </div>
+              <div ui:field="courseAreaUi" class="{local_res.css.eventheader_intro_details_item}" />
+              <div ui:field="eventCategory" class="{local_res.css.eventheader_intro_details_item}" />
               <!-- IFEND event.eventType === 'multi-regatta-event' -->
             </div>
           </div>
