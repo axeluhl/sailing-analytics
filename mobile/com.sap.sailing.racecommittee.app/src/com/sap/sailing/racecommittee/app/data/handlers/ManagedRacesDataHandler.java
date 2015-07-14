@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.data.handlers;
 
 import java.util.Collection;
 
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
@@ -24,6 +25,15 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
     @Override
     public void onResult(Collection<ManagedRace> data) {
         manager.addRaces(data);
+        calcRaceState(data);
     }
 
+    private void calcRaceState(Collection<ManagedRace> data) {
+        for (ManagedRace race : data) {
+            RaceState raceState = race.getCalculatedRaceState();
+            if (raceState != null) {
+                race.setState(raceState);
+            }
+        }
+    }
 }

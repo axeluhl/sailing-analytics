@@ -1,13 +1,21 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
@@ -18,24 +26,27 @@ import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
-
-    private RaceState state;
     private final ManagedRaceIdentifier identifier;
+    private RaceState state;
     private Collection<Competitor> competitors;
     private List<MapMarker> mapMarkers;
     private CourseBase courseOnServer;
+    private ManagedRaceHelper helper;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
         this.state = state;
         this.identifier = identifier;
         this.competitors = new ArrayList<>();
         this.courseOnServer = null;
+    }
+
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceHelper helper) {
+        this.identifier = identifier;
+        this.competitors = new ArrayList<>();
+        this.courseOnServer = null;
+        this.helper = helper;
     }
 
     @Override
@@ -107,8 +118,18 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public List<MapMarker> getMapMarkers(){
+    public void setCompetitors(Collection<Competitor> competitors) {
+        this.competitors = competitors;
+    }
+
+    @Override
+    public List<MapMarker> getMapMarkers() {
         return mapMarkers;
+    }
+
+    @Override
+    public void setMapMarkers(List<MapMarker> markers) {
+        this.mapMarkers = markers;
     }
 
     @Override
@@ -122,13 +143,15 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public void setCompetitors(Collection<Competitor> competitors) {
-        this.competitors = competitors;
-    }
-
-    @Override
-    public void setMapMarkers(List<MapMarker> markers) {
-        this.mapMarkers = markers;
+    public RaceState getCalculatedRaceState() {
+        RaceState raceState = null;
+        if (helper != null) {
+            RaceLog raceLog = helper.getRaceLog();
+            AbstractLogEventAuthor author = helper.getAuthor();
+            ConfigurationLoader<RegattaConfiguration> configuration = helper.getConfiguration();
+            raceState = RaceStateImpl.create(new AndroidRaceLogResolver(), raceLog, author, configuration);
+        }
+        return raceState;
     }
 
     @Override
