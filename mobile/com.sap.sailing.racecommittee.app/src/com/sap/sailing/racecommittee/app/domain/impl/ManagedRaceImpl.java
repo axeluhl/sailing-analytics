@@ -4,18 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
-import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
-import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
@@ -23,6 +19,7 @@ import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
+import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -33,7 +30,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private Collection<Competitor> competitors;
     private List<MapMarker> mapMarkers;
     private CourseBase courseOnServer;
-    private ManagedRaceHelper helper;
+    private ManagedRaceCalculator calculator;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
         this.state = state;
@@ -42,24 +39,16 @@ public class ManagedRaceImpl implements ManagedRace {
         this.courseOnServer = null;
     }
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceHelper helper) {
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator) {
         this.identifier = identifier;
         this.competitors = new ArrayList<>();
         this.courseOnServer = null;
-        this.helper = helper;
+        this.calculator = calculator;
     }
 
     @Override
     public RaceState getState() {
         return state;
-    }
-
-    @Override
-    public void setState(RaceState state) {
-        if (this.state != null) {
-            throw new IllegalStateException("RaceState can only be set once");
-        }
-        this.state = state;
     }
 
     @Override
@@ -143,15 +132,13 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public RaceState getCalculatedRaceState() {
-        RaceState raceState = null;
-        if (helper != null) {
-            RaceLog raceLog = helper.getRaceLog();
-            AbstractLogEventAuthor author = helper.getAuthor();
-            ConfigurationLoader<RegattaConfiguration> configuration = helper.getConfiguration();
-            raceState = RaceStateImpl.create(new AndroidRaceLogResolver(), raceLog, author, configuration);
+    public boolean calculateRaceState() {
+        boolean calculated = false;
+        if (state == null && calculator != null) {
+            state = calculator.calculateRaceState();
+            calculated = true;
         }
-        return raceState;
+        return calculated;
     }
 
     @Override

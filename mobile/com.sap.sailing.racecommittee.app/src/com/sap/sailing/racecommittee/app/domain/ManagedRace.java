@@ -26,13 +26,6 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     RaceState getState();
 
     /**
-     * Sets the state of the race
-     *
-     * @param state the state of the race
-     */
-    void setState(RaceState state);
-
-    /**
      * Shortcut to {@link RaceState#getRaceLog()} of {@link ManagedRace#getState()}.
      *
      * @return the log of the race.
@@ -90,11 +83,11 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     void setMapMarkers(List<MapMarker> markers);
 
     /**
-     * Return calculated {@link RaceState} out of the helper values, if present
+     * Returns true if {@link RaceState} has been calculated and set
      *
-     * @return if helper is not null, returns {@link RaceState} else null
+     * @return true, if {@link RaceState} has been set
      */
-    RaceState getCalculatedRaceState();
+    boolean calculateRaceState();
 
     /**
      * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error message

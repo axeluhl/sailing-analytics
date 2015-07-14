@@ -23,9 +23,9 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.MergingRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceHelper;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
+import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
@@ -78,7 +78,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
-        return new ManagedRaceImpl(identifier, new ManagedRaceHelper(raceLog, author, configurationLoader));
+        return new ManagedRaceImpl(identifier, new ManagedRaceCalculator(raceLog, author, configurationLoader));
     }
 
 }
