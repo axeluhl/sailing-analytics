@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class RegattaHeaderBody extends UIObject {
 
+    private static final StringMessages I18N = StringMessages.INSTANCE;
     private static RegattaHeaderBodyUiBinder uiBinder = GWT.create(RegattaHeaderBodyUiBinder.class);
 
     interface RegattaHeaderBodyUiBinder extends UiBinder<Element, RegattaHeaderBody> {
@@ -33,9 +34,9 @@ public class RegattaHeaderBody extends UIObject {
         logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
         nameUi.setInnerText(regattaMetadata.getDisplayName());
         LabelTypeUtil.renderLabelTypeOrHide(labelUi, regattaMetadata.getState().getStateMarker());
-        addDetailsItem(regattaMetadata.getCompetitorsCount(), StringMessages.INSTANCE.competitors());
-        addDetailsItem(regattaMetadata.getRaceCount(), StringMessages.INSTANCE.races());
-        addDetailsItem(regattaMetadata.getTrackedRacesCount(), StringMessages.INSTANCE.trackedRaces());
+        addDetailsItem(regattaMetadata.getCompetitorsCount(), I18N.competitorsCount(regattaMetadata.getCompetitorsCount()));
+        addDetailsItem(regattaMetadata.getRaceCount(), I18N.racesCount(regattaMetadata.getRaceCount()));
+        addDetailsItem(regattaMetadata.getTrackedRacesCount(), I18N.trackedRacesCount(regattaMetadata.getTrackedRacesCount()));
         addDetailsItem(regattaMetadata.getDefaultCourseAreaName());
         addDetailsItem(regattaMetadata.getBoatCategory());
     }
