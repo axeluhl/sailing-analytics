@@ -79,7 +79,7 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
             }
             nameUi.setInnerText(initials.toString());
         }
-        nameUi.setTitle(seriesName + " " + nameUi.getOffsetWidth() + " / " + getElement().getOffsetWidth());
+        nameUi.setTitle(seriesName);
         nameUi.getStyle().setVisibility(Visibility.VISIBLE);
     }
 
