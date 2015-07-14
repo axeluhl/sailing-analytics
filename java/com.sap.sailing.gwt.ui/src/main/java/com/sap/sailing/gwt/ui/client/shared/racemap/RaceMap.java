@@ -1304,7 +1304,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private void showCourseGeometryMetrics(final CoursePositionsDTO courseDTO) {
-        
+        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                && courseDTO.startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
+            
+        }
     }
     
     private final StringBuilder windwardStartLineMarkToFirstMarkLineText = new StringBuilder();
