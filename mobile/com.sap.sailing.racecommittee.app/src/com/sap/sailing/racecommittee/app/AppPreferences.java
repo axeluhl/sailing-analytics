@@ -251,6 +251,7 @@ public class AppPreferences {
         if (value.equals("")) {
             return "http://localhost:8889";
         }
+
         return value;
     }
 
