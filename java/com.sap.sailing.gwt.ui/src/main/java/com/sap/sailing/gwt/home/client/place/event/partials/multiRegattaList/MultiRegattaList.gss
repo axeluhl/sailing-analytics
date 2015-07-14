@@ -233,9 +233,10 @@ img.race_item_windflag {
 }
 .regattalistitem_steps_step_fleets {
   width: 100%;
-  height: 1em;
-  border: 1px solid #dedede;
+  height: 17px;
+  outline: 1px solid #dedede;
   margin-top: 0.266666666666667em;
+  padding: 1px;
 }
 .regattalistitem_steps_step_fleets_fleet {
   font-size: inherit;
@@ -247,6 +248,7 @@ img.race_item_windflag {
   height: 100%;
   padding: 0.666666666666667em;
   text-align: right;
+  margin-top: 3px;
 }
 .regattalistitem_steps_button .button {
   margin-left: 0.8em;
