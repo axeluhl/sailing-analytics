@@ -571,7 +571,7 @@ public class RaceListColumnFactory {
             @Override
             public void render(Context context, Date value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    sb.appendEscaped(showTimeOnly ? "" : (DATE_FORMAT.format(value) + " ") + TIME_FORMAT.format(value));
+                    sb.appendEscaped((showTimeOnly ? "" : DATE_FORMAT.format(value) + " ") + TIME_FORMAT.format(value));
                 }
             }
         }
