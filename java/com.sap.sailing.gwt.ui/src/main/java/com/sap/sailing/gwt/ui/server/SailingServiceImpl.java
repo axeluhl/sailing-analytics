@@ -3301,11 +3301,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
+        URL sailorsInfoWebsiteURL = sailorsInfoWebsiteURLAsString != null ? new URL(sailorsInfoWebsiteURLAsString) : null;
         List<ImageDescriptor> eventImages = convertToImages(images);
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        officialWebsiteURLAsString == null ? null : new URL(officialWebsiteURLAsString), new URL(sailorsInfoWebsiteURLAsString), eventImages, eventVideos));
+                        officialWebsiteURL, sailorsInfoWebsiteURL, eventImages, eventVideos));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
