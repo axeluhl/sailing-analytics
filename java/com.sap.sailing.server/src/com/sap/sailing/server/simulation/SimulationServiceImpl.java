@@ -320,6 +320,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     public SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
+        TimePoint simulationStartTime = MillisecondsTimePoint.now();
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
@@ -418,7 +419,7 @@ public class SimulationServiceImpl implements SimulationService {
             }
             // prepare simulator-results
             result = new SimulationResults(startTimePoint.asDate(), timeStep.asMillis(), legDuration, startPosition,
-                    endPosition, paths, null, MillisecondsTimePoint.now());
+                    endPosition, paths, null, simulationStartTime);
         }
         return result;
     }
