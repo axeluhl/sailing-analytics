@@ -81,7 +81,7 @@ public class EventViewImpl extends Composite implements EventView {
             listContentUi.add(regattaStatus);
             refreshManager.add(regattaStatus, new GetRegattasAndLiveRacesForEventAction(event.getId()));
         } else {
-            MinileaderboardBox miniLeaderboard = new MinileaderboardBox();
+            MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
             miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(regattaId));
             listContentUi.add(miniLeaderboard);
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(event.getId(), regattaId, 3));

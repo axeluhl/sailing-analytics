@@ -29,7 +29,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
 
     @UiField(provided = true) SeriesHeader eventHeaderUi;
     @UiField Quickfinder quickFinderUi;
-    @UiField MinileaderboardBox leaderboardUi;
+    @UiField(provided = true) MinileaderboardBox leaderboardUi;
     @UiField FlowPanel eventsUi;
 //    @UiField(provided = true) StatisticsBox statisticsBoxUi;
 
@@ -42,6 +42,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
         EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
 //        this.setupStatisticsBox(event);
+        leaderboardUi = new MinileaderboardBox(true);
         initWidget(uiBinder.createAndBindUi(this));
         this.setupListContent(series);
         this.setupEventListContent(series);
