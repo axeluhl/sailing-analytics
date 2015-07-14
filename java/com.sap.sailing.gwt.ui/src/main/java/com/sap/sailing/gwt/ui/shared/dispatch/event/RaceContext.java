@@ -144,11 +144,10 @@ public class RaceContext {
                     }
                 }
             }
-        } else {
-            Wind wind = checkForWindFixesFromRaceLog();
-            if (wind != null) {
-                return new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
-            }
+        }
+        Wind wind = checkForWindFixesFromRaceLog();
+        if (wind != null) {
+            return new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
         }
         return null;
     }
@@ -194,11 +193,10 @@ public class RaceContext {
                     return new WindStatisticsDTO(averageDirection, lowerBoundWindInKnots, upperBoundWindInKnots);
                 }
             }
-        } else {
-            Wind wind = checkForWindFixesFromRaceLog();
-            if (wind != null) {
-                return new WindStatisticsDTO(wind.getFrom().getDegrees(), wind.getKnots(), wind.getKnots());
-            }
+        }
+        Wind wind = checkForWindFixesFromRaceLog();
+        if (wind != null) {
+            return new WindStatisticsDTO(wind.getFrom().getDegrees(), wind.getKnots(), wind.getKnots());
         }
         return null;
     }
