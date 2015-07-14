@@ -205,12 +205,11 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> implements RefreshableWidget<SortedSetResult<RaceListRaceDTO>> {
         private final SortableRaceListColumn<RaceListRaceDTO, ?> durationColumn = RaceListColumnFactory.getDurationColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> windSpeedColumn = RaceListColumnFactory.getWindRangeColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windfixesCountColumn = RaceListColumnFactory.getWindFixesCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
-        private final SortableRaceListColumn<RaceListRaceDTO, ?> windSpeedColumn = RaceListColumnFactory
-                .getWindRangeColumn();
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
