@@ -4,7 +4,8 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListResources" />
-	<div class="{local_res.css.regattalistitem_steps_step_fleets_fleet}">
-		<div class="{local_res.css.regattalistitem_steps_step_fleets_fleet_progress}" ui:field="fleetProgressBarUi"></div>
+	<div class="{local_res.css.regattalistitem_steps_step_fleets_fleet}" style="position:relative;">
+		<div class="{local_res.css.regattalistitem_steps_step_fleets_fleet_progress}" style="position:absolute; top:0;" ui:field="fleetProgressBarLiveUi"></div>
+		<div class="{local_res.css.regattalistitem_steps_step_fleets_fleet_progress}" style="position:absolute; top:0;" ui:field="fleetProgressBarUi"></div>
 	</div>
 </ui:UiBinder>

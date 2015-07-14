@@ -41,12 +41,6 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
         nameUi.getStyle().setVisibility(Visibility.HIDDEN);
         seriesName = DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName();
         nameUi.setInnerText(seriesName);
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                renderNames();
-            }
-        });
         if (seriesProgress.isCompleted()) {
             progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
         } else {
@@ -55,21 +49,26 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
                     seriesProgress.getProgressRaceCount(), seriesProgress.getTotalRaceCount()));
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                renderNames();
+            }
+        });
     }
-
     
     private void addFleetProgresses(Map<FleetMetadataDTO, RegattaProgressFleetDTO> fleetStates, int totalRaceCount) {
         double height = fleetStates.isEmpty() ? 100.0 : 100.0 / fleetStates.size();
         for (Entry<FleetMetadataDTO, RegattaProgressFleetDTO> fleetState : fleetStates.entrySet()) {
-            double fleetWidth = (fleetState.getValue().getFinishedRaceCount() * 100.0) / totalRaceCount;
+            double finishedWidth = (fleetState.getValue().getFinishedRaceCount() * 100.0) / totalRaceCount;
+            double liveWidth = (fleetState.getValue().getFinishedAndLiveRaceCount() * 100.0) / totalRaceCount;
             String fleetColor = fleetState.getKey().getFleetColor();
-            MultiRegattaListStepsBodyFleet fleet = new MultiRegattaListStepsBodyFleet(fleetWidth, height, fleetColor);
+            MultiRegattaListStepsBodyFleet fleet = new MultiRegattaListStepsBodyFleet(finishedWidth, liveWidth, height, fleetColor);
             fleetsContainerUi.appendChild(fleet.getElement());
         }
     }
     
     private void renderNames() {
-
         if (getElement().getOffsetWidth() < nameUi.getOffsetWidth() + checkUi.getOffsetWidth()
                 + progressUi.getOffsetWidth()) {
             String[] tokens = seriesName.split(" ");

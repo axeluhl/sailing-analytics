@@ -22,4 +22,8 @@ public class RegattaProgressFleetDTO implements DTO {
     public int getLiveRaceCount() {
         return liveRaceCount;
     }
+    
+    public int getFinishedAndLiveRaceCount() {
+        return finishedRaceCount + liveRaceCount;
+    }
 }

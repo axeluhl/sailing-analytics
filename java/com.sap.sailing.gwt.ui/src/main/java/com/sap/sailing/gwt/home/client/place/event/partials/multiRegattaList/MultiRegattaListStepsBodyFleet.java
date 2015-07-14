@@ -16,12 +16,15 @@ public class MultiRegattaListStepsBodyFleet extends UIObject {
     }
 
     @UiField DivElement fleetProgressBarUi;
+    @UiField DivElement fleetProgressBarLiveUi;
 
-    public MultiRegattaListStepsBodyFleet(double width, double height, String color) {
+    public MultiRegattaListStepsBodyFleet(double finishedWidth, double liveWidth, double height, String color) {
         setElement(uiBinder.createAndBindUi(this));
         getElement().getStyle().setHeight(height, Unit.PCT);
-        fleetProgressBarUi.getStyle().setWidth(width, Unit.PCT);
+        fleetProgressBarUi.getStyle().setWidth(finishedWidth, Unit.PCT);
         fleetProgressBarUi.getStyle().setBackgroundColor(color);
+        fleetProgressBarLiveUi.getStyle().setWidth(liveWidth, Unit.PCT);
+        fleetProgressBarLiveUi.getStyle().setBackgroundColor("#ff4040");
     }
-
+    
 }
