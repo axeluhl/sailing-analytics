@@ -31,6 +31,10 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.FlagPole;
@@ -160,23 +164,32 @@ public class RaceContext {
             if (newestEvent != null && newestEvent.before(toTimePoint)) {
                 toTimePoint = newestEvent;
             }
+            final BearingWithConfidenceCluster<TimePoint> bwcc = new BearingWithConfidenceCluster<TimePoint>(
+                    new Weigher<TimePoint>() {
+                        private static final long serialVersionUID = -5779398785058438328L;
+                        @Override
+                        public double getConfidence(TimePoint fix, TimePoint request) {
+                            return 1;
+                        }
+                    });
             WindTrack windTrack = trackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.COMBINED));
             if (windTrack != null) {
                 TimePoint startTime = getStartTime();
                 if (startTime == null) {
                     startTime = toTimePoint;
                 }
-                List<TimePoint> pointsToGetWind = Arrays.asList(startTime,
-                        startTime.plus(startTime.until(toTimePoint).divide(2)), toTimePoint);
+                TimePoint middleOfRace = startTime.plus(startTime.until(toTimePoint).divide(2));
+                List<TimePoint> pointsToGetWind = Arrays.asList(startTime, middleOfRace, toTimePoint);
                 Double lowerBoundWindInKnots = null;
                 Double upperBoundWindInKnots = null;
-                Double averageDirection = null;
                 for (TimePoint timePoint : pointsToGetWind) {
                     WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
                             .getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(timePoint), timePoint);
                     if (averagedWindWithConfidence != null) {
                         Wind wind = averagedWindWithConfidence.getObject();
-                        averageDirection = wind.getFrom().getDegrees();
+                        
+                        bwcc.add(new BearingWithConfidenceImpl<TimePoint>(wind.getBearing(), averagedWindWithConfidence
+                                .getConfidence(), timePoint));
                         double currentWindInKnots = wind.getKnots();
                         if (currentWindInKnots >= 0.05d) {
                             if (lowerBoundWindInKnots == null) {
@@ -190,7 +203,9 @@ public class RaceContext {
                     }
                 }
                 if (lowerBoundWindInKnots != null && upperBoundWindInKnots != null) {
-                    return new WindStatisticsDTO(averageDirection, lowerBoundWindInKnots, upperBoundWindInKnots);
+                    BearingWithConfidence<TimePoint> average = bwcc.getAverage(middleOfRace);
+                    return new WindStatisticsDTO(average.getObject().getDegrees(), lowerBoundWindInKnots,
+                            upperBoundWindInKnots);
                 }
             }
         }
@@ -569,6 +584,6 @@ public class RaceContext {
     }
 
     public boolean isFinished() {
-        return state.getStatus() == RaceLogRaceStatus.FINISHED;
+        return getLiveRaceViewState() == RaceViewState.FINISHED;
     }
 }
