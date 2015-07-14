@@ -363,6 +363,7 @@ public class RaceContext {
             liveRaceDTO.setWindSourcesCount(getWindSourceCount());
             liveRaceDTO.setVideoCount(getVideoCount());
             liveRaceDTO.setAudioCount(getAudioCount());
+            liveRaceDTO.setWind(getWindStatisticsOrNull());
             return liveRaceDTO;
         }
         return null;
