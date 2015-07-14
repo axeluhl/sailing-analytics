@@ -13,6 +13,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/12MR.png")
     ImageResource _12mRIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/18FOOTER.png")
+    ImageResource _18FooterIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/2_4M.png")
     ImageResource _2_4mIcon();
     
@@ -25,7 +28,7 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/470.png")
     ImageResource _470Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/49ER_FX.jpg")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/49ER_FX.png")
     ImageResource _49erFXIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/49ER.png")
@@ -42,6 +45,12 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/B_ONE.png")
     ImageResource BOne();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CANOE_IC.png")
+    ImageResource CanoeICIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CANOE_TAIFUN.png")
+    ImageResource CanoeTaifunIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CONTENDER.png")
     ImageResource ContenderIcon();
@@ -76,11 +85,17 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FOLKBOAT.png")
     ImageResource FolkBoatIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FUN.png")
+    ImageResource FUNIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/H_BOAT.png")
     ImageResource H_BoatIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/HOBIE.png")
     ImageResource HobieIcon(); 
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J22.png")
+    ImageResource J22Icon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/J24.png")
     ImageResource J24Icon();
@@ -126,6 +141,9 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_X.png")
     ImageResource RSXIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_FEVA.png")
+    ImageResource RSFevaIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SONAR.png")
     ImageResource SonarIcon();

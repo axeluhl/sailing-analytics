@@ -105,13 +105,13 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
         final TrackedRace oldTrackedRace;
-        LockUtil.lockForWrite(trackedRacesLock);
+        lockTrackedRacesForWrite();
         try {
             logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
                     " with regatta hash code "+getRegatta().hashCode());
             oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
         } finally {
-            LockUtil.unlockAfterWrite(trackedRacesLock);
+            unlockTrackedRacesAfterWrite();
         }
         if (oldTrackedRace != trackedRace) {
             for (RaceListener listener : raceListeners.keySet()) {
@@ -159,43 +159,38 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     @Override
     public TrackedRace getTrackedRace(RaceDefinition race) {
         boolean interrupted = false;
-        lockTrackedRacesForRead();
-        try {
-            TrackedRace result = trackedRaces.get(race);
-            if (!interrupted && result == null) {
-                final Object mutex = new Object();
-                final RaceListener listener = new RaceListener() {
-                    @Override
-                    public void raceRemoved(TrackedRace trackedRace) {}
-                    
-                    @Override
-                    public void raceAdded(TrackedRace trackedRace) {
-                        synchronized (mutex) {
-                            mutex.notifyAll();
-                        }
-                    }
-                };
-                addRaceListener(listener);
-                try {
+        TrackedRace result = getExistingTrackedRace(race);
+        if (!interrupted && result == null) {
+            final Object mutex = new Object();
+            final RaceListener listener = new RaceListener() {
+                @Override
+                public void raceRemoved(TrackedRace trackedRace) {}
+                
+                @Override
+                public void raceAdded(TrackedRace trackedRace) {
                     synchronized (mutex) {
-                        result = trackedRaces.get(race);
-                        while (!interrupted && result == null) {
-                            try {
-                                mutex.wait();
-                                result = trackedRaces.get(race);
-                            } catch (InterruptedException e) {
-                                interrupted = true;
-                            }
+                        mutex.notifyAll();
+                    }
+                }
+            };
+            addRaceListener(listener);
+            try {
+                synchronized (mutex) {
+                    result = getExistingTrackedRace(race);
+                    while (!interrupted && result == null) {
+                        try {
+                            mutex.wait();
+                            result = getExistingTrackedRace(race);
+                        } catch (InterruptedException e) {
+                            interrupted = true;
                         }
                     }
-                } finally {
-                    removeRaceListener(listener);
                 }
+            } finally {
+                removeRaceListener(listener);
             }
-            return result;
-        } finally {
-            unlockTrackedRacesAfterRead();
         }
+        return result;
     }
     
     @Override

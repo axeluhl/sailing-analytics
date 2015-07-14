@@ -651,7 +651,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
                             .type(MediaType.TEXT_PLAIN).build();
                 }
-
+                // Crop request interval to startOfTracking / [endOfTracking|timePointOfLastEvent]
+                from = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
+                to = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
                         new DefaultWindTrackJsonSerializer());
                 serializer.setWindSource(windSource);
