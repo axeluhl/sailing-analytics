@@ -772,7 +772,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private MarkDTO convertToMarkDTO(Mark mark, Position position) {
         MarkDTO markDTO;
-        if(position != null) {
+        if (position != null) {
             markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), position.getLatDeg(), position.getLngDeg());
         } else {
             markDTO = new MarkDTO(mark.getId().toString(), mark.getName());
@@ -1864,6 +1864,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.totalLegsCount = trackedRace.getRace().getCourse().getLegs().size();
             result.currentLegNumber = trackedRace.getLastLegStarted(dateAsTimePoint);
             result.marks = new HashSet<MarkDTO>();
+            result.course = new ArrayList<>();
             result.waypointPositions = new ArrayList<>();
             Set<Mark> marks = new HashSet<Mark>();
             Course course = trackedRace.getRace().getCourse();
