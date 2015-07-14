@@ -16,7 +16,6 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -40,7 +39,6 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -272,31 +270,9 @@ public class RaceContext {
         }
         return null;
     }
-
-    private Regatta getRegatta() {
-        final Regatta regatta;
-        if (leaderboard instanceof RegattaLeaderboard) {
-            regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-        } else {
-            regatta = null;
-        }
-        return regatta;
-    }
-
+    
     private String getCourseAreaOrNull() {
-        /** The course area will not be shown if there is only one course area defined for the event */
-        if (Util.size(event.getVenue().getCourseAreas()) <= 1) {
-            return null;
-        }
-        CourseArea courseArea = null;
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
-        }
-        Regatta regatta = getRegatta();
-        if (regatta != null) {
-            courseArea = regatta.getDefaultCourseArea();
-        }
-        return courseArea == null ? null : regatta.getDefaultCourseArea().getName();
+        return HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard);
     }
 
     private RaceProgressDTO getProgressOrNull() {
