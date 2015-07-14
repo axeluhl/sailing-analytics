@@ -48,7 +48,7 @@ public class LeaderboardContext {
         RegattaProgressCalculator regattaProgressCalculator = new RegattaProgressCalculator();
         forRaces(context, regattaProgressCalculator);
         RegattaWithProgressDTO regattaDTO = new RegattaWithProgressDTO(regattaProgressCalculator.getResult());
-        HomeServiceUtil.fillRegattaFields(leaderboardGroup, leaderboard, regattaDTO);
+        HomeServiceUtil.fillRegattaFields(event, leaderboardGroup, leaderboard, regattaDTO);
         return regattaDTO;
     }
     

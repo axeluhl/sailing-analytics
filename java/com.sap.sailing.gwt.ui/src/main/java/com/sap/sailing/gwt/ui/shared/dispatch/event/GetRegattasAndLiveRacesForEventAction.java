@@ -69,7 +69,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         Map<String, RegattaMetadataDTO> result = new HashMap<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             for (Leaderboard lb : lg.getLeaderboards()) {
-                result.put(lb.getName(), HomeServiceUtil.toRegattaMetadataDTO(lg, lb));
+                result.put(lb.getName(), HomeServiceUtil.toRegattaMetadataDTO(event, lg, lb));
             }
         }
         return result;

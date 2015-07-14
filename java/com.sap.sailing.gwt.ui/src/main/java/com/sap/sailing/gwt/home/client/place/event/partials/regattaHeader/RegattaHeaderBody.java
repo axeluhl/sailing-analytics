@@ -46,10 +46,12 @@ public class RegattaHeaderBody extends UIObject {
     }
     
     private void addDetailsItem(String text) {
-        DivElement detailsItem = DOM.createDiv().cast();
-        detailsItem.addClassName(RegattaHeaderResources.INSTANCE.css().regattaheader_content_details_item());
-        detailsItem.setInnerText(text);
-        detailsItemContainerUi.appendChild(detailsItem);
+        if(text != null) {
+            DivElement detailsItem = DOM.createDiv().cast();
+            detailsItem.addClassName(RegattaHeaderResources.INSTANCE.css().regattaheader_content_details_item());
+            detailsItem.setInnerText(text);
+            detailsItemContainerUi.appendChild(detailsItem);
+        }
     }
 
 }
