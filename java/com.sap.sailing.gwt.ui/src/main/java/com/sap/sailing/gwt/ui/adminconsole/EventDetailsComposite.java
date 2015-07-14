@@ -157,7 +157,7 @@ public class EventDetailsComposite extends Composite  {
             }
             videoURLList.setValues(videoURLStringsAsList);
             List<String> leaderboardGroupNamesAsList = new ArrayList<>();
-            for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
+            for (LeaderboardGroupDTO leaderboardGroupDTO : event.getLeaderboardGroups()) {
                 leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
             }
             leaderboardGroupList.setValues(leaderboardGroupNamesAsList);
