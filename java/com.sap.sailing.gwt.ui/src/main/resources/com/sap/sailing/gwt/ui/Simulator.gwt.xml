@@ -23,8 +23,6 @@
 	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
 	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 
-	<!-- Specify the app entry point class. -->
-	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint' />
 
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
@@ -44,4 +42,8 @@
 		It generates a set of files in WEB-INF/deploy; those files need to be placed 
 		on the server -->
 	<set-property name="compiler.stackMode" value="emulated" />
+
+	<!-- Specify the app entry point class. -->
+	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint' />
+
 </module>

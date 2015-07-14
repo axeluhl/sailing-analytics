@@ -24,7 +24,6 @@
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 
-	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
 	
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de"/>
@@ -43,5 +42,6 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
+	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
 	
 </module>

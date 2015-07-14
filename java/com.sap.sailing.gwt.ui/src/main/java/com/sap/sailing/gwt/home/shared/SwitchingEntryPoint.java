@@ -152,7 +152,7 @@ public class SwitchingEntryPoint implements EntryPoint {
     }
 
     private void configureDesktopHeader() {
-        metaElement("viewport", "width=device-width,initial-scale=0.5,maximum-scale=1");
+        metaElement("viewport", "width=device-width,initial-scale=0.5,maximum-scale=2");
     }
 
     private void configureMobileHeader() {
