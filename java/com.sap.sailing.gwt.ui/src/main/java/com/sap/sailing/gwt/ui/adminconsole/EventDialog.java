@@ -42,6 +42,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected TextBox officialWebsiteURLEntryField;
+    protected TextBox sailorsInfoWebsiteURLEntryField;
     protected StringListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
     protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
@@ -157,6 +158,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
+        result.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURLEntryField.getText().trim().isEmpty() ? null : sailorsInfoWebsiteURLEntryField.getText().trim());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -187,7 +189,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             panel.add(additionalWidget);
         }
 
-        Grid formGrid = new Grid(7, 2);
+        Grid formGrid = new Grid(8, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
@@ -204,6 +206,8 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(5, 1, isPublicCheckBox);
         formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
         formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
+        formGrid.setWidget(7, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
+        formGrid.setWidget(7, 1, sailorsInfoWebsiteURLEntryField);
 
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("250px");

@@ -57,15 +57,6 @@ public class Regatta extends Composite {
     @UiField SpanElement racesCount;
     @UiField SpanElement trackedRacesCount;
     @UiField DivElement isLiveDiv;
-//    @UiField TableElement isLiveDiv2;
-//    @UiField DivElement isFinishedDiv;
-//    @UiField DivElement isFinishedDiv2;
-//    @UiField DivElement isScheduledDiv;
-//    @UiField AnchorElement leaderboardLink;
-//    @UiField DivElement liveRaceInfosPerFleetPanel;
-//    @UiField(provided=true) RegattaCompetitor competitorWithRank1;
-//    @UiField(provided=true) RegattaCompetitor competitorWithRank2;
-//    @UiField(provided=true) RegattaCompetitor competitorWithRank3;
 
     @UiField Anchor regattaDetailsLink;
     
