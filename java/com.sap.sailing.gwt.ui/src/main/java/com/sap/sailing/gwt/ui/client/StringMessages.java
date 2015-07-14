@@ -1333,7 +1333,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noNews();
     String pointsValue(double value);
     String openLeaderboard();
-    String resultsStandings();
     String now();
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
