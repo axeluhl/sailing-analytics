@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class SortedSetResult<T extends DTO> implements DTO, Result {
+public class SortedSetResult<T extends DTO> implements CollectionResult<T> {
     private TreeSet<T> values = new TreeSet<>();
     
     public SortedSetResult() {

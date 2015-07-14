@@ -38,7 +38,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetFinishedRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
@@ -91,7 +90,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @UiField SimplePanel oldContentContainer;
 
     private RacesListLive liveRacesList;
-    private RaceListFinishedRaces finishedRacesList;
+    private RaceListContainer<RaceListRaceDTO> raceListContainer;
 
     public RegattaRacesTabView() {
         listNavigationPanelUi = new ListNavigationPanel<Navigation>(new RegattaRacesTabViewNavigationSelectionCallback());
@@ -103,7 +102,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     public void setPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
         listFormatContainerUi.add(liveRacesList = new RacesListLive(currentPresenter, false));
-        listFormatContainerUi.add(new RaceListContainer<>(I18N.finishedRaces(), finishedRacesList = new RaceListFinishedRaces(currentPresenter)));
+        raceListContainer = new RaceListContainer<>(I18N.finishedRaces(), I18N.noFinishedRaces(), new RaceListFinishedRaces(currentPresenter));
+        listFormatContainerUi.add(raceListContainer);
     }
     
     @Override
@@ -119,14 +119,14 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     //        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
     //        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
             
-            refreshManager.add(liveRacesList, new GetLiveRacesForRegattaAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
+            refreshManager.add(liveRacesList.getRefreshable(), new GetLiveRacesForRegattaAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
                 @Override
                 public void setData(RegattaWithProgressDTO data, long nextUpdate, int updateNo) {
                     regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data));
                 }
             }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
-            refreshManager.add(finishedRacesList, new GetFinishedRacesAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
+            refreshManager.add(raceListContainer, new GetFinishedRacesAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             
             oldContentContainer.removeFromParent();
         } else {
@@ -203,7 +203,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
     
-    private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> implements RefreshableWidget<SortedSetResult<RaceListRaceDTO>> {
+    private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> {
         private final SortableRaceListColumn<RaceListRaceDTO, ?> durationColumn = RaceListColumnFactory.getDurationColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windSpeedColumn = RaceListColumnFactory.getWindRangeColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windSourcesCountColumn = RaceListColumnFactory.getWindSourcesCountColumn();
@@ -216,11 +216,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
         
         @Override
-        public void setData(SortedSetResult<RaceListRaceDTO> data, long nextUpdate, int updateNo) {
-            setListData(data.getValues());
-        }
-
-        public void setListData(Collection<RaceListRaceDTO> data) {
+        protected void setTableData(Collection<RaceListRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);
             this.fleetNameColumn.setShowDetails(hasFleets);
@@ -231,7 +227,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
             this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
             this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
-            setTableData(data);
+            super.setTableData(data);
         }
 
         @Override

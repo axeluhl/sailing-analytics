@@ -7,7 +7,8 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources" />
 	<g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
     <h3 ui:field="titleUi"></h3>
-    <div style="display:none;" ui:field="infoUi"></div>
+    <div style="display: none;" ui:field="infoUi"></div>
+    <div style="display: none; font-weight: bold; font-style: italic;" ui:field="noContentPlaceholderUi"></div>
     <r:AbstractRaceList ui:field="raceListUi"/>
   </g:HTMLPanel>
 </ui:UiBinder> 

@@ -79,7 +79,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         
         initWidget(ourUiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        refreshManager.add(racesListLiveUi, new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(racesListLiveUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
         if (SHOW_NEW_REGATTA_LIST) {
             refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));

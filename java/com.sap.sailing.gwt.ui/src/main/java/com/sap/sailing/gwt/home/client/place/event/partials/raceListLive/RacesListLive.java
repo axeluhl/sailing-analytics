@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Composite;
@@ -13,31 +12,23 @@ import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDat
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.CollectionResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 
-public class RacesListLive extends Composite implements RefreshableWidget<SortedSetResult<LiveRaceDTO>> {
+public class RacesListLive extends Composite {
 
     private final RaceListLiveRaces raceList;
+    private final RaceListContainer<LiveRaceDTO> raceListContainer;
 
     public RacesListLive(EventView.Presenter presenter, boolean showRegattaDetails) {
         raceList = new RaceListLiveRaces(presenter, showRegattaDetails);
-        initWidget(new RaceListContainer<LiveRaceDTO>(StringMessages.INSTANCE.liveNow(), raceList));
+        raceListContainer = new RaceListContainer<LiveRaceDTO>(StringMessages.INSTANCE.liveNow(), raceList);
+        initWidget(raceListContainer);
         getElement().getStyle().setDisplay(Display.NONE);
     }
 
-    @Override
-    public void setData(SortedSetResult<LiveRaceDTO> data, long nextUpdate, int updateNo) {
-        this.setListData(data == null ? Collections.<LiveRaceDTO>emptySet() : data.getValues());
-    }
-    
-    public void setListData(Collection<LiveRaceDTO> data) {
-        if(data == null || data.isEmpty()) {
-            getElement().getStyle().setDisplay(Display.NONE);
-        } else {
-            getElement().getStyle().clearDisplay();
-            raceList.setListData(data);
-        }
+    public RefreshableWidget<CollectionResult<LiveRaceDTO>> getRefreshable() {
+        return raceListContainer;
     }
     
     private class RaceListLiveRaces extends AbstractRaceList<LiveRaceDTO> {
@@ -52,8 +43,9 @@ public class RacesListLive extends Composite implements RefreshableWidget<Sorted
             super(presenter);
             this.regattaNameColumn.setShowDetails(showRegattaDetails);
         }
-
-        public void setListData(Collection<LiveRaceDTO> data) {
+        
+        @Override
+        protected void setTableData(Collection<LiveRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);
             this.fleetNameColumn.setShowDetails(hasFleets);
@@ -62,7 +54,7 @@ public class RacesListLive extends Composite implements RefreshableWidget<Sorted
             boolean hasWind = RaceListDataUtil.hasWind(data);
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
-            setTableData(data);
+            super.setTableData(data);
         }
 
         @Override
