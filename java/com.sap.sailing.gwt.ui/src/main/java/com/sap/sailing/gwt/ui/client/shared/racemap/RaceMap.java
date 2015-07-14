@@ -1460,6 +1460,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine = null;
                 }
             }
+            // TODO bug3027: also show advantage information for all other gates/lines; generalize CoursePositionsDTO line structures to provide this info
+            // TODO bug3027: show SmallTransparentInfoOverlay in addition to tooltip if course geometry option is true; remove it if option is false
+            // TODO bug3027: show *all* course middle lines if course geometry option is true
+            
             // draw the finish line
             if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions != null && courseDTO.finishMarkPositions.size() == 2) {
