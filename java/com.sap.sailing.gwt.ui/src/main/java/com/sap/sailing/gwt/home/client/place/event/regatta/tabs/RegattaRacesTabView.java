@@ -206,7 +206,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private class RaceListFinishedRaces extends AbstractRaceList<RaceListRaceDTO> implements RefreshableWidget<SortedSetResult<RaceListRaceDTO>> {
         private final SortableRaceListColumn<RaceListRaceDTO, ?> durationColumn = RaceListColumnFactory.getDurationColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windSpeedColumn = RaceListColumnFactory.getWindRangeColumn();
-        private final SortableRaceListColumn<RaceListRaceDTO, ?> windfixesCountColumn = RaceListColumnFactory.getWindFixesCountColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> windSourcesCountColumn = RaceListColumnFactory.getWindSourcesCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
@@ -228,7 +228,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             boolean hasWind = RaceListDataUtil.hasWind(data);
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
-            this.windfixesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
+            this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
             this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
             this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
             setTableData(data);
@@ -243,7 +243,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             add(durationColumn);
             add(windSpeedColumn);
             add(windDirectionColumn);
-            add(windfixesCountColumn);
+            add(windSourcesCountColumn);
             add(videoCountColumn);
             add(audioCountColumn);
             add(winnerColumn);

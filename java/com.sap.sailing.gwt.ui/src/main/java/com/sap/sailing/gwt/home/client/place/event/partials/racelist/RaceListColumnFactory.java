@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -266,24 +267,13 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends LiveRaceDTO> SortableRaceListColumn<T, String> getWindSpeedColumn() {
-        Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator =  new InvertibleComparatorWrapper<T, Double>( new NullSafeComparableComparator<Double>()) {
             @Override
             protected Double getComparisonValue(T object) {
                 return object.getWind() != null ? object.getWind().getTrueWindSpeedInKnots() : null;
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.wind(), cell, comparator) {
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-            
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-            
+        return new WindSpeedOrRangeColumn<T>(comparator) {
             @Override
             public String getValue(T object) {
                 return object.getWind() != null ? I18N.knotsValue(object.getWind().getTrueWindSpeedInKnots()) : null;
@@ -292,39 +282,23 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getWindRangeColumn() {
-        Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Double>(
-                new NullSafeComparableComparator<Double>()) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Double>(new NullSafeComparableComparator<Double>()) {
             @Override
             protected Double getComparisonValue(T object) {
-                return object.getWind() != null ? (object.getWind().getTrueUpperboundWindInKnots() + object.getWind()
-                        .getTrueLowerboundWindInKnots()) : null;
+                WindStatisticsDTO wind = object.getWind();
+                return wind != null ? (wind.getTrueUpperboundWindInKnots() + wind .getTrueLowerboundWindInKnots()) : null;
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.wind(), cell, comparator) {
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-
+        return new WindSpeedOrRangeColumn<T>(comparator) {
             @Override
             public String getValue(T object) {
-                if (object == null || object.getWind() == null) {
+                WindStatisticsDTO wind = object.getWind();
+                if (wind == null) {
                     return "";
+                } else if (wind.getRoundedDifference() <= 0d) {
+                    return I18N.knotsValue(wind.getTrueLowerboundWindInKnots());
                 }
-                Double trueUpperboundWindInKnots = Math.round(object.getWind().getTrueUpperboundWindInKnots()*10d)/10d;
-                Double trueLowerboundWindInKnots = Math.round(object.getWind().getTrueLowerboundWindInKnots()*10d)/10d;
-                StringBuilder sb = new StringBuilder();
-                sb.append(I18N.knotsValue(trueLowerboundWindInKnots));
-                if (trueUpperboundWindInKnots - trueLowerboundWindInKnots != 0d) {
-                    sb.append(" - ").append(I18N.knotsValue(trueUpperboundWindInKnots));
-                }
-                return sb.toString();
+                return I18N.knotsRange(wind.getTrueLowerboundWindInKnots(), wind.getTrueUpperboundWindInKnots());
             }
         };
     }
@@ -418,7 +392,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getWindFixesCountColumn() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getWindSourcesCountColumn() {
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
             @Override
             protected Integer getComparisonValue(T object) {
@@ -581,6 +555,22 @@ public class RaceListColumnFactory {
                 return object;
             }
         };
+    }
+    
+    private static abstract class WindSpeedOrRangeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, String> {
+        protected WindSpeedOrRangeColumn(InvertibleComparator<T> comparator) {
+            super(I18N.wind(), new TextCell(), comparator);
+        }
+
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+        
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_item();
+        }
     }
     
     private static abstract class DataCountColumn<T extends RaceListRaceDTO> extends SortableRaceListColumn<T, Number> {

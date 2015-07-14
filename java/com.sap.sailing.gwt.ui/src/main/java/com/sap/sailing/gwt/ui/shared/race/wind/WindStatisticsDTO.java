@@ -22,6 +22,9 @@ public class WindStatisticsDTO extends AbstractWindDTO {
     public Double getTrueUpperboundWindInKnots() {
         return trueUpperboundWindInKnots;
     }
-
+    
+    public Double getRoundedDifference() {
+        return (Math.round(trueUpperboundWindInKnots*10d)/10d) - (Math.round(trueLowerboundWindInKnots*10d)/10d);
+    }
 
 }
