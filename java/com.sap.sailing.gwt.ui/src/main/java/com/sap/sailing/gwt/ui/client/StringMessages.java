@@ -1275,6 +1275,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String courseAreaName(String courseAreaName);
     String currentOfTotalLegs(int currentLeg, int totalLegs);
     String clone();
     String changed();
