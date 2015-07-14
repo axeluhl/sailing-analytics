@@ -33,6 +33,21 @@ public class RaceListDataUtil {
         return false;
     }
     
+    private static <T extends RaceMetadataDTO<?>> boolean hasDifferentValues(Collection<T> races, ValueProvider<T, ?> valueProvider) {
+        Object compareValue = null;
+        for (T race : races) {
+            Object currentValue = valueProvider.getValue(race);
+            if (currentValue == null) {
+                continue;
+            } else if (compareValue == null) {
+                compareValue = currentValue;
+            } else if (!compareValue.equals(currentValue)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static <T extends RaceMetadataDTO<?>> boolean hasFleets(Collection<T> data) {
         return hasValues(data, new ValueProvider<T, FleetMetadataDTO>() {
             @Override
@@ -101,6 +116,16 @@ public class RaceListDataUtil {
             @Override
             public String getValue(T object) {
                 return object.getCourseArea();
+            }
+        });
+    }
+    
+    private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
+    public static <T extends RaceMetadataDTO<?>> boolean hasDifferentStartDates(Collection<T> data) {
+        return hasDifferentValues(data, new ValueProvider<T, Long>() {
+            @Override
+            public Long getValue(T object) {
+                return object.getStart().getTime() / DAY_IN_MILLIS;
             }
         });
     }

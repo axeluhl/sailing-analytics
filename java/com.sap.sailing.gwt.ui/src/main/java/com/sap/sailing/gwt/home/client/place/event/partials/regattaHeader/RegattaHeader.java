@@ -25,6 +25,7 @@ public class RegattaHeader extends Composite {
     }
     
     public void setRegattaNavigation(PlaceNavigation<?> placeNavigation) {
+        headerArrowUi.getStyle().clearDisplay();
         placeNavigation.configureAnchorElement(headerBodyUi);
         placeNavigation.configureAnchorElement(headerArrowUi);
     }

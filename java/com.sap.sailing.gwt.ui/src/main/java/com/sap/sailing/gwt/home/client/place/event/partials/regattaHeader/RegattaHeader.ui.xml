@@ -12,7 +12,7 @@
 <!-- 					<a class="{local_res.css.regattaheader_toggle}"> -->
 <!-- 						<img src="images/home/arrow-down-grey.png" class="{local_res.css.regattaheader_toggle_icon}"></img> -->
 <!-- 					</a> -->
-					<a class="{local_res.css.regattaheader_arrow}" ui:field="headerArrowUi"></a>
+					<a class="{local_res.css.regattaheader_arrow}" style="display:none;" ui:field="headerArrowUi"></a>
 <!-- 					<div class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}"></div> -->
 <!-- 					<div class="{local_res.css.regattaheader_toggle}"></div> -->
 <!-- 					<div class="{local_res.css.regattaheader_arrow}"></div> -->
