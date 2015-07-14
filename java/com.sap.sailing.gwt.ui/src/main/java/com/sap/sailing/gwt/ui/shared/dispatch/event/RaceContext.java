@@ -564,6 +564,12 @@ public class RaceContext {
     }
     
     public boolean isLive() {
+        if(getStartTime() == null) {
+            return false;
+        }
+        if (trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+            return trackedRace.isLive(now);
+        }
         return getLiveRaceViewState() == RaceViewState.RUNNING;
     }
 }
