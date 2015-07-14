@@ -890,6 +890,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
                         showStartAndFinishLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
+                        showCourseGeometryMetrics(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
                         showAdvantageLine(competitorsToShow, newTime);
@@ -1299,6 +1300,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     advantageLine = null;
                 }
             }
+        }
+    }
+    
+    private void showCourseGeometryMetrics(final CoursePositionsDTO courseDTO) {
+        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                && courseDTO.startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
+            
         }
     }
     

@@ -42,15 +42,12 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
         infoBoxWidth = 20;
         infoBoxHeight = 20;
         cornerRadius = 4;
-
         if (getCanvas() != null) {
             getCanvas().setWidth(String.valueOf(canvasWidth));
             getCanvas().setHeight(String.valueOf(canvasHeight));
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             getCanvas().setCoordinateSpaceHeight(canvasHeight);
         }
-
-//        setCanvasSize(canvasWidth, canvasHeight);
     }
 
     @Override
