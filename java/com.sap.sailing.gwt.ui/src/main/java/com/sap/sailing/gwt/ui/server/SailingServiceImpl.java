@@ -902,7 +902,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             CourseBase lastCourse = state.getCourseDesign();
             if (lastCourse != null) {
-                raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
+                raceInfoDTO.lastCourseDesign = convertToRaceCourseDTO(lastCourse);
                 raceInfoDTO.lastCourseName = lastCourse.getName();
             }
             
@@ -950,20 +950,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             break;
         }
         raceInfoDTO.startProcedureDTO = info;
-    }
-
-    private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
-        RaceCourseDTO result = new RaceCourseDTO(Collections.<WaypointDTO> emptyList());
-        if (lastCourseDesign != null) {
-            List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
-            for (Waypoint waypoint : lastCourseDesign.getWaypoints()) {
-                ControlPointDTO controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint());
-                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, waypoint.getPassingInstructions());
-                waypointDTOs.add(waypointDTO);
-            }
-            result = new RaceCourseDTO(waypointDTOs);
-        }
-        return result;
     }
 
     private List<RaceWithCompetitorsDTO> convertToRaceDTOs(Regatta regatta) {
@@ -5099,25 +5085,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private RaceCourseDTO convertToRaceCourseDTO(CourseBase course) {
-        List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
-        Map<Serializable, ControlPointDTO> controlPointCache = new HashMap<>();
-        RaceCourseDTO result = new RaceCourseDTO(waypointDTOs);
-        for (Waypoint waypoint : course.getWaypoints()) {
-            waypointDTOs.add(convertToWaypointDTO(waypoint, controlPointCache));
+        final RaceCourseDTO result;
+        if (course != null) {
+            List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
+            Map<Serializable, ControlPointDTO> controlPointCache = new HashMap<>();
+            for (Waypoint waypoint : course.getWaypoints()) {
+                waypointDTOs.add(convertToWaypointDTO(waypoint, controlPointCache));
+            }
+            result = new RaceCourseDTO(waypointDTOs);
+        } else {
+            result = new RaceCourseDTO(Collections.<WaypointDTO> emptyList());
         }
         return result;
     }
     
     @Override
-    public RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName,
-            String fleetName) {
+    public RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        
         CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl("");
         }
-        
         return convertToRaceCourseDTO(lastPublishedCourse);
     }
     
