@@ -54,7 +54,6 @@
     <attr name="course_updown_64dp" format="reference"/>
     <attr name="dns_48dp" format="reference"/>
     <attr name="hearing_48dp" format="reference"/>
-    <attr name="link_18dp" format="reference"/>
     <attr name="link_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
     <attr name="marker" format="reference"/>

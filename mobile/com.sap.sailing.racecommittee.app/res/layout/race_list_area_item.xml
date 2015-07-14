@@ -82,7 +82,7 @@
                 android:id="@+id/has_dependent_races"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="?link_18dp"
+                android:src="?link_24dp"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="5dp"
                 android:visibility="gone"

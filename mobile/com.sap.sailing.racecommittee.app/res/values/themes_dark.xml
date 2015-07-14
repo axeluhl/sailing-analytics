@@ -69,7 +69,6 @@
         <item name="course_updown_64dp">@drawable/course_updown_64dp_dark</item>
         <item name="dns_48dp">@drawable/ic_dns_white_48dp</item>
         <item name="hearing_48dp">@drawable/ic_hearing_white_48dp</item>
-        <item name="link_18dp">@drawable/ic_link_white_18dp</item>
         <item name="link_24dp">@drawable/ic_link_white_24dp</item>
         <item name="lock_outline">@drawable/lock_outline_dark</item>
         <item name="marker">@drawable/marker_dark</item>
