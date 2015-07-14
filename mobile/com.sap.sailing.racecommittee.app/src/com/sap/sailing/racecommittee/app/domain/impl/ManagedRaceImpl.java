@@ -25,9 +25,7 @@ import java.util.List;
 public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
 
-    // private static final String TAG = ManagedRace.class.getName();
-
-    private final RaceState state;
+    private RaceState state;
     private final ManagedRaceIdentifier identifier;
     private Collection<Competitor> competitors;
     private List<MapMarker> mapMarkers;
@@ -36,13 +34,21 @@ public class ManagedRaceImpl implements ManagedRace {
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
         this.state = state;
         this.identifier = identifier;
-        this.competitors = new ArrayList<Competitor>();
+        this.competitors = new ArrayList<>();
         this.courseOnServer = null;
     }
 
     @Override
     public RaceState getState() {
         return state;
+    }
+
+    @Override
+    public void setState(RaceState state) {
+        if (this.state != null) {
+            throw new IllegalStateException("RaceState can only be set once");
+        }
+        this.state = state;
     }
 
     @Override

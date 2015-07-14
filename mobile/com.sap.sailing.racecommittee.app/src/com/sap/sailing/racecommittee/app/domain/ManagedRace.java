@@ -26,6 +26,13 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     RaceState getState();
 
     /**
+     * Sets the state of the race
+     *
+     * @param state the state of the race
+     */
+    void setState(RaceState state);
+
+    /**
      * Shortcut to {@link RaceState#getRaceLog()} of {@link ManagedRace#getState()}.
      * 
      * @return the log of the race.
