@@ -34,8 +34,6 @@
   margin: -1em 1em -1em 0;
   background-size: contain;
   background-position: center;
-  -webkit-filter: grayscale(100%);
-          filter: grayscale(100%);
 }
 .sectionheader_item_image_seperator {
   position: absolute;
