@@ -3,18 +3,22 @@
 	<ui:with field="res"
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
-		.space-top {
-			margin-top: 2em;
+  		.legend_and_filter {
+			text-align: right;
 		}
-		.space-bottom {
-			margin-bottom: 2em;
+  		.legend_and_filter > div {
+			display: inline-block;
+			vertical-align: middle;
 		}
 	</ui:style>
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.grid}">
-			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.space-bottom}">
-				<p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{style.space-top}" />
-				<p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" addStyleNames="{style.space-top}"/>
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
+				<p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
+				<div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}">
+					<p:multiRegattaList.MultiRegattaListStepsLegend />
+			        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
+		        </div>
 				<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
 			</div>
 		</div>

@@ -3,12 +3,24 @@
   			 xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event.partials"
   			 xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview">
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  	<ui:style>
+  		.legend_and_filter {
+			text-align: right;
+		}
+  		.legend_and_filter > div {
+			display: inline-block;
+			vertical-align: middle;
+		}
+  	</ui:style>
   <g:HTMLPanel>
     <o:EventOverviewStage ui:field="stage" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
         <p:raceListLive.RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
-        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
+        <div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}">
+			<p:multiRegattaList.MultiRegattaListStepsLegend />
+	        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
+        </div>
 		<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
       </div>
     </div>
