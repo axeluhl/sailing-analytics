@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.TextTransform;
@@ -185,30 +184,14 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, Date> getStartTimeColumn() {
-        Cell<Date> cell = new DateCell(DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE));
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListStartTimeColumn<T> getStartTimeColumn() {
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>()) {
             @Override
             protected Date getComparisonValue(T object) {
                 return object.getStart();
             }
         };
-        return new SortableRaceListColumn<T, Date>(I18N.start(), cell, comparator) {
-            @Override
-            public String getHeaderStyle() {
-                return CSS.raceslist_head_item();
-            }
-
-            @Override
-            public String getColumnStyle() {
-                return CSS.race_item();
-            }
-
-            @Override
-            public Date getValue(T object) {
-                return object.getStart();
-            }
-        };
+        return new SortableRaceListStartTimeColumn<T>(comparator);
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getDurationColumn() {
@@ -556,6 +539,44 @@ public class RaceListColumnFactory {
             }
         };
     }
+    
+    public static class SortableRaceListStartTimeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, Date> {
+        protected SortableRaceListStartTimeColumn(InvertibleComparator<T> comparator) {
+            super(I18N.start(), new StartTimeCell(), comparator);
+        }
+        
+        public void setShowTimeOnly(boolean showTimeOnly) {
+            ((StartTimeCell) getCell()).showTimeOnly = showTimeOnly;
+        }
+        
+        @Override
+        public String getHeaderStyle() {
+            return CSS.raceslist_head_item();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return CSS.race_item();
+        }
+
+        @Override
+        public Date getValue(T object) {
+            return object.getStart();
+        }
+        
+        private static class StartTimeCell extends AbstractCell<Date> {
+            private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.MONTH_NUM_DAY);
+            private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
+            private boolean showTimeOnly = true;
+            @Override
+            public void render(Context context, Date value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    sb.appendEscaped(showTimeOnly ? "" : (DATE_FORMAT.format(value) + " ") + TIME_FORMAT.format(value));
+                }
+            }
+        }
+    }
+    
     
     private static abstract class WindSpeedOrRangeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, String> {
         protected WindSpeedOrRangeColumn(InvertibleComparator<T> comparator) {

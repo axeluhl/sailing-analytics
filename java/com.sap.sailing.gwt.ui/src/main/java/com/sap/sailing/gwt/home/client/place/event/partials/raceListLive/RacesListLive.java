@@ -49,6 +49,7 @@ public class RacesListLive extends Composite {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);
             this.fleetNameColumn.setShowDetails(hasFleets);
+            this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
             this.courseAreaColumn.setShowDetails(RaceListDataUtil.hasCourseAreas(data));
             this.courseColumn.setShowDetails(RaceListDataUtil.hasCourses(data));
             boolean hasWind = RaceListDataUtil.hasWind(data);

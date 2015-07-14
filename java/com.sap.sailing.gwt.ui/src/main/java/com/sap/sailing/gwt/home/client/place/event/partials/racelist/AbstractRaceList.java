@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory.SortableRaceListStartTimeColumn;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
@@ -25,7 +26,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     protected final SortableRaceListColumn<T, ?> fleetCornerColumn = RaceListColumnFactory.getFleetCornerColumn();
     protected final SortableRaceListColumn<T, ?> raceNameColumn = RaceListColumnFactory.getRaceNameColumn();
     protected final SortableRaceListColumn<T, ?> fleetNameColumn = RaceListColumnFactory.getFleetNameColumn(); 
-    protected final SortableRaceListColumn<T, ?> startTimeColumn = RaceListColumnFactory.getStartTimeColumn();
+    protected final SortableRaceListStartTimeColumn<T> startTimeColumn = RaceListColumnFactory.getStartTimeColumn();
     protected final SortableRaceListColumn<T, ?> windDirectionColumn = RaceListColumnFactory.getWindDirectionColumn();
     protected final SortableRaceListColumn<T, ?> raceViewerButtonColumn;
     

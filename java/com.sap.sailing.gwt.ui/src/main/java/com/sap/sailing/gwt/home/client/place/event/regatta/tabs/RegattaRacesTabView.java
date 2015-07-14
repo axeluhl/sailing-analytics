@@ -220,6 +220,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);
             this.fleetNameColumn.setShowDetails(hasFleets);
+            this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
             this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
             boolean hasWind = RaceListDataUtil.hasWind(data);
             this.windSpeedColumn.setShowDetails(hasWind);
