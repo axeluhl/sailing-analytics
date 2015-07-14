@@ -1,0 +1,44 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:style>
+		.multiregatta_steps_legend {
+			font-size: 1rem;
+		}
+		.multiregatta_steps_legend_item {
+			display: inline-block;
+			padding: 0.4em 0.666666666666667em;
+			margin: 0.333333333333333em 0.666666666666667em 0.333333333333333em 0;
+			font-size: 0.666em;
+			font-weight: 700;
+			line-height: 0.666666666666667em;
+			border: 1px solid #008fcc;
+		}
+		.multiregatta_steps_legend_item_finished {
+			color: #fff;
+			border-color: #ccc;
+			background-color: #f0ab00;
+		}
+		.multiregatta_steps_legend_item_live {
+			color: #fff;
+			border-color: #e94a1b;
+			background-color: #e94a1b;
+		}
+		.multiregatta_steps_legend_item_planned {
+			color: #ccc;
+			border-color: #ccc;
+			background-color: #fff;
+		}
+		</ui:style>
+	<div class="{style.multiregatta_steps_legend}">
+	    <div class="{style.multiregatta_steps_legend_item} {style.multiregatta_steps_legend_item_finished}">
+	      <ui:text from='{i18n.raceIsFinished}' />
+	    </div>
+	    <div class="{style.multiregatta_steps_legend_item} {style.multiregatta_steps_legend_item_live}">
+	      <ui:text from='{i18n.playModeLive}' />
+	    </div>
+	    <div class="{style.multiregatta_steps_legend_item} {style.multiregatta_steps_legend_item_planned}">
+	      <ui:text from='{i18n.raceIsPlanned}' />
+	    </div>
+     </div>
+</ui:UiBinder> 
