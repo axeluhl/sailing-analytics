@@ -5,7 +5,7 @@ public class WindStatisticsDTO extends AbstractWindDTO {
     private Double trueLowerboundWindInKnots;
     private Double trueUpperboundWindInKnots;
 
-    public WindStatisticsDTO() {
+    protected WindStatisticsDTO() {
         super();
     }
 
