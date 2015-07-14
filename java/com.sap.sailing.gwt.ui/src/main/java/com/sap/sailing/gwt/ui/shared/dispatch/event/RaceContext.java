@@ -174,7 +174,7 @@ public class RaceContext {
                 Double averageDirection = null;
                 for (TimePoint timePoint : pointsToGetWind) {
                     WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
-                            .getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(toTimePoint), toTimePoint);
+                            .getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(timePoint), timePoint);
                     if (averagedWindWithConfidence != null) {
                         Wind wind = averagedWindWithConfidence.getObject();
                         averageDirection = wind.getFrom().getDegrees();
