@@ -41,6 +41,8 @@ public class EventHeader extends Composite {
     @UiField StringMessages i18n;
     
     @UiField DivElement eventLogo;
+    @UiField
+    AnchorElement eventLogoAnchorUi;
     @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
@@ -97,7 +99,9 @@ public class EventHeader extends Composite {
 
     private void initFields() {
         LogoUtil.setEventLogo(eventLogo, event);
-        
+        if (presenter.showRegattaMetadata()) {
+            presenter.getCurrentEventNavigation().configureAnchorElement(eventLogoAnchorUi);
+        }
         String eventDisplayName = event.getDisplayName();
         String nameToShow;
         if(presenter.showRegattaMetadata()) {
