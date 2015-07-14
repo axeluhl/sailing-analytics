@@ -1865,11 +1865,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     marks.add(b);
                 }
             }
-            for (Mark mark : marks) {
-                GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                if (positionAtDate != null) {
-                    result.marks.add(convertToMarkDTO(mark, positionAtDate));
+            for (final WaypointDTO waypointDTO : result.course.waypoints) {
+                for (final MarkDTO markDTO : waypointDTO.controlPoint.getMarks()) {
+                    if (markDTO.position != null) {
+                        result.marks.add(markDTO);
+                    }
                 }
             }
 
