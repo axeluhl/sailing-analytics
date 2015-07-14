@@ -6,9 +6,14 @@
 		.listContainer > div {
 			margin-bottom: 2em;
 		}
+		.legend {
+			margin-top: 2em;
+			margin-bottom: -1.5em;
+		}
 	</ui:style>
     <g:HTMLPanel ui:field="contentPanel">
     	<div class="{res.mediaCss.grid}">
+   			<p:multiRegattaList.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" />
     		<g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
     	</div>
         <p:listNavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
