@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -453,6 +454,7 @@ public final class HomeServiceUtil {
             regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
         }
         regattaDTO.setState(calculateRegattaState(regattaDTO));
+        regattaDTO.setDefaultCourseAreaName(getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
     }
     
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {
@@ -468,5 +470,22 @@ public final class HomeServiceUtil {
         // TODO better solution
         long livePlayDelayInMillis = 15_000;
         return System.currentTimeMillis() - livePlayDelayInMillis;
+    }
+    
+    public static String getCourseAreaNameForRegattaIdThereIsMoreThanOne(EventBase event, Leaderboard leaderboard) {
+        /** The course area will not be shown if there is only one course area defined for the event */
+        if (Util.size(event.getVenue().getCourseAreas()) <= 1) {
+            return null;
+        }
+        CourseArea courseArea = null;
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+        } else if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            if (regatta != null) {
+                courseArea = regatta.getDefaultCourseArea();
+            }
+        }
+        return courseArea == null ? null : courseArea.getName();
     }
 }
