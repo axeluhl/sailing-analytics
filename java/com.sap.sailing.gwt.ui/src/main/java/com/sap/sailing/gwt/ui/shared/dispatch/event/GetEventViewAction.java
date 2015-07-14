@@ -64,7 +64,7 @@ public class GetEventViewAction implements Action<EventViewDTO> {
                     if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                         continue;
                     }
-                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(leaderboardGroup, leaderboard);
+                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(event, leaderboardGroup, leaderboard);
                     dto.getRegattas().add(regattaDTO);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);

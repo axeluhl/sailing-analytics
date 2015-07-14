@@ -429,18 +429,20 @@ public final class HomeServiceUtil {
         return result;
     }
     
-    public static RegattaMetadataDTO toRegattaMetadataDTO(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+    public static RegattaMetadataDTO toRegattaMetadataDTO(EventBase event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
         RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();
-        fillRegattaFields(leaderboardGroup, leaderboard, regattaDTO);
+        fillRegattaFields(event, leaderboardGroup, leaderboard, regattaDTO);
         
         return regattaDTO;
     }
 
-    public static void fillRegattaFields(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
+    public static void fillRegattaFields(EventBase event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
             RegattaMetadataDTO regattaDTO) {
         regattaDTO.setId(leaderboard.getName());
         regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
-        regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+        if(hasMultipleLeaderboardGroups(event)) {
+            regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+        }
         regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
         regattaDTO.setTrackedRacesCount(calculateTrackedRaceCount(leaderboard));
@@ -453,6 +455,10 @@ public final class HomeServiceUtil {
         regattaDTO.setState(calculateRegattaState(regattaDTO));
     }
     
+    private static boolean hasMultipleLeaderboardGroups(EventBase event) {
+        return Util.size(event.getLeaderboardGroups()) > 1;
+    }
+
     public static boolean hasLiveRace(LeaderboardDTO leaderboard) {
         List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(getLiveTimePointInMillis());
         return !liveRaces.isEmpty();
