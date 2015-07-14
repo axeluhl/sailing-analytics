@@ -24,15 +24,13 @@ public class GetLiveRacesForEventAction implements Action<ResultWithTTL<SortedSe
     @Override
     @GwtIncompatible
     public ResultWithTTL<SortedSetResult<LiveRaceDTO>> execute(final DispatchContext context) {
-        ResultWithTTL<SortedSetResult<LiveRaceDTO>> result = EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<SortedSetResult<LiveRaceDTO>>() {
+        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<SortedSetResult<LiveRaceDTO>>() {
             @Override
             public ResultWithTTL<SortedSetResult<LiveRaceDTO>> calculateWithEvent(Event event) {
                 LiveRaceCalculator liveRaceCalculator = new LiveRaceCalculator();
                 EventActionUtil.forRacesOfEvent(context, eventId, liveRaceCalculator);
-                ResultWithTTL<SortedSetResult<LiveRaceDTO>> result = liveRaceCalculator.getResult();
-                return result;
+                return liveRaceCalculator.getResult();
             }
         });
-        return result;
     }
 }
