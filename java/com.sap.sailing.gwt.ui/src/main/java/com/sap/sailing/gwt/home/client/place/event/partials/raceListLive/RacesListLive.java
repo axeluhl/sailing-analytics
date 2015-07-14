@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 public class RacesListLive extends Composite implements RefreshableWidget<SortedSetResult<LiveRaceDTO>> {
 
     private final RaceListLiveRaces raceList;
-    
+
     public RacesListLive(EventView.Presenter presenter, boolean showRegattaDetails) {
         raceList = new RaceListLiveRaces(presenter, showRegattaDetails);
         initWidget(new RaceListContainer<LiveRaceDTO>(StringMessages.INSTANCE.liveNow(), raceList));
@@ -46,6 +46,8 @@ public class RacesListLive extends Composite implements RefreshableWidget<Sorted
         private final SortableRaceListColumn<LiveRaceDTO, ?> courseAreaColumn = RaceListColumnFactory.getCourseAreaColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> courseColumn = RaceListColumnFactory.getCourseColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> raceViewStateColumn = RaceListColumnFactory.getRaceViewStateColumn();
+        private final SortableRaceListColumn<LiveRaceDTO, ?> windSpeedColumn = RaceListColumnFactory
+                .getWindSpeedColumn();
 
         public RaceListLiveRaces(EventView.Presenter presenter, boolean showRegattaDetails) {
             super(presenter);

@@ -24,7 +24,7 @@ public class RaceListViewDTO implements DTO {
         add(finishedRaces, finishedRace);
     }
     
-    private <T extends RaceMetadataDTO> void add(TreeSet<T> set, T race) {
+    private <T extends RaceMetadataDTO<?>> void add(TreeSet<T> set, T race) {
         if (race != null) {
             set.add(race);
         }

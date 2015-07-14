@@ -44,7 +44,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -82,7 +82,7 @@ public class RaceListColumnFactory {
         SafeHtml imageHeader(String styleNames, SafeUri imageURL);
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, FleetMetadataDTO> getFleetCornerColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, FleetMetadataDTO> getFleetCornerColumn() {
         Cell<FleetMetadataDTO> cell = new AbstractCell<FleetMetadataDTO>() {
             @Override
             public void render(Context context, FleetMetadataDTO value, SafeHtmlBuilder sb) {
@@ -106,7 +106,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getRegattaNameColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getRegattaNameColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
             @Override
@@ -132,7 +132,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getRaceNameColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getRaceNameColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
             @Override
@@ -158,7 +158,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getFleetNameColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getFleetNameColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
             @Override
@@ -184,7 +184,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, Date> getStartTimeColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, Date> getStartTimeColumn() {
         Cell<Date> cell = new DateCell(DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE));
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>()) {
             @Override
@@ -265,7 +265,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getWindSpeedColumn() {
+    public static <T extends LiveRaceDTO> SortableRaceListColumn<T, String> getWindSpeedColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator =  new InvertibleComparatorWrapper<T, Double>( new NullSafeComparableComparator<Double>()) {
             @Override
@@ -291,10 +291,48 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, SimpleWindDTO> getWindDirectionColumn() {
-        Cell<SimpleWindDTO> cell = new AbstractCell<SimpleWindDTO>() {
+    public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getWindRangeColumn() {
+        Cell<String> cell = new TextCell();
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Double>(
+                new NullSafeComparableComparator<Double>()) {
             @Override
-            public void render(Context context, SimpleWindDTO value, SafeHtmlBuilder sb) {
+            protected Double getComparisonValue(T object) {
+                return object.getWind() != null ? (object.getWind().getTrueUpperboundWindInKnots() + object.getWind()
+                        .getTrueLowerboundWindInKnots()) : null;
+            }
+        };
+        return new SortableRaceListColumn<T, String>(I18N.wind(), cell, comparator) {
+            @Override
+            public String getHeaderStyle() {
+                return CSS.raceslist_head_item();
+            }
+
+            @Override
+            public String getColumnStyle() {
+                return CSS.race_item();
+            }
+
+            @Override
+            public String getValue(T object) {
+                if (object == null || object.getWind() == null) {
+                    return "";
+                }
+                Double trueUpperboundWindInKnots = Math.round(object.getWind().getTrueUpperboundWindInKnots()*10d)/10d;
+                Double trueLowerboundWindInKnots = Math.round(object.getWind().getTrueLowerboundWindInKnots()*10d)/10d;
+                StringBuilder sb = new StringBuilder();
+                sb.append(I18N.knotsValue(trueLowerboundWindInKnots));
+                if (trueUpperboundWindInKnots - trueLowerboundWindInKnots != 0d) {
+                    sb.append(" - ").append(I18N.knotsValue(trueUpperboundWindInKnots));
+                }
+                return sb.toString();
+            }
+        };
+    }
+
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, AbstractWindDTO> getWindDirectionColumn() {
+        Cell<AbstractWindDTO> cell = new AbstractCell<AbstractWindDTO>() {
+            @Override
+            public void render(Context context, AbstractWindDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
                     SafeStylesBuilder safeStyles = new SafeStylesBuilder();
                     safeStyles.trustedNameAndValue("-webkit-transform", "rotate(" + value.getTrueWindFromDeg() + "deg)");
@@ -310,7 +348,7 @@ public class RaceListColumnFactory {
                 return object.getWind() != null ? object.getWind().getTrueWindFromDeg() : null;
             }
         };
-        return new SortableRaceListColumn<T, SimpleWindDTO>(I18N.from(), cell, comparator) {
+        return new SortableRaceListColumn<T, AbstractWindDTO>(I18N.from(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.hideonsmall());
@@ -322,13 +360,13 @@ public class RaceListColumnFactory {
             }
 
             @Override
-            public SimpleWindDTO getValue(T object) {
+            public AbstractWindDTO getValue(T object) {
                 return object.getWind();
             }
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getCourseAreaColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getCourseAreaColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
             @Override
@@ -354,7 +392,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, String> getCourseColumn() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getCourseColumn() {
         Cell<String> cell = new TextCell();
         InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
             @Override
@@ -502,7 +540,7 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
         Cell<T> cell = new AbstractCell<T>() {
             private final String watchNowStyle = getButtonStyleNames(MAIN_CSS.buttonred());
             private final String analyseRaceStyle = getButtonStyleNames(MAIN_CSS.buttonprimary());

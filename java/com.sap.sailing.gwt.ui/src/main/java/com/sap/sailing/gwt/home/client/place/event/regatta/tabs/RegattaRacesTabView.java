@@ -211,7 +211,9 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
-        
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> windSpeedColumn = RaceListColumnFactory
+                .getWindRangeColumn();
+
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter);
         }

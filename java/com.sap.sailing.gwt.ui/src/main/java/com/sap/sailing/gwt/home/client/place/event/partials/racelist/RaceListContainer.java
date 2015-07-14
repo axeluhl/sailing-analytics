@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
-public class RaceListContainer<T extends RaceMetadataDTO> extends Composite {
+public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite {
 
     private static RaceListContainerUiBinder uiBinder = GWT.create(RaceListContainerUiBinder.class);
 

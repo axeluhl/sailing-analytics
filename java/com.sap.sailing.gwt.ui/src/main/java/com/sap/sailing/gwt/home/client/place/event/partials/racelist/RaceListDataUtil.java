@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sse.common.Duration;
 
 public class RaceListDataUtil {
@@ -14,7 +14,7 @@ public class RaceListDataUtil {
         V getValue(T object);
     }
     
-    private static <T extends RaceMetadataDTO> boolean hasValues(Collection<T> races, ValueProvider<T, ?> valueProvider) {
+    private static <T extends RaceMetadataDTO<?>> boolean hasValues(Collection<T> races, ValueProvider<T, ?> valueProvider) {
         for (T race : races) {
             if (valueProvider.getValue(race) != null) {
                 return true;
@@ -23,7 +23,7 @@ public class RaceListDataUtil {
         return false;
     }
     
-    private static <T extends RaceMetadataDTO> boolean hasNumberValues(Collection<T> races, ValueProvider<T, Number> valueProvider) {
+    private static <T extends RaceMetadataDTO<?>> boolean hasNumberValues(Collection<T> races, ValueProvider<T, Number> valueProvider) {
         for (T race : races) {
             Number value = valueProvider.getValue(race);
             if (value != null && value.longValue() > 0) {
@@ -33,7 +33,7 @@ public class RaceListDataUtil {
         return false;
     }
     
-    public static <T extends RaceMetadataDTO> boolean hasFleets(Collection<T> data) {
+    public static <T extends RaceMetadataDTO<?>> boolean hasFleets(Collection<T> data) {
         return hasValues(data, new ValueProvider<T, FleetMetadataDTO>() {
             @Override
             public FleetMetadataDTO getValue(T object) {
@@ -51,10 +51,10 @@ public class RaceListDataUtil {
         });
     }
     
-    public static <T extends RaceMetadataDTO> boolean hasWind(Collection<T> data) {
-        return hasValues(data, new ValueProvider<T, SimpleWindDTO>() {
+    public static <T extends RaceMetadataDTO<?>> boolean hasWind(Collection<T> data) {
+        return hasValues(data, new ValueProvider<T, AbstractWindDTO>() {
             @Override
-            public SimpleWindDTO getValue(T object) {
+            public AbstractWindDTO getValue(T object) {
                 return object.getWind();
             }
         });
@@ -87,7 +87,7 @@ public class RaceListDataUtil {
         });
     }
     
-    public static <T extends RaceMetadataDTO> boolean hasCourses(Collection<T> data) {
+    public static <T extends RaceMetadataDTO<?>> boolean hasCourses(Collection<T> data) {
         return hasValues(data, new ValueProvider<T, String>() {
             @Override
             public String getValue(T object) {
@@ -96,7 +96,7 @@ public class RaceListDataUtil {
         });
     }
     
-    public static <T extends RaceMetadataDTO> boolean hasCourseAreas(Collection<T> data) {
+    public static <T extends RaceMetadataDTO<?>> boolean hasCourseAreas(Collection<T> data) {
         return hasValues(data, new ValueProvider<T, String>() {
             @Override
             public String getValue(T object) {

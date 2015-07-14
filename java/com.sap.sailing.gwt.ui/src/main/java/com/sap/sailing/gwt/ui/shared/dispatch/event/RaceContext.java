@@ -48,7 +48,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.SimpleWindDTO;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -299,7 +299,7 @@ public class RaceContext {
             fillRaceData(liveRaceDTO);
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
-            
+            liveRaceDTO.setWind(getWindOrNull());
             return liveRaceDTO;
         }
         return null;
@@ -391,7 +391,7 @@ public class RaceContext {
         return null;
     }
 
-    private void fillRaceData(RaceMetadataDTO dto) {
+    private void fillRaceData(RaceMetadataDTO<?> dto) {
         dto.setViewState(getLiveRaceViewState());
         dto.setRegattaDisplayName(getRegattaDisplayName());
         dto.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
@@ -401,7 +401,7 @@ public class RaceContext {
         dto.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
         dto.setCourseArea(getCourseAreaOrNull());
         dto.setCourse(getCourseNameOrNull());
-        dto.setWind(getWindOrNull());
+
     }
     
     public boolean isLiveOrOfPublicInterest() {

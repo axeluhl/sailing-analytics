@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.WindStatisticsDTO;
 import com.sap.sse.common.Duration;
 
-public class RaceListRaceDTO extends RaceMetadataDTO {
+public class RaceListRaceDTO extends RaceMetadataDTO<WindStatisticsDTO> {
     
     private Duration duration;
     private SimpleCompetitorDTO winner;

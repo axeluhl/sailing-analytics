@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.SimpleWindDTO;
 
-public class LiveRaceDTO extends RaceMetadataDTO {
+public class LiveRaceDTO extends RaceMetadataDTO<SimpleWindDTO> {
     
     private FlagStateDTO flagState;
     

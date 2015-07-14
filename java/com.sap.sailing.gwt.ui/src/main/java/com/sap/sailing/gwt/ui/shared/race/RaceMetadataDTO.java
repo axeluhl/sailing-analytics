@@ -4,9 +4,10 @@ import java.util.Date;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sse.common.Util;
 
-public class RaceMetadataDTO implements DTO, Comparable<RaceMetadataDTO> {
+public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements DTO, Comparable<RaceMetadataDTO<WIND>> {
     
     public enum RaceViewState {
         PLANNED {       // no start time set
@@ -66,7 +67,7 @@ public class RaceMetadataDTO implements DTO, Comparable<RaceMetadataDTO> {
     private String boatClass;
     private RaceViewState state;
     private RaceTrackingState trackingState;
-    private SimpleWindDTO wind;
+    private WIND wind;
 
     protected RaceMetadataDTO() {
     }
@@ -148,11 +149,11 @@ public class RaceMetadataDTO implements DTO, Comparable<RaceMetadataDTO> {
         this.trackedRaceName = trackedRaceName;
     }
     
-    public SimpleWindDTO getWind() {
+    public WIND getWind() {
         return wind;
     }
 
-    public void setWind(SimpleWindDTO wind) {
+    public void setWind(WIND wind) {
         this.wind = wind;
     }
 
@@ -165,7 +166,7 @@ public class RaceMetadataDTO implements DTO, Comparable<RaceMetadataDTO> {
     }
 
     @Override
-    public int compareTo(RaceMetadataDTO o) {
+    public int compareTo(RaceMetadataDTO<WIND> o) {
         Date thisStart = getStart();
         Date otherStart = o.getStart();
         if(Util.equalsWithNull(thisStart, otherStart)) {
@@ -181,7 +182,7 @@ public class RaceMetadataDTO implements DTO, Comparable<RaceMetadataDTO> {
         return -thisStart.compareTo(otherStart);
     }
 
-    private int compareBySecondaryCriteria(RaceMetadataDTO o) {
+    private int compareBySecondaryCriteria(RaceMetadataDTO<?> o) {
         String thisRegattaName = getRegattaName();
         String otherRegattaName = o.getRegattaName();
         if(thisRegattaName != otherRegattaName) {
