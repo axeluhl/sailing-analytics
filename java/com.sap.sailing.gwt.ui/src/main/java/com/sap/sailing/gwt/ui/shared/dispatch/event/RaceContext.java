@@ -202,7 +202,7 @@ public class RaceContext {
                 }
                 if (lowerBoundWindInKnots != null && upperBoundWindInKnots != null) {
                     BearingWithConfidence<TimePoint> average = bwcc.getAverage(middleOfRace);
-                    return new WindStatisticsDTO(average.getObject().getDegrees(), lowerBoundWindInKnots,
+                    return new WindStatisticsDTO(average.getObject().reverse().getDegrees(), lowerBoundWindInKnots,
                             upperBoundWindInKnots);
                 }
             }
