@@ -100,12 +100,14 @@ import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
@@ -210,11 +212,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private AdvantageLineMouseOverMapHandler advantageLineMouseOverHandler;
     
     /**
-     * Polyline for the course middle line.
+     * Polylines for the course middle lines; keys are the two control points delimiting the leg for which the
+     * {@link Polyline} value shows the course middle line. As only one course middle line is shown even if there
+     * are multiple legs using the same control points in different directions, using a {@link Set} makes this
+     * independent of the order of the two control points. If no course middle line is currently being shown for
+     * a pair of control points, the map will not contain a value for this pair.
      */
-    private Polyline courseMiddleLine;
+    private final Map<Set<ControlPointDTO>, Polyline> courseMiddleLines;
 
-    private Map<SidelineDTO, Polygon> courseSidelines;
+    private final Map<SidelineDTO, Polygon> courseSidelines;
     
     /**
      * Wind data used to display the advantage line. Retrieved by a {@link GetWindInfoAction} execution and used in
@@ -395,7 +401,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager();
         markDTOs = new HashMap<String, MarkDTO>();
-        courseSidelines = new HashMap<SidelineDTO, Polygon>();
+        courseSidelines = new HashMap<>();
+        courseMiddleLines = new HashMap<>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
@@ -1315,87 +1322,39 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
         final List<Position> startMarkPositions = courseDTO.getStartMarkPositions();
-        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
-                && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
-            LatLng windwardStartLinePoint = coordinateSystem.toLatLng(startMarkPositions.get(0)); 
-            LatLng leewardStartLinePoint = coordinateSystem.toLatLng(startMarkPositions.get(1));
-            LatLng firstMarkPoint = coordinateSystem.toLatLng(courseDTO.waypointPositions.get(1));
-            windwardStartLineMarkToFirstMarkLineText.replace(0, windwardStartLineMarkToFirstMarkLineText.length(),
-                    stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
-                            .format(startMarkPositions.get(0).getDistance(courseDTO.waypointPositions.get(1))
-                                    .getMeters())));
-            leewardStartLineMarkToFirstMarkLineText.replace(0, leewardStartLineMarkToFirstMarkLineText.length(),
-                    stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
-                            .format(startMarkPositions.get(1).getDistance(courseDTO.waypointPositions.get(1))
-                                    .getMeters())));
-            if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
-                PolylineOptions options = PolylineOptions.newInstance();
-                options.setGeodesic(true);
-                options.setStrokeColor("grey");
-                options.setStrokeWeight(1);
-                options.setStrokeOpacity(1.0);
-
-                MVCArray<LatLng> windwardLinePoints = MVCArray.newInstance();
-                windwardLinePoints.insertAt(0, windwardStartLinePoint);
-                windwardLinePoints.insertAt(1, firstMarkPoint);
-
-                MVCArray<LatLng> leewardLinePoints = MVCArray.newInstance();
-                leewardLinePoints.insertAt(0, leewardStartLinePoint);
-                leewardLinePoints.insertAt(1, firstMarkPoint);
-
-                windwardStartLineMarkToFirstMarkLine = Polyline.newInstance(options);
-                windwardStartLineMarkToFirstMarkLine.setPath(windwardLinePoints);
-                windwardStartLineMarkToFirstMarkLine.addMouseOverHandler(new MouseOverMapHandler() {
-                    @Override
-                    public void onEvent(MouseOverMapEvent event) {
-                        map.setTitle(windwardStartLineMarkToFirstMarkLineText.toString());
-                    }
-                });
-                windwardStartLineMarkToFirstMarkLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                    @Override
-                    public void onEvent(MouseOutMapEvent event) {
-                        map.setTitle("");
-                    }
-                });
-                leewardStartLineMarkToFirstMarkLine = Polyline.newInstance(options);
-                leewardStartLineMarkToFirstMarkLine.setPath(leewardLinePoints);
-                leewardStartLineMarkToFirstMarkLine.addMouseOverHandler(new MouseOverMapHandler() {
-                    @Override
-                    public void onEvent(MouseOverMapEvent event) {
-                        map.setTitle(leewardStartLineMarkToFirstMarkLineText.toString());
-                    }
-                });
-                leewardStartLineMarkToFirstMarkLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                    @Override
-                    public void onEvent(MouseOutMapEvent event) {
-                        map.setTitle("");
-                    }
-                });
-
-                windwardStartLineMarkToFirstMarkLine.setMap(map);
-                leewardStartLineMarkToFirstMarkLine.setMap(map);
-                
-            } else {
-                windwardStartLineMarkToFirstMarkLine.getPath().removeAt(1);
-                windwardStartLineMarkToFirstMarkLine.getPath().removeAt(0);
-                windwardStartLineMarkToFirstMarkLine.getPath().insertAt(0, windwardStartLinePoint);
-                windwardStartLineMarkToFirstMarkLine.getPath().insertAt(1, firstMarkPoint);
-                
-                leewardStartLineMarkToFirstMarkLine.getPath().removeAt(1);
-                leewardStartLineMarkToFirstMarkLine.getPath().removeAt(0);
-                leewardStartLineMarkToFirstMarkLine.getPath().insertAt(0, leewardStartLinePoint);
-                leewardStartLineMarkToFirstMarkLine.getPath().insertAt(1, firstMarkPoint);
+        final Position windwardStartLinePosition = startMarkPositions.get(0);
+        final Position leewardStartLinePosition = startMarkPositions.get(1);
+        final Position firstMarkPosition = courseDTO.waypointPositions.get(1);
+        windwardStartLineMarkToFirstMarkLineText.replace(0, windwardStartLineMarkToFirstMarkLineText.length(),
+                stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
+                        .format(windwardStartLinePosition.getDistance(firstMarkPosition)
+                                .getMeters())));
+        leewardStartLineMarkToFirstMarkLineText.replace(0, leewardStartLineMarkToFirstMarkLineText.length(),
+                stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
+                        .format(leewardStartLinePosition.getDistance(firstMarkPosition)
+                                .getMeters())));
+        final MouseOverMapHandler windwardStartLineMarkToFirstMarkLineTooltipHandler = new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                map.setTitle(windwardStartLineMarkToFirstMarkLineText.toString());
             }
-        } else {
-            if (windwardStartLineMarkToFirstMarkLine != null) {
-                windwardStartLineMarkToFirstMarkLine.setMap(null);
-                windwardStartLineMarkToFirstMarkLine = null;
+        };
+        final MouseOverMapHandler leewardStartLineMarkToFirstMarkLineTooltipHandler = new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                map.setTitle(leewardStartLineMarkToFirstMarkLineText.toString());
             }
-            if (leewardStartLineMarkToFirstMarkLine != null) {
-                leewardStartLineMarkToFirstMarkLine.setMap(null);
-                leewardStartLineMarkToFirstMarkLine = null;
-            }
-        }
+        };
+        windwardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(windwardStartLineMarkToFirstMarkLine, /* showLine */
+                settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                        && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
+                windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineTooltipHandler,
+                "grey");
+        leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
+                settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                        && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
+                leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineTooltipHandler,
+                "grey");
     }
 
     private final StringBuilder startLineAdvantageText = new StringBuilder();
@@ -1457,11 +1416,28 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     finishLineLeftPosition, finishLineRightPosition, finishLineTooltipHandler, "#000000");
 
             final int zeroBasedIndexOfStartWaypoint = oneBasedLegOfLeadingCompetitor-1;
+            final Set<ControlPointDTO> key = getCourseMiddleLinesKey(courseDTO, zeroBasedIndexOfStartWaypoint);
             // draw the course middle line
             final boolean showCourseMiddleLine = oneBasedLegOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > oneBasedLegOfLeadingCompetitor &&
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE);
-            courseMiddleLine = showOrRemoveCourseMiddleLine(courseDTO, courseMiddleLine, zeroBasedIndexOfStartWaypoint, showCourseMiddleLine);
+            courseMiddleLines.put(key, showOrRemoveCourseMiddleLine(courseDTO, courseMiddleLines.get(key),
+                    zeroBasedIndexOfStartWaypoint, showCourseMiddleLine));
         }
+    }
+
+    /**
+     * Given a zero-based index into <code>courseDTO</code>'s {@link RaceCourseDTO#waypoints waypoints list} that denotes the start
+     * waypoint of the leg in question, returns a key that can be used for the {@link #courseMiddleLines} map, consisting of a set
+     * that holds the two {@link ControlPointDTO}s representing the start and finish control point of that leg.
+     */
+    private Set<ControlPointDTO> getCourseMiddleLinesKey(final CoursePositionsDTO courseDTO,
+            final int zeroBasedIndexOfStartWaypoint) {
+        ControlPointDTO startControlPoint = courseDTO.course.waypoints.get(zeroBasedIndexOfStartWaypoint).controlPoint;
+        ControlPointDTO endControlPoint = courseDTO.course.waypoints.get(zeroBasedIndexOfStartWaypoint+1).controlPoint;
+        final Set<ControlPointDTO> key = new HashSet<>();
+        key.add(startControlPoint);
+        key.add(endControlPoint);
+        return key;
     }
 
     /**
