@@ -49,6 +49,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation();
 
         boolean showRegattaMetadata();
+        boolean isEventOrRegattaLive();
         HasRegattaMetadata getRegattaMetadata();
         
         String getRegattaOverviewLink();
