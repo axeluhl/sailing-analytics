@@ -302,11 +302,11 @@ public class RaceContext {
 
     public TimePoint getStartTime() {
         if (!startTimeCalculated) {
-            if (trackedRace != null) {
-                startTime = trackedRace.getStartOfRace();
-            }
-            if (startTime == null && state != null) {
+            if (state != null) {
                 startTime = state.getStartTime();
+            }
+            if (startTime == null && trackedRace != null) {
+                startTime = trackedRace.getStartOfRace();
             }
             startTimeCalculated = true;
         }
@@ -315,10 +315,11 @@ public class RaceContext {
 
     private TimePoint getFinishTime() {
         if (!finishTimeCalculated) {
-            if (trackedRace != null) {
-                finishTime = trackedRace.getEndOfRace();
-            } else if (state != null) {
+            if (state != null) {
                 finishTime = state.getFinishedTime();
+            }
+            if (finishTime == null && trackedRace != null) {
+                finishTime = trackedRace.getEndOfRace();
             }
             finishTimeCalculated = true;
         }
@@ -380,7 +381,7 @@ public class RaceContext {
 
     private int getWindSourceCount() {
         if (trackedRace != null) {
-            return trackedRace.getWindSources().size() - trackedRace.getWindSourcesToExclude().size();
+            return Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
         }
         return 0;
     }
