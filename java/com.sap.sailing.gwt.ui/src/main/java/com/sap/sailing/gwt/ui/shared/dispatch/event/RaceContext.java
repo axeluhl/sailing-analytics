@@ -380,7 +380,7 @@ public class RaceContext {
 
     private int getWindSourceCount() {
         if (trackedRace != null) {
-            return trackedRace.getWindSources().size() - trackedRace.getWindSourcesToExclude().size();
+            return Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
         }
         return 0;
     }
