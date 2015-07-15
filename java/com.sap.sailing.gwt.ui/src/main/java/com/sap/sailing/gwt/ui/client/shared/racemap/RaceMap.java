@@ -110,6 +110,7 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -1401,13 +1402,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final StringBuilder finishLineAdvantageText = new StringBuilder();
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
-        if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
+        if (map != null && courseDTO != null && courseDTO.course != null && courseDTO.course.waypoints != null &&
+                !courseDTO.course.waypoints.isEmpty() && lastRaceTimesInfo != null) {
             com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getFarthestAheadVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
-            int legOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
-            int numberOfLegs = lastRaceTimesInfo.legInfos.size();
+            int oneBasedLegOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
+            int numberOfLegs = courseDTO.course.waypoints.size()-1;
             // draw the start line
-            updateCountdownCanvas(courseDTO.startMarkPositions);
-            if (legOfLeadingCompetitor <= 1 && 
+            updateCountdownCanvas(courseDTO.course.waypoints.get(0));
+            if (oneBasedLegOfLeadingCompetitor <= 1 && 
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions != null && courseDTO.startMarkPositions.size() == 2) {
                 LatLng startLinePoint1 = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0));
                 LatLng startLinePoint2 = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1)); 
@@ -1465,7 +1467,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // TODO bug3027: show *all* course middle lines if course geometry option is true
             
             // draw the finish line
-            if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
+            if (oneBasedLegOfLeadingCompetitor > 0 && oneBasedLegOfLeadingCompetitor == numberOfLegs &&
                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions != null && courseDTO.finishMarkPositions.size() == 2) {
                 LatLng finishLinePoint1 = coordinateSystem.toLatLng(courseDTO.finishMarkPositions.get(0)); 
                 LatLng finishLinePoint2 = coordinateSystem.toLatLng(courseDTO.finishMarkPositions.get(1)); 
@@ -1519,9 +1521,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     finishLine = null;
                 }
             }
-            final int zeroBasedIndexOfStartWaypoint = legOfLeadingCompetitor-1;
+            final int zeroBasedIndexOfStartWaypoint = oneBasedLegOfLeadingCompetitor-1;
             // draw the course middle line
-            final boolean showCourseMiddleLine = legOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > legOfLeadingCompetitor &&
+            final boolean showCourseMiddleLine = oneBasedLegOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > oneBasedLegOfLeadingCompetitor &&
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE);
             courseMiddleLine = showCourseMiddleLine(courseDTO, courseMiddleLine,
                     zeroBasedIndexOfStartWaypoint, showCourseMiddleLine);
@@ -1598,8 +1600,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * still in the pre-start phase, show a {@link SmallTransparentInfoOverlay} at the
      * start line that shows the count down.
      */
-    private void updateCountdownCanvas(List<Position> startMarkPositions) {
-        if (!settings.isShowSelectedCompetitorsInfo() || startMarkPositions == null || startMarkPositions.isEmpty()
+    private void updateCountdownCanvas(WaypointDTO startWaypoint) {
+        if (!settings.isShowSelectedCompetitorsInfo() || startWaypoint == null || Util.isEmpty(startWaypoint.controlPoint.getMarks())
                 || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
             if (countDownOverlay != null) {
                 countDownOverlay.removeFromMap();
@@ -1616,7 +1618,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             } else {
                 countDownOverlay.setInfoText(countDownText);
             }
-            countDownOverlay.setPosition(startMarkPositions.get(startMarkPositions.size() - 1), -1);
+            countDownOverlay.setPosition(startWaypoint.controlPoint.getMarks().iterator().next().position, /* transition time */ -1);
             countDownOverlay.draw();
         }
     }
