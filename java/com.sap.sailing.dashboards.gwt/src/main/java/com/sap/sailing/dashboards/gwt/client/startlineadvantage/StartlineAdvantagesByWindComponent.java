@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesAction;
-import com.sap.sailing.dashboards.gwt.client.visualeffects.NumberTickingAnimation;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -49,8 +48,6 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     
     private RibDashboardServiceAsync ribDashboardService;
     private AsyncActionsExecutor asyncActionsExecutor;
-    private NumberTickingAnimation maximumTickingAnimation;
-    private NumberTickingAnimation averageTickingAnimation;
     
     public StartlineAdvantagesByWindComponent(RibDashboardServiceAsync ribDashboardService) {
         startlineAdvantagesOnLineChart = new StartlineAdvantagesOnLineChart();
@@ -58,29 +55,10 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
         advantageMaximumLiveAverage.header.getStyle().setFontSize(14, Unit.PT);
         advantageMaximumLiveAverage.liveLabel.setInnerHTML("advantage max.");
         advantageMaximumLiveAverage.averageLabel.setInnerHTML("advantage max. average "+StringMessages.INSTANCE.dashboardAverageWindMinutes(15));
-        initTickingAnimations();
         initWidget(uiBinder.createAndBindUi(this));
         this.ribDashboardService = ribDashboardService;
         this.asyncActionsExecutor = new AsyncActionsExecutor();
         initSampleTimer();
-    }
-    
-    private void initTickingAnimations() {
-        maximumTickingAnimation = new NumberTickingAnimation() {
-            
-            @Override
-            public void setValueInUI(String value) {
-                advantageMaximumLiveAverage.setLiveValue(value);
-            }
-        };
-        
-        averageTickingAnimation = new NumberTickingAnimation() {
-            
-            @Override
-            public void setValueInUI(String value) {
-                advantageMaximumLiveAverage.setAverageValue(value);
-            }
-        };
     }
     
     private void loadData() {
@@ -95,8 +73,8 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
             @Override
             public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
                 startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
-                maximumTickingAnimation.execute(result.maximum);
-                averageTickingAnimation.execute(result.average);
+                advantageMaximumLiveAverage.setLiveValue(""+result.maximum);
+                advantageMaximumLiveAverage.setAverageValue(""+result.average);
             }
 
         });

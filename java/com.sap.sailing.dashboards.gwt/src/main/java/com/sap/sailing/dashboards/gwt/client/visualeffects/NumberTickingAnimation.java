@@ -20,8 +20,9 @@ public abstract class NumberTickingAnimation implements NumberValueSetter {
     List<String> animationNumberStrings;
     private final int ANIMATION_TIME_IN_MILLISECONDS = 1000;
     
-    public void execute(double number) { 
-        animationNumberStrings = getValuesBetweenDoubleOldAndNewNumber(number);
+    public void execute(String numberString) { 
+        double numberAsDouble = Double.parseDouble(numberString);
+        animationNumberStrings = getValuesBetweenDoubleOldAndNewNumber(numberAsDouble);
         int animationTimePerNumber = ANIMATION_TIME_IN_MILLISECONDS/animationNumberStrings.size();
             timer = new Timer() {
                 @Override
