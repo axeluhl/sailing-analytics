@@ -8,6 +8,7 @@ import org.moxieapps.gwt.highcharts.client.Animation;
 import org.moxieapps.gwt.highcharts.client.Animation.Easing;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
@@ -23,6 +24,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.AreaPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,6 +36,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesAction;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -45,7 +48,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Alexander Ries (D062114)
  *
  */
-public class StartlineAdvantagesOnLineChart extends Composite implements HasWidgets, TimeListener {
+public class StartlineAdvantagesOnLineChart extends Composite implements HasWidgets {
 
     private static StartlineAdvantagesOnLineChartUiBinder uiBinder = GWT.create(StartlineAdvantagesOnLineChartUiBinder.class);
 
@@ -57,44 +60,43 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
 
     @UiField
     HTMLPanel chartContainer;
+    
+    @UiField
+    DivElement confidenceBarHeader;
+    
+    @UiField
+    DivElement confidenceBarMinLabel;
+    
+    @UiField
+    DivElement confidenceBarMaxLabel;
 
-    private RibDashboardServiceAsync ribDashboardService;
-    private AsyncActionsExecutor asyncActionsExecutor;
-    private String leaderboardName;
     private Chart chart;
     private Series series;
     
-    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
+    private static final int POINT_ADDING_ANIMATION_DURATION_IN_MILLIS = 2000;
     
-    public StartlineAdvantagesOnLineChart(RibDashboardServiceAsync ribDashboardService) {
-        this.ribDashboardService = ribDashboardService;
-        this.asyncActionsExecutor = new AsyncActionsExecutor();
-        this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
+    public StartlineAdvantagesOnLineChart() {
         initWidget(uiBinder.createAndBindUi(this));
         initAndAddChart();
-        
+        setConfidenceColorBarLabelValues();
         //TODO Remove and centralize data retrieving
-        initSampleTimer();
-    }
-    
-    private void initSampleTimer(){
-        Timer timer = new Timer(PlayModes.Live);
-        timer.setRefreshInterval(3000);
-        timer.addTimeListener(this);
-        timer.play();
     }
     
     private void initAndAddChart() {  
         chart = initChart();
+        /**
+         * Highcharts default chart element spacing is not consistent
+         * so there is a need to correct the right spacing 
+         * of the chart to make it look visually right.
+         * */
         setCorrectChartSpacing(chart);
         setXAxisOfChart(chart);
         setYAxisOfChart(chart);
         series = createSeries(chart);
-        chart.addSeries(createSeries(chart));
         chartContainer.add(chart);
     }
     
-    private Chart initChart(){
+    private Chart initChart() {
         Chart chart = new Chart()  
         .setType(Series.Type.AREA) 
         .setChartTitleText(null)
@@ -108,11 +110,6 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         return chart;
     }
     
-    /**
-     * Highcharts default chart element spacing is not consistent
-     * so there is a need to correct the right spacing 
-     * of the chart to make it look visually right.
-     * */
     private void setCorrectChartSpacing(Chart chart){
         chart.setSpacingTop(17)
         .setSpacingBottom(13)
@@ -162,8 +159,14 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
                 .setPlotOptions(
                         new AreaPlotOptions().setDashStyle(DashStyle.SOLID).setLineWidth(1)
                                 .setMarker(new Marker().setEnabled(false)).setShadow(false).setHoverStateEnabled(false)
-                                .setLineColor("#008FFF").setFillColor("#008FFF"));
+                                .setLineColor("#FFFFFF").setFillColor("#FFFFFF"));
         return series;
+    }
+    
+    private void setConfidenceColorBarLabelValues() {
+        confidenceBarHeader.setInnerText("CONFIDENCE");
+        confidenceBarMaxLabel.setInnerText("High");
+        confidenceBarMinLabel.setInnerText("Low");
     }
     
     private String getAxisLabelValueForLabelData(double labelData) {
@@ -192,37 +195,44 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         }
     }
     
-    /**
-     * Removed all Points and adds new ones
-     * */
-    private void updateSeriesPoints(List<Pair<Double, Double>> xYPairs) {
+    public void setStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages) {
         if (series.getPoints() != null && series.getPoints().length  > 0) {
-            updateExistingPointsOfSeriesWithXYPairs(xYPairs, series);
+            updateStartlineAdvantages(startlineAdvantages, series);
         } else {
-            addXYPairsToSeries(xYPairs, series);
-            chart.addSeries(series , true, new Animation().setDuration(20000).setEasing(Easing.SWING));
+            addStartlineAdvantages(startlineAdvantages, series);
         }
         chart.setSizeToMatchContainer();
     }
     
-    private void updateExistingPointsOfSeriesWithXYPairs(List<Pair<Double, Double>> xYPairs, Series series){
+    private void updateStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages, Series series) {
         int counter = 0;
         if (series != null) {
             for (Point point : series.getPoints()) {
-                Pair<Double, Double> xYPair = xYPairs.get(counter);
-                point.update(xYPair.getA(), xYPair.getB(), false);
+                StartLineAdvantageDTO currentNewStartlineAdvantage = startlineAdvantages.get(counter);
+                point.update(currentNewStartlineAdvantage.distanceToRCBoatInMeters,  currentNewStartlineAdvantage.startLineAdvantage, false);
                 counter++;
             }
         }
         chart.redraw();
     }
     
-    private void addXYPairsToSeries(List<Pair<Double, Double>> xYPairs, Series series){
-        for (Pair<Double, Double> xYPair : xYPairs) {
-            series.addPoint(new Point(xYPair.getA(), xYPair.getB()), true, false, new Animation().setDuration(2000));
+    private void addStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages, Series series){
+        //TODO Build this with forEach Consumer as soon as the bundle uses GWT 2.8 with Java 8 Support.
+        for (StartLineAdvantageDTO startlineAdvantage : startlineAdvantages) {
+            Point point = new Point(startlineAdvantage.distanceToRCBoatInMeters, startlineAdvantage.startLineAdvantage);
+            series.addPoint(point, true, false, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS));
         }
+        setConfidenceGradientColorToSeries(series, startlineAdvantages);
+        chart.addSeries(series , true, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS).setEasing(Easing.SWING));
     }
-
+    
+    private void setConfidenceGradientColorToSeries(Series series, List<StartLineAdvantageDTO> startlineAdvantages) {
+        Color confidenceGradientColor = ConfidenceColorCalculator.getColorWithConfidenceGradients(startlineAdvantages);
+        series.setPlotOptions(
+                new AreaPlotOptions().setDashStyle(DashStyle.SOLID).setLineWidth(1)
+                .setMarker(new Marker().setEnabled(false)).setShadow(false).setHoverStateEnabled(false)
+                .setLineColor("#FFFFFF").setFillColor(confidenceGradientColor));
+    }
     
     @Override
     public void add(Widget w) {
@@ -244,24 +254,35 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         return false;
     }
     
-    private void loadData() {
-        GetStartlineAdvantagesAction getRibDashboardRaceInfoAction = new GetStartlineAdvantagesAction(
-                ribDashboardService, leaderboardName);
-        asyncActionsExecutor.execute(getRibDashboardRaceInfoAction, new AsyncCallback<List<Pair<Double, Double>>>() {
-
-            @Override
-            public void onSuccess(List<Pair<Double, Double>> result) {
-                updateSeriesPoints(result);
+    private static class ConfidenceColorCalculator {
+        private static final String LOW_CONFIDENCE_COLOR_AS_HEX = "#43cea2";
+        private static final String HIGHT_CONFIDENCE_COLOR_AS_HEX = "#008FFF";
+        
+        public static Color getColorWithConfidenceGradients(List<StartLineAdvantageDTO> startlineAdvantages) {
+            Color color = new Color().setLinearGradient(1.0, 0.0, 0.0, 0.0);
+            double lineLenght = getBiggestDistanceToRCBoat(startlineAdvantages);
+            for(StartLineAdvantageDTO startlineAdvantageDTO : startlineAdvantages) {
+                double gradientPosition = getGradientStopPositionFromStartlineLenghtAndDistanceToRCBoat(lineLenght, startlineAdvantageDTO.distanceToRCBoatInMeters);
+                color.addColorStop(gradientPosition, getColorAsHexStringFromConfidence(startlineAdvantageDTO.confidence));
             }
-
-            @Override
-            public void onFailure(Throwable caught) {
+            return color;
+        }
+        
+        private static double getGradientStopPositionFromStartlineLenghtAndDistanceToRCBoat(double startlineLenght, double distanceToRCBoat) {
+            return distanceToRCBoat/startlineLenght;
+        }
+        
+        private static String getColorAsHexStringFromConfidence(double position) {
+            if(position >= 0.5) {
+                return HIGHT_CONFIDENCE_COLOR_AS_HEX;
+            }else {
+                return LOW_CONFIDENCE_COLOR_AS_HEX;
             }
-        });
-    }
-
-    @Override
-    public void timeChanged(Date newTime, Date oldTime) {
-        loadData();
+        }
+        
+        private static double getBiggestDistanceToRCBoat(List<StartLineAdvantageDTO> startlineAdvantages) {
+            StartLineAdvantageDTO startlineAdvantageDTO = startlineAdvantages.get(startlineAdvantages.size()-1);
+            return startlineAdvantageDTO.distanceToRCBoatInMeters;
+        }
     }
 }

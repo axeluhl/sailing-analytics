@@ -100,7 +100,7 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
         this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));
     }
 
-    public void updateValues(String liveValue, String averageValue) {
+    public void setValues(String liveValue, String averageValue) {
         this.liveNumber.setInnerText(liveValue);
         this.averageNumber.setInnerText(averageValue);
     }

@@ -174,12 +174,12 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
                     Point[] directionPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes,
                             WindType.DIRECTION);
 
-                    trueWindSpeedLiveAverageComponent.updateValues(
+                    trueWindSpeedLiveAverageComponent.setValues(
                             ""
                                     + NumberFormat.getFormat("#0.0").format(
                                             speedPoints[speedPoints.length - 1].getY().doubleValue()), ""
                                     + NumberFormat.getFormat("#0.0").format(movingAverageSpeed.getAverage()));
-                    trueWindDirectionLiveAverageComponent.updateValues(
+                    trueWindDirectionLiveAverageComponent.setValues(
                             ""
                                     + NumberFormat.getFormat("#0.0").format(
                                             directionPoints[directionPoints.length - 1].getY().doubleValue()), ""

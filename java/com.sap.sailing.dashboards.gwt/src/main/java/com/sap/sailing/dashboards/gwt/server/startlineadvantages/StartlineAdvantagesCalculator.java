@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.dashboards.gwt.server.LiveTrackedRaceListener;
-import com.sap.sailing.dashboards.gwt.server.RibDashboardServiceImpl;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;

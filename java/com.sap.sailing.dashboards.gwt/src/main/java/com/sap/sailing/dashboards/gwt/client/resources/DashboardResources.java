@@ -12,6 +12,7 @@ public interface DashboardResources extends ClientBundle {
     interface Style extends CssResource {
         // Your classes here
     }
+    
     // We only need to source the theme file
     @Source({"colors.gss", "Ribstyle.css"})
     Style style();

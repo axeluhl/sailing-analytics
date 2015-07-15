@@ -9,10 +9,10 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetStartlineAdvantagesAction implements AsyncAction<List<Pair<Double, Double>>> {
+public class GetStartlineAdvantagesAction implements AsyncAction<List<StartLineAdvantageDTO>> {
 
     private final RibDashboardServiceAsync ribDashboardService;
     private final String leaderboardName;
@@ -23,7 +23,6 @@ public class GetStartlineAdvantagesAction implements AsyncAction<List<Pair<Doubl
     }
 
     @Override
-    public void execute(AsyncCallback<List<Pair<Double, Double>>> callback) {
+    public void execute(AsyncCallback<List<StartLineAdvantageDTO>> callback) {
         ribDashboardService.getAdvantagesOnStartline(leaderboardName, callback);
-    }
-}
+    }}

@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sse.common.Util.Pair;
 
 public interface RibDashboardService extends RemoteService {
     RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName) throws NoWindException; 
@@ -16,5 +16,5 @@ public interface RibDashboardService extends RemoteService {
     
     List<CompetitorDTO> getCompetitorsInLeaderboard(String leaderboardName);
     
-    List<Pair<Double, Double>> getAdvantagesOnStartline(String leaderboardName);
+    List<StartLineAdvantageDTO> getAdvantagesOnStartline(String leaderboardName);
 }

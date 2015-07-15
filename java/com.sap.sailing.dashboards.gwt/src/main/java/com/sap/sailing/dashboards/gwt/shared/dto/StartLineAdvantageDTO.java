@@ -5,10 +5,11 @@ import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageTyp
 
 public class StartLineAdvantageDTO implements IsSerializable {
     
-    public StartlineAdvantageType startLineAdvatageType;
     public double startLineAdvantage;
     public double startlineAdvantageAverage;
     public double distanceToRCBoatInMeters;
+    public StartlineAdvantageType startLineAdvatageType;
+    public double confidence;
     
     public StartLineAdvantageDTO(){}
 }

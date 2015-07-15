@@ -7,8 +7,7 @@
 	xmlns:mgwtpanel="urn:import:com.googlecode.mgwt.ui.client.widget.panel">
 
 	<ui:style
-		type='com.sap.sailing.dashboards.gwt.client.RibDashboardPanelStyle'
-		src='Ribstyle.css'></ui:style>
+		type='com.sap.sailing.dashboards.gwt.client.RibDashboardPanelStyle' src='resources/Ribstyle.css'></ui:style>
 
 	<g:LayoutPanel ui:field="root">
 		<g:layer left="0%" top="0%" right="0%" height="35pt">

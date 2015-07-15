@@ -31,8 +31,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -273,16 +271,28 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
 
     @Override
-    public List<Pair<Double, Double>> getAdvantagesOnStartline(String leaderboardName) {
+    public List<StartLineAdvantageDTO> getAdvantagesOnStartline(String leaderboardName) {
         return generateRandomAdvantagesOnStartline();
     }
     
-    private List<Pair<Double, Double>> generateRandomAdvantagesOnStartline(){
-        List<Pair<Double, Double>> randomAdvantagesOnStartline = new ArrayList<Util.Pair<Double,Double>>();
-        for(int i = 0; i <= 100; i = i+20){
-            randomAdvantagesOnStartline.add(new Pair<Double, Double>(new Double(i), new Double((i+1)/2+(0 + (int)(Math.random()*5)))));
+    private List<StartLineAdvantageDTO> generateRandomAdvantagesOnStartline(){
+        List<StartLineAdvantageDTO> randomAdvantagesOnStartline = new ArrayList<StartLineAdvantageDTO>();
+        for(int i = 0; i <= 100; i = i+10){
+            randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(i));
         }
         return randomAdvantagesOnStartline;
+    }
+    
+    private StartLineAdvantageDTO getRandomStartLineAdvantageDTOWithX(int x) {
+        StartLineAdvantageDTO result = new StartLineAdvantageDTO();
+        result.distanceToRCBoatInMeters = x;
+        result.startLineAdvantage = (x+1)/2+(0 + (int)(Math.random()*5));
+        if(x >= 50) {
+            result.confidence = 1;
+        }else{
+            result.confidence = 0.3;
+        } 
+        return result;
     }
 
     @Override
