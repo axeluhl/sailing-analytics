@@ -23,7 +23,7 @@
 	        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
 	        <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
 	        		target="_blank" ui:field="regattaOverviewLinkUi">
-	        	<ui:text from="{i18n.raceDetailsToShow}" />
+	        	<ui:text from="{i18n.racesOverview}" />
 	        </a>
         </div>
 		<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
