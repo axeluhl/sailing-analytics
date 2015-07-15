@@ -34,13 +34,13 @@ public class DependentStartTimeFinderTest {
     private AbstractLogEventAuthor author;
 
     private TimePoint nowMock;
-    
+
     private RaceLogResolver raceLogResolver;
 
     @Before
     public void setUp() {
         author = new LogEventAuthorImpl("Test", 1);
-        
+
         raceLogA = new RaceLogImpl("raceLogA");
         raceLogB = new RaceLogImpl("raceLogB");
         raceLogC = new RaceLogImpl("raceLogC");
@@ -63,108 +63,132 @@ public class DependentStartTimeFinderTest {
 
     @Test
     public void testDependentStartTimeUpdate() {
-       raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
+        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
                 new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000)));
 
-       StartTimeFinder finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       //Tests for correct behaviour, when race depending on has no starttime set
-       assertNull(finder.analyze().getStartTime());
-       
-       raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-               new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000)));
-       
-       finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       StartTimeFinderResult result = finder.analyze();
-       
-       List<SimpleRaceLogIdentifier> expectedDependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-       expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("A", "", ""));
-       assertNull(result.getStartTime());
-       assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
-       
-       finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       //Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time is unknown
-       expectedDependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-       expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("B", "", ""));
-       expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("A", "", ""));
-       
-       result = finder.analyze();
-       assertNull(result.getStartTime());
-       assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
-       
-       MillisecondsTimePoint now = MillisecondsTimePoint.now();
-       raceLogA.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
-       
-       finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       assertEquals(10000, finder.analyze().getStartTime().asMillis());
-       finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       assertEquals(15000, finder.analyze().getStartTime().asMillis());
-       
-       //Test correct behaviour, when middle element changes
-       raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(15000)));
-       finder = new StartTimeFinder(raceLogResolver, raceLogA);
-       assertEquals(5000, finder.analyze().getStartTime().asMillis());
-       finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       assertEquals(15000, finder.analyze().getStartTime().asMillis());
-       finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       assertEquals(20000, finder.analyze().getStartTime().asMillis());
+        StartTimeFinder finder = new StartTimeFinder(raceLogResolver, raceLogC);
+        // Tests for correct behaviour, when race depending on has no start time set
+        assertNull(finder.analyze().getStartTime());
+
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(6000)));
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogB);
+        StartTimeFinderResult result = finder.analyze();
+
+        List<SimpleRaceLogIdentifier> expectedDependingOnRaces = new ArrayList<>();
+        expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("A", "", ""));
+        assertNull(result.getStartTime());
+        assertNull(result.getStartTimeDiff());
+        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        // assertEquals(5000, result.getStartTimeDiff().asMillis());
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogC);
+        // Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time
+        // is unknown
+        expectedDependingOnRaces = new ArrayList<>();
+        expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("B", "", ""));
+        expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("A", "", ""));
+
+        result = finder.analyze();
+        assertNull(result.getStartTime());
+        assertNull(result.getStartTimeDiff());
+        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogB);
+        result = finder.analyze();
+        assertEquals(11000, result.getStartTime().asMillis());
+        assertEquals(6000, result.getStartTimeDiff().asMillis());
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogC);
+        result = finder.analyze();
+        assertEquals(16000, result.getStartTime().asMillis());
+        assertEquals(5000, result.getStartTimeDiff().asMillis());
+
+        // Test correct behaviour, when middle element changes
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(15000)));
+        finder = new StartTimeFinder(raceLogResolver, raceLogA);
+        result = finder.analyze();
+        assertEquals(5000, result.getStartTime().asMillis());
+        assertNull(result.getStartTimeDiff());
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogB);
+        result = finder.analyze();
+        assertEquals(15000, result.getStartTime().asMillis());
+        assertNull(result.getStartTimeDiff());
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogC);
+        result = finder.analyze();
+        assertEquals(20000, result.getStartTime().asMillis());
+        assertEquals(5000, result.getStartTimeDiff().asMillis());
     }
-    
+
     @Test
     public void testDependentStartTimeCycle() {
         raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000)));
-        
-        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000)));
-        
-        raceLogA.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("C", "", ""), new MillisecondsDurationImpl(5000)));
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(6000)));
 
-       
-       //Check that all resolve to null in case of a cycle 
-       StartTimeFinder finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       assertNull(finder.analyze().getStartTime());
-       
-       finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       assertNull(finder.analyze().getStartTime());
-       
-       finder = new StartTimeFinder(raceLogResolver, raceLogA);
-       assertNull(finder.analyze().getStartTime());
-       
-       //Check that all resolve correctly after changing some element in cycle
-       MillisecondsTimePoint now = MillisecondsTimePoint.now();
-       raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12,
-               new MillisecondsTimePoint(5000)));
-       
-       //now A -> C -> B
-       finder = new StartTimeFinder(raceLogResolver, raceLogA);
-       //Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time is unknown
-       List<SimpleRaceLogIdentifier> expectedDependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-       expectedDependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-       expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("C", "", ""));
-       expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("B", "", ""));
-       
-       StartTimeFinderResult result = finder.analyze();
-       assertEquals(15000, result.getStartTime().asMillis());
-       assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
-       
-       //now C -> B
-       finder = new StartTimeFinder(raceLogResolver, raceLogC);
-       //Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time is unknown
-       expectedDependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-       expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("B", "", ""));
-       
-       result = finder.analyze();
-       assertEquals(10000, result.getStartTime().asMillis());
-       assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
-       
-       //now B
-       finder = new StartTimeFinder(raceLogResolver, raceLogB);
-       //Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time is unknown
-       expectedDependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
-       
-       result = finder.analyze();
-       assertEquals(5000, result.getStartTime().asMillis());
-       assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(7000)));
+
+        raceLogA.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
+                new SimpleRaceLogIdentifierImpl("C", "", ""), new MillisecondsDurationImpl(8000)));
+
+        // Check that all resolve to null in case of a cycle
+        StartTimeFinder finder = new StartTimeFinder(raceLogResolver, raceLogC);
+        assertNull(finder.analyze().getStartTime());
+        assertNull(finder.analyze().getStartTimeDiff());
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogB);
+        assertNull(finder.analyze().getStartTime());
+        assertNull(finder.analyze().getStartTimeDiff());
+
+        finder = new StartTimeFinder(raceLogResolver, raceLogA);
+        assertNull(finder.analyze().getStartTime());
+        assertNull(finder.analyze().getStartTimeDiff());
+
+        // Check that all resolve correctly after changing some element in cycle
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
+
+        // now A -> C -> B
+        finder = new StartTimeFinder(raceLogResolver, raceLogA);
+        // Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time
+        // is unknown
+        List<SimpleRaceLogIdentifier> expectedDependingOnRaces;
+        expectedDependingOnRaces = new ArrayList<>();
+        expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("C", "", ""));
+        expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("B", "", ""));
+
+        StartTimeFinderResult result = finder.analyze();
+        assertEquals(19000, result.getStartTime().asMillis());
+        assertEquals(8000, result.getStartTimeDiff().asMillis());
+        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+
+        // now C -> B
+        finder = new StartTimeFinder(raceLogResolver, raceLogC);
+        // Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time
+        // is unknown
+        expectedDependingOnRaces = new ArrayList<>();
+        expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("B", "", ""));
+
+        result = finder.analyze();
+        assertEquals(11000, result.getStartTime().asMillis());
+        assertEquals(6000, result.getStartTimeDiff().asMillis());
+        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+
+        // now B
+        finder = new StartTimeFinder(raceLogResolver, raceLogB);
+        // Tests for correct behaviour, when race depending on has a DependentStartTimeEvent and its parent start time
+        // is unknown
+        expectedDependingOnRaces = new ArrayList<>();
+
+        result = finder.analyze();
+        assertEquals(5000, result.getStartTime().asMillis());
+        assertNull(result.getStartTimeDiff());
+        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
     }
 }

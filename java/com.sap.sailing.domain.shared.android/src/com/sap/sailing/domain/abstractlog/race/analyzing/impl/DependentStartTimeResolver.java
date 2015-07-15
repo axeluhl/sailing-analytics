@@ -16,11 +16,10 @@ public class DependentStartTimeResolver {
 
     public DependentStartTimeResolver(RaceLogResolver raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
-
     }
 
     public StartTimeFinderResult resolve(RaceLogDependentStartTimeEvent event) {
-        List<SimpleRaceLogIdentifier> dependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
+        List<SimpleRaceLogIdentifier> dependingOnRaces = new ArrayList<>();
         return internalResolve(event, dependingOnRaces);
     }
 
@@ -33,16 +32,15 @@ public class DependentStartTimeResolver {
         extendedDependingOnRaces.add(identifier);
         final StartTimeFinderResult result;
         if (containsCycle(extendedDependingOnRaces)) {
-            result = new StartTimeFinderResult(extendedDependingOnRaces, null);
+            result = new StartTimeFinderResult(extendedDependingOnRaces, null, null);
         } else {
             StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
             StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
             if (resultOfDependentRace.getStartTime() == null) {
                 result = resultOfDependentRace;
             } else {
-                result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(),
-                        resultOfDependentRace.getStartTime() == null ? null : resultOfDependentRace.getStartTime()
-                                .plus(startTimeDifference));
+                result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(), resultOfDependentRace.getStartTime()
+                    .plus(startTimeDifference), startTimeDifference);
             }
         }
         return result;
