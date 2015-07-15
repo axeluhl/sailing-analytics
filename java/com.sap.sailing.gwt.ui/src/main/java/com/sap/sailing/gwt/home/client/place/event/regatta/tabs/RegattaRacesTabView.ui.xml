@@ -1,26 +1,41 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui' 
-		xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'>
-	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:style>
-		.listContainer > div {
-			margin-bottom: 2em;
-		}
-		.legend {
-			margin-top: 2em;
-			margin-bottom: -1.5em;
-		}
-	</ui:style>
+        xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'>
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .listContainer > div {
+            margin-bottom: 2em;
+        }
+        .legend {
+            margin-top: 2em;
+            margin-bottom: -1.5em;
+        }
+        .buttonContainer {
+            position: relative;
+            margin: 0 !important;
+        }
+        .regattaOverviewButton {
+            position: absolute;
+            right: 0;
+            top: -0.25em;
+        }
+    </ui:style>
     <g:HTMLPanel ui:field="contentPanel">
-    	<div class="{res.mediaCss.grid}">
-   			<p:multiRegattaList.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" />
-    		<g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
-    	</div>
+        <div class="{res.mediaCss.grid}">
+               <p:multiRegattaList.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" />
+            <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
+        </div>
         <p:listNavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
-    	<div class="{res.mediaCss.grid}">
-    		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi" />
-    		<g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
-		</div>
-		<g:SimplePanel ui:field="oldContentContainer"/>
+        <div class="{res.mediaCss.grid}">
+            <div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi">
+                <p:raceListLive.RacesListLive ui:field="liveRacesListUi" />
+                <div class="{style.buttonContainer}">
+                    <a class="{res.mainCss.button} {res.mainCss.buttonarrowrightwhite} {style.regattaOverviewButton}" ui:field="regattaOverviewUi"><ui:text from="{i18n.raceDetailsToShow}" /></a>
+                </div>
+                <p:racelist.RaceListContainer ui:field="raceListContainerUi" />
+            </div>
+            <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
+        </div>
+        <g:SimplePanel ui:field="oldContentContainer"/>
     </g:HTMLPanel>
 </ui:UiBinder>
