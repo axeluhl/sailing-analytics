@@ -312,7 +312,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     @Override
     public String getRegattaOverviewLink() {
-        String url = "RegattaOverview.html?event=" + getCtx().getEventId();
+        String url = "RegattaOverview.html?ignoreLocalSettings=true&event=" + getCtx().getEventId();
         if(showRegattaMetadata()) {
             url += "&regatta=" + getCtx().getRegattaId();
         } else if(getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
