@@ -1339,12 +1339,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         };
         windwardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(windwardStartLineMarkToFirstMarkLine, /* showLine */
-                settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE) ||
+                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY))
                         && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                 windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineTooltipHandler,
                 "grey");
         leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
-                settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
+                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE) ||
+                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY))
                         && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                 leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineTooltipHandler,
                 "grey");
