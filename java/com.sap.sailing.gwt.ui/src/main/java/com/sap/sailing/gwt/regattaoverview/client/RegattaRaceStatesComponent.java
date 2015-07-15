@@ -137,7 +137,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
      */
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings,
-            Timer timerToSynchronize) {
+            Timer timerToSynchronize, boolean ignoreLocalSettings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventId = eventId;
@@ -148,7 +148,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventId.toString();
         this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
         this.settings = new RegattaRaceStatesSettings();
-        loadAndSetSettings(settings);
+        if(!ignoreLocalSettings) {
+            loadAndSetSettings(settings);
+        }
         mainPanel = new VerticalPanel();
         mainPanel.getElement().getStyle().setWidth(100, Unit.PCT);
         getElement().getStyle().setWidth(100, Unit.PCT);
