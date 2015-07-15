@@ -1,0 +1,43 @@
+.video_content_item_info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  color: #f6f9fc;
+  padding: 1.333333333333333em;
+  background: rgba(0,0,0,0.6);
+}
+.video_content_item_info.info {
+  font-size: inherit;
+}
+.video_content_item_info_text {
+  font-size: inherit;
+  padding: 0 2em 0 0;
+}
+.video_content_item_info_text_title {
+  font-size: 1.466666666666667em;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+.video_content_item_info_text_titlesmall {
+  font-size: 1.2em;
+}
+.video_content_item_info_text .label {
+  display: inline-block;
+  margin-left: 1.25em;
+  text-transform: capitalize;
+}
+.video_content_item_info_text p {
+  margin: 0;
+  padding: 0;
+}
+.video_content_item_info_button {
+  font-size: 0.933333333333333em;
+  float: right;
+  height: 100%;
+  cursor: pointer;
+  margin-right: -1.071428571428571em;
+  white-space: nowrap;
+  text-transform: uppercase;
+}

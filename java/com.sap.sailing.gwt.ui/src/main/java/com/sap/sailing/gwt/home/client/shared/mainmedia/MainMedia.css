@@ -107,9 +107,9 @@
 .videopreview_videocontainer_video {
   position: absolute;
   left: 0;
+  right: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 0;
 }
 .videopreview_title {
  font-size: 1.466666666666667em;
