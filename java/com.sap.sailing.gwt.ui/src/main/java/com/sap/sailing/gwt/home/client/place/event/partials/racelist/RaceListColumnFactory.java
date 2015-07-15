@@ -542,7 +542,7 @@ public class RaceListColumnFactory {
     
     public static class SortableRaceListStartTimeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, Date> {
         protected SortableRaceListStartTimeColumn(InvertibleComparator<T> comparator) {
-            super(I18N.start(), new StartTimeCell(), comparator);
+            super(I18N.start(), new StartTimeCell(), comparator, SortingOrder.DESCENDING);
         }
         
         public void setShowTimeOnly(boolean showTimeOnly) {
