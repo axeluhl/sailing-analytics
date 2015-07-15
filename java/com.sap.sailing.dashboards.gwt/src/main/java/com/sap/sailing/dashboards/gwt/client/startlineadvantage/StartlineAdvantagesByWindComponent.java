@@ -3,7 +3,6 @@ package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 import java.util.Date;
 import java.util.Iterator;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.CssResource;
@@ -18,7 +17,6 @@ import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesActio
 import com.sap.sailing.dashboards.gwt.client.visualeffects.NumberTickingAnimation;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
