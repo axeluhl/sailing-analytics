@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -13,6 +14,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
@@ -40,6 +43,8 @@ import com.sap.sse.common.Util.Triple;
  */
 public class MultiregattaRegattasTabView extends Composite implements MultiregattaTabView<MultiregattaRegattasPlace> {
     
+    private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
+
     interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
     }
 
@@ -49,10 +54,8 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     @UiField(provided = true) RacesListLive racesListLiveUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
+    @UiField AnchorElement regattaOverviewLinkUi;
     private Presenter currentPresenter;
-
-    public MultiregattaRegattasTabView() {
-    }
 
     @Override
     public Class<MultiregattaRegattasPlace> getPlaceClassForActivation() {
@@ -77,6 +80,8 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         regattaListUi = new MultiRegattaList(currentPresenter);
         
         initWidget(ourUiBinder.createAndBindUi(this));
+        regattaOverviewLinkUi.setHref(currentPresenter.getRegattaOverviewLink());
+        regattaOverviewLinkUi.addClassName(currentPresenter.isEventOrRegattaLive() ? MAIN_CSS.buttonred() : MAIN_CSS.buttonprimary());
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         refreshManager.add(racesListLiveUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         

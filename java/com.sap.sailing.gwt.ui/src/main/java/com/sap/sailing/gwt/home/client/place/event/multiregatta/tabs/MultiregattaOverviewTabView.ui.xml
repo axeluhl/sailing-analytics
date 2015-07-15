@@ -3,6 +3,7 @@
   			 xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event.partials"
   			 xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview">
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   	<ui:style>
   		.legend_and_filter {
 			text-align: right;
@@ -20,6 +21,10 @@
         <div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}">
 			<p:multiRegattaList.MultiRegattaListStepsLegend />
 	        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
+	        <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
+	        		target="_blank" ui:field="regattaOverviewLinkUi">
+	        	<ui:text from="{i18n.raceDetailsToShow}" />
+	        </a>
         </div>
 		<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
       </div>
