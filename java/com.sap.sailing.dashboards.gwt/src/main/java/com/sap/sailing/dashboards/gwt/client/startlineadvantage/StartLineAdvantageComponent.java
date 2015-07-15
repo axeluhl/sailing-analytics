@@ -105,10 +105,10 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             startLineAdvantageComponent.averageNumber.setInnerText(averageValue);
             lastLiveValue = liveValue;
             lastAverageValue = averageValue;
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry.lastLiveValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry.lastAverageValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average);
+            setLiveValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage));
+            setAverageValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average));
         }
 
         @Override
@@ -138,10 +138,10 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             startLineAdvantageComponent.averageNumber.setInnerText(averageValue);
             lastLiveValue = liveValue;
             lastAverageValue = averageValue;
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind.lastLiveValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind.lastAverageValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average);
+            setLiveValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage));
+            setAverageValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average));
         }
 
         @Override
