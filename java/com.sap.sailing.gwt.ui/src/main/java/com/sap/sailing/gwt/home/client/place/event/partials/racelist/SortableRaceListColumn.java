@@ -19,6 +19,10 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
         this(new TextHeader(headerText), cell, comparator);
     }
     
+    protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
+        this(new TextHeader(headerText), cell, comparator, preferredSortingOrder);
+    }
+    
     protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
         this(header, cell, comparator, SortingOrder.ASCENDING);
     }

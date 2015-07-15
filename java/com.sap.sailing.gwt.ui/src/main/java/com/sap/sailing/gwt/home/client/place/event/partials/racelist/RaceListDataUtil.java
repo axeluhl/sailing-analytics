@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 import java.util.Collection;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
@@ -116,6 +117,15 @@ public class RaceListDataUtil {
             @Override
             public String getValue(T object) {
                 return object.getCourseArea();
+            }
+        });
+    }
+    
+    public static <T extends RaceListRaceDTO> boolean hasWinner(Collection<T> data) {
+        return hasValues(data, new ValueProvider<T, SimpleCompetitorDTO>() {
+            @Override
+            public SimpleCompetitorDTO getValue(T object) {
+                return object.getWinner();
             }
         });
     }

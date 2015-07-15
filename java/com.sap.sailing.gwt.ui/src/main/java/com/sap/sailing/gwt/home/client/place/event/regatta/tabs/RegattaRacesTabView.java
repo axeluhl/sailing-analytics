@@ -243,6 +243,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
             this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
             this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
+            this.winnerColumn.setShowDetails(RaceListDataUtil.hasWinner(data));
             super.setTableData(data);
         }
 

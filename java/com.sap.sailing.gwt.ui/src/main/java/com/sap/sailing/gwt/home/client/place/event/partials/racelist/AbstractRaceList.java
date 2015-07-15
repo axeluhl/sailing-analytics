@@ -3,10 +3,13 @@ package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 import java.util.Collection;
 
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
@@ -38,15 +41,24 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         this.initWidget(cellTableContainer);
     }
 
+    @SuppressWarnings("unchecked")
     protected void setTableData(Collection<T> data) {
-        Column<T, ?> sortColumn = (this.cellTable == null ? null : this.cellTable.getCurrentlySortedColumn());
+        ColumnSortList sortList = this.cellTable == null ? null : this.cellTable.getColumnSortList();
         this.cellTable = new SortedCellTable<T>(data.size(), CleanCellTableResources.INSTANCE);
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initTableColumns();
         this.cellTable.setList(data);
-        if (sortColumn != null && this.cellTable.getColumnIndex(sortColumn) >= 0) {
-            this.cellTable.sortColumn(sortColumn);
+        if (sortList != null && sortList.size() > 0) {
+            for (int i = sortList.size() - 1; i >= 0; i--) {
+                ColumnSortInfo sortInfo = sortList.get(i);
+                Column<T, ?> column = (Column<T, ?>) sortInfo.getColumn();
+                if(this.cellTable.getColumnIndex(column) >= 0) {
+                    this.cellTable.sortColumn(column, sortInfo.isAscending());
+                }
+            }
+        } else {
+            this.cellTable.sortColumn(startTimeColumn);
         }
     }
 
@@ -73,7 +85,11 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
                 header.setHeaderStyleNames(column.getHeaderStyle());
             }
             boolean ascending = column.getPreferredSortingOrder().isAscending();
-            this.cellTable.addColumn(column, header, column.getComparator(), ascending);
+            InvertibleComparator<T> comperator = column.getComparator();
+            if (comperator != null) {
+                comperator.setAscending(ascending);
+            }
+            this.cellTable.addColumn(column, header, comperator, ascending);
         }
     }
     
