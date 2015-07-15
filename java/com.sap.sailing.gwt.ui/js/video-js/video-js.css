@@ -1,6 +1,6 @@
 /*!
 Video.js Default Styles (http://videojs.com)
-Version 4.12.0
+Version 4.12.10
 Create your own skin at http://designer.videojs.com
 */
 /* SKIN
@@ -37,7 +37,7 @@ The control icons are from a custom font. Each icon corresponds to a character
   padding: 0;
   /* background-color-with-alpha */
   background-color: #333333;
-  background-color: rgba(51, 51, 51, 0.8);
+  background-color: rgba(51, 51, 51, 0.9);
 }
 .vjs-default-skin .vjs-slider:focus {
   /* box-shadow */
@@ -446,18 +446,14 @@ Positioning of the play button in the center or other corners can be done more
 easily in the skin designer. http://designer.videojs.com/
 */
 .vjs-default-skin .vjs-big-play-button {
-  /* Center it horizontally */
-  left: 50%;
-  margin-left: -2.75em;
-  /* Center it vertically */
-  top: 50%;
-  margin-top: -1.8em;
-  font-size: 1.9em;
+  left: 0.5em;
+  top: 0.5em;
+  font-size: 3em;
   display: block;
   z-index: 2;
   position: absolute;
-  width: 3.5em;
-  height: 1.6em;
+  width: 4em;
+  height: 2.6em;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -465,12 +461,12 @@ easily in the skin designer. http://designer.videojs.com/
   /* Need a slightly gray bg so it can be seen on black backgrounds */
   /* background-color-with-alpha */
   background-color: #07141e;
-  background-color: rgba(7, 20, 30, 0.5);
-  border: 1px solid #3b4249;
+  background-color: rgba(7, 20, 30, 0.7);
+  border: 0.1em solid #3b4249;
   /* border-radius */
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
+  -webkit-border-radius: 0.8em;
+  -moz-border-radius: 0.8em;
+  border-radius: 0.8em;
   /* box-shadow */
   -webkit-box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
   -moz-box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
@@ -485,10 +481,10 @@ easily in the skin designer. http://designer.videojs.com/
 .vjs-default-skin.vjs-big-play-centered .vjs-big-play-button {
   /* Center it horizontally */
   left: 50%;
-  margin-left: -1.5em;
+  margin-left: -2.1em;
   /* Center it vertically */
   top: 50%;
-  margin-top: -1.3em;
+  margin-top: -1.4000000000000001em;
 }
 /* Hide if controls are disabled */
 .vjs-default-skin.vjs-controls-disabled .vjs-big-play-button {
@@ -526,7 +522,7 @@ easily in the skin designer. http://designer.videojs.com/
   /* In order to center the play icon vertically we need to set the line height
      to the same as the button height */
 
-  line-height: 1.6em;
+  line-height: 2.6em;
   text-shadow: 0.05em 0.05em 0.1em #000;
   text-align: center /* Needed for IE8 */;
   position: absolute;
@@ -872,6 +868,7 @@ body.vjs-full-window {
   background-repeat: no-repeat;
   background-position: 50% 50%;
   background-size: contain;
+  background-color: #000000;
   cursor: pointer;
   margin: 0;
   padding: 0;
@@ -1012,4 +1009,3 @@ body.vjs-full-window {
 /* -----------------------------------------------------------------------------
 The original source of this file lives at
 https://github.com/videojs/video.js/blob/master/src/css/video-js.less */
-

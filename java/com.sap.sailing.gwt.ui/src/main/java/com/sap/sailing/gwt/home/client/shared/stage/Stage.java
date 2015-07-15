@@ -8,7 +8,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sse.gwt.client.controls.carousel.WidgetCarousel;
 
@@ -21,14 +21,14 @@ public class Stage extends Composite {
 
     private StageTeaser stageTeaser;
 
-    private final HomePlacesNavigator placeNavigator;
+    private final DesktopPlacesNavigator placeNavigator;
 
     interface StageUiBinder extends UiBinder<Widget, Stage> {
     }
 
     private static StageUiBinder uiBinder = GWT.create(StageUiBinder.class);
 
-    public Stage(HomePlacesNavigator placeNavigator) {
+    public Stage(DesktopPlacesNavigator placeNavigator) {
         this.placeNavigator = placeNavigator;
 
         StageResources.INSTANCE.css().ensureInjected();
