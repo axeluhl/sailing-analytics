@@ -344,7 +344,7 @@ public class TrackedLegImpl implements TrackedLeg {
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode, cache);
         final Distance result;
-        if (preResult == null || preResult.getMeters() >= 0) {
+        if (preResult.getMeters() >= 0) {
             result = preResult;
         } else {
             result = new MeterDistance(-preResult.getMeters());

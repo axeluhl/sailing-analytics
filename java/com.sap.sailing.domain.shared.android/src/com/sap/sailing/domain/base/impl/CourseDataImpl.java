@@ -23,6 +23,7 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     @Override
     public List<Leg> getLegs() {
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -71,6 +72,7 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     @Override
     public Leg getFirstLeg() {
+        // TODO Auto-generated method stub
         return null;
     }
 

@@ -4,24 +4,23 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class SeriesActivityProxy extends AbstractActivityProxy {
 
-    private AbstractSeriesPlace place;
+    private final AbstractSeriesPlace place;
     private SeriesContext ctx;
     private SeriesClientFactory clientFactory;
-    private final DesktopPlacesNavigator homePlacesNavigator;
+    private final HomePlacesNavigator homePlacesNavigator;
 
     public SeriesActivityProxy(AbstractSeriesPlace place, SeriesClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator) {
+            HomePlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.ctx = place.getCtx();
         this.clientFactory = clientFactory;
@@ -57,11 +56,13 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
+                final AbstractSeriesPlace placeToStart;
                 if (place instanceof SeriesDefaultPlace) {
-                    place = getRealPlace();
+                    placeToStart = getRealPlace();
+                } else {
+                    placeToStart = place;
                 }
-                place = verifyAndAdjustPlace();
-                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, clientFactory,
+                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) placeToStart, clientFactory,
                         homePlacesNavigator));
             }
         });
@@ -73,18 +74,5 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
         } else {
             return new SeriesEventsPlace(ctx);
         }
-    }
-    
-    /**
-     * Checks if the place is valid for the given event.
-     * If not, the place is automatically being adjusted.
-     */
-    private AbstractSeriesPlace verifyAndAdjustPlace() {
-        if(place instanceof SeriesMiniOverallLeaderboardPlace) {
-            return new EventSeriesOverallLeaderboardPlace(place.getCtx());
-        }
-        
-        // no adjustment necessary
-        return place;
     }
 }

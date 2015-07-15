@@ -29,10 +29,8 @@ public class BatchAction implements Action<BatchResult> {
         final int nrOfActions = getActions().length;
         final ArrayList<Result> results = new ArrayList<Result>(nrOfActions);
         final ArrayList<DispatchException> exceptions = new ArrayList<DispatchException>(nrOfActions);
-
         for (Action<?> a : getActions()) {
             Result result = null;
-            long start = System.currentTimeMillis();
             try {
                 result = a.execute(ctx);
                 exceptions.add(null);
@@ -40,17 +38,6 @@ public class BatchAction implements Action<BatchResult> {
                 DispatchException e2 = handleException(e);
                 exceptions.add(e2);
                 logger.log(Level.SEVERE, "Error trying to dispatch action from type " + a.getClass().getName(), e);
-            } finally {
-                long duration = System.currentTimeMillis() - start;
-                final Level logLevel;
-                if (duration < 100) {
-                    logLevel = Level.FINEST;
-                } else if (duration < 500) {
-                    logLevel = Level.INFO;
-                } else {
-                    logLevel = Level.WARNING;
-                }
-                logger.log(logLevel, "Dispatch took " + duration + "ms for " + a.getClass().getSimpleName());
             }
             results.add(result);
         }

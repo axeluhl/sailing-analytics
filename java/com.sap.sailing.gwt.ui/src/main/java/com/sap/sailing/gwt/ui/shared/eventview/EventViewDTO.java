@@ -1,23 +1,20 @@
 package com.sap.sailing.gwt.ui.shared.eventview;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.TreeSet;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.general.HasLogo;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
+public class EventViewDTO extends EventMetadataDTO implements Result {
 
     public enum EventType {
         SINGLE_REGATTA, MULTI_REGATTA, SERIES_EVENT
     }
 
-    private TreeSet<RegattaMetadataDTO> regattas = new TreeSet<>();
+    private ArrayList<RegattaMetadataDTO> regattas = new ArrayList<>();
     private ArrayList<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
     
     private EventType type;
@@ -26,7 +23,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String seriesName;
     private ImageDTO logoImage;
     private String officialWebsiteURL;
-    private String sailorsInfoWebsiteURL;
+    private String sailorsInfoURL;
 
     public EventViewDTO() {
     }
@@ -43,7 +40,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         this.type = type;
     }
 
-    public Collection<RegattaMetadataDTO> getRegattas() {
+    public List<RegattaMetadataDTO> getRegattas() {
         return regattas;
     }
 
@@ -108,19 +105,11 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         return officialWebsiteURL;
     }
 
-    public String getSailorsInfoWebsiteURL() {
-        return sailorsInfoWebsiteURL;
+    public String getSailorsInfoURL() {
+        return sailorsInfoURL;
     }
 
-    public void setSailorsInfoWebsiteURL(String sailorsInfoWebsiteURL) {
-        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
-    }
-    
-    public String getLocationAndVenueAndCountry() {
-        String venue = getLocationAndVenue();
-        if(getVenueCountry() != null && !getVenueCountry().isEmpty()) {
-            return venue + ", " + getVenueCountry();
-        }
-        return venue;
+    public void setSailorsInfoURL(String sailorsInfoURL) {
+        this.sailorsInfoURL = sailorsInfoURL;
     }
 }

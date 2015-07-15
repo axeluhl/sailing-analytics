@@ -52,7 +52,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
-        header.getElement().getStyle().setZIndex(19);
+        header.getElement().getStyle().setZIndex(1337);
         return header;
     }
 }

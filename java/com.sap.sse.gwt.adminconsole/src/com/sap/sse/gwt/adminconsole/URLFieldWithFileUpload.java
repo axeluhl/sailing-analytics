@@ -113,7 +113,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get("file_uri") != null) {
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
-                        setValue(uri, true);
+                        urlTextBox.setValue(uri);
                         removeButton.setEnabled(true);
                         Window.alert(stringMessages.uploadSuccessful());
                     } else {

@@ -10,7 +10,7 @@
         <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
           <div class="{local_res.css.eventheader_intro}">
             <div class="{local_res.css.eventheader_intro_logo}">
-            	  <a ui:field="eventLogoAnchorUi"><div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" /></a>
+              <div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
             <!-- IF header.dropdown === 'regattas' -->
             <div ui:field="dropdownTitle" class="{local_res.css.dropdown} {local_res.css.dropdownregattas} {local_res.css.jsdropdown}">
@@ -53,8 +53,9 @@
               <div ui:field="competitors" class="{local_res.css.eventheader_intro_details_item}" />
               <div ui:field="races" class="{local_res.css.eventheader_intro_details_item}" />
               <div ui:field="trackedRaces" class="{local_res.css.eventheader_intro_details_item}" />
-              <div ui:field="courseAreaUi" class="{local_res.css.eventheader_intro_details_item}" />
-              <div ui:field="eventCategory" class="{local_res.css.eventheader_intro_details_item}" />
+              <div ui:field="eventCategory" class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.category -->
+              </div>
               <!-- IFEND event.eventType === 'multi-regatta-event' -->
             </div>
           </div>

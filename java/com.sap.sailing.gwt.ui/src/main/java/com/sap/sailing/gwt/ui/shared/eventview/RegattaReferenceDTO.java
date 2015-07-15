@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.eventview;
 
-import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class RegattaReferenceDTO implements DTO, Comparable<RegattaReferenceDTO> {
+public class RegattaReferenceDTO implements IsSerializable {
     private String id;
     private String displayName;
     
@@ -27,14 +27,5 @@ public class RegattaReferenceDTO implements DTO, Comparable<RegattaReferenceDTO>
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    @Override
-    public int compareTo(RegattaReferenceDTO o) {
-        int compareByDisplayName = displayName.compareTo(o.displayName);
-        if(compareByDisplayName != 0) {
-            return compareByDisplayName;
-        }
-        return id.compareTo(o.id);
     }
 }

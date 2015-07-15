@@ -16,7 +16,7 @@
     </div>
   </div>
 </div>
-<div ui:field="racesUi" class="{local_res.css.eventregattaraces}">
+<div class="{local_res.css.eventregattaraces}">
   <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.eventregattaraces_legend}">

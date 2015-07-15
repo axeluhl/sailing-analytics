@@ -19,7 +19,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -89,7 +88,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     private final Button removeFixedMarkPassingsButton;
     private final Button suppressPassingsButton;
     private final Button removeSuppressedPassingButton;
-    private Label selectCompetitorLabel = new Label();
 
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
@@ -267,7 +265,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 });
             }
         });
-        selectCompetitorLabel.setText(stringMessages.selectCompetitor());
         refreshWaypoints();
         HorizontalPanel tableAndButtons = new HorizontalPanel();
         add(tableAndButtons, 0, 0);
@@ -280,7 +277,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         buttonPanel.add(removeFixedMarkPassingsButton);
         buttonPanel.add(suppressPassingsButton);
         buttonPanel.add(removeSuppressedPassingButton);
-        buttonPanel.add(selectCompetitorLabel);
         enableButtons();
     }
 
@@ -295,14 +291,12 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     }
 
     private void processCompetitorSelectionChange() {
-            waypointSelectionModel.clear();
-            if (isVisible() && Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
-                selectCompetitorLabel.setText("");
-                refillList();
-            } else {
-                disableEditing();
-                selectCompetitorLabel.setText(stringMessages.selectCompetitor());
-            }
+        waypointSelectionModel.clear();
+        if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+            refillList();
+        } else {
+            disableEditing();
+        }
     }
 
     private void disableEditing() {

@@ -31,7 +31,8 @@
 	<stylesheet src="../RibDashboard.css" />
 
 	<!-- Highcharts API -->
-	<inherits name='com.sap.sse.gwt.Highcharts_Autoinject' />
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+
 	<inherits name="com.google.gwt.resources.Resources" />
 
 	<!-- Google Maps -->

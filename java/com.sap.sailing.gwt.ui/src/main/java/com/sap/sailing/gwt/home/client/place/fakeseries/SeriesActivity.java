@@ -12,13 +12,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -32,7 +32,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     protected final SeriesContext ctx;
     protected final SeriesClientFactory clientFactory;
 
-    protected final DesktopPlacesNavigator homePlacesNavigator;
+    protected final HomePlacesNavigator homePlacesNavigator;
     
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
     
@@ -42,7 +42,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
 
-    public SeriesActivity(AbstractSeriesTabPlace place, SeriesClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
+    public SeriesActivity(AbstractSeriesTabPlace place, SeriesClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.ctx = new SeriesContext(place.getCtx());
         this.clientFactory = clientFactory;

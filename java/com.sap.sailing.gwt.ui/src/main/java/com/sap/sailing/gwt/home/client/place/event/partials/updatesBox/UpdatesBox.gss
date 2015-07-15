@@ -40,6 +40,7 @@
 }
 .updatesbox_item {
   display: block;
+  height: 6em;
   padding: 1.333333333333333em 2em 1.333333333333333em 1em;
   position: relative;
   color: #0a0a0a;
@@ -99,6 +100,7 @@
 }
 .updatesbox_item_content_text {
   font-size: 1em;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }

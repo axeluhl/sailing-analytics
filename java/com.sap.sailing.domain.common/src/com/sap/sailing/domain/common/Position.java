@@ -57,13 +57,11 @@ public interface Position extends Serializable {
     Distance crossTrackError(Position p, Bearing bearing);
 
     /**
-     * Computes how far along the great circle starting at <code>from</code> and pointing to <code>bearing</code> one
-     * has to travel to reach the projection of this position onto the great circle described by <code>from</code> and
-     * <code>bearing</code>. Note that if the angle between this position and the great circle is 90 degrees then there
-     * is no solution, and a <code>NaN</code> or exception will result.
-     * <p>
-     * 
-     * If either <code>from</code> or <code>bearing</code> or both are <code>null</code>, <code>null</code> is returned.
+     * Computes how far along the great circle starting at <code>from</code> and pointing
+     * to <code>bearing</code> one has to travel to reach the projection of this position
+     * onto the great circle described by <code>from</code> and <code>bearing</code>. Note that
+     * if the angle between this position and the great circle is 90 degrees then there is
+     * no solution, and a <code>NaN</code> or exception will result.
      */
 
     Distance alongTrackDistance(Position from, Bearing bearing);

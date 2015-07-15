@@ -1,0 +1,67 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.footer.FooterResources" />
+  <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.client.app.PlaceNavigation" />
+  <ui:style gss="true">
+    .languageSelect::-ms-expand {
+      display: none;
+    }
+    .languageSelect {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -ms-appearance: none;
+      appearance: none;
+      
+      margin-top: 25px;
+      color: #efaa00;
+      line-height: 1.5em;
+      height: 1.5em;
+      display: inline-block;
+      border: transparent;
+      cursor: pointer;
+      padding-right: 1.2em;
+      background: #333;
+      cursor: pointer;
+      
+      background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
+      background-position: right center;
+      background-repeat: no-repeat;
+      
+    }
+  </ui:style>
+  <g:HTMLPanel tag="footer" addStyleNames="{local_res.css.sitefooter}">
+    <!-- Website footer-->
+      <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.medium9} {res.mediaCss.columns}">
+          <div class="{local_res.css.sitefooter_copyright}">
+            <ui:text from='{i18n.footerCopyright}' />
+          </div>
+          <div class="{local_res.css.sitefooter_links}">
+            <a href="http://www.sap.com/about/legal/impressum.html" target="_blank" class="{local_res.css.sitefooter_links_link}">
+              <ui:text from='{i18n.footerLegal}' />
+            </a>
+            <a href="http://www.sap.com/about/legal/privacy.html" target="_blank" class="{local_res.css.sitefooter_links_link}">
+              <ui:text from='{i18n.footerPrivacy}' />
+            </a>
+	          <a href="http://jobs.sapsailing.com" target="_blank" class="{local_res.css.sitefooter_links_link}">
+	              <ui:text from='{i18n.footerJobs}'/>
+	          </a>
+            <a href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
+              <ui:text from='{i18n.footerFeedback}' />
+            </a>
+            <a href="{releaseNotesNavigation.getTargetUrl}" class="{local_res.css.sitefooter_links_link}">
+              <ui:text from='{i18n.whatsNew}' />
+            </a>
+          </div>
+        </div>
+        <div ui:field="languageSelectionDiv" class="{res.mediaCss.small12} {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_language}">
+          <span><ui:text from='{i18n.footerLanguage}' />:</span>
+            <g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" />
+            <g:ValueListBox addStyleNames="{style.languageSelect}" ui:field="changeLanguageList" />
+        </div>
+      </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

@@ -5,9 +5,8 @@ import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesTabPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
-import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class SeriesOverviewPlace extends AbstractSeriesTabPlace implements HasMobileVersion {
+public class SeriesOverviewPlace extends AbstractSeriesTabPlace {
     public SeriesOverviewPlace(String id) {
         super(id);
     }

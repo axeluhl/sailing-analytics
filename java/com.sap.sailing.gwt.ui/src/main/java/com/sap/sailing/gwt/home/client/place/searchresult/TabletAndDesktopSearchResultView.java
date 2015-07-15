@@ -5,8 +5,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.searchresult.SearchResult;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public class TabletAndDesktopSearchResultView extends Composite implements SearchResultView {
@@ -17,7 +17,7 @@ public class TabletAndDesktopSearchResultView extends Composite implements Searc
 
     @UiField(provided=true) SearchResult searchResult;
     
-    public TabletAndDesktopSearchResultView(DesktopPlacesNavigator navigator) {
+    public TabletAndDesktopSearchResultView(HomePlacesNavigator navigator) {
         searchResult = new SearchResult(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }

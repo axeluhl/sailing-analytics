@@ -3,14 +3,25 @@
 	<ui:style gss="true">
 		@external vjs-big-play-button;
 		.vjs-big-play-button {
-			display: none !important;
+			background-image: url("images/home/play.png") !important;
+			width: 80px !important;
+			height: 80px !important;
+			background-color: transparent !important;
+			background-repeat: no-repeat !important; 
+			padding: 0 !important;
+			border: none !important;
+			box-shadow: none !important;
+			z-index: auto !important;
 		}
-		.player {
-			width: 100%;
-			height: 100%;
+		.vjs-big-play-button:BEFORE {
+			content: "" !important;
 		}
+		.caption {
+			padding: 5px;
+		} 
 	</ui:style>
-	<div class="{style.player}">
-		<video class="{style.player} video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
+	<div>
+		<video class="video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
+		<div class="{style.caption}" ui:field="captionUi" />
 	</div>
 </ui:UiBinder>

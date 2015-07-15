@@ -57,31 +57,20 @@
 			margin-bottom: 0;
 		}
 	}
-	.videoPlayerBox {
-		position: relative;
-		padding-top: 56.25% !important;
-		height: 0px;
-	}
-	.videoPlayer {
-		position: absolute;
-		top: 0px;
-		bottom: 0px;
-		left: 0px;
-		right: 0px;
-	}
+	
 	</ui:style>
 	<g:HTMLPanel>
 		<div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
 			<div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-					<h1>
-						<ui:text from='{i18n.videos}' />
-					</h1>
+					<header class="{res.mainCss.mainsection_header}">
+						<h3 class="{res.mainCss.mainsection_header_title}">
+							<ui:text from='{i18n.videos}' />
+						</h3>
+					</header>
 				</div>
 				<div ui:field="videoDisplayOuterBoxUi" class="{res.mediaCss.columns}">
-					<div class="{style.videoPlayerBox}">
-						<g:SimplePanel ui:field="videoDisplayHolderUi" addStyleNames="{style.videoPlayer}" />
-					</div>
+					<g:SimplePanel ui:field="videoDisplayHolderUi" />
 				</div>
 				<div ui:field="videoListOuterBoxUi" class=" {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="videosListUi" styleName="{style.videoList}"/>
@@ -91,9 +80,12 @@
 		<div ui:field="photoSectionUi" style="display: none;"
 			class="{res.mediaCss.grid} {local_res.css.media}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-				<h1>
-					<ui:text from='{i18n.photos}' />
-				</h1>
+				<header class="{res.mainCss.mainsection_header}">
+					<h3 class="{res.mainCss.mainsection_header_title}">
+						<ui:text from='{i18n.photos}' />
+					</h3>
+				</header>
+				
 			</div>
 		</div>
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">

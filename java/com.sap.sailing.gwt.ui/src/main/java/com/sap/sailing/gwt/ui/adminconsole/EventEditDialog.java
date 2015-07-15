@@ -36,8 +36,6 @@ public class EventEditDialog extends EventDialog {
         }
         officialWebsiteURLEntryField = createTextBox(event.getOfficialWebsiteURL());
         officialWebsiteURLEntryField.setVisibleLength(50);
-        sailorsInfoWebsiteURLEntryField = createTextBox(event.getSailorsInfoWebsiteURL());
-        sailorsInfoWebsiteURLEntryField.setVisibleLength(50);
         courseAreaNameList.setValue(courseAreaNames);
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {

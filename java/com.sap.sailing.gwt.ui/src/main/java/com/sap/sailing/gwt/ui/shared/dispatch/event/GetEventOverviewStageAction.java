@@ -21,8 +21,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     
     private UUID eventId;
     
-    @SuppressWarnings("unused")
-    private GetEventOverviewStageAction() {
+    public GetEventOverviewStageAction() {
     }
 
     public GetEventOverviewStageAction(UUID eventId) {

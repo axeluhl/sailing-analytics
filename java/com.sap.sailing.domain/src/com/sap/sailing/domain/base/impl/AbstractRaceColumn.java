@@ -158,8 +158,6 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             RaceLog raceLogAvailable = raceLogs.get(fleet);
             if (raceLogAvailable == null) {
                 RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
-                // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
-                // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
                 newOrLoadedRaceLog.addListener(listener);
                 raceLogs.put(fleet, newOrLoadedRaceLog);
             } else {

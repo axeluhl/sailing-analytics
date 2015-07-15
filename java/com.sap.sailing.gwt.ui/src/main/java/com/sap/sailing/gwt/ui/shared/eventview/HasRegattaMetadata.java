@@ -37,6 +37,4 @@ public interface HasRegattaMetadata {
     Date getEndDate();
     
     RegattaState getState();
-
-    String getDefaultCourseAreaName();
 }

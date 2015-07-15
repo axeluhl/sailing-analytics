@@ -159,11 +159,6 @@
 	background-color: #f4f5f6;
 }
 
-.cellTableRaceColumnHeader span > div, .cellTableLegColumnHeader span > div {
-	width: 19px !important;
-	height: 19px !important;
-}
-
 .cellTableRaceColumn {
 	background-color: #e0e0e0 !important;
 }

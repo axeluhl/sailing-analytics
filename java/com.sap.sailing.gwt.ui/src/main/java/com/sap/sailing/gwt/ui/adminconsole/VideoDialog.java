@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
@@ -76,6 +77,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.youtube.name());
         mimeTypeListBox.addItem(MimeType.vimeo.name());
         
+        GWT.debugger();
         localeListBox = createListBox(false);
         localeListBox.addItem(NO_LOCALE_TEXT, "");
         localeListBox.addItem("English", "en");

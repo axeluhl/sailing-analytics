@@ -63,8 +63,8 @@ import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.Simulator;
+import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
@@ -73,8 +73,8 @@ import com.sap.sailing.simulator.impl.PathGenerator1Turner;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
-import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.SimulatorImpl;
+import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -312,7 +312,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                                                                                               // params.getSeedLines());
         }
 
-        return new SimulatorResultsDTO(0, 0, null, timeStep.asMillis(), 0, rcDTO, pathDTOs, windFieldDTO,
+        return new SimulatorResultsDTO(0, null, timeStep.asMillis(), 0, rcDTO, pathDTOs, windFieldDTO,
                 simulatedPaths.notificationMessage);
     }
 

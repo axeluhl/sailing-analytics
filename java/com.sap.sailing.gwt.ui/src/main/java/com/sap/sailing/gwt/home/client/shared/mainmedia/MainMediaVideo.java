@@ -7,10 +7,10 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
-import com.sap.sailing.gwt.home.client.shared.videoPlayer.VideoPlayer;
+import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 
 public class MainMediaVideo extends Composite {
@@ -23,9 +23,10 @@ public class MainMediaVideo extends Composite {
 
     @UiField SpanElement videoTitle;
     @UiField Element videoTitleWrapper;
-    @UiField SimplePanel videoHolderUi;
+    @UiField
+    HTMLPanel videoHolderUi;
     
-    final VideoPlayer vJs = new VideoPlayer();
+    final VideoJSPlayer vJs = new VideoJSPlayer();
 
     public MainMediaVideo(SailingVideoDTO video) {
         this(video, false);
@@ -42,8 +43,8 @@ public class MainMediaVideo extends Composite {
         // }
 
         vJs.setVideo(video);
-        vJs.addStyleName(MainMediaResources.INSTANCE.css().videopreview_videocontainer_video());
-        videoHolderUi.setWidget(vJs);
+        videoHolderUi.clear();
+        videoHolderUi.add(vJs);
         String eventName = video.getTitle();
         if(eventName == null || eventName.isEmpty()) {
             videoTitleWrapper.removeFromParent();
@@ -62,4 +63,9 @@ public class MainMediaVideo extends Composite {
         // }, MouseOverEvent.getType());
 
     }
+
+    public void show(SailingVideoDTO video) {
+        vJs.setVideo(video);
+    }
+    
 }

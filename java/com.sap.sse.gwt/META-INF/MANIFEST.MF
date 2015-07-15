@@ -38,5 +38,4 @@ Export-Package: com.google.gwt.user.client.rpc.core.java.util,
  com.sap.sse.gwt.server,
  com.sap.sse.gwt.server.filestorage,
  com.sap.sse.gwt.shared,
- com.sap.sse.gwt.shared.filestorage,
- com.sap.sse.gwt.resources
+ com.sap.sse.gwt.shared.filestorage

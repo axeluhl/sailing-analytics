@@ -6,9 +6,6 @@ The term itself should be revised at some point, and currently refers to the tec
 ## Server Architecture
 [Server Architecture](racelog-tracking/server)
 
-## Setting Up
-[Smartphone Tracking](wiki/smartphone-tracking)
-
 ## App Architecture
 - [current Tracking App](tracking-app)
 - [old prototype](racelog-tracking/app)

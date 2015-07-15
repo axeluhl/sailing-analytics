@@ -9,13 +9,13 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
@@ -25,11 +25,11 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
     protected final SeriesContext ctx;
     protected final SeriesClientFactory clientFactory;
 
-    protected final DesktopPlacesNavigator homePlacesNavigator;
+    protected final HomePlacesNavigator homePlacesNavigator;
     
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
-    public AbstractSeriesActivity(PLACE place, SeriesClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
+    public AbstractSeriesActivity(PLACE place, SeriesClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.ctx = new SeriesContext(place.getCtx());
         this.clientFactory = clientFactory;

@@ -35,7 +35,7 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -55,7 +55,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -1047,14 +1047,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
-        String sailorsInfoWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name());
-        if (sailorsInfoWebSiteURLAsString != null) {
-            try {
-                result.setSailorsInfoWebsiteURL(new URL(sailorsInfoWebSiteURLAsString));
-            } catch (MalformedURLException e) {
-                logger.severe("Error parsing sailors info website URL "+sailorsInfoWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
-            }
-        }
         BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {
@@ -1404,9 +1396,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogAdditionalScoringInformationEvent.class.getSimpleName())) {
             return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogFixedMarkPassingEvent.class.getSimpleName())){
+        } else if (eventClass.equals(FixedMarkPassingEvent.class.getSimpleName())){
             return loadRaceLogFixedMarkPassingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogSuppressedMarkPassingsEvent.class.getSimpleName())){
+        } else if (eventClass.equals(SuppressedMarkPassingsEvent.class.getSimpleName())){
             return loadRaceLogSuppressedMarkPassingsEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 

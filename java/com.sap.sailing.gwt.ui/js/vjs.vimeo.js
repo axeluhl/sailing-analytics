@@ -239,7 +239,14 @@ videojs.Vimeo.prototype.supportsFullScreen = function() {
 };
 
 videojs.Vimeo.canPlaySource = function(srcObj){
-  return (srcObj.type == 'video/vimeo');
+  if (srcObj.type)  
+      return (srcObj.type == 'video/vimeo');
+  else {
+      var regExp = /^.*(vimeo\.com\/)((channels\/[A-z]+\/)|(groups\/[A-z]+\/videos\/))?([0-9]+)/;
+      var match = srcObj.src.match(regExp);
+
+      return (match)
+  }
 };
 
 videojs.Vimeo.makeQueryString = function(args){
@@ -466,7 +473,7 @@ var Froogaloop = (function(){
      * Retrieves stored callbacks.
      */
     function getCallback(eventName, target_id) {
-        if (target_id && eventCallbacks[target_id]) {
+        if (target_id) {
             return eventCallbacks[target_id][eventName];
         }
         else {

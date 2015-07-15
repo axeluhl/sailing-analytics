@@ -11,7 +11,7 @@ import com.sap.sailing.simulator.SimulationResults;
 
 public interface SimulationService {
 
-    long getSimulationResultsVersion(LegIdentifier legIdentifier);
+    int getSimulationResultsVersion(LegIdentifier legIdentifier);
     
     SimulationResults getSimulationResults(LegIdentifier legIdentifier);
 

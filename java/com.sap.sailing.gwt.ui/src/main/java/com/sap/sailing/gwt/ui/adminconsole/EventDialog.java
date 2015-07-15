@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -44,10 +42,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected TextBox officialWebsiteURLEntryField;
-    protected TextBox sailorsInfoWebsiteURLEntryField;
     protected StringListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
-    protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
+    protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
     protected ImagesListComposite imagesListComposite; 
     protected VideosListComposite videosListComposite; 
 
@@ -122,10 +119,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
-        this.availableLeaderboardGroupsByName = new HashMap<>();
-        for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
-            availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
-        }
+        this.availableLeaderboardGroups = availableLeaderboardGroups;
         getDialogBox().getWidget().setWidth("730px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -155,16 +149,14 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected EventDTO getResult() {
         EventDTO result = new EventDTO();
         List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
-        for (final String lgName : leaderboardGroupNames) {
-            final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
-            if (lgDTO != null) {
-                result.addLeaderboardGroup(lgDTO);
+        for(LeaderboardGroupDTO lg: availableLeaderboardGroups) {
+            if(leaderboardGroupNames.contains(lg.getName())) {
+                result.addLeaderboardGroup(lg);
             }                
         }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
-        result.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURLEntryField.getText().trim().isEmpty() ? null : sailorsInfoWebsiteURLEntryField.getText().trim());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -195,7 +187,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             panel.add(additionalWidget);
         }
 
-        Grid formGrid = new Grid(8, 2);
+        Grid formGrid = new Grid(7, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
@@ -212,8 +204,6 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(5, 1, isPublicCheckBox);
         formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
         formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
-        formGrid.setWidget(7, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
-        formGrid.setWidget(7, 1, sailorsInfoWebsiteURLEntryField);
 
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("250px");

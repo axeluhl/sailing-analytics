@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,8 +26,6 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
  * @author Frank Mittag (c163874)
  */
 public abstract class AbstractLeaderboardViewer extends SimplePanel {
-    
-    protected static final ViewerToolbar RES = GWT.create(ViewerToolbar.class);
     protected final StringMessages stringMessages;
     private final LeaderboardPanel leaderboardPanel;
     protected final CompetitorSelectionModel competitorSelectionProvider;
@@ -38,7 +35,10 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
 
     protected final Timer timer;
     protected final boolean hideToolbar;
-
+    
+    private final static String STYLE_VIEWER_TOOLBAR = "viewerToolbar";
+    private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
+    private final static String STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON = "viewerToolbar-settingsButton";
 
     public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, StringMessages stringMessages, boolean hideToolbar, LeaderboardPanel leaderboardPanel) {
@@ -48,8 +48,6 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         this.stringMessages = stringMessages;
         this.timer = timer;
         this.hideToolbar = hideToolbar;
-        
-        RES.css().ensureInjected();
     }
     
     public LeaderboardPanel getLeaderboardPanel() {
@@ -63,7 +61,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         getElement().getStyle().setMarginRight(12, Unit.PX);
         if (!hideToolbar) {
             componentsNavigationPanel = new FlowPanel();
-            componentsNavigationPanel.addStyleName(RES.css().viewerToolbar());
+            componentsNavigationPanel.addStyleName(STYLE_VIEWER_TOOLBAR);
             mainPanel.add(componentsNavigationPanel);
         }
         return mainPanel;
@@ -82,7 +80,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
             checkBox.setEnabled(isCheckboxEnabled);
             checkBox.setValue(component.isVisible());
             checkBox.setTitle(stringMessages.showHideComponent(componentName));
-            checkBox.addStyleName(RES.css().viewerToolbarInnerElement());
+            checkBox.addStyleName(STYLE_VIEWER_TOOLBAR_INNERELEMENT);
             checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> newValue) {
@@ -110,12 +108,11 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
                 });
             }
             settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
-            settingsButton.addStyleName(RES.css().viewerToolbarSettingsButton());
+            settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
             settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
             settingsButton.setTitle(stringMessages.settingsForComponent(componentName));
             componentsNavigationPanel.add(settingsButton);
         }
     }
-
 }
 

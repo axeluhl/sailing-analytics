@@ -5,14 +5,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -48,19 +51,21 @@ public class TrackedRegattaImpl implements TrackedRegatta {
      */
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     
-    private transient ConcurrentHashMap<RaceListener, RaceListener> raceListeners;
+    private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
+    private transient Set<RaceListener> raceListeners;
 
     public TrackedRegattaImpl(Regatta regatta) {
         super();
         trackedRacesLock = new NamedReentrantReadWriteLock("trackeRaces lock for tracked regatta "+regatta.getName(), /* fair */ false);
         this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
-        raceListeners = new ConcurrentHashMap<RaceListener, RaceListener>();
+        this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
+        raceListeners = new HashSet<RaceListener>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        this.raceListeners = new ConcurrentHashMap<RaceListener, RaceListener>();
+        this.raceListeners = new HashSet<RaceListener>();
     }
     
     @Override
@@ -99,22 +104,31 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private Object readResolve() throws ObjectStreamException {
         TrackedRegattaImpl result = new TrackedRegattaImpl(this.regatta);
         result.trackedRaces.putAll(this.trackedRaces);
+        result.trackedRacesByBoatClass.putAll(this.trackedRacesByBoatClass);
         return result;
     }
 
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
         final TrackedRace oldTrackedRace;
-        lockTrackedRacesForWrite();
+        LockUtil.lockForWrite(trackedRacesLock);
         try {
             logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
                     " with regatta hash code "+getRegatta().hashCode());
             oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
+            if (oldTrackedRace != trackedRace) {
+                Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
+                if (coll == null) {
+                    coll = new ArrayList<TrackedRace>();
+                    trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
+                }
+                coll.add(trackedRace);
+            }
         } finally {
-            unlockTrackedRacesAfterWrite();
+            LockUtil.unlockAfterWrite(trackedRacesLock);
         }
         if (oldTrackedRace != trackedRace) {
-            for (RaceListener listener : raceListeners.keySet()) {
+            for (RaceListener listener : raceListeners) {
                 listener.raceAdded(trackedRace);
             }
         }
@@ -135,7 +149,14 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         LockUtil.lockForWrite(trackedRacesLock);
         try {
             trackedRaces.remove(trackedRace.getRace());
-            for (RaceListener listener : raceListeners.keySet()) {
+            Collection<TrackedRace> trbbc = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
+            if (trbbc != null) {
+                trbbc.remove(trackedRace);
+                if (trbbc.isEmpty()) {
+                    trackedRacesByBoatClass.remove(trackedRace.getRace().getBoatClass());
+                }
+            }
+            for (RaceListener listener : raceListeners) {
                 listener.raceRemoved(trackedRace);
             }
         } finally {
@@ -157,40 +178,28 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
+    public Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass) {
+        return trackedRacesByBoatClass.get(boatClass);
+    }
+
+    @Override
     public TrackedRace getTrackedRace(RaceDefinition race) {
         boolean interrupted = false;
-        TrackedRace result = getExistingTrackedRace(race);
-        if (!interrupted && result == null) {
-            final Object mutex = new Object();
-            final RaceListener listener = new RaceListener() {
-                @Override
-                public void raceRemoved(TrackedRace trackedRace) {}
-                
-                @Override
-                public void raceAdded(TrackedRace trackedRace) {
-                    synchronized (mutex) {
-                        mutex.notifyAll();
-                    }
+        lockTrackedRacesForRead();
+        try {
+            TrackedRace result = trackedRaces.get(race);
+            while (!interrupted && result == null) {
+                try {
+                    trackedRaces.wait();
+                    result = trackedRaces.get(race);
+                } catch (InterruptedException e) {
+                    interrupted = true;
                 }
-            };
-            addRaceListener(listener);
-            try {
-                synchronized (mutex) {
-                    result = getExistingTrackedRace(race);
-                    while (!interrupted && result == null) {
-                        try {
-                            mutex.wait();
-                            result = getExistingTrackedRace(race);
-                        } catch (InterruptedException e) {
-                            interrupted = true;
-                        }
-                    }
-                }
-            } finally {
-                removeRaceListener(listener);
             }
+            return result;
+        } finally {
+            unlockTrackedRacesAfterRead();
         }
-        return result;
     }
     
     @Override
@@ -208,23 +217,13 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
         lockTrackedRacesForRead();
         try {
-            raceListeners.put(listener, listener);
+            raceListeners.add(listener);
             Util.addAll(getTrackedRaces(), trackedRacesCopy);
         } finally {
             unlockTrackedRacesAfterRead();
         }
         for (TrackedRace trackedRace : trackedRacesCopy) {
             listener.raceAdded(trackedRace);
-        }
-    }
-
-    @Override
-    public void removeRaceListener(RaceListener listener) {
-        lockTrackedRacesForRead();
-        try {
-            raceListeners.remove(listener);
-        } finally {
-            unlockTrackedRacesAfterRead();
         }
     }
 

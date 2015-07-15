@@ -9,7 +9,6 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private int trackedRacesCount;
     private String boatClass;
     private String boatCategory;
-    private String defaultCourseAreaName;
     private Date startDate;
     private Date endDate;
     private RegattaState state;
@@ -91,13 +90,5 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setState(RegattaState state) {
         this.state = state;
-    }
-
-    public String getDefaultCourseAreaName() {
-        return defaultCourseAreaName;
-    }
-
-    public void setDefaultCourseAreaName(String defaultCourseAreaName) {
-        this.defaultCourseAreaName = defaultCourseAreaName;
     }
 }

@@ -197,9 +197,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     }
 
     /**
-     * Checks whether this replicable is a replica. If yes, the operation is executed locally and sent to the master
-     * server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes and
-     * replicates the operation immediately.
+     * Checks whether this replicable is a replica. If yes, the operation is not executed locally but instead sent to
+     * the master server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes
+     * and replicates the operation immediately.
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
         boolean needToRemoveThreadLocal = false;
@@ -249,10 +249,10 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             }
             return result;
         } catch (Exception e) {
+            // FIXME why is the following call not performed in a finally clause? What are the consequences of not "cleaning up" in case the method terminates normally?
+            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
-        } finally {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
         }
     }
 }

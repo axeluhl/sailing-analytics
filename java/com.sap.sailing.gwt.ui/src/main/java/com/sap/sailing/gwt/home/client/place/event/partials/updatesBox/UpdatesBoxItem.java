@@ -15,8 +15,8 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
@@ -36,7 +36,7 @@ public class UpdatesBoxItem extends Widget {
     @UiField DivElement messageUi;
     @UiField DivElement timestampUi;
     
-    public UpdatesBoxItem(NewsEntryDTO entry, Date currentTimestamp, EventView.Presenter presenter) {
+    public UpdatesBoxItem(NewsEntryDTO entry, EventView.Presenter presenter) {
         UpdatesBoxResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
@@ -55,6 +55,7 @@ public class UpdatesBoxItem extends Widget {
         }
         
         Date newsTimestamp = entry.getTimestamp();
+        Date currentTimestamp = entry.getCurrentTimestamp();
         if(newsTimestamp == null || currentTimestamp == null) {
             timestampUi.removeFromParent();
         } else {

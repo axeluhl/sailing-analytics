@@ -3,8 +3,7 @@ package com.sap.sailing.domain.persistence.impl;
 import java.util.logging.Logger;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -18,11 +17,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
@@ -180,13 +178,13 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     }
     
         @Override
-    public void visit(RaceLogFixedMarkPassingEvent event) {
+    public void visit(FixedMarkPassingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(RaceLogSuppressedMarkPassingsEvent event) {
+    public void visit(SuppressedMarkPassingsEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
@@ -195,19 +193,5 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogDependentStartTimeEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
-    }
-
-    @Override
-    public void visit(RaceLogStartOfTrackingEvent event) {
-        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        mongoObjectFactory.storeRaceLogEventEvent(object);
-        
-    }
-
-    @Override
-    public void visit(RaceLogEndOfTrackingEvent event) {
-        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        mongoObjectFactory.storeRaceLogEventEvent(object);
-        
     }
 }

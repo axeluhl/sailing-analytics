@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,7 +27,6 @@ public class EventRegattaRaces extends Composite {
     @UiField HTMLPanel regattaPhasesNavigationPanel;   
     @UiField HTMLPanel regattaPhasesPanel;
     @UiField HTMLPanel rootPanel;
-    @UiField DivElement racesUi;
     
     private final List<EventRegattaRacesPhase> phaseElements;
     private final Presenter presenter;
@@ -48,7 +46,7 @@ public class EventRegattaRaces extends Composite {
         // clear all existing child elements first
         regattaPhasesPanel.getElement().removeAllChildren();
         phaseElements.clear();
-        
+       
         regatta.setData(leaderboardGroup, hasMultipleLeaderboardGroups, leaderboard, raceGroup);
         
         int regattaPhases = raceGroup.getSeries().size();
@@ -58,14 +56,11 @@ public class EventRegattaRaces extends Composite {
                 regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
                 phaseElements.add(regattaPhase);
             }
-        } else if(regattaPhases == 1) {
+        } else {
             RaceGroupSeriesDTO raceGroupSeriesDTO = raceGroup.getSeries().get(0);
             EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, raceGroupSeriesDTO, presenter); 
             regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
             phaseElements.add(regattaPhase);
-        } else {
-            regattaPhasesPanel.removeFromParent();
-            racesUi.removeFromParent();
         }
     }
 }

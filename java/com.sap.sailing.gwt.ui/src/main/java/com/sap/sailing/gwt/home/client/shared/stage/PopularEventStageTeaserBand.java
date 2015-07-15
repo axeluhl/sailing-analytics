@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 /**
@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
  */
 public class PopularEventStageTeaserBand extends StageTeaserBand {
 
-    public PopularEventStageTeaserBand(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
+    public PopularEventStageTeaserBand(EventStageDTO event, HomePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getDisplayName());

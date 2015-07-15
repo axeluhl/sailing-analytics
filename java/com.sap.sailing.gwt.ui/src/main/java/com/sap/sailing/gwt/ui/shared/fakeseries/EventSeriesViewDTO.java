@@ -6,11 +6,10 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.HasLogo;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class EventSeriesViewDTO implements IsSerializable, HasLogo {
+public class EventSeriesViewDTO implements IsSerializable {
     private UUID id;
     private String displayName;
     private ArrayList<EventMetadataDTO> events = new ArrayList<>();

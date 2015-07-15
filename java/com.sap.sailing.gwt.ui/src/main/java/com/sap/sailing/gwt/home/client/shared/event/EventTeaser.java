@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -13,10 +12,10 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
@@ -88,11 +87,4 @@ public class EventTeaser extends Composite {
         eventImage.getStyle().setBackgroundImage(thumbnailUrlBuilder.toString());
     }
 
-    public void hideImage(boolean hide) {
-        if (hide) {
-            eventImage.getStyle().setDisplay(Display.NONE);
-        } else {
-            eventImage.getStyle().setDisplay(Display.BLOCK);
-        }
-    }
 }

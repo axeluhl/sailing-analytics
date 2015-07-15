@@ -246,11 +246,12 @@ if [[ $OPERATION == "auto-install" ]]; then
         activate_user_data
         # then download and install environment and append to env.sh
         install_environment
-	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
-	append_user_data_to_envsh
+	    # finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+	    append_user_data_to_envsh
 
         # make sure to reload data
         source `pwd`/env.sh
+
 
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
             echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"

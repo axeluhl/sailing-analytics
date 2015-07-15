@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -51,6 +52,7 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
     private static final long serialVersionUID = -7282869695818293745L;
+    private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
     protected final Speed maxSpeedForSmoothing;
     
     private final ItemType trackedItem;

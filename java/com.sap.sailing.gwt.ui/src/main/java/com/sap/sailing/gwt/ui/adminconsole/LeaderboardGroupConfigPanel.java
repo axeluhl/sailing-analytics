@@ -697,11 +697,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                 for (int i = 0; i < availableLeaderboardGroups.size(); i++) {
                                     LeaderboardGroupDTO group = availableLeaderboardGroups.get(i);
                                     if (oldGroupName.equals(group.getName())) {
-                                        // if the leaderboard is selected, de-select equality/hashCode may change) and select again when done
-                                        final boolean wasSelected = Util.equalsWithNull(groupToUpdate, getSelectedGroup());
-                                        if (wasSelected) {
-                                            groupsSelectionModel.setSelected(groupToUpdate, false);
-                                        }
                                         groupToUpdate.setName(updateDescriptor.getName());
                                         groupToUpdate.description = updateDescriptor.getDescription();
                                         groupToUpdate.setDisplayName(updateDescriptor.getDisplayName());
@@ -712,9 +707,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                         int displayedIndex = groupsProvider.getList().indexOf(group);
                                         if (displayedIndex != -1) {
                                             groupsProvider.getList().set(displayedIndex, groupToUpdate);
-                                        }
-                                        if (wasSelected) {
-                                            groupsSelectionModel.setSelected(groupToUpdate, true);
                                         }
                                     }
                                 }

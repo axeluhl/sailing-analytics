@@ -60,7 +60,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private Boolean[] visiblePaths;
     private PathDTO racePath;
     private int raceLeg = 0;
-    private long requestedSimulationVersion = 0;
     private Canvas simulationLegend;
     
     public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem) {
@@ -72,14 +71,9 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         this.colors = new ColorPaletteGenerator();
     }
     
-    public void updateLeg(int newLeg, boolean clearCanvas, long newVersion) {
-        if (((newLeg != raceLeg)||((newLeg == raceLeg)&&(newVersion > this.getVersion()))) && (this.isVisible())) {
-            if (newLeg != raceLeg) {
-                raceLeg = newLeg;
-                requestedSimulationVersion = 0;                
-            } else {
-                requestedSimulationVersion = newVersion;
-            }
+    public void updateLeg(int newLeg, boolean clearCanvas, int newVersion) {
+        if (((newLeg != raceLeg)||((newLeg == raceLeg)&&(newVersion != (simulationResult==null ? 0 : simulationResult.getVersion())))) && (this.isVisible())) {
+            raceLeg = newLeg;
             if (clearCanvas) {
                 this.clearCanvas();
             }
@@ -91,7 +85,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         return new LegIdentifierImpl(raceIdentifier, String.valueOf(raceLeg));
     }
     
-    public long getVersion() {
+    public int getVersion() {
         if (this.simulationResult == null) {
             return 0;
         } else {
@@ -346,7 +340,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                     public void onSuccess(SimulatorResultsDTO result) {
                         // store results
                         if (result != null) {
-                            if ((result.getPaths() != null) && (result.getVersion() >= requestedSimulationVersion) && (result.getLeg() == raceLeg)) {
+                            if (result.getPaths() != null) {
                                 simulationResult = result;
                                 PathDTO[] paths = result.getPaths();
                                 if (result.getLegDuration() > 0) {

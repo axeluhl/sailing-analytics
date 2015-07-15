@@ -1093,7 +1093,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String advancePassId();
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
-    String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
@@ -1282,7 +1281,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
-    String courseAreaName(String courseAreaName);
     String currentOfTotalLegs(int currentLeg, int totalLegs);
     String clone();
     String changed();
@@ -1321,31 +1319,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
-    String resultsQuickfinder();
-    String statistics();
-    String impressions();
-    String notAvailableOnMobileMessage();
-    String gotoDesktop();
-    String goBack();
     String resultsUpdate();
     String competitorWonRace(String competitorName);
-    String showAllX(String text);
-    String collapseX(String text);
-    String numberOfGPSFixes();
-    String fastestSailor();
-    String numberWindFixes();
-    String sailedMiles();
-    String millionValue(double value);
-    String billionValue(double value);
-    String noResults();
-    String noNews();
-    String pointsValue(double value);
-    String openLeaderboard();
     String now();
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
-    String selectCompetitor();
-    String points();
-    String numberOfRacesShort();
-    String miniLeeaderboardLegendText();
 }

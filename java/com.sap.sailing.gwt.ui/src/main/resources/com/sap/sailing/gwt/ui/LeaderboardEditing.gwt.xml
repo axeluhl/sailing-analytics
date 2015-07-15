@@ -18,7 +18,7 @@
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	
   	<!-- Highcharts API -->
-	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />

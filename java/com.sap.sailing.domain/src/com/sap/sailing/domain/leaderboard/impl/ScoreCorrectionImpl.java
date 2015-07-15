@@ -2,11 +2,12 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +40,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */
-    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
+    private final Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
 
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
+    private final Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
 
     /**
      * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
@@ -66,8 +67,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     public ScoreCorrectionImpl(Leaderboard leaderboard) {
         this.leaderboard = leaderboard;
-        this.maxPointsReasons = new ConcurrentHashMap<>();
-        this.correctedScores = new ConcurrentHashMap<>();
+        this.maxPointsReasons = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason>();
+        this.correctedScores = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double>();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
 

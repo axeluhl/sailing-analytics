@@ -9,8 +9,7 @@ public class ResultWithTTL<T extends DTO> implements Result {
 
     private T dto;
     
-    @SuppressWarnings("unused")
-    private ResultWithTTL() {
+    public ResultWithTTL() {
     }
 
     public ResultWithTTL(long ttl, T dto) {

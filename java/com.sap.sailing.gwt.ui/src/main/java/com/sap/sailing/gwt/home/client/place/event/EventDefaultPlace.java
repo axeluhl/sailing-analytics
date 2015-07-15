@@ -1,9 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.event;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class EventDefaultPlace extends AbstractEventPlace implements HasMobileVersion {
+public class EventDefaultPlace extends AbstractEventPlace {
 
     public EventDefaultPlace(EventContext ctx) {
         super(ctx);
