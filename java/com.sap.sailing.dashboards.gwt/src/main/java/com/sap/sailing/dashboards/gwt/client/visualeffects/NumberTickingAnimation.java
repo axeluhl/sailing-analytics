@@ -1,10 +1,14 @@
 package com.sap.sailing.dashboards.gwt.client.visualeffects;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Timer;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+
 
 /**
  * Animates number values changes in the UI as ticking animation. Requires a method to change the value of the corresponding UI element.
@@ -12,33 +16,30 @@ import com.google.gwt.user.client.Timer;
  * @author Alexander Ries (D062114)
  *
  */
-public abstract class NumberTickingAnimation implements NumberValueSetter {
+public abstract class NumberTickingAnimation implements NumberValueSetter, TimeListener {
 
     private double previousNumber = 0;
-    private Timer timer;
     int counter = 0;
+    Timer timer;
     List<String> animationNumberStrings;
     private final int ANIMATION_TIME_IN_MILLISECONDS = 1000;
     
-    public void execute(String numberString) { 
-        double numberAsDouble = Double.parseDouble(numberString);
-        animationNumberStrings = getValuesBetweenDoubleOldAndNewNumber(numberAsDouble);
-        int animationTimePerNumber = ANIMATION_TIME_IN_MILLISECONDS/animationNumberStrings.size();
-            timer = new Timer() {
-                @Override
-                public void run() {
-                            if(animationNumberStrings.size() > counter) {
-                             String value = animationNumberStrings.get(counter);
-                            setValueInUI(value);
-                            counter++;
-                            }else {
-                                timer.cancel();
-                                counter = 0;
-                            }
-                        }                    
-            };
-            timer.scheduleRepeating(animationTimePerNumber);
-        }
+    public NumberTickingAnimation(){
+        animationNumberStrings = new ArrayList<String>();
+        timer = new Timer(PlayModes.Live);
+    }
+    
+    public void execute(String numberString) {
+        //if (!timer.getPlayState().equals(Timer.PlayStates.Playing)) {
+            double numberAsDouble = Double.parseDouble(numberString);
+            animationNumberStrings.clear();
+            animationNumberStrings = getValuesBetweenDoubleOldAndNewNumber(numberAsDouble);
+            int animationTimePerNumber = ANIMATION_TIME_IN_MILLISECONDS / animationNumberStrings.size();
+            timer.setRefreshInterval(animationTimePerNumber);
+            timer.addTimeListener(this);
+            timer.play();
+        //}
+    }
     
     private List<String> getValuesBetweenDoubleOldAndNewNumber(double number) {
         List<String> result = new ArrayList<String>();
@@ -58,4 +59,16 @@ public abstract class NumberTickingAnimation implements NumberValueSetter {
         return result;
     }
     
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        if (animationNumberStrings.size() > counter) {
+            String value = animationNumberStrings.get(counter);
+            setValueInUI(value);
+            counter++;
+        } else {
+            timer.pause();
+            timer.removeTimeListener(this);
+            counter = 0;
+        }
+    }
 }
