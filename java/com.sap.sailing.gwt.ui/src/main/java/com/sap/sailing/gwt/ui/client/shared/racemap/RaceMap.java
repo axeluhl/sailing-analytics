@@ -1326,44 +1326,44 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
                         .format(leewardStartLinePosition.getDistance(firstMarkPosition)
                                 .getMeters())));
-        final MouseOverMapHandler windwardStartLineMarkToFirstMarkLineTooltipHandler = new MouseOverMapHandler() {
+        final LineInfoProvider windwardStartLineMarkToFirstMarkLineInfoProvider = new LineInfoProvider() {
             @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(windwardStartLineMarkToFirstMarkLineText.toString());
+            public String getLineInfo() {
+                return windwardStartLineMarkToFirstMarkLineText.toString();
             }
         };
-        final MouseOverMapHandler leewardStartLineMarkToFirstMarkLineTooltipHandler = new MouseOverMapHandler() {
+        final LineInfoProvider leewardStartLineMarkToFirstMarkLineInfoProvider = new LineInfoProvider() {
             @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(leewardStartLineMarkToFirstMarkLineText.toString());
+            public String getLineInfo() {
+                return leewardStartLineMarkToFirstMarkLineText.toString();
             }
         };
         windwardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(windwardStartLineMarkToFirstMarkLine, /* showLine */
                 (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE) ||
                  settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY))
                         && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
-                windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineTooltipHandler,
+                windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineInfoProvider,
                 "grey");
         leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
                 (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE) ||
                  settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY))
                         && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
-                leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineTooltipHandler,
+                leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineInfoProvider,
                 "grey");
     }
 
     private final StringBuilder startLineAdvantageText = new StringBuilder();
     private final StringBuilder finishLineAdvantageText = new StringBuilder();
-    final MouseOverMapHandler startLineTooltipHandler = new MouseOverMapHandler() {
+    final LineInfoProvider startLineInfoProvider = new LineInfoProvider() {
         @Override
-        public void onEvent(MouseOverMapEvent event) {
-            map.setTitle(stringMessages.startLine()+startLineAdvantageText);
+        public String getLineInfo() {
+            return stringMessages.startLine()+startLineAdvantageText;
         }
     };
-    final MouseOverMapHandler finishLineTooltipHandler = new MouseOverMapHandler() {
+    final LineInfoProvider finishLineInfoProvider = new LineInfoProvider() {
         @Override
-        public void onEvent(MouseOverMapEvent event) {
-            map.setTitle(stringMessages.finishLine()+finishLineAdvantageText);
+        public String getLineInfo() {
+            return stringMessages.finishLine()+finishLineAdvantageText;
         }
     };
 
@@ -1392,7 +1392,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     ((oneBasedLegOfLeadingCompetitor <= 1 && 
                      settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE)) ||
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)),
-                    startLineLeftPosition, startLineRightPosition, startLineTooltipHandler, "#ffffff");
+                    startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff");
             // TODO bug3027: show SmallTransparentInfoOverlay in addition to tooltip if course geometry option is true; remove it if option is false
             // TODO bug3027: show *all* course middle lines if course geometry option is true
             
@@ -1411,7 +1411,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             finishLine = showOrRemoveOrUpdateLine(finishLine, /* showLine */ courseDTO.getFinishMarkPositions() != null && courseDTO.getFinishMarkPositions().size() == 2 &&
                     (oneBasedLegOfLeadingCompetitor > 0 && oneBasedLegOfLeadingCompetitor == numberOfLegs && settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE))
                  || settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY),
-                    finishLineLeftPosition, finishLineRightPosition, finishLineTooltipHandler, "#000000");
+                    finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, "#000000");
             // the control point pairs for which we already decided whether or not
             // to show a course middle line for; values tell whether to show the line and for which zero-based
             // start waypoint index to do so; when for an equal control point pair multiple decisions with different
@@ -1467,9 +1467,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             final int zeroBasedIndexOfStartWaypoint, final boolean showLine) {
         final Position position1DTO = courseDTO.waypointPositions.get(zeroBasedIndexOfStartWaypoint);
         final Position position2DTO = courseDTO.waypointPositions.get(zeroBasedIndexOfStartWaypoint+1);
-        final MouseOverMapHandler tooltipHandler = new MouseOverMapHandler() {
+        final LineInfoProvider lineInfoProvider = new LineInfoProvider() {
             @Override
-            public void onEvent(MouseOverMapEvent event) {
+            public String getLineInfo() {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(stringMessages.courseMiddleLine());
                 sb.append('\n');
@@ -1487,12 +1487,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         sb.append(stringMessages.degreesToWind(diff));
                     }
                 }
-                map.setTitle(sb.toString());
+                return sb.toString();
             }
         };
-        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO, tooltipHandler, "#2268a0");
+        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO, lineInfoProvider, "#2268a0");
     }
 
+    private interface LineInfoProvider {
+        String getLineInfo();
+    }
+    
     /**
      * @param showLine
      *            tells whether or not to show the line; if the <code>lineToShowOrRemoveOrUpdate</code> references a
@@ -1503,7 +1507,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      *         otherwise
      */
     private Polyline showOrRemoveOrUpdateLine(Polyline lineToShowOrRemoveOrUpdate, final boolean showLine,
-            final Position position1DTO, final Position position2DTO, final MouseOverMapHandler tooltipHandler, String lineColorRGB) {
+            final Position position1DTO, final Position position2DTO, final LineInfoProvider lineInfoProvider, String lineColorRGB) {
         if (showLine) {
             LatLng courseMiddleLinePoint1 = coordinateSystem.toLatLng(position1DTO);
             LatLng courseMiddleLinePoint2 = coordinateSystem.toLatLng(position2DTO);
@@ -1518,7 +1522,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 pointsAsArray = MVCArray.newInstance();
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
-                lineToShowOrRemoveOrUpdate.addMouseOverHandler(tooltipHandler);
+                lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
+                    @Override
+                    public void onEvent(MouseOverMapEvent event) {
+                        map.setTitle(lineInfoProvider.getLineInfo());
+                    }
+                });
                 lineToShowOrRemoveOrUpdate.addMouseOutMoveHandler(new MouseOutMapHandler() {
                     @Override
                     public void onEvent(MouseOutMapEvent event) {
