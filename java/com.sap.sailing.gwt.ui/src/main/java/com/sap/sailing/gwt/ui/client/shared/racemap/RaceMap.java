@@ -1304,8 +1304,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private void showCourseGeometryMetrics(final CoursePositionsDTO courseDTO) {
-        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
-                && courseDTO.startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
+        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)) {
             // based on the courseDTO, find the symmetrical pairs of marks that form legs, regardless the to/from
             // direction, draw those 
         }
@@ -1315,18 +1314,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final StringBuilder leewardStartLineMarkToFirstMarkLineText = new StringBuilder();
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
+        final List<Position> startMarkPositions = courseDTO.getStartMarkPositions();
         if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)
-                && courseDTO.startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
-            LatLng windwardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0)); 
-            LatLng leewardStartLinePoint = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1));
+                && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
+            LatLng windwardStartLinePoint = coordinateSystem.toLatLng(startMarkPositions.get(0)); 
+            LatLng leewardStartLinePoint = coordinateSystem.toLatLng(startMarkPositions.get(1));
             LatLng firstMarkPoint = coordinateSystem.toLatLng(courseDTO.waypointPositions.get(1));
             windwardStartLineMarkToFirstMarkLineText.replace(0, windwardStartLineMarkToFirstMarkLineText.length(),
                     stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
-                            .format(courseDTO.startMarkPositions.get(0).getDistance(courseDTO.waypointPositions.get(1))
+                            .format(startMarkPositions.get(0).getDistance(courseDTO.waypointPositions.get(1))
                                     .getMeters())));
             leewardStartLineMarkToFirstMarkLineText.replace(0, leewardStartLineMarkToFirstMarkLineText.length(),
                     stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
-                            .format(courseDTO.startMarkPositions.get(1).getDistance(courseDTO.waypointPositions.get(1))
+                            .format(startMarkPositions.get(1).getDistance(courseDTO.waypointPositions.get(1))
                                     .getMeters())));
             if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
                 PolylineOptions options = PolylineOptions.newInstance();
@@ -1408,133 +1408,113 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             int oneBasedLegOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
             int numberOfLegs = courseDTO.course.waypoints.size()-1;
             // draw the start line
-            updateCountdownCanvas(courseDTO.course.waypoints.get(0));
-            if (oneBasedLegOfLeadingCompetitor <= 1 && 
-                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions != null && courseDTO.startMarkPositions.size() == 2) {
-                LatLng startLinePoint1 = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(0));
-                LatLng startLinePoint2 = coordinateSystem.toLatLng(courseDTO.startMarkPositions.get(1)); 
-                if (courseDTO.startLineAngleToCombinedWind != null) {
-                    startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
-                            NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
-                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleToCombinedWind)),
-                            courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
-                            NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
-                } else {
-                    startLineAdvantageText.delete(0, startLineAdvantageText.length());
-                }
-                if (startLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance();
-                    options.setClickable(true);
-                    options.setGeodesic(true);
-                    options.setStrokeColor("#FFFFFF");
-                    options.setStrokeWeight(1);
-                    options.setStrokeOpacity(1.0);
-                    
-                    MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
-                    pointsAsArray.insertAt(0, startLinePoint1);
-                    pointsAsArray.insertAt(1, startLinePoint2);
-
-                    startLine = Polyline.newInstance(options);
-                    startLine.setPath(pointsAsArray);
-
-                    startLine.addMouseOverHandler(new MouseOverMapHandler() {
-                        @Override
-                        public void onEvent(MouseOverMapEvent event) {
-                            map.setTitle(stringMessages.startLine()+startLineAdvantageText);
-                        }
-                    });
-                    startLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                        @Override
-                        public void onEvent(MouseOutMapEvent event) {
-                            map.setTitle("");
-                        }
-                    });
-                    startLine.setMap(map);
-                } else {
-                    startLine.getPath().removeAt(1);
-                    startLine.getPath().removeAt(0);
-                    startLine.getPath().insertAt(0, startLinePoint1);
-                    startLine.getPath().insertAt(1, startLinePoint2);
-                }
+            final WaypointDTO startWaypoint = courseDTO.course.waypoints.get(0);
+            updateCountdownCanvas(startWaypoint);
+            final Position startLineLeftPosition = courseDTO.getStartMarkPositions().get(0);
+            final Position startLineRightPosition = courseDTO.getStartMarkPositions().get(1);
+            if (courseDTO.startLineAngleToCombinedWind != null) {
+                startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
+                        NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
+                        NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleToCombinedWind)),
+                        courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
+                        NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
             } else {
-                if (startLine != null) {
-                    startLine.setMap(null);
-                    startLine = null;
-                }
+                startLineAdvantageText.delete(0, startLineAdvantageText.length());
             }
+            final MouseOverMapHandler startLineTooltipHandler = new MouseOverMapHandler() {
+                @Override
+                public void onEvent(MouseOverMapEvent event) {
+                    map.setTitle(stringMessages.startLine()+startLineAdvantageText);
+                }
+            };
+            startLine = showOrRemoveOrUpdateLine(startLine, /* showLine */ oneBasedLegOfLeadingCompetitor <= 1 && 
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) &&
+                    courseDTO.getStartMarkPositions().size() == 2, startLineLeftPosition, startLineRightPosition, startLineTooltipHandler, "#ffffff");
             // TODO bug3027: also show advantage information for all other gates/lines; generalize CoursePositionsDTO line structures to provide this info
             // TODO bug3027: show SmallTransparentInfoOverlay in addition to tooltip if course geometry option is true; remove it if option is false
             // TODO bug3027: show *all* course middle lines if course geometry option is true
             
             // draw the finish line
-            if (oneBasedLegOfLeadingCompetitor > 0 && oneBasedLegOfLeadingCompetitor == numberOfLegs &&
-                settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions != null && courseDTO.finishMarkPositions.size() == 2) {
-                LatLng finishLinePoint1 = coordinateSystem.toLatLng(courseDTO.finishMarkPositions.get(0)); 
-                LatLng finishLinePoint2 = coordinateSystem.toLatLng(courseDTO.finishMarkPositions.get(1)); 
-                if (courseDTO.startLineAngleToCombinedWind != null) {
-                    finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
-                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
-                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleToCombinedWind)),
-                            courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
-                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
-                } else {
-                    finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
-                }
-                if (finishLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance();
-                    options.setClickable(true);
-                    options.setGeodesic(true);
-                    options.setStrokeColor("#000000");
-                    options.setStrokeWeight(1);
-                    options.setStrokeOpacity(1.0);
-                   
-                    MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
-                    pointsAsArray.insertAt(0, finishLinePoint1);
-                    pointsAsArray.insertAt(1, finishLinePoint2);
-
-                    finishLine = Polyline.newInstance(options);
-                    finishLine.setPath(pointsAsArray);
-
-                    finishLine.addMouseOverHandler(new MouseOverMapHandler() {
-                        @Override
-                        public void onEvent(MouseOverMapEvent event) {
-                            map.setTitle(stringMessages.finishLine()+finishLineAdvantageText);
-                        }
-                    });
-                    finishLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                        @Override
-                        public void onEvent(MouseOutMapEvent event) {
-                            map.setTitle("");
-                        }
-                    });
-                    finishLine.setMap(map);
-                } else {
-                    finishLine.getPath().removeAt(1);
-                    finishLine.getPath().removeAt(0);
-                    finishLine.getPath().insertAt(0, finishLinePoint1);
-                    finishLine.getPath().insertAt(1, finishLinePoint2);
-                }
+            final Position finishLineLeftPosition = courseDTO.getFinishMarkPositions().get(0);
+            final Position finishLineRightPosition = courseDTO.getFinishMarkPositions().get(1);
+            if (courseDTO.startLineAngleToCombinedWind != null) {
+                finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
+                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
+                        NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleToCombinedWind)),
+                        courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
+                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
+            } else {
+                finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
-            else {
-                if (finishLine != null) {
-                    finishLine.setMap(null);
-                    finishLine = null;
+            final MouseOverMapHandler finishLineTooltipHandler = new MouseOverMapHandler() {
+                @Override
+                public void onEvent(MouseOverMapEvent event) {
+                    map.setTitle(stringMessages.finishLine()+finishLineAdvantageText);
                 }
-            }
+            };
+            finishLine = showOrRemoveOrUpdateLine(finishLine, /* showLine */ oneBasedLegOfLeadingCompetitor > 0 && oneBasedLegOfLeadingCompetitor == numberOfLegs &&
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.getFinishMarkPositions() != null && courseDTO.getFinishMarkPositions().size() == 2,
+                    finishLineLeftPosition, finishLineRightPosition, finishLineTooltipHandler, "#000000");
+
             final int zeroBasedIndexOfStartWaypoint = oneBasedLegOfLeadingCompetitor-1;
             // draw the course middle line
             final boolean showCourseMiddleLine = oneBasedLegOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > oneBasedLegOfLeadingCompetitor &&
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE);
-            courseMiddleLine = showCourseMiddleLine(courseDTO, courseMiddleLine,
-                    zeroBasedIndexOfStartWaypoint, showCourseMiddleLine);
+            courseMiddleLine = showOrRemoveCourseMiddleLine(courseDTO, courseMiddleLine, zeroBasedIndexOfStartWaypoint, showCourseMiddleLine);
         }
     }
 
-    private Polyline showCourseMiddleLine(final CoursePositionsDTO courseDTO, Polyline lineToShowOrRemoveOrUpdate,
+    /**
+     * @param showLine
+     *            tells whether or not to show the line; if the <code>lineToShowOrRemoveOrUpdate</code> references a
+     *            line but the line shall not be shown, the line is removed from the map; conversely, if the line is not
+     *            yet shown but shall be, a new line is created, added to the map and returned. If the line is shown and
+     *            shall continue to be shown, the line is returned after updating its vertex coordinates.
+     * @return <code>null</code> if the line is not shown; the polyline object representing the line being displayed
+     *         otherwise
+     */
+    private Polyline showOrRemoveCourseMiddleLine(final CoursePositionsDTO courseDTO, Polyline lineToShowOrRemoveOrUpdate,
             final int zeroBasedIndexOfStartWaypoint, final boolean showLine) {
+        final Position position1DTO = courseDTO.waypointPositions.get(zeroBasedIndexOfStartWaypoint);
+        final Position position2DTO = courseDTO.waypointPositions.get(zeroBasedIndexOfStartWaypoint+1);
+        final MouseOverMapHandler tooltipHandler = new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                final StringBuilder sb = new StringBuilder();
+                sb.append(stringMessages.courseMiddleLine());
+                sb.append('\n');
+                sb.append(NumberFormat.getFormat("0").format(
+                        Math.abs(position1DTO.getDistance(position2DTO).getMeters()))+stringMessages.metersUnit());
+                if (lastCombinedWindTrackInfoDTO != null) {
+                    final WindTrackInfoDTO windTrackAtLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(zeroBasedIndexOfStartWaypoint);
+                    if (windTrackAtLegMiddle != null && windTrackAtLegMiddle.windFixes != null && !windTrackAtLegMiddle.windFixes.isEmpty()) {
+                        WindDTO windAtLegMiddle = windTrackAtLegMiddle.windFixes.get(0);
+                        final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
+                        final String diff = NumberFormat.getFormat("0.0").format(
+                                Math.min(Math.abs(windAtLegMiddle.dampenedTrueWindBearingDeg-legBearingDeg),
+                                                     Math.abs(windAtLegMiddle.dampenedTrueWindFromDeg-legBearingDeg)));
+                        sb.append(", ");
+                        sb.append(stringMessages.degreesToWind(diff));
+                    }
+                }
+                map.setTitle(sb.toString());
+            }
+        };
+        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO, tooltipHandler, "#2268a0");
+    }
+
+    /**
+     * @param showLine
+     *            tells whether or not to show the line; if the <code>lineToShowOrRemoveOrUpdate</code> references a
+     *            line but the line shall not be shown, the line is removed from the map; conversely, if the line is not
+     *            yet shown but shall be, a new line is created, added to the map and returned. If the line is shown and
+     *            shall continue to be shown, the line is returned after updating its vertex coordinates.
+     * @return <code>null</code> if the line is not shown; the polyline object representing the line being displayed
+     *         otherwise
+     */
+    private Polyline showOrRemoveOrUpdateLine(Polyline lineToShowOrRemoveOrUpdate, final boolean showLine,
+            final Position position1DTO, final Position position2DTO, final MouseOverMapHandler tooltipHandler, String lineColorRGB) {
         if (showLine) {
-            final Position position1DTO = courseDTO.waypointPositions.get(zeroBasedIndexOfStartWaypoint);
-            final Position position2DTO = courseDTO.waypointPositions.get(zeroBasedIndexOfStartWaypoint+1);
             LatLng courseMiddleLinePoint1 = coordinateSystem.toLatLng(position1DTO);
             LatLng courseMiddleLinePoint2 = coordinateSystem.toLatLng(position2DTO);
             final MVCArray<LatLng> pointsAsArray;
@@ -1542,35 +1522,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 PolylineOptions options = PolylineOptions.newInstance();
                 options.setClickable(true);
                 options.setGeodesic(true);
-                options.setStrokeColor("#2268a0");
+                options.setStrokeColor(lineColorRGB);
                 options.setStrokeWeight(1);
                 options.setStrokeOpacity(1.0);
                 pointsAsArray = MVCArray.newInstance();
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
-                lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
-                    @Override
-                    public void onEvent(MouseOverMapEvent event) {
-                        final StringBuilder sb = new StringBuilder();
-                        sb.append(stringMessages.courseMiddleLine());
-                        sb.append('\n');
-                        sb.append(NumberFormat.getFormat("0").format(
-                                Math.abs(position1DTO.getDistance(position2DTO).getMeters()))+stringMessages.metersUnit());
-                        if (lastCombinedWindTrackInfoDTO != null) {
-                            final WindTrackInfoDTO windTrackAtLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(zeroBasedIndexOfStartWaypoint);
-                            if (windTrackAtLegMiddle != null && windTrackAtLegMiddle.windFixes != null && !windTrackAtLegMiddle.windFixes.isEmpty()) {
-                                WindDTO windAtLegMiddle = windTrackAtLegMiddle.windFixes.get(0);
-                                final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
-                                final String diff = NumberFormat.getFormat("0.0").format(
-                                        Math.min(Math.abs(windAtLegMiddle.dampenedTrueWindBearingDeg-legBearingDeg),
-                                                             Math.abs(windAtLegMiddle.dampenedTrueWindFromDeg-legBearingDeg)));
-                                sb.append(", ");
-                                sb.append(stringMessages.degreesToWind(diff));
-                            }
-                        }
-                        map.setTitle(sb.toString());
-                    }
-                });
+                lineToShowOrRemoveOrUpdate.addMouseOverHandler(tooltipHandler);
                 lineToShowOrRemoveOrUpdate.addMouseOutMoveHandler(new MouseOutMapHandler() {
                     @Override
                     public void onEvent(MouseOutMapEvent event) {
