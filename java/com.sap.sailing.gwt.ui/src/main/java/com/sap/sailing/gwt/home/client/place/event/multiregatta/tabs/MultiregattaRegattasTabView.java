@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,6 +25,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRe
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaList;
+import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
@@ -51,8 +53,10 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
     @UiField SimplePanel content;
+    @UiField DivElement newContentContainerUi;
     @UiField(provided = true) RacesListLive racesListLiveUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
+    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
     @UiField AnchorElement regattaOverviewLinkUi;
     private Presenter currentPresenter;
@@ -90,7 +94,9 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
             content.removeFromParent();
         } else {
             boatCategoryFilterUi.removeFromParent();
+            regattaProgressLegendUi.removeFromParent();
             regattaListUi.removeFromParent();
+            newContentContainerUi.removeFromParent();
             // TODO: understand, and than move this into appropiate place (probably context)
             currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
                 @Override
