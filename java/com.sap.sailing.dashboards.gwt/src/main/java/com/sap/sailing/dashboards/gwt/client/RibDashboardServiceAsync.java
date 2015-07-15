@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
-import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
@@ -16,5 +16,5 @@ public interface RibDashboardServiceAsync {
 
     void getCompetitorsInLeaderboard(String leaderboardName, AsyncCallback<List<CompetitorDTO>> callback);
 
-    void getAdvantagesOnStartline(String leaderboardName, AsyncCallback<List<StartLineAdvantageDTO>> callback);
+    void getAdvantagesOnStartline(String leaderboardName, AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO> callback);
 }

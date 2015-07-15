@@ -14,10 +14,12 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardService;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.server.startanalysis.StartAnalysisCreationController;
+import com.sap.sailing.dashboards.gwt.server.startlineadvantages.StartlineAdvantagesCalculator;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 import com.sap.sailing.dashboards.gwt.shared.ResponseMessage;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -47,6 +49,8 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     private static final long serialVersionUID = 1L;
 
     private StartAnalysisCreationController startAnalysisCreationController;
+    
+    private StartlineAdvantagesCalculator startlineAdvantagesCalculator;
 
     /**
      * Variable contains last {@link TrackedRace} that is or was live
@@ -78,6 +82,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         baseDomainFactory = getRacingEventService().getBaseDomainFactory();
         startAnalysisCreationController = new StartAnalysisCreationController(getRacingEventService());
+        startlineAdvantagesCalculator = new StartlineAdvantagesCalculator();
 
         averageStartLineAdvantageByWind = new MovingAverage(400);
         averageStartLineAdvantageByGeometry = new MovingAverage(400);
@@ -195,13 +200,13 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                 double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
                 startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
                 averageStartLineAdvantageByWind.add(startlineAdvantage);
-                startLineAdvantageDTO.startlineAdvantageAverage = averageStartLineAdvantageByWind.getAverage();
+                startLineAdvantageDTO.average = averageStartLineAdvantageByWind.getAverage();
             } else if (startlineAdvantageType == StartlineAdvantageType.GEOMETRIC) {
                 startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.GEOMETRIC;
                 double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
                 startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
                 averageStartLineAdvantageByGeometry.add(startlineAdvantage);
-                startLineAdvantageDTO.startlineAdvantageAverage = averageStartLineAdvantageByGeometry.getAverage();
+                startLineAdvantageDTO.average = averageStartLineAdvantageByGeometry.getAverage();
             }
             lRInfo.startLineAdvantageDTO = startLineAdvantageDTO;
         }
@@ -271,29 +276,10 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
 
     @Override
-    public List<StartLineAdvantageDTO> getAdvantagesOnStartline(String leaderboardName) {
-        return generateRandomAdvantagesOnStartline();
+    public StartlineAdvantagesWithMaxAndAverageDTO getAdvantagesOnStartline(String leaderboardName) {
+        return startlineAdvantagesCalculator.getStartLineAdvantagesAccrossLineAtTimePoint(MillisecondsTimePoint.now());
     }
     
-    private List<StartLineAdvantageDTO> generateRandomAdvantagesOnStartline(){
-        List<StartLineAdvantageDTO> randomAdvantagesOnStartline = new ArrayList<StartLineAdvantageDTO>();
-        for(int i = 0; i <= 100; i = i+10){
-            randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(i));
-        }
-        return randomAdvantagesOnStartline;
-    }
-    
-    private StartLineAdvantageDTO getRandomStartLineAdvantageDTOWithX(int x) {
-        StartLineAdvantageDTO result = new StartLineAdvantageDTO();
-        result.distanceToRCBoatInMeters = x;
-        result.startLineAdvantage = (x+1)/2+(0 + (int)(Math.random()*5));
-        if(x >= 50) {
-            result.confidence = 1;
-        }else{
-            result.confidence = 0.3;
-        } 
-        return result;
-    }
 
     @Override
     public void notifyLiveTrackedRaceListenerAboutLiveTrackedRaceChange(TrackedRace trackedRace) {
