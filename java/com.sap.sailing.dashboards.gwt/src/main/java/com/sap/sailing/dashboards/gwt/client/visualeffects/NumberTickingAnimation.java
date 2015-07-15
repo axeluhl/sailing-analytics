@@ -30,7 +30,6 @@ public abstract class NumberTickingAnimation implements NumberValueSetter, TimeL
     }
     
     public void execute(String numberString) {
-        //if (!timer.getPlayState().equals(Timer.PlayStates.Playing)) {
             double numberAsDouble = Double.parseDouble(numberString);
             animationNumberStrings.clear();
             animationNumberStrings = getValuesBetweenDoubleOldAndNewNumber(numberAsDouble);
@@ -38,7 +37,6 @@ public abstract class NumberTickingAnimation implements NumberValueSetter, TimeL
             timer.setRefreshInterval(animationTimePerNumber);
             timer.addTimeListener(this);
             timer.play();
-        //}
     }
     
     private List<String> getValuesBetweenDoubleOldAndNewNumber(double number) {
