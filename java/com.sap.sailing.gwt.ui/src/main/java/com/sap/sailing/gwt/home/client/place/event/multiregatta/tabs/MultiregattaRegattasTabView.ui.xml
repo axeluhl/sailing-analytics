@@ -9,6 +9,7 @@
   		.legend_and_filter > div {
 			display: inline-block;
 			vertical-align: middle;
+			margin-right: 2em;
 		}
 	</ui:style>
 	<g:HTMLPanel>
