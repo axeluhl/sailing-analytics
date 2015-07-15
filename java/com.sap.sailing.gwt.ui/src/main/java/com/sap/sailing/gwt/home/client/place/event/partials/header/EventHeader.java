@@ -3,12 +3,9 @@ package com.sap.sailing.gwt.home.client.place.event.partials.header;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,23 +13,21 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.Event.NativePreviewHandler;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.client.shared.DropdownHandler;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
@@ -46,6 +41,8 @@ public class EventHeader extends Composite {
     @UiField StringMessages i18n;
     
     @UiField DivElement eventLogo;
+    @UiField
+    AnchorElement eventLogoAnchorUi;
     @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
@@ -61,6 +58,7 @@ public class EventHeader extends Composite {
     @UiField DivElement races;
     @UiField DivElement trackedRaces;
     @UiField DivElement eventCategory;
+    @UiField DivElement courseAreaUi;
     
     @UiField FlowPanel dropdownContent;
     
@@ -69,9 +67,6 @@ public class EventHeader extends Composite {
     private EventViewDTO event;
 
     private Presenter presenter;
-
-    private HandlerRegistration reg;
-    boolean dropdownShown = false;
     
     public EventHeader(EventView.Presenter presenter) {
         this.event = presenter.getCtx().getEventDTO();
@@ -103,12 +98,11 @@ public class EventHeader extends Composite {
     }
 
     private void initFields() {
-        String logoUrl = event.getLogoImage() != null ? event.getLogoImage().getSourceRef() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
-        eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
-        
+        LogoUtil.setEventLogo(eventLogo, event);
+        if (presenter.showRegattaMetadata()) {
+            presenter.getCurrentEventNavigation().configureAnchorElement(eventLogoAnchorUi);
+        }
         String eventDisplayName = event.getDisplayName();
-        eventLogo.setTitle(eventDisplayName);
-        
         String nameToShow;
         if(presenter.showRegattaMetadata()) {
             HasRegattaMetadata regattaMetadata = presenter.getRegattaMetadata();
@@ -134,6 +128,11 @@ public class EventHeader extends Composite {
             } else {
                 hide(trackedRaces);
             }
+            if(regattaMetadata.getDefaultCourseAreaName() != null) {
+                courseAreaUi.setInnerText(i18n.courseAreaName(regattaMetadata.getDefaultCourseAreaName()));
+            } else {
+                hide(courseAreaUi);
+            }
             if(regattaMetadata.getBoatCategory() != null) {
                 eventCategory.setInnerText(regattaMetadata.getBoatCategory());
             } else {
@@ -147,11 +146,7 @@ public class EventHeader extends Composite {
         } else {
             nameToShow = eventDisplayName;
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
-            String venue = event.getLocationAndVenue();
-            if(event.getVenueCountry() != null && !event.getVenueCountry().isEmpty()) {
-                venue += ", " + event.getVenueCountry();
-            }
-            eventVenue.setInnerText(venue);
+            eventVenue.setInnerText(event.getLocationAndVenueAndCountry());
             
             if(event.getOfficialWebsiteURL() != null) {
                 String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
@@ -164,7 +159,7 @@ public class EventHeader extends Composite {
                 hide(eventLink);
             }
             
-            hide(competitors, races, trackedRaces);
+            hide(competitors, races, trackedRaces, courseAreaUi, eventCategory);
         }
         
         initTitleAndSelection(nameToShow);
@@ -185,38 +180,16 @@ public class EventHeader extends Composite {
     }
 
     private void initDropdown() {
-        Event.sinkEvents(dropdownTrigger, Event.ONCLICK);
-        Event.setEventListener(dropdownTrigger, new EventListener() {
+        new DropdownHandler(dropdownTrigger, dropdownContent.getElement()) {
             @Override
-            public void onBrowserEvent(Event event) {
+            protected void dropdownStateChanged(boolean dropdownShown) {
                 if(dropdownShown) {
-                    return;
+                    dropdownTitle.addClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
+                } else {
+                    dropdownTitle.removeClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
                 }
-                dropdownTitle.addClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
-                dropdownShown = true;
-                reg = Event.addNativePreviewHandler(new NativePreviewHandler() {
-                    @Override
-                    public void onPreviewNativeEvent(NativePreviewEvent event) {
-                        EventTarget eventTarget = event.getNativeEvent().getEventTarget();
-                        if(!Element.is(eventTarget)) {
-                            return;
-                        }
-                        Element evtElement = Element.as(eventTarget);
-                        if(event.getTypeInt() == Event.ONCLICK && !dropdownContent.getElement().isOrHasChild(evtElement)) {
-                            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                                @Override
-                                public void execute() {
-                                    dropdownTitle.removeClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
-                                    dropdownShown = false;
-                                    reg.removeHandler();
-                                    reg = null;
-                                }
-                            });
-                        }
-                    }
-                });
             }
-        });
+        };
         
         presenter.forPlaceSelection(new PlaceCallback() {
             @Override
