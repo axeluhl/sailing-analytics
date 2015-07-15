@@ -94,6 +94,12 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         .setLegend(new Legend().setEnabled(false))
         .setToolTip(new ToolTip().setEnabled(false))
         .setCredits(new Credits().setEnabled(false))
+        .setBackgroundColor("#FFFFFF")
+        .setBorderColor("#FFFFFF")
+        .setPlotShadow(false)
+        .setPlotBorderColor("#FFFFFF")
+        .setOption("/exporting/enabled", false)
+        .setShadow(false)
         .setStyle(new Style().setPosition("absolute").setTop("0px").setBottom("0px").setLeft("0px").setRight("0px"))
         .setAnimation(true);
         chart.setSize("100%", "100%");
@@ -124,23 +130,25 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
                     .setLineWidth(1)
         .setLineColor("grey")
         .setTickColor("grey")
+        .setGridLineColor("white")
         .setTickWidth(1)
+        .setGridLineWidth(0)
         .setReversed(true);
     }
     
-    private void setYAxisOfChart(Chart chart){
-        chart.getYAxis()  
-        .setAxisTitle(new AxisTitle().setText(StringMessages.INSTANCE.dashboardAdvantageInSeconds()).setStyle(new Style().setFontFamily("Open Sans")
-                    .setFontSize("14")
-                    .setColor("black").setFontWeight("bold")))
-        .setLabels(new YAxisLabels()
-                   .setFormatter(new AxisLabelsFormatter() {  
-                       public String format(AxisLabelsData axisLabelsData) {  
+    private void setYAxisOfChart(Chart chart) {
+        chart.getYAxis()
+                .setAxisTitle(
+                        new AxisTitle().setText(StringMessages.INSTANCE.dashboardAdvantageInSeconds()).setStyle(
+                                new Style().setFontFamily("Open Sans").setFontSize("14").setColor("black")
+                                        .setFontWeight("bold")))
+                .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+                    public String format(AxisLabelsData axisLabelsData) {
                         return String.valueOf(axisLabelsData.getValueAsLong());
-                    }  
-                    }  
-                    ).setStyle(new Style().setFontFamily("Open Sans").setFontSize("12")
-                            .setColor("grey"))).setLineColor("grey").setTickWidth(1).setTickColor("grey").setLineWidth(1).setGridLineWidth(0);          
+                    }
+                }).setStyle(new Style().setFontFamily("Open Sans").setFontSize("12").setColor("grey")))
+                .setLineColor("grey").setGridLineWidth(0).setMinorGridLineWidth(0).setGridLineColor("white")
+                .setTickWidth(1).setTickColor("grey").setLineWidth(1).setGridLineWidth(0);
     }
 
     private Series createSeries(Chart chart){
