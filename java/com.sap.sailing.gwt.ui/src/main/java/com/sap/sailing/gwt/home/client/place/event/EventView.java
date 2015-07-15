@@ -50,6 +50,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
         boolean showRegattaMetadata();
         HasRegattaMetadata getRegattaMetadata();
+        
+        String getRegattaOverviewLink();
 
         String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race);
         

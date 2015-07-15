@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.player.Timer;
@@ -305,6 +306,18 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             return false;
         }
         return ctx.getEventDTO().isHasMedia();
+    }
+    
+    @Override
+    public String getRegattaOverviewLink() {
+        String url = "RegattaOverview.html?event=" + getCtx().getEventId();
+        if(showRegattaMetadata()) {
+            url += "&regatta=" + getCtx().getRegattaId();
+        } else if(getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            // TODO do we need special settings for multi-regatta events to reduce the number of shown races?
+//            url += "&onlyrunningraces=false&onlyracesofsameday=true";
+        }
+        return url;
     }
 
     protected abstract EventView<PLACE, ?> getView();
