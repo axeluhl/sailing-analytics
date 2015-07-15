@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListN
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListItem;
+import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
@@ -83,6 +84,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
 
     private Presenter currentPresenter;
 
+    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField SimplePanel regattaInfoContainerUi;
     @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
     @UiField FlowPanel listFormatContainerUi;
@@ -130,6 +132,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             
             oldContentContainer.removeFromParent();
         } else {
+            regattaProgressLegendUi.removeFromParent();
             regattaInfoContainerUi.removeFromParent();
             listFormatContainerUi.removeFromParent();
             compFormatContainerUi.removeFromParent();

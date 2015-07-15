@@ -12,11 +12,11 @@
 		}
 	</ui:style>
 	<g:HTMLPanel>
-		<div class="{res.mediaCss.grid}">
+		<div class="{res.mediaCss.grid}" ui:field="newContentContainerUi">
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
 				<p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
 				<div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}">
-					<p:multiRegattaList.MultiRegattaListStepsLegend />
+					<p:multiRegattaList.MultiRegattaListStepsLegend ui:field="regattaProgressLegendUi" />
 			        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
 		        </div>
 				<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
