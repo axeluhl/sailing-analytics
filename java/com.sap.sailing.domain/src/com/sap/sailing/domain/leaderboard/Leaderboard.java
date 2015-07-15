@@ -54,11 +54,11 @@ public interface Leaderboard extends LeaderboardBase {
      */
     public interface Entry {
         int getTrackedRank();
-        Double getNetPoints() throws NoWindException;
-        Double getNetPointsUncorrected() throws NoWindException;
-        Double getTotalPoints() throws NoWindException;
+        Double getNetPoints();
+        Double getNetPointsUncorrected();
+        Double getTotalPoints();
         MaxPointsReason getMaxPointsReason();
-        boolean isDiscarded() throws NoWindException;
+        boolean isDiscarded();
         /**
          * Tells if the net points have been corrected by a {@link ScoreCorrection}
          */

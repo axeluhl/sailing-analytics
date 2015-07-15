@@ -17,7 +17,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Big Data - Numbers|wiki/big-data-numbers]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
-  * [[RaceLog tracking|wiki/racelog-tracking]]
+  * [[RaceLog / Smartphone tracking|wiki/racelog-tracking]]
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
   * [[Web Services API|wiki/sailing-webservices]]

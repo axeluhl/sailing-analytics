@@ -26,6 +26,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private String description;
     private List<? extends LeaderboardGroupBaseDTO> leaderboardGroups;
     private String officialWebsiteURL;
+    private String sailorsInfoWebsiteURL;
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
 
@@ -96,6 +97,14 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
+    }
+
+    public String getSailorsInfoWebsiteURL() {
+        return sailorsInfoWebsiteURL;
+    }
+
+    public void setSailorsInfoWebsiteURL(String sailorsInfoWebsiteURL) {
+        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
     }
 
     /**

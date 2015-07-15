@@ -7,7 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class RaceLogDependentStartTimeEventSerializer extends BaseRaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
+public class RaceLogDependentStartTimeEventSerializer extends RaceLogRaceStatusEventSerializer implements JsonSerializer<RaceLogEvent> {
 
     public RaceLogDependentStartTimeEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -34,6 +34,8 @@ public class RaceLogDependentStartTimeEventSerializer extends BaseRaceLogEventSe
         result.put(FIELD_DEPDENDENT_ON_RACECOLUMN, event.getDependentOnRaceIdentifier().getRaceColumnName());
         result.put(FIELD_DEPDENDENT_ON_REGATTALIKE, event.getDependentOnRaceIdentifier().getRegattaLikeParentName());
         result.put(FIELD_START_TIME_DIFFERENCE, event.getStartTimeDifference().asMillis());
+        result.put(FIELD_NEXT_STATUS, event.getNextStatus().toString());
+        
         return result;
     }
 

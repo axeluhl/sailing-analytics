@@ -18,7 +18,9 @@ import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectio
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
@@ -142,6 +144,14 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
                         RaceLogRaceTracker.this.onCourseDesignChangedEvent(event);
+                    }
+                    @Override
+                    public void visit(RaceLogStartOfTrackingEvent event) {
+                        RaceLogRaceTracker.this.onStartOfTrackingEvent(event);
+                    }
+                    @Override
+                    public void visit(RaceLogEndOfTrackingEvent event) {
+                        RaceLogRaceTracker.this.onEndOfTrackingEvent(event);
                     }
                 };
                 visitors.put(log, visitor);
@@ -389,22 +399,27 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             startTracking(event);
         }
     }
+    
+    private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
+        trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+    }
+    
+    private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
+        trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+    }
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
-        if (trackedRace == null)
-            return;
-
-        CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
-        List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
-
-        for (Waypoint waypoint : base.getWaypoints()) {
-            update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
-        }
-
-        try {
-            trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
-        } catch (PatchFailedException e) {
-            logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+        if (trackedRace != null) {
+            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+            List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+            for (Waypoint waypoint : base.getWaypoints()) {
+                update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            }
+            try {
+                trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
+            } catch (PatchFailedException e) {
+                logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+            }
         }
     }
 
