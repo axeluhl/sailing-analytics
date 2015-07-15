@@ -100,7 +100,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             String liveValue = NumberFormat.getFormat("#0.0").format(
                     liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
             String averageValue = NumberFormat.getFormat("#0.0").format(
-                    liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+                    liveRaceInfoDTO.startLineAdvantageDTO.average);
             startLineAdvantageComponent.liveNumber.setInnerText(liveValue);
             startLineAdvantageComponent.averageNumber.setInnerText(averageValue);
             lastLiveValue = liveValue;
@@ -108,7 +108,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry.lastLiveValue = NumberFormat
                     .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
             startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry.lastAverageValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average);
         }
 
         @Override
@@ -133,7 +133,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             String liveValue = NumberFormat.getFormat("#0.0").format(
                     liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
             String averageValue = NumberFormat.getFormat("#0.0").format(
-                    liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+                    liveRaceInfoDTO.startLineAdvantageDTO.average);
             startLineAdvantageComponent.liveNumber.setInnerText(liveValue);
             startLineAdvantageComponent.averageNumber.setInnerText(averageValue);
             lastLiveValue = liveValue;
@@ -141,7 +141,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind.lastLiveValue = NumberFormat
                     .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
             startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind.lastAverageValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average);
         }
 
         @Override

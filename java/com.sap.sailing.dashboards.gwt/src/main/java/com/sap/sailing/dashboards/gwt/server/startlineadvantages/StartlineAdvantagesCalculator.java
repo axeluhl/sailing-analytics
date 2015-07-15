@@ -1,12 +1,15 @@
 package com.sap.sailing.dashboards.gwt.server.startlineadvantages;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.dashboards.gwt.server.LiveTrackedRaceListener;
+import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -27,14 +30,22 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
     private TrackedRace currentLiveTrackedRace;
     private Pair<Position, Position> startlineMarkPositions;
     private Position firstMarkPosition;
+    private MovingAverage advantageMaximumAverage;
     
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
     
     public StartlineAdvantagesCalculator(){
+        advantageMaximumAverage = new MovingAverage(500);
     }
     
-    public Map<Double, Double> getStartLineAdvantagesAccrossLine(){
-        Map<Double, Double> result = new HashMap<Double, Double>();
+    public StartlineAdvantagesWithMaxAndAverageDTO getStartLineAdvantagesAccrossLineAtTimePoint(TimePoint timepoint){
+        StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
+        List<StartLineAdvantageDTO> advantages = generateRandomAdvantagesOnStartline();
+        result.advantages = advantages;
+        double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(advantages);
+        result.maximum = maximum;
+        advantageMaximumAverage.add(maximum);
+        result.average = advantageMaximumAverage.getAverage();
         // Get Course Buoys
         // Get Wind
         // Get Maneuver Angle and Boat Speed at Angle
@@ -45,10 +56,39 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
         // Calculate duration from two new distances for normal upwind starts
         // Put all durations in one set
         // Get the smallest of the durations and subtract number from every other number
-        retrieveFirstLegWayPoints();
-        logger.log(Level.INFO, "Startline Startboat : "+startlineMarkPositions.getA());
-        logger.log(Level.INFO, "Startline PinEnd: "+startlineMarkPositions.getB());
-        logger.log(Level.INFO, "Firstmark: "+firstMarkPosition);
+//        retrieveFirstLegWayPoints();
+//        logger.log(Level.INFO, "Startline Startboat : "+startlineMarkPositions.getA());
+//        logger.log(Level.INFO, "Startline PinEnd: "+startlineMarkPositions.getB());
+//        logger.log(Level.INFO, "Firstmark: "+firstMarkPosition);
+        return result;
+    }
+
+    private double getMaximumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
+        double result = 0;
+        if(advantages != null && advantages.size() > 0) {
+        Collections.sort(advantages, StartLineAdvantageDTO.startlineAdvantageComparatorDesc);
+        result = advantages.get(0).startLineAdvantage;
+        }
+        return result;
+    }
+    
+    private List<StartLineAdvantageDTO> generateRandomAdvantagesOnStartline(){
+        List<StartLineAdvantageDTO> randomAdvantagesOnStartline = new ArrayList<StartLineAdvantageDTO>();
+        for(int i = 0; i <= 100; i = i+10){
+            randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(i));
+        }
+        return randomAdvantagesOnStartline;
+    }
+    
+    private StartLineAdvantageDTO getRandomStartLineAdvantageDTOWithX(int x) {
+        StartLineAdvantageDTO result = new StartLineAdvantageDTO();
+        result.distanceToRCBoatInMeters = x;
+        result.startLineAdvantage = (x+1)/2+(0 + (int)(Math.random()*5));
+        if(x >= 50) {
+            result.confidence = 1;
+        }else{
+            result.confidence = 0.3;
+        } 
         return result;
     }
     

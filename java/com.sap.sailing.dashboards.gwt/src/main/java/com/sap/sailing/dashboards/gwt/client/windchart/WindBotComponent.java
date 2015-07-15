@@ -174,16 +174,12 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
                     Point[] directionPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes,
                             WindType.DIRECTION);
 
-                    trueWindSpeedLiveAverageComponent.setValues(
-                            ""
-                                    + NumberFormat.getFormat("#0.0").format(
-                                            speedPoints[speedPoints.length - 1].getY().doubleValue()), ""
-                                    + NumberFormat.getFormat("#0.0").format(movingAverageSpeed.getAverage()));
-                    trueWindDirectionLiveAverageComponent.setValues(
-                            ""
-                                    + NumberFormat.getFormat("#0.0").format(
-                                            directionPoints[directionPoints.length - 1].getY().doubleValue()), ""
-                                    + NumberFormat.getFormat("#0.0").format(movingAverageDirection.getAverage()));
+                    trueWindSpeedLiveAverageComponent.setLiveValue(""+NumberFormat.getFormat("#0.0").format(speedPoints[speedPoints.length - 1].getY().doubleValue()));
+                    trueWindSpeedLiveAverageComponent.setAverageValue(""+NumberFormat.getFormat("#0.0").format(movingAverageSpeed.getAverage()));
+                    
+                    trueWindDirectionLiveAverageComponent.setLiveValue(""+NumberFormat.getFormat("#0.0").format(directionPoints[directionPoints.length - 1].getY().doubleValue()));
+                    trueWindDirectionLiveAverageComponent.setAverageValue(""+NumberFormat.getFormat("#0.0").format(movingAverageDirection.getAverage()));
+
                     trueWindSpeedVerticalWindChart.addPointsToSeriesWithAverage(speedPoints,
                             movingAverageSpeed.getAverage());
                     trueWindDirectionVerticalWindChart.addPointsToSeriesWithAverage(directionPoints,

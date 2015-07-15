@@ -1,6 +1,5 @@
 package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,21 +27,13 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
-import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesAction;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * @author Alexander Ries (D062114)
