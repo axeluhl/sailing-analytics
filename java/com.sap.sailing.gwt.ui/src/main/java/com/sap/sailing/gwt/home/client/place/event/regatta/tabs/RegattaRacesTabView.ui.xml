@@ -30,7 +30,10 @@
             <div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi">
                 <p:raceListLive.RacesListLive ui:field="liveRacesListUi" />
                 <div class="{style.buttonContainer}">
-                    <a class="{res.mainCss.button} {res.mainCss.buttonarrowrightwhite} {style.regattaOverviewButton}" ui:field="regattaOverviewUi"><ui:text from="{i18n.racesOverview}" /></a>
+                    <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
+	        				target="_blank" ui:field="regattaOverviewUi">
+                    	<ui:text from="{i18n.racesOverview}" />
+                    </a>
                 </div>
                 <p:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
