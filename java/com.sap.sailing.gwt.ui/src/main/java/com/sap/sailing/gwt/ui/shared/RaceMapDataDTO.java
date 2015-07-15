@@ -13,5 +13,5 @@ public class RaceMapDataDTO implements IsSerializable {
     public List<SidelineDTO> courseSidelines;
     public LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
     public LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
-    public int simulationResultVersion;
+    public long simulationResultVersion;
 }
