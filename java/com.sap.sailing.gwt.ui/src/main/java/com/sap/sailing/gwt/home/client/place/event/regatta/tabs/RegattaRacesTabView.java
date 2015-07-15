@@ -48,7 +48,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -116,7 +115,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
         
         regattaOverviewUi.setHref(currentPresenter.getRegattaOverviewLink());
-        if(currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
+        if(currentPresenter.isEventOrRegattaLive()) {
             regattaOverviewUi.addClassName(SharedResources.INSTANCE.mainCss().buttonred());
         } else {
             regattaOverviewUi.addClassName(SharedResources.INSTANCE.mainCss().buttonprimary());
