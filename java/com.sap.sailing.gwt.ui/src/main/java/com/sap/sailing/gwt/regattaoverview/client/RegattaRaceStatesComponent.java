@@ -125,6 +125,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private CellTable<RegattaOverviewEntryDTO> table;
     boolean hasAnyRaceGroupASeries = false;
     boolean hasAnyRaceGroupAFleet = false;
+    private final boolean ignoreLocalSettings;
 
     public void setEntryClickedHandler(EntryHandler handler) {
         this.entryClickedHandler = handler;
@@ -148,9 +149,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventId.toString();
         this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
         this.settings = new RegattaRaceStatesSettings();
-        if(!ignoreLocalSettings) {
-            loadAndSetSettings(settings);
-        }
+        this.ignoreLocalSettings = ignoreLocalSettings;
+        loadAndSetSettings(settings);
         mainPanel = new VerticalPanel();
         mainPanel.getElement().getStyle().setWidth(100, Unit.PCT);
         getElement().getStyle().setWidth(100, Unit.PCT);
@@ -162,9 +162,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private void loadAndSetSettings(RegattaRaceStatesSettings settings) {
-        RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
-        if (loadedSettings != null) {
-            settings = loadedSettings;
+        if(!ignoreLocalSettings) {
+            RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
+            if (loadedSettings != null) {
+                settings = loadedSettings;
+            }
         }
         updateSettings(settings);
     }
