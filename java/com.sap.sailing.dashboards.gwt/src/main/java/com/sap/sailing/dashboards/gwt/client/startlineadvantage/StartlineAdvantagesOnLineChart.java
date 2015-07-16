@@ -2,6 +2,8 @@ package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.moxieapps.gwt.highcharts.client.Animation;
 import org.moxieapps.gwt.highcharts.client.Animation.Easing;
@@ -65,6 +67,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     private Series series;
     
     private static final int POINT_ADDING_ANIMATION_DURATION_IN_MILLIS = 2000;
+    private static final Logger logger = Logger.getLogger(StartlineAdvantagesOnLineChart.class.getName());
     
     public StartlineAdvantagesOnLineChart() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -173,9 +176,9 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         com.sap.sse.common.Util.Pair<Double, Double> firstAndLastXValue = getFirstnAndLastXValueOfSeries();
         if (firstAndLastXValue != null && firstAndLastXValue.getA() != null && firstAndLastXValue.getB() != null) {
             if (labelData == firstAndLastXValue.getA().doubleValue()) {
-                result = StringMessages.INSTANCE.dashboardRCBoat();
-            } else if (labelData == firstAndLastXValue.getB().doubleValue()) {
                 result = StringMessages.INSTANCE.dashboardPinEnd();
+            } else if (labelData == firstAndLastXValue.getB().doubleValue()) {
+                result = StringMessages.INSTANCE.dashboardRCBoat();
             }
         }
         return result;
@@ -195,6 +198,9 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     }
     
     public void setStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages) {
+        for(StartLineAdvantageDTO startLineAdvantageDTO : startlineAdvantages) {
+            logger.log(Level.INFO, startLineAdvantageDTO.distanceToRCBoatInMeters +" "+startLineAdvantageDTO.startLineAdvantage);
+        }
         if (series.getPoints() != null && series.getPoints().length  > 0) {
             updateStartlineAdvantages(startlineAdvantages, series);
         } else {

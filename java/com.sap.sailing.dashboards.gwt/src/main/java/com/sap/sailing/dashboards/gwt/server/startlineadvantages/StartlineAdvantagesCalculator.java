@@ -33,11 +33,17 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
     private Pair<Position, Position> startlineMarkPositions;
     private Position firstMarkPosition;
     private MovingAverage advantageMaximumAverage;
+    private double startlineAdvantage;
+    private double startlineLenght;
+    private double windSpeed;
+    private double windDirection;
+    private double tackingAngle;
+    private double jibingAngle;
     
     private static final double DEFAULT_TACKING_ANGLE = 60.0;
     private static final double DEFAULT_JIBING_ANGLE = 45.0;
-    private static final double DEFAULT_WIND_DIRECTION = 60.0;
-    private static final double DEFAULT_WIND_SPEED = 45.0;
+    private static final double DEFAULT_WIND_DIRECTION = 0.0;
+    private static final double DEFAULT_WIND_SPEED_IN_KTS = 12.0;
     
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
     
@@ -45,33 +51,40 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
         advantageMaximumAverage = new MovingAverage(500);
     }
     
+    // Get Course Buoys
+    // Get Wind
+    // Get Maneuver Angle and Boat Speed at Angle
+    // Get Positions on start line with normal upwind and overlaying lay line upwind
+    // Calculate intersection point(s) between start line and lay lines
+    // Calculate duration from start line to first mark for overlaying positions
+    // Calculate intersection points from normal upwind start positions to first mark
+    // Calculate duration from two new distances for normal upwind starts
+    // Put all durations in one set
+    // Get the smallest of the durations and subtract number from every other number
     public StartlineAdvantagesWithMaxAndAverageDTO getStartLineAdvantagesAccrossLineAtTimePoint(TimePoint timepoint){
         StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
-        List<StartLineAdvantageDTO> advantages = generateRandomAdvantagesOnStartline();
+        List<StartLineAdvantageDTO> advantages;
+        if (currentLiveTrackedRace != null) {
+            collectDataForCalculation();
+            advantages = calculateStartlineAdvantages();
+        } else {
+            advantages = generateRandomAdvantagesOnStartline();
+            logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
+        }
         result.advantages = advantages;
         double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(advantages);
         result.maximum = maximum;
         advantageMaximumAverage.add(maximum);
         result.average = advantageMaximumAverage.getAverage();
-        // Get Course Buoys
-        // Get Wind
-        // Get Maneuver Angle and Boat Speed at Angle
-        // Calculate intersection point(s) between start line and lay lines
-        // Get Positions on start line with normal upwind and overlaying lay line upwind
-        // Calculate duration from start line to first mark for overlaying positions
-        // Calculate intersection points from normal upwind start positions to first mark
-        // Calculate duration from two new distances for normal upwind starts
-        // Put all durations in one set
-        // Get the smallest of the durations and subtract number from every other number
-        if (currentLiveTrackedRace != null) {
-            retrieveFirstLegWayPoints();
-            retrieveStartlineAdvantageAndWindDirection();
-        } else {
-            logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
-        }
         return result;
     }
 
+    private void collectDataForCalculation() {
+        retrieveFirstLegWayPoints();
+        retrieveStartlineAdvantageAndLenght();
+        retrieveWind();
+        retrieveTrackingAndJibingAngle();
+    }
     
     private void retrieveFirstLegWayPoints() {
             Course course = currentLiveTrackedRace.getRace().getCourse();
@@ -109,14 +122,57 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
         }
     }
     
-    private void retrieveStartlineAdvantageAndWindDirection() {
+    private void retrieveStartlineAdvantageAndLenght() {
         LineDetails startline = currentLiveTrackedRace.getStartLine(MillisecondsTimePoint.now());
-        startline.getAdvantage();
+        //startlineLenght = startline.getLength().getMeters();
+        startlineLenght = 50;
+        if (startline != null && startline.getAdvantage() != null) {
+            startlineAdvantage = startline.getAdvantage().getMeters();
+        }
+    }
+    
+    private void retrieveWind() {
+        windSpeed = DEFAULT_WIND_SPEED_IN_KTS;
+        windDirection = DEFAULT_WIND_DIRECTION;
+    }
+    
+    private void retrieveTrackingAndJibingAngle() {
+        tackingAngle = DEFAULT_TACKING_ANGLE;
+        jibingAngle = DEFAULT_JIBING_ANGLE;
     }
     
     private Position getPositionFromMarkAtTimePoint(TrackedRace trackedRace, Mark mark, TimePoint timePoint){
         GPSFixTrack<Mark, GPSFix> fixTrack = trackedRace.getTrack(mark);
         return fixTrack.getEstimatedPosition(timePoint, true);
+    }
+    
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantages() {
+        List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
+        List<StartLineAdvantageDTO> startlineAdvantagesUnderneathLayline = calculateStartlineAdvantagesUnderneathLaylines();
+        result.addAll(startlineAdvantagesUnderneathLayline);
+        return result;
+    }
+    
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantagesUnderneathLaylines() {
+        List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
+        StartLineAdvantageDTO startlineAdvantagePinEnd = new StartLineAdvantageDTO();
+        startlineAdvantagePinEnd.confidence = 1.0;
+        startlineAdvantagePinEnd.distanceToRCBoatInMeters = startlineLenght;
+        StartLineAdvantageDTO startlineAdvantageRCBoat = new StartLineAdvantageDTO();
+        startlineAdvantageRCBoat.confidence = 1.0;
+        startlineAdvantageRCBoat.distanceToRCBoatInMeters = 0.0;
+        logger.log(Level.INFO, "Startline Advantage "+startlineAdvantage);
+        if(startlineAdvantage > 0) {
+            startlineAdvantagePinEnd.startLineAdvantage = startlineAdvantage;
+            startlineAdvantageRCBoat.startLineAdvantage = 0.0;
+        } else {
+            startlineAdvantagePinEnd.startLineAdvantage = 0.0;
+            startlineAdvantageRCBoat.startLineAdvantage = Math.abs(startlineAdvantage);
+        }
+        result.add(startlineAdvantageRCBoat);
+        result.add(startlineAdvantagePinEnd);
+        return result;
+        
     }
     
     private void getStartlineOfRace(){
@@ -153,9 +209,8 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
     
     private List<StartLineAdvantageDTO> generateRandomAdvantagesOnStartline(){
         List<StartLineAdvantageDTO> randomAdvantagesOnStartline = new ArrayList<StartLineAdvantageDTO>();
-        for(int i = 0; i <= 100; i = i+10){
-            randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(i));
-        }
+        randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(0));
+        randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(33));
         return randomAdvantagesOnStartline;
     }
     
@@ -163,11 +218,7 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
         StartLineAdvantageDTO result = new StartLineAdvantageDTO();
         result.distanceToRCBoatInMeters = x;
         result.startLineAdvantage = (x+1)/2+(0 + (int)(Math.random()*5));
-        if(x >= 50) {
-            result.confidence = 1;
-        }else{
-            result.confidence = 0.3;
-        } 
+        result.confidence = 1;
         return result;
     }
 }
