@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
-	<!-- Inherit the core Web Toolkit stuff. -->
-	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
 
 	<!-- Other module inherits -->
-	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
@@ -15,7 +13,7 @@
 	<inherits name="com.sap.sailing.simulator.Simulator" />
 
 	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	<inherits name="com.sap.sse.gwt.Highcharts" />
 
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
@@ -25,28 +23,27 @@
 	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
 	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 
-	<!-- Specify the app entry point class. -->
-	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint' />
+
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
 	<extend-property name="locale" values="ru" />
 
-	<source path='common' />
-	<source path='shared' />
-	<source path='client' />
-	<source path='actions' />
-	<source path='simulator' />
-	<source path='leaderboard' />
-	<source path='adminconsole' />
-	<source path='usermanagement' />
-	<source path='masterdataimport' />
+	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceActions'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
+	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
 
-	<inherits name='com.google.gwt.logging.Logging' />
-	<set-property name="gwt.logging.enabled" value="FALSE" />
-	<!-- Set logging level to INFO -->
-	<set-property name="gwt.logging.logLevel" value="INFO" />
+	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
+
 	<!-- Add compiler.stackMode to get a readable stacktrace from JavaScript 
 		It generates a set of files in WEB-INF/deploy; those files need to be placed 
 		on the server -->
 	<set-property name="compiler.stackMode" value="emulated" />
+
+	<!-- Specify the app entry point class. -->
+	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint' />
+
 </module>

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -45,7 +47,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected TextBox sailorsInfoWebsiteURLEntryField;
     protected StringListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
-    protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
+    protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
     protected ImagesListComposite imagesListComposite; 
     protected VideosListComposite videosListComposite; 
 
@@ -120,7 +122,10 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
-        this.availableLeaderboardGroups = availableLeaderboardGroups;
+        this.availableLeaderboardGroupsByName = new HashMap<>();
+        for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
+            availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
+        }
         getDialogBox().getWidget().setWidth("730px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -150,9 +155,10 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected EventDTO getResult() {
         EventDTO result = new EventDTO();
         List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
-        for(LeaderboardGroupDTO lg: availableLeaderboardGroups) {
-            if(leaderboardGroupNames.contains(lg.getName())) {
-                result.addLeaderboardGroup(lg);
+        for (final String lgName : leaderboardGroupNames) {
+            final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
+            if (lgDTO != null) {
+                result.addLeaderboardGroup(lgDTO);
             }                
         }
         result.setName(nameEntryField.getText());

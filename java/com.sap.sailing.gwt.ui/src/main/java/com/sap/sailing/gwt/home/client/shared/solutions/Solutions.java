@@ -15,12 +15,12 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -58,9 +58,9 @@ public class Solutions extends Composite {
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> simulatorAppDetailsNavigation;
-    private final HomePlacesNavigator placesNavigator;
+    private final DesktopPlacesNavigator placesNavigator;
     
-    public Solutions(SolutionsNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {
+    public Solutions(SolutionsNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         this.navigationTab = navigationTab;
         this.placesNavigator = placesNavigator;
         

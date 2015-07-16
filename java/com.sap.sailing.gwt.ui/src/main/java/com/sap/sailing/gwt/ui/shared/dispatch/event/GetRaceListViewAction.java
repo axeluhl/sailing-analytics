@@ -8,7 +8,8 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
 public class GetRaceListViewAction implements Action<ResultWithTTL<RaceListViewDTO>> {
-    public GetRaceListViewAction() {
+    @SuppressWarnings("unused")
+    private GetRaceListViewAction() {
     }
 
     public GetRaceListViewAction(UUID eventId) {
