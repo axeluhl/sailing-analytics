@@ -3,6 +3,7 @@ package com.sap.sailing.dashboards.gwt.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,17 +23,23 @@ import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -59,13 +66,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
 
     /**
      * {@link MovingAverage} of last 400 start line advantage values during the last races. See initialization at
-     * {@link #RibDashboardServiceImpl()}) Advantage by wind is the advantage in meters that a boat, starting a the pin
-     * end of the line, has, compared to a boat starting at the very right side of the line.
-     * */
-    private MovingAverage averageStartLineAdvantageByWind;
-
-    /**
-     * {@link MovingAverage} of last 400 start line advantage values during the last races. See initialization at
      * {@link #RibDashboardServiceImpl()}) Advantage by geometry is the delta in meters of the distance from race
      * committee boat to first mark and pin end mark to first mark. Wind has no influence on the value.
      * */
@@ -84,7 +84,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         startAnalysisCreationController = new StartAnalysisCreationController(getRacingEventService());
         startlineAdvantagesCalculator = new StartlineAdvantagesCalculator();
         addLiveTrackedRaceListener(startlineAdvantagesCalculator);
-        averageStartLineAdvantageByWind = new MovingAverage(400);
         averageStartLineAdvantageByGeometry = new MovingAverage(400);
     }
 
@@ -113,7 +112,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             TimePoint timePointOfRequest = MillisecondsTimePoint.now();
             if (checkIfRaceIsStillRunning(timePointOfRequest, leaderboardName)) {
                 fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
-                fillLiveRaceInfoDTOWithStartLineAdavantageData(lRInfo, timePointOfRequest);
+                fillLiveRaceInfoDTOWithStartLineAdavantageByGeometryData(lRInfo, timePointOfRequest);
                 lRInfo.responseMessage = ResponseMessage.RACE_LIVE;
             } else {
                 lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;
@@ -191,55 +190,73 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         return result;
     }
 
-    private void fillLiveRaceInfoDTOWithStartLineAdavantageData(RibDashboardRaceInfoDTO lRInfo, TimePoint timePoint)
-            throws NoWindException {
+    private void fillLiveRaceInfoDTOWithStartLineAdavantageByGeometryData(RibDashboardRaceInfoDTO lRInfo,
+            TimePoint timePoint) throws NoWindException {
         if (runningRace != null && timePoint != null) {
             StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
-            StartlineAdvantageType startlineAdvantageType = getStartlineAdvantageType(runningRace, timePoint);
-            if (startlineAdvantageType == null || startlineAdvantageType == StartlineAdvantageType.WIND) {
-                startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.WIND;
-                double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
-                startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
-                averageStartLineAdvantageByWind.add(startlineAdvantage);
-                startLineAdvantageDTO.average = averageStartLineAdvantageByWind.getAverage();
-            } else if (startlineAdvantageType == StartlineAdvantageType.GEOMETRIC) {
-                startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.GEOMETRIC;
-                double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
-                startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
-                averageStartLineAdvantageByGeometry.add(startlineAdvantage);
-                startLineAdvantageDTO.average = averageStartLineAdvantageByGeometry.getAverage();
-            }
+            startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.GEOMETRIC;
+            double startlineAdvantage = calculateStartlineAdvantageByGeometry();
+            startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
+            averageStartLineAdvantageByGeometry.add(startlineAdvantage);
+            startLineAdvantageDTO.average = averageStartLineAdvantageByGeometry.getAverage();
             lRInfo.startLineAdvantageDTO = startLineAdvantageDTO;
         }
     }
 
-    private StartlineAdvantageType getStartlineAdvantageType(TrackedRace trackedRace, TimePoint timePoint) {
-        try {
-            LegType typeOfFirstLeg;
-            typeOfFirstLeg = getFirstLegTypeOfTrackedRaceAtTimePoint(trackedRace, timePoint);
-            switch (typeOfFirstLeg) {
-            case UPWIND:
-                return StartlineAdvantageType.WIND;
-            case REACHING:
-                return StartlineAdvantageType.GEOMETRIC;
-            default:
-                return StartlineAdvantageType.WIND;
+    private double calculateStartlineAdvantageByGeometry() {
+        double result = 0.0;
+        Course course = runningRace.getRace().getCourse();
+        if (course != null) {
+            Waypoint startlineWayPoint = course.getFirstLeg().getFrom();
+            Waypoint firstmarkWayPoint = course.getFirstLeg().getTo();
+            if (startlineWayPoint != null && firstmarkWayPoint != null) {
+                Pair<Position, Position> startlineMarkPositions = retrieveStartlineMarkPositionsFromStartLineWayPoint(startlineWayPoint);
+                Position firstMarkPosition = retrieveFirstMarkPositionFromFirstMarkWayPoint(firstmarkWayPoint);
+                if (startlineMarkPositions != null && firstMarkPosition != null) {
+                    logger.log(Level.INFO, "RC "+startlineMarkPositions.getA());
+                    logger.log(Level.INFO, "PIN "+startlineMarkPositions.getA());
+                    logger.log(Level.INFO, "FIRST "+firstMarkPosition);
+                    Distance rcToMark = firstMarkPosition.getDistance(startlineMarkPositions.getA());
+                    Distance pinToMark = firstMarkPosition.getDistance(startlineMarkPositions.getB());
+                    logger.log(Level.INFO, "rcToMark "+rcToMark);
+                    logger.log(Level.INFO, "pinToMark "+pinToMark);
+                    return pinToMark.getMeters() - rcToMark.getMeters();
+                }
             }
-        } catch (NoWindException e) {
-            e.printStackTrace();
-            return null;
         }
+        return result;
     }
 
-    private LegType getFirstLegTypeOfTrackedRaceAtTimePoint(TrackedRace trackedRace, TimePoint timePoint)
-            throws NoWindException {
-        Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
-        if (trackedLegs != null && trackedLegs.iterator().hasNext()) {
-            TrackedLeg firstLegInTrackedRace = trackedLegs.iterator().next();
-            return firstLegInTrackedRace.getLegType(timePoint);
-        } else {
-            return null;
+    private Pair<Position, Position> retrieveStartlineMarkPositionsFromStartLineWayPoint(Waypoint startLineWayPoint) {
+        Pair<Position, Position> startLineMarkPositions = null;
+        Iterator<Mark> markIterator = startLineWayPoint.getMarks().iterator();
+        if (markIterator.hasNext()) {
+            Mark startboat = (Mark) markIterator.next();
+            if (markIterator.hasNext()) {
+                Mark pinEnd = (Mark) markIterator.next();
+                TimePoint now = MillisecondsTimePoint.now();
+                Position startBoatPosition = getPositionFromMarkAtTimePoint(runningRace, startboat, now);
+                Position pinEndPosition = getPositionFromMarkAtTimePoint(runningRace, pinEnd, now);
+                return  new Pair<Position, Position>(startBoatPosition, pinEndPosition);
+            }
         }
+        return startLineMarkPositions;
+    }
+
+    private Position getPositionFromMarkAtTimePoint(TrackedRace trackedRace, Mark mark, TimePoint timePoint) {
+        GPSFixTrack<Mark, GPSFix> fixTrack = trackedRace.getTrack(mark);
+        return fixTrack.getEstimatedPosition(timePoint, true);
+    }
+
+    private Position retrieveFirstMarkPositionFromFirstMarkWayPoint(Waypoint firstMarkWayPoint) {
+        Position firstMarkPosition = null;
+        if (firstMarkWayPoint.getMarks().iterator().hasNext()) {
+            Mark firstMark = firstMarkWayPoint.getMarks().iterator().next();
+            TimePoint now = MillisecondsTimePoint.now();
+            firstMarkPosition = getPositionFromMarkAtTimePoint(runningRace, firstMark, now);
+            logger.log(Level.INFO, "Firstmark: " + firstMarkPosition);
+        }
+        return firstMarkPosition;
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
