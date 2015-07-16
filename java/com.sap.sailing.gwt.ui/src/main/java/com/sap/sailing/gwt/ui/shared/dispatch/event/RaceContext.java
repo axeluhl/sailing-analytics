@@ -354,13 +354,22 @@ public class RaceContext {
             }
         }
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        if(trackedRace == null && scoreCorrection != null && scoreCorrection.hasCorrectionFor(raceColumn)) {
+        if(!hasTrackingForRaceColumn() && scoreCorrection != null && scoreCorrection.hasCorrectionFor(raceColumn)) {
             return RaceViewState.FINISHED;
         }
         if(startTime != null) {
             return RaceViewState.RUNNING;
         }
         return RaceViewState.PLANNED;
+    }
+
+    private boolean hasTrackingForRaceColumn() {
+        for(Fleet fleetOfRaceColumn : raceColumn.getFleets()) {
+            if(raceColumn.getTrackedRace(fleetOfRaceColumn) != null) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private Wind checkForWindFixesFromRaceLog() {
