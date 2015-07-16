@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Could not determine the version of your GWT SDK; using the module DTD 
+	from GWT 1.6.4. You may want to change this. -->
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
+<module>
+	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
+
+	<!-- Other module inherits -->
+	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
+	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
+	<inherits name="com.sap.sse.SSECommon" />
+	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<inherits name="com.sap.sse.gwt.AdminConsole" />
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	
+  	
+	<extend-property name="locale" values="en,de,zh,ru" />
+    <set-property name="locale" value="en,de,zh,ru" />
+	<set-property-fallback name="locale" value="en"/>
+	
+	<source path='shared' />
+	<source path='client' />
+	<source path='mobile' />
+		
+	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
+	
+	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceActions'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
+	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
+	<inherits name="com.sap.sailing.gwt.regattaoverview.SourceRegattaOverview"/>
+	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
+	
+	
+<!-- 	<entry-point class="com.sap.sailing.gwt.home.mobile.MobileEntryPoint" /> -->
+	
+</module>

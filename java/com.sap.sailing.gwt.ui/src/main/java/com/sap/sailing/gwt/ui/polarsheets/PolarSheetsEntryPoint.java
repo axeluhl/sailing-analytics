@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.resources.Highcharts;
 
 public class PolarSheetsEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher {
 
@@ -17,6 +18,7 @@ public class PolarSheetsEntryPoint extends AbstractSailingEntryPoint implements 
 
     @Override
     protected void doOnModuleLoad() {
+        Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         
         regattaDisplayers = new HashSet<RegattasDisplayer>();

@@ -9,7 +9,7 @@
 	<inherits name='com.google.gwt.debug.Debug'/>
 
 	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
 	
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
