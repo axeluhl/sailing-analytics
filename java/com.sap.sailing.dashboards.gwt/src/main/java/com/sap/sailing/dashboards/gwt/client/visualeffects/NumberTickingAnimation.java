@@ -22,7 +22,7 @@ public abstract class NumberTickingAnimation implements NumberValueSetter, TimeL
     int counter = 0;
     Timer timer;
     List<String> animationNumberStrings;
-    private final int ANIMATION_TIME_IN_MILLISECONDS = 1000;
+    private final int ANIMATION_TIME_IN_MILLISECONDS = 500;
     
     public NumberTickingAnimation(){
         animationNumberStrings = new ArrayList<String>();
