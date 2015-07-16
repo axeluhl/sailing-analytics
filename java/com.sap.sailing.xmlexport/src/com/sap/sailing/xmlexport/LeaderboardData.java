@@ -77,12 +77,16 @@ public class LeaderboardData extends ExportAction {
     private static final String STRONG_WIND_DESCRIPTION = "Strong";
     private static final String VERY_STRONG_WIND_DESCRIPTION = "Very Strong";
     
+    private final Map<RaceColumn, List<Competitor>> raceColumnToCompetitors;
+    
     public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
         super(req, res, service);
+        this.raceColumnToCompetitors = new HashMap<>();
     }
     
     public LeaderboardData(Leaderboard leaderboard) {
         super(leaderboard);
+        this.raceColumnToCompetitors = new HashMap<>();
     }
 
     /**
@@ -218,24 +222,36 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
         addNamedElementWithValue(raceElement, "is_live", "false");
         TimePoint timepointToBeUsed = MillisecondsTimePoint.now();
+        List<Competitor> competitorsForColumn = this.raceColumnToCompetitors.get(column);
+        if (competitorsForColumn == null) {
+            competitorsForColumn = new ArrayList<>();
+        }
         List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
         for (Competitor competitorInLeaderboard : competitors) {
-            MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
-            if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
-                // add this competitor to the list to have him evaluated
-                Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
-                Element competitorRaceDataElement = new Element("competitor_race_data");
-                MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
-                addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
-                boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, timepointToBeUsed);
-                addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-                Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, timepointToBeUsed);
-                addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
-                competitorElement.addContent(competitorRaceDataElement);
-                raceElement.addContent(competitorElement);
-                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
+            // we must keep track of competitors that we are associated to fleets
+            // in order to not export the score correction twice. This is needed
+            // because the score correction does not know about fleets and we do not
+            // know to which fleet the competitor belongs because no races are linked
+            if (!competitorsForColumn.contains(competitorInLeaderboard)) {
+                MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
+                if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
+                    // add this competitor to the list to have him evaluated
+                    Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
+                    Element competitorRaceDataElement = new Element("competitor_race_data");
+                    MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
+                    addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
+                    boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, timepointToBeUsed);
+                    addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
+                    Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, timepointToBeUsed);
+                    addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
+                    competitorElement.addContent(competitorRaceDataElement);
+                    raceElement.addContent(competitorElement);
+                    raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
+                    competitorsForColumn.add(competitorInLeaderboard);
+                }
             }
         }
+        this.raceColumnToCompetitors.put(column, competitorsForColumn);
         return raceElement;
     }
     
