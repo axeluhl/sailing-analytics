@@ -17,6 +17,7 @@ import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Style;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.YAxis;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
@@ -175,6 +176,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         String result = String.valueOf(labelData);
         com.sap.sse.common.Util.Pair<Double, Double> firstAndLastXValue = getFirstnAndLastXValueOfSeries();
         if (firstAndLastXValue != null && firstAndLastXValue.getA() != null && firstAndLastXValue.getB() != null) {
+            chart.getXAxis().setTickInterval(firstAndLastXValue.getB()/2);
             if (labelData == firstAndLastXValue.getA().doubleValue()) {
                 result = StringMessages.INSTANCE.dashboardPinEnd();
             } else if (labelData == firstAndLastXValue.getB().doubleValue()) {

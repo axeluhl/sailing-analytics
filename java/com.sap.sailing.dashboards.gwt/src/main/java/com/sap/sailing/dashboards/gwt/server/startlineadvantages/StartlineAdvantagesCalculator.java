@@ -2,6 +2,7 @@ package com.sap.sailing.dashboards.gwt.server.startlineadvantages;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -98,18 +99,17 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
             }
     }
     
-    private void retrieveStartlineMarkPositionsFromStartLineWayPoint(Waypoint startLineWayPoint){
-        if(startLineWayPoint.getMarks().iterator().hasNext()){
-           Mark startboat =  startLineWayPoint.getMarks().iterator().next();
-           if(startLineWayPoint.getMarks().iterator().hasNext()){
-               Mark pinEnd =  startLineWayPoint.getMarks().iterator().next();
-               TimePoint now = MillisecondsTimePoint.now();
-               Position startBoatPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, startboat, now);
-               Position pinEndPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, pinEnd, now);
-               startlineMarkPositions = new Pair<Position, Position>(startBoatPosition, pinEndPosition);
-               logger.log(Level.INFO, "Startline Startboat : "+startlineMarkPositions.getA());
-               logger.log(Level.INFO, "Startline PinEnd: "+startlineMarkPositions.getB());
-           }
+    private void retrieveStartlineMarkPositionsFromStartLineWayPoint(Waypoint startLineWayPoint) {
+        Iterator<Mark> markIterator = startLineWayPoint.getMarks().iterator();
+        if (markIterator.hasNext()) {
+            Mark startboat = (Mark) markIterator.next();
+            if (markIterator.hasNext()) {
+                Mark pinEnd = (Mark) markIterator.next();
+                TimePoint now = MillisecondsTimePoint.now();
+                Position startBoatPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, startboat, now);
+                Position pinEndPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, pinEnd, now);
+                startlineMarkPositions =  new Pair<Position, Position>(startBoatPosition, pinEndPosition);
+            }
         }
     }
     
@@ -124,8 +124,7 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
     
     private void retrieveStartlineAdvantageAndLenght() {
         LineDetails startline = currentLiveTrackedRace.getStartLine(MillisecondsTimePoint.now());
-        //startlineLenght = startline.getLength().getMeters();
-        startlineLenght = 50;
+        startlineLenght = startline.getLength().getMeters();
         if (startline != null && startline.getAdvantage() != null) {
             startlineAdvantage = startline.getAdvantage().getMeters();
         }
