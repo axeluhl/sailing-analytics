@@ -28,12 +28,12 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     private List<SidelineDTO> courseSidelines;
     private List<CompactQuickRankDTO> quickRanks;
     private LinkedHashMap<String, Integer> competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber;
-    private int simulationResultVersion;
+    private long simulationResultVersion;
     
     CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
-           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, int simulationResultVersion) {
+           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion) {
         this.boatPositionsByCompetitorIdAsString = new HashMap<String, List<GPSFixDTO>>();
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
             this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());

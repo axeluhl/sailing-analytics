@@ -34,8 +34,11 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -46,6 +49,8 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -97,7 +102,7 @@ public class LeaderboardData extends ExportAction {
      *     </competitor>
      *  </pre>
      */
-    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
+    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> windData, List<Element> competitors, List<Element> races, Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());
         addNamedElementWithValue(leaderboardElement, "display_name", leaderboard.getDisplayName());
@@ -106,6 +111,9 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(leaderboardElement, "boat_class", getBoatClassName(leaderboard));
         leaderboardElement.addContent(createTimedXML("last_modification_", leaderboard.getTimePointOfLatestModification()));
         leaderboardElement.addContent(createDataConfidenceXML(leaderboardConfidenceAndErrorMessages));
+        Element windContainer = new Element("wind");
+        windContainer.addContent(windData);
+        leaderboardElement.addContent(windContainer);
         leaderboardElement.addContent(competitors);
         leaderboardElement.addContent(races);
         return leaderboardElement;
@@ -202,6 +210,35 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
+    private Element createRaceXMLWithoutRaceData(final Fleet fleet, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+        Element raceElement = new Element("race");
+        addNamedElementWithValue(raceElement, "name", column.getName()+'-'+fleet.getName());
+        addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
+        addNamedElementWithValue(raceElement, "fleet_name", fleet.getName());
+        addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
+        addNamedElementWithValue(raceElement, "is_live", "false");
+        TimePoint timepointToBeUsed = MillisecondsTimePoint.now();
+        List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
+        for (Competitor competitorInLeaderboard : competitors) {
+            MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
+            if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
+                // add this competitor to the list to have him evaluated
+                Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
+                Element competitorRaceDataElement = new Element("competitor_race_data");
+                MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
+                addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
+                boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, timepointToBeUsed);
+                addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
+                Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, timepointToBeUsed);
+                addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
+                competitorElement.addContent(competitorRaceDataElement);
+                raceElement.addContent(competitorElement);
+                raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
+            }
+        }
+        return raceElement;
+    }
+    
     /**
      * Creates elements containing information about a race
      */
@@ -233,7 +270,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
-        LineDetails start = race.getStartLine(race.getStartOfTracking());
+        LineDetails start = race.getStartLine(race.getStartOfRace());
         if (start != null) {
             if (start.getLength() != null) {
                 addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
@@ -568,13 +605,16 @@ public class LeaderboardData extends ExportAction {
                 // will kick in
             }
         }
-        if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
-            timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
+        // first look for latest modification of leaderboard
+        // if there is no latest modification then take the last races time
+        if (leaderboard.getTimePointOfLatestModification() != null) {
+            timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
         } else {
-            if (leaderboard.getTimePointOfLatestModification() != null) {
-                timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
+                timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
             } else {
-                timePointOfLatestModification = MillisecondsTimePoint.now();
+                // make sure that the timepoint is far in the future - could be that the export is called too early
+                timePointOfLatestModification = MillisecondsTimePoint.now().plus(Duration.ONE_YEAR);
             }
         }
         Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
@@ -708,6 +748,36 @@ public class LeaderboardData extends ExportAction {
         return legElement;
     }
     
+    private List<Element> createFullWindDataXML(TrackedRace race, Fleet fleet, int sameDayIndex) {
+        List<Element> windElements = new ArrayList<>();
+        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+        windSourcesToDeliver.add(windSource);
+        TimePoint fromTimePoint = race.getStartOfRace();
+        TimePoint toTimePoint = race.getEndOfRace();
+        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / /*resolutionInMillis*/ 1000*60*5);
+        WindTrack windTrack = race.getOrCreateWindTrack(windSource);
+        TimePoint timePoint = fromTimePoint;
+        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                    .getAveragedWindWithConfidence(null, timePoint);
+            if (averagedWindWithConfidence != null) {
+                Element windElement = new Element("windFix");
+                addNamedElementWithValue(windElement, "same_day_index", sameDayIndex);
+                addNamedElementWithValue(windElement, "race_name", race.getRace().getName());
+                addNamedElementWithValue(windElement, "fleet_name", fleet.getName());
+                windElement.addContent(createTimedXML("", averagedWindWithConfidence.getObject().getTimePoint()));
+                addNamedElementWithValue(windElement, "bearingInDegrees", averagedWindWithConfidence.getObject().getBearing().getDegrees());
+                addNamedElementWithValue(windElement, "directionFromInDegrees", averagedWindWithConfidence.getObject().getBearing().reverse().getDegrees());
+                windElement.addContent(createWindXML("", new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(averagedWindWithConfidence.getObject().getKnots()), 
+                        averagedWindWithConfidence.getConfidence(), toTimePoint)));
+                windElements.add(windElement);
+            }
+            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + 1000*60*5);
+        }
+        return windElements;
+    }
+    
     /**
      * Creates xml elements that indicate confidence.
      */
@@ -784,24 +854,29 @@ public class LeaderboardData extends ExportAction {
     private Util.Pair<Double, Vector<String>> checkData(TrackedRace race) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         TimePoint dateAtYear2000 = new MillisecondsTimePoint(946681200000l);
-        if (race.getStartOfRace() == null || race.getStartOfRace().before(dateAtYear2000)) {
-            messages.add("Start time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+        if (race == null) {
+            messages.add("Tracked race is null - no race seems to be connected!");
             simpleConfidence -= 1;
-        }
-        if (race.getEndOfRace() == null || race.getEndOfRace().before(dateAtYear2000)) {
-            messages.add("End time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
-            simpleConfidence -= 1;
-        }
-        if (race.getStartOfTracking() == null || race.getStartOfTracking().before(dateAtYear2000)) {
-            messages.add("Start tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
-            simpleConfidence -= 0.2;
-        }
-        if (race.getEndOfTracking() == null || race.getEndOfTracking().before(dateAtYear2000)) {
-            messages.add("End tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
-            simpleConfidence -= 0.2;
-        }
-        if (race.isLive(MillisecondsTimePoint.now())) {
-            messages.add("This race is live - data for this race will not be available until the race has been finished!");
+        } else {
+            if (race.getStartOfRace() == null || race.getStartOfRace().before(dateAtYear2000)) {
+                messages.add("Start time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+                simpleConfidence -= 1;
+            }
+            if (race.getEndOfRace() == null || race.getEndOfRace().before(dateAtYear2000)) {
+                messages.add("End time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+                simpleConfidence -= 1;
+            }
+            if (race.getStartOfTracking() == null || race.getStartOfTracking().before(dateAtYear2000)) {
+                messages.add("Start tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+                simpleConfidence -= 0.2;
+            }
+            if (race.getEndOfTracking() == null || race.getEndOfTracking().before(dateAtYear2000)) {
+                messages.add("End tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+                simpleConfidence -= 0.2;
+            }
+            if (race.isLive(MillisecondsTimePoint.now())) {
+                messages.add("This race is live - data for this race will not be available until the race has been finished!");
+            }
         }
         return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
@@ -886,24 +961,25 @@ public class LeaderboardData extends ExportAction {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         log.info("Starting XML export of " + leaderboard.getName());
         Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
-        
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
-        
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
             Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
             competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
-        
+        List<Element> windData = new ArrayList<Element>();
         TrackedRace raceBefore = null; int sameDayGroupIndex = 0; int raceCounter = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                if (trackedRace != null && trackedRace.hasGPSData()) {
+                if (trackedRace != null) {
                     sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
-                    TimePoint timeSpentForRace = MillisecondsTimePoint.now();
-                    Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
-                    final List<Element> legs = new ArrayList<Element>();
+                }
+                TimePoint timeSpentForRace = MillisecondsTimePoint.now();
+                Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
+                final List<Element> legs = new ArrayList<Element>();
+                if (trackedRace != null && trackedRace.hasGPSData()) {
+                    windData.addAll(createFullWindDataXML(trackedRace, fleet, sameDayGroupIndex));
                     int legCounter = 0;
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                         Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
@@ -914,12 +990,15 @@ public class LeaderboardData extends ExportAction {
                     addNamedElementWithValue(raceElement, "generation_time_in_milliseconds", elapsedTimeForRace.asMillis());
                     racesElements.add(raceElement);
                     log.info("Exported complete race " + trackedRace.getRace().getName() + " in " + elapsedTimeForRace.asMillis() + " milliseconds!");
-                    raceBefore = trackedRace;
+                } else {
+                    racesElements.add(createRaceXMLWithoutRaceData(fleet, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages));
+                    log.info("Exported empty race in race column " + raceColumn.getName() + " with fleet " + fleet.getName());
                 }
+                raceBefore = trackedRace;
             }
         }
         log.info("Finished XML export of leaderboard " + leaderboard.getName() + " in " + MillisecondsTimePoint.now().minus(timeSpent.asMillis()).asMillis() + " milliseconds");
-        Element dataToExport = createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages);
+        Element dataToExport = createLeaderboardXML(leaderboard, windData, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages);
         sendDocument(dataToExport, leaderboard.getName() + ".xml");
     }
 }
