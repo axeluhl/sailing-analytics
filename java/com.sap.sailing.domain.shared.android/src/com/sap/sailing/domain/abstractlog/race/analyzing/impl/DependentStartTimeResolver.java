@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class DependentStartTimeResolver {
     }
 
     public StartTimeFinderResult resolve(RaceLogDependentStartTimeEvent event) {
-        List<SimpleRaceLogIdentifier> dependingOnRaces = new ArrayList<>();
+        List<SimpleRaceLogIdentifier> dependingOnRaces = Collections.emptyList();
         return internalResolve(event, dependingOnRaces);
     }
 
