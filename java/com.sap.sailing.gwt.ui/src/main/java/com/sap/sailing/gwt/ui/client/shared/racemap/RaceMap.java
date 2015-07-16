@@ -224,6 +224,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final Map<SidelineDTO, Polygon> courseSidelines;
     
     /**
+     * When the {@link HelpLineTypes#COURSEGEOMETRY} option is selected, little markers will be displayed on the
+     * lines that show the tooltip text in a little info box linked to the line. When the line is removed by
+     * {@link #showOrRemoveOrUpdateLine(Polyline, boolean, Position, Position, LineInfoProvider, String)}, these
+     * overlays need to be removed as well. Also, when the {@link HelpLineTypes#COURSEGEOMETRY} setting is
+     * deactivated, all these overlays need to go.
+     */
+    private final Map<Polyline, SmallTransparentInfoOverlay> infoOverlaysForLinesForCourseGeometry;
+    
+    /**
      * Wind data used to display the advantage line. Retrieved by a {@link GetWindInfoAction} execution and used in
      * {@link #showAdvantageLine(Iterable, Date)}.
      */
@@ -404,6 +413,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<>();
         courseMiddleLines = new HashMap<>();
+        infoOverlaysForLinesForCourseGeometry = new HashMap<>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
@@ -1339,14 +1349,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         };
         windwardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(windwardStartLineMarkToFirstMarkLine, /* showLine */
-                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE) ||
-                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY))
+                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
                         && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                 windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineInfoProvider,
                 "grey");
         leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
-                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE) ||
-                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY))
+                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
                         && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                 leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineInfoProvider,
                 "grey");
@@ -1369,7 +1377,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void showStartAndFinishAndCourseMiddleLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && courseDTO.course != null && courseDTO.course.waypoints != null &&
-                !courseDTO.course.waypoints.isEmpty() && lastRaceTimesInfo != null) {
+                !courseDTO.course.waypoints.isEmpty()) {
             com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getFarthestAheadVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
             int oneBasedLegOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
             int numberOfLegs = courseDTO.course.waypoints.size()-1;
@@ -1426,7 +1434,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                          && oneBasedLegOfLeadingCompetitor-1 == zeroBasedIndexOfStartWaypoint);
                 keysAlreadyHandled.put(key, new Pair<>(showCourseMiddleLine, zeroBasedIndexOfStartWaypoint));
             }
-            // TODO after a course change there may be stale keys and stale course middle lines; make sure they are removed in this process
             Set<Set<ControlPointDTO>> keysToConsider = new HashSet<>(keysAlreadyHandled.keySet());
             keysToConsider.addAll(courseMiddleLines.keySet());
             for (final Set<ControlPointDTO> key : keysToConsider) {
@@ -1535,21 +1542,52 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                 });
                 lineToShowOrRemoveOrUpdate.setMap(map);
+                
             } else {
                 pointsAsArray = lineToShowOrRemoveOrUpdate.getPath();
                 pointsAsArray.removeAt(1);
                 pointsAsArray.removeAt(0);
             }
+            adjustInfoOverlayForVisibleLine(lineToShowOrRemoveOrUpdate, position1DTO, position2DTO, lineInfoProvider);
             pointsAsArray.insertAt(0, courseMiddleLinePoint1);
             pointsAsArray.insertAt(1, courseMiddleLinePoint2);
-        }
-        else {
+        } else {
             if (lineToShowOrRemoveOrUpdate != null) {
                 lineToShowOrRemoveOrUpdate.setMap(null);
+                adjustInfoOverlayForRemovedLine(lineToShowOrRemoveOrUpdate);
                 lineToShowOrRemoveOrUpdate = null;
             }
         }
         return lineToShowOrRemoveOrUpdate;
+    }
+
+    private void adjustInfoOverlayForRemovedLine(Polyline lineToShowOrRemoveOrUpdate) {
+        SmallTransparentInfoOverlay infoOverlay = infoOverlaysForLinesForCourseGeometry.remove(lineToShowOrRemoveOrUpdate);
+        if (infoOverlay != null) {
+            infoOverlay.removeFromMap();
+        }
+    }
+
+    private void adjustInfoOverlayForVisibleLine(Polyline lineToShowOrRemoveOrUpdate, final Position position1DTO,
+            final Position position2DTO, final LineInfoProvider lineInfoProvider) {
+        SmallTransparentInfoOverlay infoOverlay = infoOverlaysForLinesForCourseGeometry.get(lineToShowOrRemoveOrUpdate);
+        if (getSettings().getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)) {
+            if (infoOverlay == null) {
+                infoOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, lineInfoProvider.getLineInfo(), coordinateSystem);
+                infoOverlaysForLinesForCourseGeometry.put(lineToShowOrRemoveOrUpdate, infoOverlay);
+                infoOverlay.addToMap();    
+            } else {
+                infoOverlay.setInfoText(lineInfoProvider.getLineInfo());
+            }
+            infoOverlay.setPosition(position1DTO.translateGreatCircle(position1DTO.getBearingGreatCircle(position2DTO),
+                    position1DTO.getDistance(position2DTO).scale(0.5)), /* transition time */ -1);
+            infoOverlay.draw();
+        } else {
+            if (infoOverlay != null) {
+               infoOverlay.removeFromMap();
+               infoOverlaysForLinesForCourseGeometry.remove(lineToShowOrRemoveOrUpdate);
+            }
+        }
     }
     
     /**
@@ -1559,7 +1597,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private void updateCountdownCanvas(WaypointDTO startWaypoint) {
         if (!settings.isShowSelectedCompetitorsInfo() || startWaypoint == null || Util.isEmpty(startWaypoint.controlPoint.getMarks())
-                || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
+                || lastRaceTimesInfo == null || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
             if (countDownOverlay != null) {
                 countDownOverlay.removeFromMap();
                 countDownOverlay = null;
