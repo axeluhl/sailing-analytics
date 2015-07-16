@@ -262,7 +262,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
-        LineDetails start = race.getStartLine(race.getStartOfTracking());
+        LineDetails start = race.getStartLine(race.getStartOfRace());
         if (start != null) {
             if (start.getLength() != null) {
                 addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
