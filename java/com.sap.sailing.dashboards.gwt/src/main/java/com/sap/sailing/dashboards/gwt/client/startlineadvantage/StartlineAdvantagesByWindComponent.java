@@ -51,7 +51,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     
     public StartlineAdvantagesByWindComponent(RibDashboardServiceAsync ribDashboardService) {
         startlineAdvantagesOnLineChart = new StartlineAdvantagesOnLineChart();
-        advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWind(), "s");
+        advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWind(), "m");
         advantageMaximumLiveAverage.header.getStyle().setFontSize(14, Unit.PT);
         advantageMaximumLiveAverage.liveLabel.setInnerHTML("advantage max.");
         advantageMaximumLiveAverage.averageLabel.setInnerHTML("advantage max. average "+StringMessages.INSTANCE.dashboardAverageWindMinutes(15));
