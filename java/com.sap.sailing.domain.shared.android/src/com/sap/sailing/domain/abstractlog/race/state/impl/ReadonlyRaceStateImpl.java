@@ -350,7 +350,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         return false;
     }
 
-    private void update() {
+    protected void update() {
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;

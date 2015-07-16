@@ -221,4 +221,8 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         return event != null;
     }
 
+    @Override
+    public void forceUpdate() {
+        super.update();
+    }
 }
