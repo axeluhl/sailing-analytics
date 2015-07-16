@@ -30,7 +30,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -353,7 +353,7 @@ public class RaceContext {
                 }
             }
         }
-        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        ScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if(!hasTrackingForRaceColumn() && scoreCorrection != null && scoreCorrection.hasCorrectionFor(raceColumn)) {
             return RaceViewState.FINISHED;
         }
