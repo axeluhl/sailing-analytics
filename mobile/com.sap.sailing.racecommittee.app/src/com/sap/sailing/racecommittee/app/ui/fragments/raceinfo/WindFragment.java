@@ -2,10 +2,15 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +45,7 @@ import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -125,6 +131,10 @@ public class WindFragment extends BaseFragment
 
         // refresh ui
         mRefreshUIRunnable = createUIRefreshRunnable();
+
+        //register receiver to be notified if race is tracked
+        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new IsTrackedReceiver(), filter);
     }
 
     private Runnable createUIRefreshRunnable() {
@@ -278,6 +288,8 @@ public class WindFragment extends BaseFragment
             });
         }
         if (mContentMapShow != null) {
+            // disable functionality at first. will be enabled after contacting the server if race is tracked
+            mContentMapShow.setEnabled(false);
             mContentMapShow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -409,6 +421,8 @@ public class WindFragment extends BaseFragment
         tearUpPositionPoller();
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        // Contact server and ask if race is tracked and map is allowed to show.
+        WindHelper.isTrackedRace(getActivity(), getRace());
     }
 
     @Override
@@ -494,6 +508,15 @@ public class WindFragment extends BaseFragment
     protected void saveEntriesInPreferences(Wind wind) {
         preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
         preferences.setWindSpeed(wind.getKnots());
+    }
+
+    private class IsTrackedReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mContentMapShow.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+        }
+
     }
 
 }
