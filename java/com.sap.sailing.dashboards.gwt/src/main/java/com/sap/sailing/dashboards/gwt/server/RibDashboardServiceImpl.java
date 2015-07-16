@@ -83,7 +83,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         baseDomainFactory = getRacingEventService().getBaseDomainFactory();
         startAnalysisCreationController = new StartAnalysisCreationController(getRacingEventService());
         startlineAdvantagesCalculator = new StartlineAdvantagesCalculator();
-
+        addLiveTrackedRaceListener(startlineAdvantagesCalculator);
         averageStartLineAdvantageByWind = new MovingAverage(400);
         averageStartLineAdvantageByGeometry = new MovingAverage(400);
     }
@@ -159,6 +159,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                 for (Fleet fleet : column.getFleets()) {
                     TrackedRace race = column.getTrackedRace(fleet);
                     if (race != null) {
+                        notifyLiveTrackedRaceListenerAboutLiveTrackedRaceChange(race);
                         TimePoint startOfRace = race.getStartOfRace();
                         // not relying on isLive() because the time window is too short
                         // to retrieve wind information we need to extend the time window

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.dashboards.gwt.server.LiveTrackedRaceListener;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -31,6 +33,11 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
     private Pair<Position, Position> startlineMarkPositions;
     private Position firstMarkPosition;
     private MovingAverage advantageMaximumAverage;
+    
+    private static final double DEFAULT_TACKING_ANGLE = 60.0;
+    private static final double DEFAULT_JIBING_ANGLE = 45.0;
+    private static final double DEFAULT_WIND_DIRECTION = 60.0;
+    private static final double DEFAULT_WIND_SPEED = 45.0;
     
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
     
@@ -56,13 +63,85 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
         // Calculate duration from two new distances for normal upwind starts
         // Put all durations in one set
         // Get the smallest of the durations and subtract number from every other number
-//        retrieveFirstLegWayPoints();
-//        logger.log(Level.INFO, "Startline Startboat : "+startlineMarkPositions.getA());
-//        logger.log(Level.INFO, "Startline PinEnd: "+startlineMarkPositions.getB());
-//        logger.log(Level.INFO, "Firstmark: "+firstMarkPosition);
+        if (currentLiveTrackedRace != null) {
+            retrieveFirstLegWayPoints();
+            retrieveStartlineAdvantageAndWindDirection();
+        } else {
+            logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
+        }
         return result;
     }
 
+    
+    private void retrieveFirstLegWayPoints() {
+            Course course = currentLiveTrackedRace.getRace().getCourse();
+            if (course != null) {
+                Waypoint startlineWayPoint= course.getFirstLeg().getFrom();
+                Waypoint firstmarkWayPoint = course.getFirstLeg().getTo();
+                if (startlineWayPoint != null && firstmarkWayPoint != null) {
+                    retrieveStartlineMarkPositionsFromStartLineWayPoint(startlineWayPoint);
+                    retrieveFirstMarkPositionFromFirstMarkWayPoint(firstmarkWayPoint);
+                }
+            }
+    }
+    
+    private void retrieveStartlineMarkPositionsFromStartLineWayPoint(Waypoint startLineWayPoint){
+        if(startLineWayPoint.getMarks().iterator().hasNext()){
+           Mark startboat =  startLineWayPoint.getMarks().iterator().next();
+           if(startLineWayPoint.getMarks().iterator().hasNext()){
+               Mark pinEnd =  startLineWayPoint.getMarks().iterator().next();
+               TimePoint now = MillisecondsTimePoint.now();
+               Position startBoatPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, startboat, now);
+               Position pinEndPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, pinEnd, now);
+               startlineMarkPositions = new Pair<Position, Position>(startBoatPosition, pinEndPosition);
+               logger.log(Level.INFO, "Startline Startboat : "+startlineMarkPositions.getA());
+               logger.log(Level.INFO, "Startline PinEnd: "+startlineMarkPositions.getB());
+           }
+        }
+    }
+    
+    private void retrieveFirstMarkPositionFromFirstMarkWayPoint(Waypoint firstMarkWayPoint) {
+        if (firstMarkWayPoint.getMarks().iterator().hasNext()) {
+            Mark firstMark = firstMarkWayPoint.getMarks().iterator().next();
+            TimePoint now = MillisecondsTimePoint.now();
+            firstMarkPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, firstMark, now);
+            logger.log(Level.INFO, "Firstmark: "+firstMarkPosition);
+        }
+    }
+    
+    private void retrieveStartlineAdvantageAndWindDirection() {
+        LineDetails startline = currentLiveTrackedRace.getStartLine(MillisecondsTimePoint.now());
+        startline.getAdvantage();
+    }
+    
+    private Position getPositionFromMarkAtTimePoint(TrackedRace trackedRace, Mark mark, TimePoint timePoint){
+        GPSFixTrack<Mark, GPSFix> fixTrack = trackedRace.getTrack(mark);
+        return fixTrack.getEstimatedPosition(timePoint, true);
+    }
+    
+    private void getStartlineOfRace(){
+        
+    }
+    
+    private void getFirstMarkOfRace(){
+        
+    }
+    
+    private Set<Double> getPositionsLineWithStepWidthInMeter(Object line, int meter){
+        return null;
+    }
+    
+    private Position getIntersectionPointOfTwoGPSLines(Object line1, Object line2){
+        return null;
+    }
+
+    @Override
+    public void liveTrackedRaceDidChange(TrackedRace trackedRace) {
+        this.currentLiveTrackedRace = trackedRace;
+    }
+    
+    //Dummy data generation
+    
     private double getMaximumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
         double result = 0;
         if(advantages != null && advantages.size() > 0) {
@@ -90,66 +169,5 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
             result.confidence = 0.3;
         } 
         return result;
-    }
-    
-    private void retrieveFirstLegWayPoints() {
-        if (currentLiveTrackedRace != null) {
-            Course course = currentLiveTrackedRace.getRace().getCourse();
-            if (course != null) {
-                Waypoint startlineWayPoint= course.getFirstLeg().getFrom();
-                Waypoint firstmarkWayPoint = course.getFirstLeg().getTo();
-                if (startlineWayPoint != null && firstmarkWayPoint != null) {
-                    retrieveStartlineMarkPositionsFromStartLineWayPoint(startlineWayPoint);
-                    retrieveFirstMarkPositionFromFirstMarkWayPoint(firstmarkWayPoint);
-                }
-            }
-        }
-    }
-    
-    private void retrieveStartlineMarkPositionsFromStartLineWayPoint(Waypoint startLineWayPoint){
-        if(startLineWayPoint.getMarks().iterator().hasNext()){
-           Mark startboat =  startLineWayPoint.getMarks().iterator().next();
-           if(startLineWayPoint.getMarks().iterator().hasNext()){
-               Mark pinEnd =  startLineWayPoint.getMarks().iterator().next();
-               TimePoint now = MillisecondsTimePoint.now();
-               Position startBoatPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, startboat, now);
-               Position pinEndPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, pinEnd, now);
-               startlineMarkPositions = new Pair<Position, Position>(startBoatPosition, pinEndPosition);
-           }
-        }
-    }
-    
-    private void retrieveFirstMarkPositionFromFirstMarkWayPoint(Waypoint firstMarkWayPoint) {
-        if (firstMarkWayPoint.getMarks().iterator().hasNext()) {
-            Mark firstMark = firstMarkWayPoint.getMarks().iterator().next();
-            TimePoint now = MillisecondsTimePoint.now();
-            firstMarkPosition = getPositionFromMarkAtTimePoint(currentLiveTrackedRace, firstMark, now);
-        }
-    }
-    
-    private Position getPositionFromMarkAtTimePoint(TrackedRace trackedRace, Mark mark, TimePoint timePoint){
-        GPSFixTrack<Mark, GPSFix> fixTrack = trackedRace.getTrack(mark);
-        return fixTrack.getEstimatedPosition(timePoint, true);
-    }
-    
-    private void getStartlineOfRace(){
-        
-    }
-    
-    private void getFirstMarkOfRace(){
-        
-    }
-    
-    private Set<Double> getPositionsLineWithStepWidthInMeter(Object line, int meter){
-        return null;
-    }
-    
-    private Position getIntersectionPointOfTwoGPSLines(Object line1, Object line2){
-        return null;
-    }
-
-    @Override
-    public void liveTrackedRaceDidChange(TrackedRace trackedRace) {
-        this.currentLiveTrackedRace = trackedRace;
     }
 }
