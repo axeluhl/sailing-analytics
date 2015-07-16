@@ -901,11 +901,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return null;
     }
     private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
-        Map<String, String> leaderboardLinkParameters = new HashMap<String, String>();
-        leaderboardLinkParameters.put("name", entryDTO.regattaName);
-        leaderboardLinkParameters.put("showRaceDetails", String.valueOf(true));
-        leaderboardLinkParameters.put("displayName", entryDTO.regattaDisplayName);
-        String leaderboardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
+        Map<String, String> leaderboardLinkParameters = Collections.emptyMap();
+        String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.regattaName, leaderboardLinkParameters);
         return leaderboardLink;
     }
     public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {
