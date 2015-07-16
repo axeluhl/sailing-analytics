@@ -597,13 +597,16 @@ public class LeaderboardData extends ExportAction {
                 // will kick in
             }
         }
-        if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
-            timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
+        // first look for latest modification of leaderboard
+        // if there is no latest modification then take the last races time
+        if (leaderboard.getTimePointOfLatestModification() != null) {
+            timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
         } else {
-            if (leaderboard.getTimePointOfLatestModification() != null) {
-                timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
+                timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
             } else {
-                timePointOfLatestModification = MillisecondsTimePoint.now();
+                // make sure that the timepoint is far in the future - could be that the export is called too early
+                timePointOfLatestModification = MillisecondsTimePoint.now().plus(Duration.ONE_YEAR);
             }
         }
         Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
