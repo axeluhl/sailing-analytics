@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,7 +11,7 @@ public class RaceMapHelpLinesSettings {
      * Types of help lines on the map
      */
     public enum HelpLineTypes {
-        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS, STARTLINETOFIRSTMARKTRIANGLE
+        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS, STARTLINETOFIRSTMARKTRIANGLE, COURSEGEOMETRY
     }
     
     private final Set<HelpLineTypes> visibleHelpLines;
@@ -35,6 +36,10 @@ public class RaceMapHelpLinesSettings {
         return visibleHelpLines.contains(helpLineType);
     }
 
+    public Iterable<HelpLineTypes> getVisibleHelpLineTypes() {
+        return Collections.unmodifiableCollection(visibleHelpLines);
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -499,6 +499,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String knotsValue(double value);
+    String knotsRange(double lowerValue, double upperValue);
     String averageJibeLossInMetersTooltip();
     String averageManeuverLossInMetersTooltip();
     String averageTackLossInMetersTooltip();
@@ -1275,6 +1276,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String courseAreaName(String courseAreaName);
     String currentOfTotalLegs(int currentLeg, int totalLegs);
     String clone();
     String changed();
@@ -1333,12 +1335,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noNews();
     String pointsValue(double value);
     String openLeaderboard();
-    String resultsStandings();
     String now();
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
+    String winner();
+    String durationPlain();
+    String finishedRaces();
     String selectCompetitor();
+    String allBoatClasses();
     String points();
     String numberOfRacesShort();
+    String courseGeometry();
+    String degreesToWind(String diff);
     String miniLeeaderboardLegendText();
+    String currentOfTotal(int current, int total);
+    String noFinishedRaces();
 }

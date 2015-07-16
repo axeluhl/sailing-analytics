@@ -29,11 +29,12 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
     @UiField(provided = true)
     SeriesHeader eventHeaderUi;
     @UiField Quickfinder quickFinderUi;
-    @UiField
+    @UiField(provided = true)
     MinileaderboardBox minileaderboardUi;
 
     public SeriesMiniOverallLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
+        minileaderboardUi = new MinileaderboardBox(true);
         eventHeaderUi = new SeriesHeader(presenter.getCtx().getSeriesDTO());
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());

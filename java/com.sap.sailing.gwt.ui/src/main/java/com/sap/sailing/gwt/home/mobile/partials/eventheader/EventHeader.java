@@ -47,7 +47,7 @@ public class EventHeader extends Composite {
         }
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         LogoUtil.setEventLogo(eventLogoUi, event);
-        eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
+        eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());
     }
 }

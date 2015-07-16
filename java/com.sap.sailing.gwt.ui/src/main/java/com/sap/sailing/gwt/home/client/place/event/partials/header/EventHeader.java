@@ -41,6 +41,8 @@ public class EventHeader extends Composite {
     @UiField StringMessages i18n;
     
     @UiField DivElement eventLogo;
+    @UiField
+    AnchorElement eventLogoAnchorUi;
     @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
@@ -56,6 +58,7 @@ public class EventHeader extends Composite {
     @UiField DivElement races;
     @UiField DivElement trackedRaces;
     @UiField DivElement eventCategory;
+    @UiField DivElement courseAreaUi;
     
     @UiField FlowPanel dropdownContent;
     
@@ -96,7 +99,9 @@ public class EventHeader extends Composite {
 
     private void initFields() {
         LogoUtil.setEventLogo(eventLogo, event);
-        
+        if (presenter.showRegattaMetadata()) {
+            presenter.getCurrentEventNavigation().configureAnchorElement(eventLogoAnchorUi);
+        }
         String eventDisplayName = event.getDisplayName();
         String nameToShow;
         if(presenter.showRegattaMetadata()) {
@@ -122,6 +127,11 @@ public class EventHeader extends Composite {
                 trackedRaces.setInnerText(i18n.trackedRacesCount(regattaMetadata.getTrackedRacesCount()));
             } else {
                 hide(trackedRaces);
+            }
+            if(regattaMetadata.getDefaultCourseAreaName() != null) {
+                courseAreaUi.setInnerText(i18n.courseAreaName(regattaMetadata.getDefaultCourseAreaName()));
+            } else {
+                hide(courseAreaUi);
             }
             if(regattaMetadata.getBoatCategory() != null) {
                 eventCategory.setInnerText(regattaMetadata.getBoatCategory());
@@ -149,7 +159,7 @@ public class EventHeader extends Composite {
                 hide(eventLink);
             }
             
-            hide(competitors, races, trackedRaces);
+            hide(competitors, races, trackedRaces, courseAreaUi, eventCategory);
         }
         
         initTitleAndSelection(nameToShow);

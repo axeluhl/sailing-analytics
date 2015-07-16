@@ -6,11 +6,10 @@
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de"/>
 
-	<entry-point class="com.sap.sailing.gwt.ui.polarsheets.PolarSheetsEntryPoint" />
 	
 
 	<!-- Highcharts API -->
-	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
+	<inherits name="com.sap.sse.gwt.Highcharts" />
 
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
@@ -38,4 +37,6 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole" />
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
+	<entry-point class="com.sap.sailing.gwt.ui.polarsheets.PolarSheetsEntryPoint" />
+	
 </module>

@@ -827,7 +827,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
             // check for time-out
             if (this.isTimedOut()) {
-                //reachedEnd = true;
+                reachedEnd = true; 
             }
             
         } // main while-loop
