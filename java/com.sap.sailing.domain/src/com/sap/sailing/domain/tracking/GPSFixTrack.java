@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
@@ -27,6 +28,7 @@ import com.sap.sse.common.Util;
  */
 public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<FixType> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 10000; // makes for a 5s half-side interval
+    static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(40);
 
     /**
      * A listener is notified whenever a new fix is added to this track

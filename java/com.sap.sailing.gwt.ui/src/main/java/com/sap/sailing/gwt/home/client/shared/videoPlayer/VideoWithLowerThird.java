@@ -1,0 +1,38 @@
+package com.sap.sailing.gwt.home.client.shared.videoPlayer;
+
+import com.sap.sailing.gwt.home.client.shared.lowerThird.LowerThird;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
+import com.sap.sse.gwt.client.media.VideoDTO;
+
+public class VideoWithLowerThird extends VideoPlayer {
+    private final LowerThird lowerThird = new LowerThird();
+    
+    public VideoWithLowerThird() {
+        this(true, false);
+    }
+    public VideoWithLowerThird(boolean fullHeightWidth, boolean autoplay) {
+        super(fullHeightWidth, autoplay);
+    }
+    
+    @Override
+    protected void initialize() {
+        lowerThird.setVisible(false);
+        panel.add(lowerThird);
+    }
+    
+    @Override
+    protected void onPlay() {
+        super.onPlay();
+        lowerThird.setVisible(false);
+    }
+    
+    public void setVideo(VideoDTO video) {
+        super.setVideo(video);
+        if(video.getTitle() != null && !video.getTitle().isEmpty()) {
+            lowerThird.setVisible(paused());
+            lowerThird.setData(video.getTitle(), video.getSubtitle(), LabelType.NONE);
+        } else {
+            lowerThird.setVisible(false);
+        }
+    }
+}

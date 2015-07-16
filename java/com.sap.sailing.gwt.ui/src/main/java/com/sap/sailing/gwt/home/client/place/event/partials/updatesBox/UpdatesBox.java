@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.updatesBox;
 
 import java.util.Collection;
+import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.UListElement;
@@ -30,10 +31,10 @@ public class UpdatesBox extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setData(Collection<NewsEntryDTO> newsEntries) {
+    public void setData(Collection<NewsEntryDTO> newsEntries, Date currentTimestamp) {
         entries.clear();
         for (NewsEntryDTO newsEntryDTO : newsEntries) {
-            entries.add(new UpdatesBoxItem(newsEntryDTO, presenter));
+            entries.add(new UpdatesBoxItem(newsEntryDTO, currentTimestamp, presenter));
         }
     }
 }

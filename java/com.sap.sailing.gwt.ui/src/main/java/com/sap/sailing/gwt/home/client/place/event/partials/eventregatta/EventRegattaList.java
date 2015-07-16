@@ -60,13 +60,13 @@ public class EventRegattaList extends Composite {
         leaderboardGroupFilterAnchors = new ArrayList<AnchorElement>();
         boolean hasMultipleLeaderboardGroups = presenter.getCtx().getLeaderboardGroups().size() > 1;
         
-        if(event.getType() == EventType.SERIES_EVENT) {
+        if (event.getType() == EventType.SERIES_EVENT) {
             regattaListNavigationDiv.getStyle().setDisplay(Display.NONE);
         } else {
-            if(hasMultipleLeaderboardGroups) {
+            if (hasMultipleLeaderboardGroups) {
                 // fill the navigation panel
                 registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
-                for(LeaderboardGroupDTO leaderboardGroup: presenter.getCtx().getLeaderboardGroups()) {
+                for (LeaderboardGroupDTO leaderboardGroup: presenter.getCtx().getLeaderboardGroups()) {
                     AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
                     filterLeaderboardGroupAnchor.addClassName(EventRegattaListResources.INSTANCE.css().item());
                     filterLeaderboardGroupAnchor.setHref("javascript:;");
@@ -126,8 +126,10 @@ public class EventRegattaList extends Composite {
             for (LeaderboardGroupDTO lg : presenter.getCtx().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
-                for (Regatta regatta : regattaElements) {
-                    regatta.setVisible(isVisible);
+                if (regattaElements != null) {
+                    for (Regatta regatta : regattaElements) {
+                        regatta.setVisible(isVisible);
+                    }
                 }
             }
         } else {
@@ -135,8 +137,10 @@ public class EventRegattaList extends Composite {
             filterNoLeaderboardGroupsAnchor.addClassName(EventRegattaListResources.INSTANCE.css().selectedItem());
             for (LeaderboardGroupDTO lg : presenter.getCtx().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
-                for (Regatta regatta : regattaElements) {
-                    regatta.setVisible(true);
+                if (regattaElements != null) {
+                    for (Regatta regatta : regattaElements) {
+                        regatta.setVisible(true);
+                    }
                 }
             }
         }
