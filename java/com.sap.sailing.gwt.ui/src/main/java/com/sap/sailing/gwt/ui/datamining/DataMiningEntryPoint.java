@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
-import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
@@ -28,7 +27,6 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     private static final ComponentResources resources = GWT.create(ComponentResources.class);
@@ -56,12 +54,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
         ResultsPresenter<Number> resultsPresenter = new ResultsChart(getStringMessages());
-        if (GwtHttpRequestUtils.getBooleanParameter("benchmark", false)) {
-            BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls);
-            splitPanel.addSouth(benchmarkResultsPanel, 500);
-        } else {
-            splitPanel.addSouth(resultsPresenter.getWidget(), 400);
-        }
+        splitPanel.addSouth(resultsPresenter.getWidget(), 400);
         
         splitPanel.add(selectionDockPanel);
         
