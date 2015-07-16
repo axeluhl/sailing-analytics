@@ -134,6 +134,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
                     .setLineWidth(1)
         .setLineColor("grey")
         .setTickColor("grey")
+        .setTickInterval(50)
         .setGridLineColor("white")
         .setTickWidth(1)
         .setGridLineWidth(0)
