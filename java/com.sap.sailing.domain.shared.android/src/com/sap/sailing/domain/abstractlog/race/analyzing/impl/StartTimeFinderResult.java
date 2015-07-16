@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sse.common.Duration;
@@ -9,24 +8,18 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class StartTimeFinderResult {
-    private Iterable<SimpleRaceLogIdentifier> racesDependingOn;
-    private TimePoint startTime;
-    private Duration startTimeDiff;
+    private final Iterable<SimpleRaceLogIdentifier> racesDependingOn;
+    private final TimePoint startTime;
+    private final Duration startTimeDiff;
 
     public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
-        this(startTime, startTimeDiff);
+        this.startTime = startTime;
+        this.startTimeDiff = startTimeDiff;
         this.racesDependingOn = racesDependingOn;
     }
 
     public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff) {
-        racesDependingOn = new ArrayList<>();
-        this.startTime = startTime;
-        this.startTimeDiff = startTimeDiff;
-    }
-
-    public StartTimeFinderResult(List<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
-        this(startTime, startTimeDiff);
-        this.racesDependingOn = racesDependingOn;
+        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff);
     }
 
     public Iterable<SimpleRaceLogIdentifier> getRacesDependingOn() {
