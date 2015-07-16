@@ -30,7 +30,7 @@ public class DependentStartTimeResolver {
         Duration startTimeDifference = event.getStartTimeDifference();
         RaceLog raceLog = raceLogResolver.resolve(identifier);
 
-        StartTimeFinderResult result;
+        final StartTimeFinderResult result;
         if (raceLog == null) {
             result = new StartTimeFinderResult(dependingOnRaces, null, startTimeDifference);
         } else {
