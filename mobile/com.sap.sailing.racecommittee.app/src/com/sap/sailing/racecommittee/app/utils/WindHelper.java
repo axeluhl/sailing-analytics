@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -20,6 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class WindHelper {
+    private static String TAG = WindHelper.class.getName();
+
     public static void isTrackedRace(final Context context, final ManagedRace race){
         try {
             Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
@@ -45,12 +48,12 @@ public class WindHelper {
             }, new NetworkHelper.NetworkHelperFailureListener() {
                 @Override
                 public void performAction(NetworkHelper.NetworkHelperError e) {
-                    // TODO: Error handling
+                    Log.e(TAG, "Failed to contact server: " + e.getMessage());
                 }
             });
         }
         catch (MalformedURLException e){
-            // TODO: Error handling
+            Log.e(TAG, "Failed to generate url for server call: " + e.getMessage());
         }
     }
 
@@ -86,8 +89,7 @@ public class WindHelper {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            // TODO: Error handling e.g. logging
+            Log.e(TAG, "Failed to parse contents of the server response: " + e.getMessage());
         }
         return isTracked;
     }
