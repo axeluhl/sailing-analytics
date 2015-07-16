@@ -472,17 +472,28 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public boolean hasCorrectionFor(RaceColumn raceInLeaderboard) {
+        return internalHasScoreCorrectionFor(raceInLeaderboard, /* considerOnlyUntrackedRaces */ false);
+    }
+
+    private boolean internalHasScoreCorrectionFor(RaceColumn raceInLeaderboard, boolean considerOnlyUntrackedRaces) {
         for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
-            if (correctedScoresKey.getB() == raceInLeaderboard) {
+            if (correctedScoresKey.getB() == raceInLeaderboard &&
+                    (!considerOnlyUntrackedRaces || raceInLeaderboard.getTrackedRace(correctedScoresKey.getA()) == null)) {
                 return true;
             }
         }
         for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
-            if (maxPointsReasonsKey.getB() == raceInLeaderboard) {
+            if (maxPointsReasonsKey.getB() == raceInLeaderboard &&
+                    (!considerOnlyUntrackedRaces || raceInLeaderboard.getTrackedRace(maxPointsReasonsKey.getA()) == null)) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean hasCorrectionForNonTrackedFleet(RaceColumn raceInLeaderboard) {
+        return internalHasScoreCorrectionFor(raceInLeaderboard, /* considerOnlyUntrackedRaces */ true);
     }
 
     @Override
