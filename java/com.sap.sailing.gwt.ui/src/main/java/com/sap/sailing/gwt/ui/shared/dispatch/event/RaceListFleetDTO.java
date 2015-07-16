@@ -1,23 +1,23 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 
-public class RaceListDayDTO implements IsSerializable {
+public class RaceListFleetDTO implements IsSerializable {
     
-    private Date day;
-    
+    private FleetMetadataDTO fleet;
+    private int competitorCount = (int) (Math.random() * 10); // TODO   
     private ArrayList<RaceListRaceDTO> races = new ArrayList<>();
     
     @SuppressWarnings("unused")
-    private RaceListDayDTO() {
+    private RaceListFleetDTO() {
     }
     
-    public RaceListDayDTO(Date day) {
-        this.day = day;
+    public RaceListFleetDTO(FleetMetadataDTO fleet) {
+        this.fleet = fleet;
     }
     
     public void addRace(RaceListRaceDTO race) {
@@ -25,8 +25,12 @@ public class RaceListDayDTO implements IsSerializable {
         races.add(race);
     }
     
-    public Date getDay() {
-        return day;
+    public FleetMetadataDTO getFleet() {
+        return fleet;
+    }
+    
+    public int getCompetitorCount() {
+        return competitorCount;
     }
     
     public List<RaceListRaceDTO> getRaces() {

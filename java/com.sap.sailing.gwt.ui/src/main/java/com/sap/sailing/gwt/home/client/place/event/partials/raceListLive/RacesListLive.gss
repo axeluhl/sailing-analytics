@@ -66,7 +66,7 @@
 }
 .race_itemwinner {
   overflow: hidden;
-  white-space: nowrap;
+  white-space: normal;
   text-overflow: ellipsis;
   vertical-align: middle;
   min-width: 13.333333333333334em;

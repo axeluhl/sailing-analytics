@@ -499,6 +499,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String knotsValue(double value);
+    String knotsRange(double lowerValue, double upperValue);
     String averageJibeLossInMetersTooltip();
     String averageManeuverLossInMetersTooltip();
     String averageTackLossInMetersTooltip();
@@ -1337,10 +1338,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String now();
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
+    String winner();
+    String durationPlain();
+    String finishedRaces();
     String selectCompetitor();
+    String allBoatClasses();
     String points();
     String numberOfRacesShort();
     String courseGeometry();
     String degreesToWind(String diff);
     String miniLeeaderboardLegendText();
+    String currentOfTotal(int current, int total);
+    String noFinishedRaces();
 }
