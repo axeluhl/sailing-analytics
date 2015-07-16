@@ -394,7 +394,11 @@ public class RaceContext {
         }
         // TODO do not calculate the winner if the blue flag is currently shown.
         try {
-            competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, getFinishTime());
+            TimePoint finishTime = getFinishTime();
+            if(finishTime == null) {
+                finishTime = HomeServiceUtil.getLiveTimePoint();
+            }
+            competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
             if (competitors == null || competitors.isEmpty()) {
                 return null;
             }
