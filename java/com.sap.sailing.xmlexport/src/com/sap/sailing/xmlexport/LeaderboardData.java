@@ -34,8 +34,11 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -46,6 +49,8 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -97,7 +102,7 @@ public class LeaderboardData extends ExportAction {
      *     </competitor>
      *  </pre>
      */
-    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
+    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> windData, List<Element> competitors, List<Element> races, Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());
         addNamedElementWithValue(leaderboardElement, "display_name", leaderboard.getDisplayName());
@@ -106,6 +111,9 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(leaderboardElement, "boat_class", getBoatClassName(leaderboard));
         leaderboardElement.addContent(createTimedXML("last_modification_", leaderboard.getTimePointOfLatestModification()));
         leaderboardElement.addContent(createDataConfidenceXML(leaderboardConfidenceAndErrorMessages));
+        Element windContainer = new Element("wind");
+        windContainer.addContent(windData);
+        leaderboardElement.addContent(windContainer);
         leaderboardElement.addContent(competitors);
         leaderboardElement.addContent(races);
         return leaderboardElement;
@@ -740,6 +748,36 @@ public class LeaderboardData extends ExportAction {
         return legElement;
     }
     
+    private List<Element> createFullWindDataXML(TrackedRace race, Fleet fleet, int sameDayIndex) {
+        List<Element> windElements = new ArrayList<>();
+        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+        windSourcesToDeliver.add(windSource);
+        TimePoint fromTimePoint = race.getStartOfRace();
+        TimePoint toTimePoint = race.getEndOfRace();
+        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / /*resolutionInMillis*/ 1000*60*5);
+        WindTrack windTrack = race.getOrCreateWindTrack(windSource);
+        TimePoint timePoint = fromTimePoint;
+        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                    .getAveragedWindWithConfidence(null, timePoint);
+            if (averagedWindWithConfidence != null) {
+                Element windElement = new Element("windFix");
+                addNamedElementWithValue(windElement, "same_day_index", sameDayIndex);
+                addNamedElementWithValue(windElement, "race_name", race.getRace().getName());
+                addNamedElementWithValue(windElement, "fleet_name", fleet.getName());
+                windElement.addContent(createTimedXML("", averagedWindWithConfidence.getObject().getTimePoint()));
+                addNamedElementWithValue(windElement, "bearingInDegrees", averagedWindWithConfidence.getObject().getBearing().getDegrees());
+                addNamedElementWithValue(windElement, "directionFromInDegrees", averagedWindWithConfidence.getObject().getBearing().reverse().getDegrees());
+                windElement.addContent(createWindXML("", new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(averagedWindWithConfidence.getObject().getKnots()), 
+                        averagedWindWithConfidence.getConfidence(), toTimePoint)));
+                windElements.add(windElement);
+            }
+            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + 1000*60*5);
+        }
+        return windElements;
+    }
+    
     /**
      * Creates xml elements that indicate confidence.
      */
@@ -923,15 +961,13 @@ public class LeaderboardData extends ExportAction {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         log.info("Starting XML export of " + leaderboard.getName());
         Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
-        
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
-        
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
             Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
             competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
-        
+        List<Element> windData = new ArrayList<Element>();
         TrackedRace raceBefore = null; int sameDayGroupIndex = 0; int raceCounter = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
@@ -943,6 +979,7 @@ public class LeaderboardData extends ExportAction {
                 Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                 final List<Element> legs = new ArrayList<Element>();
                 if (trackedRace != null && trackedRace.hasGPSData()) {
+                    windData.addAll(createFullWindDataXML(trackedRace, fleet, sameDayGroupIndex));
                     int legCounter = 0;
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                         Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
@@ -961,7 +998,7 @@ public class LeaderboardData extends ExportAction {
             }
         }
         log.info("Finished XML export of leaderboard " + leaderboard.getName() + " in " + MillisecondsTimePoint.now().minus(timeSpent.asMillis()).asMillis() + " milliseconds");
-        Element dataToExport = createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages);
+        Element dataToExport = createLeaderboardXML(leaderboard, windData, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages);
         sendDocument(dataToExport, leaderboard.getName() + ".xml");
     }
 }
