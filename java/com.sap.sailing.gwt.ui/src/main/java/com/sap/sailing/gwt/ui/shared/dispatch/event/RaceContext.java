@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -323,33 +324,43 @@ public class RaceContext {
     
     private RaceViewState getLiveRaceViewState() {
         if(raceViewState == null) {
-            raceViewState = calculateLiveRaceViewState();
+            raceViewState = calculateRaceViewState();
         }
         return raceViewState;
     }
-    
-    private RaceViewState calculateLiveRaceViewState() {
+
+    private RaceViewState calculateRaceViewState() {
         TimePoint startTime = getStartTime();
         TimePoint finishTime = getFinishTime();
-        RaceViewState raceState = RaceViewState.RUNNING;
         if (startTime != null && now.before(startTime)) {
-            raceState = RaceViewState.SCHEDULED;
-        } else if (finishTime != null && now.after(finishTime)) {
-            raceState = RaceViewState.FINISHED;
-        } else if(raceLog != null) {
+            return RaceViewState.SCHEDULED;
+        }
+        if (finishTime != null && now.after(finishTime)) {
+            return RaceViewState.FINISHED;
+        }
+        if(raceLog != null) {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
                 if(upperFlag.equals(Flags.AP)) {
-                    raceState = RaceViewState.POSTPONED;
-                } else if(upperFlag.equals(Flags.NOVEMBER)) {
-                    raceState = RaceViewState.ABANDONED;
-                } else if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
-                    raceState = RaceViewState.ABANDONED;
+                    return RaceViewState.POSTPONED;
+                }
+                if(upperFlag.equals(Flags.NOVEMBER)) {
+                    return RaceViewState.ABANDONED;
+                }
+                if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                    return RaceViewState.ABANDONED;
                 }
             }
         }
-        return raceState;
+        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        if(trackedRace == null && scoreCorrection != null && scoreCorrection.hasCorrectionFor(raceColumn)) {
+            return RaceViewState.FINISHED;
+        }
+        if(startTime != null) {
+            return RaceViewState.RUNNING;
+        }
+        return RaceViewState.PLANNED;
     }
     
     private Wind checkForWindFixesFromRaceLog() {
