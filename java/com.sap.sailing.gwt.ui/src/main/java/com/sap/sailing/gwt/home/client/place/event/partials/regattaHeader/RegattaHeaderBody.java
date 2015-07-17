@@ -36,7 +36,6 @@ public class RegattaHeaderBody extends UIObject {
         LabelTypeUtil.renderLabelTypeOrHide(labelUi, regattaMetadata.getState().getStateMarker());
         addDetailsItem(regattaMetadata.getCompetitorsCount(), I18N.competitorsCount(regattaMetadata.getCompetitorsCount()));
         addDetailsItem(regattaMetadata.getRaceCount(), I18N.racesCount(regattaMetadata.getRaceCount()));
-        addDetailsItem(regattaMetadata.getTrackedRacesCount(), I18N.trackedRacesCount(regattaMetadata.getTrackedRacesCount()));
         String defaultCourseAreaName = regattaMetadata.getDefaultCourseAreaName();
         if(defaultCourseAreaName != null) {
             addDetailsItem(I18N.courseAreaName(defaultCourseAreaName));
