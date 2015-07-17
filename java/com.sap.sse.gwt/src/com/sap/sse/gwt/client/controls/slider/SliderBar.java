@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sse.common.Util;
 
 /**
  * A widget that allows the user to select a value within a range of possible values using a sliding bar that responds
@@ -704,9 +705,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value
      */
     public void setMaxValue(Double maxValue, boolean fireEvent) {
-        this.maxValue = maxValue;
-        drawTickLabels();
-        resetCurrentValue(fireEvent);
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            onMinMaxValueChanged(fireEvent);
+        }
     }
 
     /**
@@ -716,8 +718,40 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value
      */
     public void setMinValue(Double minValue, boolean fireEvent) {
-        this.minValue = minValue;
-        drawTickLabels();
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            onMinMaxValueChanged(fireEvent);
+        }
+    }
+    
+    /**
+     * Set the minimum and maximum value
+     * 
+     * @param minValue
+     *            the current value for min
+     * @param maxValue
+     *            the current valuefor max
+     */
+    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        boolean changed = false;
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            changed = true;
+        }
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            changed = true;
+        }
+        if (changed) {
+            onMinMaxValueChanged(fireEvent);
+        }
+    }
+    
+    /**
+     * Handle value changes of min and/or max value
+     */
+    protected void onMinMaxValueChanged(boolean fireEvent) {
+        redraw();
         resetCurrentValue(fireEvent);
     }
 
