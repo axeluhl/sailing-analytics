@@ -199,21 +199,21 @@ public class TimeSlider extends SliderBar {
     }
     
     public void setMaxValue(Double maxValue, boolean fireEvent) {
-        if(!isZoomed) {
+        calculateTicks();
+        if (!isZoomed) {
             super.setMaxValue(maxValue, fireEvent);
         } else {
             this.maxValue = maxValue;
         }
-        calculateTicks();
     }
 
     public void setMinValue(Double minValue, boolean fireEvent) {
-        if(!isZoomed) {
+        calculateTicks();
+        if (!isZoomed) {
             super.setMinValue(minValue, fireEvent);
         } else {
             this.minValue = minValue;
         }
-        calculateTicks();
     }
 
     public void setStepSize(double stepSize, boolean fireEvent) {
