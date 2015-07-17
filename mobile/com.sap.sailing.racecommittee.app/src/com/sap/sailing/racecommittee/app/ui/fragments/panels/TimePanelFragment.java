@@ -158,7 +158,7 @@ public class TimePanelFragment extends BasePanelFragment {
             StartTimeFinderResult result = stf.analyze();
             if (result != null) {
                 mLinkedRace = result.isDependentStartTime();
-                if (mHeaderTime != null) {
+                if (mLinkedRace && mHeaderTime != null) {
                     SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
                     mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
@@ -182,37 +182,37 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void checkStatus() {
         switch (getRace().getStatus()) {
-        case UNSCHEDULED:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case UNSCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case PRESCHEDULED:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case PRESCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case SCHEDULED:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case SCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case STARTPHASE:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case STARTPHASE:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case RUNNING:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case RUNNING:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
 
-        case FINISHING:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case FINISHING:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
 
-        case FINISHED:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case FINISHED:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
 
-        default:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            default:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
         }
     }
 
@@ -240,17 +240,17 @@ public class TimePanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
-                break;
+                case 1:
+                    replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
-                break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
             }
             disableToggle(container, markerId);
         }
