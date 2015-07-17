@@ -348,6 +348,10 @@ public class LeaderboardData extends ExportAction {
             competitorToDistanceRank.put(competitorSorted, raceRankSorted);
         }
         
+        List<Competitor> competitorsForColumn = this.raceColumnToCompetitors.get(column);
+        if (competitorsForColumn == null) {
+            competitorsForColumn = new ArrayList<>();
+        }
         // it can happen that there are competitors that did not race but got points
         int additionalCompetitorCount = 0;
         for (Competitor competitorInLeaderboard : leaderboard.getAllCompetitors()) {
@@ -356,7 +360,7 @@ public class LeaderboardData extends ExportAction {
                 // check if he has an overwritten score for that race
                 MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
                 Fleet fleetCompetitorIsSailingIn = column.getFleetOfCompetitor(competitorInLeaderboard);
-                if (fleetCompetitorIsSailingIn != null && fleetCompetitorIsSailingIn.equals(fleet)) {
+                if (fleetCompetitorIsSailingIn != null && fleetCompetitorIsSailingIn.equals(fleet) && !competitorsForColumn.contains(competitorInLeaderboard)) {
                     if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
                         // add this competitor to the list to have him evaluated
                         Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
@@ -371,6 +375,7 @@ public class LeaderboardData extends ExportAction {
                         raceElement.addContent(competitorElement);
                         raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!", 0.2, raceConfidenceAndErrorMessages);
                         additionalCompetitorCount++;
+                        competitorsForColumn.add(competitorInLeaderboard);
                     }
                 }
             }
@@ -382,6 +387,9 @@ public class LeaderboardData extends ExportAction {
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorRaceDataElement = new Element("competitor_race_data");
             MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
+            if (maxPointsReason != null && !maxPointsReason.equals(MaxPointsReason.NONE)) {
+                competitorsForColumn.add(competitor);
+            }
             addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
             boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
@@ -566,6 +574,7 @@ public class LeaderboardData extends ExportAction {
             raceElement.addContent(competitorElement);
         }
 
+        this.raceColumnToCompetitors.put(column, competitorsForColumn);
         raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         raceElement.addContent(legs);
         return raceElement;
