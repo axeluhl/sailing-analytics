@@ -65,8 +65,8 @@ public class WindFragment extends BaseFragment
     private final static long EVERY_POSITION_CHANGE = 0;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
-    private final static float MAX_LOCATION_DRIFT_IN_METER = 10f;
-    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 30000;
+    private final static float MAX_LOCATION_DRIFT_IN_METER = 25f; // 25 meter
+    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 8 * 60 * 1000; // 8 hours
 
     private View mHeaderLayout;
     private View mContentLayout;
