@@ -464,7 +464,6 @@ public final class HomeServiceUtil {
         }
         regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(calculateRaceColumnCount(leaderboard));
-        regattaDTO.setTrackedRacesCount(calculateTrackedRaceColumnCount(leaderboard));
         regattaDTO.setBoatClass(getBoatClassName(leaderboard));
         if(leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
