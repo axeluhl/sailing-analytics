@@ -24,7 +24,7 @@ import java.net.URL;
 
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
-    private final static String GWT_MAP_AND_WIND_CHART_HTML = "/gwt/EmbeddedMapAndWindChart.html";
+    private final static String GWT_MAP_AND_WIND_CHART_HTML = "gwt/EmbeddedMapAndWindChart.html";
 
     public static void isTrackedRace(final Context context, final ManagedRace race){
         try {
