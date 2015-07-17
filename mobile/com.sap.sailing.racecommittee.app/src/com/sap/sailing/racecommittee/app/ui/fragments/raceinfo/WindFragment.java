@@ -118,7 +118,7 @@ public class WindFragment extends BaseFragment
         // initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
 
-        // refresh ui
+        // create runnable for ui refreshing
         mRefreshUIRunnable = createUIRefreshRunnable();
 
         //register receiver to be notified if race is tracked
@@ -137,7 +137,8 @@ public class WindFragment extends BaseFragment
     }
 
     /**
-     * refresh location information
+     * refresh location data labels and highlight missing or inaccuracy gps data
+     * disable mContentSetData button if gps data is missing or inaccurate
      */
     private void refreshUI() {
         if (mCurrentLocation != null) {
@@ -388,16 +389,17 @@ public class WindFragment extends BaseFragment
         tearUpApiClient();
         tearUpPositionPoller();
 
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        // stop refreshing ui
+        // stop ui refreshing
         if (mRefreshUIHandler != null) {
             mRefreshUIHandler.removeCallbacks(mRefreshUIRunnable);
         }
