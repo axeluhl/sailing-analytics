@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,13 +38,7 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
 
     private static ClusterBoundary<Bearing> createBoundary(double angleInDeg, ComparisonStrategy strategy) {
         Bearing angle = new DegreeBearingImpl(angleInDeg);
-        Comparator<Bearing> comparator = new Comparator<Bearing>() {
-
-            @Override
-            public int compare(Bearing arg0, Bearing arg1) {
-                return new Double(arg0.getDegrees()).compareTo(new Double(arg1.getDegrees()));
-            }
-        };
+        Comparator<Bearing> comparator = new BearingComparator();
         return new ComparatorClusterBoundary<Bearing>(angle, strategy, comparator);
     }
 
@@ -51,6 +46,16 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         return "";
     }
+    
+    private static class BearingComparator implements Comparator<Bearing>, Serializable {
+
+        private static final long serialVersionUID = 8166601046140275541L;
+
+        @Override
+        public int compare(Bearing arg0, Bearing arg1) {
+            return new Double(arg0.getDegrees()).compareTo(new Double(arg1.getDegrees()));
+        }
+    };
 
 
 }
