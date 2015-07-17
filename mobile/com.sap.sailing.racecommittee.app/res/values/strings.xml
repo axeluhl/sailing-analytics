@@ -447,8 +447,8 @@
     <string name="error_finishing_time">The selected time is before the race start.</string>
     <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
     <string name="error_wrong_race_state">The RaceState isn\'t in the correct state (needed: %1$s - current: %2$s)</string>
-    <string name="wind_map_button_show">Show Wind Map</string>
-    <string name="wind_map_button_hide">Hide Wind Map</string>
+    <string name="wind_map_button_show">Wind Map</string>
+    <string name="wind_map_button_hide">Hide</string>
     <string name="wind_latitude">Latitude</string>
     <string name="wind_longitude">Longitude</string>
     <string name="wind_accuracy">Accuracy</string>

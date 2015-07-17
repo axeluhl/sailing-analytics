@@ -428,7 +428,7 @@
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
     <string name="wind_map_button_show">Windkarte</string>
-    <string name="wind_map_button_hide">Windkarte schließen</string>
+    <string name="wind_map_button_hide">Schließen</string>
     <string name="wind_latitude">Breite</string>
     <string name="wind_longitude">Länge</string>
     <string name="wind_accuracy">Genauigkeit</string>
