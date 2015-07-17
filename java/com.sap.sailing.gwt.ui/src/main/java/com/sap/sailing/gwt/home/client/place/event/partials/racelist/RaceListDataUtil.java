@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
 import java.util.Collection;
+import java.util.Date;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
@@ -135,7 +136,11 @@ public class RaceListDataUtil {
         return hasDifferentValues(data, new ValueProvider<T, Long>() {
             @Override
             public Long getValue(T object) {
-                return object.getStart().getTime() / DAY_IN_MILLIS;
+                Date start = object.getStart();
+                if(start == null) {
+                    return null;
+                }
+                return start.getTime() / DAY_IN_MILLIS;
             }
         });
     }
