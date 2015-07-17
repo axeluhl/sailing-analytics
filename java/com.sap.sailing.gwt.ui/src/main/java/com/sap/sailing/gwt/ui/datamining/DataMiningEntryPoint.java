@@ -27,6 +27,7 @@ import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
@@ -38,6 +39,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     @Override
     protected void doOnModuleLoad() {
+        Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         session = new UUIDDataMiningSession(UUID.randomUUID());
         
