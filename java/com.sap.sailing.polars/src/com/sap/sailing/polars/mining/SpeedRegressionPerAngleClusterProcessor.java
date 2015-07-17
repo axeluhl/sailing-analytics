@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,8 +28,11 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class SpeedRegressionPerAngleClusterProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>{
-    
+public class SpeedRegressionPerAngleClusterProcessor implements
+        Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
+   
+    private static final long serialVersionUID = 3279917556091599077L;
+
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, IncrementalLeastSquares> regressions = new HashMap<>();
@@ -37,7 +41,10 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
 
     private final ClusterGroup<Bearing> angleClusterGroup;
 
-    private final ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+    /**
+     * FIXME make sure listeners and replication interact correctly
+     */
+    private final transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
     
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup, ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.angleClusterGroup = angleClusterGroup;

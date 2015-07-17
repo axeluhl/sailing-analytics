@@ -1,5 +1,7 @@
 package com.sap.sailing.polars.regression;
 
+import java.io.Serializable;
+
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -10,7 +12,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
  * @author Frederik Petersen (D054528)
  *
  */
-public interface IncrementalLeastSquares {
+public interface IncrementalLeastSquares extends Serializable {
 
     /**
      * Adds data to the least squares regression. This only updates the internal matrix and vector and will not trigger the 

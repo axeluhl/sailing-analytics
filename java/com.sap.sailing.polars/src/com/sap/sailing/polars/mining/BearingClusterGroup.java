@@ -18,6 +18,8 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class BearingClusterGroup extends FixClusterGroup<Bearing>{
 
+    private static final long serialVersionUID = -3810975212669767738L;
+
     public BearingClusterGroup(int startAngle, int endAngle, int clusterSize) {
         super("", createClusters(startAngle, endAngle, clusterSize));
     }

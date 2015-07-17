@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -10,7 +11,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 
-public interface MovingAverageProcessor extends Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>{
+public interface MovingAverageProcessor extends Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
     SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
 			Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException;
 

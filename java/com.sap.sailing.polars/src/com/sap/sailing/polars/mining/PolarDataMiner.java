@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,19 +57,20 @@ import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 
-public class PolarDataMiner {
+public class PolarDataMiner implements Serializable {
 
+    private static final long serialVersionUID = -3916741273749925910L;
     private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
-    private final ThreadPoolExecutor executor = createExecutor();
+    private final transient ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
-    private final Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new HashMap<>();
+    private final transient Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new HashMap<>();
     
-    private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
+    private final transient Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
     
     private static final Logger logger = Logger.getLogger(PolarDataMiner.class.getSimpleName());
     
-    private final ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
+    private final transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
 
     private ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
@@ -106,7 +108,7 @@ public class PolarDataMiner {
     private CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor;
     
     private SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor;
-    private ParallelFilteringProcessor<GPSFixMovingWithOriginInfo> preFilteringProcessor;
+    private transient ParallelFilteringProcessor<GPSFixMovingWithOriginInfo> preFilteringProcessor;
 
     public PolarDataMiner() {
         this(PolarSheetGenerationSettingsImpl.createBackendPolarSettings());

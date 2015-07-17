@@ -33,6 +33,8 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
+    private static final long serialVersionUID = 9016357546663534562L;
+
     private static final Logger logger = Logger.getLogger(MovingAverageProcessorImpl.class.getName());
 
     private final Map<GroupKey, MovingAverageBoatSpeedEstimator> boatSpeedEstimators = new HashMap<>();
@@ -42,8 +44,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     private final ClusterGroup<Speed> speedClusterGroup;
 
     private final Set<BoatClass> availableBoatClasses = new HashSet<>();
-
-
 
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;

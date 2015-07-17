@@ -29,6 +29,8 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  */
 public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSquares {
     
+    private static final long serialVersionUID = -5282614133220702724L;
+
     private class NaNCheckerVisitor implements RealMatrixPreservingVisitor {
         
         private boolean hasNaNEntry = false;
@@ -64,10 +66,10 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
     
     private AtomicBoolean functionNeedsUpdate = new AtomicBoolean(true);
 
-    private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
+    private final transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
             false);
     
-    private final NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
+    private final transient NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
             true);
 
     private PolynomialFunction cachedFunction;
