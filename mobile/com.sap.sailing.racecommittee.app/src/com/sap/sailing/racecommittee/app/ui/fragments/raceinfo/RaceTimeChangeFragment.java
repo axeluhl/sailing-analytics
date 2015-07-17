@@ -95,7 +95,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
             case FINISHING_TIME_MODE:
                 start.setTime(getRaceState().getStartTime().asDate());
-                mPastDays = TimeUtils.daysBetween(calendar, start);
+                mPastDays = TimeUtils.daysBetween(start, calendar);
                 finished.setTime(getRaceState().getFinishedTime().asDate());
                 mFutureDays = TimeUtils.daysBetween(finished, calendar);
                 break;
