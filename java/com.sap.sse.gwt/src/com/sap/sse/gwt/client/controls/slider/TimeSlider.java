@@ -3,12 +3,12 @@ package com.sap.sse.gwt.client.controls.slider;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.user.client.DOM;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
 
@@ -199,7 +199,6 @@ public class TimeSlider extends SliderBar {
     }
     
     public void setMaxValue(Double maxValue, boolean fireEvent) {
-        calculateTicks();
         if (!isZoomed) {
             super.setMaxValue(maxValue, fireEvent);
         } else {
@@ -207,13 +206,28 @@ public class TimeSlider extends SliderBar {
         }
     }
 
-    public void setMinValue(Double minValue, boolean fireEvent) {
-        calculateTicks();
+    public void setMinValue(Double minValue, boolean fireEvent) {   
         if (!isZoomed) {
             super.setMinValue(minValue, fireEvent);
         } else {
             this.minValue = minValue;
+        }  
+    }
+    
+    @Override
+    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        if (!isZoomed) {
+            super.setMinAndMaxValue(minValue, maxValue, fireEvent);
+        } else {
+            this.minValue = minValue;
+            this.maxValue = maxValue;
         }
+    }
+    
+    @Override
+    protected void onMinMaxValueChanged(boolean fireEvent) {
+        calculateTicks();
+        super.onMinMaxValueChanged(fireEvent);
     }
 
     public void setStepSize(double stepSize, boolean fireEvent) {
