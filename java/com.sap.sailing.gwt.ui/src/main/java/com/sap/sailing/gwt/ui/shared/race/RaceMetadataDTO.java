@@ -4,8 +4,9 @@ import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
-public class RaceMetadataDTO implements IsSerializable {
+public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataDTO> {
     
     public enum RaceViewState {
         PLANNED {       // no start time set
@@ -152,5 +153,58 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setRegattaDisplayName(String regattaDisplayName) {
         this.regattaDisplayName = regattaDisplayName;
+    }
+
+    @Override
+    public int compareTo(RaceMetadataDTO o) {
+        Date thisStart = getStart();
+        Date otherStart = o.getStart();
+        if(Util.equalsWithNull(thisStart, otherStart)) {
+            // cases where both start times are == null or equal
+            return compareBySecondaryCriteria(o);
+        }
+        if(thisStart == null) {
+            return 1;
+        }
+        if(otherStart == null) {
+            return -1;
+        }
+        return -thisStart.compareTo(otherStart);
+    }
+
+    private int compareBySecondaryCriteria(RaceMetadataDTO o) {
+        String thisRegattaName = getRegattaName();
+        String otherRegattaName = o.getRegattaName();
+        if(thisRegattaName != otherRegattaName) {
+            if(thisRegattaName == null) {
+                return 1;
+            }
+            if(otherRegattaName == null) {
+                return -1;
+            }
+            int compareByRegatta = thisRegattaName.compareTo(otherRegattaName);
+            if(compareByRegatta != 0) {
+                return compareByRegatta;
+            }
+        }
+        int compareByRace = getRaceName().compareTo(o.getRaceName());
+        if(compareByRace != 0) {
+            return compareByRace;
+        }
+        FleetMetadataDTO thisFleet = getFleet();
+        FleetMetadataDTO otherFleet = o.getFleet();
+        if(thisFleet != otherFleet) {
+            if(thisFleet == null) {
+                return 1;
+            }
+            if(otherFleet == null) {
+                return -1;
+            }
+            int compareByFleet = thisFleet.compareTo(otherFleet);
+            if(compareByFleet != 0) {
+                return compareByFleet;
+            }
+        }
+        return getViewState().compareTo(o.getViewState());
     }
 }

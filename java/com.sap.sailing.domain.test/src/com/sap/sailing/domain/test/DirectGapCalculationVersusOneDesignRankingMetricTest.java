@@ -60,7 +60,7 @@ public class DirectGapCalculationVersusOneDesignRankingMetricTest extends Abstra
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("06/21/2014-13:03:35")),
-                        new KnotSpeedWithBearingImpl(18, new DegreeBearingImpl(296))),
+                        new KnotSpeedWithBearingImpl(18, new DegreeBearingImpl(90))),
                 new WindSourceImpl(WindSourceType.WEB));
     }
     

@@ -11,11 +11,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
@@ -33,11 +33,11 @@ public class SearchResultItem extends Composite {
     @UiField SpanElement resultEventVenue;
     @UiField Anchor eventOverviewLink;
     
-    private final HomePlacesNavigator placeNavigator;
+    private final DesktopPlacesNavigator placeNavigator;
     private final PlaceNavigation<AbstractEventRegattaPlace> regattaNavigation;
     private final PlaceNavigation<EventDefaultPlace> eventNavigation;
 
-    public SearchResultItem(HomePlacesNavigator navigator, LeaderboardSearchResultDTO searchResult) {
+    public SearchResultItem(DesktopPlacesNavigator navigator, LeaderboardSearchResultDTO searchResult) {
         this.placeNavigator = navigator;
         
         SearchResultResources.INSTANCE.css().ensureInjected();

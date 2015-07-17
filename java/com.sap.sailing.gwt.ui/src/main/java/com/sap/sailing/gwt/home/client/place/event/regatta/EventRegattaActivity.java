@@ -3,14 +3,14 @@ package com.sap.sailing.gwt.home.client.place.event.regatta;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventActivity;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
@@ -28,7 +28,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
-            HomePlacesNavigator homePlacesNavigator) {
+            DesktopPlacesNavigator homePlacesNavigator) {
         super(place, clientFactory, homePlacesNavigator);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(

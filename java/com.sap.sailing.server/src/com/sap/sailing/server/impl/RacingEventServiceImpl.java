@@ -2609,10 +2609,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
-                id, /* officialWebsiteURL */null, /* images */Collections.<ImageDescriptor> emptyList(),
-                /* videos */Collections.<VideoDescriptor> emptyList());
+                id, /* officialWebsiteURL */null, /* sailorsInfoWebsiteURLAsString */null,
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList());
         replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, id,
-                /* officialWebsiteURLAsString */null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
+                /* officialWebsiteURLAsString */null, /* sailorsInfoWebsiteURLAsString */null,
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
         return result;
     }
 
@@ -2623,8 +2624,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Iterable<ImageDescriptor> images,
-            Iterable<VideoDescriptor> videos) {
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
@@ -2645,7 +2646,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL,
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
@@ -2669,6 +2670,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
+        event.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL);
         event.setImages(images);
         event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch

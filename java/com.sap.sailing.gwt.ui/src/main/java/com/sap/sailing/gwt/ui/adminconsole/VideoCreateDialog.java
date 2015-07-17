@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -9,7 +10,7 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoCreateDialog extends VideoDialog {
 
-    public VideoCreateDialog(StringMessages stringMessages, DialogCallback<VideoDTO> callback) {
+    public VideoCreateDialog(String initialTag, StringMessages stringMessages, DialogCallback<VideoDTO> callback) {
         super(new VideoParameterValidator(stringMessages), stringMessages, callback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
@@ -19,7 +20,11 @@ public class VideoCreateDialog extends VideoDialog {
         copyrightTextBox = createTextBox(null);
         copyrightTextBox.setVisibleLength(50);
         lengthIntegerBox = createIntegerBox(null, 10);
-        tagsListEditor.setValue(Collections.<String>emptyList());
+        List<String> tags = new ArrayList<>();
+        if(initialTag != null && !initialTag.isEmpty()) {
+            tags.add(initialTag);
+        }
+        tagsListEditor.setValue(tags);
         setSelectedMimeType(MimeType.unknown);
     }
 }
