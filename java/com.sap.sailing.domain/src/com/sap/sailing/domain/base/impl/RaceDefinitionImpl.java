@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -13,6 +16,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private static final long serialVersionUID = -1900955198751393727L;
     private final Course course;
     private final LinkedHashMap<Serializable, Competitor> competitorsById;
+    private final Set<Competitor> competitors;
     private final BoatClass boatClass;
     private final Serializable id;
     
@@ -23,11 +27,12 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, Serializable id) {
         super(name);
         assert name != null;
-        
         this.course = course;
+        this.competitors = new HashSet<>();
         this.competitorsById = new LinkedHashMap<>();
         for (Competitor competitor : competitors) {
             Competitor competitorWithEqualID = competitorsById.put(competitor.getId(), competitor);
+            this.competitors.add(competitor);
             if (competitorWithEqualID != null && competitorWithEqualID != competitor) {
                 throw new IllegalArgumentException("Two distinct competitors with equal ID "+competitor.getId()+" are not allowed within the single race "+name);
             }
@@ -48,7 +53,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
 
     @Override
     public Iterable<Competitor> getCompetitors() {
-        return competitorsById.values();
+        return Collections.unmodifiableSet(competitors);
     }
 
     @Override

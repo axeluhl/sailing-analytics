@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,6 +36,10 @@ public class RaceMapHelpLinesSettings {
         return visibleHelpLines.contains(helpLineType);
     }
 
+    public Iterable<HelpLineTypes> getVisibleHelpLineTypes() {
+        return Collections.unmodifiableCollection(visibleHelpLines);
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

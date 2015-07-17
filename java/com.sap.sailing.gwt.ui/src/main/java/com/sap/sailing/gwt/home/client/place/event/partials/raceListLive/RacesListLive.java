@@ -29,7 +29,7 @@ public class RacesListLive extends Composite implements RefreshableWidget<LiveRa
 
     @Override
     public void setData(LiveRacesDTO data, long nextUpdate, int updateNo) {
-        if(data.getRaces().isEmpty()) {
+        if(data == null || data.getRaces().isEmpty()) {
             getElement().getStyle().setDisplay(Display.NONE);
         } else {
             getElement().getStyle().clearDisplay();
