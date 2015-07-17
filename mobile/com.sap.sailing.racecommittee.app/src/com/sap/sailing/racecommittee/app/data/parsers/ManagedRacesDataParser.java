@@ -53,8 +53,9 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
             RaceGroup group = deserializer.deserialize(json);
             addManagedRaces(managedRaces, group);
         }
-        
-        forceRaceStateUpdate(managedRaces);
+
+        //FIXME NPE
+        //forceRaceStateUpdate(managedRaces);
 
         return managedRaces;
     }
