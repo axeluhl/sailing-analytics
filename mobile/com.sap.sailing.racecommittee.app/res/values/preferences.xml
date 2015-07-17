@@ -82,7 +82,7 @@
     <bool name="preference_isSendingActive_default">false</bool>
 
     <string name="preference_allow_dependent_races_key" translatable="false">dependentRaces</string>
-    <bool name="preference_allow_dependent_races_default">false</bool>
+    <bool name="preference_allow_dependent_races_default">true</bool>
     <string name="preference_dependent_races_offset_key" translatable="false">dependentRacesOffset</string>
     <integer name="preference_dependent_races_offset_default">5</integer>
 
