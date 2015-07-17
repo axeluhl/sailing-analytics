@@ -448,6 +448,7 @@ public class WindFragment extends BaseFragment
 
     @Override
     public void onConnectionSuspended(int i) {
+        LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
     }
 
     @Override
