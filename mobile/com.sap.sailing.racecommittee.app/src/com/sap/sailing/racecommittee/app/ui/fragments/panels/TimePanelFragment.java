@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -24,10 +25,14 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimePanelFragment extends BasePanelFragment {
@@ -153,6 +158,11 @@ public class TimePanelFragment extends BasePanelFragment {
             StartTimeFinderResult result = stf.analyze();
             if (result != null) {
                 mLinkedRace = result.isDependentStartTime();
+                if (mHeaderTime != null) {
+                    SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                    ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
+                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
+                }
             }
         }
 
@@ -173,6 +183,10 @@ public class TimePanelFragment extends BasePanelFragment {
     private void checkStatus() {
         switch (getRace().getStatus()) {
         case UNSCHEDULED:
+            changeVisibility(mTimeLock, View.GONE);
+            break;
+
+        case PRESCHEDULED:
             changeVisibility(mTimeLock, View.GONE);
             break;
 
