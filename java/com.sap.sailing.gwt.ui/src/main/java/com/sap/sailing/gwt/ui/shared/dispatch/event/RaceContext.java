@@ -261,6 +261,7 @@ public class RaceContext {
         case FINISHING:
         case RUNNING:
         case SCHEDULED:
+            case PRESCHEDULED:
         case STARTPHASE:
         case UNKNOWN:
             break;

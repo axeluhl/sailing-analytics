@@ -108,7 +108,8 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             default:
                 // use default values
             }
-            ThemeHelper.setPickerTextColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
             TimeUtils.initDatePicker(getActivity(), mDatePicker, calendar, mPastDays, mFutureDays, false);
             mDatePicker.setValue(Math.abs(mPastDays));
             mDatePicker.setTag(calendar);
@@ -119,7 +120,8 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
         mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
         if (mTimePicker != null) {
-            ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
             mTimePicker.setIs24HourView(true);
             mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
             mTimePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
@@ -127,7 +129,8 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
         mSecondPicker = (NumberPicker) layout.findViewById(R.id.second_picker);
         if (mSecondPicker != null) {
-            ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
             mSecondPicker.setVisibility(View.VISIBLE);
             mSecondPicker.setMinValue(0);
             mSecondPicker.setMaxValue(59);

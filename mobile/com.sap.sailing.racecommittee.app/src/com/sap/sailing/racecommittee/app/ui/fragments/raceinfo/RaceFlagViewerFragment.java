@@ -131,7 +131,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
                         }
                     }
                 } else {
-                    if (mLayout != null && mFlagCache.nextPole != null) {
+                    if (mFlagCache.nextPole != null) {
                         for (int i = 0; i < mLayout.getChildCount(); i++) {
                             ImageView flagImage = ViewHolder.get(mLayout.getChildAt(i), R.id.flag);
                             Flags flags = (Flags) flagImage.getTag();

@@ -1,11 +1,10 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import android.text.TextUtils;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 
@@ -24,6 +23,10 @@ public class RaceGroupSeriesFleet {
 
         seriesOrder = getSeriesIndex(race, series);
         fleetOrder = getFleetIndex(series.getFleets(), race.getFleet());
+    }
+
+    private static int getSeriesIndex(ManagedRace race, SeriesBase series) {
+        return Util.indexOf(race.getRaceGroup().getSeries(), series);
     }
 
     public RaceGroup getRaceGroup() {
@@ -59,10 +62,10 @@ public class RaceGroupSeriesFleet {
         if (!useDisplayName || TextUtils.isEmpty(name)) {
             name = raceGroup.getName();
         }
-        if (series != null && !series.getName().equals(AppConstants.DEFAULT)) {
+        if (series != null && !series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
             name += " - " + series.getName();
         }
-        if (fleet != null && !fleet.getName().equals(AppConstants.DEFAULT)) {
+        if (fleet != null && !fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
             name += " - " + fleet.getName();
         }
         return name;
@@ -129,9 +132,5 @@ public class RaceGroupSeriesFleet {
 
     private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
         return Util.indexOf(fleets, fleet);
-    }
-
-    private static int getSeriesIndex(ManagedRace race, SeriesBase series) {
-        return Util.indexOf(race.getRaceGroup().getSeries(), series);
     }
 }
