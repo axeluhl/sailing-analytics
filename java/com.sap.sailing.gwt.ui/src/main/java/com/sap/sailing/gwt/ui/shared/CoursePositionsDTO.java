@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -8,9 +9,8 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 
 public class CoursePositionsDTO implements IsSerializable {
+    public RaceCourseDTO course;
     public List<Position> waypointPositions;
-    public List<Position> startMarkPositions;
-    public List<Position> finishMarkPositions;
     public Set<MarkDTO> marks;
     
     public int totalLegsCount;
@@ -35,4 +35,24 @@ public class CoursePositionsDTO implements IsSerializable {
     public NauticalSide finishLineAdvantageousSide;
     public Double finishLineAdvantageInMeters;
     public Double finishLineLengthInMeters;
+    
+    public List<Position> getStartMarkPositions() {
+        final List<Position> result = new ArrayList<>();
+        if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {
+            for (final MarkDTO mark : course.waypoints.get(0).controlPoint.getMarks()) {
+                result.add(mark.position);
+            }
+        }
+        return result;
+    }
+
+    public List<Position> getFinishMarkPositions() {
+        final List<Position> result = new ArrayList<>();
+        if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {
+            for (final MarkDTO mark : course.waypoints.get(course.waypoints.size()-1).controlPoint.getMarks()) {
+                result.add(mark.position);
+            }
+        }
+        return result;
+    }
 }
