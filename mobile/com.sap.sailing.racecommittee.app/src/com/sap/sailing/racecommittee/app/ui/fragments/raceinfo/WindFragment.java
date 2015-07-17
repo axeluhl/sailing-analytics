@@ -145,12 +145,12 @@ public class WindFragment extends BaseFragment
             double longitude = mCurrentLocation.getLongitude();
             float accuracy = mCurrentLocation.getAccuracy();
             long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-            mContentLatitude.setText(String.format("%s %.5f", "Lat: ", latitude));
+            mContentLatitude.setText(String.format("%s: %.5f", getString(R.string.wind_latitude), latitude));
             mContentLatitude.setTextColor(Color.BLACK);
-            mContentLongitude.setText(String.format("%s %.5f", "Lon: ", longitude));
+            mContentLongitude.setText(String.format("%s: %.5f", getString(R.string.wind_longitude), longitude));
             mContentLongitude.setTextColor(Color.BLACK);
-            String timeFormatted = TimeUtils.formatTimeAgo(timeDifference);
-            mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", mCurrentLocation.getAccuracy(), timeFormatted));
+            String timeFormatted = TimeUtils.formatTimeAgo(timeDifference) + " " + getString(R.string.wind_accuracy_ago);
+            mContentAccuracy.setText(String.format("%s: ~%.0fm\n(%s)", getString(R.string.wind_accuracy), mCurrentLocation.getAccuracy(), timeFormatted));
             mContentSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
 
             // highlight accuracy problem if location is invalid

@@ -432,6 +432,6 @@
     <string name="wind_latitude">Breite</string>
     <string name="wind_longitude">Länge</string>
     <string name="wind_accuracy">Genauigkeit</string>
-    <string name="wind_accuracy_ago">vergangen</string>
+    <string name="wind_accuracy_ago">alt</string>
 
 </resources>
