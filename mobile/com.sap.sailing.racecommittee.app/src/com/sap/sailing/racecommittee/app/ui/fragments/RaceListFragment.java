@@ -47,8 +47,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogF
 import com.sap.sailing.racecommittee.app.utils.*;
 import com.sap.sse.common.TimePoint;
 
-import java.util.*;
-
 public class RaceListFragment extends LoggableFragment implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();

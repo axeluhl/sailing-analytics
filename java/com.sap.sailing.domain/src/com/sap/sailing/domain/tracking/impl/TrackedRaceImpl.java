@@ -139,7 +139,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -3669,7 +3668,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
        if (polarDataService == null) {
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
-        Duration durationOfAllLegs = new MillisecondsDurationImpl(0);
+        Duration durationOfAllLegs = Duration.NULL;
         for (TrackedLeg leg : trackedLegs.values()) {
             Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint);
             durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);

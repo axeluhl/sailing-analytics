@@ -614,4 +614,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
+
+    RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);
 }
