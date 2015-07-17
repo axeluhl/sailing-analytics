@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -185,7 +186,7 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListStartTimeColumn<T> getStartTimeColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>()) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>(true)) {
             @Override
             protected Date getComparisonValue(T object) {
                 return object.getStart();
@@ -473,7 +474,8 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(
+                new NullSafeComparatorWrapper<String>(new NaturalComparator(false), false)) {
             @Override
             protected String getComparisonValue(T object) {
                 return object.getWinner() != null ? object.getWinner().getName() : null;
