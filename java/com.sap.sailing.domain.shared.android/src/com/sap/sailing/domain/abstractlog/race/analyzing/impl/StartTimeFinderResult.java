@@ -10,7 +10,7 @@ import com.sap.sse.common.Util;
 public class StartTimeFinderResult {
     private final Iterable<SimpleRaceLogIdentifier> racesDependingOn;
     private final TimePoint startTime;
-    private final Duration startTimeDiff;
+    private Duration startTimeDiff;
 
     public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
         this.startTime = startTime;
@@ -32,6 +32,10 @@ public class StartTimeFinderResult {
 
     public Duration getStartTimeDiff() {
         return startTimeDiff;
+    }
+
+    public void setStartTimeDiff(Duration startTimeDiff) {
+        this.startTimeDiff = startTimeDiff;
     }
 
     public boolean isDependentStartTime() {
