@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -38,6 +40,7 @@ import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
@@ -58,6 +61,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView race_finished;
     private LinearLayout race_scheduled;
     private TextView race_unscheduled;
+    private TextView depends_on;
     private ImageView current_flag;
     private TextView race_name;
     private TextView flag_timer;
@@ -197,8 +201,28 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_finished.setText(mResources.getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
                 }
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
-                    race_scheduled.setVisibility(View.GONE);
-                    race_unscheduled.setVisibility(View.VISIBLE);
+                    switch (race.getRace().getStatus()) {
+                        case PRESCHEDULED:
+                            race_scheduled.setVisibility(View.GONE);
+                            race_unscheduled.setVisibility(View.GONE);
+                            if (depends_on != null) {
+                                StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), race.getRace().getRaceLog());
+                                StartTimeFinderResult result = stf.analyze();
+                                if (result != null && result.isDependentStartTime()) {
+                                    SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                                    ManagedRace tmp = DataManager.create(getContext()).getDataStore().getRace(identifier);
+                                    depends_on.setText(getContext()
+                                        .getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
+                                            .getRaceName(tmp, " / ")));
+                                    depends_on.setVisibility(View.VISIBLE);
+                                }
+                            }
+                            break;
+
+                        default:
+                            race_scheduled.setVisibility(View.GONE);
+                            race_unscheduled.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     if (race_name != null) {
                         race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
@@ -249,6 +273,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         boat_class = ViewHolder.get(layout, R.id.boat_class);
         fleet_series = ViewHolder.get(layout, R.id.fleet_series);
         has_dependent_races = ViewHolder.get(layout, R.id.has_dependent_races);
+        depends_on = ViewHolder.get(layout, R.id.depends_on);
     }
 
     private void resetValues(View layout) {
@@ -279,6 +304,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             if (has_dependent_races != null) {
                 has_dependent_races.setVisibility(View.GONE);
+            }
+            if (depends_on != null) {
+                depends_on.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+                depends_on.setVisibility(View.GONE);
             }
             setMarker(0);
         }
@@ -321,20 +350,20 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     if (isNext != 0) {
                         flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), FLAG_SIZE);
                         switch (isNext) {
-                        case 1:
-                            if (nextPole.isDisplayed()) {
+                            case 1:
+                                if (nextPole.isDisplayed()) {
+                                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
+                                } else {
+                                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
+                                }
+                                break;
+
+                            case 2:
                                 arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                            } else {
-                                arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
-                            }
-                            break;
+                                break;
 
-                        case 2:
-                            arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                            break;
-
-                        default:
-                            ExLog.i(getContext(), TAG, "unknown flag");
+                            default:
+                                ExLog.i(getContext(), TAG, "unknown flag");
                         }
                         timer = TimeUtils.formatDuration(now, poleState.getNextStateValidFrom());
                     }
