@@ -39,15 +39,12 @@ import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class WindFragment extends BaseFragment
     implements CompassDirectionListener,
@@ -152,10 +149,7 @@ public class WindFragment extends BaseFragment
             mContentLatitude.setTextColor(Color.BLACK);
             mContentLongitude.setText(String.format("%s %.5f", "Lon: ", longitude));
             mContentLongitude.setTextColor(Color.BLACK);
-            Date time = new Date(timeDifference);
-            DateFormat timeFormatter = new SimpleDateFormat("HH'h'mm'´´'ss'´'", Locale.getDefault());
-            timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String timeFormatted = timeFormatter.format(time);
+            String timeFormatted = TimeUtils.formatTimeAgo(timeDifference);
             mContentAccuracy.setText(String.format("%s ~ %.0f m (%s ago)", "Acc: ", mCurrentLocation.getAccuracy(), timeFormatted));
             mContentSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
 
