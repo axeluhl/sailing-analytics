@@ -707,8 +707,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public void setMaxValue(Double maxValue, boolean fireEvent) {
         if (!Util.equalsWithNull(maxValue, this.maxValue)) {
             this.maxValue = maxValue;
-            redraw();
-            resetCurrentValue(fireEvent);
+            onMinMaxValueChanged(fireEvent);
         }
     }
 
@@ -721,9 +720,39 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public void setMinValue(Double minValue, boolean fireEvent) {
         if (!Util.equalsWithNull(minValue, this.minValue)) {
             this.minValue = minValue;
-            redraw();
-            resetCurrentValue(fireEvent);
+            onMinMaxValueChanged(fireEvent);
         }
+    }
+    
+    /**
+     * Set the minimum and maximum value
+     * 
+     * @param minValue
+     *            the current value for min
+     * @param maxValue
+     *            the current valuefor max
+     */
+    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        boolean changed = false;
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            changed = true;
+        }
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            changed = true;
+        }
+        if (changed) {
+            onMinMaxValueChanged(fireEvent);
+        }
+    }
+    
+    /**
+     * Handle value changes of min and/or max value
+     */
+    protected void onMinMaxValueChanged(boolean fireEvent) {
+        redraw();
+        resetCurrentValue(fireEvent);
     }
 
     /**
