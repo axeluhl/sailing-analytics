@@ -31,5 +31,8 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
         for (ManagedRace race : data) {
             race.calculateRaceState();
         }
+        for (ManagedRace race : data) {
+            race.getState().forceUpdate();
+        }
     }
 }

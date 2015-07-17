@@ -88,7 +88,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public RaceLog getRaceLog() {
-        return state.getRaceLog();
+        return state == null ? null : state.getRaceLog();
     }
 
     @Override

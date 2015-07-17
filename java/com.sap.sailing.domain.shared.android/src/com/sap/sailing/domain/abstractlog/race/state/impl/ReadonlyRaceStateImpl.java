@@ -178,7 +178,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
         recreateRacingProcedure();
+        registerListenerOnDependentRaceIfDependentStartTime();
+    }
 
+    protected void registerListenerOnDependentRaceIfDependentStartTime() {
         // Check wether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
         // dependent startTime setup listeners
         this.raceLog.lockForRead();
@@ -333,11 +336,14 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         if (raceStateToObserve != null) {
             // Remove previous listeners
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+            raceStateToObserve = null;
         }
         RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) event;
         RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentStartTimeEvent.getDependentOnRaceIdentifier());
-        raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog);
-        raceStateToObserve.addChangedListener(raceStateToObserveListener);
+        if (resolvedRaceLog != null) {
+            raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog);
+            raceStateToObserve.addChangedListener(raceStateToObserveListener);
+        }
     }
 
     @Override
