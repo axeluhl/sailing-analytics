@@ -23,8 +23,6 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -34,19 +32,14 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.text.DateFormat;
@@ -65,7 +58,6 @@ public class WindFragment extends BaseFragment
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
-    private final static String GWT_MAP_AND_WIND_CHART_HTML = "/gwt/EmbeddedMapAndWindChart.html";
     private final static long ONE_SEC = 1000;
     private final static long FIVE_SEC = 5000;
     private final static long EVERY_POSITION_CHANGE = 0;
@@ -363,27 +355,9 @@ public class WindFragment extends BaseFragment
     private boolean loadRaceMap(boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
         ManagedRace race = getRace();
         if (race != null) {
-
-            // get data store for event id
-            DataStore dataStore = DataManager.create(getActivity()).getDataStore();
-
-            // get server base url
-            String serverBaseURL = AppPreferences.on(getActivity()).getServerBaseURL();
-
-            // get simple race log identifier
-            Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
-            SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
-
             // build complete race map url
-            mMapWebView.loadUrl(serverBaseURL + GWT_MAP_AND_WIND_CHART_HTML +
-                    "?regattaLikeName=" + identifier.getRegattaLikeParentName() +
-                    "&raceColumnName=" + identifier.getRaceColumnName() +
-                    "&fleetName=" + identifier.getFleetName() +
-                    "&eventId=" + dataStore.getEventUUID() +
-                    "&viewShowWindChart=" + showWindCharts +
-                    "&viewShowStreamlets=" + showStreamlets +
-                    "&viewShowSimulation=" + showSimulation +
-                    "&viewShowMapControls=" + showMapControls);
+            String mapUrl = WindHelper.generateMapURL(getActivity(), race, showWindCharts, showStreamlets, showSimulation, showMapControls);
+            mMapWebView.loadUrl(mapUrl);
             return true;
         }
         return false;

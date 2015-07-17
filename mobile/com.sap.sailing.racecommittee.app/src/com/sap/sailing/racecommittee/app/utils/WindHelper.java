@@ -6,6 +6,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -22,6 +24,7 @@ import java.net.URL;
 
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
+    private final static String GWT_MAP_AND_WIND_CHART_HTML = "/gwt/EmbeddedMapAndWindChart.html";
 
     public static void isTrackedRace(final Context context, final ManagedRace race){
         try {
@@ -92,5 +95,25 @@ public class WindHelper {
             Log.e(TAG, "Failed to parse contents of the server response: " + e.getMessage());
         }
         return isTracked;
+    }
+
+    public static String generateMapURL(Context context, ManagedRace race ,boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls){
+        StringBuilder builder = new StringBuilder();
+
+        // get simple race log identifier
+        Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
+        SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
+
+        builder.append(getBaseUrl(context));
+        builder.append(GWT_MAP_AND_WIND_CHART_HTML);
+        builder.append("?regattaLikeName=" + identifier.getRegattaLikeParentName());
+        builder.append("&raceColumnName=" + identifier.getRaceColumnName());
+        builder.append("&fleetName=" + identifier.getFleetName());
+        builder.append("&eventId=" + getEventId(context));
+        builder.append("&viewShowWindChart=" + showWindCharts);
+        builder.append("&viewShowStreamlets=" + showStreamlets);
+        builder.append("&viewShowSimulation=" + showSimulation);
+        builder.append("&viewShowMapControls=" + showMapControls);
+        return builder.toString();
     }
 }
