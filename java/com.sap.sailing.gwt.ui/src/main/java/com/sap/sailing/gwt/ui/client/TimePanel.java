@@ -429,7 +429,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
         }
         if (changed) {
-            if(!timeRangeProvider.isZoomed()) {
+            if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(min, max, this);
             }
             
