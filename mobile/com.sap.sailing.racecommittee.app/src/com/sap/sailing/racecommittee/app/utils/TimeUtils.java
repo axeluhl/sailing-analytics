@@ -12,6 +12,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class TimeUtils {
 
@@ -74,6 +75,21 @@ public class TimeUtils {
     public static String formatDurationUntil(long milliseconds, boolean emptyHours) {
         int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
         return formatDuration(secondsTillStart, emptyHours);
+    }
+
+    /**
+     * Formats milliseconds to a string like: 01h23'45''
+     *
+     * @return
+     */
+    public static String formatTimeAgo(long milliseconds) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(milliseconds);
+        String hours = String.format("%02d", calendar.get(Calendar.HOUR)) + "h";
+        String minutes = String.format("%02d", calendar.get(Calendar.MINUTE)) + "'";
+        String seconds = String.format("%02d", calendar.get(Calendar.SECOND)) + "''";
+        return hours + minutes + seconds;
     }
 
     public static String calcDuration(Calendar from, Calendar to) {

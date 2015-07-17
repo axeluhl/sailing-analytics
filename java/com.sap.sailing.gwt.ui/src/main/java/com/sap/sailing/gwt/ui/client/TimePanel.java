@@ -20,6 +20,9 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -331,9 +334,13 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         if (timeRangeProvider.isZoomed()) {
             timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
         } else {
+            if (getFromTime() == null || getToTime() == null) {
+                initializeTimeRange(oldTime, newTime);
+            }
             if (getFromTime() != null && getToTime() != null) {
                 // handle the case where time advances beyond slider's end.
                 if (newTime.after(getToTime())) {
+                    // in live mode, expand the range
                     switch (timer.getPlayMode()) {
                     case Live:
                         Date newMaxTime = new Date(newTime.getTime());
@@ -343,6 +350,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                         setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
                         break;
                     case Replay:
+                        // in replay, stop playing when the end of the range has been reached
                         timer.pause();
                         break;
                     }
@@ -360,6 +368,22 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             timeToStartControlPanel.setVisible(false);
             timeToStartLabel.setText("");
         }
+    }
+
+    /**
+     * When the time range is not yet properly initialized and we get a time change, adjust the time range so that old and
+     * new time are in range. A margin of one minute is used before and after. This method assumes that at least one of the
+     * two time points passed as parameters has a value other than <code>null</code>. Should the other be <code>null</code>,
+     * it is ignored. No assumptions are made about the temporal relation of the two time points to each other; in other
+     * words, <code>oldTime</code> may also be after <code>newTime<code> which could, e.g., be the case for a timer running
+     * backwards. 
+     */
+    private void initializeTimeRange(Date oldTime, Date newTime) {
+        TimePoint from = Util.getEarliestOfTimePoints(getFromTime()==null?null:new MillisecondsTimePoint(getFromTime()), oldTime==null?null:new MillisecondsTimePoint(oldTime));
+        from = Util.getEarliestOfTimePoints(from, newTime==null?null:new MillisecondsTimePoint(newTime));
+        TimePoint to = Util.getEarliestOfTimePoints(getToTime()==null?null:new MillisecondsTimePoint(getToTime()), oldTime==null?null:new MillisecondsTimePoint(oldTime));
+        from = Util.getEarliestOfTimePoints(to, newTime==null?null:new MillisecondsTimePoint(newTime));
+        timeRangeProvider.setTimeRange(from==null?null:from.asDate(), to==null?null:to.asDate());
     }
 
     protected String getTimeToStartLabelText(Date time) {
@@ -396,16 +420,12 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(timeRangeProvider.getToTime())) {
+        if (!max.equals(timeRangeProvider.getToTime()) || !min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
-            timeSlider.setMaxValue(new Double(max.getTime()), fireEvent);
-        }
-        if (!min.equals(timeRangeProvider.getFromTime())) {
-            changed = true;
-            timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
+            timeSlider.setMinAndMaxValue(new Double(min.getTime()),new Double(max.getTime()), fireEvent);
         }
         if (changed) {
-            if(!timeRangeProvider.isZoomed()) {
+            if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(min, max, this);
             }
             
@@ -594,5 +614,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     @Override
     public String getDependentCssClassName() {
         return "timePanel";
+    }
+
+    public Button getBackToLiveButton() {
+        return backToLivePlayButton;
     }
 }
