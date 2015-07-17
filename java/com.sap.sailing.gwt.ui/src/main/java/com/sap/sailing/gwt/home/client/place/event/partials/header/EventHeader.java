@@ -56,7 +56,6 @@ public class EventHeader extends Composite {
     @UiField AnchorElement eventLink;
     @UiField DivElement competitors;
     @UiField DivElement races;
-    @UiField DivElement trackedRaces;
     @UiField DivElement eventCategory;
     @UiField DivElement courseAreaUi;
     
@@ -123,11 +122,6 @@ public class EventHeader extends Composite {
             } else {
                 hide(races);
             }
-            if(regattaMetadata.getTrackedRacesCount() > 0) {
-                trackedRaces.setInnerText(i18n.trackedRacesCount(regattaMetadata.getTrackedRacesCount()));
-            } else {
-                hide(trackedRaces);
-            }
             if(regattaMetadata.getDefaultCourseAreaName() != null) {
                 courseAreaUi.setInnerText(i18n.courseAreaName(regattaMetadata.getDefaultCourseAreaName()));
             } else {
@@ -159,7 +153,7 @@ public class EventHeader extends Composite {
                 hide(eventLink);
             }
             
-            hide(competitors, races, trackedRaces, courseAreaUi, eventCategory);
+            hide(competitors, races, courseAreaUi, eventCategory);
         }
         
         initTitleAndSelection(nameToShow);

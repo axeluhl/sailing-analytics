@@ -190,6 +190,10 @@ public final class HomeServiceUtil {
         return count;
     }
     
+    public static int calculateRaceColumnCount(Leaderboard sl) {
+        return Util.size(sl.getRaceColumns());
+    }
+    
     public static int calculateTrackedRaceCount(Leaderboard sl) {
         int count=0;
         for (RaceColumn column : sl.getRaceColumns()) {
@@ -197,6 +201,20 @@ public final class HomeServiceUtil {
                 TrackedRace trackedRace = column.getTrackedRace(fleet);
                 if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                     count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    public static int calculateTrackedRaceColumnCount(Leaderboard sl) {
+        int count=0;
+        for (RaceColumn column : sl.getRaceColumns()) {
+            for (Fleet fleet : column.getFleets()) {
+                TrackedRace trackedRace = column.getTrackedRace(fleet);
+                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+                    count++;
+                    break;
                 }
             }
         }
@@ -447,8 +465,7 @@ public final class HomeServiceUtil {
             regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         }
         regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
-        regattaDTO.setTrackedRacesCount(calculateTrackedRaceCount(leaderboard));
+        regattaDTO.setRaceCount(calculateRaceColumnCount(leaderboard));
         regattaDTO.setBoatClass(getBoatClassName(leaderboard));
         if(leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
