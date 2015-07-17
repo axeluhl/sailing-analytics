@@ -1,6 +1,14 @@
 package com.sap.sailing.polars.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
@@ -27,12 +35,18 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.PolarDataOperation;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.util.SmartFutureCache;
 
 /**
@@ -43,12 +57,27 @@ import com.sap.sse.util.SmartFutureCache;
  * @author Frederik Petersen (D054528)
  * 
  */
-public class PolarDataServiceImpl implements PolarDataService {
+public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObjectInputStream<PolarDataServiceImpl, PolarDataOperation<?>>{
 
-    private final PolarDataMiner polarDataMiner;
+    private PolarDataMiner polarDataMiner;
+    
+    private final ConcurrentHashMap<OperationExecutionListener<PolarDataServiceImpl>, OperationExecutionListener<PolarDataServiceImpl>> operationExecutionListeners;
+    
+    /**
+     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
+     * currently replicated from any master.
+     */
+    private ReplicationMasterDescriptor replicatingFromMaster;
+
+    private final Set<OperationWithResult<PolarDataServiceImpl, ?>> operationsSentToMasterForReplication;
+    
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
+            .withInitial(() -> false);
     
     public PolarDataServiceImpl() {
         this.polarDataMiner = new PolarDataMiner();
+        this.operationsSentToMasterForReplication = new HashSet<>();
+        this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -215,6 +244,86 @@ public class PolarDataServiceImpl implements PolarDataService {
     @Override
     public void unregisterListener(BoatClass boatClass, PolarsChangedListener listener) {
         polarDataMiner.unregisterListener(boatClass, listener);
+    }
+
+    @Override
+    public void addOperationExecutionListener(OperationExecutionListener<PolarDataServiceImpl> listener) {
+        operationExecutionListeners.put(listener, listener);
+    }
+
+    @Override
+    public void removeOperationExecutionListener(OperationExecutionListener<PolarDataServiceImpl> listener) {
+        operationExecutionListeners.remove(listener);
+    }
+
+    @Override
+    public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        polarDataMiner = null;
+    }
+    
+    @Override
+    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
+        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b) {
+        currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(b);
+        
+    }
+
+    @Override
+    public Serializable getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        //FIXME problem since we dont have access to basedomainfactory
+        return new ObjectInputStream(is);
+    }
+
+    @Override
+    public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
+            InterruptedException {
+        polarDataMiner = (PolarDataMiner) is.readObject();
+    }
+
+    @Override
+    public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(polarDataMiner);
+    }
+
+    @Override
+    public Iterable<OperationExecutionListener<PolarDataServiceImpl>> getOperationExecutionListeners() {
+        return operationExecutionListeners.keySet();
+    }
+
+    @Override
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return replicatingFromMaster;
+    }
+
+    @Override
+    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = master;
+    }
+
+    @Override
+    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.replicatingFromMaster = null;
+    }
+
+    @Override
+    public boolean hasSentOperationToMaster(OperationWithResult<PolarDataServiceImpl, ?> operation) {
+        return this.operationsSentToMasterForReplication.contains(operation);
+    }
+
+
+    @Override
+    public void addOperationSentToMasterForReplication(
+            OperationWithResultWithIdWrapper<PolarDataServiceImpl, ?> operation) {
+        this.operationsSentToMasterForReplication.add(operation);
     }
 
 }
