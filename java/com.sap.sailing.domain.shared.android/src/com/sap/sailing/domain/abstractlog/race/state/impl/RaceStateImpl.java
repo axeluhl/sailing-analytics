@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
+import java.util.Collections;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
@@ -42,6 +44,10 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     private final AbstractLogEventAuthor author;
     private final RaceLogEventFactory factory;
     
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+    }
+
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
@@ -63,9 +69,11 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         this(raceLogResolver, raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
-    private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
+    private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author,
+            RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
-        super(raceLogResolver, raceLog, analyzersClock, procedureFactory, /* update */ true);
+        super(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, analyzersClock, procedureFactory,
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap(), /* update */ true);
         this.author = author;
         this.factory = eventFactory;
     }
@@ -224,6 +232,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void forceUpdate() {
         super.update();
-        registerListenerOnDependentRaceIfDependentStartTime();
+        registerListenerOnDependentRaceIfDependentStartTime(Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
     }
+
 }
