@@ -48,6 +48,23 @@ public class RaceMapSettings extends AbstractSettings {
     }
 
     /**
+     * "Copy constructor" that produces a new settings object that equals the one passed as argument
+     */
+    public RaceMapSettings(RaceMapSettings settings) {
+        this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
+        this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.maneuverTypesToShow = settings.maneuverTypesToShow;
+        this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
+        this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
+        this.showSelectedCompetitorsInfo = settings.showSelectedCompetitorsInfo;
+        this.showSimulationOverlay = settings.showSimulationOverlay;
+        this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
+        this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
+        this.windUp = settings.windUp;
+        this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
+    }
+
+    /**
      * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
     public long getEffectiveTailLengthInMilliseconds() {

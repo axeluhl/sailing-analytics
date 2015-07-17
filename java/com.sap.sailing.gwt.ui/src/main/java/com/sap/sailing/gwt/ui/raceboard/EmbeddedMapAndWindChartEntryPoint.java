@@ -66,7 +66,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
 
     @Override
     protected void doOnModuleLoad() {
-        GWT.debugger(); // TODO remove again
         super.doOnModuleLoad();
         // read mandatory parameters
         regattaLikeName = Window.Location.getParameter(PARAM_REGATTA_LIKE_NAME);
@@ -168,12 +167,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                             map.setControls(ControlPosition.RIGHT_BOTTOM, backToLivePlayButton);
                         }
                     };
-                    final RaceMapSettings mapSettings = raceMap.getSettings();
+                    final RaceMapSettings mapSettings = new RaceMapSettings(raceMap.getSettings());
                     mapSettings.setZoomSettings(new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false));
                     Set<HelpLineTypes> helpLineTypes = new HashSet<>();
                     Util.addAll(mapSettings.getHelpLinesSettings().getVisibleHelpLineTypes(), helpLineTypes);
                     helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
                     mapSettings.setHelpLinesSettings(new RaceMapHelpLinesSettings(helpLineTypes));
+                    mapSettings.setWindUp(true);
                     raceMap.updateSettings(mapSettings);
                     raceMap.onRaceSelectionChange(raceList);
                     final WindChart windChart;
