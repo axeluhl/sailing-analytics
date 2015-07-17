@@ -182,7 +182,7 @@ public class TimeSlider extends SliderBar {
             return;
         
         Element knobElement = knobImage.getElement();
-        if(curValue >= minValue && curValue <= maxValue) {
+        if (curValue != null && minValue != null && maxValue != null && curValue >= minValue && curValue <= maxValue) {
             // Move the knob to the correct position
             int lineWidth = lineElement.getOffsetWidth();
             int knobWidth = knobElement.getOffsetWidth();
