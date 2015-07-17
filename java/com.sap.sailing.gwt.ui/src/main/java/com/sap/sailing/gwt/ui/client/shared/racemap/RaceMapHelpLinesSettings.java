@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.sap.sse.common.Util;
 
 public class RaceMapHelpLinesSettings {
     
@@ -28,8 +29,9 @@ public class RaceMapHelpLinesSettings {
         visibleHelpLines.add(HelpLineTypes.BOATTAILS);
     }
     
-    public RaceMapHelpLinesSettings(Collection<HelpLineTypes> visibleHelpLines) {
-        this.visibleHelpLines = new HashSet<HelpLineTypes>(visibleHelpLines);
+    public RaceMapHelpLinesSettings(Iterable<HelpLineTypes> visibleHelpLines) {
+        this.visibleHelpLines = new HashSet<>();
+        Util.addAll(visibleHelpLines, this.visibleHelpLines);
     }
 
     public boolean isVisible(HelpLineTypes helpLineType) {
