@@ -1376,11 +1376,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     };
 
     private void showStartAndFinishAndCourseMiddleLines(final CoursePositionsDTO courseDTO) {
+//        Window.alert("legs" + courseDTO.currentLegNumber + "/" + courseDTO.totalLegsCount);
         if (map != null && courseDTO != null && courseDTO.course != null && courseDTO.course.waypoints != null &&
                 !courseDTO.course.waypoints.isEmpty()) {
-            com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getFarthestAheadVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
-            int oneBasedLegOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
-            int numberOfLegs = courseDTO.course.waypoints.size()-1;
             // draw the start line
             final WaypointDTO startWaypoint = courseDTO.course.waypoints.get(0);
             updateCountdownCanvas(startWaypoint);
@@ -1397,8 +1395,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             startLine = showOrRemoveOrUpdateLine(startLine, /* showLine */ courseDTO.getStartMarkPositions() != null &&
                     courseDTO.getStartMarkPositions().size() == 2 &&
-                    ((oneBasedLegOfLeadingCompetitor <= 1 && 
-                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE)) ||
+                    ((courseDTO.currentLegNumber <= 1 && 
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE)) ||
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)),
                     startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff");
             // TODO bug3027: show SmallTransparentInfoOverlay in addition to tooltip if course geometry option is true; remove it if option is false
@@ -1417,7 +1415,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
             finishLine = showOrRemoveOrUpdateLine(finishLine, /* showLine */ courseDTO.getFinishMarkPositions() != null && courseDTO.getFinishMarkPositions().size() == 2 &&
-                    (oneBasedLegOfLeadingCompetitor > 0 && oneBasedLegOfLeadingCompetitor == numberOfLegs && settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE))
+                    (courseDTO.currentLegNumber == courseDTO.totalLegsCount && 
+                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE))
                  || settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY),
                     finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, "#000000");
             // the control point pairs for which we already decided whether or not
@@ -1430,8 +1429,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boolean showCourseMiddleLine = keysAlreadyHandled.containsKey(key) && keysAlreadyHandled.get(key).getA() ||
                         settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) ||
                         (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)
-                         && oneBasedLegOfLeadingCompetitor > 0
-                         && oneBasedLegOfLeadingCompetitor-1 == zeroBasedIndexOfStartWaypoint);
+                         && courseDTO.currentLegNumber > 0
+                         && courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint);
                 keysAlreadyHandled.put(key, new Pair<>(showCourseMiddleLine, zeroBasedIndexOfStartWaypoint));
             }
             Set<Set<ControlPointDTO>> keysToConsider = new HashSet<>(keysAlreadyHandled.keySet());
