@@ -1384,8 +1384,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // draw the start line
             final WaypointDTO startWaypoint = courseDTO.course.waypoints.get(0);
             updateCountdownCanvas(startWaypoint);
-            final Position startLineLeftPosition = courseDTO.getStartMarkPositions().get(0);
-            final Position startLineRightPosition = courseDTO.getStartMarkPositions().get(1);
+            final int numberOfStartWaypointMarks = courseDTO.getStartMarkPositions() == null ? 0 : courseDTO.getStartMarkPositions().size();
+            final Position startLineLeftPosition = numberOfStartWaypointMarks == 0 ? null : courseDTO.getStartMarkPositions().get(0);
+            final Position startLineRightPosition = numberOfStartWaypointMarks < 2 ? null : courseDTO.getStartMarkPositions().get(1);
             if (courseDTO.startLineAngleToCombinedWind != null) {
                 startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                         NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
@@ -1395,18 +1396,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             } else {
                 startLineAdvantageText.delete(0, startLineAdvantageText.length());
             }
-            startLine = showOrRemoveOrUpdateLine(startLine, /* showLine */ courseDTO.getStartMarkPositions() != null &&
-                    courseDTO.getStartMarkPositions().size() == 2 &&
+            startLine = showOrRemoveOrUpdateLine(startLine, /* showLine */ numberOfStartWaypointMarks == 2 &&
                     ((oneBasedLegOfLeadingCompetitor <= 1 && 
                      settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE)) ||
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)),
                     startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff");
-            // TODO bug3027: show SmallTransparentInfoOverlay in addition to tooltip if course geometry option is true; remove it if option is false
-            // TODO bug3027: show *all* course middle lines if course geometry option is true
-            
             // draw the finish line
-            final Position finishLineLeftPosition = courseDTO.getFinishMarkPositions().get(0);
-            final Position finishLineRightPosition = courseDTO.getFinishMarkPositions().get(1);
+            final int numberOfFinishWaypointMarks = courseDTO.getFinishMarkPositions() == null ? 0 : courseDTO.getFinishMarkPositions().size();
+            final Position finishLineLeftPosition = numberOfFinishWaypointMarks == 0 ? null : courseDTO.getFinishMarkPositions().get(0);
+            final Position finishLineRightPosition = numberOfFinishWaypointMarks < 2 ? null : courseDTO.getFinishMarkPositions().get(1);
             if (courseDTO.finishLineAngleToCombinedWind != null) {
                 finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                         NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
@@ -1416,7 +1414,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             } else {
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
-            finishLine = showOrRemoveOrUpdateLine(finishLine, /* showLine */ courseDTO.getFinishMarkPositions() != null && courseDTO.getFinishMarkPositions().size() == 2 &&
+            finishLine = showOrRemoveOrUpdateLine(finishLine, /* showLine */ numberOfFinishWaypointMarks == 2 &&
                     (oneBasedLegOfLeadingCompetitor > 0 && oneBasedLegOfLeadingCompetitor == numberOfLegs && settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE))
                  || settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY),
                     finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, "#000000");
