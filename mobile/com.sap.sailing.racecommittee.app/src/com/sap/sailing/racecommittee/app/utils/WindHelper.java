@@ -24,7 +24,7 @@ import java.net.URL;
 
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
-    private final static String GWT_MAP_AND_WIND_CHART_HTML = "gwt/EmbeddedMapAndWindChart.html";
+    private final static String GWT_MAP_AND_WIND_CHART_HTML = "/gwt/EmbeddedMapAndWindChart.html";
 
     public static void isTrackedRace(final Context context, final ManagedRace race){
         try {
@@ -61,7 +61,13 @@ public class WindHelper {
     }
 
     private static String getBaseUrl(Context context){
-        return AppPreferences.on(context).getServerBaseURL();
+        /* remove trailing slash on baseUrl if exists */
+        String baseUrl = AppPreferences.on(context).getServerBaseURL();
+        if( baseUrl != null && baseUrl.substring(baseUrl.length() - 1).equals("/")) {
+            return baseUrl.substring(0, baseUrl.length() - 1);
+        } else {
+            return baseUrl;
+        }
     }
 
     private static String getEventId(Context context){
