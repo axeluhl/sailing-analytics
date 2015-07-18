@@ -360,7 +360,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.replayPathCanvasOverlays = null;
         this.raceCourseCanvasOverlay = null;
         this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        this.initializeData(showMapControls);
+        this.initializeData(showMapControls, /* showHeaderPanel */ true);
         this.parent = parent;
     }
 
@@ -1000,7 +1000,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     @Override
-    public void initializeData(boolean showMapControls) {
+    public void initializeData(boolean showMapControls, boolean showHeaderPanel) {
         loadMapsAPIV3();
     }
 
