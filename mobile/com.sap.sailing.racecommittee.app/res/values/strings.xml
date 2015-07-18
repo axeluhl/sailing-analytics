@@ -246,8 +246,8 @@
     <string name="race_start_in_4_minutes">4 Minutes</string>
     <string name="race_start_in_2_minutes">2 Minutes</string>
     <string name="race_start_in_1_minute">1 Minute</string>
-    <string name="race_start_time_in">-#TIME#</string>
-    <string name="race_start_time_ago">#TIME#</string>
+    <string name="race_start_time_in">-%s</string>
+    <string name="race_start_time_ago">%s</string>
     <string name="race_set_time">Set Time</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
@@ -322,13 +322,13 @@
     <string name="wind_enter_position">Set Your Position</string>
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
-    <string name="wind_sensor"><![CDATA[at #AT# / from #FROM#° / #SPEED# kn]]></string>
+    <string name="wind_sensor"><![CDATA[at %1$s / from %2$.0f° / %3$.1f kn]]></string>
     <string name="wind_panel"><![CDATA[from %1$.0f°\n%2$.1f kn]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
     <string name="time_down">Down in #TIME#</string>
-    <string name="time_start">Start #TIME#</string>
+    <string name="time_start">Start %s</string>
     <string name="time_finish">Finish N/A</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Set Signal</string>
@@ -352,7 +352,7 @@
     <string name="race_reset_cancel">No Thanks</string>
     <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
     <string name="race_begin_finish_header">Begin Finish</string>
-    <string name="race_end_finish_header">End Finish</string>
+    <string name="race_end_finish_header">End Finish (Begin Finish: %s)</string>
     <string name="race_begin_finish_current">Use Current Time</string>
     <string name="race_begin_finish_custom">Use Custom Time</string>
     <string name="race_setup_confirm">Confirm Setup</string>
@@ -393,7 +393,7 @@
     <string name="delete_file_title">Delete file</string>
     <string name="delete_file">This will delete the picture</string>
     <string name="start_time">Start Time</string>
-    <string name="start_time_value">At #TIME# in #COUNTDOWN#</string>
+    <string name="start_time_value">At %1$s in %2$s</string>
 
     <!--Extracted locales -->
     <string name="selected_course_area_lost">The selected course area was lost.</string>
@@ -440,9 +440,12 @@
     <string name="change_cancel">Cancel</string>
     <string name="change_message">According to the racing rules this data is not changeable in the current\nrace state. You may proceed nevertheless to correct wrong inputs.</string>
     <string name="change_title">Warning</string>
-    <string name="send_mail">Send mail...</string>
+    <string name="send_mail">Send mail…</string>
     <string name="data_reload_title">Data has changed externally</string>
     <string name="data_reload_message">Data have to be reloaded. Possible data loss is possible.</string>
+    <string name="preference_allow_dependent_races_header">Relative Start Time (Minutes)</string>
+    <string name="preference_allow_dependent_races_description">Enable Relative Start Time between Races</string>
+    <string name="preference_dependent_races_offset_header">Default Relative Start Time Offset</string>
     <string name="error_finished_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
     <string name="error_finishing_time">The selected time is before the race start.</string>
     <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
@@ -452,6 +455,11 @@
     <string name="wind_latitude">Latitude</string>
     <string name="wind_longitude">Longitude</string>
     <string name="wind_accuracy">Accuracy</string>
+    <string name="dependent_races_absolute">Absolute Start Time</string>
+    <string name="dependent_races_relative">Relative Start Time</string>
+    <string name="dependent_races_prompt">Please select the race</string>
+    <string name="minutes_after">Minutes after</string>
+    <string name="minutes_after_long">%1$.0f Minutes after %2$s</string>
     <string name="wind_accuracy_ago">ago</string>
 
 </resources>

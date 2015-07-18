@@ -108,15 +108,11 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
             mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-            View header = ViewHolder.get(layout, R.id.header_text);
-            if (header != null) {
-                //                header.setOnClickListener(this);
-            }
-
             mTimePicker = ViewHolder.get(layout, R.id.time_picker);
             if (mTimePicker != null) {
                 Calendar calendar = Calendar.getInstance();
-                ThemeHelper.setPickerTextColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white));
+                ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                    .getColor(getActivity(), R.attr.sap_yellow_1));
                 mTimePicker.setIs24HourView(true);
                 mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
             }
@@ -133,26 +129,41 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 finishCustom.setOnClickListener(this);
             }
 
+            return layout;
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+
             switch (getArguments().getInt(START_MODE, 0)) {
             case 1: // Race-State: Finishing -> End Finishing
-                ImageView flag = ViewHolder.get(layout, R.id.header_flag);
+                View header = ViewHolder.get(getView(), R.id.header_text);
+                if (header != null) {
+                    header.setOnClickListener(this);
+                }
+
+                View back = ViewHolder.get(getView(), R.id.header_back);
+                if (back != null) {
+                    back.setVisibility(View.VISIBLE);
+                }
+
+                ImageView flag = ViewHolder.get(getView(), R.id.header_flag);
                 if (flag != null) {
                     int resId = R.drawable.flag_blue_48dp;
                     Drawable drawable = BitmapHelper.getDrawable(getActivity(), resId);
                     flag.setImageDrawable(drawable);
                 }
 
-                TextView headline = ViewHolder.get(layout, R.id.header_headline);
+                TextView headline = ViewHolder.get(getView(), R.id.header_headline);
                 if (headline != null) {
-                    headline.setText(getString(R.string.race_end_finish_header));
+                    headline.setText(getString(R.string.race_end_finish_header, mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
                 }
                 break;
 
             default: // Race-State: Running -> Start Finishing
                 break;
             }
-
-            return layout;
         }
 
         @Override
@@ -181,7 +192,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 break;
 
             default:
-                // currently unused, because of no other button
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
             }
         }

@@ -52,4 +52,6 @@
     <dimen name="wind_hide_button_right_margin">76dp</dimen>
     <dimen name="wind_hide_button_top_margin">20dp</dimen>
 
+    <item name="picker_scale" format="float" type="integer">1.55</item>
+
 </resources>
