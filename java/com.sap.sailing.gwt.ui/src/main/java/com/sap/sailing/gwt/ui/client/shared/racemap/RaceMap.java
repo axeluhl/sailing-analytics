@@ -1196,10 +1196,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         // this only works because the quickRanks are sorted
         for (Entry<CompetitorDTO, Integer> competitorsByWindwardDistanceTraveledAndOneBasedLegNumber :
             competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.entrySet()) {
-            if (Util.contains(competitorsToShow, competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey())) {
+            if (Util.contains(competitorsToShow, competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey()) && 
+                    competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue() != null) {
                 leadingCompetitorDTO = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey();
-                legOfLeaderCompetitor = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue() == null ?
-                        0 : competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue();
+                legOfLeaderCompetitor = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue();
                 return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
             }
         }
