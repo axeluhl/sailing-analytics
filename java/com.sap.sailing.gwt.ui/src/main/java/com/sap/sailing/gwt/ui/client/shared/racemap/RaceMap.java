@@ -1407,7 +1407,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // draw the finish line
             final Position finishLineLeftPosition = courseDTO.getFinishMarkPositions().get(0);
             final Position finishLineRightPosition = courseDTO.getFinishMarkPositions().get(1);
-            if (courseDTO.startLineAngleToCombinedWind != null) {
+            if (courseDTO.finishLineAngleToCombinedWind != null) {
                 finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                         NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
                         NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleToCombinedWind)),
