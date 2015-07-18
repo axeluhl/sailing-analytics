@@ -118,7 +118,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         }
 
         TextView text = ViewHolder.get(layout, android.R.id.text1);
-        if (text != null && mData.get(position).getRace() != null) {
+        if (text != null && position < mData.size() && mData.get(position).getRace() != null) {
             String raceName = mData.get(position).getRace().getName();
             String additional = RaceHelper.getFleetSeries(mData.get(position).getRace());
             if (!TextUtils.isEmpty(additional)) {
