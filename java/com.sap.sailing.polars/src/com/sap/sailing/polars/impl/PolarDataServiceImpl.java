@@ -11,11 +11,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
@@ -30,6 +32,8 @@ import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -40,8 +44,14 @@ import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
+import com.sap.sailing.polars.mining.BearingClusterGroup;
+import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
+import com.sap.sailing.polars.mining.MovingAverageProcessorImpl;
 import com.sap.sailing.polars.mining.PolarDataMiner;
+import com.sap.sailing.polars.mining.SpeedClusterGroupFromWindSteppingCreator;
+import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -59,6 +69,8 @@ import com.sap.sse.util.SmartFutureCache;
  */
 public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObjectInputStream<PolarDataServiceImpl, PolarDataOperation<?>>{
 
+    private static final Logger logger = Logger.getLogger(PolarDataServiceImpl.class.getSimpleName());
+    
     private PolarDataMiner polarDataMiner;
     
     private final ConcurrentHashMap<OperationExecutionListener<PolarDataServiceImpl>, OperationExecutionListener<PolarDataServiceImpl>> operationExecutionListeners;
@@ -73,11 +85,27 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
     
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
             .withInitial(() -> false);
+
+    private DomainFactory domainFactory;
     
     public PolarDataServiceImpl() {
-        this.polarDataMiner = new PolarDataMiner();
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
+        ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
+        WindSpeedSteppingWithMaxDistance stepping = settings.getWindSpeedStepping();
+        final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
+                .createSpeedClusterGroupFrom(stepping);
+        MovingAverageProcessorImpl movingAverageProcessor = new MovingAverageProcessorImpl(speedClusterGroup);
+        CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
+        SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(
+                angleClusterGroup);
+        this.polarDataMiner = new PolarDataMiner(settings, movingAverageProcessor, cubicRegressionPerCourseProcessor,
+                speedRegressionPerAngleClusterProcessor, speedClusterGroup, angleClusterGroup);
         this.operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
+    }
+
+    private ClusterGroup<Bearing> createAngleClusterGroup() {
+        return new BearingClusterGroup(0, 180, 5);
     }
 
     @Override
@@ -279,19 +307,42 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        //FIXME problem since we dont have access to basedomainfactory
-        return new ObjectInputStream(is);
+        ObjectInputStream ois;
+        if (domainFactory != null) {
+            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is);
+        } else {
+            // TODO ensure that domainfactory is set here. Otherwise there can be issues with duplicate domain objects
+            logger.warning("PolarDataService didn't have a domain factory attached. Replication to this service could fail.");
+            ois = new ObjectInputStream(is);
+        }
+        return ois;
     }
 
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
             InterruptedException {
-        polarDataMiner = (PolarDataMiner) is.readObject();
+        PolarSheetGenerationSettings backendPolarSettings = (PolarSheetGenerationSettings) is.readObject();
+        //MovingAverageProcessor movingAverageProcessor = (MovingAverageProcessor) is.readObject();
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
+        WindSpeedSteppingWithMaxDistance stepping = settings.getWindSpeedStepping();
+        final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
+                .createSpeedClusterGroupFrom(stepping);
+        MovingAverageProcessorImpl movingAverageProcessor = new MovingAverageProcessorImpl(speedClusterGroup);
+        
+        CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = (CubicRegressionPerCourseProcessor) is.readObject();
+        SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = (SpeedRegressionPerAngleClusterProcessor) is.readObject();
+
+        polarDataMiner = new PolarDataMiner(backendPolarSettings, movingAverageProcessor,
+                cubicRegressionPerCourseProcessor, speedRegressionPerAngleClusterProcessor,
+                movingAverageProcessor.getSpeedCluster(), speedRegressionPerAngleClusterProcessor.getAngleCluster());
     }
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
-        objectOutputStream.writeObject(polarDataMiner);
+        objectOutputStream.writeObject(polarDataMiner.getPolarSheetGenerationSettings());
+        //objectOutputStream.writeObject(polarDataMiner.getMovingAverageProcessor());
+        objectOutputStream.writeObject(polarDataMiner.getCubicRegressionPerCourseProcessor());
+        objectOutputStream.writeObject(polarDataMiner.getSpeedRegressionPerAngleClusterProcessor());
     }
 
     @Override
@@ -324,6 +375,18 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
     public void addOperationSentToMasterForReplication(
             OperationWithResultWithIdWrapper<PolarDataServiceImpl, ?> operation) {
         this.operationsSentToMasterForReplication.add(operation);
+    }
+
+    @Override
+    public void registerDomainFactory(DomainFactory domainFactory) {
+        this.domainFactory = domainFactory;
+    }
+
+    @Override
+    public void unregisterDomainFactory(DomainFactory domainFactory) {
+        if (this.domainFactory == domainFactory) {
+            this.domainFactory = null;
+        }
     }
 
 }

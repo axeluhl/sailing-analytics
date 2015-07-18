@@ -8,6 +8,7 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
@@ -242,5 +243,9 @@ public interface PolarDataService {
      */
     void unregisterListener(BoatClass boatClass, PolarsChangedListener listener);
 
+    void registerDomainFactory(DomainFactory domainFactory);
+    
+    void unregisterDomainFactory(DomainFactory domainFactory);
+    
 
 }

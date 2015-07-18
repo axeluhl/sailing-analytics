@@ -36,10 +36,6 @@ public class CubicRegressionPerCourseProcessor implements
      * FIXME Make sure replication and listeners interact correctly
      */
     private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
-    
-    public CubicRegressionPerCourseProcessor(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
-        this.listeners = listeners;
-    }
 
     @Override
     public boolean canProcessElements() {
@@ -152,6 +148,10 @@ public class CubicRegressionPerCourseProcessor implements
         logger.severe("Polar Data Mining Pipe failed. Cause: " + failure.getMessage());
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
+    
+    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
 
 
     @Override
@@ -193,5 +193,7 @@ public class CubicRegressionPerCourseProcessor implements
         // TODO Auto-generated method stub
         return null;
     }
+
+
 
 }

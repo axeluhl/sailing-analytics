@@ -2,6 +2,7 @@ package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,11 +45,12 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     /**
      * FIXME make sure listeners and replication interact correctly
      */
-    private final transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+
+    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
     
-    public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup, ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+    public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
-        this.listeners = listeners;
     }
     
     @Override
@@ -77,6 +79,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
+        availableBoatClasses.add(boatClass);
         Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
         if (listenersForBoatClass != null) {
             for (PolarsChangedListener listener : listenersForBoatClass) {
@@ -162,6 +165,14 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return polynomialFunction;
     }
     
+    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
+    
+    Set<BoatClass> getAvailableBoatClasses() {
+        return availableBoatClasses;
+    }
+    
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
      // TODO Auto-generated method stub
@@ -200,6 +211,10 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public ClusterGroup<Bearing> getAngleCluster() {
+        return angleClusterGroup;
     }
 
 }
