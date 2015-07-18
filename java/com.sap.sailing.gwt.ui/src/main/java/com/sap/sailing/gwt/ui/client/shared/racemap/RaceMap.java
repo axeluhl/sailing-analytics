@@ -1376,7 +1376,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     };
 
     private void showStartAndFinishAndCourseMiddleLines(final CoursePositionsDTO courseDTO) {
-//        Window.alert("legs" + courseDTO.currentLegNumber + "/" + courseDTO.totalLegsCount);
         if (map != null && courseDTO != null && courseDTO.course != null && courseDTO.course.waypoints != null &&
                 !courseDTO.course.waypoints.isEmpty()) {
             // draw the start line
