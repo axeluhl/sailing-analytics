@@ -6,7 +6,7 @@ package com.sap.sailing.domain.common.racelog;
  * 
  */
 public enum RaceLogRaceStatus {
-    UNKNOWN(0), UNSCHEDULED(1), SCHEDULED(2), STARTPHASE(3), RUNNING(4), FINISHING(5), FINISHED(6);
+    UNKNOWN(0), UNSCHEDULED(1), PRESCHEDULED(2), SCHEDULED(3), STARTPHASE(4), RUNNING(5), FINISHING(6), FINISHED(7);
 
     /** the order number represents the natural order of the states */
     private int orderNumber;

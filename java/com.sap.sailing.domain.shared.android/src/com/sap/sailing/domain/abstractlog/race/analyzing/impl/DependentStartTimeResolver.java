@@ -24,8 +24,7 @@ public class DependentStartTimeResolver {
         return internalResolve(event, dependingOnRaces);
     }
 
-    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event,
-            Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
+    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event,Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
         SimpleRaceLogIdentifier identifier = event.getDependentOnRaceIdentifier();
         Duration startTimeDifference = event.getStartTimeDifference();
         RaceLog raceLog = raceLogResolver.resolve(identifier);
@@ -41,9 +40,9 @@ public class DependentStartTimeResolver {
                 result = new StartTimeFinderResult(extendedDependingOnRaces, null, null);
             } else {
                 StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
-                StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder
-                        .analyze(extendedDependingOnRaces);
+                StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
                 if (resultOfDependentRace.getStartTime() == null) {
+                    resultOfDependentRace.setStartTimeDiff(startTimeDifference);
                     result = resultOfDependentRace;
                 } else {
                     result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(),

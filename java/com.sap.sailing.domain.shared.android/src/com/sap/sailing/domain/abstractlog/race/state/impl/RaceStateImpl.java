@@ -224,5 +224,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void forceUpdate() {
         super.update();
+        registerListenerOnDependentRaceIfDependentStartTime();
     }
 }

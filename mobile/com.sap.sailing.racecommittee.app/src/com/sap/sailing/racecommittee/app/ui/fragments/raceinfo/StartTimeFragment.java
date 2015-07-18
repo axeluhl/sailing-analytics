@@ -217,7 +217,9 @@ public class StartTimeFragment extends BaseFragment
                 case MODE_TIME_PANEL:
                     if (getRace() != null && getRaceState() != null) {
                         mStartTime = getRaceState().getStartTime();
-                        time.setTime(mStartTime.asDate());
+                        if (mStartTime != null) {
+                            time.setTime(mStartTime.asDate());
+                        }
                     }
                     View frame = ViewHolder.get(getView(), R.id.header);
                     if (frame != null) {
