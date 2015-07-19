@@ -518,7 +518,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            of {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor
      *            associations per race tracked.
      */
-    private RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
+    public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
             WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);

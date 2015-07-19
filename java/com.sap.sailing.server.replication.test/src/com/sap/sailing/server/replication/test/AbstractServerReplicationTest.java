@@ -1,7 +1,10 @@
 package com.sap.sailing.server.replication.test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
@@ -49,10 +52,21 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
 
         @Override
         public RacingEventServiceImpl createNewReplica() {
-            return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
-                    // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl((srlid)->null)), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
-                    EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+            return new RacingEventServiceImpl(
+                    (final RaceLogResolver raceLogResolver) -> {
+                        return new RacingEventServiceImpl.ConstructorParameters() {
+                            private final DomainObjectFactory domainObjectFactory =
+                                    PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                                            // replica gets its own base DomainFactory:
+                                            new DomainFactoryImpl(raceLogResolver));
+
+                            @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
+                            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+                            @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
+                            @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+                        };
+                    }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
+                    /* serviceFinderFactory */ null);
         }
     }
 }
