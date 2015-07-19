@@ -54,6 +54,7 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -134,6 +135,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
@@ -3691,5 +3693,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     public void setRaceLogResolver(RaceLogResolver raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
+    }
+
+    /**
+     * When given the opportunity to resolve after de-serialization, grabs the {@link RaceLogResolver} from the
+     * {@link SharedDomainFactory} because the field is transient and needs filling after de-serialization.
+     */
+    @Override
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+        this.raceLogResolver = domainFactory.getRaceLogResolver();
+        return this;
     }
 }
