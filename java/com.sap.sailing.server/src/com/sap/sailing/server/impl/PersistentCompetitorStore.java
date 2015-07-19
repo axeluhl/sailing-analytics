@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URI;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -40,8 +41,9 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
      *            if <code>true</code>, the persistent competitor store is initially cleared, with all persistent
      *            competitor data removed; use with caution!
      */
-    public PersistentCompetitorStore(MongoObjectFactory storeTo, boolean clear, TypeBasedServiceFinderFactory serviceFinderFactory) {
-        DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this);
+    public PersistentCompetitorStore(MongoObjectFactory storeTo, boolean clear,
+            TypeBasedServiceFinderFactory serviceFinderFactory, RaceLogResolver raceLogResolver) {
+        DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this, raceLogResolver);
         this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);
         this.storeTo = storeTo;
         if (clear) {

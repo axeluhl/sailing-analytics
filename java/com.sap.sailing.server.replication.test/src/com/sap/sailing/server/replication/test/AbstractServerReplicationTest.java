@@ -51,7 +51,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
         public RacingEventServiceImpl createNewReplica() {
             return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                     // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
+                    new DomainFactoryImpl((srlid)->null)), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
                     EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
     }
