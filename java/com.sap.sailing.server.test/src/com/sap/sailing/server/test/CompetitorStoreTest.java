@@ -52,14 +52,14 @@ public class CompetitorStoreTest {
     @Test
     public void testPersistentCompetitorStore() {
         CompetitorStore persistentStore1 = new PersistentCompetitorStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
         DynamicCompetitor template = AbstractLeaderboardTest.createCompetitor("Test Competitor");
         Competitor competitor = persistentStore1.getOrCreateCompetitor(template.getId(), template.getName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 template.getBoat(), /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730));
 
         CompetitorStore persistentStore2 = new PersistentCompetitorStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
         Competitor competitor2 = persistentStore2.getExistingCompetitorById(template.getId());
         assertNotSame(competitor2, template); // the new store loads new instances from the database
         assertEquals(template.getId(), competitor2.getId());
