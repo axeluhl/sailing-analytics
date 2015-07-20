@@ -24,7 +24,8 @@ public abstract class RaceInfoFragmentChooser {
     public RaceFragment choose(Context context, ManagedRace managedRace) {
         switch (managedRace.getStatus()) {
             case UNSCHEDULED:
-                return createInfoFragment(StartTimeFragment.newInstance(1), managedRace);
+                return createInfoFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_1), managedRace);
+            case PRESCHEDULED:
             case SCHEDULED:
             case STARTPHASE:
                 return createInfoFragment(context, getStartphaseFragment(), managedRace);

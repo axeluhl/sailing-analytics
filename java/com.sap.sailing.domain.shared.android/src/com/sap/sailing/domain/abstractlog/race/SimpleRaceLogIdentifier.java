@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race;
 
+import java.io.Serializable;
+
 import com.sap.sse.common.Util.Triple;
 
-public interface SimpleRaceLogIdentifier {
+public interface SimpleRaceLogIdentifier extends Serializable {
     String getRegattaLikeParentName();
 
     String getRaceColumnName();

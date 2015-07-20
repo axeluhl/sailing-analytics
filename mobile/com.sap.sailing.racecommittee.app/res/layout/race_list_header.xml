@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@color/constant_black" />
+        android:src="@color/constant_black"/>
 
     <View
         android:layout_width="match_parent"
@@ -27,7 +27,7 @@
         android:layout_margin="@dimen/default_margin"
         android:background="@drawable/round_button"
         android:padding="10dp"
-        android:src="@drawable/ic_power_settings_new_white_48dp" />
+        android:src="@drawable/ic_power_settings_new_white_48dp"/>
 
     <TextView
         android:id="@+id/regatta_data"
@@ -36,24 +36,23 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@id/nav_button"
         android:layout_toStartOf="@id/nav_button"
-        tools:text="Marina Bay / Viewer"
-        android:textSize="@dimen/textSize_32"
         android:paddingLeft="@dimen/default_padding_half"
         android:paddingRight="@dimen/default_padding_half"
         android:textColor="@color/constant_white"
-        />
+        android:textSize="@dimen/textSize_32"
+        tools:text="Marina Bay / Viewer"/>
 
     <TextView
         android:id="@+id/regatta_course"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@id/regatta_data"
         android:layout_toLeftOf="@id/nav_button"
         android:layout_toStartOf="@id/nav_button"
-        android:layout_above="@id/regatta_data"
         android:paddingLeft="@dimen/default_padding_half"
         android:paddingRight="@dimen/default_padding_half"
         android:singleLine="true"
         android:textColor="@color/constant_white"
-        tools:text="Extreme Sailing Series 2015 Act 1 Singapore"
-        android:textSize="@dimen/textSize_32" />
+        android:textSize="@dimen/textSize_32"
+        tools:text="Extreme Sailing Series 2015 Act 1 Singapore"/>
 </RelativeLayout>

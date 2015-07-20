@@ -112,6 +112,11 @@
 .regattaleaderboard_meta_reload:hover {
   background-color: #909090;
 }
+
+.regattaleaderboard_meta_reload_live:hover {
+  background-color: #ffa4a4;
+}
+
 .regattaleaderboard_meta_settings {
   display: inline-block;
   text-align: right;

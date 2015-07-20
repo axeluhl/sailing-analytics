@@ -45,7 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
 public class RaceContext {
-    private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 15 * 60 * 1000; // 15 min
+    private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 60 * 60 * 1000; // 1 hour
     private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
     
     private final TimePoint now = MillisecondsTimePoint.now();
@@ -181,6 +181,7 @@ public class RaceContext {
             case FINISHING:
             case RUNNING:
             case SCHEDULED:
+            case PRESCHEDULED:
             case STARTPHASE:
             case UNKNOWN:
                 break;

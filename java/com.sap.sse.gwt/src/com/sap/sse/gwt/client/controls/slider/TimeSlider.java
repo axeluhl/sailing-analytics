@@ -3,12 +3,12 @@ package com.sap.sse.gwt.client.controls.slider;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.user.client.DOM;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
 
@@ -182,7 +182,7 @@ public class TimeSlider extends SliderBar {
             return;
         
         Element knobElement = knobImage.getElement();
-        if(curValue >= minValue && curValue <= maxValue) {
+        if (curValue != null && minValue != null && maxValue != null && curValue >= minValue && curValue <= maxValue) {
             // Move the knob to the correct position
             int lineWidth = lineElement.getOffsetWidth();
             int knobWidth = knobElement.getOffsetWidth();
@@ -199,21 +199,35 @@ public class TimeSlider extends SliderBar {
     }
     
     public void setMaxValue(Double maxValue, boolean fireEvent) {
-        if(!isZoomed) {
+        if (!isZoomed) {
             super.setMaxValue(maxValue, fireEvent);
         } else {
             this.maxValue = maxValue;
         }
-        calculateTicks();
     }
 
-    public void setMinValue(Double minValue, boolean fireEvent) {
-        if(!isZoomed) {
+    public void setMinValue(Double minValue, boolean fireEvent) {   
+        if (!isZoomed) {
             super.setMinValue(minValue, fireEvent);
         } else {
             this.minValue = minValue;
+        }  
+    }
+    
+    @Override
+    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        if (!isZoomed) {
+            super.setMinAndMaxValue(minValue, maxValue, fireEvent);
+        } else {
+            this.minValue = minValue;
+            this.maxValue = maxValue;
         }
+    }
+    
+    @Override
+    protected void onMinMaxValueChanged(boolean fireEvent) {
         calculateTicks();
+        super.onMinMaxValueChanged(fireEvent);
     }
 
     public void setStepSize(double stepSize, boolean fireEvent) {

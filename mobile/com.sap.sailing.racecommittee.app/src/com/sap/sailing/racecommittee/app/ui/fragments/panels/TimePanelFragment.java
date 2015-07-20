@@ -1,28 +1,41 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import android.content.*;
+import java.text.SimpleDateFormat;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.text.SimpleDateFormat;
-
-public class TimePanelFragment extends BasePanelFragment implements TickListener {
+public class TimePanelFragment extends BasePanelFragment {
 
     public final static String TOGGLED = "toggled";
 
@@ -36,6 +49,8 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     private TextView mHeaderTime;
     private TextView mTimeStart;
     private TextView mTimeFinish;
+    private ImageView mLinkIcon;
+    private Boolean mLinkedRace = null;
 
     public TimePanelFragment() {
         mReceiver = new IntentReceiver();
@@ -64,6 +79,8 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         mTimeFinish = ViewHolder.get(layout, R.id.time_finish);
         mHeaderTime = ViewHolder.get(layout, R.id.timer_text);
         mTimeStart = ViewHolder.get(layout, R.id.time_start);
+        mLinkIcon = ViewHolder.get(layout, R.id.linked_race);
+
         if (getArguments().getBoolean(TOGGLED, false)) {
             toggleMarker(layout, R.id.time_marker);
         }
@@ -75,7 +92,6 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     public void onResume() {
         super.onResume();
 
-        TickSingleton.INSTANCE.registerListener(this);
         notifyTick(MillisecondsTimePoint.now());
         checkStatus();
 
@@ -111,8 +127,12 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         if (getRace() != null && getRace().getState() != null) {
             TimePoint startTime = getRace().getState().getStartTime();
 
-            if (mTimeStart != null && startTime != null) {
-                mTimeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
+            if (mTimeStart != null) {
+                if (startTime != null) {
+                    mTimeStart.setText(getString(R.string.time_start, dateFormat.format(startTime.asDate())));
+                } else {
+                    mTimeStart.setText(getString(R.string.time_start, "N/A"));
+                }
             }
 
             if (mTimeFinish != null) {
@@ -129,8 +149,25 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                     resId = R.string.race_start_time_ago;
                     time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
                 }
-                mHeaderTime.setText(getString(resId).replace("#TIME#", time));
+                mHeaderTime.setText(getString(resId, time));
             }
+        }
+
+        if (mLinkedRace == null) {
+            StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
+            StartTimeFinderResult result = stf.analyze();
+            if (result != null) {
+                mLinkedRace = result.isDependentStartTime();
+                if (mLinkedRace && mHeaderTime != null) {
+                    SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                    ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
+                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
+                }
+            }
+        }
+
+        if (mLinkedRace != null && mLinkIcon != null) {
+            mLinkIcon.setVisibility(mLinkedRace ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -145,33 +182,37 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
     private void checkStatus() {
         switch (getRace().getStatus()) {
-        case UNSCHEDULED:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case UNSCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case SCHEDULED:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case PRESCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case STARTPHASE:
-            changeVisibility(mTimeLock, View.GONE);
-            break;
+            case SCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case RUNNING:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case STARTPHASE:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
 
-        case FINISHING:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case RUNNING:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
 
-        case FINISHED:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case FINISHING:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
 
-        default:
-            changeVisibility(mTimeLock, View.VISIBLE);
-            break;
+            case FINISHED:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
+
+            default:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
         }
     }
 
@@ -199,17 +240,17 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(StartTimeFragment.newInstance(2));
-                break;
+                case 1:
+                    replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
-                break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
             }
             disableToggle(container, markerId);
         }
@@ -251,6 +292,13 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
             checkStatus();
             uncheckMarker(mView);
+        }
+
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            super.onStartTimeChanged(state);
+
+            mLinkedRace = null;
         }
     }
 }
