@@ -37,7 +37,7 @@ public class RaceFilter extends Filter {
 
     protected static FilterResults createResults(Collection<RaceListDataType> result) {
         FilterResults results = new FilterResults();
-        results.values = new ArrayList<RaceListDataType>(result);
+        results.values = new ArrayList<>(result);
         results.count = result.size();
         return results;
     }
@@ -50,7 +50,6 @@ public class RaceFilter extends Filter {
         
         List<RaceListDataType> filteredItems = new ArrayList<RaceListDataType>();
         RaceListDataTypeRace currentUnscheduledItem = null;
-        RaceListDataTypeRace currentPrescheduledItem = null;
         RaceListDataTypeRace currentFinishedItem = null;
         
         List<RaceListDataType> allItems = new ArrayList<RaceListDataType>(items);
@@ -61,7 +60,6 @@ public class RaceFilter extends Filter {
                 
                 // new run for all types!
                 currentUnscheduledItem = null;
-                currentPrescheduledItem = null;
                 currentFinishedItem = null;
             } else if (item instanceof RaceListDataTypeRace) {
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
@@ -69,13 +67,6 @@ public class RaceFilter extends Filter {
                 if (currentUnscheduledItem == null && status.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                     filteredItems.add(raceItem);
                     currentUnscheduledItem = raceItem;
-                } else if (status.equals(RaceLogRaceStatus.PRESCHEDULED)) {
-                    if (filteredItems.contains(currentPrescheduledItem)) {
-                        filteredItems.remove(currentPrescheduledItem);
-                    }
-                    filteredItems.add(raceItem);
-                    currentPrescheduledItem = raceItem;
-                    currentUnscheduledItem = null;
                 } else if (status.equals(RaceLogRaceStatus.FINISHED)) {
                     if (filteredItems.contains(currentFinishedItem)) {
                         filteredItems.remove(currentFinishedItem);
@@ -83,12 +74,10 @@ public class RaceFilter extends Filter {
                     filteredItems.add(raceItem);
                     currentFinishedItem = raceItem;
                     currentUnscheduledItem = null;
-                    currentPrescheduledItem = null;
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     filteredItems.add(raceItem);
                     // new run for all types!
                     currentUnscheduledItem = null;
-                    currentPrescheduledItem = null;
                     currentFinishedItem = null;
                 }
             }
