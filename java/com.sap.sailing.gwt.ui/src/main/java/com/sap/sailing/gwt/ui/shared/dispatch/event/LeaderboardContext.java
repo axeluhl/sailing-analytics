@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,11 +11,9 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -26,38 +23,41 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LeaderboardContext {
     private static final Logger logger = Logger.getLogger(LeaderboardContext.class.getName());
 
+    private final TimePoint now = MillisecondsTimePoint.now();
     private final Event event;
     private final LeaderboardGroup leaderboardGroup;
     private final Leaderboard leaderboard;
     private final RacingEventService service;
 
-    public LeaderboardContext(RacingEventService service, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        this.service = service;
+    public LeaderboardContext(DispatchContext dispatchContext, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+        this.service = dispatchContext.getRacingEventService();
         this.event = event;
         this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;
     }
     
-    public void forRaces(DispatchContext context, RaceCallback callback) {
+    public void forRaces(RaceCallback callback) {
         for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for(Fleet fleet : raceColumn.getFleets()) {
-                callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, context.getRacingEventService()));
+                callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, service));
             }
         }
     }
     
-    public RegattaWithProgressDTO getRegattaWithProgress(DispatchContext context) {
+    public RegattaWithProgressDTO getRegattaWithProgress() {
         RegattaProgressCalculator regattaProgressCalculator = new RegattaProgressCalculator();
-        forRaces(context, regattaProgressCalculator);
+        forRaces(regattaProgressCalculator);
         RegattaWithProgressDTO regattaDTO = new RegattaWithProgressDTO(regattaProgressCalculator.getResult());
         fillRegattaFields(regattaDTO);
         return regattaDTO;
@@ -73,7 +73,7 @@ public class LeaderboardContext {
             
             result.setScoreCorrectionText(leaderboardDTO.getComment());
             result.setLastScoreUpdate(leaderboardDTO.getTimePointOfLastCorrectionsValidity());
-            boolean isLive = hasLiveRace(leaderboardDTO);
+            boolean isLive = hasLiveRace();
             result.setLive(isLive);
             
             int rank = 0;
@@ -99,9 +99,42 @@ public class LeaderboardContext {
         }
     }
 
-    private boolean hasLiveRace(LeaderboardDTO leaderboard) {
-        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(HomeServiceUtil.getLiveTimePointInMillis());
-        return !liveRaces.isEmpty();
+    private boolean hasLiveRace() {
+        OverallRacesStateCalculator racesStateCalculator = new OverallRacesStateCalculator();
+        forRaces(racesStateCalculator);
+        return racesStateCalculator.hasLiveRace();
+    }
+    
+    public RegattaState calculateRegattaState() {
+        EventState eventState = HomeServiceUtil.calculateEventState(event);
+        if(eventState == EventState.FINISHED) {
+            return RegattaState.FINISHED;
+        }
+        if(eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
+            return RegattaState.UPCOMING;
+        }
+        
+        TimePoint startDate = getStartTimePoint();
+        TimePoint endDate = getEndTimePoint();
+        if(startDate != null && now.compareTo(startDate) < 0) {
+            return RegattaState.UPCOMING;
+        }
+        if(endDate != null && now.compareTo(endDate) > 0) {
+            return RegattaState.FINISHED;
+        }
+        
+        OverallRacesStateCalculator racesStateCalculator = new OverallRacesStateCalculator();
+        forRaces(racesStateCalculator);
+        if(racesStateCalculator.hasLiveRace()) {
+            return RegattaState.RUNNING;
+        }
+        if(!racesStateCalculator.hasUnfinishedRace()) {
+            return RegattaState.FINISHED;
+        }
+        if(racesStateCalculator.hasAbandonedOrPostponedRace() || racesStateCalculator.hasFinishedRace()) {
+            return RegattaState.PROGRESS;
+        }
+        return RegattaState.UPCOMING;
     }
     
     private Date getStartDateWithEventFallback() {
@@ -176,7 +209,7 @@ public class LeaderboardContext {
             regattaDTO.setStartDate(getStartDateWithEventFallback());
             regattaDTO.setEndDate(getEndDateWithEventFallback());
         }
-        regattaDTO.setState(HomeServiceUtil.calculateRegattaState(regattaDTO));
+        regattaDTO.setState(calculateRegattaState());
         regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
     }
     

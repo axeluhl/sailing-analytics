@@ -25,8 +25,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -80,22 +78,6 @@ public final class HomeServiceUtil {
             }
         }
         return true;
-    }
-    
-    public static RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
-        Date now = new Date();
-        Date startDate = regatta.getStartDate();
-        Date endDate = regatta.getEndDate();
-        if(startDate != null && now.compareTo(startDate) < 0) {
-            return RegattaState.UPCOMING;
-        }
-        if(endDate != null && now.compareTo(endDate) > 0) {
-            return RegattaState.FINISHED;
-        }
-        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
-            return RegattaState.RUNNING;
-        }
-        return RegattaState.UNKNOWN;
     }
     
     public static EventState calculateEventState(EventBase event) {

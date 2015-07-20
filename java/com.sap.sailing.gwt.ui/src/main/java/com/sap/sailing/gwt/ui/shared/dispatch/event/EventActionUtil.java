@@ -43,7 +43,7 @@ public final class EventActionUtil {
         }
         LeaderboardGroup leaderboardGroup = Util.get(event.getLeaderboardGroups(), 0);
         Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
-        return new LeaderboardContext(service, event, leaderboardGroup, overallLeaderboard);
+        return new LeaderboardContext(context, event, leaderboardGroup, overallLeaderboard);
     }
     
     public static LeaderboardContext getLeaderboardContext(DispatchContext context, UUID eventId, String leaderboardId) {
@@ -52,7 +52,7 @@ public final class EventActionUtil {
         for(LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for(Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if(leaderboard.getName().equals(leaderboardId)) {
-                    return new LeaderboardContext(service, event, leaderboardGroup, leaderboard);
+                    return new LeaderboardContext(context, event, leaderboardGroup, leaderboard);
                 }
             }
         }
@@ -109,10 +109,9 @@ public final class EventActionUtil {
     }
 
     public static void forLeaderboardsOfEvent(DispatchContext context, Event event, LeaderboardCallback callback) {
-        RacingEventService service = context.getRacingEventService();
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                callback.doForLeaderboard(new LeaderboardContext(service, event, leaderboardGroup, leaderboard));
+                callback.doForLeaderboard(new LeaderboardContext(context, event, leaderboardGroup, leaderboard));
             }
         }
     }
@@ -121,12 +120,12 @@ public final class EventActionUtil {
         forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext leaderboardContext) {
-                leaderboardContext.forRaces(context, callback);
+                leaderboardContext.forRaces(callback);
             }
         });
     }
     
     public static void forRacesOfRegatta(DispatchContext context, UUID eventId, String regattaName, RaceCallback callback) {
-        getLeaderboardContext(context, eventId, regattaName).forRaces(context, callback);
+        getLeaderboardContext(context, eventId, regattaName).forRaces(callback);
     }
 }
