@@ -1027,9 +1027,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 } else {
                     final TimePoint endOfTracking = getEndOfTracking();
                     if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
-                            (!trackedLegOfCompetitor.hasFinishedLeg(endOfTracking)
-                            && ((endOfTracking != null && timePoint.after(endOfTracking))
-                                    || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
+                            (endOfTracking != null && !trackedLegOfCompetitor.hasFinishedLeg(endOfTracking)
+                            && (timePoint.after(endOfTracking) || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
                         // If the race is no longer tracking and hence no more data can be expected, and the competitor
                         // hasn't finished a leg after the requested time point, no valid distance traveled can be determined
                         // for the competitor in this race the the time point requested
