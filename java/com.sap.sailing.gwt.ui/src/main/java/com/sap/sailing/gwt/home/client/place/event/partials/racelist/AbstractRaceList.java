@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
@@ -34,44 +36,23 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     protected final SortableRaceListColumn<T, ?> windDirectionColumn = RaceListColumnFactory.getWindDirectionColumn();
     protected final SortableRaceListColumn<T, ?> raceViewerButtonColumn;
     
-    private SortedCellTable<T> cellTable;
+    private SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
+    private boolean tableColumnsInitialized = false;
     
     protected AbstractRaceList(EventView.Presenter presenter) {
         CSS.ensureInjected();
         this.raceViewerButtonColumn = RaceListColumnFactory.getRaceViewerButtonColumn(presenter);
-        this.cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initWidget(cellTableContainer);
     }
 
-    @SuppressWarnings("unchecked")
     protected void setTableData(Collection<T> data) {
-        if (this.cellTable.getColumnCount() == 0) {
-            this.initTableColumns();
-        }
-        ColumnSortList sortList = this.cellTable.getColumnSortList();
-        List<ColumnSortInfo> oldSortInfos = new ArrayList<ColumnSortList.ColumnSortInfo>(sortList.size());
-        for (int i = sortList.size() - 1; i >= 0; i--) {
-            oldSortInfos.add(sortList.get(i));
-        }
+        this.ensureInitTableColumns();
+        this.updateColumnVisibility();
         this.cellTable.setPageSize(data.size());
-        for (int i = 0; i < this.cellTable.getColumnCount(); i++) {
-            SortableRaceListColumn<T, ?> column = (SortableRaceListColumn<T, ?>) this.cellTable.getColumn(i);
-            column.getHeader().setHeaderStyleNames(column.getCurrentHeaderStyle());
-            column.setCellStyleNames(column.getCurrentColumnStyle());
-        }
         this.cellTable.setList(data);
-        if (!oldSortInfos.isEmpty()) {
-            for (ColumnSortInfo sortInfo : oldSortInfos) {
-                SortableRaceListColumn<T, ?> column = (SortableRaceListColumn<T, ?>) sortInfo.getColumn();
-                if(column.isShowDetails()) {
-                    this.cellTable.sortColumn(column, sortInfo.isAscending());
-                }
-            }
-        } else {
-            this.cellTable.sortColumn(startTimeColumn);
-        }
+        this.restoreColumnSortInfos();
     }
 
     private void initTableStyle() {
@@ -85,16 +66,46 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         });
     }
     
+    private void ensureInitTableColumns() {
+        if (tableColumnsInitialized) return;
+        tableColumnsInitialized = true;
+        this.initTableColumns();
+    }
+    
     protected abstract void initTableColumns();
     
+    private void updateColumnVisibility() {
+        for (int i = 0; i < this.cellTable.getColumnCount(); i++) {
+            SortableRaceListColumn<T, ?> column = (SortableRaceListColumn<T, ?>) this.cellTable.getColumn(i);
+            Header<?> header = column.getHeader();
+            if (header != null) {
+                header.setHeaderStyleNames(column.getCurrentHeaderStyle());
+            }
+            column.setCellStyleNames(column.getCurrentColumnStyle());
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void restoreColumnSortInfos() {
+        ColumnSortList sortList = this.cellTable.getColumnSortList();
+        List<ColumnSortInfo> oldSortInfos;
+        if (sortList.size() == 0) {
+            boolean ascending = startTimeColumn.getPreferredSortingOrder().isAscending();
+            oldSortInfos = Collections.singletonList(new ColumnSortInfo(startTimeColumn, ascending));
+        } else {
+            oldSortInfos = new ArrayList<ColumnSortList.ColumnSortInfo>(sortList.size());
+            for (int i = sortList.size() - 1; i >= 0; i--) {
+                oldSortInfos.add(sortList.get(i));
+            }
+        }
+        for (ColumnSortInfo sortInfo : oldSortInfos) {
+            Column<T, ?> column = (Column<T, ?>) sortInfo.getColumn();
+            this.cellTable.sortColumn(column);
+        }
+    }
+    
     protected void add(SortableRaceListColumn<T, ?> column) {
-        if (column.getColumnStyle() != null) {
-            column.setCellStyleNames(column.getColumnStyle());
-        }
         Header<?> header = column.getHeader();
-        if (header != null && column.getHeaderStyle() != null) {
-            header.setHeaderStyleNames(column.getHeaderStyle());
-        }
         boolean ascending = column.getPreferredSortingOrder().isAscending();
         InvertibleComparator<T> comperator = column.getComparator();
         if (comperator != null) {

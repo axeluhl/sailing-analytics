@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
@@ -17,11 +18,11 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
     private boolean showDetails = true;
 
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
-        this(new TextHeader(headerText), cell, comparator);
+        this(new WrappedTextHeader(headerText), cell, comparator);
     }
     
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
-        this(new TextHeader(headerText), cell, comparator, preferredSortingOrder);
+        this(new WrappedTextHeader(headerText), cell, comparator, preferredSortingOrder);
     }
     
     protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
@@ -71,4 +72,9 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
         return showDetails ? showStyle : getStyleNamesString(showStyle, COLUMN_HIDDEN_STYLE);
     }
     
+    private static class WrappedTextHeader extends SafeHtmlHeader {
+        public WrappedTextHeader(String headerText) {
+            super(SafeHtmlUtils.fromTrustedString("<div>" + headerText + "</div>"));
+        }
+    }
 }
