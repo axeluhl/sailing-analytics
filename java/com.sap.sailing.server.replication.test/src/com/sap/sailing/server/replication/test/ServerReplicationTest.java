@@ -78,8 +78,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testWaypointRemovalReplication() throws InterruptedException {
         final String boatClassName = "49er";
-        // FIXME use master DomainFactory; see bug 592
-        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
+        final DomainFactory masterDomainFactory = testSetUp.getMaster().getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName,

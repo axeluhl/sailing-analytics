@@ -741,7 +741,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportForRaceLogEventsReferencingCompetitors() throws MalformedURLException, IOException,
             InterruptedException, ClassNotFoundException {
         // Setup source service
-        DomainFactory sourceDomainFactory = new DomainFactoryImpl();
+        DomainFactory sourceDomainFactory = new DomainFactoryImpl((srlid)->null);
         RacingEventService sourceService = new RacingEventServiceImpl(
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),

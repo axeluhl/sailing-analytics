@@ -118,7 +118,7 @@ public class LeaderboardCourseChangeTest {
         ThresholdBasedResultDiscardingRule rule = new ThresholdBasedResultDiscardingRuleImpl(ruleRaw);
         Leaderboard leaderboard = new RegattaLeaderboardImpl(mockedRegatta, rule);
         
-        DomainFactory baseDomainFactory = new DomainFactoryImpl();
+        DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
                 trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
 
