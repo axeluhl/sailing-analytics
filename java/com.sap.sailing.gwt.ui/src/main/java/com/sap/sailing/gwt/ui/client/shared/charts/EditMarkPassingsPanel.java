@@ -103,8 +103,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         this.stringMessages = stringMessages;
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
 
-        setVisible(false);
-
         // Waypoint list
         currentWaypoints = new ArrayList<>();
         waypointList = new ListDataProvider<>();
@@ -269,6 +267,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         });
         selectCompetitorLabel.setText(stringMessages.selectCompetitor());
         refreshWaypoints();
+        setVisible(false);
         HorizontalPanel tableAndButtons = new HorizontalPanel();
         add(tableAndButtons, 0, 0);
         tableAndButtons.setSpacing(3);
@@ -283,20 +282,27 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         buttonPanel.add(selectCompetitorLabel);
         enableButtons();
     }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        processCompetitorSelectionChange(visible);
+        super.setVisible(visible);
+        
+    }
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        processCompetitorSelectionChange();
+        processCompetitorSelectionChange(isVisible());
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        processCompetitorSelectionChange();
+        processCompetitorSelectionChange(isVisible());
     }
 
-    private void processCompetitorSelectionChange() {
+    private void processCompetitorSelectionChange(boolean visible) {
             waypointSelectionModel.clear();
-            if (isVisible() && Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+            if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
                 selectCompetitorLabel.setText("");
                 refillList();
             } else {
@@ -309,6 +315,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         waypointList.getList().clear();
         clearInfo();
     }
+    
 
     private void refillList() {
         clearInfo();

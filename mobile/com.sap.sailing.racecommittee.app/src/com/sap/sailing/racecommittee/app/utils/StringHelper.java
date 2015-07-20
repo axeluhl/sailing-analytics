@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.utils;
 
 import android.content.Context;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 
@@ -14,8 +13,7 @@ public class StringHelper {
     }
 
     public static StringHelper on(Context context) {
-        StringHelper helper = new StringHelper(context);
-        return helper;
+        return new StringHelper(context);
     }
 
     public String getAuthor(String author) {
