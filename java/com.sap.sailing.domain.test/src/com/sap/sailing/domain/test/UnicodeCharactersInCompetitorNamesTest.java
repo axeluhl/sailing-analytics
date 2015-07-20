@@ -38,7 +38,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
 
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
     }
     
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, CreateModelException, SubscriberInitializationException {

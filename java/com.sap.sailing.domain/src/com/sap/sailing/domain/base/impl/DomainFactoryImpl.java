@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -67,12 +68,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     /**
      * Uses a transient competitor store
      */
-    public DomainFactoryImpl() {
-        super(new TransientCompetitorStoreImpl());
+    public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
+        super(new TransientCompetitorStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorStore competitorStore) {
-        super(competitorStore);
+    public DomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+        super(competitorStore, raceLogResolver);
     }
 
     @Override
