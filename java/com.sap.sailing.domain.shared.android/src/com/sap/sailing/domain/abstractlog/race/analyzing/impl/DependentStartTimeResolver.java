@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -16,33 +17,37 @@ public class DependentStartTimeResolver {
 
     public DependentStartTimeResolver(RaceLogResolver raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
-
     }
 
     public StartTimeFinderResult resolve(RaceLogDependentStartTimeEvent event) {
-        List<SimpleRaceLogIdentifier> dependingOnRaces = new ArrayList<SimpleRaceLogIdentifier>();
+        List<SimpleRaceLogIdentifier> dependingOnRaces = Collections.emptyList();
         return internalResolve(event, dependingOnRaces);
     }
 
-    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event, Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
+    StartTimeFinderResult internalResolve(RaceLogDependentStartTimeEvent event,Iterable<SimpleRaceLogIdentifier> dependingOnRaces) {
         SimpleRaceLogIdentifier identifier = event.getDependentOnRaceIdentifier();
         Duration startTimeDifference = event.getStartTimeDifference();
         RaceLog raceLog = raceLogResolver.resolve(identifier);
-        List<SimpleRaceLogIdentifier> extendedDependingOnRaces = new ArrayList<>();
-        Util.addAll(dependingOnRaces, extendedDependingOnRaces);
-        extendedDependingOnRaces.add(identifier);
+
         final StartTimeFinderResult result;
-        if (containsCycle(extendedDependingOnRaces)) {
-            result = new StartTimeFinderResult(extendedDependingOnRaces, null);
+        if (raceLog == null) {
+            result = new StartTimeFinderResult(dependingOnRaces, null, startTimeDifference);
         } else {
-            StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
-            StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
-            if (resultOfDependentRace.getStartTime() == null) {
-                result = resultOfDependentRace;
+            List<SimpleRaceLogIdentifier> extendedDependingOnRaces = new ArrayList<>();
+            Util.addAll(dependingOnRaces, extendedDependingOnRaces);
+            extendedDependingOnRaces.add(identifier);
+            if (containsCycle(extendedDependingOnRaces)) {
+                result = new StartTimeFinderResult(extendedDependingOnRaces, null, null);
             } else {
-                result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(),
-                        resultOfDependentRace.getStartTime() == null ? null : resultOfDependentRace.getStartTime()
-                                .plus(startTimeDifference));
+                StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
+                StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
+                if (resultOfDependentRace.getStartTime() == null) {
+                    resultOfDependentRace.setStartTimeDiff(startTimeDifference);
+                    result = resultOfDependentRace;
+                } else {
+                    result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(),
+                            resultOfDependentRace.getStartTime().plus(startTimeDifference), startTimeDifference);
+                }
             }
         }
         return result;

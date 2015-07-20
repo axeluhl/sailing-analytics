@@ -90,6 +90,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         setUp(raceNumber);
+        synchronized (getSemaphor()) {
+            while (!isStoredDataLoaded()) {
+                getSemaphor().wait();
+            }
+        }
         testWholeRace();
         testMiddleOfRace(0);
         testMiddleOfRace(2);

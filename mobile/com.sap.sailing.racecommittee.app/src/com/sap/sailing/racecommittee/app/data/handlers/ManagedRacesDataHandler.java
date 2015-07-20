@@ -24,6 +24,15 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
     @Override
     public void onResult(Collection<ManagedRace> data) {
         manager.addRaces(data);
+        calcRaceState(data);
     }
 
+    private void calcRaceState(Collection<ManagedRace> data) {
+        for (ManagedRace race : data) {
+            race.calculateRaceState();
+        }
+        for (ManagedRace race : data) {
+            race.getState().forceUpdate();
+        }
+    }
 }
