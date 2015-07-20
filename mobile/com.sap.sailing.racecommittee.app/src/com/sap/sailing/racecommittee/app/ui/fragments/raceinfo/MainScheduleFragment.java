@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
@@ -26,7 +25,6 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -35,7 +33,6 @@ import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
@@ -48,7 +45,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     private TextView mStartTimeTextView;
     private String mStartTimeString;
-    private String mRaceId;
+    private SimpleRaceLogIdentifier mRaceId;
     private TimePoint mStartTime;
     private Duration mStartTimeDiff;
     private TextView mWindValue;
@@ -190,7 +187,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
 
         mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
-        mRaceId = (String) getArguments().getSerializable(DEPENDENT_RACE);
+        mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(DEPENDENT_RACE);
 
         if (mRaceId != null && mStartTimeDiff != null) {
             ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
@@ -210,32 +207,32 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-        case R.id.start_course:
-            openFragment(CourseFragment.newInstance(0, getRace()));
-            break;
+            case R.id.start_course:
+                openFragment(CourseFragment.newInstance(0, getRace()));
+                break;
 
-        case R.id.start_mode:
-            openFragment(StartModeFragment.newInstance(0));
-            break;
+            case R.id.start_mode:
+                openFragment(StartModeFragment.newInstance(0));
+                break;
 
-        case R.id.start_procedure:
-            openFragment(StartProcedureFragment.newInstance(0));
-            break;
+            case R.id.start_procedure:
+                openFragment(StartProcedureFragment.newInstance(0));
+                break;
 
-        case R.id.start_race:
-            startRace();
-            break;
+            case R.id.start_race:
+                startRace();
+                break;
 
-        case R.id.start_time:
-            openFragment(StartTimeFragment.newInstance(getArguments()));
-            break;
+            case R.id.start_time:
+                openFragment(StartTimeFragment.newInstance(getArguments()));
+                break;
 
-        case R.id.wind:
-            openFragment(WindFragment.newInstance(0));
-            break;
+            case R.id.wind:
+                openFragment(WindFragment.newInstance(0));
+                break;
 
-        default:
-            ExLog.i(getActivity(), TAG, "Clicked on " + v);
+            default:
+                ExLog.i(getActivity(), TAG, "Clicked on " + v);
         }
     }
 
@@ -251,9 +248,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         if (mStartTimeDiff == null && mRaceId == null) {
             getRaceState().forceNewStartTime(now, mStartTime);
         } else {
-            Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(mRaceId);
-            SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
-            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, identifier);
+            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId);
         }
         if (procedure != null) {
             procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
