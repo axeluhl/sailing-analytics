@@ -14,8 +14,6 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
@@ -27,7 +25,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
     private int mLayout;
     private int mSelectedItem = -1;
 
-    private ArrayList<RaceData> mData;
+    private ArrayList<String> mData;
 
     public DependentRaceSpinnerAdapter(Context context, @LayoutRes int layout) {
         mContext = context;
@@ -44,37 +42,17 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
         TextView mainText = ViewHolder.get(layout, android.R.id.text1);
         if (mainText != null) {
-            mainText.setText(mData.get(position).getMainText());
+            mainText.setText(mData.get(position));
         }
 
-        TextView subTextView = ViewHolder.get(layout, android.R.id.text2);
-        String subText = mData.get(position).getSubText();
-        if (subTextView != null) {
-            if (getItemViewType(position) == HEADER) {
-                layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_20));
-                if (subText != null) {
-                    subTextView.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
-                    subTextView.setText(subText);
-                    subTextView.setVisibility(View.VISIBLE);
-                } else {
-                    subTextView.setVisibility(View.GONE);
-                }
-                layout.setClickable(true);
-                if (mainText != null) {
-                    mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
-                }
-            } else {
-                if (mSelectedItem == position) {
-                    layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
-                } else {
-                    layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
-                }
-                subTextView.setVisibility(View.GONE);
-                layout.setClickable(false);
-                if (mainText != null) {
-                    mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.white));
-                }
-            }
+        if (mSelectedItem == position) {
+            layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
+        } else {
+            layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+        }
+        layout.setClickable(false);
+        if (mainText != null) {
+            mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.white));
         }
 
         return layout;
@@ -96,8 +74,8 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
-        return position;
+    public String getItem(int position) {
+        return mData.get(position);
     }
 
     @Override
@@ -118,16 +96,8 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         }
 
         TextView text = ViewHolder.get(layout, android.R.id.text1);
-        if (text != null && position < mData.size() && mData.get(position).getRace() != null) {
-            String raceName = mData.get(position).getRace().getName();
-            String additional = RaceHelper.getFleetSeries(mData.get(position).getRace());
-            if (!TextUtils.isEmpty(additional)) {
-                additional += " - ";
-            }
-            additional += RaceHelper.getRaceGroupName(mData.get(position).getRace());
-            if (!TextUtils.isEmpty(additional)) {
-                raceName += " (" + additional + ")";
-            }
+        if (text != null && position < mData.size() && !TextUtils.isEmpty(mData.get(position))) {
+            String raceName = mData.get(position);
             text.setText(raceName);
         }
 
@@ -136,9 +106,6 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (mData.get(position).getRace() == null) {
-            return HEADER;
-        }
         return DATA;
     }
 
@@ -152,39 +119,17 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         return (mData.size() == 0);
     }
 
-    public void add(RaceData data) {
+    public void add(String data) {
         mData.add(data);
+    }
+
+    public void addUnique(String data) {
+        if (!mData.contains(data)) {
+            mData.add(data);
+        }
     }
 
     public void setSelected(int position) {
         mSelectedItem = position;
-    }
-
-    public ManagedRace getRaceAtPosition(int position) {
-        return mData.get(position).getRace();
-    }
-
-    public static class RaceData {
-        private String mText1;
-        private String mText2;
-        private ManagedRace mRace;
-
-        public RaceData(String mainText, String subText, ManagedRace race) {
-            mText1 = mainText;
-            mText2 = subText;
-            mRace = race;
-        }
-
-        public String getMainText() {
-            return mText1;
-        }
-
-        public String getSubText() {
-            return mText2;
-        }
-
-        public ManagedRace getRace() {
-            return mRace;
-        }
     }
 }
