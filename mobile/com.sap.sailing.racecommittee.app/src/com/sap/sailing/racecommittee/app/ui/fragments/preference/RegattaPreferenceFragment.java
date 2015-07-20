@@ -105,6 +105,7 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
     private void setupGeneral() {
         setupRacingProcedureTypePreference();
         setupCourseDesignerTypePreference();
+        setupDependentRacesPreference();
     }
 
     private void setupRacingProcedureTypePreference() {
@@ -137,6 +138,10 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         preference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
 
         bindPreferenceSummaryToValue(preference);
+    }
+
+    private void setupDependentRacesPreference() {
+        bindPreferenceSummaryToInteger(findPreference(R.string.preference_dependent_races_offset_key));
     }
 
     private void setupRRS26StartmodeFlagsList() {

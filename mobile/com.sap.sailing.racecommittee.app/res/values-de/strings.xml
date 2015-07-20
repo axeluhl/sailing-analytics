@@ -300,7 +300,7 @@
     <string name="time_down">Runter in #TIME#</string>
     <string name="time_up">Hoch in #TIME#</string>
     <string name="time_finish">Ende N/A</string>
-    <string name="time_start">Start #TIME#</string>
+    <string name="time_start">Start %s</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Signal setzen</string>
     <string name="flag_ap_desc">Rennen verschieben</string>
@@ -323,13 +323,13 @@
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden!</string>
     <string name="race_set_time">Zeit setzen</string>
-    <string name="race_start_time_in">-#TIME#</string>
-    <string name="race_start_time_ago">#TIME#</string>
+    <string name="race_start_time_in">-%s</string>
+    <string name="race_start_time_ago">%s</string>
     <string name="tomorrow">Morgen</string>
     <string name="race_begin_finish_header">Beginn des Zieleinlaufs</string>
     <string name="race_begin_finish_current">Aktuelle Zeit verwenden</string>
     <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
-    <string name="wind_sensor"><![CDATA[um #AT# / von #FROM#° / #SPEED# kn]]></string>
+    <string name="wind_sensor"><![CDATA[um %1$s / von %2$.0f° / %3$.1f kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
     <string name="wind_panel"><![CDATA[von %1$.0f°\n%2$.1f kn]]></string>
     <string name="settings_category_developer">Entwickler Optionen</string>
@@ -372,7 +372,7 @@
     <string name="delete_file_title">Datei löschen</string>
     <string name="degrees">Grad</string>
     <string name="start_time">Startzeit</string>
-    <string name="start_time_value">Um #TIME# in #COUNTDOWN#</string>
+    <string name="start_time_value">Um %1$s in %2$s</string>
 
     <!--Extracted locales -->
     <string name="selected_course_area_lost">Die ausgewählte Kursumgebung ist nicht mehr verfügbar.</string>
@@ -419,13 +419,27 @@
     <string name="change_cancel">Abbrechen</string>
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>
-    <string name="send_mail">Sende Email...</string>
+    <string name="send_mail">Sende Email…</string>
 
     <string name="data_reload_title">Daten wurden extern verändert</string>
     <string name="data_reload_message">Daten müssen neu geladen werden. Eventueller Datenverlust ist möglich.</string>
+    <string name="preference_allow_dependent_races_header">Relative Startzeit</string>
+    <string name="preference_allow_dependent_races_description">Aktiviert relative Startzeiten zwischen Rennen</string>
+    <string name="preference_dependent_races_offset_header">Standard Offset der relativen Startzeit (Minuten)</string>
     <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
+    <string name="wind_map_button_show">Windkarte</string>
+    <string name="wind_map_button_hide">Schließen</string>
+    <string name="wind_latitude">Breite</string>
+    <string name="wind_longitude">Länge</string>
+    <string name="wind_accuracy">Genauigkeit</string>
+    <string name="dependent_races_absolute">Absolute Startzeit</string>
+    <string name="dependent_races_relative">Relative Startzeit</string>
+    <string name="dependent_races_prompt">Bitte Rennen auswählen</string>
+    <string name="minutes_after">Minuten nach</string>
+    <string name="minutes_after_long">%1$.0f Minuten nach %2$s</string>
+    <string name="wind_accuracy_ago">alt</string>
 
 </resources>

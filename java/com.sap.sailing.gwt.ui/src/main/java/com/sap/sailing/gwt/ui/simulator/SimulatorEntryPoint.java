@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.resources.Highcharts;
 
 public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
 
@@ -45,6 +46,7 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
 
     @Override
     protected void doOnModuleLoad() {
+        Highcharts.ensureInjectedWithExport();
     	super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
     	checkUrlParameters();

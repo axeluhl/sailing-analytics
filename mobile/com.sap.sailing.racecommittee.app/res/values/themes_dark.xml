@@ -7,6 +7,7 @@
     <style name="AppTheme.Dark.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
+        <item name="android:tabWidgetStyle">@style/AppTheme.Dark.TabWidget</item>
 
         <item name="colorPrimary">@color/dark_colorPrimary</item>
         <item name="colorPrimaryDark">@color/dark_colorPrimaryDark</item>
@@ -34,6 +35,7 @@
         <item name="buttonSolidXSmall">@style/AppTheme.Dark.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Dark.Button.Normal</item>
+        <item name="text">@style/AppTheme.Dark.Text</item>
         <item name="textXXSmall">@style/AppTheme.Dark.Text.XXSmall</item>
         <item name="textXSmall">@style/AppTheme.Dark.Text.XSmall</item>
         <item name="textSmall">@style/AppTheme.Dark.Text.Small</item>
@@ -67,6 +69,7 @@
         <item name="course_updown_64dp">@drawable/course_updown_64dp_dark</item>
         <item name="dns_48dp">@drawable/ic_dns_white_48dp</item>
         <item name="hearing_48dp">@drawable/ic_hearing_white_48dp</item>
+        <item name="link_24dp">@drawable/ic_link_white_24dp</item>
         <item name="lock_outline">@drawable/lock_outline_dark</item>
         <item name="marker">@drawable/marker_dark</item>
         <item name="marker_race">@drawable/marker_race_dark</item>
@@ -77,6 +80,7 @@
         <item name="swipe_idle">@drawable/swipe_idle_dark</item>
         <item name="swipe_left">@drawable/swipe_left_dark</item>
         <item name="swipe_right">@drawable/swipe_right_dark</item>
+        <item name="tab_widget">@drawable/tabwidget_dark</item>
         <item name="value_next">@drawable/value_next_dark</item>
         <item name="value_prev">@drawable/value_prev_dark</item>
         <item name="wind_off">@drawable/wind_off_dark</item>
@@ -169,6 +173,15 @@
     <style name="AppTheme.Dark.Text.PanelCaption">
         <item name="android:textSize">@dimen/textSize_22</item>
         <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="AppTheme.Dark.TabWidget" parent="@android:style/Widget.TabWidget">
+        <item name="android:textAppearance">@style/AppTheme.Light.TabWidgetText</item>
+    </style>
+
+    <style name="AppTheme.Dark.TabWidgetText" parent="@android:style/TextAppearance.Widget.TabWidget">
+        <item name="android:textSize">@dimen/textSize_32</item>
+        <item name="android:textColor">?white</item>
     </style>
 
 </resources>
