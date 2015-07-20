@@ -19,11 +19,11 @@ public class BaseFragment extends RaceFragment {
     public void replaceFragment(RaceFragment fragment, @IdRes int viewId) {
         if (fragment.getArguments() == null) {
             fragment.setArguments(getRecentArguments());
-            if (getArguments() != null) {
-                fragment.getArguments().putAll(getArguments());
-            }
         } else {
             fragment.getArguments().putAll(getRecentArguments());
+        }
+        if (getArguments() != null) {
+            fragment.getArguments().putAll(getArguments());
         }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(viewId, fragment).commit();
