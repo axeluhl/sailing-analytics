@@ -39,6 +39,7 @@
     <string name="label_login_position">Position</string>
     <string name="login_type_viewer">Im Demo-Modus anmelden</string>
     <string name="racelist_unscheduled">Noch nicht geplant</string>
+    <string name="racelist_prescheduled">Geplant für %s</string>
     <string name="racelist_scheduled">Geplant für %s</string>
     <string name="racelist_startphase">Start um %s läuft</string>
     <string name="racelist_running">Gestartet um %s</string>

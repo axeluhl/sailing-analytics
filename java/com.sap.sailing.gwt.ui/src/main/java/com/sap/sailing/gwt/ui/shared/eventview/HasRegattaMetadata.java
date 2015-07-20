@@ -26,8 +26,6 @@ public interface HasRegattaMetadata {
 
     int getCompetitorsCount();
 
-    int getTrackedRacesCount();
-
     String getBoatClass();
     
     String getBoatCategory();

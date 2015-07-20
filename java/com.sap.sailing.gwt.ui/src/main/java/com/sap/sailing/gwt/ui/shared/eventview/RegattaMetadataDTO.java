@@ -6,7 +6,6 @@ import java.util.Date;
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
     private int raceCount;
     private int competitorsCount;
-    private int trackedRacesCount;
     private String boatClass;
     private String boatCategory;
     private String defaultCourseAreaName;
@@ -37,15 +36,6 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setCompetitorsCount(int competitorsCount) {
         this.competitorsCount = competitorsCount;
-    }
-
-    @Override
-    public int getTrackedRacesCount() {
-        return trackedRacesCount;
-    }
-
-    public void setTrackedRacesCount(int trackedRacesCount) {
-        this.trackedRacesCount = trackedRacesCount;
     }
 
     @Override
