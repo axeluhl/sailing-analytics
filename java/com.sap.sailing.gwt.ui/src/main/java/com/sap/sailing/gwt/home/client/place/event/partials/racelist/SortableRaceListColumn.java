@@ -5,6 +5,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.common.Util;
 
@@ -54,4 +55,20 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
     protected final String getStyleNamesString(String... styleNames) {
         return Util.join(" ", styleNames);
     }
+    
+    private static final String COLUMN_HIDDEN_STYLE = RacesListLiveResources.INSTANCE.css().racesListHideColumn();
+    
+    protected final String getCurrentHeaderStyle() {
+        return getShowOrHiddenStyle(getHeaderStyle());
+    }
+    
+    protected final String getCurrentColumnStyle() {
+        return getShowOrHiddenStyle(getColumnStyle());
+    }
+    
+    private String getShowOrHiddenStyle(String showStyle) {
+        showStyle = showStyle == null ? "" : showStyle;
+        return showDetails ? showStyle : getStyleNamesString(showStyle, COLUMN_HIDDEN_STYLE);
+    }
+    
 }

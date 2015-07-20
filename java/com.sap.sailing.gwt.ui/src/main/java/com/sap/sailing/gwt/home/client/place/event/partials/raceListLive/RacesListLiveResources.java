@@ -49,5 +49,6 @@ public interface RacesListLiveResources extends ClientBundle {
         String raceslistlive();
 
         String racesListIcon();
+        String racesListHideColumn();
     }
 }
