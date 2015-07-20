@@ -106,6 +106,7 @@ public class LeaderboardContext {
     }
     
     public RegattaState calculateRegattaState() {
+        // First using event state -> fast and ensures that all regattas are marked as finished after the event is finished
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         if(eventState == EventState.FINISHED) {
             return RegattaState.FINISHED;
@@ -114,15 +115,18 @@ public class LeaderboardContext {
             return RegattaState.UPCOMING;
         }
         
+        // Using regatta start and end -> fast calculation of upcoming and finished states but not helpful to
+        // distinguish between live and progress
         TimePoint startDate = getStartTimePoint();
-        TimePoint endDate = getEndTimePoint();
-        if(startDate != null && now.compareTo(startDate) < 0) {
+        if(startDate != null && now.before(startDate)) {
             return RegattaState.UPCOMING;
         }
-        if(endDate != null && now.compareTo(endDate) > 0) {
+        TimePoint endDate = getEndTimePoint();
+        if(endDate != null && now.after(endDate)) {
             return RegattaState.FINISHED;
         }
         
+        // Using the race states to calculate the real state for running events/regattas
         OverallRacesStateCalculator racesStateCalculator = new OverallRacesStateCalculator();
         forRaces(racesStateCalculator);
         if(racesStateCalculator.hasLiveRace()) {
