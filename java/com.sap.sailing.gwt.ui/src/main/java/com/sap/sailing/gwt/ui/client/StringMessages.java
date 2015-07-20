@@ -1050,6 +1050,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String ratio();
     String importWind();
     String importWindTooltip();
+    String importDeviceConfigurations();
+    String importDeviceConfigurationsTooltip();
     String authorName();
     String authorPriority();
     String removeDenotation();
