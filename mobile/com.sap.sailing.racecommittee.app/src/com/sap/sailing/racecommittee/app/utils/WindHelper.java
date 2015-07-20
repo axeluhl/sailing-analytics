@@ -83,8 +83,7 @@ public class WindHelper {
                 boolean matchingFleetName = fleetName != null && fleetName.equals(triple.getC());
                 boolean matchingRaceName = raceName != null && raceName.equals(race.getRaceName());
                 if (matchingLeaderboardName && matchingFleetName && matchingRaceName){
-                    String trackedRaceId = raceState.getString("trackedRaceId");
-                    if (trackedRaceId != null){
+                    if (!raceState.isNull("trackedRaceId")){
                         isTracked = true;
                         break;
                     }
