@@ -61,10 +61,10 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
-import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
@@ -5585,45 +5585,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PolarSheetsXYDiagramData createXYDiagramForBoatClass(String boatClassName) {
         BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> movingAverageSpeedDataLists = new HashMap<>();
         Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> regressionSpeedDataLists = new HashMap<>();
-        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> averageConfidenceDataLists = new HashMap<>();
         for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
             for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                movingAverageSpeedDataLists.put(new Pair<LegType, Tack>(legType, tack),
-                        new ArrayList<Pair<Double, Double>>());
                 regressionSpeedDataLists.put(new Pair<LegType, Tack>(legType, tack),
-                        new ArrayList<Pair<Double, Double>>());
-                averageConfidenceDataLists.put(new Pair<LegType, Tack>(legType, tack),
                         new ArrayList<Pair<Double, Double>>());
             }
         }
         for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
             for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
-                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-
-                    try {
-                        SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
-                                .getPolarDataService().getAverageSpeedWithBearing(boatClass,
-                                        new KnotSpeedImpl(windInKnots), legType, tack, false);
-
-                        movingAverageSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
-                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage.getObject()
-                                        .getKnots()));
-                        
-
-                        averageConfidenceDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
-                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage
-                                        .getConfidence()));
-                        
-                    } catch (NotEnoughDataHasBeenAddedException e) {
-                        // Do not add a point to the result
-                    }
-                    
+                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {     
                     try {
                         SpeedWithBearingWithConfidence<Void> averageUpwindStarboardRegression = getService()
                                 .getPolarDataService().getAverageSpeedWithBearing(boatClass,
-                                        new KnotSpeedImpl(windInKnots), legType, tack, true);
+                                        new KnotSpeedImpl(windInKnots), legType, tack);
 
                         regressionSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
                                 new Pair<Double, Double>(windInKnots, averageUpwindStarboardRegression.getObject()
@@ -5635,8 +5610,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
 
-        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(movingAverageSpeedDataLists,
-                regressionSpeedDataLists, averageConfidenceDataLists);
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(regressionSpeedDataLists);
 
         return data;
     }

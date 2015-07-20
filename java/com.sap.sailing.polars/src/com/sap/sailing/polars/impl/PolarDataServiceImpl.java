@@ -33,7 +33,6 @@ import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
-import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -46,9 +45,7 @@ import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
-import com.sap.sailing.polars.mining.MovingAverageProcessorImpl;
 import com.sap.sailing.polars.mining.PolarDataMiner;
-import com.sap.sailing.polars.mining.SpeedClusterGroupFromWindSteppingCreator;
 import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -91,15 +88,11 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
     public PolarDataServiceImpl() {
         PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
-        WindSpeedSteppingWithMaxDistance stepping = settings.getWindSpeedStepping();
-        final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
-                .createSpeedClusterGroupFrom(stepping);
-        MovingAverageProcessorImpl movingAverageProcessor = new MovingAverageProcessorImpl(speedClusterGroup);
         CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
         SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(
                 angleClusterGroup);
-        this.polarDataMiner = new PolarDataMiner(settings, movingAverageProcessor, cubicRegressionPerCourseProcessor,
-                speedRegressionPerAngleClusterProcessor, speedClusterGroup, angleClusterGroup);
+        this.polarDataMiner = new PolarDataMiner(settings, cubicRegressionPerCourseProcessor,
+                speedRegressionPerAngleClusterProcessor, angleClusterGroup);
         this.operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
@@ -124,12 +117,12 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
-            LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
         if (polarDataMiner == null) {
             throw new NotEnoughDataHasBeenAddedException("Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
         }
         SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround = polarDataMiner
-                .getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, useRegressionForSpeed);
+                .getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType);
         if (tack == Tack.PORT) {
             //Negative twa
             DegreeBearingImpl bearing = new DegreeBearingImpl(-averageSpeedAndCourseOverGround.getObject().getBearing()
@@ -251,17 +244,11 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
         if (polarDataMiner == null) {
             throw new NotEnoughDataHasBeenAddedException("Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
         }
-        SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, true);
+        SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType);
         Bearing bearing = new DegreeBearingImpl(speed.getObject().getBearing().getDegrees() * 2);
         BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing, speed.getConfidence(),
                 null);
         return bearingWithConfidence;
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
-            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, true);
     }
 
     @Override
@@ -331,19 +318,13 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
     public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
             InterruptedException {
         PolarSheetGenerationSettings backendPolarSettings = (PolarSheetGenerationSettings) is.readObject();
-        //MovingAverageProcessor movingAverageProcessor = (MovingAverageProcessor) is.readObject();
-        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
-        WindSpeedSteppingWithMaxDistance stepping = settings.getWindSpeedStepping();
-        final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
-                .createSpeedClusterGroupFrom(stepping);
-        MovingAverageProcessorImpl movingAverageProcessor = new MovingAverageProcessorImpl(speedClusterGroup);
         
         CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = (CubicRegressionPerCourseProcessor) is.readObject();
         SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = (SpeedRegressionPerAngleClusterProcessor) is.readObject();
 
-        polarDataMiner = new PolarDataMiner(backendPolarSettings, movingAverageProcessor,
+        polarDataMiner = new PolarDataMiner(backendPolarSettings,
                 cubicRegressionPerCourseProcessor, speedRegressionPerAngleClusterProcessor,
-                movingAverageProcessor.getSpeedCluster(), speedRegressionPerAngleClusterProcessor.getAngleCluster());
+                speedRegressionPerAngleClusterProcessor.getAngleCluster());
     }
 
     @Override

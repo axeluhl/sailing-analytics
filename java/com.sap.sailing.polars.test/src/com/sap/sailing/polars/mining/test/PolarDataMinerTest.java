@@ -32,7 +32,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -52,9 +51,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
-import com.sap.sailing.polars.mining.MovingAverageProcessorImpl;
 import com.sap.sailing.polars.mining.PolarDataMiner;
-import com.sap.sailing.polars.mining.SpeedClusterGroupFromWindSteppingCreator;
 import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -91,12 +88,9 @@ public class PolarDataMinerTest {
             NotEnoughDataHasBeenAddedException {
         PolarSheetGenerationSettings settings = createTestPolarSettings();
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
-        WindSpeedSteppingWithMaxDistance stepping = settings.getWindSpeedStepping();
-        final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
-                .createSpeedClusterGroupFrom(stepping);
-        PolarDataMiner miner = new PolarDataMiner(settings, new MovingAverageProcessorImpl(speedClusterGroup),
+        PolarDataMiner miner = new PolarDataMiner(settings,
                 new CubicRegressionPerCourseProcessor(),
-                new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup), speedClusterGroup, angleClusterGroup);
+                new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup), angleClusterGroup);
 
         BoatClass mockedBoatClass = mock(BoatClass.class);
         
