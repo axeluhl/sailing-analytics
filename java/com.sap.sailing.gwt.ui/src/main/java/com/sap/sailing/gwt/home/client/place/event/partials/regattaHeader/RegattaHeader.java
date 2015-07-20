@@ -19,9 +19,9 @@ public class RegattaHeader extends Composite {
     @UiField AnchorElement headerBodyUi;
     @UiField AnchorElement headerArrowUi;
 
-    public RegattaHeader(RegattaMetadataDTO regattaMetadata) {
+    public RegattaHeader(RegattaMetadataDTO regattaMetadata, boolean showStateMarker) {
         initWidget(uiBinder.createAndBindUi(this));
-        headerBodyUi.appendChild(new RegattaHeaderBody(regattaMetadata).getElement());
+        headerBodyUi.appendChild(new RegattaHeaderBody(regattaMetadata, showStateMarker).getElement());
     }
     
     public void setRegattaNavigation(PlaceNavigation<?> placeNavigation) {

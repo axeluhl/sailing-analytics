@@ -133,7 +133,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
                 @Override
                 public void setData(RegattaWithProgressDTO data) {
-                    regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data));
+                    regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
                 }
             }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             refreshManager.add(raceListContainerUi, new GetFinishedRacesAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
