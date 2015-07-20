@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -17,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
 public class RefreshManager {
+    private static final Logger LOG = Logger.getLogger(RefreshManager.class.getName());
 
     private static final long PAUSE_ON_ERROR = 1000 * 30;
     private List<RefreshHolder<DTO, Action<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
@@ -68,7 +71,11 @@ public class RefreshManager {
                     public void onSuccess(ResultWithTTL<DTO> result) {
                         refreshable.callRunning = false;
                         refreshable.timeout = System.currentTimeMillis() + result.getTtl();
-                        refreshable.widget.setData(result.getDto(), refreshable.timeout, updateNo);
+                        try {
+                            refreshable.widget.setData(result.getDto(), refreshable.timeout, updateNo);
+                        } catch(Throwable error) {
+                            LOG.log(Level.SEVERE, "Error while refreshing content.", error);
+                        }
                         reschedule();
                     }
                 });
