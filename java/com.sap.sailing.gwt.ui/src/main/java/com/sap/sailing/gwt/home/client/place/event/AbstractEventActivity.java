@@ -325,9 +325,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             if(ctx.getRegatta().getState() == RegattaState.RUNNING) {
                 return true;
             }
-            if(ctx.getRegatta().getState() != RegattaState.UNKNOWN) {
-                return false;
-            }
         }
         return ctx.getEventDTO().getState() == EventState.RUNNING;
     }
