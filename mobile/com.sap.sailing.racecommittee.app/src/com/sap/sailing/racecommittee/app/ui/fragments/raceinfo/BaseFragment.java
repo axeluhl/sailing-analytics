@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.FragmentTransaction;
 import android.support.annotation.IdRes;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
@@ -18,6 +19,9 @@ public class BaseFragment extends RaceFragment {
     public void replaceFragment(RaceFragment fragment, @IdRes int viewId) {
         if (fragment.getArguments() == null) {
             fragment.setArguments(getRecentArguments());
+            if (getArguments() != null) {
+                fragment.getArguments().putAll(getArguments());
+            }
         } else {
             fragment.getArguments().putAll(getRecentArguments());
         }
