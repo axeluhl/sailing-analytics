@@ -152,8 +152,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     private class MultiregattaOverviewRegattasTabViewRegattaFilterList implements 
             DropdownFilterList<String>, RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
         @Override
-        public void setData(SortedSetResult<RegattaWithProgressDTO> data, long nextUpdate, int updateNo) {
-            regattaListUi.setData(data, nextUpdate, updateNo);
+        public void setData(SortedSetResult<RegattaWithProgressDTO> data) {
+            regattaListUi.setData(data);
             boatCategoryFilterUi.updateFilterValues();
         }
         @Override
