@@ -49,6 +49,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -111,8 +112,9 @@ public class OnlineDataManager extends DataManager {
 
                 // ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
-                return new OnlineDataLoader<Collection<EventBase>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/events"), parser, handler);
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/events", new String[0], new Object[0]);
+                return new OnlineDataLoader<Collection<EventBase>>(context,
+                    url, parser, handler);
             }
         }, getContext());
     }
@@ -166,10 +168,11 @@ public class OnlineDataManager extends DataManager {
                         globalConfiguration, RaceGroupDeserializer.create(domainFactory,
                                 RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/racegroups?" + RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "="
-                        + courseAreaId.toString() + "&" + RaceLogServletConstants.PARAMS_CLIENT_UUID + "="
-                        + MessageSendingService.uuid), parser, handler);
+
+                Object[] params = {RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, RaceLogServletConstants.PARAMS_CLIENT_UUID};
+                Object[] values = {courseAreaId.toString(), MessageSendingService.uuid};
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups",params, values);
+                return new OnlineDataLoader<Collection<ManagedRace>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -191,10 +194,12 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                return new OnlineDataLoader<Collection<Mark>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/marks?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                        + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                Object[] params = {RaceLogServletConstants.PARAMS_LEADERBOARD_NAME,
+                    RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME,
+                    RaceLogServletConstants.PARAMS_RACE_FLEET_NAME};
+                Object[] values = {raceGroupName, raceColumnName, fleetName};
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/marks", params, values);
+                return new OnlineDataLoader<Collection<Mark>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -218,10 +223,13 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                return new OnlineDataLoader<CourseBase>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                        + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                Object[] params = {RaceLogServletConstants.PARAMS_LEADERBOARD_NAME,
+                    RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME,
+                    RaceLogServletConstants.PARAMS_RACE_FLEET_NAME};
+                Object[] values = {raceGroupName, raceColumnName, fleetName};
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/currentcourse", params, values);
+
+                return new OnlineDataLoader<CourseBase>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -247,10 +255,12 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/competitors?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                        + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                Object[] params = {RaceLogServletConstants.PARAMS_LEADERBOARD_NAME,
+                    RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME,
+                    RaceLogServletConstants.PARAMS_RACE_FLEET_NAME};
+                Object[] values = {raceGroupName, raceColumnName, fleetName};
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params, values);
+                return new OnlineDataLoader<Collection<Competitor>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -270,8 +280,11 @@ public class OnlineDataManager extends DataManager {
                 String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), MessageSendingService.charsetName);
                 encodedIdentifier = encodedIdentifier.replace("+", "%20");
 
-                return new OnlineDataLoader<DeviceConfiguration>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/configuration?client=" + encodedIdentifier), parser, handler);
+                Object[] params = {"client"};
+                Object[] values = {encodedIdentifier};
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params, values);
+                return new OnlineDataLoader<DeviceConfiguration>(context,
+                    url, parser, handler);
             }
         }, getContext());
     }

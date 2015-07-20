@@ -1,12 +1,11 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.net.MalformedURLException;
+import java.util.*;
 
+import android.content.Context;
+import android.util.Log;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -17,14 +16,18 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
+    private static String TAG = InMemoryDataStore.class.getName();
     private HashMap<Serializable, EventBase> eventsById;
     private HashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
@@ -170,7 +173,7 @@ public enum InMemoryDataStore implements DataStore {
      * order to allow for retrieving a managed race with exclusively the information provided by a 
      * SimpleRaceLogIdentifier (which is less than the information provided by a ManagedRaceIdentifier)
      *  
-     * @param id
+     * @param escapedId
      *          serialized version of a ManagedRaceIdentifier 
      * @return
      *          corresponding SimpleRaceLogIdentifier
@@ -260,4 +263,21 @@ public enum InMemoryDataStore implements DataStore {
     public void setCourseUUID(UUID uuid) {
         courseUUID = uuid;
     }
+
+    @Override
+    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
+        String url = "";
+        // get simple race log identifier
+        Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
+        SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
+        Object [] params = {"regattaLikeName", "raceColumnName", "fleetName", "eventId", "viewShowWindChart", "viewShowStreamlets", "viewShowSimulation", "viewShowMapControls"};
+        Object [] values = {identifier.getRegattaLikeParentName(), identifier.getRaceColumnName(), identifier.getFleetName(), eventId, showWindCharts, showStreamlets, showSimulation, showMapControls};
+        try {
+            url = UrlHelper.generateUrl(baseUrl, AppConstants.GWT_MAP_AND_WIND_CHART_HTML, params, values).toString();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "An error occured while generating the map url: " + e.getMessage());
+        }
+        return url;
+    }
+
 }

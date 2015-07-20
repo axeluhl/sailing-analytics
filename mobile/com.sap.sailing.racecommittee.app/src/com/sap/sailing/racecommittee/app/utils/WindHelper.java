@@ -6,12 +6,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.util.NetworkHelper;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sse.common.Util;
@@ -24,19 +23,12 @@ import java.net.URL;
 
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
-    private final static String GWT_MAP_AND_WIND_CHART_HTML = "gwt/EmbeddedMapAndWindChart.html";
 
     public static void isTrackedRace(final Context context, final ManagedRace race){
         try {
             Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
-            StringBuilder builder = new StringBuilder();
-            builder.append(getBaseUrl(context));
-            builder.append("/sailingserver/api/v1/events/");
-            builder.append(getEventId(context));
-            builder.append("/racestates");
-            builder.append("?filterByLeaderboard=" + triple.getA());
-
-            URL serverUrl = new URL(builder.toString());
+            String path = "/sailingserver/api/v1/events/"+ getEventId(context) + "/racestates";
+            URL serverUrl = UrlHelper.generateUrl(getBaseUrl(context), path, new Object[]{"filterByLeaderboard"}, new  Object[]{triple.getA()});
 
             HttpGetRequest request = new HttpGetRequest(serverUrl, context);
             NetworkHelper.getInstance(context).executeHttpJsonRequestAsnchronously(request, new NetworkHelper.NetworkHelperSuccessListener() {
@@ -97,22 +89,7 @@ public class WindHelper {
     }
 
     public static String generateMapURL(Context context, ManagedRace race ,boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls){
-        StringBuilder builder = new StringBuilder();
-
-        // get simple race log identifier
-        Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
-        SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
-
-        builder.append(getBaseUrl(context));
-        builder.append(GWT_MAP_AND_WIND_CHART_HTML);
-        builder.append("?regattaLikeName=" + identifier.getRegattaLikeParentName());
-        builder.append("&raceColumnName=" + identifier.getRaceColumnName());
-        builder.append("&fleetName=" + identifier.getFleetName());
-        builder.append("&eventId=" + getEventId(context));
-        builder.append("&viewShowWindChart=" + showWindCharts);
-        builder.append("&viewShowStreamlets=" + showStreamlets);
-        builder.append("&viewShowSimulation=" + showSimulation);
-        builder.append("&viewShowMapControls=" + showMapControls);
-        return builder.toString();
+        DataStore dataStore = OnlineDataManager.create(context).getDataStore();
+        return dataStore.getMapUrl(AppPreferences.on(context).getServerBaseURL(), race, getEventId(context), showWindCharts, showStreamlets, showSimulation, showMapControls);
     }
 }
