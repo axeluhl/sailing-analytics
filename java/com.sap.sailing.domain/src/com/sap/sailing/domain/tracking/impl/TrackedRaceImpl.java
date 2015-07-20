@@ -1024,14 +1024,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
                     // competitor has finished race at or before the requested time point; use time point of crossing the finish line
                     end = markPassings.last().getTimePoint();
-                } else if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
-                        (!trackedLegOfCompetitor.hasFinishedLeg(getEndOfTracking())
-                        && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
-                                || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
-                    // If the race is no longer tracking and hence no more data can be expected, and the competitor
-                    // hasn't finished a leg after the requested time point, no valid distance traveled can be determined
-                    // for the competitor in this race the the time point requested
-                    end = null;
+                } else {
+                    final TimePoint endOfTracking = getEndOfTracking();
+                    if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
+                            (!trackedLegOfCompetitor.hasFinishedLeg(endOfTracking)
+                            && ((endOfTracking != null && timePoint.after(endOfTracking))
+                                    || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
+                        // If the race is no longer tracking and hence no more data can be expected, and the competitor
+                        // hasn't finished a leg after the requested time point, no valid distance traveled can be determined
+                        // for the competitor in this race the the time point requested
+                        end = null;
+                    }
                 }
                 if (end == null) {
                     result = null;

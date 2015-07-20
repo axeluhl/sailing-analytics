@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
