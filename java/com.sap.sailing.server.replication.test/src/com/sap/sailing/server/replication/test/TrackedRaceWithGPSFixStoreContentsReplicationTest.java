@@ -75,8 +75,7 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
                 /* dropDB */true, /* master=null means create a new one */null,
                 /* replica=null means create a new one */null);
         final String boatClassName = "49er";
-        // FIXME use master DomainFactory; see bug 592
-        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
+        final DomainFactory masterDomainFactory = testSetUp.getMaster().getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
         competitor = masterDomainFactory.getCompetitorStore().getOrCreateCompetitor("GER 61", "Tina Lutz", Color.RED, "someone@nowhere.de", null, new TeamImpl("Tina Lutz + Susann Beucke",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
@@ -145,5 +144,9 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
         }
     }
 
-
+    @Test
+    public void testTrackedRaceHasValidRaceLogResolverAfterDeserialization() {
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        assertNotNull(replicaTrackedRace.getRaceLogResolver());
+    }
 }

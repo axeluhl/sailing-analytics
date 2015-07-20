@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -35,27 +36,42 @@ public final class EventActionUtil {
     }
     
     public static LeaderboardContext getOverallLeaderboardContext(DispatchContext context, UUID eventId) {
-        Event event = context.getRacingEventService().getEvent(eventId);
+        RacingEventService service = context.getRacingEventService();
+        Event event = service.getEvent(eventId);
         if(!HomeServiceUtil.isFakeSeries(event)) {
             throw new DispatchException("The given event is not a series event.");
         }
         LeaderboardGroup leaderboardGroup = Util.get(event.getLeaderboardGroups(), 0);
         Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
-        return new LeaderboardContext(event, leaderboardGroup, overallLeaderboard);
+        return new LeaderboardContext(service, event, leaderboardGroup, overallLeaderboard);
     }
     
     public static LeaderboardContext getLeaderboardContext(DispatchContext context, UUID eventId, String leaderboardId) {
-        Event event = context.getRacingEventService().getEvent(eventId);
+        RacingEventService service = context.getRacingEventService();
+        Event event = service.getEvent(eventId);
         for(LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for(Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if(leaderboard.getName().equals(leaderboardId)) {
-                    return new LeaderboardContext(event, leaderboardGroup, leaderboard);
+                    return new LeaderboardContext(service, event, leaderboardGroup, leaderboard);
                 }
             }
         }
         throw new DispatchException("The leaderboard is not part of the given event.");
     }
     
+    public static long getEventStateDependentTTL(DispatchContext context, UUID eventId, long liveTTL) {
+        Event event = context.getRacingEventService().getEvent(eventId);
+        return getEventStateDependentTTL(event, liveTTL);
+    }
+    
+    private static long getEventStateDependentTTL(Event event, long liveTTL) {
+        EventState eventState = HomeServiceUtil.calculateEventState(event);
+        if(eventState == EventState.RUNNING) {
+            return liveTTL;
+        }
+        return calculateTtlForNonLiveEvent(event, eventState);
+    }
+
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(DispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
@@ -87,10 +103,11 @@ public final class EventActionUtil {
     }
 
     public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {
-        Event event = context.getRacingEventService().getEvent(eventId);
+        RacingEventService service = context.getRacingEventService();
+        Event event = service.getEvent(eventId);
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                callback.doForLeaderboard(new LeaderboardContext(event, leaderboardGroup, leaderboard));
+                callback.doForLeaderboard(new LeaderboardContext(service, event, leaderboardGroup, leaderboard));
             }
         }
     }
