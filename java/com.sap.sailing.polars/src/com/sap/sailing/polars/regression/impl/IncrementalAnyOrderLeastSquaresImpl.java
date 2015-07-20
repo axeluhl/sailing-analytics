@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.regression.impl;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -66,10 +67,10 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
     
     private AtomicBoolean functionNeedsUpdate = new AtomicBoolean(true);
 
-    private final transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
+    private transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
             false);
     
-    private final transient NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
+    private transient NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
             true);
 
     private PolynomialFunction cachedFunction;
@@ -297,6 +298,15 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             return result;
         }
 
+    }
+    
+    private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
+                false);
+        cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
+                true);
     }
 
     @Override

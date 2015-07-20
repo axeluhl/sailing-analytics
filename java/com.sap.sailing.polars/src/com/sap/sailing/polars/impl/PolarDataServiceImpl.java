@@ -110,6 +110,9 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
 
     @Override
     public SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
+        if (polarDataMiner == null) {
+            throw new NotEnoughDataHasBeenAddedException("Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
+        }
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
     }
 
@@ -122,6 +125,9 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
+        if (polarDataMiner == null) {
+            throw new NotEnoughDataHasBeenAddedException("Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
+        }
         SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround = polarDataMiner
                 .getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, useRegressionForSpeed);
         if (tack == Tack.PORT) {
@@ -241,6 +247,9 @@ public class PolarDataServiceImpl implements PolarDataService, ReplicableWithObj
         LegType legType = maneuverType == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND;
         if (boatClass == null || windSpeed == null) {
             throw new IllegalArgumentException("Boatclass and windspeed cannot be null.");
+        }
+        if (polarDataMiner == null) {
+            throw new NotEnoughDataHasBeenAddedException("Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
         }
         SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, true);
         Bearing bearing = new DegreeBearingImpl(speed.getObject().getBearing().getDegrees() * 2);
