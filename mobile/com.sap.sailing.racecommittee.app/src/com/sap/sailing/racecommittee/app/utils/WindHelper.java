@@ -11,6 +11,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sse.common.Util;
@@ -20,6 +21,8 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
@@ -28,7 +31,9 @@ public class WindHelper {
         try {
             Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
             String path = "/sailingserver/api/v1/events/"+ getEventId(context) + "/racestates";
-            URL serverUrl = UrlHelper.generateUrl(getBaseUrl(context), path, new Object[]{"filterByLeaderboard"}, new  Object[]{triple.getA()});
+            List<Util.Pair> params = new ArrayList<>();
+            params.add(new Util.Pair("filterByLeaderboard", triple.getA()));
+            URL serverUrl = UrlHelper.generateUrl(getBaseUrl(context), path, params);
 
             HttpGetRequest request = new HttpGetRequest(serverUrl, context);
             NetworkHelper.getInstance(context).executeHttpJsonRequestAsnchronously(request, new NetworkHelper.NetworkHelperSuccessListener() {
@@ -89,7 +94,7 @@ public class WindHelper {
     }
 
     public static String generateMapURL(Context context, ManagedRace race ,boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls){
-        DataStore dataStore = OnlineDataManager.create(context).getDataStore();
-        return dataStore.getMapUrl(AppPreferences.on(context).getServerBaseURL(), race, getEventId(context), showWindCharts, showStreamlets, showSimulation, showMapControls);
+        ReadonlyDataManager dataManager = OnlineDataManager.create(context);
+        return dataManager.getMapUrl(AppPreferences.on(context).getServerBaseURL(), race, getEventId(context), showWindCharts, showStreamlets, showSimulation, showMapControls);
     }
 }

@@ -50,5 +50,4 @@ public interface DataStore {
     UUID getCourseUUID();
     void setCourseUUID(UUID uuid);
 
-    String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls);
 }

@@ -264,20 +264,4 @@ public enum InMemoryDataStore implements DataStore {
         courseUUID = uuid;
     }
 
-    @Override
-    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
-        String url = "";
-        // get simple race log identifier
-        Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
-        SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
-        Object [] params = {"regattaLikeName", "raceColumnName", "fleetName", "eventId", "viewShowWindChart", "viewShowStreamlets", "viewShowSimulation", "viewShowMapControls"};
-        Object [] values = {identifier.getRegattaLikeParentName(), identifier.getRaceColumnName(), identifier.getFleetName(), eventId, showWindCharts, showStreamlets, showSimulation, showMapControls};
-        try {
-            url = UrlHelper.generateUrl(baseUrl, AppConstants.GWT_MAP_AND_WIND_CHART_HTML, params, values).toString();
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "An error occured while generating the map url: " + e.getMessage());
-        }
-        return url;
-    }
-
 }
