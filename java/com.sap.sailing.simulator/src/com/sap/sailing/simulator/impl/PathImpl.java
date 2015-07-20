@@ -132,7 +132,8 @@ public class PathImpl implements Path, Serializable {
 
             if ((this.pathPoints.get(idx).getTimePoint().asMillis() >= nextTimePoint.asMillis())||(idx == this.pathPoints.size()-1)) {
 
-                if (idx == this.pathPoints.size()-1) {
+                // for the last step, next-time-point needs to be aligned to the time-range of the course
+                if (nextTimePoint.after(endTime)) {
                 	nextTimePoint = endTime;
                 }
                 
