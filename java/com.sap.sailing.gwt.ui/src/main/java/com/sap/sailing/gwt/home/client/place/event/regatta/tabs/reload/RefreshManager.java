@@ -59,7 +59,8 @@ public class RefreshManager {
             // This makes it possible to use batching resulting in less requests.
             if (!refreshable.callRunning && refreshable.timeout < System.currentTimeMillis() + 5000) {
                 refreshable.callRunning = true;
-                actionExecutor.execute(refreshable.provider.getAction(), new AsyncCallback<ResultWithTTL<DTO>>() {
+                final Action<ResultWithTTL<DTO>> action = refreshable.provider.getAction();
+                actionExecutor.execute(action, new AsyncCallback<ResultWithTTL<DTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         refreshable.callRunning = false;
@@ -74,7 +75,7 @@ public class RefreshManager {
                         try {
                             refreshable.widget.setData(result.getDto(), refreshable.timeout, updateNo);
                         } catch(Throwable error) {
-                            LOG.log(Level.SEVERE, "Error while refreshing content.", error);
+                            LOG.log(Level.SEVERE, "Error while refreshing content with action " + action.getClass().getName(), error);
                         }
                         reschedule();
                     }
