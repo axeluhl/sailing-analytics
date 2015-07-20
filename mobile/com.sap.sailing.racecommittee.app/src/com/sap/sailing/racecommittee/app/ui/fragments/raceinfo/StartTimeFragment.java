@@ -46,6 +46,7 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -71,7 +72,6 @@ public class StartTimeFragment extends BaseFragment
 
     private NumberPicker mDatePicker;
     private NumberPicker mTimeOffset;
-    private Spinner mDependentRace;
     private Spinner mLeaderBoard;
     private Spinner mFleet;
     private Spinner mRace;
@@ -293,7 +293,8 @@ public class StartTimeFragment extends BaseFragment
             int leaderBoard = -1;
             mLeaderBoardAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
-                mLeaderBoardAdapter.addUnique(races.getRaceGroup().getName());
+                Util.Pair<String, String> data = new Util.Pair<>(races.getRaceGroup().getName(), races.getRaceGroup().getDisplayName());
+                mLeaderBoardAdapter.add(data);
                 if (leaderBoard == -1 && getRace().getRaceGroup().getName().equals(races.getRaceGroup().getName())) {
                     leaderBoard = mLeaderBoardAdapter.getCount() - 1;
                 }
@@ -309,7 +310,7 @@ public class StartTimeFragment extends BaseFragment
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
-                    mLeaderBoardAdapter.setSelected(-1);
+                    mLeaderBoardAdapter.setSelected(0);
                 }
             });
             mLeaderBoard.setSelection(leaderBoard);
@@ -331,17 +332,18 @@ public class StartTimeFragment extends BaseFragment
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
-                    mFleetAdapter.setSelected(-1);
+                    mFleetAdapter.setSelected(0);
                 }
             });
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
-                if (races.getRaceGroup().getName().equals(mLeaderBoard.getSelectedItem())) {
-                    mFleetAdapter.addUnique(races.getFleet().getName());
+                Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
+                if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
+                    mFleetAdapter.add(new Util.Pair<String, String>(races.getFleet().getName(), null));
                 }
             }
 
             mFleet.setSelection(0);
-            if (mFleetAdapter.getCount() > 1 || (mFleetAdapter.getCount() == 1 && !mFleetAdapter.getItem(0)
+            if (mFleetAdapter.getCount() > 1 || (mFleetAdapter.getCount() == 1 && !mFleetAdapter.getItem(0).getA()
                 .equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME))) {
                 mFleet.setAdapter(mFleetAdapter);
                 mFleet.setVisibility(View.VISIBLE);
@@ -360,27 +362,35 @@ public class StartTimeFragment extends BaseFragment
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     mRaceAdapter.setSelected(position);
-                    String leaderBoard = (String) mLeaderBoard.getSelectedItem();
-                    String fleet = (mFleet.getSelectedItem() != null) ?
-                        (String) mFleet.getSelectedItem() :
-                        LeaderboardNameConstants.DEFAULT_FLEET_NAME;
-                    String race = (String) mRace.getSelectedItem();
-                    identifier = new SimpleRaceLogIdentifierImpl(leaderBoard, race, fleet);
+                    String leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition()).getA();
+                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    if (fleet == null) {
+                        fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
+                    }
+                    String race = mRaceAdapter.getItem(mRace.getSelectedItemPosition()).getA();
+                    identifier = new SimpleRaceLogIdentifierImpl(leaderBoard, race, fleet.getA());
                 }
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
-                    mRaceAdapter.setSelected(-1);
+                    mRaceAdapter.setSelected(0);
                     identifier = null;
                 }
             });
 
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
-                if (races.getRaceGroup().getName().equals(mLeaderBoard.getSelectedItem())) {
-                    String fleet = (String) mFleet.getSelectedItem();
-                    if (races.getFleet().getName().equals(fleet) || LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(races.getFleet().getName())) {
+                Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
+                if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
+                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    if (fleet == null) {
+                        fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
+                    }
+                    if (races.getFleet().getName().equals(fleet.getA()) || LeaderboardNameConstants.DEFAULT_FLEET_NAME
+                        .equals(races.getFleet().getName())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
-                            mRaceAdapter.addUnique(race.getRaceName());
+                            if (!getRace().equals(race)) {
+                                mRaceAdapter.add(new Util.Pair<String, String>(race.getRaceName(), null));
+                            }
                         }
                     }
                 }

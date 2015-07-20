@@ -15,17 +15,17 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
 
 public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
-    private static final int HEADER = 0;
-    private static final int DATA = 1;
+    private static final int DATA = 0;
 
     private Context mContext;
     private int mLayout;
     private int mSelectedItem = -1;
 
-    private ArrayList<String> mData;
+    private ArrayList<Util.Pair<String, String>> mData;
 
     public DependentRaceSpinnerAdapter(Context context, @LayoutRes int layout) {
         mContext = context;
@@ -42,7 +42,11 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
         TextView mainText = ViewHolder.get(layout, android.R.id.text1);
         if (mainText != null) {
-            mainText.setText(mData.get(position));
+            String text = mData.get(position).getB();
+            if (TextUtils.isEmpty(text)) {
+                text = mData.get(position).getA();
+            }
+            mainText.setText(text);
         }
 
         if (mSelectedItem == position) {
@@ -74,7 +78,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
     }
 
     @Override
-    public String getItem(int position) {
+    public Util.Pair<String, String> getItem(int position) {
         return mData.get(position);
     }
 
@@ -96,10 +100,11 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         }
 
         TextView text = ViewHolder.get(layout, android.R.id.text1);
-        if (text != null && position < mData.size() && !TextUtils.isEmpty(mData.get(position))) {
-            String raceName = mData.get(position);
-            text.setText(raceName);
+        String spinnerText = mData.get(position).getB();
+        if (TextUtils.isEmpty(spinnerText)) {
+            spinnerText = mData.get(position).getA();
         }
+        text.setText(spinnerText);
 
         return layout;
     }
@@ -119,14 +124,27 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         return (mData.size() == 0);
     }
 
-    public void add(String data) {
-        mData.add(data);
-    }
-
-    public void addUnique(String data) {
-        if (!mData.contains(data)) {
+    public void add(Util.Pair<String, String> data) {
+        boolean found = false;
+        for (Util.Pair<String, String> pair : mData) {
+            if (pair.getA().equals(data.getA())) {
+                if (pair.getB() == null && data.getB() == null) {
+                    found = true;
+                    break;
+                }
+                if (pair.getB() != null && pair.getB().equals(data.getB())) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) {
             mData.add(data);
         }
+    }
+
+    public Util.Pair<String, String> getSelected() {
+        return mData.get(mSelectedItem);
     }
 
     public void setSelected(int position) {
