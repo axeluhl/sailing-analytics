@@ -3241,6 +3241,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void setPolarDataService(PolarDataService service) {
         if (this.polarDataService == null) {
             polarDataService = service;
+            polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);
         }
     }
@@ -3266,6 +3267,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     public void unsetPolarDataService(PolarDataService service) {
         if (polarDataService == service) {
+            polarDataService.unregisterDomainFactory(baseDomainFactory);
             polarDataService = null;
             setPolarDataService(null);
         }

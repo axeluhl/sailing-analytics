@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,17 +23,19 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void> {
-    
+public class CubicRegressionPerCourseProcessor implements
+        Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
+
+    private static final long serialVersionUID = 3059764273262382648L;
+
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
-    
+ 
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
 
-    private ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
-    
-    public CubicRegressionPerCourseProcessor(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
-        this.listeners = listeners;
-    }
+    /**
+     * FIXME Make sure replication and listeners interact correctly
+     */
+    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
     @Override
     public boolean canProcessElements() {
@@ -145,6 +148,10 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         logger.severe("Polar Data Mining Pipe failed. Cause: " + failure.getMessage());
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
+    
+    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
 
 
     @Override
@@ -186,5 +193,7 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         // TODO Auto-generated method stub
         return null;
     }
+
+
 
 }
