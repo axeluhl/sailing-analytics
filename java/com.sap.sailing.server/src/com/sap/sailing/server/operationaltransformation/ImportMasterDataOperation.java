@@ -22,6 +22,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -119,6 +121,7 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
             importRaceLogTrackingGPSFixes(toState);
+            importDeviceConfigurations(toState);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -126,6 +129,31 @@ public class ImportMasterDataOperation extends
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             LockUtil.unlockAfterWrite(dataImportLock);
+        }
+    }
+
+    private void importDeviceConfigurations(RacingEventService toState) {
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> existingConfigs = toState.getAllDeviceConfigurations();
+        Set<DeviceConfigurationMatcher> existingKeys = existingConfigs.keySet();
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
+        for(Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : newConfigs.entrySet()) {
+            DeviceConfigurationMatcher key = entry.getKey();
+            DeviceConfiguration value = entry.getValue();
+            if (existingKeys.contains(key)) {
+                if (override) {
+                    logger.info(String.format(
+                            "Device configuration [%s] already exists. Overwrite because override flag is set.",
+                            key.getMatcherIdentifier()));
+                    toState.removeDeviceConfiguration(key);
+                    toState.createOrUpdateDeviceConfiguration(key, value);
+                } else {
+                    logger.info(String
+                            .format("Device configuration [%s] already exists. Not overwriting because override flag is not set.",
+                                    key.getMatcherIdentifier()));
+                }
+            } else {
+                toState.createOrUpdateDeviceConfiguration(key, value);
+            }
         }
     }
 

@@ -518,7 +518,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback); 
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportDeviceConfigurations, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
     

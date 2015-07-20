@@ -407,7 +407,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind, boolean exportDeviceConfigurations);
     
     DataImportProgress getImportOperationProgress(UUID id);
 
