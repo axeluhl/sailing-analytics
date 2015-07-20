@@ -119,13 +119,13 @@ public class RefreshManager {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<D> widget,
+    public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<? super D> widget,
             ActionProvider<A> provider) {
         refreshables.add(new RefreshHolder(widget, provider));
         reschedule();
     }
 
-    public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<D> widget, A action) {
+    public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<? super D> widget, A action) {
         add(widget, new DefaultActionProvider<>(action));
     }
     

@@ -26,7 +26,7 @@ public class SimpleCompetitorDTO extends NamedDTO implements Serializable {
         final Nationality nationality = competitor.getTeam().getNationality();
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         this.sailID = competitor.getBoat().getSailID();
-        this.twoLetterIsoCountryCode = countryCode.getTwoLetterISOCode();
+        this.twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
         this.flagImageURL = competitor.getFlagImage() == null ? null : competitor.getFlagImage().toString();
     }
 
