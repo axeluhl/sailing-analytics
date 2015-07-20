@@ -101,10 +101,15 @@ public final class EventActionUtil {
         }
         return 0;
     }
-
+    
     public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
+        forLeaderboardsOfEvent(context, event, callback);
+    }
+
+    public static void forLeaderboardsOfEvent(DispatchContext context, Event event, LeaderboardCallback callback) {
+        RacingEventService service = context.getRacingEventService();
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 callback.doForLeaderboard(new LeaderboardContext(service, event, leaderboardGroup, leaderboard));

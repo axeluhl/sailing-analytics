@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.server.RacingEventService;
 
 public class LeaderboardContext {
@@ -86,5 +87,17 @@ public class LeaderboardContext {
             logger.log(Level.SEVERE, "Error loading leaderboard", e);
             throw new DispatchException("Error loading leaderboard");
         }
+    }
+
+    public String getLeaderboardName() {
+        return leaderboard.getName();
+    }
+
+    public RegattaMetadataDTO asRegattaMetadataDTO() {
+        return HomeServiceUtil.toRegattaMetadataDTO(event, leaderboardGroup, leaderboard);
+    }
+
+    public boolean isPartOfEvent() {
+        return HomeServiceUtil.isPartOfEvent(event, leaderboard);
     }
 }
