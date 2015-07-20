@@ -50,10 +50,7 @@ public class RefreshManager {
         });
     }
 
-    private int updateNo;
-
     private void update() {
-        updateNo++;
         for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
             // Everything that needs refresh within the next 5000ms will be refreshed now.
             // This makes it possible to use batching resulting in less requests.
@@ -73,7 +70,7 @@ public class RefreshManager {
                         refreshable.callRunning = false;
                         refreshable.timeout = System.currentTimeMillis() + result.getTtl();
                         try {
-                            refreshable.widget.setData(result.getDto(), refreshable.timeout, updateNo);
+                            refreshable.widget.setData(result.getDto());
                         } catch(Throwable error) {
                             LOG.log(Level.SEVERE, "Error while refreshing content with action " + action.getClass().getName(), error);
                         }
