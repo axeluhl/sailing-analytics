@@ -133,12 +133,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return getRaceViewerURL(leaderboard.name, raceIdentifier);
     }
     
-    @Override
-    public String getRaceViewerURL(String regattaName, String trackedRaceName) {
-        return EntryPointLinkFactory
-                .createRaceBoardLink(createRaceBoardLinkParameters(regattaName, regattaName, trackedRaceName));
-    }
-    
     public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
         return EntryPointLinkFactory
                 .createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
