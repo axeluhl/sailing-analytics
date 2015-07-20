@@ -1350,4 +1350,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String miniLeeaderboardLegendText();
     String currentOfTotal(int current, int total);
     String noFinishedRaces();
+    String racesOverview();
 }
