@@ -43,7 +43,7 @@ public class PerSeriesResultDiscardingRuleImpl implements ResultDiscardingRule {
     }
 
     private Iterable<RaceColumn> getColumnsToConsiderInSeries(Series series, Iterable<RaceColumn> allRaceColumnsToConsider) {
-        Set<RaceColumn> result = new HashSet<>();
+        Set<RaceColumn> result = new LinkedHashSet<>();
         for (RaceColumn seriesColumn : series.getRaceColumns()) {
             if (Util.contains(allRaceColumnsToConsider, seriesColumn)) {
                 result.add(seriesColumn);
