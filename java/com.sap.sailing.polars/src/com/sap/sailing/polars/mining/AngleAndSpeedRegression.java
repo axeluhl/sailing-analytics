@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,8 +25,9 @@ import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImp
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
-public class AngleAndSpeedRegression {
+public class AngleAndSpeedRegression implements Serializable {
     
+    private static final long serialVersionUID = 6343595388753945979L;
     private final IncrementalLeastSquares speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
     private final IncrementalLeastSquares angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
     

@@ -125,6 +125,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private CellTable<RegattaOverviewEntryDTO> table;
     boolean hasAnyRaceGroupASeries = false;
     boolean hasAnyRaceGroupAFleet = false;
+    private final boolean ignoreLocalSettings;
 
     public void setEntryClickedHandler(EntryHandler handler) {
         this.entryClickedHandler = handler;
@@ -137,7 +138,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
      */
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings,
-            Timer timerToSynchronize) {
+            Timer timerToSynchronize, boolean ignoreLocalSettings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventId = eventId;
@@ -148,6 +149,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventId.toString();
         this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
         this.settings = new RegattaRaceStatesSettings();
+        this.ignoreLocalSettings = ignoreLocalSettings;
         loadAndSetSettings(settings);
         mainPanel = new VerticalPanel();
         mainPanel.getElement().getStyle().setWidth(100, Unit.PCT);
@@ -160,9 +162,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private void loadAndSetSettings(RegattaRaceStatesSettings settings) {
-        RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
-        if (loadedSettings != null) {
-            settings = loadedSettings;
+        if(!ignoreLocalSettings) {
+            RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
+            if (loadedSettings != null) {
+                settings = loadedSettings;
+            }
         }
         updateSettings(settings);
     }

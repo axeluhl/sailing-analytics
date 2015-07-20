@@ -23,6 +23,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -62,10 +64,11 @@ public class TopLevelMasterData implements Serializable {
     private final Set<WindTrackMasterData> windTrackMasterData;
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
     private final Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes;
+    private final Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
             final Map<String, Regatta> regattaForRaceIdString, final Collection<MediaTrack> allMediaTracks,
-            GPSFixStore gpsFixStore, boolean exportWind) {
+            GPSFixStore gpsFixStore, boolean exportWind, Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
         this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(gpsFixStore);
@@ -74,6 +77,7 @@ public class TopLevelMasterData implements Serializable {
         } else {
             this.windTrackMasterData = new HashSet<WindTrackMasterData>();
         }
+        this.deviceConfigurations = deviceConfigurations;
         this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
         this.filteredMediaTracks = new HashSet<MediaTrack>();
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
@@ -343,5 +347,9 @@ public class TopLevelMasterData implements Serializable {
 
     public Map<DeviceIdentifier, Set<GPSFix>> getRaceLogTrackingFixes() {
         return raceLogTrackingFixes;
+    }
+
+    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getDeviceConfigurations() {
+        return deviceConfigurations;
     }
 }

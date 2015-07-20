@@ -36,6 +36,8 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.player.Timer;
@@ -305,6 +307,29 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             return false;
         }
         return ctx.getEventDTO().isHasMedia();
+    }
+    
+    @Override
+    public String getRegattaOverviewLink() {
+        String url = "RegattaOverview.html?ignoreLocalSettings=true&onlyrunningraces=false&event=" + getCtx().getEventId();
+        url += "&onlyracesofsameday=" + getCtx().getEventDTO().isRunning();
+        if(showRegattaMetadata()) {
+            url += "&regatta=" + getCtx().getRegattaId();
+        }
+        return url;
+    }
+    
+    @Override
+    public boolean isEventOrRegattaLive() {
+        if(showRegattaMetadata()) {
+            if(ctx.getRegatta().getState() == RegattaState.RUNNING) {
+                return true;
+            }
+            if(ctx.getRegatta().getState() != RegattaState.UNKNOWN) {
+                return false;
+            }
+        }
+        return ctx.getEventDTO().getState() == EventState.RUNNING;
     }
 
     protected abstract EventView<PLACE, ?> getView();

@@ -1,29 +1,25 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class StartTimeFinderResult {
     private final Iterable<SimpleRaceLogIdentifier> racesDependingOn;
     private final TimePoint startTime;
+    private Duration startTimeDiff;
 
-    public StartTimeFinderResult(final Iterable<SimpleRaceLogIdentifier> racesDependingOn, final TimePoint startTime) {
-        this.racesDependingOn = racesDependingOn;
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
         this.startTime = startTime;
+        this.startTimeDiff = startTimeDiff;
+        this.racesDependingOn = racesDependingOn;
     }
 
-    public StartTimeFinderResult(TimePoint startTime) {
-        racesDependingOn = new ArrayList<SimpleRaceLogIdentifier>();
-        this.startTime = startTime;
-    }
-
-    public StartTimeFinderResult(List<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime) {
-        this.racesDependingOn = racesDependingOn;
-        this.startTime = startTime;
+    public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff) {
+        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff);
     }
 
     public Iterable<SimpleRaceLogIdentifier> getRacesDependingOn() {
@@ -34,11 +30,16 @@ public class StartTimeFinderResult {
         return startTime;
     }
 
+    public Duration getStartTimeDiff() {
+        return startTimeDiff;
+    }
+
+    public void setStartTimeDiff(Duration startTimeDiff) {
+        this.startTimeDiff = startTimeDiff;
+    }
+
     public boolean isDependentStartTime() {
-        if (racesDependingOn == null) {
-            return false;
-        }
-        return Util.isEmpty(racesDependingOn);
+        return racesDependingOn != null && !Util.isEmpty(racesDependingOn);
     }
 
     @Override
@@ -47,6 +48,7 @@ public class StartTimeFinderResult {
         int result = 1;
         result = prime * result + ((racesDependingOn == null) ? 0 : racesDependingOn.hashCode());
         result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
+        result = prime * result + ((startTimeDiff == null) ? 0 : startTimeDiff.hashCode());
         return result;
     }
 
@@ -68,6 +70,11 @@ public class StartTimeFinderResult {
             if (other.startTime != null)
                 return false;
         } else if (!startTime.equals(other.startTime))
+            return false;
+        if (startTimeDiff == null) {
+            if (other.startTimeDiff != null)
+                return false;
+        } else if (!startTimeDiff.equals(other.startTimeDiff))
             return false;
         return true;
     }

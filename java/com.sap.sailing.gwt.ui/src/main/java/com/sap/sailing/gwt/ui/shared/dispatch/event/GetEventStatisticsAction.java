@@ -74,7 +74,7 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
         }
         for (Leaderboard leaderboard : leaderboards) {
             competitors += HomeServiceUtil.calculateCompetitorsCount(leaderboard);
-            races += HomeServiceUtil.calculateRaceCount(leaderboard);
+            races += HomeServiceUtil.calculateRaceColumnCount(leaderboard);
             trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(leaderboard);
             regattas++;
             String disableStats = System.getenv("DISABLE_STATS");

@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -8,8 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
@@ -17,26 +24,33 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener {
 
     public static final String START_TIME = "startTime";
+    public static final String DEPENDENT_RACE = "dependentRace";
+    public static final String START_TIME_DIFF = "startTimeDiff";
+
     private static final String TAG = MainScheduleFragment.class.getName();
 
     private TextView mStartTimeTextView;
     private String mStartTimeString;
+    private String mRaceId;
     private TimePoint mStartTime;
+    private Duration mStartTimeDiff;
     private TextView mWindValue;
     private RacingProcedureType mRacingProcedureType;
 
@@ -162,8 +176,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void initStartTime() {
-        TimePoint timePoint = (TimePoint) getArguments().getSerializable(START_TIME);
         RacingActivity activity = (RacingActivity) getActivity();
+        TimePoint timePoint = (TimePoint) getArguments().getSerializable(START_TIME);
         if (timePoint == null && activity != null) {
             timePoint = activity.getStartTime();
         }
@@ -173,6 +187,14 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             }
             mStartTime = timePoint;
             mStartTimeString = mDateFormat.format(timePoint.asDate());
+        }
+
+        mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
+        mRaceId = (String) getArguments().getSerializable(DEPENDENT_RACE);
+
+        if (mRaceId != null && mStartTimeDiff != null) {
+            ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
+            mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(), RaceHelper.getRaceName(race, " / "));
         }
     }
 
@@ -205,7 +227,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             break;
 
         case R.id.start_time:
-            openFragment(StartTimeFragment.newInstance(getArguments().getSerializable(START_TIME)));
+            openFragment(StartTimeFragment.newInstance(getArguments()));
             break;
 
         case R.id.wind:
@@ -226,7 +248,13 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
         TimePoint now = MillisecondsTimePoint.now();
         getRaceState().setRacingProcedure(now, mRacingProcedureType);
-        getRaceState().forceNewStartTime(now, mStartTime);
+        if (mStartTimeDiff == null && mRaceId == null) {
+            getRaceState().forceNewStartTime(now, mStartTime);
+        } else {
+            Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(mRaceId);
+            SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
+            getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, identifier);
+        }
         if (procedure != null) {
             procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
         }
@@ -237,17 +265,18 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         super.notifyTick(now);
 
         if (mStartTimeTextView != null && !TextUtils.isEmpty(mStartTimeString)) {
-            String startTimeValue = getString(R.string.start_time_value).replace("#TIME#", mStartTimeString)
-                .replace("#COUNTDOWN#", calcCountdown(now));
-            mStartTimeTextView.setText(startTimeValue);
+            if (mRaceId == null && mStartTimeDiff == null) {
+                String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
+                mStartTimeTextView.setText(startTimeValue);
+            } else {
+                mStartTimeTextView.setText(mStartTimeString);
+            }
         }
 
         if (mWindValue != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
-            String sensorData = getString(R.string.wind_sensor);
             Wind wind = getRaceState().getWindFix();
-            sensorData = sensorData.replace("#AT#", mDateFormat.format(wind.getTimePoint().asDate()));
-            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
-            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
+            String sensorData = getString(R.string.wind_sensor, mDateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+                .getKnots());
             mWindValue.setText(sensorData);
         }
     }
@@ -269,9 +298,12 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         } else {
             fragment.setArguments(getRecentArguments());
         }
-        if (mStartTime != null) {
-            fragment.getArguments().putSerializable(START_TIME, mStartTime);
-        }
+
+        Bundle args = fragment.getArguments();
+        args.putSerializable(START_TIME, mStartTime);
+        args.putSerializable(START_TIME_DIFF, mStartTimeDiff);
+        args.putSerializable(DEPENDENT_RACE, mRaceId);
+
         getFragmentManager().beginTransaction().replace(R.id.racing_view_container, fragment).commitAllowingStateLoss();
     }
 

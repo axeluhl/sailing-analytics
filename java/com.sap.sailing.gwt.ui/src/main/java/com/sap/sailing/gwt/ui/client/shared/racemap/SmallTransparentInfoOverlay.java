@@ -42,32 +42,45 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
         infoBoxWidth = 20;
         infoBoxHeight = 20;
         cornerRadius = 4;
-
         if (getCanvas() != null) {
             getCanvas().setWidth(String.valueOf(canvasWidth));
             getCanvas().setHeight(String.valueOf(canvasHeight));
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             getCanvas().setCoordinateSpaceHeight(canvasHeight);
         }
-
-//        setCanvasSize(canvasWidth, canvasHeight);
     }
 
     @Override
     protected void draw() {
+        final int LINE_SPACING = 3;
+        final int BOTTOM_MARGIN = 8;
+        final int LEFT_MARGIN = 8;
+        final int RIGHT_MARGIN = 9;
+        final int POLE_LENGTH = 25;
         if (mapProjection != null && position != null) {
             LatLng latLngPosition = coordinateSystem.toLatLng(position);
             Context2d context2d = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
-
-            context2d.setFont("12px bold Verdana sans-serif");
-            TextMetrics measureText = context2d.measureText(infoText);
-            double textWidth = measureText.getWidth();
-
-            canvasWidth = (int) textWidth + 17;
+            final int fontSizeInPx = 12+2*Math.max(0, map.getZoom()-15);
+            final int LINE_HEIGHT = fontSizeInPx+LINE_SPACING;
+            context2d.setFont(""+fontSizeInPx+"px Roboto, Arial, sans-serif");
+//            context2d.setFont(""+fontSizeInPx+"px bold Verdana sans-serif");
+            double textWidth = 0;
+            infoBoxHeight = BOTTOM_MARGIN;
+            for (final String line : infoText.split("\n")) {
+                TextMetrics measureText = context2d.measureText(line);
+                if (measureText.getWidth() > textWidth) {
+                    textWidth = measureText.getWidth();
+                }
+                infoBoxHeight += LINE_HEIGHT;
+            }
+            canvasWidth = (int) textWidth + LEFT_MARGIN + RIGHT_MARGIN;
             infoBoxWidth = canvasWidth;
+            canvasHeight = infoBoxHeight + POLE_LENGTH;
             getCanvas().setWidth(String.valueOf(canvasWidth));
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
+            getCanvas().setHeight(String.valueOf(canvasHeight));
+            getCanvas().setCoordinateSpaceHeight(canvasHeight);
 
             // Change origin and dimensions to match true size (a stroke makes the shape a bit larger)
             context2d.setFillStyle(grayTransparentColor);
@@ -86,7 +99,13 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
 
             context2d.beginPath();
             context2d.setFillStyle("black");
-            context2d.fillText(infoText, 8, 14);
+//            context2d.setFont(""+fontSizeInPx+"px bold Verdana sans-serif");
+            context2d.setFont(""+fontSizeInPx+"px Roboto, Arial, sans-serif");
+            int y = LINE_HEIGHT;
+            for (final String line : infoText.split("\n")) {
+                context2d.fillText(line, LEFT_MARGIN, y);
+                y += LINE_HEIGHT;
+            }
             context2d.stroke();
 
             Point objectPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);

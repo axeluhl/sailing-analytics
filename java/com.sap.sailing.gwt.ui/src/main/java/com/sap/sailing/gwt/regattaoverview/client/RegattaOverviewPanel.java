@@ -81,7 +81,8 @@ public class RegattaOverviewPanel extends SimplePanel {
             final StringMessages stringMessages, 
             UUID eventId, 
             RegattaRaceStatesSettings settings, 
-            UserAgentDetails userAgent) {
+            UserAgentDetails userAgent,
+            boolean ignoreLocalSettings) {
         
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -102,7 +103,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(style.contentWrapper());
         
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventId, settings, uiUpdateTimer);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventId, settings, uiUpdateTimer, ignoreLocalSettings);
         this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
         regattaRaceStatesComponent.setWidth("100%");
         
