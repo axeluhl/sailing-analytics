@@ -121,7 +121,9 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
             importRaceLogTrackingGPSFixes(toState);
-            importDeviceConfigurations(toState);
+            if (masterData.getDeviceConfigurations() != null) {
+                importDeviceConfigurations(toState);
+            }
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
