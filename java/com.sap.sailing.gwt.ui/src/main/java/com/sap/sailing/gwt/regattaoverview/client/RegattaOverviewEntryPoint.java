@@ -28,6 +28,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private final static String PARAM_ONLY_RACES_OF_SAME_DAY = "onlyracesofsameday";
     private final static String PARAM_REGATTA = "regatta";
     private final static String PARAM_COURSE_AREA = "coursearea";
+    private final static String PARAM_IGNORE_LOCAL_SETTINGS = "ignoreLocalSettings";
     
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
@@ -96,7 +97,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
     private void createAndAddRegattaPanel(UUID eventId) {
         RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent);
+        boolean ignoreLocalSettings = getIgnoreLocalSettingsFromURL();
+        regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent, ignoreLocalSettings);
 
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
             @Override
@@ -118,6 +120,10 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         centerPanel.add(regattaPanel);
         ScrollPanel scrollPanel = new ScrollPanel(centerPanel);
         containerPanel.add(scrollPanel);
+    }
+
+    private boolean getIgnoreLocalSettingsFromURL() {
+        return Boolean.parseBoolean(Window.Location.getParameter(PARAM_IGNORE_LOCAL_SETTINGS));
     }
 
     private void createAndAddDetailPanel() {

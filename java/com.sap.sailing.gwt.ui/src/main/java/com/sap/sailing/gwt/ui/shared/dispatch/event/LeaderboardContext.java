@@ -18,17 +18,19 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
+import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.server.RacingEventService;
 
 public class LeaderboardContext {
     private static final Logger logger = Logger.getLogger(LeaderboardContext.class.getName());
 
     private final Event event;
-    @SuppressWarnings("unused")
     private final LeaderboardGroup leaderboardGroup;
     private final Leaderboard leaderboard;
+    private final RacingEventService service;
 
-    public LeaderboardContext(Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+    public LeaderboardContext(RacingEventService service, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+        this.service = service;
         this.event = event;
         this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;
@@ -37,9 +39,17 @@ public class LeaderboardContext {
     public void forRaces(DispatchContext context, RaceCallback callback) {
         for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for(Fleet fleet : raceColumn.getFleets()) {
-                callback.doForRace(new RaceContext(event, leaderboard, raceColumn, fleet, context.getRacingEventService()));
+                callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, context.getRacingEventService()));
             }
         }
+    }
+    
+    public RegattaWithProgressDTO getRegattaWithProgress(DispatchContext context) {
+        RegattaProgressCalculator regattaProgressCalculator = new RegattaProgressCalculator();
+        forRaces(context, regattaProgressCalculator);
+        RegattaWithProgressDTO regattaDTO = new RegattaWithProgressDTO(regattaProgressCalculator.getResult());
+        HomeServiceUtil.fillRegattaFields(event, leaderboardGroup, leaderboard, regattaDTO);
+        return regattaDTO;
     }
     
     public ResultWithTTL<GetMiniLeaderboardDTO> calculateMiniLeaderboard(RacingEventService service, int limit) {
