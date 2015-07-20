@@ -51,6 +51,7 @@
     <string name="login_type_shore_control">Login as shore control.</string>
     <string name="login_type_viewer">Login as view-only (demo mode) user.</string>
     <string name="racelist_unscheduled">Not yet scheduled</string>
+    <string name="racelist_prescheduled">Pre-scheduled for %s</string>
     <string name="racelist_scheduled">Scheduled for %s</string>
     <string name="racelist_startphase">Start at %s in progress</string>
     <string name="racelist_running">Running since %s</string>

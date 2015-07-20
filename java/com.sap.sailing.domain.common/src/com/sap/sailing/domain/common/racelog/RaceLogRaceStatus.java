@@ -16,11 +16,9 @@ public enum RaceLogRaceStatus {
     }
     
     public static boolean isActive(RaceLogRaceStatus status) {
-        if (status == null) {
-            return false;
-        }
+        return status != null &&
+            (status.equals(PRESCHEDULED) || status.equals(SCHEDULED) || status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING));
 
-        return status.equals(SCHEDULED) || status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING);
     }
 
     public int getOrderNumber() {
