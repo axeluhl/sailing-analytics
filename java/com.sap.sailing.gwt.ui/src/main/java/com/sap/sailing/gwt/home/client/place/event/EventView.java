@@ -6,6 +6,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
@@ -56,7 +57,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
         String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race);
         
-        String getRaceViewerURL(String regattaName, String trackedRaceName);
+        String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier);
 
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
         PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);

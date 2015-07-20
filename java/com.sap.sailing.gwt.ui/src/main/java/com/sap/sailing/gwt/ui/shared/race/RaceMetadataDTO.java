@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.race;
 
 import java.util.Date;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
@@ -56,10 +57,11 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
         TRACKED_VALID_DATA       // tracking is connected and all required data for displaying the race viewer is available
     }
     
+    private String leaderboardName;
+    private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String regattaName;
     private String regattaDisplayName;
     private String raceName;
-    private String trackedRaceName;
     private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
@@ -72,13 +74,19 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
     protected RaceMetadataDTO() {
     }
     
-    public RaceMetadataDTO(String regattaName, String raceName) {
-        this.regattaName = regattaName;
+    public RaceMetadataDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceName) {
+        this.leaderboardName = leaderboardName;
+        this.regattaAndRaceIdentifier = regattaAndRaceIdentifier;
+        this.regattaName = leaderboardName;
         this.raceName = raceName;
     }
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 
     public String getRaceName() {
@@ -141,14 +149,6 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
         this.trackingState = trackingState;
     }
 
-    public String getTrackedRaceName() {
-        return trackedRaceName;
-    }
-
-    public void setTrackedRaceName(String trackedRaceName) {
-        this.trackedRaceName = trackedRaceName;
-    }
-    
     public WIND getWind() {
         return wind;
     }
@@ -163,6 +163,10 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
 
     public void setRegattaDisplayName(String regattaDisplayName) {
         this.regattaDisplayName = regattaDisplayName;
+    }
+
+    public RegattaAndRaceIdentifier getRegattaAndRaceIdentifier() {
+        return regattaAndRaceIdentifier;
     }
 
     @Override
