@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 
 public class StartActivity extends AbstractActivity implements Presenter {
@@ -25,10 +26,8 @@ public class StartActivity extends AbstractActivity implements Presenter {
     }
 
     @Override
-    public void gotoEvents() {
-        clientFactory //
-                .getNavigator() //
-                .getEventsNavigation()//
-                .goToPlace();
+    public MobilePlacesNavigator getNavigator() {
+        return clientFactory.getNavigator();
     }
+
 }
