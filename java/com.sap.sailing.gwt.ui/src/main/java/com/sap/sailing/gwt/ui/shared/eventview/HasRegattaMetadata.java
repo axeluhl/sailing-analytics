@@ -37,4 +37,8 @@ public interface HasRegattaMetadata {
     RegattaState getState();
 
     String getDefaultCourseAreaName();
+
+    boolean isFlexibleLeaderboard();
+
+    String getDefaultCourseAreaId();
 }

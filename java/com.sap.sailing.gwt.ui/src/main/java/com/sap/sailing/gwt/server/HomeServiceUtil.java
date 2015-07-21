@@ -454,4 +454,17 @@ public final class HomeServiceUtil {
         }
         return courseArea == null ? null : courseArea.getName();
     }
+    
+    public static String getCourseAreaIdForRegatta(EventBase event, Leaderboard leaderboard) {
+        CourseArea courseArea = null;
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+        } else if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            if (regatta != null) {
+                courseArea = regatta.getDefaultCourseArea();
+            }
+        }
+        return courseArea == null ? null : courseArea.getId().toString();
+    }
 }
