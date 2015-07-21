@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.partials.stage;
 
-import com.google.gwt.dom.client.Style.Display;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
@@ -13,9 +12,6 @@ public class PopularEventStageTeaser extends StageTeaser {
 
         title.setInnerText(event.getDisplayName());
         subtitle.setInnerText(event.getLocationAndVenue());
-
-        countdown.getStyle().setDisplay(Display.NONE);
-
         bandCount.setAttribute("data-bandcount", "1");
         teaserBand = new PopularEventStageTeaserBand(event, placeNavigator);
         stageTeaserBandsPanel.getElement().appendChild(teaserBand.getElement());
