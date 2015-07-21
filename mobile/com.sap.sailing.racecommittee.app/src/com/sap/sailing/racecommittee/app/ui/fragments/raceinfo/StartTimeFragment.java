@@ -25,6 +25,8 @@ import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -35,6 +37,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -229,6 +232,13 @@ public class StartTimeFragment extends BaseFragment
                         if (frame != null) {
                             frame.setVisibility(View.GONE);
                         }
+
+                        StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
+                        StartTimeFinderResult result = stf.analyze();
+                        if (result != null && result.isDependentStartTime()) {
+                            mStartTimeOffset = result.getStartTimeDiff();
+                            mRaceId = Util.get(result.getRacesDependingOn(), 0);
+                        }
                         break;
 
                     default: // MODE_SETUP
@@ -294,9 +304,17 @@ public class StartTimeFragment extends BaseFragment
             mLeaderBoardAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
                 Util.Pair<String, String> data = new Util.Pair<>(races.getRaceGroup().getName(), races.getRaceGroup().getDisplayName());
-                mLeaderBoardAdapter.add(data);
-                if (leaderBoard == -1 && getRace().getRaceGroup().getName().equals(races.getRaceGroup().getName())) {
-                    leaderBoard = mLeaderBoardAdapter.getCount() - 1;
+                int position = mLeaderBoardAdapter.add(data);
+                if (position >= 0) {
+                    if (mRaceId != null) {
+                        if (mRaceId.getRegattaLikeParentName().equals(data.getA())) {
+                            leaderBoard = position;
+                        }
+                    } else {
+                        if (leaderBoard == -1 && getRace().getRaceGroup().getName().equals(races.getRaceGroup().getName())) {
+                            leaderBoard = position;
+                        }
+                    }
                 }
             }
 
@@ -322,6 +340,7 @@ public class StartTimeFragment extends BaseFragment
 
     private void initFleetSpinner() {
         if (mLeaderBoard != null && mFleet != null) {
+            int fleet = -1;
             mFleetAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
             mFleet.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -338,14 +357,26 @@ public class StartTimeFragment extends BaseFragment
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
                 Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
                 if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
-                    mFleetAdapter.add(new Util.Pair<String, String>(races.getFleet().getName(), null));
+                    Util.Pair<String, String> data = new Util.Pair<>(races.getFleet().getName(), null);
+                    int position = mFleetAdapter.add(data);
+                    if (position >= 0) {
+                        if (mRaceId != null) {
+                            if (mRaceId.getFleetName().equals(data.getA())) {
+                                fleet = position;
+                            }
+                        } else {
+                            if (fleet == -1) { //TODO add more heuristic here - to be discussed
+                                fleet = position;
+                            }
+                        }
+                    }
                 }
             }
 
-            mFleet.setSelection(0);
             if (mFleetAdapter.getCount() > 1 || (mFleetAdapter.getCount() == 1 && !mFleetAdapter.getItem(0).getA()
                 .equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME))) {
                 mFleet.setAdapter(mFleetAdapter);
+                mFleet.setSelection(fleet);
                 mFleet.setVisibility(View.VISIBLE);
             } else {
                 mFleet.setAdapter(null);
@@ -363,7 +394,8 @@ public class StartTimeFragment extends BaseFragment
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     mRaceAdapter.setSelected(position);
                     String leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition()).getA();
-                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    @SuppressWarnings("unchecked")
+                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
@@ -378,10 +410,12 @@ public class StartTimeFragment extends BaseFragment
                 }
             });
 
+            int racePos = -1;
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
                 Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
                 if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
-                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    @SuppressWarnings("unchecked")
+                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
@@ -389,7 +423,19 @@ public class StartTimeFragment extends BaseFragment
                         .equals(races.getFleet().getName())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
                             if (!getRace().equals(race)) {
-                                mRaceAdapter.add(new Util.Pair<String, String>(race.getRaceName(), null));
+                                Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);
+                                int position = mRaceAdapter.add(data);
+                                if (position >= 0) {
+                                    if (mRaceId != null) {
+                                        if (mRaceId.getRaceColumnName().equals(data.getA())) {
+                                            racePos = position;
+                                        }
+                                    } else {
+                                        if (racePos == -1) { //TODO add more heuristic here - to be discussed
+                                            racePos = position;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -397,6 +443,7 @@ public class StartTimeFragment extends BaseFragment
             }
             mRace.setAdapter(mRaceAdapter);
             mRace.setVisibility(View.VISIBLE);
+            mRace.setSelection(racePos);
         }
     }
 
