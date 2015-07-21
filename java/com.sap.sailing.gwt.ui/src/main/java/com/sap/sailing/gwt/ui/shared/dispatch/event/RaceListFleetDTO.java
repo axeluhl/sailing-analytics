@@ -1,16 +1,17 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.TreeSet;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
 public class RaceListFleetDTO implements IsSerializable {
     
     private FleetMetadataDTO fleet;
     private int competitorCount = (int) (Math.random() * 10); // TODO   
-    private ArrayList<RaceListRaceDTO> races = new ArrayList<>();
+    private TreeSet<SimpleRaceMetadataDTO> races = new TreeSet<>();
     
     @SuppressWarnings("unused")
     private RaceListFleetDTO() {
@@ -20,7 +21,7 @@ public class RaceListFleetDTO implements IsSerializable {
         this.fleet = fleet;
     }
     
-    public void addRace(RaceListRaceDTO race) {
+    public void addRace(SimpleRaceMetadataDTO race) {
         // TODO insert sorted
         races.add(race);
     }
@@ -33,7 +34,7 @@ public class RaceListFleetDTO implements IsSerializable {
         return competitorCount;
     }
     
-    public List<RaceListRaceDTO> getRaces() {
+    public Collection<SimpleRaceMetadataDTO> getRaces() {
         return races;
     }
 }

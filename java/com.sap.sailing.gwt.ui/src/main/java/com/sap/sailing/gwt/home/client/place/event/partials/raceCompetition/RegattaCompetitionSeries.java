@@ -8,9 +8,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
 
 public class RegattaCompetitionSeries extends Composite {
 
@@ -36,9 +36,9 @@ public class RegattaCompetitionSeries extends Composite {
     
     public void addFleet(Presenter presenter, RaceListFleetDTO fleet) {
         RegattaCompetitionFleet competitionFleet = new RegattaCompetitionFleet(fleet);
-        for (RaceListRaceDTO race : fleet.getRaces()) {
+        for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
             boolean tracked = race.getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
-            String raceViewerUrl = tracked ? presenter.getRaceViewerURL(race.getRegattaName(), race.getRegattaAndRaceIdentifier()) : null; 
+            String raceViewerUrl = tracked ? presenter.getRaceViewerURL(race.getLeaderboardName(), race.getRegattaAndRaceIdentifier()) : null; 
             competitionFleet.addRace(race, raceViewerUrl);
         }
         containerUi.add(competitionFleet);

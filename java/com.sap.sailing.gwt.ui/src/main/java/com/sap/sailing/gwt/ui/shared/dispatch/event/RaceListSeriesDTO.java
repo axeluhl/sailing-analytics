@@ -1,8 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.TreeMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
@@ -12,7 +11,7 @@ public class RaceListSeriesDTO implements IsSerializable {
     private String seriesName;
     private int raceCount = 0;
     private int competitorCount = (int) (Math.random() * 10); // TODO
-    private Map<String, RaceListFleetDTO> fleets = new HashMap<>();
+    private TreeMap<FleetMetadataDTO, RaceListFleetDTO> fleets = new TreeMap<>();
 
     @SuppressWarnings("unused")
     private RaceListSeriesDTO() {
@@ -29,10 +28,9 @@ public class RaceListSeriesDTO implements IsSerializable {
     }
     
     private RaceListFleetDTO ensureFleet(FleetMetadataDTO fleetData) {
-        String fleetName = fleetData == null ? null : fleetData.getFleetName();
-        RaceListFleetDTO fleet = fleets.get(fleetName);
+        RaceListFleetDTO fleet = fleets.get(fleetData);
         if (fleet == null) {
-            fleets.put(fleetName, fleet = new RaceListFleetDTO(fleetData));
+            fleets.put(fleetData, fleet = new RaceListFleetDTO(fleetData));
         }
         return fleet;
     }

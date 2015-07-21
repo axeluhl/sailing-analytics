@@ -1,96 +1,29 @@
 package com.sap.sailing.gwt.ui.shared.race;
 
-import java.util.Date;
-
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sse.common.Util;
 
-public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements DTO, Comparable<RaceMetadataDTO<WIND>> {
+public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> extends SimpleRaceMetadataDTO {
     
-    public enum RaceViewState {
-        PLANNED {       // no start time set
-            @Override
-            public String getLabel() {
-                return StringMessages.INSTANCE.raceIsPlanned();
-            }
-        },
-        SCHEDULED {     // the start time is set and in the future
-            @Override
-            public String getLabel() {
-                return StringMessages.INSTANCE.raceIsScheduled(); // fallback representation
-            }
-        },
-        RUNNING {       // start time is the past and end time is not set or in the future
-            @Override
-            public String getLabel() {
-                return StringMessages.INSTANCE.raceIsRunning(); // fallback representation
-            }
-        },
-        FINISHED {      // the end time is set and is in the past
-            @Override
-            public String getLabel() {
-                return StringMessages.INSTANCE.raceIsFinished();
-            }
-        },
-        POSTPONED {     // the start has been postponed
-            @Override
-            public String getLabel() {
-                return StringMessages.INSTANCE.raceIsPostponed();
-            }
-        },
-        ABANDONED {      // the running racing has been abandoned
-            @Override
-            public String getLabel() {
-                return StringMessages.INSTANCE.raceIsCanceled();
-            }
-        };
-
-        public abstract String getLabel();
-    }
-    
-    public enum RaceTrackingState {
-        NOT_TRACKED,             // No tracking data -> probably just managed by race committee app
-        TRACKED_NO_VALID_DATA,   // tracking is connected but the required data for displaying the race viewer is not available
-        TRACKED_VALID_DATA       // tracking is connected and all required data for displaying the race viewer is available
-    }
-    
-    private String leaderboardName;
-    private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String regattaName;
     private String regattaDisplayName;
-    private String raceName;
     private FleetMetadataDTO fleet;
-    private Date start;
     private String courseArea;
     private String course;
     private String boatClass;
-    private RaceViewState state;
-    private RaceTrackingState trackingState;
     private WIND wind;
 
     protected RaceMetadataDTO() {
     }
     
     public RaceMetadataDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceName) {
-        this.leaderboardName = leaderboardName;
-        this.regattaAndRaceIdentifier = regattaAndRaceIdentifier;
+        super(leaderboardName, regattaAndRaceIdentifier, raceName);
         this.regattaName = leaderboardName;
-        this.raceName = raceName;
     }
 
     public String getRegattaName() {
         return regattaName;
-    }
-
-    public String getLeaderboardName() {
-        return leaderboardName;
-    }
-
-    public String getRaceName() {
-        return raceName;
     }
 
     public FleetMetadataDTO getFleet() {
@@ -99,14 +32,6 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
 
     public void setFleet(FleetMetadataDTO fleet) {
         this.fleet = fleet;
-    }
-
-    public Date getStart() {
-        return start;
-    }
-
-    public void setStart(Date start) {
-        this.start = start;
     }
 
     public String getCourseArea() {
@@ -133,22 +58,6 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
         this.boatClass = boatClass;
     }
 
-    public RaceViewState getViewState() {
-        return state;
-    }
-
-    public void setViewState(RaceViewState state) {
-        this.state = state;
-    }
-
-    public RaceTrackingState getTrackingState() {
-        return trackingState;
-    }
-
-    public void setTrackingState(RaceTrackingState trackingState) {
-        this.trackingState = trackingState;
-    }
-
     public WIND getWind() {
         return wind;
     }
@@ -165,60 +74,24 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements D
         this.regattaDisplayName = regattaDisplayName;
     }
 
-    public RegattaAndRaceIdentifier getRegattaAndRaceIdentifier() {
-        return regattaAndRaceIdentifier;
-    }
-
     @Override
-    public int compareTo(RaceMetadataDTO<WIND> o) {
-        Date thisStart = getStart();
-        Date otherStart = o.getStart();
-        if(Util.equalsWithNull(thisStart, otherStart)) {
-            // cases where both start times are == null or equal
-            return compareBySecondaryCriteria(o);
-        }
-        if(thisStart == null) {
-            return 1;
-        }
-        if(otherStart == null) {
-            return -1;
-        }
-        return -thisStart.compareTo(otherStart);
-    }
-
-    private int compareBySecondaryCriteria(RaceMetadataDTO<?> o) {
-        String thisRegattaName = getRegattaName();
-        String otherRegattaName = o.getRegattaName();
-        if(thisRegattaName != otherRegattaName) {
-            if(thisRegattaName == null) {
-                return 1;
+    protected <T extends SimpleRaceMetadataDTO> int compareBySecondaryCriteria(T o) {
+        if (o instanceof RaceMetadataDTO<?>) {
+            RaceMetadataDTO<?> other = (RaceMetadataDTO<?>) o;
+            int compareByRegattaName = Util.compareToWithNull(getRegattaName(), other.getRegattaName(), true);
+            if(compareByRegattaName != 0) {
+                return compareByRegattaName;
             }
-            if(otherRegattaName == null) {
-                return -1;
+            int compareByRaceName = getRaceName().compareTo(o.getRaceName());
+            if(compareByRaceName != 0) {
+                return compareByRaceName;
             }
-            int compareByRegatta = thisRegattaName.compareTo(otherRegattaName);
-            if(compareByRegatta != 0) {
-                return compareByRegatta;
-            }
-        }
-        int compareByRace = getRaceName().compareTo(o.getRaceName());
-        if(compareByRace != 0) {
-            return compareByRace;
-        }
-        FleetMetadataDTO thisFleet = getFleet();
-        FleetMetadataDTO otherFleet = o.getFleet();
-        if(thisFleet != otherFleet) {
-            if(thisFleet == null) {
-                return 1;
-            }
-            if(otherFleet == null) {
-                return -1;
-            }
-            int compareByFleet = thisFleet.compareTo(otherFleet);
+            int compareByFleet = Util.compareToWithNull(getFleet(), other.getFleet(), true);
             if(compareByFleet != 0) {
                 return compareByFleet;
             }
+            return getViewState().compareTo(o.getViewState());
         }
-        return getViewState().compareTo(o.getViewState());
+        return super.compareBySecondaryCriteria(o);
     }
 }

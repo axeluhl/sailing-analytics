@@ -4,7 +4,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible

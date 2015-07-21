@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
 public class RegattaCompetitionFleet extends Widget {
 
@@ -30,7 +30,7 @@ public class RegattaCompetitionFleet extends Widget {
         }
     }
     
-    public void addRace(RaceListRaceDTO race, String raceViewerURL) {
+    public void addRace(SimpleRaceMetadataDTO race, String raceViewerURL) {
         RegattaCompetitionFleetRace competitionRace = new RegattaCompetitionFleetRace(race, raceViewerURL);
         racesContainerUi.appendChild(competitionRace.getElement());
     }

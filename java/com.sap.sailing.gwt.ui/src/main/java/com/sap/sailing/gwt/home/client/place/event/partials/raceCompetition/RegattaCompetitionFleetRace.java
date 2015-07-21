@@ -7,9 +7,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
 
 public class RegattaCompetitionFleetRace extends UIObject {
 
@@ -23,7 +23,7 @@ public class RegattaCompetitionFleetRace extends UIObject {
     @UiField DivElement raceDateUi;
     private final AnchorElement anchor;
 
-    public RegattaCompetitionFleetRace(RaceListRaceDTO race, String raceViewerUrl) {
+    public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
         anchor = uiBinder.createAndBindUi(this);
         anchor.setHref(raceViewerUrl);
         local_res.css().ensureInjected();
