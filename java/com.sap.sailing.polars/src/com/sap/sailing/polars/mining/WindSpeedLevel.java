@@ -1,10 +1,13 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSpeedStepping;
 
-public class WindSpeedLevel {
+public class WindSpeedLevel implements Serializable {
 
+    private static final long serialVersionUID = -4498750034316806342L;
     private final int level;
     private final WindSpeedStepping stepping;
 

@@ -49,10 +49,14 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sailing.polars.mining.BearingClusterGroup;
+import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.PolarDataMiner;
+import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.datamining.data.ClusterGroup;
 
 public class PolarDataMinerTest {
 
@@ -73,12 +77,20 @@ public class PolarDataMinerTest {
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false, 3);
     }
+    
+    private ClusterGroup<Bearing> createAngleClusterGroup() {
+        return new BearingClusterGroup(0, 180, 5);
+    }
 
     @Ignore
     @Test
     public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException,
             NotEnoughDataHasBeenAddedException {
-        PolarDataMiner miner = new PolarDataMiner(createTestPolarSettings());
+        PolarSheetGenerationSettings settings = createTestPolarSettings();
+        ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
+        PolarDataMiner miner = new PolarDataMiner(settings,
+                new CubicRegressionPerCourseProcessor(),
+                new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup), angleClusterGroup);
 
         BoatClass mockedBoatClass = mock(BoatClass.class);
         
