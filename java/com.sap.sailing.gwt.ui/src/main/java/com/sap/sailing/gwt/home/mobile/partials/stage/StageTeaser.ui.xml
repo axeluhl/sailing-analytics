@@ -12,6 +12,7 @@
 		position: absolute;
 		top: 1em;
 		width: 100%;
+		transform: scale(0.66);
 	}
 	</ui:style>
 	<g:HTMLPanel styleName="{local_res.css.stageteaser} {local_res.css.swiperslide}">
