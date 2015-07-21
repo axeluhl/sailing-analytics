@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.server;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
+import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
@@ -19,6 +23,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -44,6 +49,9 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public final class HomeServiceUtil {
+    public interface EventVisitor {
+        void visit(EventBase event, boolean onRemoteServer, URL baseURL);
+    }
     
     private HomeServiceUtil() {
     }
@@ -466,5 +474,43 @@ public final class HomeServiceUtil {
             }
         }
         return courseArea == null ? null : courseArea.getId().toString();
+    }
+    
+    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request, EventVisitor visitor) throws MalformedURLException {
+        URL requestedBaseURL = getRequestBaseURL(request);
+        for (Event event : service.getAllEvents()) {
+            if(event.isPublic()) {
+                visitor.visit(event, false, requestedBaseURL);
+            }
+        }
+        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+            service.getPublicEventsOfAllSailingServers().entrySet()) {
+            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
+            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
+            URL baseURL = getBaseURL(serverRef.getURL());
+            if (remoteEvents != null) {
+                for (EventBase remoteEvent : remoteEvents) {
+                    if(remoteEvent.isPublic()) {
+                        visitor.visit(remoteEvent, true, baseURL);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
+     * to <code>http://sapsailing.com</code>.
+     * @throws MalformedURLException 
+     */
+    private static URL getRequestBaseURL(HttpServletRequest request) throws MalformedURLException {
+        final URL url = new URL(request.getRequestURL().toString());
+        final URL baseURL = getBaseURL(url);
+        return baseURL;
+    }
+
+    private static URL getBaseURL(URL url) throws MalformedURLException {
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
 }

@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -20,8 +19,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
@@ -72,10 +71,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     protected RacingEventService getService() {
         return racingEventServiceTracker.getService(); 
     }
-
-    private interface EventVisitor {
-        void visit(EventBase event, boolean onRemoteServer, URL baseURL);
-    }
     
     private static class EventHolder {
         EventBase event;
@@ -100,51 +95,13 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         }
     }
     
-    public void forAllPublicEvents(EventVisitor visitor) throws MalformedURLException {
-        URL requestedBaseURL = getRequestBaseURL();
-        for (Event event : getService().getAllEvents()) {
-            if(event.isPublic()) {
-                visitor.visit(event, false, requestedBaseURL);
-            }
-        }
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
-                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
-            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
-            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
-            URL baseURL = getBaseURL(serverRef.getURL());
-            if (remoteEvents != null) {
-                for (EventBase remoteEvent : remoteEvents) {
-                    if(remoteEvent.isPublic()) {
-                        visitor.visit(remoteEvent, true, baseURL);
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
-     * to <code>http://sapsailing.com</code>.
-     * @throws MalformedURLException 
-     */
-    private URL getRequestBaseURL() throws MalformedURLException {
-        final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
-        final URL baseURL = getBaseURL(url);
-        return baseURL;
-    }
-
-    private URL getBaseURL(URL url) throws MalformedURLException {
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
-    }
-    
     @Override
     public StartViewDTO getStartView() throws MalformedURLException {
         final List<Pair<StageEventType, EventHolder>> featuredEvents = new ArrayList<Pair<StageEventType, EventHolder>>();
         final List<EventHolder> recentEventsOfLast12Month = new ArrayList<EventHolder>();
         final TimePoint now = MillisecondsTimePoint.now();
         
-        forAllPublicEvents(new EventVisitor() {
+        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), new EventVisitor() {
             @Override
             public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
                 EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
@@ -354,7 +311,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     public EventListViewDTO getEventListView() throws MalformedURLException {
         // TODO fill stats of years
         final EventListViewDTO result = new EventListViewDTO();
-        forAllPublicEvents(new EventVisitor() {
+        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), new EventVisitor() {
             @Override
             public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
                 EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, getService());

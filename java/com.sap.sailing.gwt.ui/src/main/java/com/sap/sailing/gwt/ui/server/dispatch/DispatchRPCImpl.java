@@ -43,7 +43,7 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
             R executionResult = action.execute(
                     new DispatchContextImpl(request.getCurrentClientTime(),
                     racingEventServiceTracker.getService(), eventNewsServiceTracker.getService(), request
-                            .getClientLocaleName()));
+                            .getClientLocaleName(), getThreadLocalRequest()));
             return new ResultWrapper<R>(executionResult);
         } catch (DispatchException d) {
             logger.log(Level.WARNING, "Server exception", d);
