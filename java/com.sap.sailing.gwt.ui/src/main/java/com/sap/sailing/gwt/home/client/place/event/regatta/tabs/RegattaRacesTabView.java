@@ -125,9 +125,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         if (ExperimentalFeatures.SHOW_NEW_RACES_LIST) {
-            listNavigationPanelUi.removeFromParent(); // TODO temporary removed
-    //        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
-    //        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
+            listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
+            listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
             
             refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
