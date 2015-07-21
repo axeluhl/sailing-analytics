@@ -8,6 +8,7 @@ import java.util.List;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 
@@ -31,13 +32,13 @@ public class DependentStartTimeResolver {
 
         final StartTimeFinderResult result;
         if (raceLog == null) {
-            result = new StartTimeFinderResult(dependingOnRaces, null, startTimeDifference);
+            result = new StartTimeFinderResult(dependingOnRaces, startTimeDifference, ResolutionFailed.RACE_LOG_UNRESOLVED);
         } else {
             List<SimpleRaceLogIdentifier> extendedDependingOnRaces = new ArrayList<>();
             Util.addAll(dependingOnRaces, extendedDependingOnRaces);
             extendedDependingOnRaces.add(identifier);
             if (containsCycle(extendedDependingOnRaces)) {
-                result = new StartTimeFinderResult(extendedDependingOnRaces, null, null);
+                result = new StartTimeFinderResult(extendedDependingOnRaces, null, ResolutionFailed.CYCLIC_DEPENDENCY);
             } else {
                 StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
                 StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
