@@ -9,10 +9,10 @@
 		<div class="{local_res.css.stageteaser_background}">
 			<div ui:field="teaserImage" class="{local_res.css.stageteaser_background_image}" />
 		</div>
-		<div class="{local_res.css.stageteaser_content}">
+		<div class="{local_res.css.stageteaser_content}"  style="display:none;">
 			<header class="{local_res.css.stageteaser_content_header}">
 				<p class="{local_res.css.stageteaser_content_header_subtitle}">
-					<span ui:field="subtitle" />
+					<span ui:field="subtitle"/>
 				</p>
 				<h2 class="{local_res.css.stageteaser_content_header_title}">
 					<span ui:field="title" />

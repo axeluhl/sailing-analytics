@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 public class GetRecentEventsAction implements Action<ListResult<EventQuickfinderDTO>> {
     
     private int limit;
+    private String kabum;
 
     protected GetRecentEventsAction() {
     }
@@ -27,6 +28,7 @@ public class GetRecentEventsAction implements Action<ListResult<EventQuickfinder
     
     @GwtIncompatible
     public ListResult<EventQuickfinderDTO> execute(final DispatchContext context) throws MalformedURLException {
+
         final SortedSet<EventQuickfinderDTO> events = new TreeSet<>();
         HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), new EventVisitor() {
             @Override

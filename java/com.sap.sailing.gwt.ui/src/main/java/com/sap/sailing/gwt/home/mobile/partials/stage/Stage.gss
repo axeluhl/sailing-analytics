@@ -1,4 +1,3 @@
-@external slick-dots, slick-active;
 
 .swipercontainer {
   margin: 0 auto;
@@ -208,4 +207,5 @@
   background: #333;
 }
 
+@external slick-dots, slick-active;
 
