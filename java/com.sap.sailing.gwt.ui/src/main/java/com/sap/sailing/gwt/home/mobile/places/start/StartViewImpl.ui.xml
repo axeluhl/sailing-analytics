@@ -10,9 +10,7 @@
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 		
    	<g:HTMLPanel>
-   		<p>START VIEW</p>
-   		
-   		<p>Go to <g:Anchor ui:field="eventsLinkUi">events...</g:Anchor></p>
+   		<s:stage.Stage ui:field='stage'/>
    	 	<mp:socialfooter.SocialFooter/>	
 	</g:HTMLPanel>
 </ui:UiBinder>    
