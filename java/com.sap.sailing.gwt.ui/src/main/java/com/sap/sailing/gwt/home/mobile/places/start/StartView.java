@@ -1,12 +1,13 @@
 package com.sap.sailing.gwt.home.mobile.places.start;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
-import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public interface StartView {
 
@@ -20,6 +21,6 @@ public interface StartView {
         PlaceNavigation<?> getEventNavigation(EventQuickfinderDTO event);
     }
 
-    void setData(StartViewDTO data);
+    void setFeaturedEvents(List<EventStageDTO> list);
 }
 

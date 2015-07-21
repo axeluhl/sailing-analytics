@@ -13,7 +13,8 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.GetRecentEventsAction;
-import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.start.GetStagedEventsAction;
+import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class StartActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
@@ -28,18 +29,17 @@ public class StartActivity extends AbstractActivity implements Presenter {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         Window.setTitle(place.getTitle());
         final StartView view = new StartViewImpl(StartActivity.this);
-        clientFactory.getHomeService().getStartView(new AsyncCallback<StartViewDTO>() {
+        clientFactory.getDispatch().execute(new GetStagedEventsAction(), new AsyncCallback<ListResult<EventStageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO Auto-generated method stub
             }
-
+            
             @Override
-            public void onSuccess(StartViewDTO result) {
+            public void onSuccess(ListResult<EventStageDTO> result) {
                 panel.setWidget(view.asWidget());
                 Window.setTitle(place.getTitle());
-                view.setData(result);
-                
+                view.setFeaturedEvents(result.getValues());
             }
         });
         clientFactory.getDispatch().execute(new GetRecentEventsAction(15), new AsyncCallback<ListResult<EventQuickfinderDTO>>() {

@@ -51,7 +51,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
     private static final long serialVersionUID = 3947782997746039939L;
     
-    private static final int MAX_STAGE_EVENTS = 5;
+    public static final int MAX_STAGE_EVENTS = 5;
     private static final int MAX_RECENT_EVENTS = 3;
     private static final int MAX_VIDEO_COUNT = 3;
 
