@@ -152,10 +152,6 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         return position;
     }
 
-    public Util.Pair<String, String> getSelected() {
-        return mData.get(mSelectedItem);
-    }
-
     public void setSelected(int position) {
         mSelectedItem = position;
     }
