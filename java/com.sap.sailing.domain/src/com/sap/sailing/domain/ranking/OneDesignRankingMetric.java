@@ -53,19 +53,53 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
         final Duration result;
         final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(competitor,
                 rankingInfo.getTimePoint());
-        final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(
-                rankingInfo.getCompetitorFarthestAhead(), rankingInfo.getTimePoint());
-        final TimePoint tosLegFinishingTime = currentLegTo.getFinishTime();
-        if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint())) {
-            final TimePoint whosLegFinishingTime = currentLegWho.getFinishTime();
-            if (whosLegFinishingTime != null && !whosLegFinishingTime.after(rankingInfo.getTimePoint())) {
-                // both have finished the leg; this, by the way, means both have finished the race
-                result = tosLegFinishingTime.until(whosLegFinishingTime);
-            } else {
-                result = currentLegWho.getEstimatedTimeToNextMark(rankingInfo.getTimePoint(), WindPositionMode.EXACT);
-            }
+        final Competitor to = rankingInfo.getCompetitorFarthestAhead();
+        final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, rankingInfo.getTimePoint());
+        if (currentLegTo == null) {
+            result = null;
         } else {
-            result = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+            final TimePoint tosLegFinishingTime = currentLegTo.getFinishTime();
+            // If who is on the last leg, to will also be considered on the last leg, even if to already finished that leg.
+            // If to finished the last leg and who is on the last leg, getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead will
+            // not work properly because it considers both on the same leg and therefore doesn't restrict the time to when to finished
+            // the leg and looks at the excess time.
+            final Waypoint lastWaypoint = getTrackedRace().getRace().getCourse().getLastWaypoint();
+            if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint()) &&
+                    currentLegTo.getTrackedLeg().getLeg().getTo() == lastWaypoint) {
+                // to has finished the race
+                if (currentLegWho == null) {
+                    result = null;
+                } else {
+                    final TimePoint whosLegFinishingTime = currentLegWho.getFinishTime();
+                    if (whosLegFinishingTime != null && !whosLegFinishingTime.after(rankingInfo.getTimePoint())) {
+                        // both have finished their leg; this means both have finished the race because otherwise this wouldn't be
+                        // who's current leg
+                        result = tosLegFinishingTime.until(whosLegFinishingTime);
+                    } else {
+                        final Duration etaNextMark = currentLegWho.getEstimatedTimeToNextMark(rankingInfo.getTimePoint(), WindPositionMode.EXACT);
+                        if (etaNextMark == null) {
+                            result = null;
+                        } else {
+                            final Duration timeToTookToFinishRaceStartingAtNextMark;
+                            final Waypoint whosNextMark = currentLegWho.getTrackedLeg().getLeg().getTo();
+                            if (whosNextMark == lastWaypoint) {
+                                // who is in the last leg; the ETA to who's next mark is the solution
+                                timeToTookToFinishRaceStartingAtNextMark = Duration.NULL;
+                            } else {
+                                // after passing the next mark, who still needs to travel about the same time that to
+                                // traveled after passing the next mark until finishing the race
+                                timeToTookToFinishRaceStartingAtNextMark =
+                                        getTrackedRace().getMarkPassing(to, whosNextMark).getTimePoint().
+                                            until(tosLegFinishingTime);
+                            }
+                            final TimePoint etaAtFinish = rankingInfo.getTimePoint().plus(etaNextMark.plus(timeToTookToFinishRaceStartingAtNextMark));
+                            result = tosLegFinishingTime.until(etaAtFinish);
+                        }
+                    }
+                }
+            } else {
+                result = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+            }
         }
         return result;
     }
