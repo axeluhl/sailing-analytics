@@ -14,6 +14,7 @@ import com.sap.sse.common.TimePoint;
 public class RaceListDataTypeRace implements RaceListDataType {
 
     private static String unscheduledTemplate;
+    private static String prescheduledTemplate;
     private static String scheduldedTemplate;
     private static String startPhaseTemplate;
     private static String runningTemplate;
@@ -29,6 +30,7 @@ public class RaceListDataTypeRace implements RaceListDataType {
 
     public static void initializeTemplates(Fragment fragment) {
         unscheduledTemplate = fragment.getString(R.string.racelist_unscheduled);
+        prescheduledTemplate = fragment.getString(R.string.racelist_prescheduled);
         scheduldedTemplate = fragment.getString(R.string.racelist_scheduled);
         startPhaseTemplate = fragment.getString(R.string.racelist_startphase);
         runningTemplate = fragment.getString(R.string.racelist_running);
@@ -77,6 +79,8 @@ public class RaceListDataTypeRace implements RaceListDataType {
         switch (status) {
         case UNSCHEDULED:
             return unscheduledTemplate;
+        case PRESCHEDULED:
+            return String.format(prescheduledTemplate, formatStartTime());
         case SCHEDULED:
             return String.format(scheduldedTemplate, formatStartTime());
         case STARTPHASE:

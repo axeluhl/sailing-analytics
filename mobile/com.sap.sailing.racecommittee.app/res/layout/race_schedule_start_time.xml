@@ -218,14 +218,40 @@
                     android:text="@string/minutes_after"
                     android:textAppearance="?textLarge"/>
 
-                <Spinner
-                    android:id="@+id/dependent_race"
+                <LinearLayout
                     android:layout_width="470dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:dropDownWidth="wrap_content"
-                    android:prompt="@string/dependent_races_prompt"
-                    android:spinnerMode="dropdown"/>
+                    android:orientation="vertical">
+
+                    <Spinner
+                        android:id="@+id/dependent_leaderboard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?sap_gray_black_20"
+                        android:dropDownWidth="wrap_content"
+                        android:spinnerMode="dropdown"/>
+
+                    <Spinner
+                        android:id="@+id/dependent_fleet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_half"
+                        android:background="?sap_gray_black_20"
+                        android:dropDownWidth="wrap_content"
+                        android:spinnerMode="dropdown"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <Spinner
+                        android:id="@+id/dependent_racegroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_half"
+                        android:background="?sap_gray_black_20"
+                        android:dropDownWidth="wrap_content"
+                        android:spinnerMode="dropdown"/>
+                </LinearLayout>
             </LinearLayout>
 
             <Button
@@ -235,6 +261,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/relative_input"
                 android:layout_centerInParent="true"
+                android:layout_marginTop="@dimen/default_margin_half"
                 android:maxWidth="200dp"
                 android:text="@string/race_set_time"/>
         </RelativeLayout>

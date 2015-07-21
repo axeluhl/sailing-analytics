@@ -48,7 +48,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
 
         stage.setupRefresh(refreshManager);
-        refreshManager.add(racesListLive, new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
+        refreshManager.add(racesListLive.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
 
         contentArea.setWidget(this);

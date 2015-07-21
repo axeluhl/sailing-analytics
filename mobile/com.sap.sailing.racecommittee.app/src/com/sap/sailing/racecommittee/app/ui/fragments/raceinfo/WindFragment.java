@@ -435,7 +435,6 @@ public class WindFragment extends BaseFragment
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        refreshUI();
     }
 
     @Override
