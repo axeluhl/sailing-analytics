@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 public class StartViewImpl extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -25,6 +26,11 @@ public class StartViewImpl extends Composite implements StartView {
         this.currentPresenter = presenter;
         stage = new Stage(presenter.getNavigator());
         initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    @Override
+    public void setData(StartViewDTO data) {
+        stage.setFeaturedEvents(data.getStageEvents());
     }
 
     @Override
