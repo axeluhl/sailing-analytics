@@ -74,8 +74,12 @@ public class WidgetCarousel extends Composite {
         initWidget(ourUiBinder.createAndBindUi(this));
         uniqueId = Document.get().createUniqueId();
         sliderMainUi.addStyleName(uniqueId);
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
         init();
-
     }
 
     public void onAfterChange() {
