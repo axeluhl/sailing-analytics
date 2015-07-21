@@ -58,6 +58,10 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
         TimePoint eventStart = new MillisecondsTimePoint(event.getStartDate());
         countdownTickerUi = new CountdownTicker(eventStart.asDate());
         initWidget(uiBinder.createAndBindUi(this));
+        
+        if(MillisecondsTimePoint.now().after(eventStart)) {
+            countdownTickerUi.removeFromParent();
+        }
 
         addDomHandler(new ClickHandler() {
 
