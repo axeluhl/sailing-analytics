@@ -434,6 +434,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         : entryDTO.raceInfo.seriesName;
             }
         };
+        seriesNameColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(seriesNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.raceInfo.seriesName, right.raceInfo.seriesName);
+            }
+        });
         // seriesNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -442,6 +450,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         : entryDTO.raceInfo.fleetName;
             }
         };
+        fleetNameColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(fleetNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.raceInfo.fleetName, right.raceInfo.fleetName);
+            }
+        });
         // fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         AnchorCell raceCell = new AnchorCell();
         raceNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(raceCell) {
@@ -456,8 +472,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 }
                 return result;
             }
-
-
         };
         raceNameColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(raceNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
@@ -573,6 +587,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         tooltip);
             }
         };
+        flagColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(flagColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO o1, RegattaOverviewEntryDTO o2) {
+                NaturalComparator comp = new NaturalComparator();
+                int upper = comp.compare(o1.raceInfo.lastUpperFlag.name(), o2.raceInfo.lastUpperFlag.name());
+                return upper != 0 ? upper : comp.compare(o1.raceInfo.lastLowerFlag.name(), o2.raceInfo.lastLowerFlag.name());
+            }
+            
+        });
         flagColumn.setCellStyleNames(tableRes.cellTableStyle().flagColumn());
         boatClass = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -580,6 +604,15 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return entryDTO.boatClassName;
             }
         };
+        boatClass.setSortable(true);
+        regattaOverviewListHandler.setComparator(boatClass, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.boatClassName, right.boatClassName);
+            }
+            
+        });
         lastUpdateColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             private final NumberFormat FMT = NumberFormat.getFormat("00");
 
@@ -651,6 +684,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return additionalInformation.toString();
             }
         };
+        raceAdditionalInformationColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceAdditionalInformationColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO o1, RegattaOverviewEntryDTO o2) {
+                return new NaturalComparator().compare(raceAdditionalInformationColumn.getValue(o1), raceAdditionalInformationColumn.getValue(o2));
+            }
+        });
         endOfProtestTime = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
@@ -669,6 +709,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return additionalInformation.toString();
             }
         };
+        endOfProtestTime.setSortable(true);
+        regattaOverviewListHandler.setComparator(endOfProtestTime, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO o1, RegattaOverviewEntryDTO o2) {
+                return new NaturalComparator().compare(o1.raceInfo.protestFinishTime.toString(), o2.raceInfo.protestFinishTime.toString());
+            }
+        });
     }
 
     public List<RegattaOverviewEntryDTO> getAllRaces() {
