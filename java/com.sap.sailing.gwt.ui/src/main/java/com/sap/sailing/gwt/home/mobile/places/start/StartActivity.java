@@ -42,7 +42,7 @@ public class StartActivity extends AbstractActivity implements Presenter {
                 
             }
         });
-        clientFactory.getDispatch().execute(new GetRecentEventsAction(10), new AsyncCallback<ListResult<EventQuickfinderDTO>>() {
+        clientFactory.getDispatch().execute(new GetRecentEventsAction(15), new AsyncCallback<ListResult<EventQuickfinderDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO Auto-generated method stub
