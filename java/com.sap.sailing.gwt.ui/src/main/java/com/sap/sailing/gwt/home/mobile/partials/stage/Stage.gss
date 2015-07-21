@@ -141,7 +141,7 @@
 }
 .stage {
   font-size: 1rem;
-  height: 38.666666666666664em;
+  height: 240px;
   position: relative;
   clear: both;
 }
