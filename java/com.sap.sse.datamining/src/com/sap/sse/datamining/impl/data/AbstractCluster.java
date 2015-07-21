@@ -10,6 +10,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public abstract class AbstractCluster<ElementType> implements Cluster<ElementType> {
 
+    private static final long serialVersionUID = 1606840566021644768L;
     private final String messageKey;
     private Collection<ClusterBoundary<ElementType>> boundaries;
 

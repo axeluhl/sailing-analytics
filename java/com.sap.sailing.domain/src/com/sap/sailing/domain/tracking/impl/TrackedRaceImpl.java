@@ -54,6 +54,7 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -134,6 +135,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
@@ -1022,14 +1024,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
                     // competitor has finished race at or before the requested time point; use time point of crossing the finish line
                     end = markPassings.last().getTimePoint();
-                } else if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
-                        (!trackedLegOfCompetitor.hasFinishedLeg(getEndOfTracking())
-                        && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
-                                || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
-                    // If the race is no longer tracking and hence no more data can be expected, and the competitor
-                    // hasn't finished a leg after the requested time point, no valid distance traveled can be determined
-                    // for the competitor in this race the the time point requested
-                    end = null;
+                } else {
+                    final TimePoint endOfTracking = getEndOfTracking();
+                    if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
+                            (endOfTracking != null && !trackedLegOfCompetitor.hasFinishedLeg(endOfTracking)
+                            && (timePoint.after(endOfTracking) || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
+                        // If the race is no longer tracking and hence no more data can be expected, and the competitor
+                        // hasn't finished a leg after the requested time point, no valid distance traveled can be determined
+                        // for the competitor in this race the the time point requested
+                        end = null;
+                    }
                 }
                 if (end == null) {
                     result = null;
@@ -3691,5 +3695,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     public void setRaceLogResolver(RaceLogResolver raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
+    }
+
+    /**
+     * When given the opportunity to resolve after de-serialization, grabs the {@link RaceLogResolver} from the
+     * {@link SharedDomainFactory} because the field is transient and needs filling after de-serialization.
+     */
+    @Override
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+        this.raceLogResolver = domainFactory.getRaceLogResolver();
+        return this;
     }
 }

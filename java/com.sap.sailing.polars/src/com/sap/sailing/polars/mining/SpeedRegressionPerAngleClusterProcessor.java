@@ -1,6 +1,8 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,8 +29,11 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class SpeedRegressionPerAngleClusterProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>{
-    
+public class SpeedRegressionPerAngleClusterProcessor implements
+        Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
+   
+    private static final long serialVersionUID = 3279917556091599077L;
+
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, IncrementalLeastSquares> regressions = new HashMap<>();
@@ -37,11 +42,15 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
 
     private final ClusterGroup<Bearing> angleClusterGroup;
 
-    private final ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+    /**
+     * FIXME make sure listeners and replication interact correctly
+     */
+    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+
+    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
     
-    public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup, ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+    public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
-        this.listeners = listeners;
     }
     
     @Override
@@ -70,6 +79,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
+        availableBoatClasses.add(boatClass);
         Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
         if (listenersForBoatClass != null) {
             for (PolarsChangedListener listener : listenersForBoatClass) {
@@ -155,6 +165,14 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
         return polynomialFunction;
     }
     
+    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
+    
+    Set<BoatClass> getAvailableBoatClasses() {
+        return availableBoatClasses;
+    }
+    
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
      // TODO Auto-generated method stub
@@ -193,6 +211,10 @@ public class SpeedRegressionPerAngleClusterProcessor implements Processor<Groupe
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public ClusterGroup<Bearing> getAngleCluster() {
+        return angleClusterGroup;
     }
 
 }

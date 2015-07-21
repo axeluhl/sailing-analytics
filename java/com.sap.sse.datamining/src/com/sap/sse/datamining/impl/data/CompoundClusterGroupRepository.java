@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -24,7 +25,7 @@ public class CompoundClusterGroupRepository implements ClusterGroupRepository {
     }
 
     @Override
-    public <T> Collection<ClusterGroup<T>> getClusterGroupsFor(Class<T> type) {
+    public <T extends Serializable> Collection<ClusterGroup<T>> getClusterGroupsFor(Class<T> type) {
         Collection<ClusterGroup<T>> allClusterGroups = new HashSet<>();
         for (ClusterGroupRepository clusterGroupRepository : repositories) {
             allClusterGroups.addAll(clusterGroupRepository.getClusterGroupsFor(type));
