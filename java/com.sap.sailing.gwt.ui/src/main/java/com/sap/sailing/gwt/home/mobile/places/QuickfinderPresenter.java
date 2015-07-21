@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 public class QuickfinderPresenter {
     private static final StringMessages MSG = StringMessages.INSTANCE;
     
-
     public QuickfinderPresenter(Quickfinder quickfinder, RegattaLeaderboardNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
         if (regattaMetadatas == null) {
             quickfinder.removeFromParent();
@@ -19,7 +18,11 @@ public class QuickfinderPresenter {
         }
         quickfinder.addPlaceholderItem(MSG.resultsQuickfinder());
         for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
-            quickfinder.addItemToGroup(regattaMetadata.getBoatCategory(), regattaMetadata.getDisplayName(), navigator.getRegattaMiniLeaderboardNavigation(regattaMetadata.getId()));
+            String boatCategory = regattaMetadata.getBoatCategory();
+            if(boatCategory == null || boatCategory.isEmpty()) {
+                boatCategory = MSG.regattas();
+            }
+            quickfinder.addItemToGroup(boatCategory, regattaMetadata.getDisplayName(), navigator.getRegattaMiniLeaderboardNavigation(regattaMetadata.getId()));
         }
     }
     
@@ -38,5 +41,4 @@ public class QuickfinderPresenter {
             quickfinder.addItemToGroup(seriesName, displayName, navigator.getMiniLeaderboardNavigation(eventOfSeries.getId()));
         }
     }
-
 }
