@@ -36,7 +36,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         // clear the domainFactory competitor store for a clean start:
-        domainFactory = new DomainFactoryImpl();
+        domainFactory = new DomainFactoryImpl((srlid)->null);
     }
     
     private void dropCompetitorCollection() {

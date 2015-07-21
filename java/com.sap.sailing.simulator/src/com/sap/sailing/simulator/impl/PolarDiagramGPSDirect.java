@@ -146,13 +146,13 @@ public class PolarDiagramGPSDirect implements PolarDiagram, Serializable {
         try {
             if (beatPort == null) {
                 SpeedWithBearing beatPortRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind,
-                        LegType.UPWIND, Tack.PORT, true).getObject();
+                        LegType.UPWIND, Tack.PORT).getObject();
                 beatPort = new KnotSpeedWithBearingImpl(beatPortRelative.getKnots(), this.wind.getBearing().reverse()
                         .add(beatPortRelative.getBearing()));
             }
             if (beatStar == null) {
                 SpeedWithBearing beatStarRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind,
-                        LegType.UPWIND, Tack.STARBOARD, true).getObject();
+                        LegType.UPWIND, Tack.STARBOARD).getObject();
                 beatStar = new KnotSpeedWithBearingImpl(beatStarRelative.getKnots(), this.wind.getBearing().reverse()
                         .add(beatStarRelative.getBearing()));
             }
@@ -175,13 +175,13 @@ public class PolarDiagramGPSDirect implements PolarDiagram, Serializable {
         try {
             if (jibePort == null) {
                 SpeedWithBearing jibePortRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind,
-                        LegType.DOWNWIND, Tack.PORT, true).getObject();
+                        LegType.DOWNWIND, Tack.PORT).getObject();
                 jibePort = new KnotSpeedWithBearingImpl(jibePortRelative.getKnots(), this.wind.getBearing().reverse()
                         .add(jibePortRelative.getBearing()));
             }
             if (jibeStar == null) {
                 SpeedWithBearing jibeStarRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind,
-                        LegType.DOWNWIND, Tack.STARBOARD, true).getObject();
+                        LegType.DOWNWIND, Tack.STARBOARD).getObject();
                 jibeStar = new KnotSpeedWithBearingImpl(jibeStarRelative.getKnots(), this.wind.getBearing().reverse()
                         .add(jibeStarRelative.getBearing()));
             }

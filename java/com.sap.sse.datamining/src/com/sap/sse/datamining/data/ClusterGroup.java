@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.data;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -14,7 +15,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * 
  * @see Cluster
  */
-public interface ClusterGroup<ElementType> {
+public interface ClusterGroup<ElementType extends Serializable> extends Serializable {
 
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages);
     

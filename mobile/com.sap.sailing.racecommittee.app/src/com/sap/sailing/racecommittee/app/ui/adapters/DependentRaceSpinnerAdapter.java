@@ -124,27 +124,32 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         return (mData.size() == 0);
     }
 
-    public void add(Util.Pair<String, String> data) {
+    public int add(Util.Pair<String, String> data) {
         boolean found = false;
+        int position = -1;
+
+        int counter = 0;
         for (Util.Pair<String, String> pair : mData) {
             if (pair.getA().equals(data.getA())) {
                 if (pair.getB() == null && data.getB() == null) {
                     found = true;
+                    position = counter;
                     break;
                 }
                 if (pair.getB() != null && pair.getB().equals(data.getB())) {
                     found = true;
+                    position = counter;
                     break;
                 }
             }
+            counter++;
         }
         if (!found) {
             mData.add(data);
+            position = mData.size() - 1;
         }
-    }
 
-    public Util.Pair<String, String> getSelected() {
-        return mData.get(mSelectedItem);
+        return position;
     }
 
     public void setSelected(int position) {

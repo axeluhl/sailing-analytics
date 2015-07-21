@@ -75,8 +75,8 @@ public class UpdatesBoxItem extends Widget {
                 placeNavigation = presenter.getRegattaLeaderboardNavigation(((LeaderboardNewsEntryDTO) entry).getLeaderboardName());
             } else if(entry instanceof AbstractRaceNewsEntryDTO) {
                 AbstractRaceNewsEntryDTO raceEntry = (AbstractRaceNewsEntryDTO) entry;
-                if(raceEntry.getTrackedRaceName() != null) {
-                    directLink = presenter.getRaceViewerURL(raceEntry.getRegattaName(), raceEntry.getTrackedRaceName());
+                if(raceEntry.getRegattaAndRaceIdentfier() != null) {
+                    directLink = presenter.getRaceViewerURL(raceEntry.getLeaderboardName(), raceEntry.getRegattaAndRaceIdentfier());
                 }
             }
             if(placeNavigation != null) {

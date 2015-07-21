@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.regression.impl;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,6 +30,8 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  */
 public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSquares {
     
+    private static final long serialVersionUID = -5282614133220702724L;
+
     private class NaNCheckerVisitor implements RealMatrixPreservingVisitor {
         
         private boolean hasNaNEntry = false;
@@ -64,10 +67,10 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
     
     private AtomicBoolean functionNeedsUpdate = new AtomicBoolean(true);
 
-    private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
+    private transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
             false);
     
-    private final NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
+    private transient NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
             true);
 
     private PolynomialFunction cachedFunction;
@@ -295,6 +298,15 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             return result;
         }
 
+    }
+    
+    private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
+                false);
+        cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
+                true);
     }
 
     @Override
