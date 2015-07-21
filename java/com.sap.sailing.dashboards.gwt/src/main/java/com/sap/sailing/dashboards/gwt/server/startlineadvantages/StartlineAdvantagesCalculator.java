@@ -32,6 +32,7 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
 
     private TrackedRace currentLiveTrackedRace;
     private Pair<Position, Position> startlineMarkPositions;
+    private Position startline;
     private Position firstMarkPosition;
     private MovingAverage advantageMaximumAverage;
     private double startlineAdvantage;
@@ -174,6 +175,12 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
         
     }
     
+    private Position getIntersectionPositionBetweenStartlineAndLayline() {
+        Position result = null;
+        
+        return result;
+    }
+    
     private void getStartlineOfRace(){
         
     }
@@ -187,6 +194,7 @@ public class StartlineAdvantagesCalculator implements LiveTrackedRaceListener{
     }
     
     private Position getIntersectionPointOfTwoGPSLines(Object line1, Object line2){
+        
         return null;
     }
 
