@@ -42,7 +42,32 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
-        return rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+        // When the competitor is in the same leg as the leader (which in this ranking metric is always the boat
+        // farthest ahead) then the competitor's duration to reach the current leader's position is estimated based on the
+        // competitor's average VMG on the current leg.
+        // If the leader has already finished the competitor's current leg, the time when the competitor will probably
+        // finish the leg is compared to the time when the leader finished the leg.
+        // When the competitor has already finished the current leg this can only mean the competitor finished the race
+        // because otherwise the competitor would not be considered in this leg anymore. In this case, the mark passing
+        // times for finishing the leg are compared between competitor and leader.
+        final Duration result;
+        final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(competitor,
+                rankingInfo.getTimePoint());
+        final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(
+                rankingInfo.getCompetitorFarthestAhead(), rankingInfo.getTimePoint());
+        final TimePoint tosLegFinishingTime = currentLegTo.getFinishTime();
+        if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint())) {
+            final TimePoint whosLegFinishingTime = currentLegWho.getFinishTime();
+            if (whosLegFinishingTime != null && !whosLegFinishingTime.after(rankingInfo.getTimePoint())) {
+                // both have finished the leg; this, by the way, means both have finished the race
+                result = tosLegFinishingTime.until(whosLegFinishingTime);
+            } else {
+                result = currentLegWho.getEstimatedTimeToNextMark(rankingInfo.getTimePoint(), WindPositionMode.EXACT);
+            }
+        } else {
+            result = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+        }
+        return result;
     }
 
     @Override
