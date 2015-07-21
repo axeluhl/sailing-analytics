@@ -33,7 +33,7 @@ public class Stage extends Composite {
 
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
+        widgetCarousel.setShowArrows(false);
         stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 

@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.home.mobile.partials.stage;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,10 +22,11 @@ public abstract class StageTeaserBand extends Composite {
     
     private static StageTeaserBandUiBinder uiBinder = GWT.create(StageTeaserBandUiBinder.class);
 
-    @UiField SpanElement bandTitle;
-    @UiField SpanElement bandSubtitle;
+    @UiField
+    DivElement bandTitle;
+    @UiField
+    DivElement bandSubtitle;
     @UiField Anchor actionLink;
-    @UiField DivElement isLiveDiv;
 
     private final MobilePlacesNavigator placeNavigator;
     private final EventStageDTO event;
@@ -39,8 +38,6 @@ public abstract class StageTeaserBand extends Composite {
         
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
-        isLiveDiv.getStyle().setDisplay(Display.NONE);
 
         eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }
