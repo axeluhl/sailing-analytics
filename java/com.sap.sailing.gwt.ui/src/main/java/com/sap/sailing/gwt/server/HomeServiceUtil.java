@@ -476,11 +476,13 @@ public final class HomeServiceUtil {
         return courseArea == null ? null : courseArea.getId().toString();
     }
     
-    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request, EventVisitor visitor) throws MalformedURLException {
+    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request, EventVisitor... visitors) throws MalformedURLException {
         URL requestedBaseURL = getRequestBaseURL(request);
         for (Event event : service.getAllEvents()) {
             if(event.isPublic()) {
-                visitor.visit(event, false, requestedBaseURL);
+                for(EventVisitor visitor : visitors) {
+                    visitor.visit(event, false, requestedBaseURL);
+                }
             }
         }
         for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
@@ -492,7 +494,9 @@ public final class HomeServiceUtil {
             if (remoteEvents != null) {
                 for (EventBase remoteEvent : remoteEvents) {
                     if(remoteEvent.isPublic()) {
-                        visitor.visit(remoteEvent, true, baseURL);
+                        for(EventVisitor visitor : visitors) {
+                            visitor.visit(remoteEvent, true, baseURL);
+                        }
                     }
                 }
             }

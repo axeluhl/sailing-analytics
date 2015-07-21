@@ -37,13 +37,8 @@ import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
@@ -72,57 +67,22 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         return racingEventServiceTracker.getService(); 
     }
     
-    private static class EventHolder {
-        EventBase event;
-        boolean onRemoteServer;
-        URL baseURL;
-        public EventHolder(EventBase event, boolean onRemoteServer, URL baseURL) {
-            super();
-            this.event = event;
-            this.onRemoteServer = onRemoteServer;
-            this.baseURL = baseURL;
-        }
-    }
-    
-    private class FeaturedEventsComparator implements Comparator<Pair<StageEventType, EventHolder>> {
-        @Override
-        public int compare(Pair<StageEventType, EventHolder> eventAndStageType1,
-                Pair<StageEventType, EventHolder> eventAndStageType2) {
-            TimePoint now = MillisecondsTimePoint.now();
-            TimeRange event1Range = new TimeRangeImpl(eventAndStageType1.getB().event.getStartDate(), eventAndStageType1.getB().event.getEndDate());
-            TimeRange event2Range = new TimeRangeImpl(eventAndStageType2.getB().event.getStartDate(), eventAndStageType2.getB().event.getEndDate());
-            return event1Range.timeDifference(now).compareTo(event2Range.timeDifference(now));
-        }
-    }
-    
     @Override
     public StartViewDTO getStartView() throws MalformedURLException {
-        final List<Pair<StageEventType, EventHolder>> featuredEvents = new ArrayList<Pair<StageEventType, EventHolder>>();
-        final List<EventHolder> recentEventsOfLast12Month = new ArrayList<EventHolder>();
-        final TimePoint now = MillisecondsTimePoint.now();
+        EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
+        RecentEventsCalculator recentEventsCalculator = new RecentEventsCalculator();
         
-        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), new EventVisitor() {
-            @Override
-            public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-                EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
-                if (now.after(event.getStartDate()) && now.before(event.getEndDate())) {
-                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.RUNNING, holder));
-                } else if (event.getStartDate().after(now) &&
-                        event.getStartDate().before(now.plus(Duration.ONE_WEEK.times(4)))) {
-                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.UPCOMING_SOON, holder));
-                } else if (event.getEndDate().before(now) &&
-                        event.getEndDate().after(now.minus(Duration.ONE_YEAR))) {
-                    recentEventsOfLast12Month.add(holder);
-                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.POPULAR, holder));
-                }
-            }
-        });
+        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), stageCandidateCalculator, recentEventsCalculator);
         
         StartViewDTO result = new StartViewDTO();
         
-        Collections.sort(featuredEvents, new FeaturedEventsComparator());
-        for(int i = 0; i < MAX_STAGE_EVENTS && i < featuredEvents.size(); i++) {
-            Pair<StageEventType, EventHolder> pair = featuredEvents.get(i);
+        int count = 0;
+        for(Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
+            count++;
+            if(count > MAX_STAGE_EVENTS) {
+                break;
+            }
+            
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
             result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService()));
@@ -143,19 +103,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 }
             }
         }
-        Collections.sort(recentEventsOfLast12Month, new Comparator<EventHolder>() {
-            @Override
-            public int compare(EventHolder o1, EventHolder o2) {
-                final long diff = o2.event.getEndDate().asMillis() - o1.event.getEndDate().asMillis();
-                return diff > 0l ? 1 : diff < 0l ? -1 : 0;
-            }
-        });
         
         final Set<SailingImageDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
                                                                         // amount of shuffling
         final List<SailingVideoDTO> videoCandidates = new ArrayList<>();
         
-        for(EventHolder holder : recentEventsOfLast12Month) {
+        for(EventHolder holder : recentEventsCalculator.getRecentEventsOfLast12Month()) {
             if(result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
                 result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, getService()));
             }
