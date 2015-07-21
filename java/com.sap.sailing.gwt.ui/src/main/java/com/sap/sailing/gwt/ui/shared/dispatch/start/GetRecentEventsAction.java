@@ -36,6 +36,7 @@ public class GetRecentEventsAction implements Action<ListResult<EventQuickfinder
                 dto.setDisplayName(HomeServiceUtil.getEventDisplayName(event, context.getRacingEventService()));
                 dto.setOnRemoteServer(onRemoteServer);
                 dto.setBaseURL(baseURL == null ? null : baseURL.toString());
+                dto.setStartTimePoint(event.getStartDate());
                 events.add(dto);
             }
         });
