@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
@@ -485,9 +486,9 @@ public final class HomeServiceUtil {
                 }
             }
         }
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
             service.getPublicEventsOfAllSailingServers().entrySet()) {
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
             final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
             final Iterable<EventBase> remoteEvents = eventsOrException.getA();
             URL baseURL = getBaseURL(serverRef.getURL());
