@@ -158,6 +158,7 @@
   color: #999;
   background-color: #fff;
   border: 1px solid #999;
+  padding: 0.266666666666666em 0.266666666666666em;
 }
 .fleet_races_raceplanned:hover {
   background-color: #e6e6e6;
