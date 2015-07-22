@@ -73,25 +73,30 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> extends Simp
     public void setRegattaDisplayName(String regattaDisplayName) {
         this.regattaDisplayName = regattaDisplayName;
     }
-
+    
     @Override
-    protected <T extends SimpleRaceMetadataDTO> int compareBySecondaryCriteria(T o) {
+    public int compareTo(SimpleRaceMetadataDTO o) {
         if (o instanceof RaceMetadataDTO<?>) {
             RaceMetadataDTO<?> other = (RaceMetadataDTO<?>) o;
-            int compareByRegattaName = Util.compareToWithNull(getRegattaName(), other.getRegattaName(), true);
-            if(compareByRegattaName != 0) {
-                return compareByRegattaName;
-            }
-            int compareByRaceName = getRaceName().compareTo(o.getRaceName());
-            if(compareByRaceName != 0) {
-                return compareByRaceName;
-            }
-            int compareByFleet = Util.compareToWithNull(getFleet(), other.getFleet(), true);
-            if(compareByFleet != 0) {
-                return compareByFleet;
-            }
-            return getViewState().compareTo(o.getViewState());
+            final int compareByStart = Util.compareToWithNull(getStart(), other.getStart(), false);
+            return compareByStart != 0 ? compareByStart : compareBySecondaryCriteria(other);
         }
-        return super.compareBySecondaryCriteria(o);
+        return super.compareTo(o);
+    }
+
+    private int compareBySecondaryCriteria(RaceMetadataDTO<?> other) {
+        int compareByRegattaName = Util.compareToWithNull(getRegattaName(), other.getRegattaName(), true);
+        if(compareByRegattaName != 0) {
+            return compareByRegattaName;
+        }
+        int compareByRaceName = getRaceName().compareTo(other.getRaceName());
+        if(compareByRaceName != 0) {
+            return compareByRaceName;
+        }
+        int compareByFleet = Util.compareToWithNull(getFleet(), other.getFleet(), true);
+        if(compareByFleet != 0) {
+            return compareByFleet;
+        }
+        return getViewState().compareTo(other.getViewState());
     }
 }

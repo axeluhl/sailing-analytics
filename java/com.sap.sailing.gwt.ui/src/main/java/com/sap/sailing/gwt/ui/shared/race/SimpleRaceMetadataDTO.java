@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.race;
 import java.util.Date;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sse.common.Util;
@@ -109,11 +110,7 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     
     @Override
     public int compareTo(SimpleRaceMetadataDTO o) {
-        final int compareByStart = Util.compareToWithNull(getStart(), o.getStart(), false);
-        return compareByStart != 0 ? compareByStart : compareBySecondaryCriteria(o);
-    }
-    
-    protected <T extends SimpleRaceMetadataDTO> int compareBySecondaryCriteria(T o) {
-        return getRaceName().compareTo(o.getRaceName());
+        final int compareByRaceName = new NaturalComparator().compare(getRaceName(), o.getRaceName());
+        return compareByRaceName != 0 ? compareByRaceName : Util.compareToWithNull(getStart(), o.getStart(), true);
     }
 }
