@@ -27,6 +27,7 @@ public class RegattaCompetitionSeries extends Composite {
     private final HTMLPanel containerUi;
 
     public RegattaCompetitionSeries(Presenter presenter, RaceCompetitionFormatSeriesDTO series) {
+        RegattaCompetitionResources.INSTANCE.css().ensureInjected();
         initWidget(containerUi = uiBinder.createAndBindUi(this));
         this.seriesNameUi.setInnerText(series.getSeriesName());
         this.competitorCountUi.setInnerText(I18N.competitorsCount(series.getCompetitorCount()));

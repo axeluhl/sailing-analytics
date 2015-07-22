@@ -29,7 +29,6 @@ public class RegattaCompetitionFleetRace extends UIObject {
             anchorUi.setTarget("_blank");
             anchorUi.setHref(raceViewerUrl);
         }
-        local_res.css().ensureInjected();
         setupRaceState(race.getTrackingState(), race.getViewState());
         this.raceNameUi.setInnerText(race.getRaceName());
         if (race.getStart() != null) {
