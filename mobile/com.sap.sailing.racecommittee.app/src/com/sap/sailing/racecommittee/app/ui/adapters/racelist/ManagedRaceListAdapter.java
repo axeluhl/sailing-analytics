@@ -205,8 +205,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         }
                         time.setTextSize(textSize);
                     }
-                    StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), race.getRace().getRaceLog());
-                    StartTimeFinderResult result = stf.analyze();
+                    StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
                     if (result != null && result.isDependentStartTime()) {
                         has_dependent_races.setVisibility(View.VISIBLE);
                     }

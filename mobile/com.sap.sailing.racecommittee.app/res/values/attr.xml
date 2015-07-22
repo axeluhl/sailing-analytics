@@ -62,6 +62,7 @@
     <attr name="photo_camera_48dp" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
     <attr name="search_24dp_invert" format="reference"/>
+    <attr name="spinner_background" format="reference"/>
     <attr name="swipe_idle" format="reference"/>
     <attr name="swipe_left" format="reference"/>
     <attr name="swipe_right" format="reference"/>
