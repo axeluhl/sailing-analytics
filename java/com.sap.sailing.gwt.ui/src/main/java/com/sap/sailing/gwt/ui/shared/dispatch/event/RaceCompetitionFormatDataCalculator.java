@@ -1,14 +1,14 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 
 public class RaceCompetitionFormatDataCalculator implements RaceCallback {
     
-    private final Map<String, RaceCompetitionFormatSeriesDTO> seriesMap = new HashMap<>();
+    private final Map<String, RaceCompetitionFormatSeriesDTO> seriesMap = new LinkedHashMap<>();
 
     @Override
     public void doForRace(RaceContext context) {

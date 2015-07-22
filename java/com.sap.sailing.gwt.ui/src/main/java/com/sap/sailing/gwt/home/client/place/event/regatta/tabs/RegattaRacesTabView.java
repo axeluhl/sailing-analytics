@@ -45,7 +45,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetFinishedRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
@@ -140,9 +140,9 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                 }
             }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             refreshManager.add(raceListContainerUi, new GetFinishedRacesAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
-            refreshManager.add(new RefreshableWidget<SortedSetResult<RaceCompetitionFormatSeriesDTO>>() {
+            refreshManager.add(new RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>() {
                 @Override
-                public void setData(SortedSetResult<RaceCompetitionFormatSeriesDTO> data) {
+                public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
                     compFormatContainerUi.clear();
                     for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
                         compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));

@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
-public class RaceCompetitionFormatSeriesDTO implements DTO, Comparable<RaceCompetitionFormatSeriesDTO> {
+public class RaceCompetitionFormatSeriesDTO implements DTO {
 
     private String seriesName;
     private int raceCount = 0;
@@ -49,11 +49,6 @@ public class RaceCompetitionFormatSeriesDTO implements DTO, Comparable<RaceCompe
 
     public Collection<RaceCompetitionFormatFleetDTO> getFleets() {
         return fleets.values();
-    }
-    
-    @Override
-    public int compareTo(RaceCompetitionFormatSeriesDTO o) {
-        return seriesName.compareTo(o.seriesName);
     }
 
 }
