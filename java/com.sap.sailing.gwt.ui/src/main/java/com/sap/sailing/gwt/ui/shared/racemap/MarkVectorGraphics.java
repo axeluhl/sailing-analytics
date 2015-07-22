@@ -26,7 +26,8 @@ public class MarkVectorGraphics {
     
     private final static String DEFAULT_MARK_COLOR = "#f9ac00";
     private final static String DEFAULT_MARK_BG_COLOR = "#f0f0f0";
-    
+    private final static String DEFAULT_MARK_SELECTION_COLOR = "#ff0000";
+
     public MarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
         this.type = type;
         this.color = color;
@@ -55,19 +56,19 @@ public class MarkVectorGraphics {
                     if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
                         drawBuoyWithFinishFlag(ctx, isSelected, color);
                     } else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
-                        drawConicalBuoy(ctx, color);
+                        drawConicalBuoy(ctx, isSelected, color);
                     } else {
-                        drawSimpleBuoy(ctx, color);
+                        drawSimpleBuoy(ctx, isSelected, color);
                     }
                 } else {
-                    drawSimpleBuoy(ctx, color);
+                    drawSimpleBuoy(ctx, isSelected, color);
                 }
                 break;
             case FINISHBOAT:
                 drawFinishBoat(ctx, isSelected, color);
                 break;
             case LANDMARK:
-                drawLandmark(ctx, color);
+                drawLandmark(ctx, isSelected, color);
                 break;
             case STARTBOAT:
                 drawStartBoat(ctx, isSelected, color);
@@ -81,11 +82,11 @@ public class MarkVectorGraphics {
         }
     }
 
-    void drawSimpleBuoy(Context2d ctx, String color) {
+    void drawSimpleBuoy(Context2d ctx, boolean isSelected, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
     
         ctx.save();
-        ctx.setFillStyle(color);
+        ctx.setFillStyle(isSelected ? DEFAULT_MARK_SELECTION_COLOR: color);
         ctx.transform(12.5,0,0,12.5,-578,22.2);
         
         ctx.beginPath();
@@ -106,7 +107,7 @@ public class MarkVectorGraphics {
         ctx.restore();
         
         ctx.save();
-        ctx.setFillStyle(color);
+        ctx.setFillStyle(isSelected ? DEFAULT_MARK_SELECTION_COLOR: color);
         ctx.transform(12.5,0,0,12.5,-578,22.2);
         ctx.beginPath();
         ctx.arc(49.6,10.6,2.66,0,doublePi,false);
@@ -132,7 +133,7 @@ public class MarkVectorGraphics {
         ctx.save();
         ctx.transform(12.5,0,0,12.5,-570,22.2);
         ctx.save();
-        ctx.setFillStyle(color);
+        ctx.setFillStyle(isSelected ? DEFAULT_MARK_SELECTION_COLOR: color);
         ctx.beginPath();
         ctx.moveTo(48.8,3.82);
         ctx.lineTo(48.8,-1.32);
@@ -330,7 +331,7 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
     
-    protected void drawLandmark(Context2d ctx, String color) {
+    protected void drawLandmark(Context2d ctx, boolean isSelected, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
 
         ctx.save();
@@ -395,7 +396,7 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
 
-    protected void drawConicalBuoy(Context2d ctx, String color) {
+    protected void drawConicalBuoy(Context2d ctx, boolean isSelected, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
 
         ctx.save();
