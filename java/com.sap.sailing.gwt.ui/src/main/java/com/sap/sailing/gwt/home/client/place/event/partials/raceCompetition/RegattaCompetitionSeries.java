@@ -7,6 +7,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
@@ -14,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingStat
 
 public class RegattaCompetitionSeries extends Composite {
 
+    private static final StringMessages I18N = StringMessages.INSTANCE;
     private static RegattaCompetitionSeriesUiBinder uiBinder = GWT.create(RegattaCompetitionSeriesUiBinder.class);
 
     interface RegattaCompetitionSeriesUiBinder extends UiBinder<HTMLPanel, RegattaCompetitionSeries> {
@@ -27,8 +29,11 @@ public class RegattaCompetitionSeries extends Composite {
     public RegattaCompetitionSeries(Presenter presenter, RaceCompetitionFormatSeriesDTO series) {
         initWidget(containerUi = uiBinder.createAndBindUi(this));
         this.seriesNameUi.setInnerText(series.getSeriesName());
-        this.competitorCountUi.setInnerText(series.getCompetitorCount() + " Comp. TODO");
-        this.raceCountUi.setInnerText(series.getRaceCount() + " Races TODO");
+        this.competitorCountUi.setInnerText(I18N.competitorsCount(series.getCompetitorCount()));
+        if (series.getCompetitorCount() == 0) {
+            this.competitorCountUi.removeFromParent();
+        }
+        this.raceCountUi.setInnerText(I18N.racesCount(series.getRaceCount()));
         for (RaceCompetitionFormatFleetDTO fleet : series.getFleets()) {
             addFleet(presenter, fleet);
         }
