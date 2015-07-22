@@ -232,7 +232,7 @@ public class StartTimeFragment extends BaseFragment
                         }
 
                         StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
-                        if (result != null && result.getResolutionFailed() == null && result.isDependentStartTime()) {
+                        if (result != null && result.isDependentStartTime()) {
                             mStartTimeOffset = result.getStartTimeDiff();
                             mRaceId = Util.get(result.getRacesDependingOn(), 0);
                         }
