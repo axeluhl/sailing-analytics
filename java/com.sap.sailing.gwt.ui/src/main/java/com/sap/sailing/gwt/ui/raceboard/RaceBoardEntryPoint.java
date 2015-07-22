@@ -58,6 +58,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
 
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         // read mandatory parameters
