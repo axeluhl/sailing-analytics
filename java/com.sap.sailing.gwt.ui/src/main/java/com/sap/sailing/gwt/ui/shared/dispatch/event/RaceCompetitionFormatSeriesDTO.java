@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.ui.shared.dispatch.event;
 import java.util.Collection;
 import java.util.TreeMap;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
-public class RaceCompetitionFormatSeriesDTO implements DTO, IsSerializable {
+public class RaceCompetitionFormatSeriesDTO implements DTO, Comparable<RaceCompetitionFormatSeriesDTO> {
 
     private String seriesName;
     private int raceCount = 0;
@@ -21,8 +21,8 @@ public class RaceCompetitionFormatSeriesDTO implements DTO, IsSerializable {
         this.seriesName = seriesName;
     }
 
-    public void addRace(RaceListRaceDTO race) {
-        RaceCompetitionFormatFleetDTO fleet = ensureFleet(race.getFleet());
+    public void addRace(FleetMetadataDTO fleetMetadata, SimpleRaceMetadataDTO race) {
+        RaceCompetitionFormatFleetDTO fleet = ensureFleet(fleetMetadata);
         fleet.addRace(race);
         raceCount++;
     }
@@ -49,6 +49,11 @@ public class RaceCompetitionFormatSeriesDTO implements DTO, IsSerializable {
 
     public Collection<RaceCompetitionFormatFleetDTO> getFleets() {
         return fleets.values();
+    }
+    
+    @Override
+    public int compareTo(RaceCompetitionFormatSeriesDTO o) {
+        return seriesName.compareTo(o.seriesName);
     }
 
 }

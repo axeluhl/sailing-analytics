@@ -109,7 +109,7 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     
     @Override
     public int compareTo(SimpleRaceMetadataDTO o) {
-        final int compareByStart = Util.compareToWithNull(getStart(), o.getStart(), true);
+        final int compareByStart = Util.compareToWithNull(getStart(), o.getStart(), false);
         return compareByStart != 0 ? compareByStart : compareBySecondaryCriteria(o);
     }
     

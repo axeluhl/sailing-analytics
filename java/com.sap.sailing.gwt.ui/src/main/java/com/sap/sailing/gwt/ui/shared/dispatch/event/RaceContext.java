@@ -50,6 +50,7 @@ import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.wind.SimpleWindDTO;
@@ -337,8 +338,8 @@ public class RaceContext {
         // and special flags states indicating how the postponed/canceled races will be continued
         if (isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
-            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getLeaderboardName(), trackedRace != null ? trackedRace.getRaceIdentifier(): null, raceColumn.getName());
-            fillRaceData(liveRaceDTO);
+            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
+            fillRaceMetadata(liveRaceDTO);
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
             liveRaceDTO.setWind(getWindOrNull());
@@ -352,8 +353,8 @@ public class RaceContext {
         // and special flags states indicating how the postponed/canceled races will be continued
         if (getLiveRaceViewState() == RaceViewState.FINISHED) {
             // the start time is always given for live races
-            RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getLeaderboardName(), trackedRace != null ? trackedRace.getRaceIdentifier(): null, raceColumn.getName());
-            fillRaceData(liveRaceDTO);
+            RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
+            fillRaceMetadata(liveRaceDTO);
             liveRaceDTO.setDuration(getDurationOrNull());
             liveRaceDTO.setWinner(getWinnerOrNull());
             liveRaceDTO.setWindSourcesCount(getWindSourceCount());
@@ -363,6 +364,12 @@ public class RaceContext {
             return liveRaceDTO;
         }
         return null;
+    }
+    
+    public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
+        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
+        fillSimpleRaceMetadata(raceDTO);
+        return raceDTO;
     }
 
     private int getAudioCount() {
@@ -436,13 +443,17 @@ public class RaceContext {
         }
         return null;
     }
-
-    private void fillRaceData(RaceMetadataDTO<?> dto) {
-        dto.setViewState(getLiveRaceViewState());
-        dto.setRegattaDisplayName(getRegattaDisplayName());
-        dto.setTrackingState(getRaceTrackingState());
-        dto.setFleet(getFleetMetadataOrNull());
+    
+    private void fillSimpleRaceMetadata(SimpleRaceMetadataDTO dto) {
         dto.setStart(getStartTimeAsDate());
+        dto.setViewState(getLiveRaceViewState());
+        dto.setTrackingState(getRaceTrackingState());
+    }
+
+    private void fillRaceMetadata(RaceMetadataDTO<?> dto) {
+        fillSimpleRaceMetadata(dto);
+        dto.setRegattaDisplayName(getRegattaDisplayName());
+        dto.setFleet(getFleetMetadataOrNull());
         dto.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
         dto.setCourseArea(getCourseAreaOrNull());
         dto.setCourse(getCourseNameOrNull());
@@ -560,8 +571,8 @@ public class RaceContext {
         return getRegattaDisplayName() + " - " + raceColumn.getName();
     }
 
-    public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return trackedRace.getRaceIdentifier();
+    public RegattaAndRaceIdentifier getRaceIdentifierOrNull() {
+        return trackedRace == null ? null : trackedRace.getRaceIdentifier();
     }
 
     public String getSeriesName() {
