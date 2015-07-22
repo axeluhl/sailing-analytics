@@ -458,7 +458,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     private static TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> getFleetsGroupedBySeries(Set<RaceGroupSeriesFleet> raceGroupSeriesFleets) {
-        TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = new TreeMap<>(new SeriesBaseComperator());
+        TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = new TreeMap<>(new SeriesBaseComparator());
         for (RaceGroupSeriesFleet key : raceGroupSeriesFleets) {
             SeriesBase series = key.getSeries();
             List<RaceGroupSeriesFleet> fleets = seriesWithFleets.get(series);
@@ -471,7 +471,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         return seriesWithFleets;
     }
 
-    private static class SeriesBaseComperator implements Comparator<SeriesBase> {
+    private static class SeriesBaseComparator implements Comparator<SeriesBase> {
         @Override
         public int compare(SeriesBase lhs, SeriesBase rhs) {
             return lhs.getName().compareTo(rhs.getName());
@@ -479,7 +479,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     private static TreeMap<ManagedRace, List<RaceGroupSeriesFleet>> getFleetsGroupedByRaces(TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, List<RaceGroupSeriesFleet> fleets) {
-        TreeMap<ManagedRace, List<RaceGroupSeriesFleet>> racesWithFleets = new TreeMap<>(new ManagedRaceComperator());
+        TreeMap<ManagedRace, List<RaceGroupSeriesFleet>> racesWithFleets = new TreeMap<>(new ManagedRaceComparator());
         for (RaceGroupSeriesFleet fleet : fleets) {
             List<ManagedRace> races = racesByGroup.get(fleet);
             for (ManagedRace race : races) {
@@ -494,7 +494,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         return racesWithFleets;
     }
 
-    private static class ManagedRaceComperator implements Comparator<ManagedRace> {
+    private static class ManagedRaceComparator implements Comparator<ManagedRace> {
         @Override
         public int compare(ManagedRace lhs, ManagedRace rhs) {
             return lhs.getRaceName().compareTo(rhs.getRaceName());
