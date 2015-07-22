@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListN
 import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RaceStateLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListStepsLegend;
+import com.sap.sailing.gwt.home.client.place.event.partials.raceCompetition.RegattaCompetitionSeries;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
@@ -44,9 +45,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetFinishedRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 import com.sap.sse.common.Util.Triple;
@@ -136,7 +140,15 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                 }
             }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             refreshManager.add(raceListContainerUi, new GetFinishedRacesAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
-            
+            refreshManager.add(new RefreshableWidget<SortedSetResult<RaceCompetitionFormatSeriesDTO>>() {
+                @Override
+                public void setData(SortedSetResult<RaceCompetitionFormatSeriesDTO> data) {
+                    compFormatContainerUi.clear();
+                    for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
+                        compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
+                    }
+                }
+            }, new GetCompetitionFormatRacesAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
             oldContentContainer.removeFromParent();
         } else {
             regattaProgressLegendUi.removeFromParent();
