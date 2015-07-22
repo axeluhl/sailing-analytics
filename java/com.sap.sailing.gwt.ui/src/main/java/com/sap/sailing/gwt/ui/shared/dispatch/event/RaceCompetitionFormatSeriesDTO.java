@@ -1,18 +1,16 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.TreeMap;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
-import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
 public class RaceCompetitionFormatSeriesDTO implements DTO {
 
     private String seriesName;
     private int raceCount = 0;
-    private int competitorCount = (int) (Math.random() * 10); // TODO
-    private TreeMap<FleetMetadataDTO, RaceCompetitionFormatFleetDTO> fleets = new TreeMap<>();
+    private int competitorCount = 0;
+    private ArrayList<RaceCompetitionFormatFleetDTO> fleets = new ArrayList<>();
 
     protected RaceCompetitionFormatSeriesDTO() {
     }
@@ -20,19 +18,14 @@ public class RaceCompetitionFormatSeriesDTO implements DTO {
     public RaceCompetitionFormatSeriesDTO(String seriesName) {
         this.seriesName = seriesName;
     }
-
-    public void addRace(FleetMetadataDTO fleetMetadata, SimpleRaceMetadataDTO race) {
-        RaceCompetitionFormatFleetDTO fleet = ensureFleet(fleetMetadata);
-        fleet.addRace(race);
-        raceCount++;
+    
+    public void addFleet(RaceCompetitionFormatFleetDTO fleet) {
+        fleets.add(fleet);
+        raceCount += fleet.getRaces().size();
     }
-
-    private RaceCompetitionFormatFleetDTO ensureFleet(FleetMetadataDTO fleetData) {
-        RaceCompetitionFormatFleetDTO fleet = fleets.get(fleetData);
-        if (fleet == null) {
-            fleets.put(fleetData, fleet = new RaceCompetitionFormatFleetDTO(fleetData));
-        }
-        return fleet;
+    
+    public void setCompetitorCount(int competitorCount) {
+        this.competitorCount = competitorCount;
     }
 
     public String getSeriesName() {
@@ -48,7 +41,7 @@ public class RaceCompetitionFormatSeriesDTO implements DTO {
     }
 
     public Collection<RaceCompetitionFormatFleetDTO> getFleets() {
-        return fleets.values();
+        return fleets;
     }
 
 }

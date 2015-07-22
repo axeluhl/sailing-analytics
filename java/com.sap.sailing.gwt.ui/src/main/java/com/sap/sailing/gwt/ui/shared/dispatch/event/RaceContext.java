@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -596,5 +599,15 @@ public class RaceContext {
     
     public boolean isLive() {
         return getLiveRaceViewState() == RaceViewState.RUNNING;
+    }
+    
+    public Collection<SimpleCompetitorDTO> getCompetitors() {
+        Set<SimpleCompetitorDTO> compotitorDTOs = new HashSet<>();
+        if (raceDefinition != null) {
+            for (Competitor competitor : raceDefinition.getCompetitors()) {
+                compotitorDTOs.add(new SimpleCompetitorDTO(competitor));
+            }
+        }
+        return compotitorDTOs;
     }
 }

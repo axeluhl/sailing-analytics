@@ -10,18 +10,23 @@ import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 public class RaceCompetitionFormatFleetDTO implements IsSerializable {
     
     private FleetMetadataDTO fleet;
-    private int competitorCount = (int) (Math.random() * 10); // TODO   
+    private int competitorCount = 0;
     private TreeSet<SimpleRaceMetadataDTO> races = new TreeSet<>();
     
     protected RaceCompetitionFormatFleetDTO() {
     }
     
-    public RaceCompetitionFormatFleetDTO(FleetMetadataDTO fleet) {
+    public RaceCompetitionFormatFleetDTO(FleetMetadataDTO fleet, int competitorCount) {
         this.fleet = fleet;
+        this.competitorCount = competitorCount;
     }
     
     public void addRace(SimpleRaceMetadataDTO race) {
-        races.add(race);
+        this.races.add(race);
+    }
+    
+    public void addRaces(Collection<SimpleRaceMetadataDTO> races) {
+        this.races.addAll(races);
     }
     
     public FleetMetadataDTO getFleet() {
