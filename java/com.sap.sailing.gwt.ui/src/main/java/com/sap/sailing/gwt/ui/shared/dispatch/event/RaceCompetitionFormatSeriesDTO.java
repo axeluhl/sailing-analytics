@@ -4,52 +4,51 @@ import java.util.Collection;
 import java.util.TreeMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 
-public class RaceListSeriesDTO implements IsSerializable {
-    
+public class RaceCompetitionFormatSeriesDTO implements DTO, IsSerializable {
+
     private String seriesName;
     private int raceCount = 0;
     private int competitorCount = (int) (Math.random() * 10); // TODO
-    private TreeMap<FleetMetadataDTO, RaceListFleetDTO> fleets = new TreeMap<>();
+    private TreeMap<FleetMetadataDTO, RaceCompetitionFormatFleetDTO> fleets = new TreeMap<>();
 
-    @SuppressWarnings("unused")
-    private RaceListSeriesDTO() {
+    protected RaceCompetitionFormatSeriesDTO() {
     }
-    
-    public RaceListSeriesDTO(String seriesName) {
+
+    public RaceCompetitionFormatSeriesDTO(String seriesName) {
         this.seriesName = seriesName;
     }
 
     public void addRace(RaceListRaceDTO race) {
-        RaceListFleetDTO fleet = ensureFleet(race.getFleet());
+        RaceCompetitionFormatFleetDTO fleet = ensureFleet(race.getFleet());
         fleet.addRace(race);
         raceCount++;
     }
-    
-    private RaceListFleetDTO ensureFleet(FleetMetadataDTO fleetData) {
-        RaceListFleetDTO fleet = fleets.get(fleetData);
+
+    private RaceCompetitionFormatFleetDTO ensureFleet(FleetMetadataDTO fleetData) {
+        RaceCompetitionFormatFleetDTO fleet = fleets.get(fleetData);
         if (fleet == null) {
-            fleets.put(fleetData, fleet = new RaceListFleetDTO(fleetData));
+            fleets.put(fleetData, fleet = new RaceCompetitionFormatFleetDTO(fleetData));
         }
         return fleet;
     }
-    
+
     public String getSeriesName() {
         return seriesName;
     }
-    
+
     public int getRaceCount() {
         return raceCount;
     }
-    
+
     public int getCompetitorCount() {
         return competitorCount;
     }
-    
-    public Collection<RaceListFleetDTO> getFleets() {
+
+    public Collection<RaceCompetitionFormatFleetDTO> getFleets() {
         return fleets.values();
     }
-    
 
 }

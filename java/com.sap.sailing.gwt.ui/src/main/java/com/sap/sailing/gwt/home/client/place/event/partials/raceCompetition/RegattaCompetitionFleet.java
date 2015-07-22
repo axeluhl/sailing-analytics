@@ -6,7 +6,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListFleetDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
 public class RegattaCompetitionFleet extends Widget {
@@ -21,7 +21,7 @@ public class RegattaCompetitionFleet extends Widget {
     @UiField DivElement competitorCountUi;
     @UiField DivElement racesContainerUi;
 
-    public RegattaCompetitionFleet(RaceListFleetDTO fleet) {
+    public RegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
         setElement(uiBinder.createAndBindUi(this));
         this.competitorCountUi.setInnerText(fleet.getCompetitorCount() + " Comp. TODO");
         if (fleet.getFleet() != null) {

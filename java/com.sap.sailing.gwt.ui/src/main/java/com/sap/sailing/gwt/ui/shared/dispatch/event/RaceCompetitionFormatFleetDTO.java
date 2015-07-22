@@ -7,22 +7,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
-public class RaceListFleetDTO implements IsSerializable {
+public class RaceCompetitionFormatFleetDTO implements IsSerializable {
     
     private FleetMetadataDTO fleet;
     private int competitorCount = (int) (Math.random() * 10); // TODO   
     private TreeSet<SimpleRaceMetadataDTO> races = new TreeSet<>();
     
-    @SuppressWarnings("unused")
-    private RaceListFleetDTO() {
+    protected RaceCompetitionFormatFleetDTO() {
     }
     
-    public RaceListFleetDTO(FleetMetadataDTO fleet) {
+    public RaceCompetitionFormatFleetDTO(FleetMetadataDTO fleet) {
         this.fleet = fleet;
     }
     
     public void addRace(SimpleRaceMetadataDTO race) {
-        // TODO insert sorted
         races.add(race);
     }
     
