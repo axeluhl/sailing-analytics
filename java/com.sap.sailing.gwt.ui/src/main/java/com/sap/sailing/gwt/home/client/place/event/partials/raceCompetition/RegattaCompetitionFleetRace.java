@@ -21,28 +21,31 @@ public class RegattaCompetitionFleetRace extends UIObject {
     @UiField RegattaCompetitionResources local_res;
     @UiField DivElement raceNameUi;
     @UiField DivElement raceDateUi;
-    private final AnchorElement anchor;
+    private final AnchorElement anchorUi;
 
     public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
-        anchor = uiBinder.createAndBindUi(this);
-        anchor.setHref(raceViewerUrl);
+        anchorUi = uiBinder.createAndBindUi(this);
+        if (raceViewerUrl != null) {
+            anchorUi.setTarget("_blank");
+            anchorUi.setHref(raceViewerUrl);
+        }
         local_res.css().ensureInjected();
         setupRaceState(race.getTrackingState(), race.getViewState());
         this.raceNameUi.setInnerText(race.getRaceName());
         if (race.getStart() != null) {
             this.raceDateUi.setInnerText(DateAndTimeFormatterUtil.defaultDateFormatter.render(race.getStart())); 
         }
-        setElement(anchor);
+        setElement(anchorUi);
     }
     
     private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
         if (viewState == RaceViewState.RUNNING) {
-             anchor.addClassName(local_res.css().fleet_races_racelive());
+            anchorUi.addClassName(local_res.css().fleet_races_racelive());
         } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
-             anchor.addClassName(local_res.css().fleet_races_raceplanned());
+            anchorUi.addClassName(local_res.css().fleet_races_raceplanned());
         }
         if (trackingState != RaceTrackingState.TRACKED_VALID_DATA) {
-             anchor.addClassName(local_res.css().fleet_races_raceuntracked());
+            anchorUi.addClassName(local_res.css().fleet_races_raceuntracked());
         }
     }
 }
