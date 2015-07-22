@@ -8,9 +8,15 @@ import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 public class RaceListDataTypeHeader implements RaceListDataType {
 
     private RaceGroupSeriesFleet data;
+    private boolean isFleetVisible;
 
     public RaceListDataTypeHeader(RaceGroupSeriesFleet data) {
+        this(data, true);
+    }
+
+    public RaceListDataTypeHeader(RaceGroupSeriesFleet data, boolean isFleetVisible) {
         this.data = data;
+        this.isFleetVisible = isFleetVisible;
     }
 
     public RaceGroupSeriesFleet getRegattaSeriesFleet() {
@@ -28,6 +34,8 @@ public class RaceListDataTypeHeader implements RaceListDataType {
     public Fleet getFleet() {
         return data.getFleet();
     }
+
+    public boolean isFleetVisible() { return isFleetVisible; }
 
     @Override
     public String toString() {

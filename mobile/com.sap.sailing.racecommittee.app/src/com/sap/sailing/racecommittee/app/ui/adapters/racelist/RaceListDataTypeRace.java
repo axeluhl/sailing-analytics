@@ -9,6 +9,7 @@ import android.app.Fragment;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sse.common.TimePoint;
 
 public class RaceListDataTypeRace implements RaceListDataType {
@@ -25,6 +26,7 @@ public class RaceListDataTypeRace implements RaceListDataType {
     private boolean updateIndicatorVisible = false;
     private RaceLogRaceStatus currentStatus = RaceLogRaceStatus.UNKNOWN;
     private ManagedRace race;
+    private RaceGroupSeriesFleet fleet;
 
     private Format scheduleFormatter = new SimpleDateFormat("HH:mm", Locale.US);
 
@@ -40,7 +42,12 @@ public class RaceListDataTypeRace implements RaceListDataType {
     }
 
     public RaceListDataTypeRace(ManagedRace race) {
+        this(race, null);
+    }
+
+    public RaceListDataTypeRace(ManagedRace race, RaceGroupSeriesFleet fleet) {
         this.race = race;
+        this.fleet = fleet;
         this.currentStatus = race.getStatus();
     }
 
@@ -66,7 +73,9 @@ public class RaceListDataTypeRace implements RaceListDataType {
     public ManagedRace getRace() {
         return race;
     }
-    
+
+    public RaceGroupSeriesFleet getFleet() { return fleet; }
+
     public RaceLogRaceStatus getCurrentStatus() {
         return currentStatus;
     }

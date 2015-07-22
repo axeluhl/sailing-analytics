@@ -33,6 +33,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -110,7 +111,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position) instanceof RaceListDataTypeHeader ? ViewType.HEADER.index : ViewType.RACE.index);
+        return (getItem(position) instanceof RaceListDataTypeHeader ? ViewType.HEADER.index :
+                getItem(position) instanceof RaceListDataTypeRace ? ViewType.RACE.index : -1);
     }
 
     @Override
@@ -138,7 +140,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 regatta = header.getRaceGroup().getName();
             }
             boat_class.setText(regatta);
-            fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
+            if (header.isFleetVisible()) {
+                fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
+            } else {
+                fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
+            }
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), FLAG_SIZE));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -168,9 +174,19 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 }
             }
 
+            // TODO refactor this into RaceHelper
             if (!TextUtils.isEmpty(race.getRaceName())) {
                 race_name.setText(race.getRaceName());
             }
+            RaceGroupSeriesFleet fleet = race.getFleet();
+            if (fleet != null && !TextUtils.isEmpty(fleet.getFleetName())) {
+                if (!TextUtils.isEmpty(race_name.getText())) {
+                    race_name.setText(race_name.getText() + " - " + fleet.getFleetName());
+                } else {
+                    race_name.setText(fleet.getFleetName());
+                }
+            }
+
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
