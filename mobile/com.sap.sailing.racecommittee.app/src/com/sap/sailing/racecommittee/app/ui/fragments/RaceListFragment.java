@@ -3,9 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import android.app.Activity;
@@ -41,6 +45,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -423,16 +428,76 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         // 2. Remove previous view items
         mViewItems.clear();
 
-        // 3. Create view elements from tree
-        for (RaceGroupSeriesFleet key : mRacesByGroup.navigableKeySet()) {
-            // ... add the header view...
-            mViewItems.add(new RaceListDataTypeHeader(key));
+        // 3. Group active fleets from tree by series
+        Map<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = getFleetsGroupedBySeries(mRacesByGroup.navigableKeySet());
 
-            List<ManagedRace> races = mRacesByGroup.get(key);
-            for (ManagedRace race : races) {
-                // ... and add the race view!
-                mViewItems.add(new RaceListDataTypeRace(race));
+        // 4. Create view elements from series with fleets
+        for (SeriesBase series : seriesWithFleets.keySet()) {
+            List<RaceGroupSeriesFleet> fleets = seriesWithFleets.get(series);
+            if (fleets.size() == 1) { // Default fleet
+                // ... add the header view for default fleet...
+                RaceGroupSeriesFleet fleet = fleets.get(0);
+                mViewItems.add(new RaceListDataTypeHeader(fleet));
+                List<ManagedRace> races = mRacesByGroup.get(fleet);
+                for (ManagedRace race : races) {
+                    // ... and add the race view!
+                    mViewItems.add(new RaceListDataTypeRace(race));
+                }
+            } else if (fleets.size() > 1) {
+                // ... add the header view for all following fleets...
+                mViewItems.add(new RaceListDataTypeHeader(fleets.get(0)));
+                // ... and add all the sorted race views!
+                Map<ManagedRace, List<RaceGroupSeriesFleet>> racesWithFleets = getFleetsGroupedByRaces(mRacesByGroup, fleets);
+                for (ManagedRace race : racesWithFleets.keySet()) {
+                    for (RaceGroupSeriesFleet fleet : racesWithFleets.get(race)) {
+                        mViewItems.add(new RaceListDataTypeRace(race));
+                    }
+                }
             }
+        }
+    }
+
+    private static TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> getFleetsGroupedBySeries(Set<RaceGroupSeriesFleet> raceGroupSeriesFleets) {
+        TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = new TreeMap<>(new SeriesBaseComperator());
+        for (RaceGroupSeriesFleet key : raceGroupSeriesFleets) {
+            SeriesBase series = key.getSeries();
+            List<RaceGroupSeriesFleet> fleets = seriesWithFleets.get(series);
+            if (fleets == null) {
+                fleets = new ArrayList<>();
+            }
+            fleets.add(key);
+            seriesWithFleets.put(series, fleets);
+        }
+        return seriesWithFleets;
+    }
+
+    private static class SeriesBaseComperator implements Comparator<SeriesBase> {
+        @Override
+        public int compare(SeriesBase lhs, SeriesBase rhs) {
+            return lhs.getName().compareTo(rhs.getName());
+        }
+    }
+
+    private static TreeMap<ManagedRace, List<RaceGroupSeriesFleet>> getFleetsGroupedByRaces(TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, List<RaceGroupSeriesFleet> fleets) {
+        TreeMap<ManagedRace, List<RaceGroupSeriesFleet>> racesWithFleets = new TreeMap<>(new ManagedRaceComperator());
+        for (RaceGroupSeriesFleet fleet : fleets) {
+            List<ManagedRace> races = racesByGroup.get(fleet);
+            for (ManagedRace race : races) {
+                List<RaceGroupSeriesFleet> raceFleets = racesWithFleets.get(race);
+                if (raceFleets == null) {
+                    raceFleets = new ArrayList<>();
+                }
+                raceFleets.add(fleet);
+                racesWithFleets.put(race, raceFleets);
+            }
+        }
+        return racesWithFleets;
+    }
+
+    private static class ManagedRaceComperator implements Comparator<ManagedRace> {
+        @Override
+        public int compare(ManagedRace lhs, ManagedRace rhs) {
+            return lhs.getRaceName().compareTo(rhs.getRaceName());
         }
     }
 
