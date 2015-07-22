@@ -109,6 +109,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             tags.add(tag);
         }
         result.setTags(tags);
+        result.setThumbnailRef(thumbnailURLAndUploadComposite.getURL());
         return result;
     }
 
