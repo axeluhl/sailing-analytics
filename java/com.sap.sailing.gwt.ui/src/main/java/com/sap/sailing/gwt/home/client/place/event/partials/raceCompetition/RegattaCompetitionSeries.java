@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceCompetition;
 
+import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -29,7 +31,7 @@ public class RegattaCompetitionSeries extends Composite {
     public RegattaCompetitionSeries(Presenter presenter, RaceCompetitionFormatSeriesDTO series) {
         RegattaCompetitionResources.INSTANCE.css().ensureInjected();
         initWidget(containerUi = uiBinder.createAndBindUi(this));
-        this.seriesNameUi.setInnerText(series.getSeriesName());
+        this.seriesNameUi.setInnerText(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
         this.competitorCountUi.setInnerText(I18N.competitorsCount(series.getCompetitorCount()));
         if (series.getCompetitorCount() == 0) {
             this.competitorCountUi.removeFromParent();
