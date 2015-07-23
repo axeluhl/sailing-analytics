@@ -25,7 +25,6 @@ import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
@@ -37,7 +36,6 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -233,8 +231,7 @@ public class StartTimeFragment extends BaseFragment
                             frame.setVisibility(View.GONE);
                         }
 
-                        StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
-                        StartTimeFinderResult result = stf.analyze();
+                        StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
                         if (result != null && result.isDependentStartTime()) {
                             mStartTimeOffset = result.getStartTimeDiff();
                             mRaceId = Util.get(result.getRacesDependingOn(), 0);
