@@ -5,6 +5,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -103,6 +104,12 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
     TimePoint getStartTime();
 
     /**
+     * A more comprehensive answer than {@link #getStartTime()} delivers. The result allows callers to
+     * understand, in particular, why a start time is not known yet.
+     */
+    StartTimeFinderResult getStartTimeFinderResult();
+
+    /**
      * If there is a finishing time set for the current pass, returns it. Otherwise <code>null</code>.
      */
     TimePoint getFinishingTime();
@@ -138,4 +145,5 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If wind has been entered, returns the most recent one. Otherwise <code>null</code>.
      */
     Wind getWindFix();
+
 }

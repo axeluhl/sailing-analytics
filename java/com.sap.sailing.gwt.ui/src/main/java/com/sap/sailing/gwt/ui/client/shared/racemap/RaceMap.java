@@ -1382,6 +1382,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             final WaypointDTO startWaypoint = courseDTO.course.waypoints.get(0);
             updateCountdownCanvas(startWaypoint);
             final int numberOfStartWaypointMarks = courseDTO.getStartMarkPositions() == null ? 0 : courseDTO.getStartMarkPositions().size();
+            final int numberOfFinishWaypointMarks = courseDTO.getFinishMarkPositions() == null ? 0 : courseDTO.getFinishMarkPositions().size();
             final Position startLineLeftPosition = numberOfStartWaypointMarks == 0 ? null : courseDTO.getStartMarkPositions().get(0);
             final Position startLineRightPosition = numberOfStartWaypointMarks < 2 ? null : courseDTO.getStartMarkPositions().get(1);
             if (courseDTO.startLineAngleToCombinedWind != null) {
@@ -1393,13 +1394,28 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             } else {
                 startLineAdvantageText.delete(0, startLineAdvantageText.length());
             }
-            startLine = showOrRemoveOrUpdateLine(startLine, /* showLine */ numberOfStartWaypointMarks == 2 &&
-                    ((courseDTO.currentLegNumber <= 1 && 
-                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE)) ||
-                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)),
+            final boolean showStartLineBasedOnCurrentLeg = numberOfStartWaypointMarks == 2 && courseDTO.currentLegNumber <= 1;
+            final boolean showFinishLineBasedOnCurrentLeg = numberOfFinishWaypointMarks == 2 && courseDTO.currentLegNumber == courseDTO.totalLegsCount;
+            // show the line when STARTLINE is selected and the current leg is around the start leg,
+            // or when COURSEGEOMETRY is selected and the finish line isn't equal and wouldn't be shown at the same time based on the current leg.
+            // With this, if COURSEGEOMETRY is selected and start and finish line are equal, the start line will not be displayed if
+            // based on the race progress the finish line is to be preferred, so only the finish line will be shown.
+            final boolean reallyShowStartLine =
+                    (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && showStartLineBasedOnCurrentLeg) ||
+                    (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) &&
+                             (!showFinishLineBasedOnCurrentLeg || !startLineEqualsFinishLine(courseDTO)));
+            // show the line when FINISHLINE is selected and the current leg is the last leg,
+            // or when COURSEGEOMETRY is selected and the start line isn't equal or the current leg is the last leg.
+            // With this, if COURSEGEOMETRY is selected and start and finish line are equal, the start line will be displayed unless
+            // the finish line should take precedence based on race progress.
+            final boolean reallyShowFinishLine = showFinishLineBasedOnCurrentLeg &&
+                    (!showStartLineBasedOnCurrentLeg || !startLineEqualsFinishLine(courseDTO)) &&
+                    (settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && showFinishLineBasedOnCurrentLeg) ||
+                    (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) &&
+                            (!startLineEqualsFinishLine(courseDTO) || showFinishLineBasedOnCurrentLeg));
+            startLine = showOrRemoveOrUpdateLine(startLine, reallyShowStartLine,
                     startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff");
             // draw the finish line
-            final int numberOfFinishWaypointMarks = courseDTO.getFinishMarkPositions() == null ? 0 : courseDTO.getFinishMarkPositions().size();
             final Position finishLineLeftPosition = numberOfFinishWaypointMarks == 0 ? null : courseDTO.getFinishMarkPositions().get(0);
             final Position finishLineRightPosition = numberOfFinishWaypointMarks < 2 ? null : courseDTO.getFinishMarkPositions().get(1);
             if (courseDTO.finishLineAngleToCombinedWind != null) {
@@ -1411,10 +1427,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             } else {
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
-            finishLine = showOrRemoveOrUpdateLine(finishLine, /* showLine */ numberOfFinishWaypointMarks == 2 &&
-                    (courseDTO.currentLegNumber == courseDTO.totalLegsCount && 
-                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE))
-                 || settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY),
+            finishLine = showOrRemoveOrUpdateLine(finishLine, reallyShowFinishLine,
                     finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, "#000000");
             // the control point pairs for which we already decided whether or not
             // to show a course middle line for; values tell whether to show the line and for which zero-based
@@ -1440,6 +1453,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 courseMiddleLines.put(key, showOrRemoveCourseMiddleLine(courseDTO, courseMiddleLines.get(key), zeroBasedIndexOfStartWaypoint, showCourseMiddleLine));
             }
         }
+    }
+
+    private boolean startLineEqualsFinishLine(CoursePositionsDTO courseDTO) {
+        final List<WaypointDTO> waypoints;
+        return courseDTO != null && courseDTO.course != null &&
+                (waypoints = courseDTO.course.waypoints) != null &&
+                waypoints.get(0).controlPoint.equals(waypoints.get(waypoints.size()-1).controlPoint);
     }
 
     /**

@@ -308,6 +308,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     public TimePoint getStartTime() {
         return cachedStartTimeFinderResult.getStartTime();
     }
+    
+    @Override
+    public StartTimeFinderResult getStartTimeFinderResult() {
+        return cachedStartTimeFinderResult;
+    }
 
     @Override
     public TimePoint getFinishingTime() {

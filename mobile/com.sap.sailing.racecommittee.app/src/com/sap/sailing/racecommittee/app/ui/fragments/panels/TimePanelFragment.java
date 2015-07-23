@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
+
 import java.text.SimpleDateFormat;
 
 import android.content.BroadcastReceiver;
@@ -18,13 +20,11 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
@@ -154,11 +154,10 @@ public class TimePanelFragment extends BasePanelFragment {
         }
 
         if (mLinkedRace == null) {
-            StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), getRace().getRaceLog());
-            StartTimeFinderResult result = stf.analyze();
+            StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
             if (result != null) {
                 mLinkedRace = result.isDependentStartTime();
-                if (mLinkedRace && mHeaderTime != null) {
+                if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
                     SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
                     mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));

@@ -74,7 +74,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                     this.trackedRaces.put(fleet, trackedRace);
                     this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
                     logger.info(String.format("Linked race column %s with tracked race %s.", this.getName(),
-                            trackedRace.getRace().getName()));
+                            trackedRace.getRace() == null ? "null" : trackedRace.getRace().getName()));
                 }
             }
             if (trackedRace != null) {

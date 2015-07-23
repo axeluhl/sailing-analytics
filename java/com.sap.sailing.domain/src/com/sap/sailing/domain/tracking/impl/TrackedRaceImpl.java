@@ -3365,10 +3365,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final TrackedLeg legDeterminingDirection = getLegDeterminingDirectionInWhichToPassWaypoint(waypoint);
             final Mark portMarkWhileApproachingLine = marksAndPositions.getPortMarkWhileApproachingLine();
             final Mark starboardMarkWhileApproachingLine = marksAndPositions.getStarboardMarkWhileApproachingLine();
-            final Position portMarkPositionWhileApproachingLine = marksAndPositions
-                    .getPortMarkPositionWhileApproachingLine();
-            final Position starboardMarkPositionWhileApproachingLine = marksAndPositions
-                    .getStarboardMarkPositionWhileApproachingLine();
+            final Position portMarkPositionWhileApproachingLine = marksAndPositions.getPortMarkPositionWhileApproachingLine();
+            final Position starboardMarkPositionWhileApproachingLine = marksAndPositions.getStarboardMarkPositionWhileApproachingLine();
             final Bearing differenceToCombinedWind;
             final NauticalSide advantageousSideWhileApproachingLine;
             final Distance distanceAdvantage;
@@ -3425,14 +3423,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private LineMarksWithPositions getLineMarksAndPositions(TimePoint timePoint, Waypoint waypoint) {
         final LineMarksWithPositions result;
-        List<Position> markPositions = new ArrayList<Position>();
+        List<Position> markPositions = new ArrayList<>();
         int numberOfMarks = 0;
         boolean allMarksHavePositions = true;
         if (waypoint != null) {
             for (Mark lineMark : waypoint.getMarks()) {
                 numberOfMarks++;
-                final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(timePoint, /* extrapolate */
-                        false);
+                final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(timePoint, /* extrapolate */ false);
                 if (estimatedMarkPosition != null) {
                     markPositions.add(estimatedMarkPosition);
                 } else {
@@ -3482,12 +3479,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private TrackedLeg getLegDeterminingDirectionInWhichToPassWaypoint(Waypoint waypoint) {
         final TrackedLeg legDeterminingDirection;
-        {
-        final int indexOfWaypoint2 = getRace().getCourse().getIndexOfWaypoint(waypoint);
-        final boolean isStartLine2 = indexOfWaypoint2 == 0;
-        legDeterminingDirection = getTrackedLeg(getRace().getCourse().getLegs().get(isStartLine2 ? 0
-                : indexOfWaypoint2 - 1));
-        }
+        final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
+        final boolean isStartLine = indexOfWaypoint == 0;
+        legDeterminingDirection = getTrackedLeg(getRace().getCourse().getLegs().get(isStartLine ? 0
+                : indexOfWaypoint - 1));
         return legDeterminingDirection;
     }
 

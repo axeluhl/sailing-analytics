@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
@@ -28,7 +27,7 @@ public interface EventView {
     
     void hideQuickfinder();
 
-    void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images);
+    void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images);
 
     public interface Presenter extends NewsItemLinkProvider, RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider {
         EventContext getCtx();
