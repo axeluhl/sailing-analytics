@@ -249,6 +249,27 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
                 new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)))));
     }
 
+    /**
+     * See bug 3173. When a race is linked more than once to a fleet in a series, the "previous race"
+     * definition's transitive closure may become cyclic, and a race may be considered its own
+     * direct or transitive predecessor. This can lead to endless recursion in the {@link TrackedRace#takesWindFix(Wind)}
+     * implementation which traverses a race's predecessors recursively.
+     */
+    @Test
+    public void testCyclicPreviousRacesSequenceUsingSingleRace() {
+        createTestSetupWithRegattaAndSeries(/* linkSeriesToRegatta */ true);
+        final RaceColumnInSeries r1 = series.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
+        final RaceColumnInSeries r2 = series.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
+        final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
+        final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_MINUTE);
+        final TrackedRace tr1 = createTrackedRace("FirstRace", startOfFirstRace, endOfFirstRace);
+        r1.setTrackedRace(fleet, tr1);
+        r2.setTrackedRace(fleet, tr1);
+        assertTrue(tr1.takesWindFix(new WindImpl(new DegreePosition(12, 13),
+                startOfFirstRace.minus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.divide(2)),
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)))));
+    }
+
     private DynamicTrackedRace createTrackedRace(final String name, final TimePoint startOfRace, final TimePoint endOfRace) {
         DynamicTrackedRace trackedRace = createTestTrackedRace(REGATTA, name, BOATCLASS, Collections.<Competitor> emptyList(), startOfRace);
         trackedRace.setStartOfTrackingReceived(startOfRace);
