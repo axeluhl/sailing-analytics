@@ -80,6 +80,7 @@
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_black_36dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_white_24dp</item>
+        <item name="spinner_background">@drawable/spinner_background_light</item>
         <item name="swipe_idle">@drawable/swipe_idle_light</item>
         <item name="swipe_left">@drawable/swipe_left_light</item>
         <item name="swipe_right">@drawable/swipe_right_light</item>
