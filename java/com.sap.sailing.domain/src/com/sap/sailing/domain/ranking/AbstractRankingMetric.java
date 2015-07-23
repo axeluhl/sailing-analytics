@@ -471,7 +471,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * started at <code>timePoint</code> yet, or <code>who</code>'s tracked leg for the last leg if <code>who</code> has
      * already finished the race at <code>timePoint</code>.
      */
-    private TrackedLegOfCompetitor getCurrentLegOrLastLegIfAlreadyFinished(Competitor who, TimePoint timePoint) {
+    protected TrackedLegOfCompetitor getCurrentLegOrLastLegIfAlreadyFinished(Competitor who, TimePoint timePoint) {
         TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
         if (currentLegWho == null) { // already finished or not yet started; if already finished, use last leg
             final Waypoint lastWaypoint = getTrackedRace().getRace().getCourse().getLastWaypoint();
