@@ -120,8 +120,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
         presentationPanel = new ResizingSimplePanel() {
             @Override
             public void onResize() {
-                chart.setSizeToMatchContainer();
-                chart.redraw();
+                updateChartSize();
             }
         };
         mainPanel.add(presentationPanel);
@@ -137,6 +136,11 @@ public class ResultsChart implements ResultsPresenter<Number> {
         labeledBusyIndicator.setStyleName("chart-busyMessage");
 
         showError(this.stringMessages.invalidSelection());
+    }
+    
+    /*package*/ void updateChartSize() {
+        chart.setSizeToMatchContainer();
+        chart.redraw();
     }
 
     @Override
