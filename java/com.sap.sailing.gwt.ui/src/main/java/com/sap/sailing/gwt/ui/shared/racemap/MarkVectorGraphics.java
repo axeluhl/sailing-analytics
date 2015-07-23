@@ -27,7 +27,6 @@ public class MarkVectorGraphics {
     
     private final static String DEFAULT_MARK_COLOR = "#f9ac00";
     private final static String DEFAULT_MARK_BG_COLOR = "#f0f0f0";
-    private final static String DEFAULT_MARK_SELECTION_COLOR = "#ff0000";
 
     public MarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
         this.type = type;
@@ -54,7 +53,7 @@ public class MarkVectorGraphics {
         switch(markType) {
             case BUOY:
                 if(isSelected) {
-                    drawBlueSelection(ctx);
+                    drawMarkSelection(ctx);
                 }
                 if(shape != null) {
                     if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
@@ -72,6 +71,9 @@ public class MarkVectorGraphics {
                 drawFinishBoat(ctx, isSelected, color);
                 break;
             case LANDMARK:
+                if(isSelected) {
+                    drawMarkSelection(ctx);
+                }
                 drawLandmark(ctx, isSelected, color);
                 break;
             case STARTBOAT:
@@ -86,8 +88,12 @@ public class MarkVectorGraphics {
         }
     }
 
-    private void drawBlueSelection(Context2d ctx) {
+    private void drawMarkSelection(Context2d ctx) {
             ctx.save();
+
+            ctx.scale(1.2,1.2);
+            ctx.translate(-10,-30);
+
             CanvasGradient g1=ctx.createLinearGradient(77.8,188,165,219);
             g1.addColorStop(0,"rgba(240, 240, 240, 1)");
             g1.addColorStop(1,"rgba(240, 240, 240, 0)");
@@ -204,7 +210,7 @@ public class MarkVectorGraphics {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
     
         ctx.save();
-        ctx.setFillStyle(isSelected ? DEFAULT_MARK_SELECTION_COLOR: color);
+        ctx.setFillStyle(color);
         ctx.transform(12.5,0,0,12.5,-578,22.2);
         
         ctx.beginPath();
@@ -225,7 +231,7 @@ public class MarkVectorGraphics {
         ctx.restore();
         
         ctx.save();
-        ctx.setFillStyle(isSelected ? DEFAULT_MARK_SELECTION_COLOR: color);
+        ctx.setFillStyle(color);
         ctx.transform(12.5,0,0,12.5,-578,22.2);
         ctx.beginPath();
         ctx.arc(49.6,10.6,2.66,0,doublePi,false);
@@ -251,7 +257,7 @@ public class MarkVectorGraphics {
         ctx.save();
         ctx.transform(12.5,0,0,12.5,-570,22.2);
         ctx.save();
-        ctx.setFillStyle(isSelected ? DEFAULT_MARK_SELECTION_COLOR: color);
+        ctx.setFillStyle(color);
         ctx.beginPath();
         ctx.moveTo(48.8,3.82);
         ctx.lineTo(48.8,-1.32);
