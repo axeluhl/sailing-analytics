@@ -1525,6 +1525,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public boolean takesWindFix(Wind wind) {
+        final Set<TrackedRace> visited = new HashSet<>();
+        visited.add(this);
+        return takesWindFixRecursively(wind, visited);
+    }
+    
+    /**
+     * @param visited
+     *            used to avoid endless recursion if cyclic predecessor relations are delivered by a
+     *            {@link RaceExecutionOrderProvider}
+     */
+    @Override
+    public boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
         final boolean result;
         final TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
         final TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getEndOfRace(), getEndOfTracking());
@@ -1546,7 +1558,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // the fix is in the critical interval between EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS and
                         // TIME_BEFORE_START_TO_TRACK_WIND_MILLIS before the earliestStartTimePoint; the fix shall only be accepted
                         // if no previous race exists that accepts it
-                        result = noPreviousRaceTakesWind(wind);
+                        result = noPreviousRaceTakesWind(wind, visited);
                     }
                 }
             } else {
@@ -1558,10 +1570,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
     
-    private boolean noPreviousRaceTakesWind(Wind wind) {
+    private boolean noPreviousRaceTakesWind(Wind wind, Set<TrackedRace> visited) {
         final boolean result;
         Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
-        if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr -> tr.takesWindFix(wind) == true).findAny().isPresent()) {
+        if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr ->
+                        visited.add(tr) && tr.takesWindFixRecursively(wind, visited)).findAny().isPresent()) {
             result = true;
         } else {
             result = false;
