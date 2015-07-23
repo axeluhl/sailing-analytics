@@ -80,12 +80,23 @@
 .race_item_position {
   margin-right: 0.333333333333333em;
 }
-.race_item_winner {
+.race_item_sailid {
   margin-left: 5px;
   vertical-align: middle;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+.race_item_winner {
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .race_itemwinner {
-  padding: 0.733333333333333em 1.333333333333333em;
+  padding: 0 1.333333333333333em;
+}
+.race_itemwinner > div {
+  vertical-align: middle;	
 }
 .race_itemcenter {
   text-align: center;

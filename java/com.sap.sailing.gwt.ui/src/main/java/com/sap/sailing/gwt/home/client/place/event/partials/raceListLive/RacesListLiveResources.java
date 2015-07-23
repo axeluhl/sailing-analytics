@@ -24,6 +24,7 @@ public interface RacesListLiveResources extends ClientBundle {
         String race_itemwinner();
         String race_item_flag();
         String race_item_position();
+        String race_item_sailid();
         String race_item_winner();
         String race_itemcenter();
         String race_itemright();
