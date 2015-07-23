@@ -63,8 +63,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private static final StringMessages I18N = StringMessages.INSTANCE;
     
     private enum Navigation implements ListNavigationAction {
-        SORT_LIST_FORMAT("Sortable list Format TODO", false),
-        COMPETITION_FORMAT("Competition Format TODO", true);
+        SORT_LIST_FORMAT(I18N.listFormatLabel(), false),
+        COMPETITION_FORMAT(I18N.competitionFormatLabel(), true);
         
         private final String displayName;
         private final boolean showAdditionalWidget;
