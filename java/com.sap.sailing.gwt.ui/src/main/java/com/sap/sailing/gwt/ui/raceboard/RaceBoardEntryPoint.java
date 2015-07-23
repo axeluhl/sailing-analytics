@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -59,6 +58,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
 
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         // read mandatory parameters
@@ -138,10 +138,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     }
     
     private void createErrorPage(String message) {
+        final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        RootPanel.get().add(logoAndTitlePanel);
-        RootPanel.get().add(new Label(message));
+        RootLayoutPanel.get().add(vp);
+        vp.addNorth(logoAndTitlePanel, 100);
+        vp.add(new Label(message));
     }
 
     private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup,
@@ -194,7 +196,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor, timer, raceSelectionModel,
                 leaderboardName, leaderboardGroupName, event, raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
-        raceBoardPanel.fillRegattas(regattas);
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
 

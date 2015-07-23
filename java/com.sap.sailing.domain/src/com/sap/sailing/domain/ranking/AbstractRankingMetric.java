@@ -471,7 +471,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * started at <code>timePoint</code> yet, or <code>who</code>'s tracked leg for the last leg if <code>who</code> has
      * already finished the race at <code>timePoint</code>.
      */
-    private TrackedLegOfCompetitor getCurrentLegOrLastLegIfAlreadyFinished(Competitor who, TimePoint timePoint) {
+    protected TrackedLegOfCompetitor getCurrentLegOrLastLegIfAlreadyFinished(Competitor who, TimePoint timePoint) {
         TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
         if (currentLegWho == null) { // already finished or not yet started; if already finished, use last leg
             final Waypoint lastWaypoint = getTrackedRace().getRace().getCourse().getLastWaypoint();
@@ -593,7 +593,9 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * For each leg the total windward distance sailed is limited to the leg's windward distance at its
      * {@link TrackedLeg#getReferenceTimePoint() reference time point}. This ensures that significantly "overstaying" the lay lines
      * doesn't let a competitor rank better than one who already passed the mark but traveled little windward distance in
-     * the next leg.
+     * the next leg.<p>
+     * 
+     * If mark positions along the way are not known, the windward distance of those legs will be counted as 0.
      * 
      * @param timePoint needed to determine <code>competitor</code>'s position at that time point; note that the
      * time point for wind approximation is taken to be a reference time point selected based on the mark passings
@@ -620,7 +622,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                                 if (estimatedPosition != null) {
                                     final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(estimatedPosition, cache);
                                     final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
-                                    if (legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
+                                    if (legWindwardDistance != null && legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
                                         d = d.add(legWindwardDistance);
                                     } else {
                                         // if the competitor is currently at the mark rounding, the windward distance within the leg may
@@ -632,7 +634,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                                 }
                                 break;
                             } else {
-                                d = d.add(trackedLeg.getWindwardDistance(cache));
+                                final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
+                                if (legWindwardDistance != null) {
+                                    d = d.add(legWindwardDistance);
+                                }
                             }
                         }
                     }

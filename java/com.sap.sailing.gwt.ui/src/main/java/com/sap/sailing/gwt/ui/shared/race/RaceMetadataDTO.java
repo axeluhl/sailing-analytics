@@ -2,11 +2,13 @@ package com.sap.sailing.gwt.ui.shared.race;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sse.common.Util;
 
-public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataDTO> {
+public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements DTO, Comparable<RaceMetadataDTO<WIND>> {
     
     public enum RaceViewState {
         PLANNED {       // no start time set
@@ -55,10 +57,11 @@ public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataD
         TRACKED_VALID_DATA       // tracking is connected and all required data for displaying the race viewer is available
     }
     
+    private String leaderboardName;
+    private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String regattaName;
     private String regattaDisplayName;
     private String raceName;
-    private String trackedRaceName;
     private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
@@ -66,17 +69,24 @@ public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataD
     private String boatClass;
     private RaceViewState state;
     private RaceTrackingState trackingState;
+    private WIND wind;
 
     protected RaceMetadataDTO() {
     }
     
-    public RaceMetadataDTO(String regattaName, String raceName) {
-        this.regattaName = regattaName;
+    public RaceMetadataDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceName) {
+        this.leaderboardName = leaderboardName;
+        this.regattaAndRaceIdentifier = regattaAndRaceIdentifier;
+        this.regattaName = leaderboardName;
         this.raceName = raceName;
     }
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 
     public String getRaceName() {
@@ -139,12 +149,12 @@ public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataD
         this.trackingState = trackingState;
     }
 
-    public String getTrackedRaceName() {
-        return trackedRaceName;
+    public WIND getWind() {
+        return wind;
     }
 
-    public void setTrackedRaceName(String trackedRaceName) {
-        this.trackedRaceName = trackedRaceName;
+    public void setWind(WIND wind) {
+        this.wind = wind;
     }
 
     public String getRegattaDisplayName() {
@@ -155,8 +165,12 @@ public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataD
         this.regattaDisplayName = regattaDisplayName;
     }
 
+    public RegattaAndRaceIdentifier getRegattaAndRaceIdentifier() {
+        return regattaAndRaceIdentifier;
+    }
+
     @Override
-    public int compareTo(RaceMetadataDTO o) {
+    public int compareTo(RaceMetadataDTO<WIND> o) {
         Date thisStart = getStart();
         Date otherStart = o.getStart();
         if(Util.equalsWithNull(thisStart, otherStart)) {
@@ -172,7 +186,7 @@ public class RaceMetadataDTO implements IsSerializable, Comparable<RaceMetadataD
         return -thisStart.compareTo(otherStart);
     }
 
-    private int compareBySecondaryCriteria(RaceMetadataDTO o) {
+    private int compareBySecondaryCriteria(RaceMetadataDTO<?> o) {
         String thisRegattaName = getRegattaName();
         String otherRegattaName = o.getRegattaName();
         if(thisRegattaName != otherRegattaName) {

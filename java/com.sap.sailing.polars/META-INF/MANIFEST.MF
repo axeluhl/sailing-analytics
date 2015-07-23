@@ -19,7 +19,9 @@ Require-Bundle:
  com.sap.sse,
  com.sap.sse.shared.android,
  org.apache.commons.math;bundle-version="2.1.0",
- org.eclipse.osgi
+ org.eclipse.osgi,
+ com.sap.sse.replication;bundle-version="1.0.0",
+ com.sap.sse.operationaltransformation;bundle-version="1.0.0"
 Import-Package: 
  com.sap.sailing.util,
  com.sap.sse.common

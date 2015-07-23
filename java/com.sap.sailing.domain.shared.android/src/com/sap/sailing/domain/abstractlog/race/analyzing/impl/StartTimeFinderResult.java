@@ -1,29 +1,47 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class StartTimeFinderResult {
+    public static enum ResolutionFailed { RACE_LOG_UNRESOLVED, CYCLIC_DEPENDENCY, NO_START_TIME_SET };
+    
     private final Iterable<SimpleRaceLogIdentifier> racesDependingOn;
     private final TimePoint startTime;
+    
+    /**
+     * <code>null</code> if resolution worked
+     */
+    private final ResolutionFailed resolutionFailed;
+    
+    private Duration startTimeDiff;
 
-    public StartTimeFinderResult(final Iterable<SimpleRaceLogIdentifier> racesDependingOn, final TimePoint startTime) {
-        this.racesDependingOn = racesDependingOn;
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
+        this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null);
+    }
+    
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, Duration startTimeDiff, ResolutionFailed resolutionFailed) {
+        this(racesDependingOn, /* startTime */ null, startTimeDiff, resolutionFailed);
+    }
+    
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff,
+            ResolutionFailed resolutionFailed) {
         this.startTime = startTime;
+        this.startTimeDiff = startTimeDiff;
+        this.racesDependingOn = racesDependingOn;
+        this.resolutionFailed = resolutionFailed;
     }
 
-    public StartTimeFinderResult(TimePoint startTime) {
-        racesDependingOn = new ArrayList<SimpleRaceLogIdentifier>();
-        this.startTime = startTime;
+    public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff) {
+        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff);
     }
 
-    public StartTimeFinderResult(List<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime) {
-        this.racesDependingOn = racesDependingOn;
-        this.startTime = startTime;
+    public ResolutionFailed getResolutionFailed() {
+        return resolutionFailed;
     }
 
     public Iterable<SimpleRaceLogIdentifier> getRacesDependingOn() {
@@ -34,11 +52,16 @@ public class StartTimeFinderResult {
         return startTime;
     }
 
+    public Duration getStartTimeDiff() {
+        return startTimeDiff;
+    }
+
+    public void setStartTimeDiff(Duration startTimeDiff) {
+        this.startTimeDiff = startTimeDiff;
+    }
+
     public boolean isDependentStartTime() {
-        if (racesDependingOn == null) {
-            return false;
-        }
-        return Util.isEmpty(racesDependingOn);
+        return racesDependingOn != null && !Util.isEmpty(racesDependingOn);
     }
 
     @Override
@@ -46,7 +69,9 @@ public class StartTimeFinderResult {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((racesDependingOn == null) ? 0 : racesDependingOn.hashCode());
+        result = prime * result + ((resolutionFailed == null) ? 0 : resolutionFailed.hashCode());
         result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
+        result = prime * result + ((startTimeDiff == null) ? 0 : startTimeDiff.hashCode());
         return result;
     }
 
@@ -64,10 +89,17 @@ public class StartTimeFinderResult {
                 return false;
         } else if (!racesDependingOn.equals(other.racesDependingOn))
             return false;
+        if (resolutionFailed != other.resolutionFailed)
+            return false;
         if (startTime == null) {
             if (other.startTime != null)
                 return false;
         } else if (!startTime.equals(other.startTime))
+            return false;
+        if (startTimeDiff == null) {
+            if (other.startTimeDiff != null)
+                return false;
+        } else if (!startTimeDiff.equals(other.startTimeDiff))
             return false;
         return true;
     }

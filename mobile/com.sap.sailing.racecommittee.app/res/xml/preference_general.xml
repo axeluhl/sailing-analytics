@@ -10,7 +10,7 @@
             android:defaultValue="@string/empty"
             android:key="@string/preference_identifier_key"
             android:title="@string/device_identifier"/>
-        <EditTextPreference
+        <com.sap.sailing.racecommittee.app.ui.views.UrlEditTextPreference
             android:defaultValue="@string/preference_server_url_default"
             android:key="@string/preference_server_url_key"
             android:title="@string/settings_advanced_service_header"/>

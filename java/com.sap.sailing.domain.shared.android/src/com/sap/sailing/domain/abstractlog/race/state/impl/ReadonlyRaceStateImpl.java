@@ -1,11 +1,16 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
@@ -15,10 +20,10 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -49,21 +54,41 @@ import com.sap.sse.common.Util;
  */
 public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedListener {
 
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */null,
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState> emptyMap());
+    }
+
     /**
      * Creates a {@link ReadonlyRaceState}.
+     * 
+     * @param forRaceLogIdentifier
+     *            If known, callers can specify the simple race log identifier for the race log to be wrapped by this
+     *            new race state. This can help avoid endless recursions because this race state can be passed along
+     *            together with the identifier so that when again along a dependent call chain a race state is required
+     *            for that race log identifier, this one can be used.
      */
     public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog,
-            ConfigurationLoader<RegattaConfiguration> configurationLoader) {
-        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(
-                configurationLoader));
+            SimpleRaceLogIdentifier forRaceLogIdentifier,
+            ConfigurationLoader<RegattaConfiguration> configurationLoader,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, forRaceLogIdentifier, new ReadonlyRacingProcedureFactory(
+                        configurationLoader), dependentRaceStates);
     }
 
     /**
      * Creates a {@link ReadonlyRaceState} with an empty configuration ( {@link EmptyRegattaConfiguration} ).
+     * 
+     * @param forRaceLogIdentifier
+     *            If known, callers can specify the simple race log identifier for the race log to be wrapped by this
+     *            new race state. This can help avoid endless recursions because this race state can be passed along
+     *            together with the identifier so that when again along a dependent call chain a race state is required
+     *            for that race log identifier, this one can be used.
      */
-    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
-        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, new ReadonlyRacingProcedureFactory(
-                new EmptyRegattaConfiguration()));
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, forRaceLogIdentifier, new ReadonlyRacingProcedureFactory(
+                        new EmptyRegattaConfiguration()), dependentRaceStates);
     }
 
     /**
@@ -127,18 +152,26 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private RaceStateChangedListener raceStateToObserveListener;
 
     private ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
-            RacingProcedureFactory procedureFactory) {
-        this(raceLogResolver, raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */true);
+            SimpleRaceLogIdentifier forRaceLogIdentifier, RacingProcedureFactory procedureFactory,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        this(raceLogResolver, raceLog, forRaceLogIdentifier, new RaceStatusAnalyzer.StandardClock(),
+                procedureFactory, dependentRaceStates, /* update */true);
     }
 
     /**
-     * @param raceLogResolver
+     * @param forRaceLogIdentifier
+     *            If known, callers can specify the simple race log identifier for the race log to be wrapped by this
+     *            new race state. This can help avoid endless recursions because this race state can be passed along
+     *            together with the identifier so that when again along a dependent call chain a race state is required
+     *            for that race log identifier, this one can be used.
      * @param update
      *            if <code>true</code>, the race state will be updated whenever the underlying <code>raceLog</code>
      *            changes.
      */
-    protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, Clock analyzersClock,
-            RacingProcedureFactory procedureFactory, boolean update) {
+    protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier, Clock analyzersClock,
+            RacingProcedureFactory procedureFactory,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
         this.raceLog = raceLog;
         this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
@@ -178,8 +211,18 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
         recreateRacingProcedure();
+        final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStatesAndMe;
+        if (forRaceLogIdentifier != null) {
+            dependentRaceStatesAndMe = new HashMap<>(dependentRaceStates);
+            dependentRaceStatesAndMe.put(forRaceLogIdentifier, this);
+        } else {
+            dependentRaceStatesAndMe = dependentRaceStates;
+        }
+        registerListenerOnDependentRaceIfDependentStartTime(dependentRaceStatesAndMe);
+    }
 
-        // Check wether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
+    protected void registerListenerOnDependentRaceIfDependentStartTime(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        // Check whether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
         // dependent startTime setup listeners
         this.raceLog.lockForRead();
         try {
@@ -187,7 +230,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
                 if (event instanceof RaceLogStartTimeEvent) {
                     break;
                 } else if (event instanceof RaceLogDependentStartTimeEvent) {
-                    setupListenersOnDependentRace(event);
+                    setupListenersOnDependentRace(event, dependentRaceStates);
                     break;
                 }
             }
@@ -265,6 +308,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     public TimePoint getStartTime() {
         return cachedStartTimeFinderResult.getStartTime();
     }
+    
+    @Override
+    public StartTimeFinderResult getStartTimeFinderResult() {
+        return cachedStartTimeFinderResult;
+    }
 
     @Override
     public TimePoint getFinishingTime() {
@@ -319,7 +367,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     @Override
     public void eventAdded(RaceLogEvent event) {
         if (event instanceof RaceLogDependentStartTimeEvent) {
-            setupListenersOnDependentRace(event);
+            setupListenersOnDependentRace(event, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
         } else if (event instanceof RaceLogStartTimeEvent) {
             if (raceStateToObserve != null) {
                 raceStateToObserve.removeChangedListener(raceStateToObserveListener);
@@ -329,15 +377,25 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         update();
     }
 
-    private void setupListenersOnDependentRace(RaceLogEvent event) {
+    private void setupListenersOnDependentRace(RaceLogEvent event, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         if (raceStateToObserve != null) {
             // Remove previous listeners
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+            raceStateToObserve = null;
         }
         RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) event;
-        RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentStartTimeEvent.getDependentOnRaceIdentifier());
-        raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog);
-        raceStateToObserve.addChangedListener(raceStateToObserveListener);
+        final SimpleRaceLogIdentifier dependentOnRaceIdentifier = dependentStartTimeEvent.getDependentOnRaceIdentifier();
+        if (dependentRaceStates.containsKey(dependentOnRaceIdentifier)) {
+            raceStateToObserve = dependentRaceStates.get(dependentOnRaceIdentifier);
+            raceStateToObserve.addChangedListener(raceStateToObserveListener);
+        } else {
+            RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentOnRaceIdentifier);
+            if (resolvedRaceLog != null) {
+                raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog,
+                        dependentOnRaceIdentifier, dependentRaceStates);
+                raceStateToObserve.addChangedListener(raceStateToObserveListener);
+            }
+        }
     }
 
     @Override
@@ -350,7 +408,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         return false;
     }
 
-    private void update() {
+    protected void update() {
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;

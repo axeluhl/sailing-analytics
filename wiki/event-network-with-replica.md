@@ -52,6 +52,8 @@ The server is localted behind the ground floor desk in the 19" cabinet. The rout
     - 1x /24 network for SAP-lounge setup
 - user: sailing => `/home/sailing/servers/{servers,test}`
 - Maven: ready to build code under `/home/sailing/code/`
+- autossh tunnel: started at replica startup, defined in /etc/rc.local
+    - redirects ports 1234(ssh), 1235(gwt), 1236(apache) to sapsailing.com where you can redirect the tunnel to your local pc
 
 ### Hostnames
 - the replica should be available as `sailing-demo.sapsailing.com` from every local network

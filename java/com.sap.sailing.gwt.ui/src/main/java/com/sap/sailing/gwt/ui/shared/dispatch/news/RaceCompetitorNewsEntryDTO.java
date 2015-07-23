@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.dispatch.news;
 
 import java.util.Date;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
@@ -17,8 +18,8 @@ public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
     private RaceCompetitorNewsEntryDTO() {
     }
     
-    public RaceCompetitorNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp, String competitorName, Type type) {
-        super(regattaName, trackedRaceName, raceTitle, boatClass, timestamp);
+    public RaceCompetitorNewsEntryDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp, String competitorName, Type type) {
+        super(leaderboardName, regattaAndRaceIdentifier, raceTitle, boatClass, timestamp);
         this.competitorName = competitorName;
         this.type = type;
     }

@@ -15,7 +15,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -70,8 +69,7 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            final View layout = LayoutInflater.from(getActivity()).inflate(
-                R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
+            final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
 
             mNat = ViewHolder.get(layout, R.id.pathfinder_nat);
             mNum = ViewHolder.get(layout, R.id.pathfinder_num);
@@ -201,8 +199,7 @@ public class GateStartFragment {
 
         private void enableSetButton(View view, View button) {
             if (view != null && view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
-                button.setEnabled(
-                    (Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
+                button.setEnabled((Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
             }
         }
     }
@@ -235,8 +232,7 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View layout = LayoutInflater.from(getActivity())
-                .inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
+            View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
 
             View caption = ViewHolder.get(layout, R.id.header_text);
             if (caption != null) {
@@ -244,8 +240,7 @@ public class GateStartFragment {
 
                     @Override
                     public void onClick(View v) {
-                        replaceFragment(Pathfinder
-                            .newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
+                        replaceFragment(Pathfinder.newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
                     }
                 });
             }
@@ -279,8 +274,10 @@ public class GateStartFragment {
             mTimeLaunch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
             mTimeGolf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
             mProcedure = getRaceState().getTypedRacingProcedure();
-            ThemeHelper.setPickerTextColor(getActivity(), mTimeLaunch, ThemeHelper.getColor(getActivity(), R.attr.white));
-            ThemeHelper.setPickerTextColor(getActivity(), mTimeGolf, ThemeHelper.getColor(getActivity(), R.attr.white));
+            ThemeHelper.setPickerColor(getActivity(), mTimeLaunch, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
+            ThemeHelper.setPickerColor(getActivity(), mTimeGolf, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
 
             setTimeLaunchWidget();
             setTimeGolfWidget();

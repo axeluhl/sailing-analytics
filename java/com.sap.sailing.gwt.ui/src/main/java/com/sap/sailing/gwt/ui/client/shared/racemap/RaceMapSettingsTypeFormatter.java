@@ -37,6 +37,8 @@ public class RaceMapSettingsTypeFormatter {
             return stringConstants.boatTails();
         case STARTLINETOFIRSTMARKTRIANGLE:
             return stringConstants.startFirstMarkTriangle();
+        case COURSEGEOMETRY:
+            return stringConstants.courseGeometry();
         }
         return null;
     }
