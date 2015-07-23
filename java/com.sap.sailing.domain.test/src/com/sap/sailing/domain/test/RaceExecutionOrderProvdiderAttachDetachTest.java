@@ -34,6 +34,7 @@ import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -49,6 +50,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * was <code>null</code> when {@link RaceColumn} was linked to {@link TrackedRace}.
  * 
  * @author Alexander Ries (D062114)
+ * @author Axel Uhl (D043530)
  *
  */
 public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest {
@@ -69,7 +71,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
     private final String RACECOLUMN_FLEXIBLELEADERBOARD = "TestFlexibleLeaderboardRaceColumn";
 
     @Test
-    public void testRaceExecutionOrderProviderAttachDetachWithRaceCollumn() {
+    public void testRaceExecutionOrderProviderAttachDetachWithRaceColumn() {
         trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(),
                 MillisecondsTimePoint.now());
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
@@ -214,5 +216,43 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
                 /* startDate */null, /* endDate */null, seriesSet, false, scoringScheme, UUID.randomUUID(), null,
                 OneDesignRankingMetric::new);
+    }
+    
+    /**
+     * See bug 3173. When a race is linked more than once to a fleet in a series, the "previous race"
+     * definition's transitive closure may become cyclic, and a race may be considered its own
+     * direct or transitive predecessor. This can lead to endless recursion in the {@link TrackedRace#takesWindFix(Wind)}
+     * implementation which traverses a race's predecessors recursively.
+     */
+    @Test
+    public void testCyclicPreviousRacesSequence() {
+        createTestSetupWithRegattaAndSeries(/* linkSeriesToRegatta */ true);
+        final RaceColumnInSeries r1 = series.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
+        final RaceColumnInSeries r2 = series.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
+        final RaceColumnInSeries r3 = series.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
+        final RaceColumnInSeries r4 = series.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
+        final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
+        final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_MINUTE);
+        final TimePoint startOfSecondRace = endOfFirstRace.plus(Duration.ONE_MINUTE);
+        final TimePoint endOfSecondRace = startOfSecondRace.plus(Duration.ONE_MINUTE);
+        final TimePoint startOfThirdRace = endOfSecondRace.plus(Duration.ONE_MINUTE);
+        final TimePoint endOfThirdRace = startOfThirdRace.plus(Duration.ONE_MINUTE);
+        final TrackedRace tr1 = createTrackedRace("FirstRace", startOfFirstRace, endOfFirstRace);
+        final TrackedRace tr2 = createTrackedRace("SecondRace", startOfSecondRace, endOfSecondRace);
+        final TrackedRace tr3 = createTrackedRace("ThirdRace", startOfThirdRace, endOfThirdRace);
+        r1.setTrackedRace(fleet, tr3);
+        r2.setTrackedRace(fleet, tr1);
+        r3.setTrackedRace(fleet, tr2);
+        r4.setTrackedRace(fleet, tr3); // produce a cycle because now transitively tr1 has itself as a predecessor
+        assertTrue(tr3.takesWindFix(new WindImpl(new DegreePosition(12, 13),
+                startOfThirdRace.minus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.divide(2)),
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)))));
+    }
+
+    private DynamicTrackedRace createTrackedRace(final String name, final TimePoint startOfRace, final TimePoint endOfRace) {
+        DynamicTrackedRace trackedRace = createTestTrackedRace(REGATTA, name, BOATCLASS, Collections.<Competitor> emptyList(), startOfRace);
+        trackedRace.setStartOfTrackingReceived(startOfRace);
+        trackedRace.setEndOfTrackingReceived(endOfRace);
+        return trackedRace;
     }
 }
