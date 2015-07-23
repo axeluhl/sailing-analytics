@@ -7,7 +7,7 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.media.MimeType;
 
-public abstract class AbstractMediaDTO implements IsSerializable {
+public abstract class AbstractMediaDTO implements IsSerializable, Comparable<AbstractMediaDTO> {
     protected String title;
 
     protected String subtitle;
@@ -102,5 +102,19 @@ public abstract class AbstractMediaDTO implements IsSerializable {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+    
+    @Override
+    public int compareTo(AbstractMediaDTO o) {
+        if(createdAtDate == o.createdAtDate) {
+            return 0;
+        }
+        if(createdAtDate == null) {
+            return 1;
+        }
+        if(o.createdAtDate == null) {
+            return -1;
+        }
+        return -createdAtDate.compareTo(o.createdAtDate);
     }
 }
