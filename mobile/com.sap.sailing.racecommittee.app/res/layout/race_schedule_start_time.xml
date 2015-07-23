@@ -205,6 +205,7 @@
                     android:id="@+id/time_offset"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginBottom="@dimen/default_margin"
                     android:layout_marginTop="@dimen/default_margin"
                     android:scaleX="@integer/picker_scale"
@@ -228,7 +229,7 @@
                         android:id="@+id/dependent_leaderboard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?sap_gray_black_20"
+                        android:background="?spinner_background"
                         android:dropDownWidth="wrap_content"
                         android:spinnerMode="dropdown"/>
 
@@ -237,7 +238,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/default_margin_half"
-                        android:background="?sap_gray_black_20"
+                        android:background="?spinner_background"
                         android:dropDownWidth="wrap_content"
                         android:spinnerMode="dropdown"
                         android:visibility="gone"
@@ -248,7 +249,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/default_margin_half"
-                        android:background="?sap_gray_black_20"
+                        android:background="?spinner_background"
                         android:dropDownWidth="wrap_content"
                         android:spinnerMode="dropdown"/>
                 </LinearLayout>
