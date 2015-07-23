@@ -245,7 +245,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                 formatedInfo += "Time: " + dateTimeFormatter.format(wind.getTimePoint().asDate());
             }
             if(wind.getPosition() != null) {
-                formatedInfo += ", Pos: " + latLngDecimalFormatter.format(wind.getPosition().getLatDeg()) + "," + latLngDecimalFormatter.format(wind.getPosition().getLngDeg()); 
+                formatedInfo += ", Pos: " + latLngDecimalFormatter.format(wind.getPosition().getLatDeg()) + " " + latLngDecimalFormatter.format(wind.getPosition().getLngDeg()); 
             }
             formatedInfo += ", Wind: " + decimalFormatter2Digits.format(wind.getKnots()) +"kn";
             if(wind.getFrom() != null) {
