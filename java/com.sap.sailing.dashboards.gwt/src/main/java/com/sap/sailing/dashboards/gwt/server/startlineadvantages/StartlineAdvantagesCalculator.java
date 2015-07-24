@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -57,7 +56,9 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
         if (currentLiveTrackedRace != null) {
             retrieveDataForCalculation(currentLiveTrackedRace);
-            calculateIntersectionPointsOfStartlineAndLaylines();
+            Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
+            Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
+            
             //result.advantages = calculateStartlineAdvantages();
         } else {
             logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
@@ -69,46 +70,42 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
     
-    private List<Position> calculateIntersectionPointsOfStartlineAndLaylines() {
-        List<Position> result = new ArrayList<Position>();
+    public Position getIntersectionOfRightLaylineAndStartline () {
+        Position result = null;
+        Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
+        result = calculateIntersectionPointsOfStartlineAndLaylineWithBearing(bearingOfRightLaylineInDeg);
+        return result;
+    }
+    
+    public Position getIntersectionOfLeftLaylineAndStartline () {
+        Position result = null;
+        Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
+        result = calculateIntersectionPointsOfStartlineAndLaylineWithBearing(bearingOfRightLaylineInDeg);
+        return result;
+    }
+    
+    private Position calculateIntersectionPointsOfStartlineAndLaylineWithBearing(Bearing bearing) {
+        Position result = null;
         Bearing bearingOfStartlineInRad = startlineAndFirstMarkPositions.startBoatPosition
                 .getBearingGreatCircle(startlineAndFirstMarkPositions.pinEndPosition);
         Bearing bearingOfStartlineInDeg = new DegreeBearingImpl(bearingOfStartlineInRad.getDegrees());
-        Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
-        Bearing bearingOfLeftLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
         logger.log(Level.INFO, "bearingOfStartlineInDeg " + bearingOfStartlineInDeg);
-        logger.log(Level.INFO, "bearingOfRightLaylineInDeg " + bearingOfRightLaylineInDeg);
-        logger.log(Level.INFO, "bearingOfLeftLaylineInDeg " + bearingOfLeftLaylineInDeg);
-        Position rightIntersectionPointLaylineStartline = startlineAndFirstMarkPositions.firstMarkPosition
-                .getIntersection(bearingOfRightLaylineInDeg, startlineAndFirstMarkPositions.pinEndPosition,
+        logger.log(Level.INFO, "bearingOfLaylineInDeg " + bearing);
+        Position intersectionPointLaylineStartline = startlineAndFirstMarkPositions.firstMarkPosition
+                .getIntersection(bearing, startlineAndFirstMarkPositions.pinEndPosition,
                         bearingOfStartlineInDeg);
-        Position leftIntersectionPointLaylineStartline = startlineAndFirstMarkPositions.firstMarkPosition
-                .getIntersection(bearingOfLeftLaylineInDeg, startlineAndFirstMarkPositions.pinEndPosition,
-                        bearingOfStartlineInDeg);
-        logger.log(Level.INFO, "rightIntersectionPointLaylineStartline " + rightIntersectionPointLaylineStartline);
-        logger.log(Level.INFO, "leftIntersectionPointLaylineStartline " + leftIntersectionPointLaylineStartline);
-        Bearing bearingRightIntersectionPointToFirstMark = new DegreeBearingImpl(
+        logger.log(Level.INFO, "rightIntersectionPointLaylineStartline " + intersectionPointLaylineStartline);
+        Bearing bearingIntersectionPointToFirstMark = new DegreeBearingImpl(
                 startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
-                        rightIntersectionPointLaylineStartline).getDegrees());
-        Bearing bearingLeftIntersectionPointToFirstMark = new DegreeBearingImpl(
-                startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
-                        leftIntersectionPointLaylineStartline).getDegrees());
-        if (bearingRightIntersectionPointToFirstMark.getDegrees() < bearingOfRightLaylineInDeg.getDegrees() + 1 &&
-            bearingRightIntersectionPointToFirstMark.getDegrees() > bearingOfRightLaylineInDeg.getDegrees() - 1 &&
-            isOnStartline(rightIntersectionPointLaylineStartline)) {
-            result.add(rightIntersectionPointLaylineStartline);
-            logger.log(Level.INFO, "Right layline crosses startline");
+                        intersectionPointLaylineStartline).getDegrees());
+        if (bearingIntersectionPointToFirstMark.getDegrees() < bearing.getDegrees() + 1 &&
+            bearingIntersectionPointToFirstMark.getDegrees() > bearing.getDegrees() - 1 &&
+            isOnStartline(intersectionPointLaylineStartline)) {
+            result = intersectionPointLaylineStartline;
+            logger.log(Level.INFO, "Layline crosses startline");
         }
-        if (bearingLeftIntersectionPointToFirstMark.getDegrees() < bearingOfLeftLaylineInDeg.getDegrees() + 1 &&
-            bearingLeftIntersectionPointToFirstMark.getDegrees() > bearingOfLeftLaylineInDeg.getDegrees() - 1 &&
-            isOnStartline(leftIntersectionPointLaylineStartline)) {
-            result.add(leftIntersectionPointLaylineStartline);
-            logger.log(Level.INFO, "Left layline crosses startline");
-        }
-        logger.log(Level.INFO, "bearingRightIntersectionPointToFirstMark.getDegrees() "
-                + bearingRightIntersectionPointToFirstMark.getDegrees());
         logger.log(Level.INFO, "bearingLeftIntersectionPointToFirstMark.getDegrees() "
-                + bearingLeftIntersectionPointToFirstMark.getDegrees());
+                + bearingIntersectionPointToFirstMark.getDegrees());
         return result;
     }
 
@@ -118,22 +115,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         if (distanceToStartline.getMeters() < 1) {
             result = true;
         }
-        return result;
-    }
-    
-    private Position getIntersectionPointOfTwoGPSLines(Pair<Position, Position> line1 , Pair<Position, Position> line2){
-        return null;
-    }
-    
-    private Position calculatePositionInBearingAndDistanceFromPosition(Position position, double bearingInDegrees, double distanceInKilometer) {
-        Position result = null;
-        double distance = distanceInKilometer/6371;
-        double bearing = bearingInDegrees * Math.PI / 180;
-        double lat1 = position.getLatRad();
-        double lon1 = position.getLngRad();
-        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance) + Math.cos(lat1) * Math.sin(distance) * Math.cos(bearing));
-        double lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2));
-        result = new DegreePosition(lat2* 180 / Math.PI, lon2* 180 / Math.PI);
         return result;
     }
 
