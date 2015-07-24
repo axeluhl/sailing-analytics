@@ -30,7 +30,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
     private TrackedRace currentLiveTrackedRace;
     private MovingAverage advantageMaximumAverage;
     
-    private Position intersectionPoint;
     private Bearing  startLineBearingFromRCToPin;
     
     private PolarDataService polarDataService;
@@ -56,17 +55,64 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
         if (currentLiveTrackedRace != null) {
             retrieveDataForCalculation(currentLiveTrackedRace);
+            if(isStartlineCompletelyUnderneathLaylines()) {
+                Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
+                calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
+            } else if (isStartlineCompletelyAboveLaylines()) {
+                Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
+                calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
+            } else {
             Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
             Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
             Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
             Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
-            result.advantages = calculateStartlineAdvantages(polarBasedStartlineAdvatagesRange, pinEndStartlineAdvatagesRange);
+            result.advantages = calculateStartlineAdvantagesForMinimumOneLaylineCrossingStartline(polarBasedStartlineAdvatagesRange, pinEndStartlineAdvatagesRange);
+            }
             double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
             result.maximum = maximum;
             advantageMaximumAverage.add(maximum);
             result.average = advantageMaximumAverage.getAverage();
         } else {
             logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
+        }
+        return result;
+    }
+    
+    private boolean isBearingAboveAdvantageLines(Bearing bearing){
+        boolean result = false;
+        Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
+        Bearing bearingOfLeftLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
+        if (bearing.getDegrees() < bearingOfRightLaylineInDeg.getDegrees() && bearing.getDegrees() > 0 && 
+            bearing.getDegrees() > bearingOfLeftLaylineInDeg.getDegrees() && bearing.getDegrees() < 360) {
+            result = true;
+        }
+        return result;
+    }
+    
+    private boolean isStartlineCompletelyAboveLaylines() {
+        boolean result = false;
+        Bearing bearingRCBoatToFirstMark = new DegreeBearingImpl(
+                startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
+                        startlineAndFirstMarkPositions.startBoatPosition).getDegrees());
+        Bearing bearingPinEndToFirstMark = new DegreeBearingImpl(
+                startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
+                        startlineAndFirstMarkPositions.pinEndPosition).getDegrees());
+        if (isBearingAboveAdvantageLines(bearingRCBoatToFirstMark) && isBearingAboveAdvantageLines(bearingPinEndToFirstMark)) {
+            result = true;
+        }
+        return result;
+    }
+    
+    private boolean isStartlineCompletelyUnderneathLaylines() {
+        boolean result = false;
+        Bearing bearingRCBoatToFirstMark = new DegreeBearingImpl(
+                startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
+                        startlineAndFirstMarkPositions.startBoatPosition).getDegrees());
+        Bearing bearingPinEndToFirstMark = new DegreeBearingImpl(
+                startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
+                        startlineAndFirstMarkPositions.pinEndPosition).getDegrees());
+        if (!isBearingAboveAdvantageLines(bearingRCBoatToFirstMark) && !isBearingAboveAdvantageLines(bearingPinEndToFirstMark)) {
+            result = true;
         }
         return result;
     }
@@ -117,7 +163,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         if (bearingIntersectionPointToFirstMark.getDegrees() < bearing.getDegrees() + 1 &&
             bearingIntersectionPointToFirstMark.getDegrees() > bearing.getDegrees() - 1 &&
             isOnStartline(intersectionPointLaylineStartline)) {
-            intersectionPoint = intersectionPointLaylineStartline;
             result = intersectionPointLaylineStartline;
             logger.log(Level.INFO, "Layline crosses startline");
         }
@@ -135,7 +180,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
 
-    private List<StartLineAdvantageDTO> calculateStartlineAdvantages(Pair<Double, Double> rangePolarBasedStartlineAdvatages, Pair<Double, Double> rangePinEndStartlineAdvantage) {
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantagesForMinimumOneLaylineCrossingStartline(Pair<Double, Double> rangePolarBasedStartlineAdvatages, Pair<Double, Double> rangePinEndStartlineAdvantage) {
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
         List<StartLineAdvantageDTO> startlineAdvantagesUnderneathLayline = calculateStartlineAdvantagesUnderneathLaylinesInRange(rangePinEndStartlineAdvantage);
         List<StartLineAdvantageDTO> startlineAdvantagesPolarBased = calculatePolarBasedStartlineAdvantagesInRange(rangePolarBasedStartlineAdvatages);
