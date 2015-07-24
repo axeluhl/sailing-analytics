@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -114,6 +113,8 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     
     @Test
     public void testStartTrackingRaceReplication() throws Exception {
+        final String leaderboardName = "Test Leaderboard";
+        master.apply(new CreateFlexibleLeaderboard(leaderboardName, null, new int[0], new LowPoint(), null));
         startTracking();
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
@@ -121,7 +122,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertNotSame(masterTrackedRace, replicaTrackedRace);
         assertNotSame(masterTrackedRace.getRace(), replicaTrackedRace.getRace());
         assertEquals(Util.size(masterTrackedRace.getRace().getCompetitors()), Util.size(replicaTrackedRace.getRace().getCompetitors()));
-        Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
+        Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(leaderboardName);
         RaceColumn column = replicaDefaultLeaderboard.getRaceColumnByName(replicaTrackedRace.getRace().getName());
         assertNotNull(column);
         assertSame(replicaTrackedRace, column.getTrackedRace(replicaDefaultLeaderboard.getFleet(null)));
