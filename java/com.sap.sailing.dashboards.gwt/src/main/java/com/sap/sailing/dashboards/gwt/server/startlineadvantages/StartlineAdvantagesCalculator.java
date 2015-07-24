@@ -30,8 +30,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
     private TrackedRace currentLiveTrackedRace;
     private MovingAverage advantageMaximumAverage;
     
-    private final double LENGHT_OF_LAYLINES_IN_KILOMETERS = 200; 
-    
     private PolarDataService polarDataService;
     
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
@@ -57,9 +55,10 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
             retrieveDataForCalculation(currentLiveTrackedRace);
             Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
             Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
-            Pair<Double, Double> startAndEndPointOfPolarBasedStartlineAdvatages = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(
+            Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(
                     intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
-            result.advantages = calculateStartlineAdvantages(startAndEndPointOfPolarBasedStartlineAdvatages);
+            Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
+            result.advantages = calculateStartlineAdvantages(polarBasedStartlineAdvatagesRange, pinEndStartlineAdvatagesRange);
         } else {
             logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
         }
@@ -132,31 +131,48 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
 
-    private List<StartLineAdvantageDTO> calculateStartlineAdvantages(Pair<Double, Double> startAndEndPointOfPolarBasedStartlineAdvatages) {
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantages(Pair<Double, Double> rangePolarBasedStartlineAdvatages, Pair<Double, Double> rangePinEndStartlineAdvantage) {
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
-        List<StartLineAdvantageDTO> startlineAdvantagesUnderneathLayline = calculateStartlineAdvantagesUnderneathLaylines();
+        List<StartLineAdvantageDTO> startlineAdvantagesUnderneathLayline = calculateStartlineAdvantagesUnderneathLaylinesInRange(rangePinEndStartlineAdvantage);
         result.addAll(startlineAdvantagesUnderneathLayline);
         return result;
     }
     
-    private List<StartLineAdvantageDTO> calculateStartlineAdvantagesUnderneathLaylines() {
-        List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
-        StartLineAdvantageDTO startlineAdvantagePinEnd = new StartLineAdvantageDTO();
-        startlineAdvantagePinEnd.confidence = 1.0;
-        startlineAdvantagePinEnd.distanceToRCBoatInMeters = startlineLenghtInMeters;
-        StartLineAdvantageDTO startlineAdvantageRCBoat = new StartLineAdvantageDTO();
-        startlineAdvantageRCBoat.confidence = 1.0;
-        startlineAdvantageRCBoat.distanceToRCBoatInMeters = 0.0;
-        logger.log(Level.INFO, "Startline Advantage "+startlineAdvantagePinEnd);
-        if(startlineAdvantageAtPinEndInMeters > 0) {
-            startlineAdvantagePinEnd.startLineAdvantage = startlineAdvantageAtPinEndInMeters;
-            startlineAdvantageRCBoat.startLineAdvantage = 0.0;
-        } else {
-            startlineAdvantagePinEnd.startLineAdvantage = 0.0;
-            startlineAdvantageRCBoat.startLineAdvantage = Math.abs(startlineAdvantageAtPinEndInMeters);
+    private Pair<Double, Double> getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(Pair<Double, Double> rangePolarBasedStartlineAdvatages) {
+        Pair<Double, Double> result = null;
+        double pinEndStartlineAdvantagesStart;
+        double pinEndStartlineAdvantagesEnd;
+        if(rangePolarBasedStartlineAdvatages.getA().doubleValue() == 0.0 && rangePolarBasedStartlineAdvatages.getB().doubleValue() != startlineLenghtInMeters) {
+            pinEndStartlineAdvantagesStart = rangePolarBasedStartlineAdvatages.getB().doubleValue();
+            pinEndStartlineAdvantagesEnd = startlineLenghtInMeters;
+            result = new Pair<Double, Double>(pinEndStartlineAdvantagesStart, pinEndStartlineAdvantagesEnd);
+        } else if (rangePolarBasedStartlineAdvatages.getA().doubleValue() != 0.0 && rangePolarBasedStartlineAdvatages.getB().doubleValue() == startlineLenghtInMeters) {
+            pinEndStartlineAdvantagesStart = 0.0;
+            pinEndStartlineAdvantagesEnd = rangePolarBasedStartlineAdvatages.getB().doubleValue();
+            result = new Pair<Double, Double>(pinEndStartlineAdvantagesStart, pinEndStartlineAdvantagesEnd);
         }
-        result.add(startlineAdvantageRCBoat);
-        result.add(startlineAdvantagePinEnd);
+        return result;
+    }
+    
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantagesUnderneathLaylinesInRange(Pair<Double, Double> rangePinEndStartlineAdvantage) {
+        List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
+        if(rangePinEndStartlineAdvantage != null) {
+        StartLineAdvantageDTO rightEdgeAdvantage = new StartLineAdvantageDTO();
+        rightEdgeAdvantage.confidence = 1.0;
+        rightEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getA();
+        StartLineAdvantageDTO leftEdgeAdvantage = new StartLineAdvantageDTO();
+        leftEdgeAdvantage.confidence = 1.0;
+        leftEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getB();
+        if(startlineAdvantageAtPinEndInMeters > 0) {
+            leftEdgeAdvantage.startLineAdvantage = startlineAdvantageAtPinEndInMeters;
+            rightEdgeAdvantage.startLineAdvantage = 0.0;
+        } else {
+            leftEdgeAdvantage.startLineAdvantage = 0.0;
+            rightEdgeAdvantage.startLineAdvantage = Math.abs(startlineAdvantageAtPinEndInMeters);
+        }
+        result.add(rightEdgeAdvantage);
+        result.add(leftEdgeAdvantage);
+        }
         return result;
         
     }
