@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -78,17 +80,23 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     private static final Logger logger = Logger.getLogger(RibDashboardServiceImpl.class.getName());
 
     public RibDashboardServiceImpl() {
-        context = Activator.getDefault();
-        racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
-        baseDomainFactory = getRacingEventService().getBaseDomainFactory();
-        startAnalysisCreationController = new StartAnalysisCreationController(getRacingEventService());
-        startlineAdvantagesCalculator = new StartlineAdvantagesCalculator();
+        this.context = Activator.getDefault();
+        this.racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
+        this.baseDomainFactory = getRacingEventService().getBaseDomainFactory();
+        this.startAnalysisCreationController = new StartAnalysisCreationController(getRacingEventService());
+        this.startlineAdvantagesCalculator = new StartlineAdvantagesCalculator(getPolarService());
         addLiveTrackedRaceListener(startlineAdvantagesCalculator);
-        averageStartLineAdvantageByGeometry = new MovingAverage(400);
+        this.averageStartLineAdvantageByGeometry = new MovingAverage(400);
     }
-
+    
     protected RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService(); // grab the service
+    }
+    
+    private PolarDataService getPolarService() {
+        ServiceReference<PolarDataService> polarServiceReference = context.getServiceReference(PolarDataService.class);
+        PolarDataService polarDataService = context.getService(polarServiceReference);
+        return polarDataService;
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -213,13 +221,8 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                 Pair<Position, Position> startlineMarkPositions = retrieveStartlineMarkPositionsFromStartLineWayPoint(startlineWayPoint);
                 Position firstMarkPosition = retrieveFirstMarkPositionFromFirstMarkWayPoint(firstmarkWayPoint);
                 if (startlineMarkPositions != null && firstMarkPosition != null) {
-                    logger.log(Level.INFO, "RC "+startlineMarkPositions.getA());
-                    logger.log(Level.INFO, "PIN "+startlineMarkPositions.getA());
-                    logger.log(Level.INFO, "FIRST "+firstMarkPosition);
                     Distance rcToMark = firstMarkPosition.getDistance(startlineMarkPositions.getA());
                     Distance pinToMark = firstMarkPosition.getDistance(startlineMarkPositions.getB());
-                    logger.log(Level.INFO, "rcToMark "+rcToMark);
-                    logger.log(Level.INFO, "pinToMark "+pinToMark);
                     return pinToMark.getMeters() - rcToMark.getMeters();
                 }
             }
